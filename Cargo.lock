@@ -629,6 +629,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
+name = "cut"
+version = "0.2.0"
+dependencies = [
+ "cpal",
+ "eframe",
+ "image",
+ "rfd",
+ "serde",
+ "serde_json",
+ "studio-ui",
+ "windows",
+]
+
+[[package]]
 name = "dasp_sample"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -912,7 +926,7 @@ dependencies = [
 
 [[package]]
 name = "ethone-studio"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "studio-core",
@@ -1707,7 +1721,7 @@ dependencies = [
 
 [[package]]
 name = "lumen"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "image",
@@ -1773,7 +1787,7 @@ dependencies = [
 
 [[package]]
 name = "motion"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "image",
@@ -2406,7 +2420,7 @@ dependencies = [
 
 [[package]]
 name = "page"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "image",
@@ -2520,7 +2534,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "pixel"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "image",
@@ -3314,7 +3328,7 @@ dependencies = [
 
 [[package]]
 name = "sound"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "eframe",
@@ -3981,7 +3995,7 @@ dependencies = [
 
 [[package]]
 name = "vector"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "eframe",
  "resvg 0.49.0",
