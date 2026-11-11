@@ -1,15 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs>
-<linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#8B7CFF"/><stop offset="1" stop-color="#2E8BFF"/></linearGradient>
-<linearGradient id="hi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g><rect x="17" y="17" width="13" height="13" rx="4" fill="white"/>
-<rect x="34" y="17" width="13" height="13" rx="4" fill="white" fill-opacity="0.8"/>
-<rect x="17" y="34" width="13" height="13" rx="4" fill="white" fill-opacity="0.8"/>
-<rect x="34" y="34" width="13" height="13" rx="4" fill="white" fill-opacity="0.6"/></g><g></g></mask>
-<filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.4" flood-color="#000000" flood-opacity="0.28"/></filter>
-</defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#hi)"/>
-<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
-<g filter="url(#sh)"><rect width="64" height="64" fill="#ffffff" mask="url(#m)"/></g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="0" x2=".35" y1="0" y2="1"><stop offset="0" stop-color="#8B7CFF"/><stop offset="1" stop-color="#2E8BFF"/></linearGradient><linearGradient id="hi" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="m" width="64" height="64" x="0" y="0" maskUnits="userSpaceOnUse"><rect width="64" height="64" fill="#000"/><g><rect width="13" height="13" x="17" y="17" fill="#fff" rx="4"/><rect width="13" height="13" x="34" y="17" fill="#fff" fill-opacity=".8" rx="4"/><rect width="13" height="13" x="17" y="34" fill="#fff" fill-opacity=".8" rx="4"/><rect width="13" height="13" x="34" y="34" fill="#fff" fill-opacity=".6" rx="4"/></g></mask><filter id="sh" width="140%" height="150%" x="-20%" y="-20%"><feDropShadow dx="0" dy="1.4" flood-color="#000" flood-opacity=".28" stdDeviation="1.4"/></filter></defs><rect width="60" height="60" x="2" y="2" fill="url(#bg)" rx="14"/><rect width="60" height="60" x="2" y="2" fill="url(#hi)" rx="14"/><rect width="59" height="59" x="2.5" y="2.5" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1" rx="13.5"/><g filter="url(#sh)"><rect width="64" height="64" fill="#fff" mask="url(#m)"/></g></svg>
