@@ -20,10 +20,24 @@ const ETHONE_LOGO_PNG: &[u8] = include_bytes!("../assets/ethone-logo.png");
 pub fn apply_style(ctx: &Context) {
     let mut fonts = egui::FontDefinitions::default();
     let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".into());
+    let read = |file: &str| std::fs::read(std::path::Path::new(&windir).join("Fonts").join(file)).ok();
+    let proportional = fonts.families.get(&egui::FontFamily::Proportional).cloned().unwrap_or_default();
+    if let Some(bytes) = read("segoeui.ttf") {
+        fonts.font_data.insert("segoe".into(), std::sync::Arc::new(egui::FontData::from_owned(bytes)));
+        fonts.families.entry(egui::FontFamily::Proportional).or_default().insert(0, "segoe".into());
+    }
+    let mut bold = proportional.clone();
+    if let Some(bytes) = read("seguisb.ttf") {
+        fonts.font_data.insert("segoe-semibold".into(), std::sync::Arc::new(egui::FontData::from_owned(bytes)));
+        bold.insert(0, "segoe-semibold".into());
+    } else if fonts.font_data.contains_key("segoe") {
+        bold.insert(0, "segoe".into());
+    }
+    fonts.families.insert(egui::FontFamily::Name("semibold".into()), bold);
     for (name, file) in [("segoe-symbol", "seguisym.ttf"), ("segoe-emoji", "seguiemj.ttf")] {
-        if let Ok(bytes) = std::fs::read(std::path::Path::new(&windir).join("Fonts").join(file)) {
+        if let Some(bytes) = read(file) {
             fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_owned(bytes)));
-            for fam in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+            for fam in [egui::FontFamily::Proportional, egui::FontFamily::Monospace, egui::FontFamily::Name("semibold".into())] {
                 fonts.families.entry(fam).or_default().push(name.into());
             }
         }
@@ -76,6 +90,10 @@ pub fn app_window_icon(id: &str) -> egui::IconData {
     };
     let (rgba, width, height) = decode(bytes);
     egui::IconData { rgba, width, height }
+}
+
+pub fn semibold(size: f32) -> FontId {
+    FontId::new(size, egui::FontFamily::Name("semibold".into()))
 }
 
 pub fn icon_texture(ctx: &Context, id: &str) -> TextureHandle {
