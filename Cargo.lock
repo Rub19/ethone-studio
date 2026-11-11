@@ -4041,6 +4041,7 @@ dependencies = [
  "rfd",
  "serde",
  "serde_json",
+ "studio-core",
  "studio-ui",
  "winresource",
 ]

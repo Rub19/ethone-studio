@@ -215,6 +215,22 @@ impl Doc {
     }
 }
 
+/// A regular polygon (`inner` = None) or a star (`inner` = ratio of the inner radius), as path nodes.
+pub fn polygon(cx: f32, cy: f32, r: f32, sides: u32, inner: Option<f32>) -> Vec<Node> {
+    let sides = sides.max(3);
+    let points = if inner.is_some() { sides * 2 } else { sides };
+    (0..points)
+        .map(|k| {
+            let a = -std::f32::consts::FRAC_PI_2 + k as f32 * std::f32::consts::TAU / points as f32;
+            let rr = match inner {
+                Some(ratio) if k % 2 == 1 => r * ratio,
+                _ => r,
+            };
+            Node::corner([cx + a.cos() * rr, cy + a.sin() * rr])
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -251,5 +267,13 @@ mod tests {
         assert_eq!(d.hit([100.0, 40.0], 0.0), Some(0));
         assert_eq!(d.hit([5.0, 5.0], 0.0), Some(1));
         assert_eq!(d.hit([190.0, 90.0], 0.0), None);
+
+        let hex = polygon(0.0, 0.0, 10.0, 6, None);
+        assert_eq!(hex.len(), 6);
+        assert!((hex[0].p[1] + 10.0).abs() < 1e-4);
+        let star = polygon(0.0, 0.0, 10.0, 5, Some(0.5));
+        assert_eq!(star.len(), 10);
+        let d1 = (star[1].p[0].powi(2) + star[1].p[1].powi(2)).sqrt();
+        assert!((d1 - 5.0).abs() < 1e-3);
     }
 }
