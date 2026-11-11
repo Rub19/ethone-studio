@@ -20,7 +20,15 @@ fn glyph(id: &str) -> (String, String) {
                 .into(),
             r#"<circle cx="31" cy="21.5" r="2.6" fill="black"/><path d="M27 35 L33 28 L37 32 L40 29 L46 35 Z" fill="black"/>"#.into(),
         ),
-        "cut" => (r#"<path d="M23 16.5 Q23 13 26.2 14.7 L47 27.3 Q50.2 29.2 47 31.1 L26.2 43.7 Q23 45.4 23 41.9 Z" fill="white" transform="translate(0 2.5)"/>"#.into(), format!(r#"<path d="M15 47 L50 17" stroke="black" stroke-width="4" stroke-linecap="round" {cut}/>"#)),
+        "cut" => (
+            r#"<rect x="13" y="17" width="38" height="30" rx="5" fill="white"/>"#.into(),
+            format!(
+                r#"<rect x="17" y="20.5" width="4.5" height="4" rx="1" {cut}/><rect x="25" y="20.5" width="4.5" height="4" rx="1" {cut}/><rect x="34.5" y="20.5" width="4.5" height="4" rx="1" {cut}/><rect x="42.5" y="20.5" width="4.5" height="4" rx="1" {cut}/>
+<rect x="17" y="39.5" width="4.5" height="4" rx="1" {cut}/><rect x="25" y="39.5" width="4.5" height="4" rx="1" {cut}/><rect x="34.5" y="39.5" width="4.5" height="4" rx="1" {cut}/><rect x="42.5" y="39.5" width="4.5" height="4" rx="1" {cut}/>
+<rect x="17" y="27.5" width="30" height="9" rx="2" fill="black" fill-opacity="0.35"/>
+<path d="M20 52 L44 12" stroke="black" stroke-width="4.5" stroke-linecap="round"/>"#
+            ),
+        ),
         "vector" => (
             r#"<path d="M32 12 L45 31 Q46.5 33.5 44.8 35.8 L38 46 H26 L19.2 35.8 Q17.5 33.5 19 31 Z" fill="white"/>
 <rect x="25" y="48" width="14" height="5" rx="2" fill="white"/>"#
