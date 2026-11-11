@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace
+      - run: cargo build --release --workspace
+      - name: Package
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $base = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+          $catalog = Get-Content catalog.json -Raw | ConvertFrom-Json
+          New-Item -ItemType Directory dist | Out-Null
+          Copy-Item target/release/ethone-studio.exe dist/EthoneStudio.exe
+          foreach ($app in $catalog.apps) {
+            $exe = "target/release/$($app.id).exe"
+            if (-not (Test-Path $exe)) { continue }
+            $name = "$($app.id)-windows-x64.exe"
+            Copy-Item $exe "dist/$name"
+            $app | Add-Member version $version
+            $app | Add-Member url "$base/$name"
+            $app | Add-Member sha256 (Get-FileHash "dist/$name" -Algorithm SHA256).Hash.ToLower()
+            $app | Add-Member size (Get-Item "dist/$name").Length
+          }
+          $catalog | ConvertTo-Json -Depth 6 | Set-Content dist/manifest.json -Encoding utf8NoBOM
+          Get-Content dist/manifest.json
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

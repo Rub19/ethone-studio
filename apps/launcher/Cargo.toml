@@ -1,0 +1,9 @@
+[package]
+name = "ethone-studio"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = { version = "0.37.0", default-features = false, features = ["wgpu", "default_fonts"] }
+studio-core = { version = "0.1.0", path = "../../crates/studio-core" }
+studio-ui = { version = "0.1.0", path = "../../crates/studio-ui" }
