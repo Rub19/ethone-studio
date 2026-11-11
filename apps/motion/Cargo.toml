@@ -1,0 +1,13 @@
+[package]
+name = "motion"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts"] }
+image = { version = "0.25.10", default-features = false, features = ["png", "gif"] }
+resvg = "0.49.0"
+rfd = "0.18.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+studio-ui = { version = "0.1.0", path = "../../crates/studio-ui" }

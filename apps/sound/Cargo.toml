@@ -1,0 +1,12 @@
+[package]
+name = "sound"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cpal = "0.18.2"
+eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts"] }
+hound = "3.5.1"
+rfd = "0.18.0"
+studio-ui = { version = "0.1.0", path = "../../crates/studio-ui" }
+symphonia = { version = "0.5", features = ["mp3", "aac", "alac", "isomp4"] }
