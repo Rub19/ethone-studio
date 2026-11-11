@@ -1,3 +1,4 @@
+pub mod pro;
 use egui::epaint::CubicBezierShape;
 use egui::{
     Color32, Context, CornerRadius, FontId, Painter, Pos2, Rect, Sense, Shape, Stroke, StrokeKind,

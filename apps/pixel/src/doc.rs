@@ -25,6 +25,16 @@ impl Area {
             y1: self.y1.max(o.y1),
         }
     }
+    pub fn contains(&self, x: u32, y: u32) -> bool {
+        x >= self.x0 && x < self.x1 && y >= self.y0 && y < self.y1
+    }
+    pub fn from_points(a: (f32, f32), b: (f32, f32), w: u32, h: u32) -> Option<Area> {
+        let x0 = a.0.min(b.0).floor().clamp(0.0, w as f32) as u32;
+        let x1 = a.0.max(b.0).ceil().clamp(0.0, w as f32) as u32;
+        let y0 = a.1.min(b.1).floor().clamp(0.0, h as f32) as u32;
+        let y1 = a.1.max(b.1).ceil().clamp(0.0, h as f32) as u32;
+        (x1 > x0 && y1 > y0).then_some(Area { x0, y0, x1, y1 })
+    }
     pub fn width(&self) -> u32 {
         self.x1 - self.x0
     }
@@ -51,6 +61,8 @@ pub struct Document {
     pub layers: Vec<Layer>,
     pub active: usize,
     pub dirty: Option<Area>,
+    pub selection: Option<Area>,
+    pub version: u64,
     pub modified: bool,
     pub name: String,
     undo: Vec<Snapshot>,
@@ -72,6 +84,8 @@ impl Document {
             layers: vec![Layer { name: layer, img, visible: true, opacity: 1.0 }],
             active: 0,
             dirty: None,
+            selection: None,
+            version: 0,
             modified: false,
             name,
             undo: Vec::new(),
@@ -93,10 +107,12 @@ impl Document {
     }
 
     pub fn touch_all(&mut self) {
+        self.version += 1;
         self.dirty = Some(self.full());
     }
 
     fn touch(&mut self, a: Area) {
+        self.version += 1;
         self.dirty = Some(self.dirty.map_or(a, |d| d.union(a)));
     }
 
@@ -157,10 +173,11 @@ impl Document {
     pub fn stamp(&mut self, cx: f32, cy: f32, brush: &Brush, color: [u8; 4], erase: bool) {
         let (w, h) = (self.width() as i32, self.height() as i32);
         let r = brush.radius.max(0.5);
-        let x0 = ((cx - r - 1.0).floor() as i32).clamp(0, w);
-        let x1 = ((cx + r + 1.0).ceil() as i32).clamp(0, w);
-        let y0 = ((cy - r - 1.0).floor() as i32).clamp(0, h);
-        let y1 = ((cy + r + 1.0).ceil() as i32).clamp(0, h);
+        let s = self.selection.unwrap_or(self.full());
+        let x0 = ((cx - r - 1.0).floor() as i32).clamp(s.x0 as i32, s.x1 as i32).clamp(0, w);
+        let x1 = ((cx + r + 1.0).ceil() as i32).clamp(s.x0 as i32, s.x1 as i32).clamp(0, w);
+        let y0 = ((cy - r - 1.0).floor() as i32).clamp(s.y0 as i32, s.y1 as i32).clamp(0, h);
+        let y1 = ((cy + r + 1.0).ceil() as i32).clamp(s.y0 as i32, s.y1 as i32).clamp(0, h);
         if x0 >= x1 || y0 >= y1 {
             return;
         }
@@ -207,7 +224,8 @@ impl Document {
 
     pub fn flood_fill(&mut self, x: u32, y: u32, color: [u8; 4], tolerance: u8) -> usize {
         let (w, h) = (self.width(), self.height());
-        if x >= w || y >= h {
+        let sel = self.selection.unwrap_or(self.full());
+        if x >= w || y >= h || !sel.contains(x, y) {
             return 0;
         }
         let img = &mut self.layers[self.active].img;
@@ -221,7 +239,7 @@ impl Document {
         let mut count = 0;
         while let Some((px, py)) = stack.pop() {
             let i = (py * w + px) as usize;
-            if seen[i] || !close(img.get_pixel(px, py).0) {
+            if seen[i] || !sel.contains(px, py) || !close(img.get_pixel(px, py).0) {
                 continue;
             }
             seen[i] = true;
@@ -308,17 +326,76 @@ impl Document {
 
     pub fn adjust(&mut self, f: impl Fn(&mut [u8; 4]) + Sync) {
         self.checkpoint();
-        for p in self.layers[self.active].img.pixels_mut() {
-            f(&mut p.0);
+        self.adjust_raw(f);
+    }
+
+    pub fn adjust_raw(&mut self, f: impl Fn(&mut [u8; 4]) + Sync) {
+        let sel = self.selection.unwrap_or(self.full());
+        for (x, y, p) in self.layers[self.active].img.enumerate_pixels_mut() {
+            if sel.contains(x, y) {
+                f(&mut p.0);
+            }
         }
         self.touch_all();
     }
 
     pub fn blur(&mut self, sigma: f32) {
         self.checkpoint();
+        self.blur_raw(sigma);
+    }
+
+    pub fn blur_raw(&mut self, sigma: f32) {
+        let sel = self.selection.unwrap_or(self.full());
         let l = &mut self.layers[self.active];
-        l.img = imageops::blur(&l.img, sigma);
+        let blurred = imageops::blur(&l.img, sigma);
+        for (x, y, p) in l.img.enumerate_pixels_mut() {
+            if sel.contains(x, y) {
+                *p = *blurred.get_pixel(x, y);
+            }
+        }
         self.touch_all();
+    }
+
+    pub fn clear_selection(&mut self) {
+        let Some(sel) = self.selection else { return };
+        self.checkpoint();
+        for y in sel.y0..sel.y1 {
+            for x in sel.x0..sel.x1 {
+                self.layers[self.active].img.put_pixel(x, y, Rgba([0, 0, 0, 0]));
+            }
+        }
+        self.touch(sel);
+    }
+
+    pub fn crop_to_selection(&mut self) {
+        let Some(s) = self.selection.take() else { return };
+        self.transform(|img| imageops::crop_imm(img, s.x0, s.y0, s.width(), s.height()).to_image());
+    }
+
+    pub fn place_layer(&mut self, original: &RgbaImage, dx: i32, dy: i32) {
+        let mut out = RgbaImage::new(original.width(), original.height());
+        imageops::overlay(&mut out, original, dx as i64, dy as i64);
+        self.layers[self.active].img = out;
+        self.touch_all();
+    }
+
+    pub fn gradient(&mut self, from: (f32, f32), to: (f32, f32), a: [u8; 4], b: [u8; 4]) {
+        self.checkpoint();
+        let sel = self.selection.unwrap_or(self.full());
+        let d = (to.0 - from.0, to.1 - from.1);
+        let len2 = (d.0 * d.0 + d.1 * d.1).max(1e-3);
+        let img = &mut self.layers[self.active].img;
+        for y in sel.y0..sel.y1 {
+            for x in sel.x0..sel.x1 {
+                let t = (((x as f32 + 0.5 - from.0) * d.0 + (y as f32 + 0.5 - from.1) * d.1) / len2).clamp(0.0, 1.0);
+                let c: [u8; 4] = std::array::from_fn(|k| (a[k] as f32 + (b[k] as f32 - a[k] as f32) * t).round() as u8);
+                let px = img.get_pixel_mut(x, y);
+                let mut acc = px.0.map(|v| v as f32 / 255.0);
+                over(&mut acc, c, 1.0);
+                px.0 = to_u8(acc);
+            }
+        }
+        self.touch(sel);
     }
 
     pub fn transform(&mut self, f: impl Fn(&RgbaImage) -> RgbaImage) {
@@ -422,6 +499,20 @@ mod tests {
         assert_eq!(d.layers[0].img.get_pixel(30, 40).0, [255, 255, 255, 255]);
         d.redo();
         assert_eq!(d.layers[0].img.get_pixel(30, 40).0, [0, 0, 255, 255]);
+
+        let mut s2 = Document::new(20, 20, Some([255, 255, 255, 255]));
+        s2.selection = Area::from_points((5.0, 5.0), (10.0, 10.0), 20, 20);
+        s2.checkpoint();
+        s2.stamp(10.0, 10.0, &Brush { radius: 8.0, hardness: 1.0, flow: 1.0 }, [0, 0, 0, 255], false);
+        assert_eq!(s2.layers[0].img.get_pixel(7, 7).0, [0, 0, 0, 255]);
+        assert_eq!(s2.layers[0].img.get_pixel(12, 12).0, [255, 255, 255, 255]);
+        s2.gradient((5.0, 0.0), (10.0, 0.0), [255, 0, 0, 255], [0, 0, 255, 255]);
+        assert!(s2.layers[0].img.get_pixel(5, 6).0[0] > 200);
+        assert!(s2.layers[0].img.get_pixel(9, 6).0[2] > 150);
+        s2.clear_selection();
+        assert_eq!(s2.layers[0].img.get_pixel(7, 7).0[3], 0);
+        s2.crop_to_selection();
+        assert_eq!((s2.width(), s2.height()), (5, 5));
 
         let (h, s, l) = rgb_to_hsl(0.2, 0.6, 0.4);
         let (r, g, b) = hsl_to_rgb(h, s, l);

@@ -2544,6 +2544,7 @@ dependencies = [
  "eframe",
  "image",
  "rfd",
+ "studio-core",
  "studio-ui",
  "winresource",
 ]
