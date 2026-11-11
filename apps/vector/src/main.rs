@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![windows_subsystem = "windows"]
 
 mod model;
 
@@ -1037,7 +1037,7 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Vector")
-            .with_icon(Arc::new(studio_ui::window_icon()))
+            .with_icon(Arc::new(studio_ui::app_window_icon("vector")))
             .with_inner_size([1400.0, 880.0])
             .with_min_inner_size([900.0, 600.0]),
         ..Default::default()

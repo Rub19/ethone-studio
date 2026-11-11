@@ -1,4 +1,4 @@
-﻿#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![windows_subsystem = "windows"]
 
 mod model;
 
@@ -77,6 +77,7 @@ struct PageApp {
     rendered: Option<(Doc, usize, f32)>,
     overflow: Vec<bool>,
     zoom: f32,
+    fit_pending: bool,
     notice: Option<(String, bool)>,
     title: String,
 }
@@ -118,6 +119,7 @@ impl PageApp {
             rendered: None,
             overflow: Vec::new(),
             zoom: 1.0,
+            fit_pending: true,
             notice: None,
             title: String::new(),
         }
@@ -371,8 +373,8 @@ impl PageApp {
     }
 
     fn pages_panel(&mut self, root: &mut egui::Ui) {
-        egui::Panel::left("pages").resizable(false).exact_size(150.0).frame(EFrame::new().fill(PANEL).inner_margin(Margin::same(10))).show(root, |ui| {
-            ui.horizontal(|ui| {
+        egui::Panel::left("pages").resizable(false).exact_size(176.0).frame(EFrame::new().fill(PANEL).inner_margin(Margin::same(10))).show(root, |ui| {
+            ui.horizontal_wrapped(|ui| {
                 for (tool, label) in [(Tool::Select, "V"), (Tool::Text, "T"), (Tool::Image, "I"), (Tool::Rect, "R")] {
                     let tip = match tool {
                         Tool::Select => "Sélection",
@@ -509,6 +511,11 @@ impl PageApp {
 
     fn canvas(&mut self, root: &mut egui::Ui) {
         egui::CentralPanel::default().frame(EFrame::new().fill(BG)).show(root, |ui| {
+            if self.fit_pending {
+                let a = ui.available_size();
+                self.zoom = ((a.y - 80.0) / self.doc.height).min((a.x - 80.0) / self.doc.width).clamp(0.25, 2.0);
+                self.fit_pending = false;
+            }
             let px = ui.ctx().pixels_per_point();
             let size = vec2(self.doc.width, self.doc.height) * self.zoom;
             egui::ScrollArea::both().auto_shrink(false).show(ui, |ui| {
@@ -662,7 +669,7 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Page")
-            .with_icon(Arc::new(studio_ui::window_icon()))
+            .with_icon(Arc::new(studio_ui::app_window_icon("page")))
             .with_inner_size([1360.0, 920.0])
             .with_min_inner_size([960.0, 640.0]),
         ..Default::default()

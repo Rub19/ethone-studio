@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![windows_subsystem = "windows"]
 
 mod doc;
 
@@ -448,7 +448,8 @@ impl Pixel {
             .exact_size(270.0)
             .frame(Frame::new().fill(PANEL).inner_margin(Margin::same(12)))
             .show(root, |ui| {
-                egui::ScrollArea::vertical().show(ui, |ui| {
+                egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
+                    ui.set_max_width(246.0);
                     heading(ui, "Couleur");
                     egui::widgets::color_picker::color_picker_color32(
                         ui,
@@ -488,7 +489,7 @@ impl Pixel {
 
     fn layers_panel(&mut self, ui: &mut egui::Ui) {
         heading(ui, "Calques");
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             if ui.small_button("+").on_hover_text("Nouveau calque").clicked() {
                 self.doc.add_layer(None, None);
             }
@@ -873,7 +874,7 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Pixel")
-            .with_icon(Arc::new(studio_ui::window_icon()))
+            .with_icon(Arc::new(studio_ui::app_window_icon("pixel")))
             .with_inner_size([1400.0, 880.0])
             .with_min_inner_size([900.0, 600.0])
             .with_drag_and_drop(true),

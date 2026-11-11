@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![windows_subsystem = "windows"]
 
 use eframe::egui::{
     self, Align, Color32, CornerRadius, FontId, Frame, Label, Layout, Margin, RichText, Sense,
@@ -51,7 +51,7 @@ impl Launcher {
             filter: Filter::All,
             confirm_uninstall: None,
             notice: None,
-            logo: studio_ui::logo_texture(&cc.egui_ctx),
+            logo: studio_ui::icon_texture(&cc.egui_ctx, "studio"),
         };
         me.refresh(&cc.egui_ctx);
         me
@@ -417,7 +417,7 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Ethone Studio")
-            .with_icon(Arc::new(studio_ui::window_icon()))
+            .with_icon(Arc::new(studio_ui::app_window_icon("studio")))
             .with_inner_size([1180.0, 760.0])
             .with_min_inner_size([760.0, 500.0]),
         ..Default::default()

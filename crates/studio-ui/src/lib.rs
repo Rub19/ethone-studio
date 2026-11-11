@@ -18,6 +18,17 @@ pub const OK: Color32 = Color32::from_rgb(70, 220, 160);
 const ETHONE_LOGO_PNG: &[u8] = include_bytes!("../assets/ethone-logo.png");
 
 pub fn apply_style(ctx: &Context) {
+    let mut fonts = egui::FontDefinitions::default();
+    let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".into());
+    for (name, file) in [("segoe-symbol", "seguisym.ttf"), ("segoe-emoji", "seguiemj.ttf")] {
+        if let Ok(bytes) = std::fs::read(std::path::Path::new(&windir).join("Fonts").join(file)) {
+            fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_owned(bytes)));
+            for fam in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+                fonts.families.entry(fam).or_default().push(name.into());
+            }
+        }
+    }
+    ctx.set_fonts(fonts);
     ctx.set_theme(egui::Theme::Dark);
     ctx.all_styles_mut(|s| {
         s.visuals.panel_fill = PANEL;
@@ -49,6 +60,28 @@ fn decode(bytes: &[u8]) -> (Vec<u8>, u32, u32) {
 pub fn window_icon() -> egui::IconData {
     let (rgba, width, height) = decode(ETHONE_LOGO_PNG);
     egui::IconData { rgba, width, height }
+}
+
+pub fn app_window_icon(id: &str) -> egui::IconData {
+    let bytes: &[u8] = match id {
+        "pixel" => include_bytes!("../assets/icons/pixel.png"),
+        "cut" => include_bytes!("../assets/icons/cut.png"),
+        "vector" => include_bytes!("../assets/icons/vector.png"),
+        "motion" => include_bytes!("../assets/icons/motion.png"),
+        "lumen" => include_bytes!("../assets/icons/lumen.png"),
+        "page" => include_bytes!("../assets/icons/page.png"),
+        "sound" => include_bytes!("../assets/icons/sound.png"),
+        "studio" => include_bytes!("../assets/icons/studio.png"),
+        _ => ETHONE_LOGO_PNG,
+    };
+    let (rgba, width, height) = decode(bytes);
+    egui::IconData { rgba, width, height }
+}
+
+pub fn icon_texture(ctx: &Context, id: &str) -> TextureHandle {
+    let icon = app_window_icon(id);
+    let img = egui::ColorImage::from_rgba_unmultiplied([icon.width as usize, icon.height as usize], &icon.rgba);
+    ctx.load_texture(format!("icon-{id}"), img, TextureOptions::LINEAR)
 }
 
 pub fn logo_texture(ctx: &Context) -> TextureHandle {

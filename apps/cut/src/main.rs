@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![windows_subsystem = "windows"]
 
 mod media;
 mod model;
@@ -879,7 +879,7 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Cut")
-            .with_icon(Arc::new(studio_ui::window_icon()))
+            .with_icon(Arc::new(studio_ui::app_window_icon("cut")))
             .with_inner_size([1480.0, 920.0])
             .with_min_inner_size([1000.0, 640.0])
             .with_drag_and_drop(true),
