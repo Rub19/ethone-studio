@@ -1,11 +1,11 @@
 {
   "apps": [
-    { "id": "pixel", "name": "Pixel", "tagline": "Retouche photo et compositing par calques", "category": "Image", "accent": [255, 92, 120] },
-    { "id": "cut", "name": "Cut", "tagline": "Montage vidéo multipiste", "category": "Vidéo", "accent": [168, 110, 255] },
-    { "id": "vector", "name": "Vector", "tagline": "Dessin vectoriel, logos et typographie", "category": "Image", "accent": [255, 176, 46] },
-    { "id": "motion", "name": "Motion", "tagline": "Animation, titres et effets visuels", "category": "Vidéo", "accent": [64, 200, 255] },
-    { "id": "lumen", "name": "Lumen", "tagline": "Développement RAW et catalogue photo", "category": "Photo", "accent": [70, 220, 160] },
-    { "id": "page", "name": "Page", "tagline": "Mise en page, magazines et PDF", "category": "Publication", "accent": [255, 120, 60] },
-    { "id": "sound", "name": "Sound", "tagline": "Édition et nettoyage audio", "category": "Audio", "accent": [120, 230, 90] }
+    { "id": "pixel", "name": "Pixel", "tagline": "Retouche photo et compositing par calques", "category": "Image", "accent": [255, 59, 107] },
+    { "id": "cut", "name": "Cut", "tagline": "Montage vidéo multipiste", "category": "Vidéo", "accent": [168, 85, 247] },
+    { "id": "vector", "name": "Vector", "tagline": "Dessin vectoriel, logos et typographie", "category": "Image", "accent": [255, 149, 10] },
+    { "id": "motion", "name": "Motion", "tagline": "Animation, titres et effets visuels", "category": "Vidéo", "accent": [30, 170, 240] },
+    { "id": "lumen", "name": "Lumen", "tagline": "Développement RAW et catalogue photo", "category": "Photo", "accent": [30, 200, 140] },
+    { "id": "page", "name": "Page", "tagline": "Mise en page, magazines et PDF", "category": "Publication", "accent": [250, 100, 50] },
+    { "id": "sound", "name": "Sound", "tagline": "Édition et nettoyage audio", "category": "Audio", "accent": [100, 95, 240] }
   ]
 }

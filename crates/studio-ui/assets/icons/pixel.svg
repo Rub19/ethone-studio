@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#FF5A7E"/><stop offset="1" stop-color="#E0184B"/></linearGradient>
+<linearGradient id="hi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g><rect x="15" y="25" width="23" height="23" rx="5" fill="white" fill-opacity="0.55"/>
+<rect x="25" y="15" width="24" height="24" rx="5" fill="white"/></g><g><circle cx="31" cy="21.5" r="2.6" fill="black"/><path d="M27 35 L33 28 L37 32 L40 29 L46 35 Z" fill="black"/></g></mask>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.4" flood-color="#000000" flood-opacity="0.28"/></filter>
+</defs>
+<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
+<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#hi)"/>
+<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
+<g filter="url(#sh)"><rect width="64" height="64" fill="#ffffff" mask="url(#m)"/></g>
+</svg>

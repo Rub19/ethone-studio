@@ -1,79 +1,86 @@
 use resvg::{tiny_skia, usvg};
 
-const APPS: [(&str, [u8; 3]); 7] = [
-    ("pixel", [255, 92, 120]),
-    ("cut", [168, 110, 255]),
-    ("vector", [255, 176, 46]),
-    ("motion", [64, 200, 255]),
-    ("lumen", [70, 220, 160]),
-    ("page", [255, 120, 60]),
-    ("sound", [120, 230, 90]),
+pub const APPS: [(&str, &str, &str); 8] = [
+    ("pixel", "#FF5A7E", "#E0184B"),
+    ("cut", "#C77DFF", "#8A2BE2"),
+    ("vector", "#FFB23F", "#F07800"),
+    ("motion", "#4CC9F0", "#0A84D6"),
+    ("lumen", "#3EE0A4", "#0FA36B"),
+    ("page", "#FF8A5B", "#E2461B"),
+    ("sound", "#7C83FF", "#4B3BDB"),
+    ("studio", "#8B7CFF", "#2E8BFF"),
 ];
 
-fn glyph(id: &str, a: &str) -> String {
-    let line = format!(r#"stroke="{a}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none""#);
-    let thin = format!(r#"stroke="{a}" stroke-opacity="0.6" stroke-width="1.6" fill="none""#);
+fn glyph(id: &str) -> (String, String) {
+    let cut = r#"fill="black""#;
     match id {
-        "pixel" => format!(
-            r##"<rect x="14" y="28" width="22" height="22" rx="4" fill="#10121a" stroke="{a}" stroke-opacity="0.45" stroke-width="2"/>
-<rect x="21" y="21" width="22" height="22" rx="4" fill="#10121a" stroke="{a}" stroke-opacity="0.7" stroke-width="2"/>
-<rect x="28" y="14" width="22" height="22" rx="4" fill="{a}"/>"##
+        "pixel" => (
+            r#"<rect x="15" y="25" width="23" height="23" rx="5" fill="white" fill-opacity="0.55"/>
+<rect x="25" y="15" width="24" height="24" rx="5" fill="white"/>"#
+                .into(),
+            r#"<circle cx="31" cy="21.5" r="2.6" fill="black"/><path d="M27 35 L33 28 L37 32 L40 29 L46 35 Z" fill="black"/>"#.into(),
         ),
-        "cut" => format!(
-            r##"<path d="M24 39 L46 13 M40 39 L18 13" {line}/><circle cx="21" cy="45" r="6.5" {line}/><circle cx="43" cy="45" r="6.5" {line}/><circle cx="32" cy="26.5" r="2.2" fill="#10121a"/>"##
+        "cut" => (r#"<path d="M23 16.5 Q23 13 26.2 14.7 L47 27.3 Q50.2 29.2 47 31.1 L26.2 43.7 Q23 45.4 23 41.9 Z" fill="white" transform="translate(0 2.5)"/>"#.into(), format!(r#"<path d="M15 47 L50 17" stroke="black" stroke-width="4" stroke-linecap="round" {cut}/>"#)),
+        "vector" => (
+            r#"<path d="M32 12 L45 31 Q46.5 33.5 44.8 35.8 L38 46 H26 L19.2 35.8 Q17.5 33.5 19 31 Z" fill="white"/>
+<rect x="25" y="48" width="14" height="5" rx="2" fill="white"/>"#
+                .into(),
+            r#"<path d="M32 18 V33" stroke="black" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="35" r="3.4" fill="black"/>"#.into(),
         ),
-        "vector" => format!(
-            r#"<path d="M12 46 L20 12 M52 18 L44 52" {thin}/><path d="M12 46 C20 12 44 52 52 18" {line}/>
-<rect x="8.5" y="42.5" width="7" height="7" fill="{a}"/><rect x="48.5" y="14.5" width="7" height="7" fill="{a}"/>
-<circle cx="20" cy="12" r="3" fill="{a}"/><circle cx="44" cy="52" r="3" fill="{a}"/>"#
-        ),
-        "motion" => format!(
-            r#"<path d="M10 46 L54 46 M16 16 L34 16 M12 22 L34 22 M20 28 L34 28" {thin}/>
-<path d="M18 41 L23 46 L18 51 L13 46 Z M32 41 L37 46 L32 51 L27 46 Z M46 41 L51 46 L46 51 L41 46 Z" fill="{a}"/>
-<circle cx="44" cy="22" r="8" fill="{a}"/>"#
+        "motion" => (
+            r#"<circle cx="39" cy="32" r="11" fill="white"/>
+<path d="M16 25 H25 M12 32 H24 M17 39 H25" stroke="white" stroke-width="4" stroke-linecap="round" stroke-opacity="0.75"/>"#
+                .into(),
+            String::new(),
         ),
         "lumen" => {
-            let mut s = format!(r#"<circle cx="32" cy="32" r="19" {line}/>"#);
+            let mut cuts = String::new();
             for k in 0..6 {
-                let t = k as f32 * std::f32::consts::TAU / 6.0;
-                let b = t + 1.9;
-                s += &format!(
-                    r#"<path d="M{} {} L{} {}" stroke="{a}" stroke-width="2.2" stroke-linecap="round"/>"#,
-                    32.0 + t.cos() * 19.0,
-                    32.0 + t.sin() * 19.0,
-                    32.0 + b.cos() * 8.0,
-                    32.0 + b.sin() * 8.0
-                );
+                let a = (k as f32) * std::f32::consts::TAU / 6.0 - 0.35;
+                let (x0, y0) = (32.0 + a.cos() * 7.0, 32.0 + a.sin() * 7.0);
+                let b = a + 1.25;
+                let (x1, y1) = (32.0 + b.cos() * 20.0, 32.0 + b.sin() * 20.0);
+                cuts += &format!(r#"<path d="M{x0:.2} {y0:.2} L{x1:.2} {y1:.2}" stroke="black" stroke-width="2.4" stroke-linecap="round"/>"#);
             }
-            s
+            (r#"<circle cx="32" cy="32" r="18" fill="white"/>"#.into(), cuts)
         }
-        "page" => format!(
-            r#"<rect x="17" y="10" width="30" height="44" rx="4" {line}/><rect x="23" y="17" width="18" height="11" rx="2" fill="{a}" fill-opacity="0.8"/>
-<path d="M23 35 L41 35 M23 41 L41 41 M23 47 L34 47" stroke="{a}" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>"#
+        "page" => (
+            r#"<path d="M19 15 Q19 12 22 12 H37 L46 21 V49 Q46 52 43 52 H22 Q19 52 19 49 Z" fill="white"/>"#.into(),
+            r#"<path d="M37 12 V19 Q37 21 39 21 H46" fill="none" stroke="black" stroke-width="2.4"/>
+<rect x="24" y="25" width="17" height="9" rx="2" fill="black"/>
+<path d="M24 40 H41 M24 46 H35" stroke="black" stroke-width="3" stroke-linecap="round"/>"#
+                .into(),
         ),
-        _ => {
-            let hs = [6.0, 16.0, 30.0, 20.0, 34.0, 14.0, 22.0, 8.0];
-            hs.iter()
-                .enumerate()
-                .map(|(i, h)| {
-                    let x = 13.0 + i as f32 * 5.5;
-                    format!(r#"<path d="M{x} {} L{x} {}" stroke="{a}" stroke-width="3" stroke-linecap="round"/>"#, 32.0 - h / 2.0, 32.0 + h / 2.0)
-                })
-                .collect()
-        }
+        "sound" => (
+            r#"<path d="M17 28 V36 M24.5 22 V42 M32 15 V49 M39.5 22 V42 M47 28 V36" stroke="white" stroke-width="5" stroke-linecap="round"/>"#.into(),
+            String::new(),
+        ),
+        _ => (
+            r#"<rect x="17" y="17" width="13" height="13" rx="4" fill="white"/>
+<rect x="34" y="17" width="13" height="13" rx="4" fill="white" fill-opacity="0.8"/>
+<rect x="17" y="34" width="13" height="13" rx="4" fill="white" fill-opacity="0.8"/>
+<rect x="34" y="34" width="13" height="13" rx="4" fill="white" fill-opacity="0.6"/>"#
+                .into(),
+            String::new(),
+        ),
     }
 }
 
-fn svg(id: &str, c: [u8; 3]) -> String {
-    let a = format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2]);
+pub fn svg(id: &str, top: &str, bottom: &str) -> String {
+    let (shape, cutouts) = glyph(id);
     format!(
         r##"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<rect x="1" y="1" width="62" height="62" rx="17" fill="#10121a"/>
-<rect x="1" y="1" width="62" height="62" rx="17" fill="{a}" fill-opacity="0.12"/>
-<rect x="1.8" y="1.8" width="60.4" height="60.4" rx="16.3" fill="none" stroke="{a}" stroke-opacity="0.8" stroke-width="1.6"/>
-{}
-</svg>"##,
-        glyph(id, &a)
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="{top}"/><stop offset="1" stop-color="{bottom}"/></linearGradient>
+<linearGradient id="hi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g>{shape}</g><g>{cutouts}</g></mask>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.4" flood-color="#000000" flood-opacity="0.28"/></filter>
+</defs>
+<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
+<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#hi)"/>
+<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
+<g filter="url(#sh)"><rect width="64" height="64" fill="#ffffff" mask="url(#m)"/></g>
+</svg>"##
     )
 }
 
@@ -93,9 +100,9 @@ fn render(svg: &str, size: u32) -> image::RgbaImage {
 fn main() {
     let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets").join("icons");
     std::fs::create_dir_all(&dir).unwrap();
-    let mut all: Vec<(&str, Vec<u8>)> = Vec::new();
-    for (id, c) in APPS {
-        let s = svg(id, c);
+    for (id, top, bottom) in APPS {
+        let s = svg(id, top, bottom);
+        std::fs::write(dir.join(format!("{id}.svg")), &s).unwrap();
         render(&s, 256).save(dir.join(format!("{id}.png"))).unwrap();
         let frames: Vec<image::codecs::ico::IcoFrame> = [16, 24, 32, 48, 64, 128, 256]
             .iter()
@@ -104,27 +111,7 @@ fn main() {
                 image::codecs::ico::IcoFrame::as_png(img.as_raw(), n, n, image::ExtendedColorType::Rgba8).unwrap()
             })
             .collect();
-        let file = std::fs::File::create(dir.join(format!("{id}.ico"))).unwrap();
-        image::codecs::ico::IcoEncoder::new(file).encode_images(&frames).unwrap();
-        all.push((id, s.into_bytes()));
+        image::codecs::ico::IcoEncoder::new(std::fs::File::create(dir.join(format!("{id}.ico"))).unwrap()).encode_images(&frames).unwrap();
     }
-    let studio = r##"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="0.55" stop-color="#40c8ff"/><stop offset="1" stop-color="#46dca0"/></linearGradient></defs>
-<rect x="1" y="1" width="62" height="62" rx="17" fill="#10121a"/>
-<rect x="2" y="2" width="60" height="60" rx="16" fill="none" stroke="url(#g)" stroke-width="2.6"/>
-<rect x="14" y="14" width="16" height="16" rx="5" fill="#ff5c78"/>
-<rect x="34" y="14" width="16" height="16" rx="5" fill="#a86eff"/>
-<rect x="14" y="34" width="16" height="16" rx="5" fill="#ffb02e"/>
-<rect x="34" y="34" width="16" height="16" rx="5" fill="#40c8ff"/>
-</svg>"##;
-    render(studio, 256).save(dir.join("studio.png")).unwrap();
-    let frames: Vec<image::codecs::ico::IcoFrame> = [16, 24, 32, 48, 64, 128, 256]
-        .iter()
-        .map(|&n| {
-            let img = render(studio, n);
-            image::codecs::ico::IcoFrame::as_png(img.as_raw(), n, n, image::ExtendedColorType::Rgba8).unwrap()
-        })
-        .collect();
-    image::codecs::ico::IcoEncoder::new(std::fs::File::create(dir.join("studio.ico")).unwrap()).encode_images(&frames).unwrap();
-    println!("{} icônes écrites dans {}", all.len() + 1, dir.display());
+    println!("{} icônes écrites dans {}", APPS.len(), dir.display());
 }

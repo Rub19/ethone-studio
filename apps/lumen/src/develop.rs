@@ -128,6 +128,43 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
     }
 }
 
+/// Red, green, blue and luminance counts, 256 bins each.
+pub fn histogram(img: &RgbImage) -> [[u32; 256]; 4] {
+    let mut h = [[0u32; 256]; 4];
+    for p in img.pixels() {
+        let [r, g, b] = p.0;
+        h[0][r as usize] += 1;
+        h[1][g as usize] += 1;
+        h[2][b as usize] += 1;
+        let l = (0.2126 * r as f32 + 0.7152 * g as f32 + 0.0722 * b as f32).round() as usize;
+        h[3][l.min(255)] += 1;
+    }
+    h
+}
+
+/// A starting point: exposure that brings the average to mid-grey, a little contrast and lift.
+pub fn auto(img: &RgbImage) -> Settings {
+    let n = (img.width() * img.height()).max(1) as f64;
+    let mean: f64 = img.pixels().map(|p| to_lin((0.2126 * p.0[0] as f32 + 0.7152 * p.0[1] as f32 + 0.0722 * p.0[2] as f32) / 255.0) as f64).sum::<f64>() / n;
+    let exposure = ((0.18 / mean.max(1e-4)).log2() as f32).clamp(-3.0, 3.0);
+    Settings { exposure: (exposure * 100.0).round() / 100.0, contrast: 12.0, shadows: 15.0, highlights: -15.0, vibrance: 12.0, ..Default::default() }
+}
+
+pub fn presets() -> Vec<(&'static str, Settings)> {
+    vec![
+        ("Naturel", Settings::default()),
+        ("Vif", Settings { contrast: 18.0, vibrance: 35.0, saturation: 8.0, ..Default::default() }),
+        ("Doux", Settings { contrast: -18.0, highlights: -20.0, shadows: 20.0, saturation: -10.0, ..Default::default() }),
+        ("Chaud", Settings { temperature: 30.0, tint: 6.0, vibrance: 10.0, ..Default::default() }),
+        ("Froid", Settings { temperature: -28.0, contrast: 8.0, ..Default::default() }),
+        ("Noir et blanc", Settings { saturation: -100.0, contrast: 22.0, ..Default::default() }),
+        ("Noir et blanc doux", Settings { saturation: -100.0, contrast: -10.0, shadows: 25.0, ..Default::default() }),
+        ("Vintage", Settings { temperature: 22.0, contrast: -12.0, blacks: 25.0, saturation: -25.0, vignette: -35.0, ..Default::default() }),
+        ("Cinéma", Settings { contrast: 20.0, temperature: -8.0, tint: -6.0, highlights: -25.0, saturation: -12.0, vignette: -25.0, ..Default::default() }),
+        ("Haute clé", Settings { exposure: 0.6, contrast: -20.0, highlights: -30.0, whites: 20.0, ..Default::default() }),
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,5 +189,14 @@ mod tests {
         assert!(p[0].abs_diff(p[2]) <= 1);
         let rot = process(&img, &Settings { rotate: 1, ..Default::default() });
         assert_eq!(rot.dimensions(), (8, 16));
+
+        let h = histogram(&img);
+        assert_eq!(h[2][200], 128);
+        assert_eq!(h[3].iter().sum::<u32>(), 128);
+        let dark = RgbImage::from_pixel(10, 10, image::Rgb([20, 20, 20]));
+        assert!(auto(&dark).exposure > 1.0);
+        let bright = RgbImage::from_pixel(10, 10, image::Rgb([240, 240, 240]));
+        assert!(auto(&bright).exposure < 0.0);
+        assert_eq!(presets()[0].1, Settings::default());
     }
 }

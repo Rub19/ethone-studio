@@ -109,9 +109,16 @@ pub fn logo_texture(ctx: &Context) -> TextureHandle {
     ctx.load_texture("ethone-logo", img, TextureOptions::LINEAR)
 }
 
-pub fn app_icon(ui: &mut Ui, size: f32, id: &str, accent: Color32) {
+pub fn app_icon(ui: &mut Ui, size: f32, id: &str, _accent: Color32) {
     let (rect, _) = ui.allocate_exact_size(Vec2::splat(size), Sense::hover());
-    paint_app_icon(ui.painter(), rect, id, accent);
+    let key = egui::Id::NULL.with(("app-icon-tex", id));
+    let ctx = ui.ctx().clone();
+    let tex = ctx.data_mut(|d| d.get_temp::<TextureHandle>(key)).unwrap_or_else(|| {
+        let t = icon_texture(&ctx, id);
+        ctx.data_mut(|d| d.insert_temp(key, t.clone()));
+        t
+    });
+    ui.painter().image(tex.id(), rect, Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)), Color32::WHITE);
 }
 
 pub fn paint_app_icon(painter: &Painter, r: Rect, id: &str, accent: Color32) {
