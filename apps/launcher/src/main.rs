@@ -375,7 +375,6 @@ impl Launcher {
 
         let pad = 20.0;
         let icon_rect = Rect::from_min_size(rect.min + vec2(pad, pad), Vec2::splat(56.0));
-        painter.circle_filled(icon_rect.center(), 34.0, accent.gamma_multiply(0.10 * (0.6 + lift)));
         let tex = self.icon(ctx, &app.id);
         painter.image(tex.id(), icon_rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
 
