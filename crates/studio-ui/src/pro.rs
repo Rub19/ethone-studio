@@ -66,21 +66,133 @@ pub fn apply(ctx: &Context) {
     });
 }
 
-pub fn pill(ui: &mut Ui, label: &str, fill: Color32, ink: Color32) -> Response {
-    let galley = ui.painter().layout_no_wrap(label.to_string(), semibold(13.5), ink);
-    let (rect, resp) = ui.allocate_exact_size(vec2(galley.size().x + 32.0, 34.0), Sense::click());
-    let fill = if resp.hovered() { fill.lerp_to_gamma(Color32::WHITE, 0.12) } else { fill };
-    ui.painter().rect_filled(rect, CornerRadius::same(17), fill);
-    ui.painter().galley(rect.center() - galley.size() / 2.0, galley, ink);
+/// Vertical two-colour fill, used to give buttons a soft top light like macOS controls.
+pub fn gradient_rect(p: &egui::Painter, r: Rect, radius: u8, top: Color32, bottom: Color32) {
+    let shape = egui::epaint::RectShape::filled(r, CornerRadius::same(radius), bottom);
+    p.add(shape);
+    let inner = Rect::from_min_max(r.min, pos2(r.max.x, r.center().y));
+    let mut mesh = egui::Mesh::default();
+    let i = 0u32;
+    let k = radius as f32 * 0.6;
+    let inner = inner.shrink2(vec2(k, 0.0));
+    for (pos, c) in [(inner.left_top(), top), (inner.right_top(), top), (inner.right_bottom(), Color32::TRANSPARENT), (inner.left_bottom(), Color32::TRANSPARENT)] {
+        mesh.colored_vertex(pos, c);
+    }
+    mesh.add_triangle(i, i + 1, i + 2);
+    mesh.add_triangle(i, i + 2, i + 3);
+    p.add(mesh);
+}
+
+fn button_base(ui: &mut Ui, label: &str, icon: Option<&dyn Fn(&egui::Painter, Rect, Color32)>, fill: Color32, ink: Color32, border: Option<Color32>) -> Response {
+    let font = semibold(12.5);
+    let galley = ui.painter().layout_no_wrap(label.to_string(), font, ink);
+    let icon_w = if icon.is_some() { 20.0 } else { 0.0 };
+    let pad = if label.is_empty() { 7.0 } else { 13.0 };
+    let w = (galley.size().x + icon_w + pad * 2.0 - if icon.is_some() && !label.is_empty() { 2.0 } else { 0.0 }).max(28.0);
+    let (rect, resp) = ui.allocate_exact_size(vec2(w, 28.0), Sense::click());
+    let pressed = resp.is_pointer_button_down_on();
+    let base = if pressed { fill.lerp_to_gamma(Color32::BLACK, 0.12) } else if resp.hovered() { fill.lerp_to_gamma(Color32::WHITE, 0.08) } else { fill };
+    let p = ui.painter();
+    gradient_rect(p, rect, 7, Color32::from_white_alpha(if pressed { 0 } else { 14 }), base);
+    if let Some(b) = border {
+        p.rect_stroke(rect, CornerRadius::same(7), Stroke::new(1.0, b), egui::StrokeKind::Inside);
+    }
+    let mut x = rect.left() + pad;
+    if let Some(paint) = icon {
+        let ir = Rect::from_center_size(pos2(x + 8.0, rect.center().y), Vec2::splat(15.0));
+        paint(p, ir, ink);
+        x += icon_w;
+    }
+    if !label.is_empty() {
+        p.galley(pos2(x, rect.center().y - galley.size().y / 2.0), galley, ink);
+    }
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
+pub fn pill(ui: &mut Ui, label: &str, fill: Color32, ink: Color32) -> Response {
+    button_base(ui, label, None, fill, ink, None)
+}
+
 pub fn primary(ui: &mut Ui, label: &str) -> Response {
-    pill(ui, label, BLUE, Color32::WHITE)
+    button_base(ui, label, None, BLUE, Color32::WHITE, Some(Color32::from_white_alpha(18)))
 }
 
 pub fn secondary(ui: &mut Ui, label: &str) -> Response {
-    pill(ui, label, FIELD, INK_STRONG)
+    button_base(ui, label, None, FIELD, INK_STRONG, Some(Color32::from_white_alpha(10)))
+}
+
+/// Primary button with a leading glyph (e.g. the export arrow).
+pub fn primary_icon(ui: &mut Ui, label: &str, paint: impl Fn(&egui::Painter, Rect, Color32)) -> Response {
+    button_base(ui, label, Some(&paint), BLUE, Color32::WHITE, Some(Color32::from_white_alpha(18)))
+}
+
+/// Secondary button with a leading glyph; an empty label gives a square icon button with a frame.
+pub fn secondary_icon(ui: &mut Ui, label: &str, paint: impl Fn(&egui::Painter, Rect, Color32)) -> Response {
+    button_base(ui, label, Some(&paint), FIELD, INK_STRONG, Some(Color32::from_white_alpha(10)))
+}
+
+/// Frameless text button that only shows a background on hover.
+pub fn ghost(ui: &mut Ui, label: &str) -> Response {
+    let galley = ui.painter().layout_no_wrap(label.to_string(), FontId::proportional(12.5), INK);
+    let (rect, resp) = ui.allocate_exact_size(vec2(galley.size().x + 18.0, 26.0), Sense::click());
+    if resp.hovered() {
+        ui.painter().rect_filled(rect, CornerRadius::same(6), Color32::from_white_alpha(12));
+    }
+    ui.painter().galley(rect.center() - galley.size() / 2.0, galley, if resp.hovered() { INK_STRONG } else { INK });
+    resp
+}
+
+/// Small rounded info chip, clickable (e.g. "1920 × 1080 · 30 i/s").
+pub fn chip(ui: &mut Ui, label: &str) -> Response {
+    let galley = ui.painter().layout_no_wrap(label.to_string(), FontId::proportional(12.0), MUTED);
+    let (rect, resp) = ui.allocate_exact_size(vec2(galley.size().x + 18.0, 24.0), Sense::click());
+    ui.painter().rect(rect, CornerRadius::same(6), if resp.hovered() { FIELD_HOVER } else { FIELD }, Stroke::new(1.0, Color32::from_white_alpha(8)), egui::StrokeKind::Inside);
+    ui.painter().galley(rect.center() - galley.size() / 2.0, galley, if resp.hovered() { INK } else { MUTED });
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+/// Keyboard shortcut badge.
+pub fn kbd(ui: &mut Ui, key: &str) {
+    let galley = ui.painter().layout_no_wrap(key.to_string(), FontId::proportional(10.5), MUTED);
+    let (rect, _) = ui.allocate_exact_size(vec2(galley.size().x + 10.0, 18.0), Sense::hover());
+    ui.painter().rect(rect, CornerRadius::same(4), WELL, Stroke::new(1.0, LINE), egui::StrokeKind::Inside);
+    ui.painter().galley(rect.center() - galley.size() / 2.0, galley, MUTED);
+}
+
+/// Thin vertical divider for toolbars.
+pub fn toolbar_sep(ui: &mut Ui) {
+    ui.add_space(4.0);
+    let (r, _) = ui.allocate_exact_size(vec2(1.0, 20.0), Sense::hover());
+    ui.painter().rect_filled(r, CornerRadius::ZERO, LINE);
+    ui.add_space(4.0);
+}
+
+/// iOS-style segmented control; returns true when the selection changed.
+pub fn segmented(ui: &mut Ui, value: &mut usize, items: &[&str]) -> bool {
+    let font = FontId::proportional(12.0);
+    let widths: Vec<f32> = items.iter().map(|t| ui.painter().layout_no_wrap(t.to_string(), font.clone(), INK).size().x + 20.0).collect();
+    let total: f32 = widths.iter().sum::<f32>() + 4.0;
+    let (outer, _) = ui.allocate_exact_size(vec2(total, 26.0), Sense::hover());
+    ui.painter().rect_filled(outer, CornerRadius::same(7), WELL);
+    let mut x = outer.left() + 2.0;
+    let mut changed = false;
+    for (k, (label, w)) in items.iter().zip(&widths).enumerate() {
+        let r = Rect::from_min_size(pos2(x, outer.top() + 2.0), vec2(*w, 22.0));
+        let resp = ui.interact(r, ui.make_persistent_id(("seg", items.len(), label, k)), Sense::click());
+        let on = *value == k;
+        if on {
+            ui.painter().rect(r, CornerRadius::same(5), FIELD_HOVER, Stroke::new(1.0, Color32::from_white_alpha(10)), egui::StrokeKind::Inside);
+        } else if resp.hovered() {
+            ui.painter().rect_filled(r, CornerRadius::same(5), Color32::from_white_alpha(6));
+        }
+        ui.painter().text(r.center(), Align2::CENTER_CENTER, *label, if on { semibold(12.0) } else { font.clone() }, if on { INK_STRONG } else { MUTED });
+        if resp.clicked() && !on {
+            *value = k;
+            changed = true;
+        }
+        x += w;
+    }
+    changed
 }
 
 /// A square icon button drawn by `paint`, highlighted when `on`.
