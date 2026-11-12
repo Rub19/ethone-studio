@@ -90,5 +90,12 @@ pub const PIXEL: &[Tuto] = &[
         "+ crée un calque, ⧉ le duplique, ⤓ le fusionne avec celui du dessous.",
         "Double-clique sur le nom pour le renommer, l'œil pour le masquer.",
     ]),
+    t("Copier et coller", "Ctrl+C / Ctrl+V", "Copie une sélection, colle une capture d'écran ou une image d'une autre app.", &["Ctrl+C copie la sélection (ou le calque), aussi dans le presse-papiers de Windows.", "Ctrl+V colle l'image du presse-papiers sur un nouveau calque, même une capture faite avec Win+Maj+S.", "Ctrl+J crée un calque par copie de la sélection, Ctrl+Maj+J par coupure."]),
+    t("Transformation", "Ctrl+T", "Agrandit, réduit ou fait pivoter le calque actif.", &["Ctrl+T, puis règle l'échelle et l'angle."]),
+    t("Effets de calque", "", "Ombre portée, lueur externe, contour.", &["Calque > Effets de calque, choisis l'effet, sa taille et sa couleur.", "L'effet est posé sur un nouveau calque sous le calque actif : tu peux l'effacer ou baisser son opacité."]),
+    t("Zone de travail", "", "Agrandit la toile sans étirer l'image, ou rogne les bords vides.", &["Clique la taille du document en haut à droite, ou Image > Taille de la zone de travail.", "Choisis où placer l'image actuelle dans la grille 3 × 3.", "Image > Rogner les bords transparents enlève le vide autour d'un détourage."]),
+    t("Sélection avancée", "", "Agrandir, réduire, bordure, pixels du calque, remplir, contour.", &["Menu Sélection pour modifier la sélection de quelques pixels.", "Maj+F5 remplit la sélection avec la couleur principale.", "Édition > Contour de la sélection trace un liseré."]),
+    t("Symétrie", "", "Peint en miroir : visages, mandalas, logos.", &["Avec un pinceau, coche Symétrie dans la barre d'options : chaque trait est répété de l'autre côté."]),
+    t("Navigateur et infos", "", "Vue d'ensemble, zoom, couleur sous le curseur, histogramme.", &["Clique dans le Navigateur pour aller à un endroit, règle le zoom avec le curseur.", "Le panneau Infos lit la couleur (hex et RVB) sous le curseur.", "Affichage > Grille (Ctrl+') pour aligner ; la grille de pixels apparaît dès 1000 %."]),
     t("Exporter", "Ctrl+E", "Enregistre l'image aplatie en PNG, JPEG ou WebP.", &["Fichier > Exporter et choisis le format avec l'extension."]),
 ];

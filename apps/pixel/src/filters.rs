@@ -43,6 +43,10 @@ pub enum Kind {
     Vignette,
     Glow,
     Chromatic,
+    Wave,
+    Twirl,
+    Spherize,
+    Halftone,
 }
 
 pub const ADJUSTMENTS: &[Kind] = &[
@@ -62,7 +66,8 @@ pub const FILTERS: &[(&str, &[Kind])] = &[
     ("Netteté", &[Kind::Unsharp]),
     ("Bruit", &[Kind::Noise, Kind::Denoise]),
     ("Pixellisation", &[Kind::Pixelate]),
-    ("Esthétiques", &[Kind::Emboss, Kind::FindEdges, Kind::Glow, Kind::Chromatic]),
+    ("Esthétiques", &[Kind::Emboss, Kind::FindEdges, Kind::Glow, Kind::Chromatic, Kind::Halftone]),
+    ("Déformation", &[Kind::Wave, Kind::Twirl, Kind::Spherize]),
     ("Rendu", &[Kind::Vignette]),
 ];
 
@@ -96,6 +101,10 @@ impl Kind {
             Kind::Vignette => "Vignettage",
             Kind::Glow => "Lueur diffuse",
             Kind::Chromatic => "Aberration chromatique",
+            Kind::Wave => "Ondulation",
+            Kind::Twirl => "Tourbillon",
+            Kind::Spherize => "Sphérisation",
+            Kind::Halftone => "Trame de demi-teintes",
         }
     }
 
@@ -121,6 +130,10 @@ impl Kind {
             Kind::Vignette => const { &[p("Quantité", -100.0, 100.0, -50.0, ""), p("Taille", 0.0, 100.0, 50.0, " %")] },
             Kind::Glow => const { &[p("Rayon", 2.0, 80.0, 18.0, " px"), p("Intensité", 0.0, 100.0, 45.0, " %")] },
             Kind::Chromatic => const { &[p("Décalage", 1.0, 30.0, 4.0, " px")] },
+            Kind::Wave => const { &[p("Amplitude", 1.0, 100.0, 12.0, " px"), p("Longueur d'onde", 10.0, 500.0, 80.0, " px")] },
+            Kind::Twirl => const { &[p("Angle", -720.0, 720.0, 180.0, "°"), p("Rayon", 5.0, 100.0, 60.0, " %")] },
+            Kind::Spherize => const { &[p("Intensité", -100.0, 100.0, 60.0, "")] },
+            Kind::Halftone => const { &[p("Taille du point", 3.0, 40.0, 8.0, " px")] },
             _ => &[],
         }
     }
@@ -370,6 +383,55 @@ impl Kind {
                     [at(x - s, y)[0], c[1], at(x + s, y)[2], c[3]]
                 })
             }
+            Kind::Wave => {
+                let (amp, len) = (g(0), g(1).max(1.0));
+                sample(img, move |x, y, at| {
+                    let (x, y) = (x as f32, y as f32);
+                    at(x + amp * (y / len * std::f32::consts::TAU).sin(), y + amp * (x / len * std::f32::consts::TAU).sin())
+                })
+            }
+            Kind::Twirl => {
+                let (ang, frac) = (g(0).to_radians(), g(1) / 100.0);
+                let (cx, cy) = (img.width() as f32 / 2.0, img.height() as f32 / 2.0);
+                let radius = cx.min(cy) * frac;
+                sample(img, move |x, y, at| {
+                    let (dx, dy) = (x as f32 - cx, y as f32 - cy);
+                    let d = (dx * dx + dy * dy).sqrt();
+                    if d >= radius {
+                        return at(x as f32, y as f32);
+                    }
+                    let a = ang * (1.0 - d / radius).powi(2);
+                    let (sn, cs) = a.sin_cos();
+                    at(cx + dx * cs - dy * sn, cy + dx * sn + dy * cs)
+                })
+            }
+            Kind::Spherize => {
+                let k = g(0) / 100.0;
+                let (cx, cy) = (img.width() as f32 / 2.0, img.height() as f32 / 2.0);
+                let r = cx.min(cy);
+                sample(img, move |x, y, at| {
+                    let (dx, dy) = ((x as f32 - cx) / r, (y as f32 - cy) / r);
+                    let d = (dx * dx + dy * dy).sqrt();
+                    if d >= 1.0 || d == 0.0 {
+                        return at(x as f32, y as f32);
+                    }
+                    let nd = if k >= 0.0 { d.powf(1.0 + k) } else { d.powf(1.0 / (1.0 - k)) };
+                    let f = nd / d;
+                    at(cx + dx * f * r, cy + dy * f * r)
+                })
+            }
+            Kind::Halftone => {
+                let cell = g(0).max(2.0);
+                sample(img, move |x, y, at| {
+                    let (cx, cy) = (((x as f32 / cell).floor() + 0.5) * cell, ((y as f32 / cell).floor() + 0.5) * cell);
+                    let c = at(cx, cy);
+                    let l = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+                    let radius = (1.0 - l).sqrt() * cell * 0.7;
+                    let d = ((x as f32 + 0.5 - cx).powi(2) + (y as f32 + 0.5 - cy).powi(2)).sqrt();
+                    let v = if d < radius { 0.0 } else { 1.0 };
+                    [v, v, v, at(x as f32, y as f32)[3]]
+                })
+            }
         }
     }
 }
@@ -475,7 +537,7 @@ mod tests {
         for k in all {
             let out = k.apply(&img, &k.defaults());
             assert_eq!(out.dimensions(), img.dimensions(), "{k:?}");
-            if !matches!(k, Kind::Blur | Kind::MotionBlur | Kind::RadialBlur | Kind::Pixelate | Kind::Unsharp | Kind::Glow | Kind::Chromatic) {
+            if !matches!(k, Kind::Blur | Kind::MotionBlur | Kind::RadialBlur | Kind::Pixelate | Kind::Unsharp | Kind::Glow | Kind::Chromatic | Kind::Wave | Kind::Twirl | Kind::Spherize) {
                 assert_eq!(out.get_pixel(1, 5).0[3], 0, "{k:?}");
             }
         }

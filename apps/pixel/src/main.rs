@@ -107,6 +107,13 @@ fn brushy(t: Tool) -> bool {
     matches!(t, Tool::Brush | Tool::Pencil | Tool::Eraser | Tool::Clone | Tool::Blur | Tool::Sharpen | Tool::Smudge | Tool::Dodge | Tool::Burn | Tool::Sponge)
 }
 
+enum Sheet {
+    Canvas { w: u32, h: u32, anchor: usize },
+    Transform { scale: f32, angle: f32 },
+    Effect { kind: u8, size: f32, dx: f32, dy: f32, color: [u8; 4] },
+    SelectBy { kind: u8, px: i32 },
+    Export { format: usize, quality: u8, scale: f32 },
+}
 struct TextDraft {
     at: (f32, f32),
     text: String,
@@ -230,6 +237,15 @@ struct Pixel {
     renaming: Option<(usize, String)>,
     error: Option<String>,
     title: String,
+    clipboard: Option<RgbaImage>,
+    symmetry: bool,
+    radial: bool,
+    outline: bool,
+    grid: u32,
+    show_grid: bool,
+    sheet: Option<Sheet>,
+    view_doc: Option<Rect>,
+    hist: Option<(u64, [u32; 256])>,
 }
 
 fn recents_path() -> PathBuf {
@@ -305,6 +321,15 @@ impl Pixel {
             mask_tex: None,
             help: studio_ui::help::Help::new("Pixel", tutos::PIXEL),
             resize: None,
+            clipboard: None,
+            symmetry: false,
+            radial: false,
+            outline: false,
+            grid: 32,
+            show_grid: false,
+            sheet: None,
+            view_doc: None,
+            hist: None,
             renaming: None,
             error: None,
             title: String::new(),
@@ -363,6 +388,188 @@ impl Pixel {
         }
     }
 
+    fn copy(&mut self) {
+        let img = match self.doc.copy_selection() {
+            Some((img, _, _)) => img,
+            None => self.doc.layers[self.doc.active].img.clone(),
+        };
+        if let Ok(mut cb) = arboard::Clipboard::new() {
+            let _ = cb.set_image(arboard::ImageData { width: img.width() as usize, height: img.height() as usize, bytes: std::borrow::Cow::Owned(img.as_raw().clone()) });
+        }
+        self.clipboard = Some(img);
+    }
+
+    fn paste(&mut self) {
+        let from_system = arboard::Clipboard::new().ok().and_then(|mut cb| cb.get_image().ok()).and_then(|d| RgbaImage::from_raw(d.width as u32, d.height as u32, d.bytes.into_owned()));
+        let Some(img) = from_system.or_else(|| self.clipboard.clone()) else {
+            self.error = Some("Le presse-papiers ne contient pas d'image".into());
+            return;
+        };
+        if self.home {
+            self.set_doc(Document::from_image("Collage".into(), img));
+            return;
+        }
+        let at = ((self.doc.width() as i64 - img.width() as i64) / 2, (self.doc.height() as i64 - img.height() as i64) / 2);
+        self.doc.paste_image(img, at, "Collage");
+    }
+
+    fn export_with(&mut self, format: usize, quality: u8, scale: f32) {
+        let ext = ["png", "jpg", "webp"][format.min(2)];
+        let Some(path) = rfd::FileDialog::new().set_file_name(format!("{}.{ext}", self.doc.name)).add_filter(ext.to_uppercase(), &[ext]).save_file() else { return };
+        let mut flat = self.doc.flatten();
+        if (scale - 100.0).abs() > 0.5 {
+            let k = scale / 100.0;
+            flat = imageops::resize(&flat, ((flat.width() as f32 * k) as u32).max(1), ((flat.height() as f32 * k) as u32).max(1), imageops::FilterType::Lanczos3);
+        }
+        let result = (|| -> Result<(), String> {
+            match format {
+                1 => {
+                    let file = std::fs::File::create(&path).map_err(|e| e.to_string())?;
+                    let rgb = image::DynamicImage::ImageRgba8(flat).to_rgb8();
+                    image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), quality).encode_image(&rgb).map_err(|e| e.to_string())
+                }
+                _ => flat.save(&path).map_err(|e| e.to_string()),
+            }
+        })();
+        match result {
+            Ok(()) => {
+                self.doc.modified = false;
+                self.remember(&path);
+            }
+            Err(e) => self.error = Some(format!("Export impossible : {e}")),
+        }
+    }
+
+    fn extra_sheet(&mut self, ctx: &egui::Context) {
+        let Some(mut sheet) = self.sheet.take() else { return };
+        let mut apply = false;
+        let mut cancel = false;
+        let title = match &sheet {
+            Sheet::Canvas { .. } => "Taille de la zone de travail",
+            Sheet::Transform { .. } => "Transformation du calque",
+            Sheet::Effect { kind: 0, .. } => "Ombre portée",
+            Sheet::Effect { kind: 1, .. } => "Lueur externe",
+            Sheet::Effect { kind: 2, .. } => "Contour du calque",
+            Sheet::Effect { .. } => "Contour de la sélection",
+            Sheet::SelectBy { kind: 0, .. } => "Agrandir la sélection",
+            Sheet::SelectBy { kind: 1, .. } => "Réduire la sélection",
+            Sheet::SelectBy { .. } => "Bordure de sélection",
+            Sheet::Export { .. } => "Exporter",
+        };
+        let keep = pro::sheet(ctx, "extra", 380.0, |ui| {
+            ui.label(RichText::new(title).font(semibold(18.0)).color(INK_STRONG));
+            ui.add_space(12.0);
+            ui.spacing_mut().slider_width = 240.0;
+            let label = |ui: &mut Ui, t: &str| {
+                ui.label(RichText::new(t).size(12.5).color(MUTED));
+            };
+            match &mut sheet {
+                Sheet::Canvas { w, h, anchor } => {
+                    ui.horizontal(|ui| {
+                        ui.add(egui::DragValue::new(w).range(1..=16384).prefix("L ").suffix(" px"));
+                        ui.add(egui::DragValue::new(h).range(1..=16384).prefix("H ").suffix(" px"));
+                    });
+                    ui.add_space(8.0);
+                    label(ui, "Position de l'image actuelle");
+                    for row in 0..3 {
+                        ui.horizontal(|ui| {
+                            for col in 0..3 {
+                                let k = row * 3 + col;
+                                let (r, resp) = ui.allocate_exact_size(Vec2::splat(30.0), Sense::click());
+                                ui.painter().rect(r, CornerRadius::same(5), if *anchor == k { BLUE } else { FIELD }, Stroke::new(1.0, LINE), StrokeKind::Inside);
+                                if resp.clicked() {
+                                    *anchor = k;
+                                }
+                            }
+                        });
+                    }
+                    ui.label(RichText::new("La zone ajoutée prend la couleur secondaire sur le fond.").size(12.0).color(FAINT));
+                }
+                Sheet::Transform { scale, angle } => {
+                    label(ui, "Échelle");
+                    ui.add(egui::Slider::new(scale, 5.0..=400.0).suffix(" %"));
+                    label(ui, "Rotation");
+                    ui.add(egui::Slider::new(angle, -180.0..=180.0).suffix("°"));
+                    ui.horizontal(|ui| {
+                        for a in [-90.0, -45.0, 45.0, 90.0] {
+                            if ui.small_button(format!("{a:+}°")).clicked() {
+                                *angle = a;
+                            }
+                        }
+                    });
+                }
+                Sheet::Effect { kind, size, dx, dy, color } => {
+                    label(ui, if *kind == 0 { "Flou" } else if *kind == 1 { "Taille" } else { "Épaisseur" });
+                    ui.add(egui::Slider::new(size, 0.0..=60.0).suffix(" px"));
+                    if *kind == 0 {
+                        label(ui, "Décalage");
+                        ui.horizontal(|ui| {
+                            ui.add(egui::DragValue::new(dx).range(-200.0..=200.0).prefix("X "));
+                            ui.add(egui::DragValue::new(dy).range(-200.0..=200.0).prefix("Y "));
+                        });
+                    }
+                    ui.horizontal(|ui| {
+                        label(ui, "Couleur");
+                        let mut c = Color32::from_rgba_unmultiplied(color[0], color[1], color[2], color[3]);
+                        if ui.color_edit_button_srgba(&mut c).changed() {
+                            *color = c.to_srgba_unmultiplied();
+                        }
+                    });
+                    if *kind < 3 {
+                        ui.label(RichText::new("L'effet est créé sur un nouveau calque sous le calque actif.").size(12.0).color(FAINT));
+                    }
+                }
+                Sheet::SelectBy { px, .. } => {
+                    ui.add(egui::Slider::new(px, 1..=200).suffix(" px"));
+                }
+                Sheet::Export { format, quality, scale } => {
+                    label(ui, "Format");
+                    pro::segmented(ui, format, &["PNG", "JPEG", "WebP"]);
+                    ui.add_space(6.0);
+                    if *format == 1 {
+                        label(ui, "Qualité");
+                        ui.add(egui::Slider::new(quality, 30..=100));
+                    }
+                    label(ui, "Échelle");
+                    ui.add(egui::Slider::new(scale, 10.0..=400.0).suffix(" %"));
+                    let (w, h) = ((self.doc.width() as f32 * *scale / 100.0) as u32, (self.doc.height() as f32 * *scale / 100.0) as u32);
+                    ui.label(RichText::new(format!("{w} × {h} px{}", if *format == 0 { " · transparence conservée" } else if *format == 1 { " · sans transparence" } else { " · sans perte" })).size(12.0).color(FAINT));
+                }
+            }
+            ui.add_space(14.0);
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                if pro::primary(ui, if matches!(sheet, Sheet::Export { .. }) { "Exporter…" } else { "Appliquer" }).clicked() {
+                    apply = true;
+                }
+                if pro::secondary(ui, "Annuler").clicked() {
+                    cancel = true;
+                }
+            });
+        });
+        if apply {
+            match sheet {
+                Sheet::Canvas { w, h, anchor } => {
+                    self.doc.canvas_size(w, h, ((anchor % 3) as f32 / 2.0, (anchor / 3) as f32 / 2.0), Some(self.secondary.to_array()));
+                    self.fit_pending = true;
+                }
+                Sheet::Transform { scale, angle } => self.doc.transform_layer(scale / 100.0, angle),
+                Sheet::Effect { kind, size, dx, dy, color } => match kind {
+                    0 => self.doc.drop_shadow(dx as i64, dy as i64, size, color),
+                    1 => self.doc.outer_glow(size, color),
+                    2 => self.doc.layer_outline(size.max(1.0) as u32, color),
+                    _ => self.doc.stroke_selection(color, size.max(1.0) as u32),
+                },
+                Sheet::SelectBy { kind, px } => match kind {
+                    0 => self.doc.grow_selection(px),
+                    1 => self.doc.grow_selection(-px),
+                    _ => self.doc.border_selection(px as u32),
+                },
+                Sheet::Export { format, quality, scale } => self.export_with(format, quality, scale),
+            }
+        } else if keep && !cancel {
+            self.sheet = Some(sheet);
+        }
+    }
     fn export(&mut self) {
         let Some(path) = rfd::FileDialog::new()
             .set_file_name(format!("{}.png", self.doc.name))
@@ -557,7 +764,7 @@ impl Pixel {
     }
 
     fn shortcuts(&mut self, ctx: &egui::Context) {
-        if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() || self.adjust.is_some() || self.text.is_some() {
+        if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() || self.adjust.is_some() || self.text.is_some() || self.sheet.is_some() {
             return;
         }
         use egui::{KeyboardShortcut as K, Modifiers as M};
@@ -601,8 +808,32 @@ impl Pixel {
         if sc(M::COMMAND, Key::U) {
             self.start_adjust(Kind::HueSat);
         }
-        if sc(M::COMMAND, Key::J) {
+        if sc(M::COMMAND | M::SHIFT, Key::J) {
+            self.doc.layer_from_selection(true);
+        } else if sc(M::COMMAND, Key::J) && !self.doc.layer_from_selection(false) {
             self.doc.duplicate_layer();
+        }
+        if sc(M::COMMAND, Key::C) {
+            self.copy();
+        }
+        if sc(M::COMMAND, Key::X) {
+            self.copy();
+            self.doc.clear_selection();
+        }
+        if sc(M::COMMAND, Key::V) {
+            self.paste();
+        }
+        if sc(M::COMMAND, Key::T) {
+            self.sheet = Some(Sheet::Transform { scale: 100.0, angle: 0.0 });
+        }
+        if sc(M::COMMAND | M::SHIFT, Key::E) {
+            self.doc.merge_visible();
+        }
+        if sc(M::SHIFT, Key::F5) {
+            self.doc.fill_selection(self.primary.to_array());
+        }
+        if sc(M::COMMAND, Key::Quote) {
+            self.show_grid = !self.show_grid;
         }
         if sc(M::COMMAND | M::SHIFT, Key::N) {
             self.doc.add_layer(None, None);
@@ -718,8 +949,25 @@ impl eframe::App for Pixel {
 
 impl Pixel {
     fn menu_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
-            ui.horizontal_centered(|ui| {
+        egui::Panel::top("menu").exact_size(40.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
+            let full = ui.max_rect();
+            let right_w = if self.home { 0.0 } else { 250.0 };
+            if !self.home {
+                let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
+                ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if pro::primary_icon(ui, "Exporter", |p, r, c| export_glyph(p, r, c)).on_hover_text("Ctrl+E").clicked() {
+                            self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0 });
+                        }
+                        ui.add_space(6.0);
+                        if pro::chip(ui, &format!("{} × {} px", self.doc.width(), self.doc.height())).on_hover_text("Taille de la zone de travail").clicked() {
+                            self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4 });
+                        }
+                    });
+                });
+            }
+            let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
+            ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| ui.horizontal_centered(|ui| {
                 ui.add(egui::Image::new((self.icon.id(), Vec2::splat(20.0))));
                 ui.add_space(6.0);
                 egui::MenuBar::new().ui(ui, |ui| {
@@ -736,6 +984,9 @@ impl Pixel {
                             }
                             ui.separator();
                             if ui.button("Exporter…                Ctrl+E").clicked() {
+                                self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0 });
+                            }
+                            if ui.button("Enregistrer une copie PNG/JPEG…").clicked() {
                                 self.export();
                             }
                             ui.separator();
@@ -751,6 +1002,28 @@ impl Pixel {
                             }
                             if ui.add_enabled(self.doc.can_redo(), egui::Button::new("Rétablir                   Ctrl+Y")).clicked() {
                                 self.doc.redo();
+                            }
+                            ui.separator();
+                            let has_sel = self.doc.selection.is_some();
+                            if ui.button("Copier                         Ctrl+C").clicked() {
+                                self.copy();
+                            }
+                            if ui.add_enabled(has_sel, egui::Button::new("Couper                         Ctrl+X")).clicked() {
+                                self.copy();
+                                self.doc.clear_selection();
+                            }
+                            if ui.button("Coller (aussi une capture d'écran)   Ctrl+V").clicked() {
+                                self.paste();
+                            }
+                            ui.separator();
+                            if ui.add_enabled(has_sel, egui::Button::new("Remplir avec la couleur principale   Maj+F5")).clicked() {
+                                self.doc.fill_selection(self.primary.to_array());
+                            }
+                            if ui.add_enabled(has_sel, egui::Button::new("Contour de la sélection…")).clicked() {
+                                self.sheet = Some(Sheet::Effect { kind: 3, size: 4.0, dx: 0.0, dy: 0.0, color: self.primary.to_array() });
+                            }
+                            if ui.button("Transformation du calque…        Ctrl+T").clicked() {
+                                self.sheet = Some(Sheet::Transform { scale: 100.0, angle: 0.0 });
                             }
                             ui.separator();
                             if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Effacer la sélection   Suppr")).clicked() {
@@ -782,6 +1055,22 @@ impl Pixel {
                             ui.separator();
                             if ui.button("Taille de l'image…").clicked() {
                                 self.resize = Some((self.doc.width(), self.doc.height(), true));
+                            }
+                            if ui.button("Taille de la zone de travail…").clicked() {
+                                self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4 });
+                            }
+                            if ui.button("Rogner les bords transparents").clicked() {
+                                if self.doc.trim() {
+                                    self.fit_pending = true;
+                                } else {
+                                    self.error = Some("Aucun bord transparent à rogner".into());
+                                }
+                            }
+                            if ui.button("Mappage de dégradé (couleurs principale → secondaire)").clicked() {
+                                self.doc.gradient_map(self.primary.to_array(), self.secondary.to_array());
+                            }
+                            if ui.button("Aplatir l'image").clicked() {
+                                self.doc.flatten_all();
                             }
                             if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Recadrer sur la sélection")).clicked() {
                                 self.doc.crop_to_selection();
@@ -818,6 +1107,37 @@ impl Pixel {
                             if ui.button("Supprimer le calque").clicked() {
                                 self.doc.delete_layer();
                             }
+                            ui.separator();
+                            let has_sel = self.doc.selection.is_some();
+                            if ui.add_enabled(has_sel, egui::Button::new("Calque par copie                 Ctrl+J")).clicked() {
+                                self.doc.layer_from_selection(false);
+                            }
+                            if ui.add_enabled(has_sel, egui::Button::new("Calque par coupure            Ctrl+Maj+J")).clicked() {
+                                self.doc.layer_from_selection(true);
+                            }
+                            if ui.button("Fusionner les calques visibles   Ctrl+Maj+E").clicked() {
+                                self.doc.merge_visible();
+                            }
+                            if ui.button("Aplatir l'image").clicked() {
+                                self.doc.flatten_all();
+                            }
+                            ui.separator();
+                            let active = self.doc.active;
+                            let locked = self.doc.layers[active].locked;
+                            if ui.button(if locked { "Déverrouiller le calque" } else { "Verrouiller le calque" }).clicked() {
+                                self.doc.layers[active].locked = !locked;
+                            }
+                            ui.menu_button("Effets de calque", |ui| {
+                                if ui.button("Ombre portée…").clicked() {
+                                    self.sheet = Some(Sheet::Effect { kind: 0, size: 12.0, dx: 8.0, dy: 10.0, color: [0, 0, 0, 160] });
+                                }
+                                if ui.button("Lueur externe…").clicked() {
+                                    self.sheet = Some(Sheet::Effect { kind: 1, size: 18.0, dx: 0.0, dy: 0.0, color: [255, 230, 120, 220] });
+                                }
+                                if ui.button("Contour…").clicked() {
+                                    self.sheet = Some(Sheet::Effect { kind: 2, size: 6.0, dx: 0.0, dy: 0.0, color: [255, 255, 255, 255] });
+                                }
+                            });
                         });
                         ui.menu_button("Sélection", |ui| {
                             if ui.button("Tout sélectionner         Ctrl+A").clicked() {
@@ -828,6 +1148,16 @@ impl Pixel {
                             }
                             if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Intervertir          Ctrl+Maj+I")).clicked() {
                                 self.doc.invert_selection();
+                            }
+                            ui.separator();
+                            let has = self.doc.selection.is_some();
+                            for (label, kind) in [("Agrandir…", 0u8), ("Réduire…", 1), ("Bordure…", 2)] {
+                                if ui.add_enabled(has, egui::Button::new(label)).clicked() {
+                                    self.sheet = Some(Sheet::SelectBy { kind, px: 4 });
+                                }
+                            }
+                            if ui.button("Pixels du calque").clicked() {
+                                self.doc.select_layer_alpha();
                             }
                         });
                         ui.menu_button("Filtre", |ui| {
@@ -850,11 +1180,22 @@ impl Pixel {
                                 self.zoom = 1.0;
                                 self.offset = Vec2::ZERO;
                             }
+                            for z in [0.5, 2.0, 4.0, 8.0] {
+                                if ui.button(format!("{:.0} %", z * 100.0)).clicked() {
+                                    self.zoom = z;
+                                }
+                            }
+                            ui.separator();
+                            ui.checkbox(&mut self.show_grid, "Grille                       Ctrl+'");
+                            ui.horizontal(|ui| {
+                                ui.label("Pas de la grille");
+                                ui.add(egui::DragValue::new(&mut self.grid).range(2..=1000).suffix(" px"));
+                            });
                         });
                     });
                     self.help.menu(ui);
                 });
-            });
+            }));
         });
     }
 
@@ -963,6 +1304,8 @@ impl Pixel {
                             pro::option_slider(ui, "Dureté", &mut self.brush.hardness, 0.0..=1.0, "", false);
                         }
                         pro::option_slider(ui, if matches!(t, Tool::Brush | Tool::Pencil | Tool::Eraser | Tool::Clone) { "Flux" } else { "Force" }, &mut self.brush.flow, 0.01..=1.0, "", false);
+                        pro::toolbar_sep(ui);
+                        ui.checkbox(&mut self.symmetry, "Symétrie").on_hover_text("Peint aussi en miroir de l'autre côté de l'image");
                         match t {
                             Tool::Sponge => {
                                 ui.selectable_value(&mut self.sponge_saturate, false, "Désaturer");
@@ -1017,14 +1360,24 @@ impl Pixel {
                         if self.tool == Tool::Line {
                             pro::option_slider(ui, "Épaisseur", &mut self.brush.radius, 0.5..=100.0, " px", true);
                         }
+                        if self.tool != Tool::Line {
+                            ui.checkbox(&mut self.outline, "Contour seulement");
+                            if self.outline {
+                                pro::option_slider(ui, "Épaisseur", &mut self.brush.radius, 0.5..=100.0, " px", true);
+                            }
+                        }
                         ui.checkbox(&mut self.shape_layer, "Sur un nouveau calque");
-                        ui.label(RichText::new("Couleur principale").size(12.5).color(MUTED));
                     }
                     Tool::Text => {
                         ui.label(RichText::new("Clique sur l'image pour placer du texte").size(12.5).color(MUTED));
                     }
                     Tool::Gradient => {
-                        ui.label(RichText::new("Glisse sur l'image : de la couleur principale à la couleur secondaire").size(12.5).color(MUTED));
+                        let mut kind = self.radial as usize;
+                        if pro::segmented(ui, &mut kind, &["Linéaire", "Radial"]) {
+                            self.radial = kind == 1;
+                        }
+                        ui.add_space(8.0);
+                        ui.label(RichText::new("Glisse sur l'image : couleur principale → secondaire").size(12.5).color(MUTED));
                     }
                     Tool::Marquee => {
                         if pro::secondary(ui, "Tout sélectionner").clicked() {
@@ -1194,6 +1547,71 @@ impl Pixel {
                         }
                     });
                 });
+                let (dw, dh) = (self.doc.width() as f32, self.doc.height() as f32);
+                let tex = self.tex.as_ref().map(|t| t.id());
+                let view = self.view_doc;
+                let mut jump = None;
+                pro::dock_panel(ui, "navigator", "Navigateur", |ui| {
+                    let wv = ui.available_width();
+                    let k = (wv / dw).min(150.0 / dh);
+                    let (r, resp) = ui.allocate_exact_size(vec2(wv, dh * k), Sense::click_and_drag());
+                    let img = Rect::from_center_size(r.center(), vec2(dw, dh) * k);
+                    ui.painter().image(self.checker.id(), img, Rect::from_min_max(pos2(0.0, 0.0), pos2(img.width() / 16.0, img.height() / 16.0)), Color32::WHITE);
+                    if let Some(id) = tex {
+                        ui.painter().image(id, img, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
+                    }
+                    if let Some(v) = view {
+                        let vr = Rect::from_min_max(img.min + v.min.to_vec2() * k, img.min + v.max.to_vec2() * k).intersect(img);
+                        ui.painter().rect_stroke(vr, CornerRadius::same(2), Stroke::new(1.5, RED), StrokeKind::Middle);
+                    }
+                    if let Some(pp) = resp.interact_pointer_pos() {
+                        jump = Some(((pp - img.min) / k).to_pos2());
+                    }
+                    ui.add_space(4.0);
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().slider_width = (wv - 70.0).max(60.0);
+                        ui.add(egui::Slider::new(&mut self.zoom, 0.02..=64.0).logarithmic(true).custom_formatter(|v, _| format!("{:.0} %", v * 100.0)));
+                    });
+                });
+                if let Some(d) = jump {
+                    self.offset = vec2((dw / 2.0 - d.x) * self.zoom, (dh / 2.0 - d.y) * self.zoom);
+                }
+                if self.hist.as_ref().is_none_or(|h| h.0 != self.doc.version) && self.last.is_none() {
+                    let mut hst = [0u32; 256];
+                    for p in self.composite.pixels().step_by(3) {
+                        let l = (0.2126 * p.0[0] as f32 + 0.7152 * p.0[1] as f32 + 0.0722 * p.0[2] as f32) as usize;
+                        hst[l.min(255)] += 1;
+                    }
+                    self.hist = Some((self.doc.version, hst));
+                }
+                let under = self.cursor.filter(|(x, y)| *x >= 0.0 && *y >= 0.0 && (*x as u32) < self.composite.width() && (*y as u32) < self.composite.height()).map(|(x, y)| (x as u32, y as u32, self.composite.get_pixel(x as u32, y as u32).0));
+                let hist = self.hist.map(|h| h.1);
+                pro::dock_panel(ui, "info", "Infos", |ui| {
+                    if let Some(h) = hist {
+                        let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 60.0), Sense::hover());
+                        ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x14, 0x14, 0x17));
+                        let max = *h.iter().max().unwrap_or(&1) as f32;
+                        for (k, v) in h.iter().enumerate() {
+                            let x = r.left() + r.width() * k as f32 / 256.0;
+                            let hh = (*v as f32 / max.max(1.0)).sqrt() * (r.height() - 4.0);
+                            ui.painter().line_segment([pos2(x, r.bottom() - 2.0), pos2(x, r.bottom() - 2.0 - hh)], Stroke::new(1.0, Color32::from_gray(150)));
+                        }
+                        ui.add_space(6.0);
+                    }
+                    match under {
+                        Some((x, y, c)) => {
+                            ui.horizontal(|ui| {
+                                let (r, _) = ui.allocate_exact_size(Vec2::splat(18.0), Sense::hover());
+                                ui.painter().rect(r, CornerRadius::same(4), Color32::from_rgb(c[0], c[1], c[2]), Stroke::new(1.0, LINE), StrokeKind::Inside);
+                                ui.label(RichText::new(format!("#{:02X}{:02X}{:02X}  R {} V {} B {} A {}", c[0], c[1], c[2], c[0], c[1], c[2], c[3])).size(12.0).monospace().color(INK));
+                            });
+                            ui.label(RichText::new(format!("x {x}  y {y}")).size(12.0).color(MUTED));
+                        }
+                        None => {
+                            ui.label(RichText::new("Survole l'image pour lire la couleur").size(12.0).color(FAINT));
+                        }
+                    }
+                });
                 pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
             });
         });
@@ -1259,7 +1677,14 @@ impl Pixel {
                 ui.painter().text(name_pos - vec2(0.0, 7.0), Align2::LEFT_CENTER, &l.name, if selected { semibold(13.5) } else { FontId::proportional(13.5) }, if selected { INK_STRONG } else { INK });
                 ui.painter().text(name_pos + vec2(0.0, 10.0), Align2::LEFT_CENTER, format!("{:.0} %", l.opacity * 100.0), FontId::proportional(11.5), FAINT);
             }
-            if resp.double_clicked() {
+            let lock_r = Rect::from_center_size(row.right_center() - vec2(16.0, 0.0), Vec2::splat(20.0));
+            let locked = self.doc.layers[i].locked;
+            if locked || resp.hovered() {
+                lock_glyph(ui.painter(), lock_r, locked, if locked { INK } else { FAINT });
+            }
+            if ui.interact(lock_r.expand(3.0), ui.make_persistent_id(("lock", i)), Sense::click()).on_hover_text("Verrouiller le calque").clicked() {
+                self.doc.layers[i].locked = !locked;
+            } else if resp.double_clicked() {
                 self.renaming = Some((i, self.doc.layers[i].name.clone()));
             } else if resp.clicked() {
                 select = Some(i);
@@ -1393,15 +1818,27 @@ impl Pixel {
                     let cur = to_doc(at);
                     match self.last {
                         None => {
-                            self.paint = self.make_paint(cur);
+                            if self.doc.layers[self.doc.active].locked {
+                                self.error = Some("Ce calque est verrouillé".into());
+                            } else {
+                                self.paint = self.make_paint(cur);
+                            }
+                            let mirror = self.doc.width() as f32 - cur.0;
                             if let Some(paint) = &mut self.paint {
                                 self.doc.checkpoint();
                                 self.doc.stamp_paint(cur.0, cur.1, &self.brush, paint);
+                                if self.symmetry {
+                                    self.doc.stamp_paint(mirror, cur.1, &self.brush, paint);
+                                }
                             }
                         }
                         Some(prev) => {
+                            let w = self.doc.width() as f32;
                             if let Some(paint) = &mut self.paint {
                                 self.doc.stroke_paint(prev, cur, &self.brush, paint);
+                                if self.symmetry {
+                                    self.doc.stroke_paint((w - prev.0, prev.1), (w - cur.0, cur.1), &self.brush, paint);
+                                }
                             }
                         }
                     }
@@ -1459,7 +1896,7 @@ impl Pixel {
                 match std::mem::replace(&mut self.drag, Drag::None) {
                     Drag::Gradient(start) => {
                         if let Some(end) = self.gradient_end.take() {
-                            self.doc.gradient(start, end, self.primary.to_array(), self.secondary.to_array());
+                            self.doc.gradient_kind(start, end, self.primary.to_array(), self.secondary.to_array(), self.radial);
                         }
                     }
                     Drag::Marquee(_) => {
@@ -1494,7 +1931,25 @@ impl Pixel {
                                 }
                                 t => {
                                     if let Some(a) = Area::from_points(start, end, w as u32, h as u32) {
-                                        self.doc.fill_shape(a, t == Tool::Ellipse, color);
+                                        if self.outline {
+                                            self.doc.checkpoint();
+                                            let b = Brush { radius: self.brush.radius, hardness: 0.95, flow: 1.0 };
+                                            let pts: Vec<(f32, f32)> = if t == Tool::Ellipse {
+                                                let (cx, cy, rx, ry) = ((a.x0 + a.x1) as f32 / 2.0, (a.y0 + a.y1) as f32 / 2.0, a.width() as f32 / 2.0, a.height() as f32 / 2.0);
+                                                (0..=72).map(|k| {
+                                                    let ang = k as f32 / 72.0 * std::f32::consts::TAU;
+                                                    (cx + ang.cos() * rx, cy + ang.sin() * ry)
+                                                }).collect()
+                                            } else {
+                                                let (x0, y0, x1, y1) = (a.x0 as f32, a.y0 as f32, a.x1 as f32, a.y1 as f32);
+                                                vec![(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)]
+                                            };
+                                            for pair in pts.windows(2) {
+                                                self.doc.stroke(pair[0], pair[1], &b, color, false);
+                                            }
+                                        } else {
+                                            self.doc.fill_shape(a, t == Tool::Ellipse, color);
+                                        }
                                     }
                                 }
                             }
@@ -1530,6 +1985,38 @@ impl Pixel {
             painter.image(self.checker.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(rect.width() / 16.0, rect.height() / 16.0)), Color32::WHITE);
             if let Some(t) = &self.tex {
                 painter.image(t.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
+            }
+            self.view_doc = Some(Rect::from_min_max(pos2((area.left() - min.x) / zoom, (area.top() - min.y) / zoom), pos2((area.right() - min.x) / zoom, (area.bottom() - min.y) / zoom)));
+            if self.show_grid {
+                let g = self.grid.max(2) as f32;
+                if g * zoom >= 6.0 {
+                    let gs = Stroke::new(1.0, Color32::from_rgba_unmultiplied(10, 132, 255, 60));
+                    let mut x = 0.0;
+                    while x <= w {
+                        painter.line_segment([to_scr((x, 0.0)), to_scr((x, h))], gs);
+                        x += g;
+                    }
+                    let mut y = 0.0;
+                    while y <= h {
+                        painter.line_segment([to_scr((0.0, y)), to_scr((w, y))], gs);
+                        y += g;
+                    }
+                }
+            }
+            if zoom >= 10.0 {
+                let ps = Stroke::new(1.0, Color32::from_black_alpha(40));
+                let (x0, x1) = (((area.left() - min.x) / zoom).floor().max(0.0), ((area.right() - min.x) / zoom).ceil().min(w));
+                let (y0, y1) = (((area.top() - min.y) / zoom).floor().max(0.0), ((area.bottom() - min.y) / zoom).ceil().min(h));
+                let mut x = x0;
+                while x <= x1 {
+                    painter.line_segment([to_scr((x, y0)), to_scr((x, y1))], ps);
+                    x += 1.0;
+                }
+                let mut y = y0;
+                while y <= y1 {
+                    painter.line_segment([to_scr((x0, y)), to_scr((x1, y))], ps);
+                    y += 1.0;
+                }
             }
             if let Some((_, t)) = &self.mask_tex {
                 painter.image(t.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
@@ -1654,6 +2141,7 @@ impl Pixel {
     }
 
     fn sheets(&mut self, ctx: &egui::Context) {
+        self.extra_sheet(ctx);
         if let Some(mut nd) = self.new_doc.take() {
             let mut create = false;
             let keep = pro::sheet(ctx, "new", 760.0, |ui| {
@@ -1898,6 +2386,23 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: u32, h: u32, selected: 
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
+fn export_glyph(p: &Painter, r: Rect, c: Color32) {
+    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
+    p.line_segment([at(0.5, 0.05), at(0.5, 0.65)], Stroke::new(2.0, c));
+    p.line_segment([at(0.5, 0.05), at(0.25, 0.3)], Stroke::new(2.0, c));
+    p.line_segment([at(0.5, 0.05), at(0.75, 0.3)], Stroke::new(2.0, c));
+    p.add(Shape::line(vec![at(0.12, 0.55), at(0.12, 0.95), at(0.88, 0.95), at(0.88, 0.55)], Stroke::new(2.0, c)));
+}
+
+fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
+    let body = Rect::from_min_max(r.min + vec2(4.0, 9.0), r.max - vec2(4.0, 2.0));
+    p.rect_filled(body, CornerRadius::same(2), c);
+    let lift = if locked { 0.0 } else { 4.0 };
+    p.add(Shape::line(
+        vec![pos2(body.left() + 2.0, body.top()), pos2(body.left() + 2.0, r.top() + 5.0 - lift), pos2(r.center().x, r.top() + 2.0 - lift), pos2(body.right() - 2.0, r.top() + 5.0 - lift), pos2(body.right() - 2.0, body.top() - lift)],
+        Stroke::new(1.6, c),
+    ));
+}
 fn image_dialog() -> rfd::FileDialog {
     rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "bmp"])
 }

@@ -7,6 +7,7 @@ pub struct Layer {
     pub visible: bool,
     pub opacity: f32,
     pub blend: Blend,
+    pub locked: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -144,7 +145,7 @@ impl Document {
 
     fn with_layer(name: String, layer: String, img: RgbaImage) -> Self {
         let mut d = Self {
-            layers: vec![Layer { name: layer, img, visible: true, opacity: 1.0, blend: Blend::Normal }],
+            layers: vec![Layer { name: layer, img, visible: true, opacity: 1.0, blend: Blend::Normal, locked: false }],
             active: 0,
             dirty: None,
             selection: None,
@@ -543,7 +544,7 @@ impl Document {
         };
         let name = name.unwrap_or_else(|| format!("Calque {}", self.layers.len() + 1));
         self.active += 1;
-        self.layers.insert(self.active, Layer { name, img, visible: true, opacity: 1.0, blend: Blend::Normal });
+        self.layers.insert(self.active, Layer { name, img, visible: true, opacity: 1.0, blend: Blend::Normal, locked: false });
         self.touch_all();
     }
 
@@ -626,7 +627,7 @@ impl Document {
         self.touch_all();
     }
 
-    pub fn gradient(&mut self, from: (f32, f32), to: (f32, f32), a: [u8; 4], b: [u8; 4]) {
+    pub fn gradient_kind(&mut self, from: (f32, f32), to: (f32, f32), a: [u8; 4], b: [u8; 4], radial: bool) {
         self.checkpoint();
         let sel = self.selection.unwrap_or(self.full());
         let d = (to.0 - from.0, to.1 - from.1);
@@ -638,7 +639,11 @@ impl Document {
                 if !inside(s0, mask, w, x, y) {
                     continue;
                 }
-                let t = (((x as f32 + 0.5 - from.0) * d.0 + (y as f32 + 0.5 - from.1) * d.1) / len2).clamp(0.0, 1.0);
+                let t = if radial {
+                    (((x as f32 + 0.5 - from.0).powi(2) + (y as f32 + 0.5 - from.1).powi(2)) / len2).sqrt().clamp(0.0, 1.0)
+                } else {
+                    (((x as f32 + 0.5 - from.0) * d.0 + (y as f32 + 0.5 - from.1) * d.1) / len2).clamp(0.0, 1.0)
+                };
                 let c: [u8; 4] = std::array::from_fn(|k| (a[k] as f32 + (b[k] as f32 - a[k] as f32) * t).round() as u8);
                 let px = img.get_pixel_mut(x, y);
                 let mut acc = px.0.map(|v| v as f32 / 255.0);
@@ -656,6 +661,302 @@ impl Document {
         }
         self.touch_all();
     }
+
+    /// New canvas size; `anchor` (0..1, 0..1) says where the old image sits (0.5, 0.5 = centre).
+    pub fn canvas_size(&mut self, w: u32, h: u32, anchor: (f32, f32), fill: Option<[u8; 4]>) {
+        let (ow, oh) = (self.width() as i64, self.height() as i64);
+        let dx = ((w as i64 - ow) as f32 * anchor.0).round() as i64;
+        let dy = ((h as i64 - oh) as f32 * anchor.1).round() as i64;
+        self.selection = None;
+        self.mask = None;
+        self.checkpoint();
+        for (i, l) in self.layers.iter_mut().enumerate() {
+            let bg = if i == 0 { fill.unwrap_or([0, 0, 0, 0]) } else { [0, 0, 0, 0] };
+            let mut out = RgbaImage::from_pixel(w.max(1), h.max(1), Rgba(bg));
+            imageops::overlay(&mut out, &l.img, dx, dy);
+            l.img = out;
+        }
+        self.touch_all();
+    }
+
+    /// Crops away fully transparent borders shared by every layer.
+    pub fn trim(&mut self) -> bool {
+        let (w, h) = (self.width(), self.height());
+        let (mut x0, mut y0, mut x1, mut y1) = (w, h, 0, 0);
+        for l in &self.layers {
+            for (x, y, p) in l.img.enumerate_pixels() {
+                if p.0[3] > 0 {
+                    (x0, y0, x1, y1) = (x0.min(x), y0.min(y), x1.max(x + 1), y1.max(y + 1));
+                }
+            }
+        }
+        if x1 <= x0 || (x0, y0, x1, y1) == (0, 0, w, h) {
+            return false;
+        }
+        self.transform(|img| imageops::crop_imm(img, x0, y0, x1 - x0, y1 - y0).to_image());
+        true
+    }
+
+    pub fn flatten_all(&mut self) {
+        self.checkpoint();
+        let flat = self.flatten();
+        self.layers = vec![Layer { name: "Fond".into(), img: flat, visible: true, opacity: 1.0, blend: Blend::Normal, locked: false }];
+        self.active = 0;
+        self.touch_all();
+    }
+
+    pub fn merge_visible(&mut self) {
+        let visible: Vec<usize> = (0..self.layers.len()).filter(|&i| self.layers[i].visible).collect();
+        if visible.len() < 2 {
+            return;
+        }
+        self.checkpoint();
+        let mut out = RgbaImage::new(self.width(), self.height());
+        let (w, h) = (self.width(), self.height());
+        for y in 0..h {
+            for x in 0..w {
+                let mut acc = [0f32; 4];
+                for &i in &visible {
+                    let l = &self.layers[i];
+                    blend_over(&mut acc, l.img.get_pixel(x, y).0, l.opacity, l.blend);
+                }
+                out.put_pixel(x, y, Rgba(to_u8(acc)));
+            }
+        }
+        let keep = visible[0];
+        for &i in visible.iter().skip(1).rev() {
+            self.layers.remove(i);
+        }
+        self.layers[keep] = Layer { name: "Fusion".into(), img: out, visible: true, opacity: 1.0, blend: Blend::Normal, locked: false };
+        self.active = keep;
+        self.touch_all();
+    }
+
+    /// Copy of the selected pixels of the active layer, cropped to the selection box.
+    pub fn copy_selection(&self) -> Option<(RgbaImage, u32, u32)> {
+        let s = self.selection?;
+        let w = self.width();
+        let src = &self.layers[self.active].img;
+        let mut out = RgbaImage::new(s.width(), s.height());
+        for y in s.y0..s.y1 {
+            for x in s.x0..s.x1 {
+                if inside(self.selection, self.mask.as_ref(), w, x, y) {
+                    out.put_pixel(x - s.x0, y - s.y0, *src.get_pixel(x, y));
+                }
+            }
+        }
+        Some((out, s.x0, s.y0))
+    }
+
+    pub fn layer_from_selection(&mut self, cut: bool) -> bool {
+        let Some((img, x, y)) = self.copy_selection() else { return false };
+        if cut {
+            self.clear_selection();
+        }
+        self.paste_image(img, (x as i64, y as i64), if cut { "Calque coupé" } else { "Calque copié" });
+        true
+    }
+
+    pub fn paste_image(&mut self, img: RgbaImage, at: (i64, i64), name: &str) {
+        let mut canvas = RgbaImage::new(self.width(), self.height());
+        imageops::overlay(&mut canvas, &img, at.0, at.1);
+        self.add_layer(Some(name.to_string()), Some(canvas));
+    }
+
+    fn sel_mask(&self) -> Vec<bool> {
+        let w = self.width();
+        (0..w * self.height()).map(|i| self.selection.is_some() && self.selected(i % w, i / w)).collect()
+    }
+
+    /// Grows (px > 0) or shrinks (px < 0) the selection.
+    pub fn grow_selection(&mut self, px: i32) {
+        if self.selection.is_none() || px == 0 {
+            return;
+        }
+        let (w, h) = (self.width() as usize, self.height() as usize);
+        let m = self.sel_mask();
+        let out = if px > 0 { dilate(&m, w, h, px as usize) } else { dilate(&m.iter().map(|v| !v).collect::<Vec<_>>(), w, h, (-px) as usize).into_iter().map(|v| !v).collect() };
+        self.select_mask(out);
+    }
+
+    pub fn border_selection(&mut self, px: u32) {
+        if self.selection.is_none() || px == 0 {
+            return;
+        }
+        let (w, h) = (self.width() as usize, self.height() as usize);
+        let m = self.sel_mask();
+        let outer = dilate(&m, w, h, px as usize);
+        let inner: Vec<bool> = dilate(&m.iter().map(|v| !v).collect::<Vec<_>>(), w, h, px as usize).into_iter().map(|v| !v).collect();
+        self.select_mask(outer.iter().zip(inner).map(|(o, i)| *o && !i).collect());
+    }
+
+    pub fn select_layer_alpha(&mut self) {
+        let m: Vec<bool> = self.layers[self.active].img.pixels().map(|p| p.0[3] > 8).collect();
+        self.select_mask(m);
+    }
+
+    pub fn fill_selection(&mut self, color: [u8; 4]) {
+        self.checkpoint();
+        let (sel, mask, w) = (self.selection, self.mask.as_ref(), self.width());
+        let s = self.selection.unwrap_or(self.full());
+        let img = &mut self.layers[self.active].img;
+        for y in s.y0..s.y1 {
+            for x in s.x0..s.x1 {
+                if inside(sel, mask, w, x, y) {
+                    let px = img.get_pixel_mut(x, y);
+                    let mut c = px.0.map(|v| v as f32 / 255.0);
+                    over(&mut c, color, 1.0);
+                    px.0 = to_u8(c);
+                }
+            }
+        }
+        self.touch_all();
+    }
+
+    pub fn stroke_selection(&mut self, color: [u8; 4], width: u32) {
+        if self.selection.is_none() {
+            return;
+        }
+        let (w, h) = (self.width() as usize, self.height() as usize);
+        let m = self.sel_mask();
+        let r = (width / 2).max(1) as usize;
+        let outer = dilate(&m, w, h, r);
+        let inner: Vec<bool> = dilate(&m.iter().map(|v| !v).collect::<Vec<_>>(), w, h, r).into_iter().map(|v| !v).collect();
+        self.checkpoint();
+        let img = &mut self.layers[self.active].img;
+        for (i, p) in img.pixels_mut().enumerate() {
+            if outer[i] && !inner[i] {
+                let mut c = p.0.map(|v| v as f32 / 255.0);
+                over(&mut c, color, 1.0);
+                p.0 = to_u8(c);
+            }
+        }
+        self.touch_all();
+    }
+
+    /// Scales and rotates the active layer around the canvas centre.
+    pub fn transform_layer(&mut self, scale: f32, angle_deg: f32) {
+        self.checkpoint();
+        let src = self.layers[self.active].img.clone();
+        let (w, h) = src.dimensions();
+        let (cx, cy) = (w as f32 / 2.0, h as f32 / 2.0);
+        let (sn, cs) = (-angle_deg.to_radians()).sin_cos();
+        let s = scale.max(0.01);
+        let out = RgbaImage::from_fn(w, h, |x, y| {
+            let (dx, dy) = (x as f32 + 0.5 - cx, y as f32 + 0.5 - cy);
+            let sx = (dx * cs - dy * sn) / s + cx;
+            let sy = (dx * sn + dy * cs) / s + cy;
+            if sx < 0.0 || sy < 0.0 || sx >= w as f32 || sy >= h as f32 {
+                return Rgba([0, 0, 0, 0]);
+            }
+            bilinear(&src, sx - 0.5, sy - 0.5)
+        });
+        self.layers[self.active].img = out;
+        self.touch_all();
+    }
+
+    fn effect_layer(&mut self, name: &str, img: RgbaImage) {
+        self.checkpoint();
+        let at = self.active;
+        self.layers.insert(at, Layer { name: format!("{name} — {}", self.layers[at].name), img, visible: true, opacity: 1.0, blend: Blend::Normal, locked: false });
+        self.active = at + 1;
+        self.touch_all();
+    }
+
+    fn alpha_tinted(&self, color: [u8; 4], grow: usize) -> RgbaImage {
+        let (w, h) = (self.width() as usize, self.height() as usize);
+        let src = &self.layers[self.active].img;
+        let alpha: Vec<u8> = if grow == 0 {
+            src.pixels().map(|p| p.0[3]).collect()
+        } else {
+            let m: Vec<bool> = src.pixels().map(|p| p.0[3] > 8).collect();
+            dilate(&m, w, h, grow).into_iter().zip(src.pixels()).map(|(d, p)| if d { 255 } else { p.0[3] }).collect()
+        };
+        RgbaImage::from_fn(w as u32, h as u32, |x, y| {
+            let a = alpha[y as usize * w + x as usize] as f32 / 255.0 * color[3] as f32 / 255.0;
+            Rgba([color[0], color[1], color[2], (a * 255.0).round() as u8])
+        })
+    }
+
+    /// Drop shadow baked into a new layer under the active one.
+    pub fn drop_shadow(&mut self, dx: i64, dy: i64, blur: f32, color: [u8; 4]) {
+        let tinted = self.alpha_tinted(color, 0);
+        let mut moved = RgbaImage::new(tinted.width(), tinted.height());
+        imageops::overlay(&mut moved, &tinted, dx, dy);
+        let out = if blur > 0.0 { imageops::fast_blur(&moved, blur) } else { moved };
+        self.effect_layer("Ombre", out);
+    }
+
+    pub fn outer_glow(&mut self, size: f32, color: [u8; 4]) {
+        let tinted = self.alpha_tinted(color, (size / 3.0) as usize);
+        self.effect_layer("Lueur", imageops::fast_blur(&tinted, size.max(0.5)));
+    }
+
+    pub fn layer_outline(&mut self, width: u32, color: [u8; 4]) {
+        let out = self.alpha_tinted(color, width.max(1) as usize);
+        self.effect_layer("Contour", out);
+    }
+
+    /// Maps luminance to a gradient between two colours (duotone).
+    pub fn gradient_map(&mut self, dark: [u8; 4], light: [u8; 4]) {
+        self.adjust_map(move |p| {
+            let l = (0.2126 * p[0] as f32 + 0.7152 * p[1] as f32 + 0.0722 * p[2] as f32) / 255.0;
+            for k in 0..3 {
+                p[k] = (dark[k] as f32 + (light[k] as f32 - dark[k] as f32) * l).round() as u8;
+            }
+        });
+    }
+
+    fn adjust_map(&mut self, f: impl Fn(&mut [u8; 4])) {
+        self.checkpoint();
+        let (sel, mask, w) = (self.selection, self.mask.as_ref(), self.width());
+        for (x, y, p) in self.layers[self.active].img.enumerate_pixels_mut() {
+            if inside(sel, mask, w, x, y) {
+                f(&mut p.0);
+            }
+        }
+        self.touch_all();
+    }
+
+}
+
+/// Square dilation of a boolean mask by `r` pixels (two separable passes).
+fn dilate(m: &[bool], w: usize, h: usize, r: usize) -> Vec<bool> {
+    let pass = |src: &[bool], horizontal: bool| -> Vec<bool> {
+        let mut out = vec![false; src.len()];
+        let (lines, len) = if horizontal { (h, w) } else { (w, h) };
+        for line in 0..lines {
+            let idx = |k: usize| if horizontal { line * w + k } else { k * w + line };
+            let mut count = 0usize;
+            for k in 0..=r.min(len - 1) {
+                count += src[idx(k)] as usize;
+            }
+            for k in 0..len {
+                out[idx(k)] = count > 0;
+                if k + r + 1 < len {
+                    count += src[idx(k + r + 1)] as usize;
+                }
+                if k >= r {
+                    count -= src[idx(k - r)] as usize;
+                }
+            }
+        }
+        out
+    };
+    pass(&pass(m, true), false)
+}
+
+fn bilinear(img: &RgbaImage, x: f32, y: f32) -> Rgba<u8> {
+    let (w, h) = img.dimensions();
+    let (x0, y0) = (x.floor().max(0.0) as u32, y.floor().max(0.0) as u32);
+    let (x1, y1) = ((x0 + 1).min(w - 1), (y0 + 1).min(h - 1));
+    let (fx, fy) = ((x - x0 as f32).clamp(0.0, 1.0), (y - y0 as f32).clamp(0.0, 1.0));
+    let (a, b, c, d) = (img.get_pixel(x0.min(w - 1), y0.min(h - 1)).0, img.get_pixel(x1, y0.min(h - 1)).0, img.get_pixel(x0.min(w - 1), y1).0, img.get_pixel(x1, y1).0);
+    Rgba(std::array::from_fn(|k| {
+        let top = a[k] as f32 * (1.0 - fx) + b[k] as f32 * fx;
+        let bot = c[k] as f32 * (1.0 - fx) + d[k] as f32 * fx;
+        (top * (1.0 - fy) + bot * fy).round() as u8
+    }))
 }
 
 fn smooth(t: f32) -> f32 {
@@ -766,7 +1067,7 @@ mod tests {
         s2.stamp(10.0, 10.0, &Brush { radius: 8.0, hardness: 1.0, flow: 1.0 }, [0, 0, 0, 255], false);
         assert_eq!(s2.layers[0].img.get_pixel(7, 7).0, [0, 0, 0, 255]);
         assert_eq!(s2.layers[0].img.get_pixel(12, 12).0, [255, 255, 255, 255]);
-        s2.gradient((5.0, 0.0), (10.0, 0.0), [255, 0, 0, 255], [0, 0, 255, 255]);
+        s2.gradient_kind((5.0, 0.0), (10.0, 0.0), [255, 0, 0, 255], [0, 0, 255, 255], false);
         assert!(s2.layers[0].img.get_pixel(5, 6).0[0] > 200);
         assert!(s2.layers[0].img.get_pixel(9, 6).0[2] > 150);
         s2.clear_selection();
@@ -791,6 +1092,37 @@ mod tests {
         m.add_layer(None, Some(RgbaImage::from_pixel(20, 20, Rgba([128, 128, 128, 255]))));
         m.layers[1].blend = Blend::Multiply;
         assert_eq!(m.flatten().get_pixel(15, 15).0, [128, 128, 128, 255]);
+
+        let mut e = Document::new(40, 40, None);
+        e.set_selection(Area::from_points((10.0, 10.0), (20.0, 20.0), 40, 40), None);
+        e.fill_selection([255, 0, 0, 255]);
+        assert_eq!(e.layers[0].img.get_pixel(15, 15).0, [255, 0, 0, 255]);
+        e.grow_selection(3);
+        assert!(e.selected(8, 8) && !e.selected(5, 5));
+        e.grow_selection(-5);
+        assert!(e.selected(15, 15) && !e.selected(11, 11));
+        e.select_layer_alpha();
+        assert_eq!(e.selection, Some(Area { x0: 10, y0: 10, x1: 20, y1: 20 }));
+        assert!(e.layer_from_selection(false));
+        assert_eq!(e.layers.len(), 2);
+        e.drop_shadow(4, 4, 0.0, [0, 0, 0, 255]);
+        assert_eq!(e.layers.len(), 3);
+        assert_eq!(e.layers[1].img.get_pixel(22, 22).0[3], 255);
+        e.layer_outline(2, [255, 255, 255, 255]);
+        assert_eq!(e.layers.len(), 4);
+        e.merge_visible();
+        assert_eq!(e.layers.len(), 1);
+        assert!(e.trim());
+        assert_eq!((e.width(), e.height()), (16, 16));
+        e.canvas_size(30, 20, (0.0, 0.0), Some([0, 0, 255, 255]));
+        assert_eq!((e.width(), e.height()), (30, 20));
+        assert_eq!(e.layers[0].img.get_pixel(29, 19).0, [0, 0, 255, 255]);
+        e.set_selection(None, None);
+        e.transform_layer(0.5, 0.0);
+        assert_eq!(e.layers[0].img.get_pixel(0, 0).0[3], 0);
+        e.gradient_map([0, 0, 0, 255], [255, 255, 0, 255]);
+        e.flatten_all();
+        assert_eq!(e.layers.len(), 1);
 
         let (h, s, l) = rgb_to_hsl(0.2, 0.6, 0.4);
         let (r, g, b) = hsl_to_rgb(h, s, l);
