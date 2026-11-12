@@ -24,6 +24,7 @@ jobs:
           $catalog = Get-Content catalog.json -Raw | ConvertFrom-Json
           New-Item -ItemType Directory dist | Out-Null
           Copy-Item target/release/ethone-studio.exe dist/EthoneStudio.exe
+          Copy-Item target/release/ethone-mcp.exe dist/ethone-mcp-windows-x64.exe
           foreach ($app in $catalog.apps) {
             $exe = "target/release/$($app.id).exe"
             if (-not (Test-Path $exe)) { continue }

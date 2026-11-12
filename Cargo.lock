@@ -944,6 +944,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "ethone-mcp"
+version = "0.4.0"
+dependencies = [
+ "hound",
+ "image",
+ "imagepipe",
+ "krilla",
+ "krilla-svg",
+ "rayon",
+ "resvg 0.47.0",
+ "resvg 0.49.0",
+ "serde",
+ "serde_json",
+ "studio-core",
+ "symphonia",
+ "ttf-parser",
+]
+
+[[package]]
 name = "ethone-studio"
 version = "0.3.0"
 dependencies = [
