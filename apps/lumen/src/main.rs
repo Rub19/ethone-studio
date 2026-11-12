@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod develop;
+mod tutos;
 
 use develop::Settings;
 use eframe::egui::{
@@ -97,6 +98,10 @@ struct Lumen {
     error: Option<String>,
     dirty_catalog: bool,
     icon: TextureHandle,
+    help: studio_ui::help::Help,
+    hsl_tab: usize,
+    export_quality: u8,
+    export_edge: u32,
 }
 
 impl Lumen {
@@ -125,6 +130,10 @@ impl Lumen {
             error: None,
             dirty_catalog: false,
             icon: studio_ui::icon_texture(&cc.egui_ctx, "lumen"),
+            help: studio_ui::help::Help::new("Lumen", tutos::LUMEN),
+            hsl_tab: 0,
+            export_quality: 92,
+            export_edge: 0,
         };
         let arg = std::env::args().nth(1).map(PathBuf::from);
         if let Some(file) = arg.filter(|p| p.is_file() && develop::is_supported(p))
@@ -259,6 +268,7 @@ impl Lumen {
             return;
         }
         let Some(dir) = rfd::FileDialog::new().set_title("Dossier d'export").pick_folder() else { return };
+        let (quality, edge) = (self.export_quality, self.export_edge);
         let done = Arc::new(AtomicUsize::new(0));
         let errors = Arc::new(Mutex::new(Vec::new()));
         self.export = Some(Export { done: done.clone(), total: list.len(), errors: errors.clone() });
@@ -266,10 +276,14 @@ impl Lumen {
             use rayon::prelude::*;
             list.par_iter().for_each(|(p, s)| {
                 let r = develop::load(p, 0).and_then(|img| {
-                    let out = develop::process(&img, s);
+                    let mut out = develop::process(&img, s);
+                    if edge > 0 && out.width().max(out.height()) > edge {
+                        let r = edge as f32 / out.width().max(out.height()) as f32;
+                        out = image::imageops::resize(&out, (out.width() as f32 * r).round() as u32, (out.height() as f32 * r).round() as u32, image::imageops::FilterType::Lanczos3);
+                    }
                     let name = p.file_stem().unwrap_or_default().to_string_lossy().into_owned();
                     let file = std::fs::File::create(dir.join(format!("{name}.jpg"))).map_err(|e| e.to_string())?;
-                    let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), 92);
+                    let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), quality);
                     enc.encode_image(&out).map_err(|e| e.to_string())
                 });
                 if let Err(e) = r
@@ -358,6 +372,7 @@ impl eframe::App for Lumen {
         let ctx = &root.ctx().clone();
         self.pump(ctx);
         self.keys(ctx);
+        self.help.show(ctx);
         if self.current.is_none() && self.view == View::Develop {
             self.view = View::Library;
         }
@@ -407,6 +422,14 @@ impl Lumen {
                         if ui.add_enabled(!self.files.is_empty(), egui::Button::new("Exporter les photos affichées…")).clicked() {
                             self.start_export(false);
                         }
+                        ui.menu_button("Options d'export", |ui| {
+                            ui.label(RichText::new("Qualité JPEG").size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(&mut self.export_quality, 40..=100));
+                            ui.label(RichText::new("Grand côté").size(12.5).color(MUTED));
+                            for (label, edge) in [("Taille d'origine", 0), ("4096 px", 4096), ("2048 px (réseaux)", 2048), ("1080 px (Instagram)", 1080)] {
+                                ui.radio_value(&mut self.export_edge, edge, label);
+                            }
+                        });
                     });
                     ui.add_enabled_ui(self.current.is_some(), |ui| {
                         ui.menu_button("Photo", |ui| {
@@ -431,6 +454,29 @@ impl Lumen {
                                 self.entry(i).settings = Settings::default();
                                 self.dirty_catalog = true;
                             }
+                            if ui.add_enabled(self.clipboard.is_some(), egui::Button::new("Coller sur les photos affichées")).clicked()
+                                && let Some(c) = self.clipboard
+                            {
+                                for v in self.visible() {
+                                    self.entry(v).settings = c;
+                                }
+                                self.dirty_catalog = true;
+                            }
+                            ui.separator();
+                            let mut cur = self.get(i).settings;
+                            let before = cur;
+                            ui.checkbox(&mut cur.mono, "Noir et blanc");
+                            ui.checkbox(&mut cur.flip, "Miroir horizontal");
+                            if ui.button("Rotation 90° horaire").clicked() {
+                                cur.rotate = (cur.rotate + 1) % 4;
+                            }
+                            if ui.button("Rotation 90° antihoraire").clicked() {
+                                cur.rotate = (cur.rotate + 3) % 4;
+                            }
+                            if cur != before {
+                                self.entry(i).settings = cur;
+                                self.dirty_catalog = true;
+                            }
                             ui.separator();
                             for r in 0..=5u8 {
                                 let label = if r == 0 { "Sans note                       0".to_string() } else { format!("{}{}   {r}", "★".repeat(r as usize), " ".repeat(5 - r as usize)) };
@@ -441,6 +487,7 @@ impl Lumen {
                             }
                         });
                     });
+                    self.help.menu(ui);
                 });
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if !self.files.is_empty() {
@@ -717,9 +764,64 @@ impl Lumen {
                     dev_slider(ui, "Teinte", &mut s.tint, -100.0..=100.0, 1.0);
                     dev_slider(ui, "Vibrance", &mut s.vibrance, -100.0..=100.0, 1.0);
                     dev_slider(ui, "Saturation", &mut s.saturation, -100.0..=100.0, 1.0);
+                    ui.checkbox(&mut s.mono, "Noir et blanc");
                 });
-                pro::dock_panel(ui, "effects", "Effets et géométrie", |ui| {
+                pro::dock_panel(ui, "presence", "Présence", |ui| {
+                    dev_slider(ui, "Texture", &mut s.texture, -100.0..=100.0, 1.0);
+                    dev_slider(ui, "Clarté", &mut s.clarity, -100.0..=100.0, 1.0);
+                    dev_slider(ui, "Correction du voile", &mut s.dehaze, -100.0..=100.0, 1.0);
+                });
+                pro::dock_panel(ui, "curve", "Courbe des tonalités", |ui| {
+                    draw_curve(ui, &s);
+                    for (k, label) in ["Ombres", "Tons foncés", "Tons clairs", "Hautes lumières"].into_iter().enumerate() {
+                        dev_slider(ui, label, &mut s.curve[k], -100.0..=100.0, 1.0);
+                    }
+                });
+                let tab = &mut self.hsl_tab;
+                pro::dock_panel(ui, "hsl", "TSL / Couleur", |ui| {
+                    ui.horizontal(|ui| {
+                        for (k, label) in ["Teinte", "Saturation", "Luminance"].into_iter().enumerate() {
+                            if ui.selectable_label(*tab == k, label).clicked() {
+                                *tab = k;
+                            }
+                        }
+                    });
+                    ui.add_space(6.0);
+                    for (b, (name, _, rgb)) in develop::BANDS.iter().enumerate() {
+                        ui.horizontal(|ui| {
+                            let (r, _) = ui.allocate_exact_size(Vec2::splat(10.0), Sense::hover());
+                            ui.painter().circle_filled(r.center(), 5.0, Color32::from_rgb(rgb[0], rgb[1], rgb[2]));
+                            ui.label(RichText::new(*name).size(12.0).color(MUTED));
+                        });
+                        dev_slider(ui, "", &mut s.hsl[b][*tab], -100.0..=100.0, 1.0);
+                    }
+                });
+                pro::dock_panel(ui, "split", "Virage partiel", |ui| {
+                    hue_slider(ui, "Teinte des ombres", &mut s.split_shadow_hue);
+                    dev_slider(ui, "Saturation des ombres", &mut s.split_shadow_sat, 0.0..=100.0, 1.0);
+                    hue_slider(ui, "Teinte des hautes lumières", &mut s.split_high_hue);
+                    dev_slider(ui, "Saturation des hautes lumières", &mut s.split_high_sat, 0.0..=100.0, 1.0);
+                    dev_slider(ui, "Équilibre", &mut s.split_balance, -100.0..=100.0, 1.0);
+                });
+                pro::dock_panel(ui, "detail", "Détail", |ui| {
+                    dev_slider(ui, "Netteté", &mut s.sharpen, 0.0..=150.0, 1.0);
+                    dev_slider(ui, "Rayon", &mut s.sharpen_radius, 0.0..=3.0, 0.1);
+                    dev_slider(ui, "Réduction du bruit", &mut s.noise, 0.0..=100.0, 1.0);
+                });
+                pro::dock_panel(ui, "effects", "Effets", |ui| {
                     dev_slider(ui, "Vignettage", &mut s.vignette, -100.0..=100.0, 1.0);
+                    dev_slider(ui, "Point milieu", &mut s.vignette_mid, 0.0..=100.0, 1.0);
+                    dev_slider(ui, "Grain", &mut s.grain, 0.0..=100.0, 1.0);
+                    dev_slider(ui, "Taille du grain", &mut s.grain_size, 0.0..=100.0, 1.0);
+                });
+                pro::dock_panel(ui, "geometry", "Géométrie", |ui| {
+                    dev_slider(ui, "Redresser", &mut s.straighten, -45.0..=45.0, 0.1);
+                    for (k, label) in ["Recadrage gauche", "Recadrage haut", "Recadrage droit", "Recadrage bas"].into_iter().enumerate() {
+                        let mut v = s.crop[k] * 100.0;
+                        dev_slider(ui, label, &mut v, 0.0..=45.0, 0.5);
+                        s.crop[k] = v / 100.0;
+                    }
+                    ui.checkbox(&mut s.flip, "Miroir horizontal");
                     ui.add_space(6.0);
                     ui.horizontal(|ui| {
                         if pro::secondary(ui, "⟲ 90°").clicked() {
@@ -732,6 +834,9 @@ impl Lumen {
                 });
                 pro::dock_panel(ui, "actions", "Réglages", |ui| {
                     ui.horizontal_wrapped(|ui| {
+                        if pro::secondary(ui, "?  Tutoriels").clicked() {
+                            self.help.learn("Développement");
+                        }
                         if pro::secondary(ui, "Copier").clicked() {
                             self.clipboard = Some(s);
                         }
@@ -848,6 +953,49 @@ fn dev_slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclu
     ui.add_space(6.0);
 }
 
+fn hue_slider(ui: &mut Ui, label: &str, v: &mut f32) {
+    ui.label(RichText::new(label).size(12.5).color(if *v != 0.0 { INK } else { MUTED }));
+    let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 16.0), Sense::click_and_drag());
+    let p = ui.painter();
+    let n = 36;
+    for k in 0..n {
+        let h = k as f32 / n as f32;
+        let seg = Rect::from_min_max(pos2(r.left() + r.width() * h, r.top() + 3.0), pos2(r.left() + r.width() * (k + 1) as f32 / n as f32 + 0.5, r.bottom() - 3.0));
+        let c = egui::ecolor::Hsva::new(h, 0.8, 0.95, 1.0);
+        p.rect_filled(seg, CornerRadius::ZERO, Color32::from(c));
+    }
+    let x = r.left() + r.width() * (*v / 360.0);
+    p.circle(pos2(x, r.center().y), 7.0, Color32::WHITE, Stroke::new(1.5, Color32::from_black_alpha(160)));
+    if let Some(pos) = resp.interact_pointer_pos() {
+        *v = ((pos.x - r.left()) / r.width()).clamp(0.0, 1.0) * 360.0;
+    }
+    ui.add_space(8.0);
+}
+
+fn draw_curve(ui: &mut Ui, s: &Settings) {
+    let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 110.0), Sense::hover());
+    let p = ui.painter();
+    p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
+    for k in 1..4 {
+        let f = k as f32 / 4.0;
+        let g = Stroke::new(1.0, Color32::from_white_alpha(14));
+        p.line_segment([pos2(r.left() + r.width() * f, r.top()), pos2(r.left() + r.width() * f, r.bottom())], g);
+        p.line_segment([pos2(r.left(), r.top() + r.height() * f), pos2(r.right(), r.top() + r.height() * f)], g);
+    }
+    p.line_segment([r.left_bottom(), r.right_top()], Stroke::new(1.0, Color32::from_white_alpha(30)));
+    let pts: Vec<egui::Pos2> = (0..=64)
+        .map(|k| {
+            let x = k as f32 / 64.0;
+            let mut y = x;
+            for (i, c) in s.curve.iter().enumerate() {
+                y += c / 100.0 * 0.18 * (-((x - (0.125 + 0.25 * i as f32)) / 0.15).powi(2)).exp();
+            }
+            pos2(r.left() + r.width() * x, r.bottom() - r.height() * y.clamp(0.0, 1.0))
+        })
+        .collect();
+    p.add(egui::Shape::line(pts, Stroke::new(2.0, INK)));
+    ui.add_space(8.0);
+}
 fn draw_histogram(ui: &mut Ui, hist: Option<&[[u32; 256]; 4]>) {
     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 96.0), Sense::hover());
     let p = ui.painter();
