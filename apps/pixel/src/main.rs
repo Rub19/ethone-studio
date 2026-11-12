@@ -1,14 +1,17 @@
 #![windows_subsystem = "windows"]
 
 mod doc;
+mod filters;
 mod inpaint;
+mod tutos;
 
-use doc::{Area, Brush, Document, hsl_to_rgb, rgb_to_hsl};
+use doc::{Area, BLENDS, Brush, Document, Paint};
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Pos2,
     Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2, pos2,
     vec2,
 };
+use filters::Kind;
 use image::{RgbaImage, imageops};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -18,79 +21,139 @@ use studio_ui::pro::{self, BLUE, CHROME, FAINT, FIELD, INK, INK_STRONG, LINE, MU
 enum Tool {
     Move,
     Marquee,
-    Brush,
-    Eraser,
-    Remove,
-    Fill,
-    Gradient,
+    EllipseMarquee,
+    Lasso,
+    Wand,
+    Crop,
     Picker,
+    Remove,
+    Clone,
+    Brush,
+    Pencil,
+    Eraser,
+    Gradient,
+    Fill,
+    Blur,
+    Sharpen,
+    Smudge,
+    Dodge,
+    Burn,
+    Sponge,
+    Rect,
+    Ellipse,
+    Line,
+    Text,
     Hand,
     Zoom,
 }
 
-const TOOLS: [(Tool, &str, Key); 10] = [
-    (Tool::Move, "Déplacement (V)", Key::V),
-    (Tool::Marquee, "Sélection rectangulaire (M)", Key::M),
-    (Tool::Brush, "Pinceau (B)", Key::B),
-    (Tool::Eraser, "Gomme (E)", Key::E),
-    (Tool::Remove, "Suppression (J)", Key::J),
-    (Tool::Fill, "Pot de peinture (K)", Key::K),
-    (Tool::Gradient, "Dégradé (G)", Key::G),
-    (Tool::Picker, "Pipette (I)", Key::I),
-    (Tool::Hand, "Main (H, ou Espace)", Key::H),
-    (Tool::Zoom, "Zoom (Z, Alt pour dézoomer)", Key::Z),
+const TOOLS: [(Tool, &str, Option<Key>); 26] = [
+    (Tool::Move, "Déplacement (V)", Some(Key::V)),
+    (Tool::Marquee, "Sélection rectangulaire (M)", Some(Key::M)),
+    (Tool::EllipseMarquee, "Sélection elliptique (Maj+M)", None),
+    (Tool::Lasso, "Lasso (L)", Some(Key::L)),
+    (Tool::Wand, "Baguette magique (W)", Some(Key::W)),
+    (Tool::Crop, "Recadrage (C)", Some(Key::C)),
+    (Tool::Picker, "Pipette (I)", Some(Key::I)),
+    (Tool::Remove, "Suppression (J)", Some(Key::J)),
+    (Tool::Clone, "Tampon de duplication (S)", Some(Key::S)),
+    (Tool::Brush, "Pinceau (B)", Some(Key::B)),
+    (Tool::Pencil, "Crayon (N)", Some(Key::N)),
+    (Tool::Eraser, "Gomme (E)", Some(Key::E)),
+    (Tool::Gradient, "Dégradé (G)", Some(Key::G)),
+    (Tool::Fill, "Pot de peinture (K)", Some(Key::K)),
+    (Tool::Blur, "Goutte (R)", Some(Key::R)),
+    (Tool::Sharpen, "Netteté (Maj+R)", None),
+    (Tool::Smudge, "Doigt (Maj+R)", None),
+    (Tool::Dodge, "Densité − (O)", Some(Key::O)),
+    (Tool::Burn, "Densité + (Maj+O)", None),
+    (Tool::Sponge, "Éponge (Maj+O)", None),
+    (Tool::Rect, "Rectangle (U)", Some(Key::U)),
+    (Tool::Ellipse, "Ellipse (Maj+U)", None),
+    (Tool::Line, "Trait (Maj+U)", None),
+    (Tool::Text, "Texte (T)", Some(Key::T)),
+    (Tool::Hand, "Main (H, ou Espace)", Some(Key::H)),
+    (Tool::Zoom, "Zoom (Z, Alt pour dézoomer)", Some(Key::Z)),
+];
+
+const GROUPS: [&[Tool]; 16] = [
+    &[Tool::Move],
+    &[Tool::Marquee, Tool::EllipseMarquee],
+    &[Tool::Lasso],
+    &[Tool::Wand],
+    &[Tool::Crop],
+    &[Tool::Picker],
+    &[Tool::Remove, Tool::Clone],
+    &[Tool::Brush, Tool::Pencil],
+    &[Tool::Eraser],
+    &[Tool::Gradient, Tool::Fill],
+    &[Tool::Blur, Tool::Sharpen, Tool::Smudge],
+    &[Tool::Dodge, Tool::Burn, Tool::Sponge],
+    &[Tool::Rect, Tool::Ellipse, Tool::Line],
+    &[Tool::Text],
+    &[Tool::Hand],
+    &[Tool::Zoom],
 ];
 
 fn tool_name(t: Tool) -> &'static str {
     TOOLS.iter().find(|x| x.0 == t).map_or("", |x| x.1.split(" (").next().unwrap_or(""))
 }
 
-#[derive(Clone, Copy, PartialEq)]
-enum Adjust {
-    BrightnessContrast { b: f32, c: f32 },
-    HueSat { h: f32, s: f32, l: f32 },
-    Blur { sigma: f32 },
+fn tool_tip(t: Tool) -> &'static str {
+    TOOLS.iter().find(|x| x.0 == t).map_or("", |x| x.1)
 }
 
-impl Adjust {
-    fn title(&self) -> &'static str {
-        match self {
-            Adjust::BrightnessContrast { .. } => "Luminosité et contraste",
-            Adjust::HueSat { .. } => "Teinte et saturation",
-            Adjust::Blur { .. } => "Flou gaussien",
-        }
-    }
+fn brushy(t: Tool) -> bool {
+    matches!(t, Tool::Brush | Tool::Pencil | Tool::Eraser | Tool::Clone | Tool::Blur | Tool::Sharpen | Tool::Smudge | Tool::Dodge | Tool::Burn | Tool::Sponge)
+}
 
-    fn apply(&self, doc: &mut Document, checkpoint: bool) {
-        match *self {
-            Adjust::BrightnessContrast { b, c } => {
-                let b = b / 100.0;
-                let k = ((c / 100.0) + 1.0).powi(2);
-                let f = move |p: &mut [u8; 4]| {
-                    for v in &mut p[..3] {
-                        let x = *v as f32 / 255.0 + b;
-                        *v = (((x - 0.5) * k + 0.5).clamp(0.0, 1.0) * 255.0).round() as u8;
+struct TextDraft {
+    at: (f32, f32),
+    text: String,
+    size: f32,
+}
+
+fn render_text(text: &str, size: f32, color: [u8; 4]) -> Option<RgbaImage> {
+    use ab_glyph::{Font, PxScale, ScaleFont, point};
+    let dir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".into());
+    let font = ab_glyph::FontVec::try_from_vec(std::fs::read(format!("{dir}\\Fonts\\segoeui.ttf")).ok()?).ok()?;
+    let scaled = font.as_scaled(PxScale::from(size));
+    let line_h = scaled.height() + scaled.line_gap();
+    let mut glyphs = Vec::new();
+    let mut width = 0f32;
+    let lines: Vec<&str> = text.lines().collect();
+    for (li, line) in lines.iter().enumerate() {
+        let mut x = 0.0;
+        let mut prev = None;
+        for ch in line.chars() {
+            let id = scaled.glyph_id(ch);
+            if let Some(p) = prev {
+                x += scaled.kern(p, id);
+            }
+            glyphs.push(id.with_scale_and_position(size, point(x, scaled.ascent() + li as f32 * line_h)));
+            x += scaled.h_advance(id);
+            prev = Some(id);
+        }
+        width = width.max(x);
+    }
+    let (w, h) = (width.ceil() as u32 + 4, (line_h * lines.len().max(1) as f32).ceil() as u32 + 4);
+    let mut img = RgbaImage::new(w, h);
+    for g in glyphs {
+        if let Some(o) = font.outline_glyph(g) {
+            let b = o.px_bounds();
+            o.draw(|x, y, c| {
+                let (px, py) = (x as i32 + b.min.x as i32, y as i32 + b.min.y as i32);
+                if px >= 0 && py >= 0 && (px as u32) < w && (py as u32) < h {
+                    let a = (c.clamp(0.0, 1.0) * color[3] as f32).round() as u8;
+                    let p = img.get_pixel_mut(px as u32, py as u32);
+                    if a > p.0[3] {
+                        p.0 = [color[0], color[1], color[2], a];
                     }
-                };
-                if checkpoint { doc.adjust(f) } else { doc.adjust_raw(f) }
-            }
-            Adjust::HueSat { h, s, l } => {
-                let f = move |p: &mut [u8; 4]| {
-                    let (hh, ss, ll) = rgb_to_hsl(p[0] as f32 / 255.0, p[1] as f32 / 255.0, p[2] as f32 / 255.0);
-                    let ss = (ss * (1.0 + s / 100.0)).clamp(0.0, 1.0);
-                    let ll = if l >= 0.0 { ll + (1.0 - ll) * l / 100.0 } else { ll * (1.0 + l / 100.0) };
-                    let (r, g, b) = hsl_to_rgb(hh + h / 360.0, ss, ll);
-                    p[0] = (r * 255.0).round() as u8;
-                    p[1] = (g * 255.0).round() as u8;
-                    p[2] = (b * 255.0).round() as u8;
-                };
-                if checkpoint { doc.adjust(f) } else { doc.adjust_raw(f) }
-            }
-            Adjust::Blur { sigma } => {
-                if checkpoint { doc.blur(sigma) } else { doc.blur_raw(sigma) }
-            }
+                }
+            });
         }
     }
+    Some(img)
 }
 
 struct NewDoc {
@@ -119,6 +182,9 @@ enum Drag {
     Marquee((f32, f32)),
     Move { from: (f32, f32), original: RgbaImage },
     Gradient((f32, f32)),
+    Lasso(Vec<(f32, f32)>),
+    Crop((f32, f32)),
+    Shape((f32, f32)),
 }
 
 struct Pixel {
@@ -148,7 +214,18 @@ struct Pixel {
     filling: Option<(usize, std::sync::mpsc::Receiver<RgbaImage>)>,
     gradient_end: Option<(f32, f32)>,
     new_doc: Option<NewDoc>,
-    adjust: Option<(Adjust, RgbaImage)>,
+    adjust: Option<(Kind, Vec<f32>, RgbaImage)>,
+    picks: [Tool; 16],
+    paint: Option<Paint>,
+    clone_src: Option<(f32, f32)>,
+    clone_offset: Option<(f32, f32)>,
+    sponge_saturate: bool,
+    contiguous: bool,
+    shape_layer: bool,
+    crop: Option<Area>,
+    text: Option<TextDraft>,
+    mask_tex: Option<(usize, TextureHandle)>,
+    help: studio_ui::help::Help,
     resize: Option<(u32, u32, bool)>,
     renaming: Option<(usize, String)>,
     error: Option<String>,
@@ -216,6 +293,17 @@ impl Pixel {
             gradient_end: None,
             new_doc: None,
             adjust: None,
+            picks: GROUPS.map(|g| g[0]),
+            paint: None,
+            clone_src: None,
+            clone_offset: None,
+            sponge_saturate: false,
+            contiguous: true,
+            shape_layer: true,
+            crop: None,
+            text: None,
+            mask_tex: None,
+            help: studio_ui::help::Help::new("Pixel", tutos::PIXEL),
             resize: None,
             renaming: None,
             error: None,
@@ -409,12 +497,67 @@ impl Pixel {
         self.thumbs_version = self.doc.version;
     }
 
+    fn select_tool(&mut self, t: Tool) {
+        self.tool = t;
+        if let Some(g) = GROUPS.iter().position(|g| g.contains(&t)) {
+            self.picks[g] = t;
+        }
+    }
+
+    fn make_paint(&mut self, at: (f32, f32)) -> Option<Paint> {
+        Some(match self.tool {
+            Tool::Brush => Paint::Color(self.primary.to_array()),
+            Tool::Pencil => Paint::Pencil(self.primary.to_array()),
+            Tool::Eraser => Paint::Erase,
+            Tool::Dodge => Paint::Dodge,
+            Tool::Burn => Paint::Burn,
+            Tool::Sponge => Paint::Sponge(if self.sponge_saturate { 1.0 } else { -1.0 }),
+            Tool::Blur => Paint::Blur(self.doc.layers[self.doc.active].img.clone()),
+            Tool::Sharpen => Paint::Sharpen(self.doc.layers[self.doc.active].img.clone()),
+            Tool::Smudge => Paint::Smudge(None),
+            Tool::Clone => {
+                let src = self.clone_src?;
+                let off = *self.clone_offset.get_or_insert((src.0 - at.0, src.1 - at.1));
+                Paint::Clone { src: self.doc.layers[self.doc.active].img.clone(), dx: off.0, dy: off.1 }
+            }
+            _ => return None,
+        })
+    }
+
+    fn sync_mask(&mut self, ctx: &egui::Context) {
+        let Some(mask) = &self.doc.mask else {
+            self.mask_tex = None;
+            return;
+        };
+        let key = mask.as_ptr() as usize;
+        if self.mask_tex.as_ref().is_some_and(|m| m.0 == key) {
+            return;
+        }
+        let (w, h) = (self.doc.width() as usize, self.doc.height() as usize);
+        let mut px = vec![0u8; w * h * 4];
+        for y in 0..h {
+            for x in 0..w {
+                let i = y * w + x;
+                if !mask[i] {
+                    continue;
+                }
+                let edge = x == 0 || y == 0 || x + 1 == w || y + 1 == h || !mask[i - 1] || !mask[i + 1] || !mask[i - w] || !mask[i + w];
+                if edge {
+                    let v = if (x + y) / 4 % 2 == 0 { 255 } else { 0 };
+                    px[i * 4..i * 4 + 4].copy_from_slice(&[v, v, v, 255]);
+                }
+            }
+        }
+        let tex = ctx.load_texture("mask", egui::ColorImage::from_rgba_unmultiplied([w, h], &px), TextureOptions::NEAREST);
+        self.mask_tex = Some((key, tex));
+    }
+
     fn new_doc_sheet(&mut self) {
         self.new_doc = Some(NewDoc { name: "Sans titre".into(), w: 1920, h: 1080, background: 0, preset: 0 });
     }
 
     fn shortcuts(&mut self, ctx: &egui::Context) {
-        if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() || self.adjust.is_some() {
+        if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() || self.adjust.is_some() || self.text.is_some() {
             return;
         }
         use egui::{KeyboardShortcut as K, Modifiers as M};
@@ -444,10 +587,19 @@ impl Pixel {
             self.export();
         }
         if sc(M::COMMAND, Key::A) {
-            self.doc.selection = Some(self.doc.full());
+            self.doc.set_selection(Some(self.doc.full()), None);
         }
         if sc(M::COMMAND, Key::D) {
-            self.doc.selection = None;
+            self.doc.set_selection(None, None);
+        }
+        if sc(M::COMMAND | M::SHIFT, Key::I) {
+            self.doc.invert_selection();
+        }
+        if sc(M::COMMAND, Key::L) {
+            self.start_adjust(Kind::Levels);
+        }
+        if sc(M::COMMAND, Key::U) {
+            self.start_adjust(Kind::HueSat);
         }
         if sc(M::COMMAND, Key::J) {
             self.doc.duplicate_layer();
@@ -461,15 +613,24 @@ impl Pixel {
         if sc(M::COMMAND, Key::Minus) {
             self.zoom = (self.zoom / 1.25).max(0.02);
         }
-        let (keys, del, swap, reset, smaller, bigger) = ctx.input(|i| {
+        let (keys, del, swap, reset, smaller, bigger, enter_key, escape_key) = ctx.input(|i| {
             let mut pick = None;
             if !i.modifiers.command {
                 for (tool, _, key) in TOOLS {
-                    if i.key_pressed(key) {
-                        pick = Some(tool);
+                    if key.is_some_and(|k| i.key_pressed(k)) {
+                        let group = GROUPS.iter().find(|g| g.contains(&tool)).copied().unwrap_or(&[]);
+                        pick = Some(if i.modifiers.shift && group.contains(&self.tool) {
+                            group[(group.iter().position(|t| *t == self.tool).unwrap_or(0) + 1) % group.len()]
+                        } else if group.contains(&self.tool) {
+                            self.tool
+                        } else {
+                            tool
+                        });
                     }
                 }
             }
+            let enter = i.key_pressed(Key::Enter);
+            let escape = i.key_pressed(Key::Escape);
             (
                 pick,
                 i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace),
@@ -477,10 +638,22 @@ impl Pixel {
                 i.key_pressed(Key::D) && !i.modifiers.command,
                 i.key_pressed(Key::OpenBracket),
                 i.key_pressed(Key::CloseBracket),
+                enter,
+                escape,
             )
         });
         if let Some(t) = keys {
-            self.tool = t;
+            self.select_tool(t);
+        }
+        if let Some(c) = self.crop {
+            if enter_key {
+                self.doc.set_selection(Some(c), None);
+                self.doc.crop_to_selection();
+                self.crop = None;
+                self.fit_pending = true;
+            } else if escape_key {
+                self.crop = None;
+            }
         }
         if del {
             self.doc.clear_selection();
@@ -504,6 +677,13 @@ impl Pixel {
 impl eframe::App for Pixel {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        if !self.home && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
+            if self.help.open {
+                self.help.open = false;
+            } else {
+                self.help.learn(tool_name(self.tool));
+            }
+        }
         self.shortcuts(ctx);
         if let Some(f) = ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf()).filter(|p| !p.as_os_str().is_empty())) {
             self.open_path(&f);
@@ -528,9 +708,11 @@ impl eframe::App for Pixel {
             self.dock(root, ctx);
             self.finish_fill();
             self.sync_texture(ctx);
+            self.sync_mask(ctx);
             self.canvas(root);
         }
         self.sheets(ctx);
+        self.help.show(ctx);
     }
 }
 
@@ -585,27 +767,16 @@ impl Pixel {
                         });
                         ui.menu_button("Image", |ui| {
                             ui.menu_button("Réglages", |ui| {
-                                if ui.button("Luminosité et contraste…").clicked() {
-                                    self.start_adjust(Adjust::BrightnessContrast { b: 0.0, c: 0.0 });
-                                }
-                                if ui.button("Teinte et saturation…").clicked() {
-                                    self.start_adjust(Adjust::HueSat { h: 0.0, s: 0.0, l: 0.0 });
+                                for k in filters::ADJUSTMENTS {
+                                    if ui.button(format!("{}…", k.title())).clicked() {
+                                        self.start_adjust(*k);
+                                    }
                                 }
                                 ui.separator();
-                                if ui.button("Noir et blanc").clicked() {
-                                    self.doc.adjust(|p| {
-                                        let v = (0.2126 * p[0] as f32 + 0.7152 * p[1] as f32 + 0.0722 * p[2] as f32).round() as u8;
-                                        p[0] = v;
-                                        p[1] = v;
-                                        p[2] = v;
-                                    });
-                                }
-                                if ui.button("Négatif").clicked() {
-                                    self.doc.adjust(|p| {
-                                        p[0] = 255 - p[0];
-                                        p[1] = 255 - p[1];
-                                        p[2] = 255 - p[2];
-                                    });
+                                for k in filters::QUICK {
+                                    if ui.button(k.title()).clicked() {
+                                        self.start_adjust(*k);
+                                    }
                                 }
                             });
                             ui.separator();
@@ -618,12 +789,12 @@ impl Pixel {
                             }
                             ui.separator();
                             if ui.button("Rotation 90° horaire").clicked() {
-                                self.doc.selection = None;
+                                self.doc.set_selection(None, None);
                                 self.doc.transform(imageops::rotate90);
                                 self.fit_pending = true;
                             }
                             if ui.button("Rotation 90° antihoraire").clicked() {
-                                self.doc.selection = None;
+                                self.doc.set_selection(None, None);
                                 self.doc.transform(imageops::rotate270);
                                 self.fit_pending = true;
                             }
@@ -650,15 +821,25 @@ impl Pixel {
                         });
                         ui.menu_button("Sélection", |ui| {
                             if ui.button("Tout sélectionner         Ctrl+A").clicked() {
-                                self.doc.selection = Some(self.doc.full());
+                                self.doc.set_selection(Some(self.doc.full()), None);
                             }
                             if ui.button("Désélectionner            Ctrl+D").clicked() {
-                                self.doc.selection = None;
+                                self.doc.set_selection(None, None);
+                            }
+                            if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Intervertir          Ctrl+Maj+I")).clicked() {
+                                self.doc.invert_selection();
                             }
                         });
                         ui.menu_button("Filtre", |ui| {
-                            if ui.button("Flou gaussien…").clicked() {
-                                self.start_adjust(Adjust::Blur { sigma: 3.0 });
+                            for (group, kinds) in filters::FILTERS {
+                                ui.menu_button(*group, |ui| {
+                                    for k in *kinds {
+                                        let label = if k.params().is_empty() { k.title().to_string() } else { format!("{}…", k.title()) };
+                                        if ui.button(label).clicked() {
+                                            self.start_adjust(*k);
+                                        }
+                                    }
+                                });
                             }
                         });
                         ui.menu_button("Affichage", |ui| {
@@ -671,14 +852,21 @@ impl Pixel {
                             }
                         });
                     });
+                    self.help.menu(ui);
                 });
             });
         });
     }
 
-    fn start_adjust(&mut self, a: Adjust) {
+    fn start_adjust(&mut self, k: Kind) {
         let base = self.doc.layers[self.doc.active].img.clone();
-        self.adjust = Some((a, base));
+        if k.params().is_empty() {
+            let out = k.apply(&base, &[]);
+            self.doc.checkpoint();
+            self.doc.put_filtered(&base, &out);
+        } else {
+            self.adjust = Some((k, Vec::new(), base));
+        }
     }
 
     fn home_screen(&mut self, root: &mut Ui) {
@@ -769,24 +957,82 @@ impl Pixel {
                 ui.painter().rect_filled(sep, CornerRadius::ZERO, LINE);
                 ui.add_space(8.0);
                 match self.tool {
-                    Tool::Brush | Tool::Eraser => {
+                    t if brushy(t) => {
                         pro::option_slider(ui, "Taille", &mut self.brush.radius, 0.5..=300.0, " px", true);
-                        pro::option_slider(ui, "Dureté", &mut self.brush.hardness, 0.0..=1.0, "", false);
-                        pro::option_slider(ui, "Flux", &mut self.brush.flow, 0.01..=1.0, "", false);
+                        if t != Tool::Pencil {
+                            pro::option_slider(ui, "Dureté", &mut self.brush.hardness, 0.0..=1.0, "", false);
+                        }
+                        pro::option_slider(ui, if matches!(t, Tool::Brush | Tool::Pencil | Tool::Eraser | Tool::Clone) { "Flux" } else { "Force" }, &mut self.brush.flow, 0.01..=1.0, "", false);
+                        match t {
+                            Tool::Sponge => {
+                                ui.selectable_value(&mut self.sponge_saturate, false, "Désaturer");
+                                ui.selectable_value(&mut self.sponge_saturate, true, "Saturer");
+                            }
+                            Tool::Clone => {
+                                let hint = if self.clone_src.is_some() { "Peins pour recopier · Alt+clic pour changer de source" } else { "Alt+clic sur la zone à recopier" };
+                                ui.label(RichText::new(hint).size(12.5).color(MUTED));
+                            }
+                            _ => {}
+                        }
                     }
                     Tool::Fill => {
                         pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
+                    }
+                    Tool::Wand => {
+                        pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
+                        ui.checkbox(&mut self.contiguous, "Contiguë");
+                        if self.doc.selection.is_some() && pro::secondary(ui, "Intervertir").clicked() {
+                            self.doc.invert_selection();
+                        }
+                    }
+                    Tool::Lasso | Tool::EllipseMarquee => {
+                        if self.doc.selection.is_some() {
+                            if pro::secondary(ui, "Désélectionner").clicked() {
+                                self.doc.set_selection(None, None);
+                            }
+                            if pro::secondary(ui, "Intervertir").clicked() {
+                                self.doc.invert_selection();
+                            }
+                        } else {
+                            ui.label(RichText::new("Glisse sur l'image pour sélectionner").size(12.5).color(MUTED));
+                        }
+                    }
+                    Tool::Crop => {
+                        if let Some(c) = self.crop {
+                            ui.label(RichText::new(format!("{} × {} px", c.width(), c.height())).size(12.5).color(INK));
+                            if pro::primary(ui, "Valider").clicked() {
+                                self.doc.set_selection(Some(c), None);
+                                self.doc.crop_to_selection();
+                                self.crop = None;
+                                self.fit_pending = true;
+                            }
+                            if pro::secondary(ui, "Annuler").clicked() {
+                                self.crop = None;
+                            }
+                        } else {
+                            ui.label(RichText::new("Glisse pour tracer le cadre à conserver").size(12.5).color(MUTED));
+                        }
+                    }
+                    Tool::Rect | Tool::Ellipse | Tool::Line => {
+                        if self.tool == Tool::Line {
+                            pro::option_slider(ui, "Épaisseur", &mut self.brush.radius, 0.5..=100.0, " px", true);
+                        }
+                        ui.checkbox(&mut self.shape_layer, "Sur un nouveau calque");
+                        ui.label(RichText::new("Couleur principale").size(12.5).color(MUTED));
+                    }
+                    Tool::Text => {
+                        ui.label(RichText::new("Clique sur l'image pour placer du texte").size(12.5).color(MUTED));
                     }
                     Tool::Gradient => {
                         ui.label(RichText::new("Glisse sur l'image : de la couleur principale à la couleur secondaire").size(12.5).color(MUTED));
                     }
                     Tool::Marquee => {
                         if pro::secondary(ui, "Tout sélectionner").clicked() {
-                            self.doc.selection = Some(self.doc.full());
+                            self.doc.set_selection(Some(self.doc.full()), None);
                         }
                         if self.doc.selection.is_some() {
                             if pro::secondary(ui, "Désélectionner").clicked() {
-                                self.doc.selection = None;
+                                self.doc.set_selection(None, None);
                             }
                             if pro::secondary(ui, "Recadrer").clicked() {
                                 self.doc.crop_to_selection();
@@ -813,7 +1059,13 @@ impl Pixel {
                         pro::option_slider(ui, "Taille", &mut self.brush.radius, 2.0..=300.0, " px", true);
                         ui.label(RichText::new("Peins sur ce qui doit disparaître : le fond est reconstruit autour").size(12.5).color(MUTED));
                     }
+                    _ => {}
                 }
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    if pro::secondary(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
+                        self.help.learn(tool_name(self.tool));
+                    }
+                });
             });
         });
     }
@@ -842,15 +1094,33 @@ impl Pixel {
 
     fn tool_rail(&mut self, root: &mut Ui) {
         egui::Panel::left("tools").resizable(false).exact_size(52.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(7, 10))).show(root, |ui| {
-            ui.spacing_mut().item_spacing.y = 4.0;
-            for (i, (tool, tip, _)) in TOOLS.iter().enumerate() {
-                if matches!(i, 2 | 7) {
-                    let (sep, _) = ui.allocate_exact_size(vec2(38.0, 9.0), Sense::hover());
+            ui.spacing_mut().item_spacing.y = 3.0;
+            for (gi, group) in GROUPS.iter().enumerate() {
+                if matches!(gi, 6 | 10 | 14) {
+                    let (sep, _) = ui.allocate_exact_size(vec2(38.0, 7.0), Sense::hover());
                     ui.painter().line_segment([sep.left_center() + vec2(6.0, 0.0), sep.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
                 }
-                let t = *tool;
-                if pro::icon_button(ui, 38.0, self.tool == t, tip, |p, r, c| tool_icon(p, r, t, c)).clicked() {
-                    self.tool = t;
+                let shown = if group.contains(&self.tool) { self.tool } else { self.picks[gi] };
+                let tip = if group.len() > 1 { format!("{}  ·  clic droit : autres outils", tool_tip(shown)) } else { tool_tip(shown).to_string() };
+                let resp = pro::icon_button(ui, 36.0, group.contains(&self.tool), &tip, |p, r, c| {
+                    tool_icon(p, r, shown, c);
+                    if group.len() > 1 {
+                        let k = r.right_bottom() + vec2(5.0, 5.0);
+                        p.add(Shape::convex_polygon(vec![k, k - vec2(4.0, 0.0), k - vec2(0.0, 4.0)], c.gamma_multiply(0.7), Stroke::NONE));
+                    }
+                });
+                if resp.clicked() {
+                    self.select_tool(shown);
+                }
+                if group.len() > 1 {
+                    resp.context_menu(|ui| {
+                        for t in *group {
+                            if ui.selectable_label(self.tool == *t, tool_tip(*t)).clicked() {
+                                self.select_tool(*t);
+                                ui.close();
+                            }
+                        }
+                    });
                 }
             }
             ui.add_space(12.0);
@@ -910,6 +1180,19 @@ impl Pixel {
                         self.doc.touch_all();
                         self.doc.modified = true;
                     }
+                    ui.add_space(4.0);
+                    ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
+                    let active = self.doc.active;
+                    let current = BLENDS.iter().find(|b| b.0 == self.doc.layers[active].blend).map_or("Normal", |b| b.1);
+                    egui::ComboBox::from_id_salt("blend").selected_text(current).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                        for (b, name) in BLENDS {
+                            if ui.selectable_label(self.doc.layers[active].blend == b, name).clicked() {
+                                self.doc.layers[active].blend = b;
+                                self.doc.touch_all();
+                                self.doc.modified = true;
+                            }
+                        }
+                    });
                 });
                 pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
             });
@@ -1099,23 +1382,34 @@ impl Pixel {
                     }
                 }
             }
-            let painting = matches!(self.tool, Tool::Brush | Tool::Eraser | Tool::Remove);
-            if matches!(self.tool, Tool::Brush | Tool::Eraser) && !space && resp.is_pointer_button_down_on() && primary_down {
+            let painting = brushy(self.tool) || self.tool == Tool::Remove;
+            if self.tool == Tool::Clone && alt && pressed && resp.hovered()
+                && let Some(at) = pointer
+            {
+                self.clone_src = Some(to_doc(at));
+                self.clone_offset = None;
+            } else if brushy(self.tool) && !space && !(self.tool == Tool::Clone && alt) && resp.is_pointer_button_down_on() && primary_down {
                 if let Some(at) = pointer {
                     let cur = to_doc(at);
-                    let erase = self.tool == Tool::Eraser;
-                    let color = self.primary.to_array();
                     match self.last {
                         None => {
-                            self.doc.checkpoint();
-                            self.doc.stamp(cur.0, cur.1, &self.brush, color, erase);
+                            self.paint = self.make_paint(cur);
+                            if let Some(paint) = &mut self.paint {
+                                self.doc.checkpoint();
+                                self.doc.stamp_paint(cur.0, cur.1, &self.brush, paint);
+                            }
                         }
-                        Some(prev) => self.doc.stroke(prev, cur, &self.brush, color, erase),
+                        Some(prev) => {
+                            if let Some(paint) = &mut self.paint {
+                                self.doc.stroke_paint(prev, cur, &self.brush, paint);
+                            }
+                        }
                     }
                     self.last = Some(cur);
                 }
             } else {
                 self.last = None;
+                self.paint = None;
             }
 
             if !space && resp.hovered() && pressed
@@ -1123,7 +1417,13 @@ impl Pixel {
             {
                 let d = to_doc(at);
                 match self.tool {
-                    Tool::Marquee => self.drag = Drag::Marquee(d),
+                    Tool::Marquee | Tool::EllipseMarquee => self.drag = Drag::Marquee(d),
+                    Tool::Lasso => self.drag = Drag::Lasso(vec![d]),
+                    Tool::Crop => self.drag = Drag::Crop(d),
+                    Tool::Rect | Tool::Ellipse | Tool::Line => {
+                        self.gradient_end = None;
+                        self.drag = Drag::Shape(d);
+                    }
                     Tool::Move => {
                         self.doc.checkpoint();
                         self.drag = Drag::Move { from: d, original: self.doc.layers[self.doc.active].img.clone() };
@@ -1134,8 +1434,18 @@ impl Pixel {
             }
             if let Some(at) = pointer {
                 let d = to_doc(at);
-                match &self.drag {
-                    Drag::Marquee(start) => self.doc.selection = Area::from_points(*start, d, w as u32, h as u32),
+                match &mut self.drag {
+                    Drag::Marquee(start) => {
+                        let a = Area::from_points(*start, d, w as u32, h as u32);
+                        self.doc.set_selection(a, None);
+                    }
+                    Drag::Lasso(pts) => {
+                        if pts.last().is_none_or(|l| (l.0 - d.0).abs() + (l.1 - d.1).abs() > 1.0) {
+                            pts.push(d);
+                        }
+                    }
+                    Drag::Crop(start) => self.crop = Area::from_points(*start, d, w as u32, h as u32),
+                    Drag::Shape(_) => self.gradient_end = Some(d),
                     Drag::Move { from, original } => {
                         let (dx, dy) = ((d.0 - from.0).round() as i32, (d.1 - from.1).round() as i32);
                         let original = original.clone();
@@ -1154,7 +1464,40 @@ impl Pixel {
                     }
                     Drag::Marquee(_) => {
                         if self.doc.selection.is_some_and(|s| s.width() < 2 && s.height() < 2) {
-                            self.doc.selection = None;
+                            self.doc.set_selection(None, None);
+                        } else if self.tool == Tool::EllipseMarquee
+                            && let Some(a) = self.doc.selection
+                        {
+                            self.doc.select_ellipse(a);
+                        }
+                    }
+                    Drag::Lasso(pts) => self.doc.select_polygon(&pts),
+                    Drag::Crop(_) => {
+                        if self.crop.is_some_and(|c| c.width() < 4 || c.height() < 4) {
+                            self.crop = None;
+                        }
+                    }
+                    Drag::Shape(start) => {
+                        if let Some(end) = self.gradient_end.take() {
+                            let color = self.primary.to_array();
+                            let name = tool_name(self.tool).to_string();
+                            if self.shape_layer {
+                                let n = self.doc.layers.len() + 1;
+                                self.doc.add_layer(Some(format!("{name} {n}")), None);
+                            }
+                            match self.tool {
+                                Tool::Line => {
+                                    self.doc.checkpoint();
+                                    let b = Brush { radius: self.brush.radius, hardness: 0.9, flow: 1.0 };
+                                    self.doc.stamp(start.0, start.1, &b, color, false);
+                                    self.doc.stroke(start, end, &b, color, false);
+                                }
+                                t => {
+                                    if let Some(a) = Area::from_points(start, end, w as u32, h as u32) {
+                                        self.doc.fill_shape(a, t == Tool::Ellipse, color);
+                                    }
+                                }
+                            }
                         }
                     }
                     _ => {}
@@ -1171,6 +1514,8 @@ impl Pixel {
                         self.doc.checkpoint();
                         self.doc.flood_fill(x as u32, y as u32, self.primary.to_array(), self.tolerance);
                     }
+                    Tool::Wand if inside => self.doc.select_color(x as u32, y as u32, self.tolerance, self.contiguous),
+                    Tool::Text if inside => self.text = Some(TextDraft { at: (x, y), text: String::new(), size: (h / 12.0).clamp(12.0, 400.0).round() }),
                     Tool::Picker if inside => {
                         let c = self.composite.get_pixel(x as u32, y as u32).0;
                         self.primary = Color32::from_rgb(c[0], c[1], c[2]);
@@ -1186,7 +1531,9 @@ impl Pixel {
             if let Some(t) = &self.tex {
                 painter.image(t.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             }
-            if let Some(s) = self.doc.selection {
+            if let Some((_, t)) = &self.mask_tex {
+                painter.image(t.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
+            } else if let Some(s) = self.doc.selection {
                 let r = Rect::from_min_max(to_scr((s.x0 as f32, s.y0 as f32)), to_scr((s.x1 as f32, s.y1 as f32)));
                 let t = ui.input(|i| i.time) as f32;
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(80));
@@ -1206,6 +1553,59 @@ impl Pixel {
                 painter.line_segment([a, b], Stroke::new(1.5, Color32::WHITE));
                 painter.circle(a, 5.0, self.primary, Stroke::new(1.5, Color32::WHITE));
                 painter.circle(b, 5.0, self.secondary, Stroke::new(1.5, Color32::WHITE));
+            }
+            if let Drag::Lasso(pts) = &self.drag {
+                let pts: Vec<Pos2> = pts.iter().map(|d| to_scr(*d)).collect();
+                painter.add(Shape::line(pts.clone(), Stroke::new(2.5, Color32::from_black_alpha(160))));
+                painter.add(Shape::line(pts, Stroke::new(1.0, Color32::WHITE)));
+            }
+            if let (Drag::Marquee(_), Tool::EllipseMarquee, Some(s)) = (&self.drag, self.tool, self.doc.selection) {
+                let r = Rect::from_min_max(to_scr((s.x0 as f32, s.y0 as f32)), to_scr((s.x1 as f32, s.y1 as f32)));
+                painter.add(egui::epaint::EllipseShape { center: r.center(), radius: r.size() / 2.0, fill: Color32::TRANSPARENT, stroke: Stroke::new(1.0, Color32::WHITE), angle: 0.0 });
+            }
+            if let Some(c) = self.crop {
+                let r = Rect::from_min_max(to_scr((c.x0 as f32, c.y0 as f32)), to_scr((c.x1 as f32, c.y1 as f32)));
+                let shade = Color32::from_black_alpha(150);
+                for band in [
+                    Rect::from_min_max(rect.min, pos2(rect.right(), r.top())),
+                    Rect::from_min_max(pos2(rect.left(), r.bottom()), rect.max),
+                    Rect::from_min_max(pos2(rect.left(), r.top()), pos2(r.left(), r.bottom())),
+                    Rect::from_min_max(pos2(r.right(), r.top()), pos2(rect.right(), r.bottom())),
+                ] {
+                    painter.rect_filled(band, CornerRadius::ZERO, shade);
+                }
+                painter.rect_stroke(r, CornerRadius::ZERO, Stroke::new(1.5, Color32::WHITE), StrokeKind::Middle);
+                for k in 1..3 {
+                    let fx = r.left() + r.width() * k as f32 / 3.0;
+                    let fy = r.top() + r.height() * k as f32 / 3.0;
+                    painter.line_segment([pos2(fx, r.top()), pos2(fx, r.bottom())], Stroke::new(0.8, Color32::from_white_alpha(110)));
+                    painter.line_segment([pos2(r.left(), fy), pos2(r.right(), fy)], Stroke::new(0.8, Color32::from_white_alpha(110)));
+                }
+            }
+            if let (Drag::Shape(start), Some(end)) = (&self.drag, self.gradient_end) {
+                let (a, b) = (to_scr(*start), to_scr(end));
+                let fill = self.primary.gamma_multiply(0.6);
+                match self.tool {
+                    Tool::Line => {
+                        painter.line_segment([a, b], Stroke::new((self.brush.radius * 2.0 * zoom).max(1.0), fill));
+                    }
+                    Tool::Ellipse => {
+                        let r = Rect::from_two_pos(a, b);
+                        painter.add(egui::epaint::EllipseShape { center: r.center(), radius: r.size() / 2.0, fill, stroke: Stroke::new(1.0, Color32::WHITE), angle: 0.0 });
+                    }
+                    _ => {
+                        painter.rect(Rect::from_two_pos(a, b), CornerRadius::ZERO, fill, Stroke::new(1.0, Color32::WHITE), StrokeKind::Middle);
+                    }
+                }
+            }
+            if let (Tool::Clone, Some(src)) = (self.tool, self.clone_src) {
+                let c = to_scr(match (self.last, self.clone_offset) {
+                    (Some(l), Some(o)) => (l.0 + o.0, l.1 + o.1),
+                    _ => src,
+                });
+                painter.circle_stroke(c, 6.0, Stroke::new(1.5, Color32::WHITE));
+                painter.line_segment([c - vec2(9.0, 0.0), c + vec2(9.0, 0.0)], Stroke::new(1.0, Color32::WHITE));
+                painter.line_segment([c - vec2(0.0, 9.0), c + vec2(0.0, 9.0)], Stroke::new(1.0, Color32::WHITE));
             }
             if !self.remove_stroke.is_empty() {
                 let pts: Vec<Pos2> = self.remove_stroke.iter().map(|d| to_scr(*d)).collect();
@@ -1236,7 +1636,8 @@ impl Pixel {
                 ui.ctx().set_cursor_icon(match self.tool {
                     _ if panning || space => egui::CursorIcon::Grabbing,
                     Tool::Hand => egui::CursorIcon::Grab,
-                    Tool::Brush | Tool::Eraser => egui::CursorIcon::None,
+                    t if brushy(t) => egui::CursorIcon::None,
+                    Tool::Text => egui::CursorIcon::Text,
                     Tool::Move => egui::CursorIcon::Move,
                     Tool::Zoom => if alt { egui::CursorIcon::ZoomOut } else { egui::CursorIcon::ZoomIn },
                     _ => egui::CursorIcon::Crosshair,
@@ -1332,36 +1733,42 @@ impl Pixel {
             }
         }
 
-        if let Some((mut adj, base)) = self.adjust.take() {
-            let before = adj;
+        if let Some((kind, mut vals, base)) = self.adjust.take() {
+            let fresh = vals.is_empty();
+            if fresh {
+                vals = kind.defaults();
+            }
+            let before = vals.clone();
             let mut apply = false;
             let mut cancel = false;
-            let keep = pro::sheet(ctx, "adjust", 360.0, |ui| {
-                ui.label(RichText::new(adj.title()).font(semibold(18.0)).color(INK_STRONG));
+            let mut reset = false;
+            let keep = pro::sheet(ctx, "adjust", 380.0, |ui| {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(kind.title()).font(semibold(18.0)).color(INK_STRONG));
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if ui.add(egui::Button::new(RichText::new("Réinitialiser").color(BLUE)).frame(false)).clicked() {
+                            reset = true;
+                        }
+                    });
+                });
                 ui.add_space(12.0);
-                ui.spacing_mut().slider_width = 220.0;
-                match &mut adj {
-                    Adjust::BrightnessContrast { b, c } => {
-                        ui.label(RichText::new("Luminosité").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(b, -100.0..=100.0));
-                        ui.label(RichText::new("Contraste").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(c, -100.0..=100.0));
+                ui.spacing_mut().slider_width = 250.0;
+                for (v, p) in vals.iter_mut().zip(kind.params()) {
+                    ui.label(RichText::new(p.label).size(12.5).color(MUTED));
+                    if p.min == 0.0 && p.max == 1.0 && p.suffix.is_empty() {
+                        let mut on = *v >= 0.5;
+                        if ui.checkbox(&mut on, "Activé").changed() {
+                            *v = if on { 1.0 } else { 0.0 };
+                        }
+                    } else {
+                        let decimals = if p.max - p.min <= 10.0 { 2 } else { 0 };
+                        ui.add(egui::Slider::new(v, p.min..=p.max).suffix(p.suffix).fixed_decimals(decimals));
                     }
-                    Adjust::HueSat { h, s, l } => {
-                        ui.label(RichText::new("Teinte").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(h, -180.0..=180.0).suffix("°"));
-                        ui.label(RichText::new("Saturation").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(s, -100.0..=100.0));
-                        ui.label(RichText::new("Luminosité").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(l, -100.0..=100.0));
-                    }
-                    Adjust::Blur { sigma } => {
-                        ui.label(RichText::new("Rayon").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(sigma, 0.5..=50.0).suffix(" px"));
-                    }
+                    ui.add_space(4.0);
                 }
-                ui.add_space(6.0);
-                ui.label(RichText::new("Aperçu en direct sur le calque actif").size(12.0).color(FAINT));
+                ui.add_space(4.0);
+                let scope = if self.doc.selection.is_some() { "Aperçu en direct · limité à la sélection" } else { "Aperçu en direct sur le calque actif" };
+                ui.label(RichText::new(scope).size(12.0).color(FAINT));
                 ui.add_space(12.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::primary(ui, "Appliquer").clicked() {
@@ -1372,19 +1779,65 @@ impl Pixel {
                     }
                 });
             });
+            if reset {
+                vals = kind.defaults();
+            }
             let active = self.doc.active;
             if apply {
-                self.doc.layers[active].img = base;
-                adj.apply(&mut self.doc, true);
+                let out = kind.apply(&base, &vals);
+                self.doc.layers[active].img = base.clone();
+                self.doc.checkpoint();
+                self.doc.put_filtered(&base, &out);
             } else if cancel || !keep {
                 self.doc.layers[active].img = base;
                 self.doc.touch_all();
             } else {
-                if adj != before || self.doc.dirty.is_none() && self.thumbs_version == u64::MAX {
-                    self.doc.layers[active].img = base.clone();
-                    adj.apply(&mut self.doc, false);
+                if fresh || vals != before {
+                    let out = kind.apply(&base, &vals);
+                    self.doc.put_filtered(&base, &out);
                 }
-                self.adjust = Some((adj, base));
+                self.adjust = Some((kind, vals, base));
+            }
+        }
+
+        if let Some(mut draft) = self.text.take() {
+            let mut add = false;
+            let mut cancel = false;
+            let keep = pro::sheet(ctx, "text", 420.0, |ui| {
+                ui.label(RichText::new("Texte").font(semibold(18.0)).color(INK_STRONG));
+                ui.add_space(10.0);
+                let r = ui.add(egui::TextEdit::multiline(&mut draft.text).hint_text("Ton texte").desired_rows(3).desired_width(f32::INFINITY));
+                if draft.text.is_empty() {
+                    r.request_focus();
+                }
+                ui.add_space(8.0);
+                ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                ui.spacing_mut().slider_width = 260.0;
+                ui.add(egui::Slider::new(&mut draft.size, 6.0..=600.0).suffix(" px").logarithmic(true));
+                ui.add_space(4.0);
+                ui.label(RichText::new("Police Segoe UI · couleur principale").size(12.0).color(FAINT));
+                ui.add_space(12.0);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    if pro::primary(ui, "Ajouter").clicked() {
+                        add = true;
+                    }
+                    if pro::secondary(ui, "Annuler").clicked() {
+                        cancel = true;
+                    }
+                });
+            });
+            if add && !draft.text.trim().is_empty() {
+                match render_text(&draft.text, draft.size, self.primary.to_array()) {
+                    Some(glyphs) => {
+                        let mut canvas = RgbaImage::new(self.doc.width(), self.doc.height());
+                        imageops::overlay(&mut canvas, &glyphs, draft.at.0 as i64, draft.at.1 as i64 - (draft.size * 0.2) as i64);
+                        let name: String = draft.text.lines().next().unwrap_or("Texte").chars().take(24).collect();
+                        self.doc.add_layer(Some(name), Some(canvas));
+                    }
+                    None => self.error = Some("Police Segoe UI introuvable".into()),
+                }
+            } else if keep && !cancel && !add {
+                self.text = Some(draft);
             }
         }
 
@@ -1415,7 +1868,7 @@ impl Pixel {
                 });
             });
             if apply {
-                self.doc.selection = None;
+                self.doc.set_selection(None, None);
                 self.doc.transform(|img| imageops::resize(img, w, h, imageops::FilterType::Lanczos3));
                 self.fit_pending = true;
             } else if keep && !cancel {
@@ -1516,6 +1969,85 @@ fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         Tool::Zoom => {
             p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
             p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.4, c));
+        }
+        Tool::EllipseMarquee => {
+            let rr = Rect::from_min_max(at(0.02, 0.15), at(0.98, 0.85));
+            let pts: Vec<Pos2> = (0..=24).map(|k| {
+                let a = k as f32 / 24.0 * std::f32::consts::TAU;
+                rr.center() + vec2(a.cos() * rr.width() / 2.0, a.sin() * rr.height() / 2.0)
+            }).collect();
+            p.extend(Shape::dashed_line(&pts, s, 3.0, 2.5));
+        }
+        Tool::Lasso => {
+            let pts: Vec<Pos2> = (0..=20).map(|k| {
+                let a = k as f32 / 20.0 * std::f32::consts::TAU;
+                at(0.5 + a.cos() * 0.45, 0.4 + a.sin() * 0.3)
+            }).collect();
+            p.add(Shape::line(pts, s));
+            p.line_segment([at(0.3, 0.68), at(0.22, 1.0)], s);
+        }
+        Tool::Wand => {
+            p.line_segment([at(0.05, 0.95), at(0.6, 0.4)], Stroke::new(2.2, c));
+            let k = at(0.75, 0.25);
+            for (dx, dy) in [(1.0, 0.0), (0.0, 1.0), (0.7, 0.7), (0.7, -0.7)] {
+                let v = vec2(dx, dy) * r.width() * 0.2;
+                p.line_segment([k - v, k + v], Stroke::new(1.4, c));
+            }
+        }
+        Tool::Crop => {
+            p.line_segment([at(0.25, 0.0), at(0.25, 0.75)], s);
+            p.line_segment([at(0.25, 0.75), at(1.0, 0.75)], s);
+            p.line_segment([at(0.0, 0.25), at(0.75, 0.25)], s);
+            p.line_segment([at(0.75, 0.25), at(0.75, 1.0)], s);
+        }
+        Tool::Clone => {
+            p.rect_filled(Rect::from_min_max(at(0.15, 0.62), at(0.85, 0.8)), CornerRadius::same(2), c);
+            p.line_segment([at(0.15, 0.95), at(0.85, 0.95)], s);
+            p.line_segment([at(0.5, 0.62), at(0.5, 0.35)], Stroke::new(2.4, c));
+            p.circle_filled(at(0.5, 0.2), r.width() * 0.16, c);
+        }
+        Tool::Pencil => {
+            p.line_segment([at(0.85, 0.15), at(0.25, 0.75)], Stroke::new(4.0, c));
+            p.add(Shape::convex_polygon(vec![at(0.18, 0.68), at(0.32, 0.82), at(0.05, 0.95)], c, Stroke::NONE));
+        }
+        Tool::Blur => {
+            p.add(Shape::convex_polygon(vec![at(0.5, 0.05), at(0.78, 0.55), at(0.5, 0.95), at(0.22, 0.55)], c, Stroke::NONE));
+            p.circle_filled(at(0.5, 0.65), r.width() * 0.3, c);
+        }
+        Tool::Sharpen => {
+            p.add(Shape::convex_polygon(vec![at(0.5, 0.02), at(0.68, 0.98), at(0.32, 0.98)], Color32::TRANSPARENT, s));
+        }
+        Tool::Smudge => {
+            p.line_segment([at(0.3, 0.95), at(0.45, 0.35)], Stroke::new(3.2, c));
+            p.circle_filled(at(0.48, 0.25), r.width() * 0.12, c);
+            p.line_segment([at(0.6, 0.6), at(0.95, 0.45)], Stroke::new(1.4, c));
+            p.line_segment([at(0.6, 0.78), at(0.95, 0.7)], Stroke::new(1.4, c));
+        }
+        Tool::Dodge => {
+            p.circle_stroke(at(0.5, 0.35), r.width() * 0.3, s);
+            p.line_segment([at(0.5, 0.65), at(0.5, 1.0)], Stroke::new(2.4, c));
+        }
+        Tool::Burn => {
+            p.line_segment([at(0.3, 0.1), at(0.3, 0.5)], Stroke::new(2.4, c));
+            p.circle_filled(at(0.55, 0.62), r.width() * 0.3, c);
+        }
+        Tool::Sponge => {
+            p.rect_stroke(Rect::from_min_max(at(0.1, 0.25), at(0.9, 0.85)), CornerRadius::same(5), s, StrokeKind::Middle);
+            for (x, y) in [(0.3, 0.45), (0.55, 0.6), (0.72, 0.42), (0.38, 0.7)] {
+                p.circle_filled(at(x, y), r.width() * 0.06, c);
+            }
+        }
+        Tool::Rect => {
+            p.rect_filled(Rect::from_min_max(at(0.08, 0.2), at(0.92, 0.8)), CornerRadius::same(2), c);
+        }
+        Tool::Ellipse => {
+            p.add(egui::epaint::EllipseShape { center: r.center(), radius: vec2(r.width() * 0.45, r.height() * 0.33), fill: c, stroke: Stroke::NONE, angle: 0.0 });
+        }
+        Tool::Line => {
+            p.line_segment([at(0.05, 0.95), at(0.95, 0.05)], Stroke::new(2.2, c));
+        }
+        Tool::Text => {
+            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(r.width() * 1.05), c);
         }
     }
 }

@@ -6,6 +6,68 @@ pub struct Layer {
     pub img: RgbaImage,
     pub visible: bool,
     pub opacity: f32,
+    pub blend: Blend,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Blend {
+    Normal,
+    Multiply,
+    Screen,
+    Overlay,
+    SoftLight,
+    Darken,
+    Lighten,
+    Difference,
+    Add,
+    ColorDodge,
+}
+
+pub const BLENDS: [(Blend, &str); 10] = [
+    (Blend::Normal, "Normal"),
+    (Blend::Multiply, "Produit"),
+    (Blend::Screen, "Superposition"),
+    (Blend::Overlay, "Incrustation"),
+    (Blend::SoftLight, "Lumière tamisée"),
+    (Blend::Darken, "Obscurcir"),
+    (Blend::Lighten, "Éclaircir"),
+    (Blend::Difference, "Différence"),
+    (Blend::Add, "Densité linéaire −"),
+    (Blend::ColorDodge, "Densité couleur −"),
+];
+
+impl Blend {
+    fn mix(self, b: f32, s: f32) -> f32 {
+        match self {
+            Blend::Normal => s,
+            Blend::Multiply => b * s,
+            Blend::Screen => 1.0 - (1.0 - b) * (1.0 - s),
+            Blend::Overlay => if b < 0.5 { 2.0 * b * s } else { 1.0 - 2.0 * (1.0 - b) * (1.0 - s) },
+            Blend::SoftLight => (1.0 - 2.0 * s) * b * b + 2.0 * s * b,
+            Blend::Darken => b.min(s),
+            Blend::Lighten => b.max(s),
+            Blend::Difference => (b - s).abs(),
+            Blend::Add => (b + s).min(1.0),
+            Blend::ColorDodge => if s >= 1.0 { 1.0 } else { (b / (1.0 - s)).min(1.0) },
+        }
+    }
+}
+
+pub enum Paint {
+    Color([u8; 4]),
+    Pencil([u8; 4]),
+    Erase,
+    Dodge,
+    Burn,
+    Sponge(f32),
+    Blur(RgbaImage),
+    Sharpen(RgbaImage),
+    Smudge(Option<[f32; 4]>),
+    Clone { src: RgbaImage, dx: f32, dy: f32 },
+}
+
+pub fn inside(sel: Option<Area>, mask: Option<&Vec<bool>>, w: u32, x: u32, y: u32) -> bool {
+    sel.is_none_or(|s| s.contains(x, y)) && mask.is_none_or(|m| m[(y * w + x) as usize])
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -62,6 +124,7 @@ pub struct Document {
     pub active: usize,
     pub dirty: Option<Area>,
     pub selection: Option<Area>,
+    pub mask: Option<Vec<bool>>,
     pub version: u64,
     pub modified: bool,
     pub name: String,
@@ -81,10 +144,11 @@ impl Document {
 
     fn with_layer(name: String, layer: String, img: RgbaImage) -> Self {
         let mut d = Self {
-            layers: vec![Layer { name: layer, img, visible: true, opacity: 1.0 }],
+            layers: vec![Layer { name: layer, img, visible: true, opacity: 1.0, blend: Blend::Normal }],
             active: 0,
             dirty: None,
             selection: None,
+            mask: None,
             version: 0,
             modified: false,
             name,
@@ -156,8 +220,7 @@ impl Document {
             for x in a.x0..a.x1 {
                 let mut acc = [0f32; 4];
                 for l in self.layers.iter().filter(|l| l.visible && l.opacity > 0.0) {
-                    let p = l.img.get_pixel(x, y).0;
-                    over(&mut acc, p, l.opacity);
+                    blend_over(&mut acc, l.img.get_pixel(x, y).0, l.opacity, l.blend);
                 }
                 out.put_pixel(x, y, Rgba(to_u8(acc)));
             }
@@ -171,6 +234,24 @@ impl Document {
     }
 
     pub fn stamp(&mut self, cx: f32, cy: f32, brush: &Brush, color: [u8; 4], erase: bool) {
+        self.stamp_paint(cx, cy, brush, &mut if erase { Paint::Erase } else { Paint::Color(color) });
+    }
+
+    pub fn stroke(&mut self, from: (f32, f32), to: (f32, f32), brush: &Brush, color: [u8; 4], erase: bool) {
+        self.stroke_paint(from, to, brush, &mut if erase { Paint::Erase } else { Paint::Color(color) });
+    }
+
+    pub fn stroke_paint(&mut self, from: (f32, f32), to: (f32, f32), brush: &Brush, paint: &mut Paint) {
+        let dist = ((to.0 - from.0).powi(2) + (to.1 - from.1).powi(2)).sqrt();
+        let step = (brush.radius * 0.25).max(0.5);
+        let n = (dist / step).ceil().max(1.0) as usize;
+        for i in 1..=n {
+            let t = i as f32 / n as f32;
+            self.stamp_paint(from.0 + (to.0 - from.0) * t, from.1 + (to.1 - from.1) * t, brush, paint);
+        }
+    }
+
+    pub fn stamp_paint(&mut self, cx: f32, cy: f32, brush: &Brush, paint: &mut Paint) {
         let (w, h) = (self.width() as i32, self.height() as i32);
         let r = brush.radius.max(0.5);
         let s = self.selection.unwrap_or(self.full());
@@ -182,10 +263,24 @@ impl Document {
             return;
         }
         let hard = brush.hardness.clamp(0.0, 0.99);
-        let base = color[3] as f32 / 255.0 * brush.flow;
+        let base = match paint {
+            Paint::Color(c) | Paint::Pencil(c) => c[3] as f32 / 255.0,
+            _ => 1.0,
+        } * brush.flow;
+        let (sel, mask, wu) = (self.selection, self.mask.as_ref(), w as u32);
         let img = &mut self.layers[self.active].img;
+        if let Paint::Smudge(carry) = paint
+            && carry.is_none()
+        {
+            *carry = Some(img.get_pixel(cx.clamp(0.0, w as f32 - 1.0) as u32, cy.clamp(0.0, h as f32 - 1.0) as u32).0.map(|v| v as f32 / 255.0));
+        }
+        let mut picked = [0f32; 4];
+        let mut picked_n = 0.0;
         for y in y0..y1 {
             for x in x0..x1 {
+                if !inside(sel, mask, wu, x as u32, y as u32) {
+                    continue;
+                }
                 let d = ((x as f32 + 0.5 - cx).powi(2) + (y as f32 + 0.5 - cy).powi(2)).sqrt();
                 let edge = (r + 0.5 - d).clamp(0.0, 1.0);
                 if edge <= 0.0 {
@@ -195,37 +290,217 @@ impl Document {
                 let soft = if t <= hard { 1.0 } else { smooth(1.0 - (t - hard) / (1.0 - hard)) };
                 let a = base * edge * soft;
                 let px = img.get_pixel_mut(x as u32, y as u32);
-                if erase {
-                    px.0[3] = (px.0[3] as f32 * (1.0 - a)).round() as u8;
-                } else {
-                    let mut acc = [
-                        px.0[0] as f32 / 255.0,
-                        px.0[1] as f32 / 255.0,
-                        px.0[2] as f32 / 255.0,
-                        px.0[3] as f32 / 255.0,
-                    ];
-                    over(&mut acc, [color[0], color[1], color[2], 255], a);
-                    px.0 = to_u8(acc);
+                let mut c = px.0.map(|v| v as f32 / 255.0);
+                match paint {
+                    Paint::Color(col) => over(&mut c, [col[0], col[1], col[2], 255], a),
+                    Paint::Pencil(col) => {
+                        if d <= r {
+                            over(&mut c, [col[0], col[1], col[2], 255], base);
+                        }
+                    }
+                    Paint::Erase => c[3] *= 1.0 - a,
+                    Paint::Dodge => (0..3).for_each(|k| c[k] += (1.0 - c[k]) * a * 0.12),
+                    Paint::Burn => (0..3).for_each(|k| c[k] *= 1.0 - a * 0.12),
+                    Paint::Sponge(dir) => {
+                        let (hh, ss, ll) = rgb_to_hsl(c[0], c[1], c[2]);
+                        let (r2, g2, b2) = hsl_to_rgb(hh, (ss + *dir * a * 0.08).clamp(0.0, 1.0), ll);
+                        (c[0], c[1], c[2]) = (r2, g2, b2);
+                    }
+                    Paint::Blur(_) | Paint::Sharpen(_) => {
+                        let sharpen = matches!(paint, Paint::Sharpen(_));
+                        let src = match paint {
+                            Paint::Blur(s) | Paint::Sharpen(s) => &*s,
+                            _ => unreachable!(),
+                        };
+                        let mut avg = [0f32; 4];
+                        let mut n = 0.0;
+                        for yy in (y - 2).max(0)..=(y + 2).min(h - 1) {
+                            for xx in (x - 2).max(0)..=(x + 2).min(w - 1) {
+                                let q = src.get_pixel(xx as u32, yy as u32).0;
+                                (0..4).for_each(|k| avg[k] += q[k] as f32 / 255.0);
+                                n += 1.0;
+                            }
+                        }
+                        let orig = src.get_pixel(x as u32, y as u32).0.map(|v| v as f32 / 255.0);
+                        for k in 0..4 {
+                            let target = if sharpen { orig[k] + (orig[k] - avg[k] / n) * 1.2 } else { avg[k] / n };
+                            c[k] += (target - c[k]) * a * 0.5;
+                        }
+                    }
+                    Paint::Smudge(Some(carry)) => {
+                        let old = c;
+                        (0..4).for_each(|k| c[k] += (carry[k] - c[k]) * a * 0.6);
+                        (0..4).for_each(|k| picked[k] += old[k] * a);
+                        picked_n += a;
+                    }
+                    Paint::Smudge(None) => {}
+                    Paint::Clone { src, dx, dy } => {
+                        let sx = (x as f32 + *dx).round() as i32;
+                        let sy = (y as f32 + *dy).round() as i32;
+                        if sx >= 0 && sy >= 0 && sx < w && sy < h {
+                            let q = src.get_pixel(sx as u32, sy as u32).0;
+                            (0..4).for_each(|k| c[k] += (q[k] as f32 / 255.0 - c[k]) * a);
+                        }
+                    }
                 }
+                px.0 = to_u8(c);
             }
+        }
+        if let Paint::Smudge(Some(carry)) = paint
+            && picked_n > 0.0
+        {
+            (0..4).for_each(|k| carry[k] = carry[k] * 0.7 + picked[k] / picked_n * 0.3);
         }
         self.touch(Area { x0: x0 as u32, y0: y0 as u32, x1: x1 as u32, y1: y1 as u32 });
     }
 
-    pub fn stroke(&mut self, from: (f32, f32), to: (f32, f32), brush: &Brush, color: [u8; 4], erase: bool) {
-        let dist = ((to.0 - from.0).powi(2) + (to.1 - from.1).powi(2)).sqrt();
-        let step = (brush.radius * 0.25).max(0.5);
-        let n = (dist / step).ceil().max(1.0) as usize;
-        for i in 1..=n {
-            let t = i as f32 / n as f32;
-            self.stamp(from.0 + (to.0 - from.0) * t, from.1 + (to.1 - from.1) * t, brush, color, erase);
+    pub fn set_selection(&mut self, area: Option<Area>, mask: Option<Vec<bool>>) {
+        self.mask = if area.is_some() { mask } else { None };
+        self.selection = area;
+        self.version += 1;
+    }
+
+    pub fn selected(&self, x: u32, y: u32) -> bool {
+        inside(self.selection, self.mask.as_ref(), self.width(), x, y)
+    }
+
+    fn select_mask(&mut self, mask: Vec<bool>) {
+        let w = self.width();
+        let (mut x0, mut y0, mut x1, mut y1) = (u32::MAX, u32::MAX, 0, 0);
+        for (i, _) in mask.iter().enumerate().filter(|m| *m.1) {
+            let (x, y) = (i as u32 % w, i as u32 / w);
+            (x0, y0, x1, y1) = (x0.min(x), y0.min(y), x1.max(x + 1), y1.max(y + 1));
         }
+        if x1 > x0 {
+            self.set_selection(Some(Area { x0, y0, x1, y1 }), Some(mask));
+        } else {
+            self.set_selection(None, None);
+        }
+    }
+
+    pub fn select_ellipse(&mut self, a: Area) {
+        let w = self.width();
+        let (cx, cy) = ((a.x0 + a.x1) as f32 / 2.0, (a.y0 + a.y1) as f32 / 2.0);
+        let (rx, ry) = (a.width() as f32 / 2.0, a.height() as f32 / 2.0);
+        let mask = (0..w * self.height())
+            .map(|i| {
+                let (x, y) = ((i % w) as f32 + 0.5, (i / w) as f32 + 0.5);
+                ((x - cx) / rx).powi(2) + ((y - cy) / ry).powi(2) <= 1.0
+            })
+            .collect();
+        self.select_mask(mask);
+    }
+
+    pub fn select_polygon(&mut self, pts: &[(f32, f32)]) {
+        if pts.len() < 3 {
+            return self.set_selection(None, None);
+        }
+        let (w, h) = (self.width(), self.height());
+        let mut mask = vec![false; (w * h) as usize];
+        for y in 0..h {
+            let fy = y as f32 + 0.5;
+            let mut xs: Vec<f32> = Vec::new();
+            for i in 0..pts.len() {
+                let (a, b) = (pts[i], pts[(i + 1) % pts.len()]);
+                if (a.1 <= fy) != (b.1 <= fy) {
+                    xs.push(a.0 + (fy - a.1) / (b.1 - a.1) * (b.0 - a.0));
+                }
+            }
+            xs.sort_by(f32::total_cmp);
+            for pair in xs.chunks(2).filter(|p| p.len() == 2) {
+                let from = (pair[0] - 0.5).ceil().clamp(0.0, w as f32) as u32;
+                let to = (pair[1] - 0.5).floor().min(w as f32 - 1.0);
+                if to < from as f32 {
+                    continue;
+                }
+                for x in from..=to as u32 {
+                    mask[(y * w + x) as usize] = true;
+                }
+            }
+        }
+        self.select_mask(mask);
+    }
+
+    pub fn select_color(&mut self, x: u32, y: u32, tolerance: u8, contiguous: bool) {
+        let (w, h) = (self.width(), self.height());
+        if x >= w || y >= h {
+            return;
+        }
+        let img = &self.layers[self.active].img;
+        let target = img.get_pixel(x, y).0;
+        let close = |p: [u8; 4]| p.iter().zip(target).all(|(a, b)| a.abs_diff(b) <= tolerance);
+        let mut mask = vec![false; (w * h) as usize];
+        if contiguous {
+            let mut stack = vec![(x, y)];
+            while let Some((px, py)) = stack.pop() {
+                let i = (py * w + px) as usize;
+                if mask[i] || !close(img.get_pixel(px, py).0) {
+                    continue;
+                }
+                mask[i] = true;
+                if px > 0 { stack.push((px - 1, py)); }
+                if px + 1 < w { stack.push((px + 1, py)); }
+                if py > 0 { stack.push((px, py - 1)); }
+                if py + 1 < h { stack.push((px, py + 1)); }
+            }
+        } else {
+            for (i, p) in img.pixels().enumerate() {
+                mask[i] = close(p.0);
+            }
+        }
+        self.select_mask(mask);
+    }
+
+    pub fn invert_selection(&mut self) {
+        if self.selection.is_none() {
+            return;
+        }
+        let w = self.width();
+        let mask = (0..w * self.height()).map(|i| !self.selected(i % w, i / w)).collect();
+        self.select_mask(mask);
+    }
+
+    pub fn put_filtered(&mut self, base: &RgbaImage, out: &RgbaImage) {
+        let (sel, mask, w) = (self.selection, self.mask.as_ref(), self.width());
+        let img = &mut self.layers[self.active].img;
+        for (i, (d, (b, o))) in img.pixels_mut().zip(base.pixels().zip(out.pixels())).enumerate() {
+            *d = if inside(sel, mask, w, i as u32 % w, i as u32 / w) { *o } else { *b };
+        }
+        self.touch_all();
+    }
+
+    pub fn fill_shape(&mut self, a: Area, ellipse: bool, color: [u8; 4]) {
+        self.checkpoint();
+        let (cx, cy) = ((a.x0 + a.x1) as f32 / 2.0, (a.y0 + a.y1) as f32 / 2.0);
+        let (rx, ry) = (a.width() as f32 / 2.0, a.height() as f32 / 2.0);
+        let (sel, mask, w) = (self.selection, self.mask.as_ref(), self.width());
+        let img = &mut self.layers[self.active].img;
+        for y in a.y0..a.y1 {
+            for x in a.x0..a.x1 {
+                if !inside(sel, mask, w, x, y) {
+                    continue;
+                }
+                let cover = if ellipse {
+                    let d = (((x as f32 + 0.5 - cx) / rx).powi(2) + ((y as f32 + 0.5 - cy) / ry).powi(2)).sqrt();
+                    ((1.0 - d) * rx.min(ry) + 0.5).clamp(0.0, 1.0)
+                } else {
+                    1.0
+                };
+                if cover > 0.0 {
+                    let px = img.get_pixel_mut(x, y);
+                    let mut c = px.0.map(|v| v as f32 / 255.0);
+                    over(&mut c, color, cover);
+                    px.0 = to_u8(c);
+                }
+            }
+        }
+        self.touch(a);
     }
 
     pub fn flood_fill(&mut self, x: u32, y: u32, color: [u8; 4], tolerance: u8) -> usize {
         let (w, h) = (self.width(), self.height());
         let sel = self.selection.unwrap_or(self.full());
-        if x >= w || y >= h || !sel.contains(x, y) {
+        if x >= w || y >= h || !self.selected(x, y) {
             return 0;
         }
         let img = &mut self.layers[self.active].img;
@@ -234,12 +509,13 @@ impl Document {
             return 0;
         }
         let close = |p: [u8; 4]| p.iter().zip(target).all(|(a, b)| a.abs_diff(b) <= tolerance);
+        let mask = self.mask.as_ref();
         let mut seen = vec![false; (w * h) as usize];
         let mut stack = vec![(x, y)];
         let mut count = 0;
         while let Some((px, py)) = stack.pop() {
             let i = (py * w + px) as usize;
-            if seen[i] || !sel.contains(px, py) || !close(img.get_pixel(px, py).0) {
+            if seen[i] || !sel.contains(px, py) || mask.is_some_and(|m| !m[i]) || !close(img.get_pixel(px, py).0) {
                 continue;
             }
             seen[i] = true;
@@ -267,7 +543,7 @@ impl Document {
         };
         let name = name.unwrap_or_else(|| format!("Calque {}", self.layers.len() + 1));
         self.active += 1;
-        self.layers.insert(self.active, Layer { name, img, visible: true, opacity: 1.0 });
+        self.layers.insert(self.active, Layer { name, img, visible: true, opacity: 1.0, blend: Blend::Normal });
         self.touch_all();
     }
 
@@ -317,41 +593,9 @@ impl Document {
                 d.0[3] as f32 / 255.0,
             ];
             if top.visible {
-                over(&mut acc, s.0, top.opacity);
+                blend_over(&mut acc, s.0, top.opacity, top.blend);
             }
             d.0 = to_u8(acc);
-        }
-        self.touch_all();
-    }
-
-    pub fn adjust(&mut self, f: impl Fn(&mut [u8; 4]) + Sync) {
-        self.checkpoint();
-        self.adjust_raw(f);
-    }
-
-    pub fn adjust_raw(&mut self, f: impl Fn(&mut [u8; 4]) + Sync) {
-        let sel = self.selection.unwrap_or(self.full());
-        for (x, y, p) in self.layers[self.active].img.enumerate_pixels_mut() {
-            if sel.contains(x, y) {
-                f(&mut p.0);
-            }
-        }
-        self.touch_all();
-    }
-
-    pub fn blur(&mut self, sigma: f32) {
-        self.checkpoint();
-        self.blur_raw(sigma);
-    }
-
-    pub fn blur_raw(&mut self, sigma: f32) {
-        let sel = self.selection.unwrap_or(self.full());
-        let l = &mut self.layers[self.active];
-        let blurred = imageops::blur(&l.img, sigma);
-        for (x, y, p) in l.img.enumerate_pixels_mut() {
-            if sel.contains(x, y) {
-                *p = *blurred.get_pixel(x, y);
-            }
         }
         self.touch_all();
     }
@@ -361,7 +605,9 @@ impl Document {
         self.checkpoint();
         for y in sel.y0..sel.y1 {
             for x in sel.x0..sel.x1 {
-                self.layers[self.active].img.put_pixel(x, y, Rgba([0, 0, 0, 0]));
+                if self.selected(x, y) {
+                    self.layers[self.active].img.put_pixel(x, y, Rgba([0, 0, 0, 0]));
+                }
             }
         }
         self.touch(sel);
@@ -369,6 +615,7 @@ impl Document {
 
     pub fn crop_to_selection(&mut self) {
         let Some(s) = self.selection.take() else { return };
+        self.mask = None;
         self.transform(|img| imageops::crop_imm(img, s.x0, s.y0, s.width(), s.height()).to_image());
     }
 
@@ -384,9 +631,13 @@ impl Document {
         let sel = self.selection.unwrap_or(self.full());
         let d = (to.0 - from.0, to.1 - from.1);
         let len2 = (d.0 * d.0 + d.1 * d.1).max(1e-3);
+        let (s0, mask, w) = (self.selection, self.mask.as_ref(), self.width());
         let img = &mut self.layers[self.active].img;
         for y in sel.y0..sel.y1 {
             for x in sel.x0..sel.x1 {
+                if !inside(s0, mask, w, x, y) {
+                    continue;
+                }
                 let t = (((x as f32 + 0.5 - from.0) * d.0 + (y as f32 + 0.5 - from.1) * d.1) / len2).clamp(0.0, 1.0);
                 let c: [u8; 4] = std::array::from_fn(|k| (a[k] as f32 + (b[k] as f32 - a[k] as f32) * t).round() as u8);
                 let px = img.get_pixel_mut(x, y);
@@ -422,6 +673,15 @@ fn over(acc: &mut [f32; 4], p: [u8; 4], opacity: f32) {
         acc[c] = (p[c] as f32 / 255.0 * a + acc[c] * acc[3] * (1.0 - a)) / out_a;
     }
     acc[3] = out_a;
+}
+
+fn blend_over(acc: &mut [f32; 4], p: [u8; 4], opacity: f32, mode: Blend) {
+    if mode == Blend::Normal || acc[3] <= 0.0 {
+        return over(acc, p, opacity);
+    }
+    let s = [p[0] as f32 / 255.0, p[1] as f32 / 255.0, p[2] as f32 / 255.0];
+    let mixed: [f32; 3] = std::array::from_fn(|k| s[k] + (mode.mix(acc[k], s[k]) - s[k]) * acc[3]);
+    over(acc, [(mixed[0] * 255.0).round() as u8, (mixed[1] * 255.0).round() as u8, (mixed[2] * 255.0).round() as u8, p[3]], opacity);
 }
 
 fn to_u8(acc: [f32; 4]) -> [u8; 4] {
@@ -513,6 +773,24 @@ mod tests {
         assert_eq!(s2.layers[0].img.get_pixel(7, 7).0[3], 0);
         s2.crop_to_selection();
         assert_eq!((s2.width(), s2.height()), (5, 5));
+
+        let mut m = Document::new(20, 20, Some([255, 255, 255, 255]));
+        m.select_ellipse(Area { x0: 0, y0: 0, x1: 20, y1: 20 });
+        assert!(m.selected(10, 10) && !m.selected(0, 0));
+        m.invert_selection();
+        assert!(!m.selected(10, 10) && m.selected(0, 0));
+        m.select_polygon(&[(2.0, 2.0), (18.0, 2.0), (2.0, 18.0)]);
+        assert!(m.selected(4, 4) && !m.selected(16, 16));
+        m.checkpoint();
+        m.stamp(10.0, 10.0, &Brush { radius: 20.0, hardness: 1.0, flow: 1.0 }, [0, 0, 0, 255], false);
+        assert_eq!(m.layers[0].img.get_pixel(16, 16).0, [255, 255, 255, 255]);
+        m.layers[0].img.put_pixel(5, 5, Rgba([10, 10, 10, 255]));
+        m.set_selection(None, None);
+        m.select_color(0, 0, 0, false);
+        assert!(m.selected(15, 15) && !m.selected(4, 4));
+        m.add_layer(None, Some(RgbaImage::from_pixel(20, 20, Rgba([128, 128, 128, 255]))));
+        m.layers[1].blend = Blend::Multiply;
+        assert_eq!(m.flatten().get_pixel(15, 15).0, [128, 128, 128, 255]);
 
         let (h, s, l) = rgb_to_hsl(0.2, 0.6, 0.4);
         let (r, g, b) = hsl_to_rgb(h, s, l);
