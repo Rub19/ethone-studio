@@ -314,6 +314,36 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
+    fn make_demo_video() {
+        let Ok(path) = std::env::var("CUT_DEMO") else { return };
+        let (w, h, fps) = (1280u32, 720u32, 30u32);
+        let mut enc = Encoder::new(Path::new(&path), w, h, fps, 4_000_000).unwrap();
+        for f in 0..fps * 6 {
+            let t = f as f32 / (fps * 6) as f32;
+            let mut rgba = vec![0u8; (w * h * 4) as usize];
+            for y in 0..h {
+                for x in 0..w {
+                    let i = ((y * w + x) * 4) as usize;
+                    let u = x as f32 / w as f32;
+                    let v = y as f32 / h as f32;
+                    let c = [(255.0 * (0.5 + 0.5 * (6.28 * (u + t)).sin())) as u8, (255.0 * v) as u8, (255.0 * (1.0 - u)) as u8];
+                    rgba[i..i + 4].copy_from_slice(&[c[0], c[1], c[2], 255]);
+                }
+            }
+            enc.video(&rgba).unwrap();
+            let tone: Vec<f32> = (0..OUT_RATE / fps)
+                .flat_map(|i| {
+                    let v = ((f * (OUT_RATE / fps) + i) as f32 * 330.0 * std::f32::consts::TAU / OUT_RATE as f32).sin() * 0.25 * (0.5 + 0.5 * (f as f32 * 0.3).sin());
+                    [v, v]
+                })
+                .collect();
+            enc.audio(&tone).unwrap();
+        }
+        enc.finish().unwrap();
+    }
+
+    #[test]
     fn encode_then_decode_mp4() {
         let path = std::env::temp_dir().join("ethone-cut-test.mp4");
         let _ = std::fs::remove_file(&path);

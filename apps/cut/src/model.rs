@@ -50,11 +50,15 @@ pub struct Project {
     pub sources: Vec<Source>,
     pub clips: Vec<Clip>,
     pub music: Vec<Music>,
+    #[serde(default)]
+    pub mute_v1: bool,
+    #[serde(default)]
+    pub mute_a2: bool,
 }
 
 impl Project {
     pub fn new() -> Self {
-        Self { width: 1920, height: 1080, fps: 30, sources: Vec::new(), clips: Vec::new(), music: Vec::new() }
+        Self { width: 1920, height: 1080, fps: 30, sources: Vec::new(), clips: Vec::new(), music: Vec::new(), mute_v1: false, mute_a2: false }
     }
 
     pub fn starts(&self) -> Vec<f64> {
@@ -137,11 +141,17 @@ impl Project {
             }
         };
         for (c, s) in self.clips.iter().zip(self.starts()) {
+            if self.mute_v1 {
+                break;
+            }
             if let Some(data) = audio(c.src) {
                 place(&data, s, c.inp, c.out, c.volume, c.fade_in, c.fade_out);
             }
         }
         for m in &self.music {
+            if self.mute_a2 {
+                break;
+            }
             if let Some(data) = audio(m.src) {
                 place(&data, m.start, m.inp, m.out, m.volume, 0.0, 0.0);
             }
@@ -189,5 +199,8 @@ mod tests {
         assert!((mix[550 * 2] - 0.5).abs() < 1e-6);
         assert!((mix[650 * 2] - 0.75).abs() < 1e-6);
         assert!((mix[750 * 2] - 0.25).abs() < 1e-6);
+        p.mute_a2 = true;
+        let muted = p.mix(&|_| Some(data.clone()), rate);
+        assert!(muted[750 * 2].abs() < 1e-6);
     }
 }
