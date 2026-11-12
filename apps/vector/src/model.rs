@@ -22,6 +22,7 @@ pub enum Geom {
     Ellipse { cx: f32, cy: f32, rx: f32, ry: f32 },
     Path { nodes: Vec<Node>, closed: bool },
     Text { x: f32, y: f32, text: String, size: f32, family: String, bold: bool },
+    Image { x: f32, y: f32, w: f32, h: f32, href: String },
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -33,7 +34,20 @@ pub struct Item {
     pub stroke_w: f32,
     pub opacity: f32,
     pub visible: bool,
+    #[serde(default)]
+    pub fill2: Option<[u8; 4]>,
+    #[serde(default)]
+    pub grad_angle: f32,
+    #[serde(default)]
+    pub dash: f32,
+    #[serde(default)]
+    pub shadow: bool,
+    #[serde(default)]
+    pub blur: f32,
+    #[serde(default)]
+    pub locked: bool,
 }
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Doc {
@@ -67,9 +81,28 @@ impl BBox {
 }
 
 impl Item {
-    pub fn bbox(&self) -> BBox {
+    pub fn blank() -> Self {
+        Item {
+            name: String::new(),
+            geom: Geom::Path { nodes: Vec::new(), closed: false },
+            fill: None,
+            stroke: None,
+            stroke_w: 1.0,
+            opacity: 1.0,
+            visible: true,
+            fill2: None,
+            grad_angle: 90.0,
+            dash: 0.0,
+            shadow: false,
+            blur: 0.0,
+            locked: false,
+        }
+    }
+
+    pub fn bbox
+(&self) -> BBox {
         match &self.geom {
-            Geom::Rect { x, y, w, h, .. } => BBox::of([[*x, *y], [x + w, y + h]]),
+            Geom::Rect { x, y, w, h, .. } | Geom::Image { x, y, w, h, .. } => BBox::of([[*x, *y], [x + w, y + h]]),
             Geom::Ellipse { cx, cy, rx, ry } => BBox::of([[cx - rx, cy - ry], [cx + rx, cy + ry]]),
             Geom::Path { nodes, .. } => BBox::of(nodes.iter().flat_map(|n| [n.p, n.cin, n.cout])),
             Geom::Text { x, y, text, size, .. } => {
@@ -82,8 +115,17 @@ impl Item {
 
     pub fn map(&mut self, f: impl Fn(P) -> P, sx: f32, sy: f32) {
         match &mut self.geom {
+            Geom::Image { x, y, w, h, .. } => {
+                let a = f([*x, *y]);
+                let b = f([*x + *w, *y + *h]);
+                *x = a[0].min(b[0]);
+                *y = a[1].min(b[1]);
+                *w = (b[0] - a[0]).abs();
+                *h = (b[1] - a[1]).abs();
+            }
             Geom::Rect { x, y, w, h, r } => {
                 let a = f([*x, *y]);
+
                 let b = f([*x + *w, *y + *h]);
                 *x = a[0].min(b[0]);
                 *y = a[1].min(b[1]);
@@ -117,7 +159,168 @@ impl Item {
     pub fn translate(&mut self, d: P) {
         self.map(|p| [p[0] + d[0], p[1] + d[1]], 1.0, 1.0);
     }
+
+    pub fn to_path(&mut self) -> bool {
+        const K: f32 = 0.552_284_8;
+        let nodes = match self.geom {
+            Geom::Rect { x, y, w, h, r } if r <= 0.0 => {
+                vec![Node::corner([x, y]), Node::corner([x + w, y]), Node::corner([x + w, y + h]), Node::corner([x, y + h])]
+            }
+            Geom::Rect { x, y, w, h, r } => {
+                let r = r.min(w / 2.0).min(h / 2.0);
+                let k = r * K;
+                let arc = |a: P, b: P, ca: P, cb: P| [Node { p: a, cin: a, cout: ca }, Node { p: b, cin: cb, cout: b }];
+                [
+                    arc([x + w - r, y], [x + w, y + r], [x + w - r + k, y], [x + w, y + r - k]),
+                    arc([x + w, y + h - r], [x + w - r, y + h], [x + w, y + h - r + k], [x + w - r + k, y + h]),
+                    arc([x + r, y + h], [x, y + h - r], [x + r - k, y + h], [x, y + h - r + k]),
+                    arc([x, y + r], [x + r, y], [x, y + r - k], [x + r - k, y]),
+                ]
+                .concat()
+            }
+            Geom::Ellipse { cx, cy, rx, ry } => {
+                let (kx, ky) = (rx * K, ry * K);
+                vec![
+                    Node { p: [cx, cy - ry], cin: [cx - kx, cy - ry], cout: [cx + kx, cy - ry] },
+                    Node { p: [cx + rx, cy], cin: [cx + rx, cy - ky], cout: [cx + rx, cy + ky] },
+                    Node { p: [cx, cy + ry], cin: [cx + kx, cy + ry], cout: [cx - kx, cy + ry] },
+                    Node { p: [cx - rx, cy], cin: [cx - rx, cy + ky], cout: [cx - rx, cy - ky] },
+                ]
+            }
+            Geom::Path { .. } => return true,
+            _ => return false,
+        };
+        self.geom = Geom::Path { nodes, closed: true };
+        true
+    }
+
+    pub fn rotate(&mut self, deg: f32) -> bool {
+        let b = self.bbox();
+        let c = [(b.min[0] + b.max[0]) / 2.0, (b.min[1] + b.max[1]) / 2.0];
+        self.rotate_about(deg, c)
+    }
+
+    pub fn rotate_about(&mut self, deg: f32, c: P) -> bool {
+        if !self.to_path() {
+            return false;
+        }
+        let (s, co) = deg.to_radians().sin_cos();
+        self.map(|p| [c[0] + (p[0] - c[0]) * co - (p[1] - c[1]) * s, c[1] + (p[0] - c[0]) * s + (p[1] - c[1]) * co], 1.0, 1.0);
+        true
+    }
 }
+
+/// Catmull-Rom tangents: turns any polyline into a smooth curve through the same anchors.
+pub fn smooth(nodes: &mut [Node], closed: bool) {
+    let n = nodes.len();
+    if n < 3 {
+        return;
+    }
+    let pts: Vec<P> = nodes.iter().map(|n| n.p).collect();
+    for i in 0..n {
+        let prev = if i == 0 { if closed { pts[n - 1] } else { pts[0] } } else { pts[i - 1] };
+        let next = if i + 1 == n { if closed { pts[0] } else { pts[n - 1] } } else { pts[i + 1] };
+        let t = [(next[0] - prev[0]) / 6.0, (next[1] - prev[1]) / 6.0];
+        nodes[i].cin = [pts[i][0] - t[0], pts[i][1] - t[1]];
+        nodes[i].cout = [pts[i][0] + t[0], pts[i][1] + t[1]];
+    }
+}
+
+/// Ramer-Douglas-Peucker on the anchors; handles are reset to corners.
+pub fn simplify(points: &[P], tol: f32) -> Vec<Node> {
+    fn rdp(pts: &[P], tol: f32, keep: &mut Vec<bool>, off: usize) {
+        if pts.len() < 3 {
+            return;
+        }
+        let (a, b) = (pts[0], pts[pts.len() - 1]);
+        let len = ((b[0] - a[0]).powi(2) + (b[1] - a[1]).powi(2)).sqrt().max(1e-6);
+        let (mut far, mut idx) = (0.0, 0);
+        for (i, p) in pts.iter().enumerate().take(pts.len() - 1).skip(1) {
+            let d = ((b[0] - a[0]) * (a[1] - p[1]) - (a[0] - p[0]) * (b[1] - a[1])).abs() / len;
+            if d > far {
+                (far, idx) = (d, i);
+            }
+        }
+        if far > tol {
+            keep[off + idx] = true;
+            rdp(&pts[..=idx], tol, keep, off);
+            rdp(&pts[idx..], tol, keep, off + idx);
+        }
+    }
+    if points.len() < 3 {
+        return points.iter().map(|p| Node::corner(*p)).collect();
+    }
+    let mut keep = vec![false; points.len()];
+    keep[0] = true;
+    keep[points.len() - 1] = true;
+    rdp(points, tol, &mut keep, 0);
+    points.iter().zip(keep).filter(|(_, k)| *k).map(|(p, _)| Node::corner(*p)).collect()
+}
+
+pub fn reverse(nodes: &mut [Node]) {
+    nodes.reverse();
+    for n in nodes {
+        std::mem::swap(&mut n.cin, &mut n.cout);
+    }
+}
+
+pub fn arrow(a: P, b: P, width: f32) -> Vec<Node> {
+    let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
+    let len = (dx * dx + dy * dy).sqrt().max(1e-3);
+    let (ux, uy) = (dx / len, dy / len);
+    let (nx, ny) = (-uy, ux);
+    let head = (width * 3.0).min(len * 0.6);
+    let shaft = width / 2.0;
+    let base = [b[0] - ux * head, b[1] - uy * head];
+    [
+        [a[0] + nx * shaft, a[1] + ny * shaft],
+        [base[0] + nx * shaft, base[1] + ny * shaft],
+        [base[0] + nx * width * 1.6, base[1] + ny * width * 1.6],
+        b,
+        [base[0] - nx * width * 1.6, base[1] - ny * width * 1.6],
+        [base[0] - nx * shaft, base[1] - ny * shaft],
+        [a[0] - nx * shaft, a[1] - ny * shaft],
+    ]
+    .into_iter()
+    .map(Node::corner)
+    .collect()
+}
+
+pub fn heart(x: f32, y: f32, w: f32, h: f32) -> Vec<Node> {
+    let at = |u: f32, v: f32| [x + u * w, y + v * h];
+    vec![
+        Node { p: at(0.5, 0.25), cin: at(0.38, 0.0), cout: at(0.62, 0.0) },
+        Node { p: at(1.0, 0.3), cin: at(1.0, 0.02), cout: at(1.0, 0.6) },
+        Node { p: at(0.5, 1.0), cin: at(0.75, 0.75), cout: at(0.25, 0.75) },
+        Node { p: at(0.0, 0.3), cin: at(0.0, 0.6), cout: at(0.0, 0.02) },
+    ]
+}
+
+pub fn spiral(cx: f32, cy: f32, r: f32, turns: f32) -> Vec<Node> {
+    let steps = (turns * 24.0).max(8.0) as usize;
+    let mut nodes: Vec<Node> = (0..=steps)
+        .map(|k| {
+            let t = k as f32 / steps as f32;
+            let a = t * turns * std::f32::consts::TAU;
+            Node::corner([cx + a.cos() * r * t, cy + a.sin() * r * t])
+        })
+        .collect();
+    smooth(&mut nodes, false);
+    nodes
+}
+
+pub fn base64(data: &[u8]) -> String {
+    const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out = String::with_capacity(data.len().div_ceil(3) * 4);
+    for c in data.chunks(3) {
+        let n = (c[0] as u32) << 16 | (*c.get(1).unwrap_or(&0) as u32) << 8 | *c.get(2).unwrap_or(&0) as u32;
+        for k in 0..4 {
+            out.push(if k <= c.len() { T[(n >> (18 - 6 * k) & 63) as usize] as char } else { '=' });
+        }
+    }
+    out
+}
+
 
 fn color(c: [u8; 4]) -> String {
     format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2])
@@ -161,12 +364,40 @@ impl Doc {
         if let Some(bg) = self.background {
             writeln!(s, r#"<rect width="100%" height="100%" fill="{}" fill-opacity="{}"/>"#, color(bg), bg[3] as f32 / 255.0).unwrap();
         }
-        for it in self.items.iter().filter(|i| i.visible) {
+        for (idx, it) in self.items.iter().enumerate().filter(|(_, i)| i.visible) {
             let mut paint = String::new();
-            match it.fill {
-                Some(c) => write!(paint, r#" fill="{}" fill-opacity="{}""#, color(c), c[3] as f32 / 255.0).unwrap(),
-                None => paint.push_str(r#" fill="none""#),
+            match (it.fill, it.fill2) {
+                (Some(a), Some(b)) => {
+                    writeln!(
+                        s,
+                        r#"<defs><linearGradient id="g{idx}" gradientTransform="rotate({} 0.5 0.5)"><stop offset="0" stop-color="{}" stop-opacity="{}"/><stop offset="1" stop-color="{}" stop-opacity="{}"/></linearGradient></defs>"#,
+                        it.grad_angle,
+                        color(a),
+                        a[3] as f32 / 255.0,
+                        color(b),
+                        b[3] as f32 / 255.0
+                    )
+                    .unwrap();
+                    write!(paint, r#" fill="url(#g{idx})""#).unwrap();
+                }
+                (Some(c), None) => write!(paint, r#" fill="{}" fill-opacity="{}""#, color(c), c[3] as f32 / 255.0).unwrap(),
+                (None, _) => paint.push_str(r#" fill="none""#),
             }
+            if it.shadow || it.blur > 0.0 {
+                let mut f = String::new();
+                if it.blur > 0.0 {
+                    write!(f, r#"<feGaussianBlur stdDeviation="{}" result="b"/>"#, it.blur).unwrap();
+                }
+                if it.shadow {
+                    write!(f, r##"<feDropShadow{} dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/>"##, if it.blur > 0.0 { r#" in="b""# } else { "" }).unwrap();
+                }
+                writeln!(s, r#"<defs><filter id="f{idx}" x="-50%" y="-50%" width="200%" height="200%">{f}</filter></defs>"#).unwrap();
+                write!(paint, r#" filter="url(#f{idx})""#).unwrap();
+            }
+            if it.dash > 0.0 && it.stroke.is_some() {
+                write!(paint, r#" stroke-dasharray="{} {}""#, it.dash, it.dash).unwrap();
+            }
+
             if let Some(c) = it.stroke {
                 write!(
                     paint,
@@ -184,8 +415,12 @@ impl Doc {
                 Geom::Rect { x, y, w, h, r } => {
                     writeln!(s, r#"<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}"{paint}/>"#).unwrap()
                 }
+                Geom::Image { x, y, w, h, href } => {
+                    writeln!(s, r#"<image x="{x}" y="{y}" width="{w}" height="{h}" preserveAspectRatio="none" href="{href}"{paint}/>"#).unwrap()
+                }
                 Geom::Ellipse { cx, cy, rx, ry } => {
-                    writeln!(s, r#"<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}"{paint}/>"#).unwrap()
+                    writeln!(s, r#"<ellipse
+ cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}"{paint}/>"#).unwrap()
                 }
                 Geom::Path { nodes, closed } => {
                     writeln!(s, r#"<path d="{}"{paint}/>"#, path_d(nodes, *closed)).unwrap()
@@ -211,7 +446,7 @@ impl Doc {
     }
 
     pub fn hit(&self, p: P, tol: f32) -> Option<usize> {
-        (0..self.items.len()).rev().find(|&i| self.items[i].visible && self.items[i].bbox().contains(p, tol))
+        (0..self.items.len()).rev().find(|&i| self.items[i].visible && !self.items[i].locked && self.items[i].bbox().contains(p, tol))
     }
 }
 
@@ -246,6 +481,7 @@ mod tests {
             stroke_w: 1.0,
             opacity: 1.0,
             visible: true,
+            ..Item::blank()
         });
         d.items.push(Item {
             name: "p".into(),
@@ -255,6 +491,7 @@ mod tests {
             stroke_w: 2.0,
             opacity: 0.5,
             visible: true,
+            ..Item::blank()
         });
         let svg = d.to_svg();
         assert!(svg.contains(r##"<rect x="10" y="10" width="50" height="20" rx="4" fill="#ff0000""##));
@@ -275,5 +512,27 @@ mod tests {
         assert_eq!(star.len(), 10);
         let d1 = (star[1].p[0].powi(2) + star[1].p[1].powi(2)).sqrt();
         assert!((d1 - 5.0).abs() < 1e-3);
+
+        let mut e = Item { geom: Geom::Ellipse { cx: 50.0, cy: 50.0, rx: 20.0, ry: 10.0 }, ..Item::blank() };
+        assert!(e.rotate(90.0));
+        let b = e.bbox();
+        assert!((b.max[1] - b.min[1] - 40.0).abs() < 2.0, "{b:?}");
+        let mut t = Item { geom: Geom::Text { x: 0.0, y: 0.0, text: "a".into(), size: 10.0, family: "x".into(), bold: false }, ..Item::blank() };
+        assert!(!t.rotate(45.0));
+
+        let line: Vec<P> = (0..50).map(|k| [k as f32, if k == 25 { 10.0 } else { 0.0 }]).collect();
+        assert_eq!(simplify(&line, 1.0).len(), 5);
+        assert_eq!(arrow([0.0, 0.0], [100.0, 0.0], 10.0)[3].p, [100.0, 0.0]);
+        assert_eq!(base64(b"Man"), "TWFu");
+        assert_eq!(base64(b"Ma"), "TWE=");
+
+        d.items[0].fill2 = Some([0, 0, 255, 255]);
+        d.items[0].shadow = true;
+        d.items[1].dash = 4.0;
+        let svg = d.to_svg();
+        assert!(svg.contains(r#"fill="url(#g0)""#) && svg.contains("feDropShadow") && svg.contains("stroke-dasharray"));
+        let opt = resvg::usvg::Options::default();
+        assert!(resvg::usvg::Tree::from_str(&svg, &opt).is_ok());
+
     }
 }

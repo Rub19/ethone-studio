@@ -1,13 +1,14 @@
 #![windows_subsystem = "windows"]
 
 mod model;
+mod tutos;
 
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Pos2,
     Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2, pos2,
     vec2,
 };
-use model::{BBox, Doc, Geom, Item, Node, P, polygon};
+use model::{BBox, Doc, Geom, Item, Node, P, arrow, heart, polygon, spiral};
 use resvg::{tiny_skia, usvg};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -19,29 +20,39 @@ const MAX_RENDER: f32 = 4096.0;
 enum Tool {
     Select,
     Pen,
+    Pencil,
+    Rotate,
     Rect,
     Ellipse,
     Polygon,
     Star,
     Line,
+    Arrow,
+    Spiral,
+    Heart,
     Text,
     Picker,
     Hand,
     Zoom,
 }
 
-const TOOLS: [(Tool, &str, Key); 11] = [
-    (Tool::Select, "Sélection (V)", Key::V),
-    (Tool::Pen, "Plume (P)", Key::P),
-    (Tool::Rect, "Rectangle (M)", Key::M),
-    (Tool::Ellipse, "Ellipse (L)", Key::L),
-    (Tool::Polygon, "Polygone (Y)", Key::Y),
-    (Tool::Star, "Étoile (S)", Key::S),
-    (Tool::Line, "Ligne (N)", Key::N),
-    (Tool::Text, "Texte (T)", Key::T),
-    (Tool::Picker, "Pipette (I)", Key::I),
-    (Tool::Hand, "Main (H, ou Espace)", Key::H),
-    (Tool::Zoom, "Zoom (Z, Alt pour dézoomer)", Key::Z),
+const TOOLS: [(Tool, &str, Option<Key>); 16] = [
+    (Tool::Select, "Sélection (V)", Some(Key::V)),
+    (Tool::Pen, "Plume (P)", Some(Key::P)),
+    (Tool::Pencil, "Crayon (N)", Some(Key::N)),
+    (Tool::Rotate, "Rotation (R)", Some(Key::R)),
+    (Tool::Rect, "Rectangle (M)", Some(Key::M)),
+    (Tool::Ellipse, "Ellipse (L)", Some(Key::L)),
+    (Tool::Polygon, "Polygone (Y)", Some(Key::Y)),
+    (Tool::Star, "Étoile (S)", Some(Key::S)),
+    (Tool::Line, "Ligne (\\)", Some(Key::Backslash)),
+    (Tool::Arrow, "Flèche", None),
+    (Tool::Spiral, "Spirale", None),
+    (Tool::Heart, "Cœur", None),
+    (Tool::Text, "Texte (T)", Some(Key::T)),
+    (Tool::Picker, "Pipette (I)", Some(Key::I)),
+    (Tool::Hand, "Main (H, ou Espace)", Some(Key::H)),
+    (Tool::Zoom, "Zoom (Z, Alt pour dézoomer)", Some(Key::Z)),
 ];
 
 fn tool_name(t: Tool) -> &'static str {
@@ -68,6 +79,8 @@ enum Drag {
     Scale { anchor: P, orig: Item, from: P },
     NodePart { node: usize, part: u8 },
     PenHandle { node: usize },
+    Rotate { center: P, orig: Item, start: f32 },
+    Pencil,
 }
 
 struct Style {
@@ -111,6 +124,15 @@ struct VectorApp {
     cursor: Option<P>,
     error: Option<String>,
     title: String,
+    help: studio_ui::help::Help,
+    grid: f32,
+    show_grid: bool,
+    snap: bool,
+    pencil: Vec<P>,
+    pencil_tol: f32,
+    arrow_w: f32,
+    turns: f32,
+    repeat: Option<(u32, f32, f32, f32)>,
 }
 
 fn recents_path() -> PathBuf {
@@ -158,6 +180,15 @@ impl VectorApp {
             cursor: None,
             error: None,
             title: String::new(),
+            help: studio_ui::help::Help::new("Vector", tutos::VECTOR),
+            grid: 20.0,
+            show_grid: false,
+            snap: false,
+            pencil: Vec::new(),
+            pencil_tol: 2.0,
+            arrow_w: 16.0,
+            turns: 3.0,
+            repeat: None,
         };
         if let Some(p) = std::env::args().nth(1) {
             me.open_path(Path::new(&p));
@@ -223,6 +254,7 @@ impl VectorApp {
             Geom::Path { closed: false, .. } => "Tracé",
             Geom::Path { .. } => "Forme",
             Geom::Text { .. } => "Texte",
+            Geom::Image { .. } => "Image",
         };
         let is_text = matches!(geom, Geom::Text { .. });
         let is_line = matches!(geom, Geom::Path { closed: false, .. });
@@ -238,8 +270,7 @@ impl VectorApp {
             },
             stroke: if is_text { None } else { self.style.stroke.or(Some(Color32::BLACK)).filter(|_| is_line || self.style.stroke.is_some()).map(|c| c.to_array()) },
             stroke_w: self.style.stroke_w,
-            opacity: 1.0,
-            visible: true,
+            ..Item::blank()
         }
     }
 
@@ -307,7 +338,7 @@ impl VectorApp {
     }
 
     fn open_path(&mut self, path: &Path) {
-        match std::fs::read(path).map_err(|e| e.to_string()).and_then(|b| serde_json::from_slice::<Doc>(&b).map_err(|e| e.to_string())) {
+        match std::fs::read(path).map_err(|e| e.to_string()).and_then(|b| serde_json::from_slice::<Doc>(b.strip_prefix(b"\xEF\xBB\xBF").unwrap_or(&b)).map_err(|e| e.to_string())) {
             Ok(doc) => {
                 self.set_doc(doc, Some(path.to_path_buf()));
                 self.remember(path);
@@ -401,8 +432,155 @@ impl VectorApp {
         it.map(|p| [nb.min[0] + (p[0] - b.min[0]) * sx, nb.min[1] + (p[1] - b.min[1]) * sy], sx, sy);
     }
 
+    fn toggle_lock(&mut self) {
+        if let Some(i) = self.sel.take() {
+            self.doc.items[i].locked = true;
+        } else {
+            self.doc.items.iter_mut().for_each(|it| it.locked = false);
+        }
+    }
+
+    fn rotate_sel(&mut self, deg: f32) {
+        let Some(i) = self.sel else { return };
+        self.checkpoint();
+        if !self.doc.items[i].rotate(deg) {
+            self.undo.pop();
+            self.error = Some("Le texte et les images ne pivotent pas".into());
+        }
+    }
+
+    fn path_op(&mut self, op: u8) {
+        let Some(i) = self.sel else { return };
+        self.checkpoint();
+        let it = &mut self.doc.items[i];
+        if op == 0 {
+            it.to_path();
+            return;
+        }
+        if let Geom::Path { nodes, closed } = &mut it.geom {
+            match op {
+                1 => model::smooth(nodes, *closed),
+                2 => {
+                    let pts: Vec<P> = nodes.iter().map(|n| n.p).collect();
+                    *nodes = model::simplify(&pts, 1.5);
+                }
+                3 => model::reverse(nodes),
+                _ => *closed = !*closed,
+            }
+        }
+    }
+
+    fn recolor(&mut self, swap: bool) {
+        let Some(i) = self.sel else { return };
+        self.checkpoint();
+        let it = &mut self.doc.items[i];
+        if swap {
+            std::mem::swap(&mut it.fill, &mut it.stroke);
+        } else {
+            let inv = |c: &mut Option<[u8; 4]>| {
+                if let Some(c) = c {
+                    for k in 0..3 {
+                        c[k] = 255 - c[k];
+                    }
+                }
+            };
+            inv(&mut it.fill);
+            inv(&mut it.fill2);
+            inv(&mut it.stroke);
+        }
+    }
+
+    fn place_image(&mut self) {
+        let Some(path) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg"]).pick_file() else { return };
+        let bytes = match std::fs::read(&path) {
+            Ok(b) => b,
+            Err(e) => return self.error = Some(format!("Image : {e}")),
+        };
+        let dims = image::ImageReader::new(std::io::Cursor::new(&bytes)).with_guessed_format().ok().and_then(|r| r.into_dimensions().ok());
+        let Some((iw, ih)) = dims else {
+            self.error = Some("Image illisible (PNG ou JPEG attendu)".into());
+            return;
+        };
+        let mime = if bytes.starts_with(&[0x89, b'P']) { "image/png" } else { "image/jpeg" };
+        let s = (self.doc.width * 0.6 / iw as f32).min(self.doc.height * 0.6 / ih as f32).min(1.0);
+        let (w, h) = (iw as f32 * s, ih as f32 * s);
+        self.checkpoint();
+        self.doc.items.push(Item {
+            name: path.file_stem().map(|n| n.to_string_lossy().into_owned()).unwrap_or("Image".into()),
+            geom: Geom::Image { x: (self.doc.width - w) / 2.0, y: (self.doc.height - h) / 2.0, w, h, href: format!("data:{mime};base64,{}", model::base64(&bytes)) },
+            ..Item::blank()
+        });
+        self.sel = Some(self.doc.items.len() - 1);
+        self.tool = Tool::Select;
+    }
+
+    fn finish_pencil(&mut self, tol: f32) {
+        let pts = std::mem::take(&mut self.pencil);
+        if pts.len() < 3 {
+            return;
+        }
+        let mut nodes = model::simplify(&pts, self.pencil_tol / self.zoom);
+        let closed = nodes.len() > 3 && dist(pts[0], pts[pts.len() - 1]) < tol * 2.0;
+        if closed {
+            nodes.pop();
+        }
+        model::smooth(&mut nodes, closed);
+        self.checkpoint();
+        let it = self.new_item(Geom::Path { nodes, closed });
+        self.doc.items.push(it);
+        self.sel = Some(self.doc.items.len() - 1);
+    }
+
+    fn repeat_sheet(&mut self, ctx: &egui::Context) {
+        let Some((mut n, mut dx, mut dy, mut rot)) = self.repeat.take() else { return };
+        let mut apply = false;
+        let mut cancel = false;
+        let keep = pro::sheet(ctx, "repeat", 340.0, |ui| {
+            ui.label(RichText::new("Répétition").font(semibold(18.0)).color(INK_STRONG));
+            ui.add_space(10.0);
+            ui.label(RichText::new("Copies").size(12.5).color(MUTED));
+            ui.add(egui::DragValue::new(&mut n).range(1..=200));
+            ui.label(RichText::new("Décalage par copie").size(12.5).color(MUTED));
+            ui.horizontal(|ui| {
+                ui.label("X");
+                ui.add(egui::DragValue::new(&mut dx).suffix(" px"));
+                ui.label("Y");
+                ui.add(egui::DragValue::new(&mut dy).suffix(" px"));
+            });
+            ui.label(RichText::new("Rotation par copie").size(12.5).color(MUTED));
+            ui.add(egui::DragValue::new(&mut rot).range(-360.0..=360.0).suffix("°"));
+            ui.add_space(4.0);
+            ui.label(RichText::new("Astuce : décalage 0 et rotation 360 ÷ copies = rosace").size(12.0).color(FAINT));
+            ui.add_space(12.0);
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                if pro::primary(ui, "Créer").clicked() {
+                    apply = true;
+                }
+                if pro::secondary(ui, "Annuler").clicked() {
+                    cancel = true;
+                }
+            });
+        });
+        if apply && let Some(i) = self.sel {
+            self.checkpoint();
+            let base = self.doc.items[i].clone();
+            let b = base.bbox();
+            let center = [(b.min[0] + b.max[0]) / 2.0, (b.min[1] + b.max[1]) / 2.0];
+            for k in 1..=n {
+                let mut c = base.clone();
+                c.name = format!("{} {}", base.name, k + 1);
+                if rot != 0.0 {
+                    c.rotate_about(rot * k as f32, center);
+                }
+                c.translate([dx * k as f32, dy * k as f32]);
+                self.doc.items.insert(i + k as usize, c);
+            }
+        } else if keep && !cancel && !apply {
+            self.repeat = Some((n, dx, dy, rot));
+        }
+    }
     fn shortcuts(&mut self, ctx: &egui::Context) {
-        if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() {
+        if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() || self.repeat.is_some() {
             return;
         }
         use egui::{KeyboardShortcut as K, Modifiers as M};
@@ -444,6 +622,12 @@ impl VectorApp {
         } else if sc(M::COMMAND, Key::CloseBracket) {
             self.reorder(1);
         }
+        if sc(M::COMMAND, Key::Quote) {
+            self.show_grid = !self.show_grid;
+        }
+        if sc(M::COMMAND, Key::Num2) {
+            self.toggle_lock();
+        }
         if sc(M::COMMAND | M::SHIFT, Key::OpenBracket) {
             self.reorder(i32::MIN);
         } else if sc(M::COMMAND, Key::OpenBracket) {
@@ -453,7 +637,7 @@ impl VectorApp {
             let mut pick = None;
             if !i.modifiers.command {
                 for (t, _, k) in TOOLS {
-                    if i.key_pressed(k) {
+                    if k.is_some_and(|k| i.key_pressed(k)) {
                         pick = Some(t);
                     }
                 }
@@ -489,6 +673,13 @@ impl eframe::App for VectorApp {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
         let before = self.doc.clone();
+        if !self.home && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
+            if self.help.open {
+                self.help.open = false;
+            } else {
+                self.help.learn(tool_name(self.tool));
+            }
+        }
         self.shortcuts(ctx);
         if let Some(p) = ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf()).filter(|p| !p.as_os_str().is_empty())) {
             self.open_path(&p);
@@ -510,6 +701,8 @@ impl eframe::App for VectorApp {
             self.canvas(root, &name);
         }
         self.new_doc_sheet(ctx);
+        self.repeat_sheet(ctx);
+        self.help.show(ctx);
         if !self.home && self.doc != before && !self.editing && matches!(self.drag, Drag::None) {
             self.undo.push(before);
             self.redo.clear();
@@ -541,6 +734,9 @@ impl VectorApp {
                             }
                             if ui.button("Enregistrer sous…     Ctrl+Maj+S").clicked() {
                                 self.save(true);
+                            }
+                            if ui.button("Importer une image…").clicked() {
+                                self.place_image();
                             }
                             ui.separator();
                             if ui.button("Exporter en SVG…").clicked() {
@@ -587,6 +783,41 @@ impl VectorApp {
                             if ui.add_enabled(has, egui::Button::new("Symétrie verticale")).clicked() {
                                 self.flip(1);
                             }
+                            if ui.add_enabled(has, egui::Button::new("Rotation 90° horaire")).clicked() {
+                                self.rotate_sel(90.0);
+                            }
+                            if ui.add_enabled(has, egui::Button::new("Rotation 90° antihoraire")).clicked() {
+                                self.rotate_sel(-90.0);
+                            }
+                            ui.separator();
+                            if ui.add_enabled(has, egui::Button::new("Répétition…")).clicked() {
+                                self.repeat = Some((5, 40.0, 0.0, 0.0));
+                            }
+                            ui.separator();
+                            let is_path = self.sel.is_some_and(|i| matches!(self.doc.items[i].geom, Geom::Path { .. }));
+                            let convertible = self.sel.is_some_and(|i| matches!(self.doc.items[i].geom, Geom::Rect { .. } | Geom::Ellipse { .. }));
+                            if ui.add_enabled(convertible, egui::Button::new("Convertir en tracé")).clicked() {
+                                self.path_op(0);
+                            }
+                            for (label, op) in [("Lisser le tracé", 1), ("Simplifier le tracé", 2), ("Inverser le sens", 3), ("Fermer / ouvrir le tracé", 4)] {
+                                if ui.add_enabled(is_path, egui::Button::new(label)).clicked() {
+                                    self.path_op(op);
+                                }
+                            }
+                            ui.separator();
+                            if ui.add_enabled(has, egui::Button::new("Échanger fond et contour")).clicked() {
+                                self.recolor(true);
+                            }
+                            if ui.add_enabled(has, egui::Button::new("Inverser les couleurs")).clicked() {
+                                self.recolor(false);
+                            }
+                            ui.separator();
+                            if ui.add_enabled(has, egui::Button::new("Verrouiller                Ctrl+2")).clicked() {
+                                self.toggle_lock();
+                            }
+                            if ui.button("Tout déverrouiller").clicked() {
+                                self.doc.items.iter_mut().for_each(|it| it.locked = false);
+                            }
                         });
                         ui.menu_button("Affichage", |ui| {
                             if ui.button("Ajuster à l'écran       Ctrl+0").clicked() {
@@ -596,8 +827,16 @@ impl VectorApp {
                                 self.zoom = 1.0;
                                 self.offset = Vec2::ZERO;
                             }
+                            ui.separator();
+                            ui.checkbox(&mut self.show_grid, "Grille                     Ctrl+'");
+                            ui.checkbox(&mut self.snap, "Magnétisme de la grille");
+                            ui.horizontal(|ui| {
+                                ui.label("Pas");
+                                ui.add(egui::DragValue::new(&mut self.grid).range(2.0..=500.0).suffix(" px"));
+                            });
                         });
                     });
+                    self.help.menu(ui);
                 });
             });
         });
@@ -720,9 +959,36 @@ impl VectorApp {
                         separator(ui);
                         style_swatches(ui, &mut self.style);
                     }
-                    Tool::Rect | Tool::Ellipse | Tool::Line => {
+                    Tool::Rect | Tool::Ellipse | Tool::Line | Tool::Heart => {
                         style_swatches(ui, &mut self.style);
                         ui.label(RichText::new("Maj : proportions fixes").size(12.0).color(FAINT));
+                    }
+                    Tool::Arrow => {
+                        pro::option_slider(ui, "Épaisseur", &mut self.arrow_w, 2.0..=120.0, " px", false);
+                        separator(ui);
+                        style_swatches(ui, &mut self.style);
+                    }
+                    Tool::Spiral => {
+                        pro::option_slider(ui, "Tours", &mut self.turns, 1.0..=12.0, "", false);
+                        separator(ui);
+                        style_swatches(ui, &mut self.style);
+                    }
+                    Tool::Pencil => {
+                        pro::option_slider(ui, "Lissage", &mut self.pencil_tol, 0.5..=12.0, "", false);
+                        separator(ui);
+                        style_swatches(ui, &mut self.style);
+                    }
+                    Tool::Rotate => {
+                        if self.sel.is_some() {
+                            ui.label(RichText::new("Glisse autour de l'objet · Maj : pas de 15°").size(12.5).color(MUTED));
+                            for (label, deg) in [("−90°", -90.0), ("−15°", -15.0), ("+15°", 15.0), ("+90°", 90.0)] {
+                                if pro::secondary(ui, label).clicked() {
+                                    self.rotate_sel(deg);
+                                }
+                            }
+                        } else {
+                            ui.label(RichText::new("Clique un objet, puis glisse pour le faire pivoter").size(12.5).color(MUTED));
+                        }
                     }
                     Tool::Text => {
                         ui.label(RichText::new("Clique sur le plan de travail pour ajouter un texte").size(12.5).color(MUTED));
@@ -740,6 +1006,11 @@ impl VectorApp {
                         }
                     }
                 }
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    if pro::secondary(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
+                        self.help.learn(tool_name(self.tool));
+                    }
+                });
             });
         });
     }
@@ -766,14 +1037,14 @@ impl VectorApp {
 
     fn tool_rail(&mut self, root: &mut Ui) {
         egui::Panel::left("tools").resizable(false).exact_size(52.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(7, 10))).show(root, |ui| {
-            ui.spacing_mut().item_spacing.y = 4.0;
+            ui.spacing_mut().item_spacing.y = 3.0;
             for (i, (tool, tip, _)) in TOOLS.iter().enumerate() {
-                if matches!(i, 2 | 7 | 9) {
-                    let (sep, _) = ui.allocate_exact_size(vec2(38.0, 9.0), Sense::hover());
+                if matches!(i, 4 | 12 | 14) {
+                    let (sep, _) = ui.allocate_exact_size(vec2(38.0, 7.0), Sense::hover());
                     ui.painter().line_segment([sep.left_center() + vec2(6.0, 0.0), sep.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
                 }
                 let t = *tool;
-                if pro::icon_button(ui, 38.0, self.tool == t, tip, |p, r, c| tool_icon(p, r, t, c)).clicked() {
+                if pro::icon_button(ui, 36.0, self.tool == t, tip, |p, r, c| tool_icon(p, r, t, c)).clicked() {
                     self.finish_pen();
                     self.tool = t;
                 }
@@ -798,7 +1069,7 @@ impl VectorApp {
                     Some(i) if i < self.doc.items.len() => {
                         pro::dock_panel(ui, "transform", "Transformation", |ui| self.transform_panel(ui, i));
                         pro::dock_panel(ui, "appearance", "Apparence", |ui| appearance(ui, &mut self.doc.items[i]));
-                        if !matches!(self.doc.items[i].geom, Geom::Ellipse { .. } | Geom::Path { closed: false, .. }) {
+                        if !matches!(self.doc.items[i].geom, Geom::Ellipse { .. }) {
                             pro::dock_panel(ui, "shape", shape_title(&self.doc.items[i].geom), |ui| shape_props(ui, &mut self.doc.items[i]));
                         }
                     }
@@ -850,6 +1121,17 @@ impl VectorApp {
         if changed {
             self.set_bbox(i, BBox { min: [x, y], max: [x + w, y + h] });
         }
+        if !matches!(self.doc.items[i].geom, Geom::Text { .. } | Geom::Image { .. }) {
+            ui.horizontal(|ui| {
+                ui.label(RichText::new("Rotation").color(MUTED));
+                for (label, deg) in [("↺ 15°", -15.0), ("↻ 15°", 15.0), ("↻ 90°", 90.0)] {
+                    if ui.small_button(label).clicked() {
+                        self.checkpoint();
+                        self.doc.items[i].rotate(deg);
+                    }
+                }
+            });
+        }
     }
 
     fn layers(&mut self, ui: &mut Ui) {
@@ -860,6 +1142,7 @@ impl VectorApp {
         }
         let mut select = None;
         let mut toggle = None;
+        let mut lock_toggle = None;
         for i in (0..self.doc.items.len()).rev() {
             let on = self.sel == Some(i);
             let (row, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::click());
@@ -883,7 +1166,13 @@ impl VectorApp {
             let sw = Rect::from_center_size(row.left_center() + vec2(42.0, 0.0), Vec2::splat(18.0));
             p.rect(sw, CornerRadius::same(4), it.fill.map(c32).unwrap_or(Color32::TRANSPARENT), Stroke::new(1.5, it.stroke.map(c32).unwrap_or(LINE)), StrokeKind::Inside);
             p.text(row.left_center() + vec2(60.0, 0.0), Align2::LEFT_CENTER, &it.name, if on { semibold(13.0) } else { FontId::proportional(13.0) }, if on { INK_STRONG } else { INK });
-            if ui.interact(eye.expand(4.0), ui.make_persistent_id(("veye", i)), Sense::click()).clicked() {
+            let lock = Rect::from_center_size(row.right_center() - vec2(16.0, 0.0), Vec2::splat(18.0));
+            if it.locked || resp.hovered() {
+                lock_icon(p, lock, it.locked, if it.locked { INK } else { FAINT });
+            }
+            if ui.interact(lock.expand(3.0), ui.make_persistent_id(("vlock", i)), Sense::click()).on_hover_text("Verrouiller").clicked() {
+                lock_toggle = Some(i);
+            } else if ui.interact(eye.expand(4.0), ui.make_persistent_id(("veye", i)), Sense::click()).clicked() {
                 toggle = Some(i);
             } else if resp.clicked() {
                 select = Some(i);
@@ -891,6 +1180,12 @@ impl VectorApp {
         }
         if let Some(i) = toggle {
             self.doc.items[i].visible = !self.doc.items[i].visible;
+        }
+        if let Some(i) = lock_toggle {
+            self.doc.items[i].locked = !self.doc.items[i].locked;
+            if self.doc.items[i].locked && self.sel == Some(i) {
+                self.sel = None;
+            }
         }
         if let Some(i) = select {
             self.finish_pen();
@@ -961,7 +1256,9 @@ impl VectorApp {
             self.cursor = pointer.filter(|p| area.contains(*p)).map(to_doc);
 
             if !panning && !space && let Some(sp) = pointer {
-                let pt = to_doc(sp);
+                let raw = to_doc(sp);
+                let g = self.grid.max(1.0);
+                let pt = if self.snap && self.tool != Tool::Pencil { [(raw[0] / g).round() * g, (raw[1] / g).round() * g] } else { raw };
                 if pressed && resp.hovered() {
                     match self.tool {
                         Tool::Zoom => zoom_at(&mut self.zoom, &mut self.offset, if alt { 0.8 } else { 1.25 }, sp),
@@ -986,6 +1283,9 @@ impl VectorApp {
                 }
             }
             if released {
+                if let Drag::Pencil = self.drag {
+                    self.finish_pencil(tol);
+                }
                 if let Drag::Create { .. } = self.drag
                     && let Some(i) = self.sel
                 {
@@ -1009,6 +1309,23 @@ impl VectorApp {
             if let Some(t) = &self.tex {
                 painter.image(t.id(), art, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             }
+            if self.show_grid && self.grid * zoom >= 4.0 {
+                let gs = Stroke::new(1.0, Color32::from_rgba_unmultiplied(10, 132, 255, 46));
+                let mut x = 0.0;
+                while x <= w {
+                    painter.line_segment([to_scr([x, 0.0]), to_scr([x, h])], gs);
+                    x += self.grid;
+                }
+                let mut y = 0.0;
+                while y <= h {
+                    painter.line_segment([to_scr([0.0, y]), to_scr([w, y])], gs);
+                    y += self.grid;
+                }
+            }
+            if self.pencil.len() > 1 {
+                let pts: Vec<Pos2> = self.pencil.iter().map(|q| to_scr(*q)).collect();
+                painter.add(Shape::line(pts, Stroke::new(1.5, BLUE)));
+            }
             if self.tool == Tool::Select
                 && let Some(hp) = pointer
                 && let Some(hi) = self.doc.hit(to_doc(hp), tol)
@@ -1025,6 +1342,7 @@ impl VectorApp {
                     Tool::Hand => egui::CursorIcon::Grab,
                     Tool::Select => egui::CursorIcon::Default,
                     Tool::Text => egui::CursorIcon::Text,
+                    Tool::Rotate => egui::CursorIcon::Alias,
                     Tool::Zoom => if alt { egui::CursorIcon::ZoomOut } else { egui::CursorIcon::ZoomIn },
                     _ => egui::CursorIcon::Crosshair,
                 });
@@ -1059,9 +1377,28 @@ impl VectorApp {
                     self.drag = Drag::Move { last: p };
                 }
             }
-            Tool::Rect | Tool::Ellipse | Tool::Polygon | Tool::Star | Tool::Line => {
+            Tool::Pencil => {
+                self.pencil = vec![p];
+                self.drag = Drag::Pencil;
+            }
+            Tool::Rotate => {
+                match self.sel {
+                    Some(i) if !matches!(self.doc.items[i].geom, Geom::Text { .. } | Geom::Image { .. }) => {
+                        self.checkpoint();
+                        let mut orig = self.doc.items[i].clone();
+                        orig.to_path();
+                        let b = orig.bbox();
+                        let center = [(b.min[0] + b.max[0]) / 2.0, (b.min[1] + b.max[1]) / 2.0];
+                        let start = (p[1] - center[1]).atan2(p[0] - center[0]).to_degrees();
+                        self.drag = Drag::Rotate { center, orig, start };
+                    }
+                    _ => self.sel = self.doc.hit(p, tol),
+                }
+            }
+            Tool::Rect | Tool::Ellipse | Tool::Polygon | Tool::Star | Tool::Line | Tool::Arrow | Tool::Spiral | Tool::Heart => {
                 self.checkpoint();
                 let geom = match self.tool {
+                    Tool::Spiral => Geom::Path { nodes: vec![Node::corner(p), Node::corner(p)], closed: false },
                     Tool::Rect => Geom::Rect { x: p[0], y: p[1], w: 0.0, h: 0.0, r: 0.0 },
                     Tool::Ellipse => Geom::Ellipse { cx: p[0], cy: p[1], rx: 0.0, ry: 0.0 },
                     Tool::Line => Geom::Path { nodes: vec![Node::corner(p), Node::corner(p)], closed: false },
@@ -1111,9 +1448,15 @@ impl VectorApp {
     }
 
     fn drag_to(&mut self, p: P, shift: bool) {
+        if let Drag::Pencil = self.drag {
+            if self.pencil.last().is_none_or(|l| dist(*l, p) > 0.5) {
+                self.pencil.push(p);
+            }
+            return;
+        }
         let Some(i) = self.sel else { return };
         let tool = self.tool;
-        let (sides, ratio) = (self.sides, self.star_ratio);
+        let (sides, ratio, arrow_w, turns) = (self.sides, self.star_ratio, self.arrow_w, self.turns);
         let it = &mut self.doc.items[i];
         match &mut self.drag {
             Drag::Move { last } => {
@@ -1122,12 +1465,12 @@ impl VectorApp {
             }
             Drag::Create { start } => {
                 let (mut dx, mut dy) = (p[0] - start[0], p[1] - start[1]);
-                if shift && tool != Tool::Line {
+                if shift && !matches!(tool, Tool::Line | Tool::Arrow) {
                     let m = dx.abs().max(dy.abs());
                     dx = m * dx.signum();
                     dy = m * dy.signum();
                 }
-                if shift && tool == Tool::Line {
+                if shift && matches!(tool, Tool::Line | Tool::Arrow) {
                     let a = dy.atan2(dx);
                     let snap = (a / (std::f32::consts::PI / 4.0)).round() * std::f32::consts::PI / 4.0;
                     let len = (dx * dx + dy * dy).sqrt();
@@ -1140,6 +1483,9 @@ impl VectorApp {
                     (Geom::Rect { r, .. }, _) => Geom::Rect { x, y, w, h, r: *r },
                     (Geom::Ellipse { .. }, _) => Geom::Ellipse { cx: x + w / 2.0, cy: y + h / 2.0, rx: w / 2.0, ry: h / 2.0 },
                     (_, Tool::Line) => Geom::Path { nodes: vec![Node::corner(*start), Node::corner([start[0] + dx, start[1] + dy])], closed: false },
+                    (_, Tool::Arrow) => Geom::Path { nodes: arrow(*start, [start[0] + dx, start[1] + dy], arrow_w), closed: true },
+                    (_, Tool::Heart) => Geom::Path { nodes: heart(x, y, w.max(0.1), h.max(0.1)), closed: true },
+                    (_, Tool::Spiral) => Geom::Path { nodes: spiral(start[0], start[1], (dx * dx + dy * dy).sqrt().max(0.1), turns), closed: false },
                     _ => {
                         let r = (dx * dx + dy * dy).sqrt();
                         let inner = (tool == Tool::Star).then_some(ratio);
@@ -1190,7 +1536,16 @@ impl VectorApp {
                     n.cin = [2.0 * n.p[0] - p[0], 2.0 * n.p[1] - p[1]];
                 }
             }
-            Drag::None => {}
+            Drag::Rotate { center, orig, start } => {
+                let mut a = (p[1] - center[1]).atan2(p[0] - center[0]).to_degrees() - *start;
+                if shift {
+                    a = (a / 15.0).round() * 15.0;
+                }
+                let mut next = orig.clone();
+                next.rotate_about(a, *center);
+                *it = next;
+            }
+            Drag::Pencil | Drag::None => {}
         }
     }
 
@@ -1367,6 +1722,22 @@ fn appearance(ui: &mut Ui, it: &mut Item) {
     if ui.add(egui::Slider::new(&mut op, 0.0..=100.0).suffix(" %")).changed() {
         it.opacity = op / 100.0;
     }
+    if it.fill.is_some() && !matches!(it.geom, Geom::Image { .. }) {
+        let mut grad = it.fill2.map(c32);
+        color_toggle(ui, "Dégradé", &mut grad);
+        it.fill2 = grad.map(|c| c.to_srgba_unmultiplied());
+        if it.fill2.is_some() {
+            ui.label(RichText::new("Angle du dégradé").size(12.5).color(MUTED));
+            ui.add(egui::Slider::new(&mut it.grad_angle, -180.0..=180.0).suffix("°"));
+        }
+    }
+    if it.stroke.is_some() {
+        ui.label(RichText::new("Pointillés").size(12.5).color(MUTED));
+        ui.add(egui::Slider::new(&mut it.dash, 0.0..=60.0).suffix(" px"));
+    }
+    ui.checkbox(&mut it.shadow, "Ombre portée");
+    ui.label(RichText::new("Flou").size(12.5).color(MUTED));
+    ui.add(egui::Slider::new(&mut it.blur, 0.0..=40.0).suffix(" px"));
 }
 
 fn shape_title(g: &Geom) -> &'static str {
@@ -1375,6 +1746,7 @@ fn shape_title(g: &Geom) -> &'static str {
         Geom::Text { .. } => "Texte",
         Geom::Path { .. } => "Tracé",
         Geom::Ellipse { .. } => "Ellipse",
+        Geom::Image { .. } => "Image",
     }
 }
 
@@ -1389,6 +1761,18 @@ fn shape_props(ui: &mut Ui, it: &mut Item) {
         Geom::Path { nodes, closed } => {
             ui.label(RichText::new(format!("{} points", nodes.len())).size(12.5).color(MUTED));
             ui.checkbox(closed, "Tracé fermé");
+            ui.horizontal(|ui| {
+                if ui.button("Lisser").on_hover_text("Arrondit tous les points").clicked() {
+                    model::smooth(nodes, *closed);
+                }
+                if ui.button("Simplifier").on_hover_text("Retire les points superflus").clicked() {
+                    let pts: Vec<P> = nodes.iter().map(|n| n.p).collect();
+                    *nodes = model::simplify(&pts, 1.5);
+                }
+                if ui.button("Inverser").on_hover_text("Inverse le sens du tracé").clicked() {
+                    model::reverse(nodes);
+                }
+            });
         }
         Geom::Text { text, size, family, bold, .. } => {
             ui.add(egui::TextEdit::multiline(text).desired_rows(3).desired_width(f32::INFINITY));
@@ -1401,7 +1785,7 @@ fn shape_props(ui: &mut Ui, it: &mut Item) {
             });
             ui.checkbox(bold, "Gras");
         }
-        Geom::Ellipse { .. } => {}
+        Geom::Ellipse { .. } | Geom::Image { .. } => {}
     }
 }
 
@@ -1472,6 +1856,16 @@ fn align_icon(p: &Painter, r: Rect, axis: usize, to: f32, c: Color32) {
     }
 }
 
+fn lock_icon(p: &Painter, r: Rect, locked: bool, c: Color32) {
+    let body = Rect::from_min_max(r.min + vec2(3.0, 8.0), r.max - vec2(3.0, 1.0));
+    p.rect_filled(body, CornerRadius::same(2), c);
+    let top = pos2(r.center().x, r.top() + 2.0);
+    let shift = if locked { 0.0 } else { 4.0 };
+    p.add(Shape::line(
+        vec![pos2(body.left() + 2.0, body.top()), pos2(body.left() + 2.0, top.y + 3.0 - shift), pos2(top.x, top.y - shift), pos2(body.right() - 2.0, top.y + 3.0 - shift), pos2(body.right() - 2.0, body.top() - shift)],
+        Stroke::new(1.6, c),
+    ));
+}
 fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
     let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
     let s = Stroke::new(1.8, c);
@@ -1518,6 +1912,45 @@ fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         Tool::Zoom => {
             p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
             p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.4, c));
+        }
+        Tool::Pencil => {
+            p.line_segment([at(0.85, 0.15), at(0.25, 0.75)], Stroke::new(4.0, c));
+            p.add(Shape::convex_polygon(vec![at(0.18, 0.68), at(0.32, 0.82), at(0.05, 0.95)], c, Stroke::NONE));
+        }
+        Tool::Rotate => {
+            let pts: Vec<Pos2> = (0..=18).map(|k| {
+                let a = (k as f32 / 18.0) * 4.8 - 0.9;
+                r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.42
+            }).collect();
+            let tip = pts[pts.len() - 1];
+            p.add(Shape::line(pts, s));
+            p.add(Shape::convex_polygon(vec![tip + vec2(-5.0, -1.0), tip + vec2(3.0, -5.0), tip + vec2(3.0, 3.0)], c, Stroke::NONE));
+        }
+        Tool::Arrow => {
+            let pts: Vec<Pos2> = arrow([0.05, 0.5], [0.95, 0.5], 0.2).iter().map(|n| at(n.p[0], n.p[1])).collect();
+            p.add(Shape::closed_line(pts, s));
+        }
+        Tool::Spiral => {
+            let pts: Vec<Pos2> = (0..=60).map(|k| {
+                let t = k as f32 / 60.0;
+                let a = t * 2.6 * std::f32::consts::TAU;
+                r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.48 * t
+            }).collect();
+            p.add(Shape::line(pts, s));
+        }
+        Tool::Heart => {
+            let nodes = heart(0.05, 0.1, 0.9, 0.85);
+            let mut pts = Vec::new();
+            for k in 0..nodes.len() {
+                let (a, b) = (nodes[k], nodes[(k + 1) % nodes.len()]);
+                for j in 0..=10 {
+                    let t = j as f32 / 10.0;
+                    let u = 1.0 - t;
+                    let q = |i: usize| u * u * u * a.p[i] + 3.0 * u * u * t * a.cout[i] + 3.0 * u * t * t * b.cin[i] + t * t * t * b.p[i];
+                    pts.push(at(q(0), q(1)));
+                }
+            }
+            p.add(Shape::closed_line(pts, s));
         }
     }
 }
