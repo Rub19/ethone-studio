@@ -1,13 +1,14 @@
 #![windows_subsystem = "windows"]
 
 mod model;
+mod tutos;
 
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key as EKey, Layout, Margin, Painter,
     Pos2, Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2,
     pos2, vec2,
 };
-use model::{Comp, Content, Ease, Layer, PROPS};
+use model::{BLENDS, Comp, Content, Ease, Layer, PROPS};
 use resvg::{tiny_skia, usvg};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -31,7 +32,7 @@ const PRESETS: [(&str, &str, u32, u32); 5] = [
     ("Carré", "Publication 1:1", 1080, 1080),
     ("Bannière GIF", "Web", 800, 400),
 ];
-const ANIMS: [(&str, &str); 8] = [
+const ANIMS: [(&str, &str); 15] = [
     ("Fondu entrant", "Opacité 0 → 100 %"),
     ("Fondu sortant", "Opacité 100 → 0 %"),
     ("Glisser depuis la gauche", "Entre par le côté"),
@@ -40,6 +41,13 @@ const ANIMS: [(&str, &str); 8] = [
     ("Rotation continue", "Un tour complet"),
     ("Rebond", "Tombe et rebondit"),
     ("Pulsation", "Respire en boucle"),
+    ("Machine à écrire", "Texte lettre par lettre"),
+    ("Tremblement", "Caméra à l'épaule"),
+    ("Tourbillon entrant", "Tourne et grandit"),
+    ("Zoom lent", "Effet Ken Burns"),
+    ("Élastique", "Apparaît en vibrant"),
+    ("Clignotement", "Apparaît et disparaît"),
+    ("Sortie à droite", "Quitte l'écran"),
 ];
 
 struct Job {
@@ -73,6 +81,7 @@ struct Motion {
     error: Option<String>,
     title: String,
     icon: TextureHandle,
+    help: studio_ui::help::Help,
 }
 
 fn recents_path() -> PathBuf {
@@ -148,6 +157,7 @@ impl Motion {
             error: None,
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "motion"),
+            help: studio_ui::help::Help::new("Motion", tutos::MOTION),
         };
         if let Some(p) = std::env::args().nth(1).map(PathBuf::from) {
             if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("emot")) {
@@ -211,7 +221,7 @@ impl Motion {
         let Some(i) = self.sel else { return };
         let t = self.t;
         let d = 0.6;
-        let (ch, dur) = (self.comp.height as f32, self.comp.duration);
+        let (cw, ch, dur) = (self.comp.width as f32, self.comp.height as f32, self.comp.duration);
         let l = &mut self.comp.layers[i];
         let x = l.props[0].at(t);
         let y = l.props[1].at(t);
@@ -253,7 +263,7 @@ impl Motion {
                     }
                 }
             }
-            _ => {
+            7 => {
                 let mut tt = t;
                 let mut big = false;
                 while tt <= dur + 1e-3 {
@@ -262,6 +272,54 @@ impl Motion {
                     tt += 0.5;
                 }
             }
+            8 => {
+                if matches!(l.content, Content::Text { .. }) {
+                    l.start = t.min(l.end - 0.1).max(0.0);
+                    l.fx.typewriter = 1.5;
+                }
+            }
+            9 => {
+                l.fx.wiggle = 10.0;
+                l.fx.wiggle_freq = 4.0;
+            }
+            10 => {
+                l.props[3].add_key(t, -180.0);
+                l.props[3].add_key(t + d, 0.0);
+                l.props[2].add_key(t, 0.0);
+                l.props[2].add_key(t + d, 100.0);
+                for pi in [2, 3] {
+                    l.props[pi].keys.iter_mut().for_each(|k| k.ease = Ease::Out);
+                }
+            }
+            11 => {
+                l.props[2].add_key(t, 100.0);
+                l.props[2].add_key(dur, 118.0);
+                l.props[2].keys.iter_mut().for_each(|k| k.ease = Ease::Linear);
+            }
+            12 => {
+                l.props[2].add_key(t, 0.0);
+                l.props[2].add_key(t + 1.0, 100.0);
+                if let Some(k) = l.props[2].key_at(t) {
+                    l.props[2].keys[k].ease = Ease::Elastic;
+                }
+            }
+            13 => {
+                let mut on = false;
+                let mut tt = t;
+                while tt <= t + 1.2 + 1e-3 {
+                    l.props[4].add_key(tt, if on { 100.0 } else { 0.0 });
+                    on = !on;
+                    tt += 0.15;
+                }
+                l.props[4].add_key(tt, 100.0);
+                l.props[4].keys.iter_mut().for_each(|k| k.ease = Ease::Hold);
+            }
+            14 => {
+                l.props[0].add_key(t, x);
+                l.props[0].add_key(t + d, cw + l.size().0 / 2.0);
+                l.props[0].keys.iter_mut().for_each(|k| k.ease = Ease::In);
+            }
+            _ => {}
         }
     }
 
@@ -350,6 +408,41 @@ impl Motion {
         }
     }
 
+    fn split(&mut self) {
+        let Some(i) = self.sel else { return };
+        let t = self.t;
+        let l = &self.comp.layers[i];
+        if t <= l.start + 1e-3 || t >= l.end - 1e-3 {
+            return;
+        }
+        let mut second = l.clone();
+        second.start = t;
+        second.name = format!("{} (suite)", l.name);
+        self.comp.layers[i].end = t;
+        self.comp.layers.insert(i + 1, second);
+        self.expanded.insert(i + 1, false);
+        self.sel = Some(i + 1);
+    }
+
+    fn reorder(&mut self, by: i32) {
+        let Some(i) = self.sel else { return };
+        let to = i as i32 + by;
+        if to < 0 || to as usize >= self.comp.layers.len() {
+            return;
+        }
+        self.comp.layers.swap(i, to as usize);
+        if (to as usize) < self.expanded.len() && i < self.expanded.len() {
+            self.expanded.swap(i, to as usize);
+        }
+        self.sel = Some(to as usize);
+    }
+
+    fn export_frame(&mut self) {
+        let Some(path) = rfd::FileDialog::new().add_filter("PNG", &["png"]).set_file_name("image.png").save_file() else { return };
+        if let Err(e) = render(&self.comp, self.t, 1.0, &self.fontdb).and_then(|pix| pix.save_png(&path).map_err(|e| e.to_string())) {
+            self.error = Some(format!("Image : {e}"));
+        }
+    }
     fn duplicate(&mut self) {
         if let Some(i) = self.sel {
             let mut l = self.comp.layers[i].clone();
@@ -397,6 +490,15 @@ impl Motion {
         }
         if sc(M::COMMAND, EKey::M) {
             self.export(true);
+        }
+        if sc(M::COMMAND | M::SHIFT, EKey::D) {
+            self.split();
+        }
+        if sc(M::COMMAND, EKey::CloseBracket) {
+            self.reorder(1);
+        }
+        if sc(M::COMMAND, EKey::OpenBracket) {
+            self.reorder(-1);
         }
         let step = 1.0 / self.comp.fps as f32;
         let (space, left, right, del, home, end) = ctx.input(|i| {
@@ -457,6 +559,7 @@ impl eframe::App for Motion {
             self.props(root);
             self.viewer(root, &name);
         }
+        self.help.show(ctx);
 
         if !self.home && self.comp != before && !self.editing {
             self.undo.push(before);
@@ -500,6 +603,9 @@ impl Motion {
                             if ui.button("Exporter en séquence PNG…").clicked() {
                                 self.export(false);
                             }
+                            if ui.button("Exporter l'image courante (PNG)…").clicked() {
+                                self.export_frame();
+                            }
                         });
                     });
                     ui.add_enabled_ui(!self.home, |ui| {
@@ -521,6 +627,16 @@ impl Motion {
                             if ui.add_enabled(self.sel.is_some(), egui::Button::new("Supprimer le calque   Suppr")).clicked() {
                                 self.delete();
                             }
+                            ui.separator();
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Fractionner à la tête   Ctrl+Maj+D")).clicked() {
+                                self.split();
+                            }
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Monter le calque         Ctrl+]")).clicked() {
+                                self.reorder(1);
+                            }
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Descendre le calque     Ctrl+[")).clicked() {
+                                self.reorder(-1);
+                            }
                         });
                         ui.menu_button("Composition", |ui| {
                             ui.add(egui::DragValue::new(&mut self.comp.width).range(16..=7680).prefix("Largeur ").suffix(" px"));
@@ -529,6 +645,7 @@ impl Motion {
                             ui.add(egui::DragValue::new(&mut self.comp.duration).range(0.1..=600.0).speed(0.1).prefix("Durée ").suffix(" s"));
                         });
                     });
+                    self.help.menu(ui);
                 });
                 if !self.home {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -650,7 +767,7 @@ impl Motion {
                 pro::dock_panel(ui, "add", "Ajouter un calque", |ui| {
                     ui.spacing_mut().item_spacing = vec2(8.0, 8.0);
                     let w = (ui.available_width() - 8.0) / 2.0;
-                    let items: [(&str, u8); 4] = [("Texte", 0), ("Rectangle", 1), ("Ellipse", 2), ("Image…", 3)];
+                    let items: [(&str, u8); 8] = [("Texte", 0), ("Rectangle", 1), ("Ellipse", 2), ("Image…", 3), ("Étoile", 4), ("Polygone", 5), ("Ligne", 6), ("Compteur", 7)];
                     for row in items.chunks(2) {
                         ui.horizontal(|ui| {
                             for (label, kind) in row {
@@ -664,7 +781,11 @@ impl Motion {
                                         0 => self.add_layer("Texte", Content::Text { text: "Texte".into(), size: 96.0, color: [255, 255, 255, 255], bold: true, family: "Segoe UI".into() }),
                                         1 => self.add_layer("Rectangle", Content::Rect { w: 400.0, h: 240.0, r: 24.0, color: [10, 132, 255, 255] }),
                                         2 => self.add_layer("Ellipse", Content::Ellipse { w: 300.0, h: 300.0, color: [255, 92, 120, 255] }),
-                                        _ => self.add_image(),
+                                        3 => self.add_image(),
+                                        4 => self.add_layer("Étoile", Content::Star { points: 5, radius: 160.0, inner: 0.45, color: [255, 196, 0, 255] }),
+                                        5 => self.add_layer("Polygone", Content::Star { points: 6, radius: 160.0, inner: 1.0, color: [48, 209, 88, 255] }),
+                                        6 => self.add_layer("Ligne", Content::Line { w: 600.0, thickness: 12.0, color: [255, 255, 255, 255] }),
+                                        _ => self.add_layer("Compteur", Content::Counter { from: 0.0, to: 100.0, decimals: 0, size: 160.0, color: [255, 255, 255, 255], prefix: String::new(), suffix: String::new() }),
                                     }
                                 }
                             }
@@ -801,8 +922,105 @@ impl Motion {
                             ui.label(RichText::new(Path::new(path.as_str()).file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()).size(12.0).color(FAINT));
                             size_row(ui, w, h);
                         }
+                        Content::Star { points, radius, inner, color } => {
+                            ui.add(egui::DragValue::new(points).range(3..=24).prefix("Branches "));
+                            ui.label(RichText::new("Rayon").size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(radius, 4.0..=2000.0).logarithmic(true));
+                            ui.label(RichText::new("Creux (1 = polygone)").size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(inner, 0.1..=1.0));
+                            color_row(ui, color);
+                        }
+                        Content::Line { w, thickness, color } => {
+                            ui.label(RichText::new("Longueur").size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(w, 4.0..=4000.0).logarithmic(true));
+                            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(thickness, 1.0..=200.0));
+                            color_row(ui, color);
+                        }
+                        Content::Counter { from, to, decimals, size, color, prefix, suffix } => {
+                            ui.horizontal(|ui| {
+                                ui.label(RichText::new("De").color(MUTED));
+                                ui.add(egui::DragValue::new(from).speed(1.0));
+                                ui.label(RichText::new("à").color(MUTED));
+                                ui.add(egui::DragValue::new(to).speed(1.0));
+                            });
+                            ui.add(egui::DragValue::new(decimals).range(0..=3).prefix("Décimales "));
+                            ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
+                            ui.horizontal(|ui| {
+                                ui.label(RichText::new("Avant").color(MUTED));
+                                ui.add(egui::TextEdit::singleline(prefix).desired_width(60.0));
+                                ui.label(RichText::new("Après").color(MUTED));
+                                ui.add(egui::TextEdit::singleline(suffix).desired_width(60.0));
+                            });
+                            color_row(ui, color);
+                            ui.label(RichText::new("Compte pendant 80 % de la durée du calque").size(12.0).color(FAINT));
+                        }
                     }
                 });
+                let mut help_open = false;
+                pro::dock_panel(ui, "fx", "Effets", |ui| {
+                    ui.spacing_mut().item_spacing.y = 6.0;
+                    ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
+                    let fx = &mut l.fx;
+                    ui.label(RichText::new("Flou").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(&mut fx.blur, 0.0..=60.0).suffix(" px"));
+                    ui.checkbox(&mut fx.shadow, "Ombre portée");
+                    let mut on = fx.stroke.is_some();
+                    ui.horizontal(|ui| {
+                        if ui.checkbox(&mut on, "Contour").changed() {
+                            fx.stroke = on.then_some([255, 255, 255, 255]);
+                            if fx.stroke_w <= 0.0 {
+                                fx.stroke_w = 4.0;
+                            }
+                        }
+                        if let Some(c) = &mut fx.stroke {
+                            let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
+                            if ui.color_edit_button_srgba(&mut col).changed() {
+                                *c = col.to_srgba_unmultiplied();
+                            }
+                        }
+                    });
+                    if fx.stroke.is_some() {
+                        ui.add(egui::Slider::new(&mut fx.stroke_w, 0.5..=40.0).suffix(" px"));
+                    }
+                    let mut grad = fx.gradient.is_some();
+                    ui.horizontal(|ui| {
+                        if ui.checkbox(&mut grad, "Dégradé vers").changed() {
+                            fx.gradient = grad.then_some([10, 132, 255, 255]);
+                        }
+                        if let Some(c) = &mut fx.gradient {
+                            let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
+                            if ui.color_edit_button_srgba(&mut col).changed() {
+                                *c = col.to_srgba_unmultiplied();
+                            }
+                        }
+                    });
+                    ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
+                    egui::ComboBox::from_id_salt("blend").selected_text(BLENDS.get(fx.blend as usize).map_or("Normal", |b| b.1)).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                        for (k, (_, name)) in BLENDS.iter().enumerate() {
+                            ui.selectable_value(&mut fx.blend, k as u8, *name);
+                        }
+                    });
+                    if matches!(l.content, Content::Text { .. }) {
+                        ui.label(RichText::new("Machine à écrire (0 = désactivée)").size(12.5).color(MUTED));
+                        ui.add(egui::Slider::new(&mut l.fx.typewriter, 0.0..=10.0).suffix(" s"));
+                    }
+                    let fx = &mut l.fx;
+                    ui.label(RichText::new("Tremblement").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(&mut fx.wiggle, 0.0..=200.0).suffix(" px"));
+                    if fx.wiggle > 0.0 {
+                        ui.add(egui::Slider::new(&mut fx.wiggle_freq, 0.1..=10.0).suffix(" /s"));
+                    }
+                    ui.checkbox(&mut fx.loop_keys, "Boucler les images clés");
+                    ui.add_space(4.0);
+                    if pro::secondary(ui, "?  Tutoriels").clicked() {
+                        help_open = true;
+                    }
+                });
+                if help_open {
+                    self.help.learn("Effets");
+                }
             });
         });
     }
@@ -1104,7 +1322,29 @@ fn short(s: &str, n: usize) -> String {
 
 fn layer_glyph(p: &Painter, r: Rect, kind: u8, c: Color32) {
     let s = Stroke::new(1.8, c);
+    let ring = |n: usize, inner: f32| -> Vec<Pos2> {
+        let count = if inner < 0.99 { n * 2 } else { n };
+        (0..count)
+            .map(|k| {
+                let a = -std::f32::consts::FRAC_PI_2 + k as f32 * std::f32::consts::TAU / count as f32;
+                let rr = if inner < 0.99 && k % 2 == 1 { inner } else { 1.0 };
+                r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.5 * rr
+            })
+            .collect()
+    };
     match kind {
+        4 => {
+            p.add(Shape::closed_line(ring(5, 0.45), s));
+        }
+        5 => {
+            p.add(Shape::closed_line(ring(6, 1.0), s));
+        }
+        6 => {
+            p.line_segment([r.left_center(), r.right_center()], Stroke::new(3.0, c));
+        }
+        7 => {
+            p.text(r.center(), Align2::CENTER_CENTER, "123", semibold(13.0), c);
+        }
         0 => {
             p.line_segment([r.left_top() + vec2(2.0, 2.0), r.right_top() + vec2(-2.0, 2.0)], Stroke::new(2.4, c));
             p.line_segment([r.center_top() + vec2(0.0, 2.0), r.center_bottom()], Stroke::new(2.4, c));
