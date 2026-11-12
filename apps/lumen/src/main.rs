@@ -26,7 +26,12 @@ const STAR: Color32 = Color32::from_rgb(255, 196, 0);
 struct Entry {
     settings: Settings,
     rating: u8,
+    flag: i8,
+    label: u8,
 }
+
+const LABELS: [(&str, [u8; 3]); 4] = [("Rouge", [255, 69, 58]), ("Jaune", [255, 204, 0]), ("Vert", [48, 209, 88]), ("Bleu", [10, 132, 255])];
+const SORTS: [&str; 3] = ["Nom", "Note", "Date"];
 
 #[derive(Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -34,6 +39,7 @@ struct Catalog {
     folder: Option<PathBuf>,
     recent_folders: Vec<PathBuf>,
     photos: HashMap<PathBuf, Entry>,
+    user_presets: Vec<(String, Settings)>,
 }
 
 impl Catalog {
@@ -68,6 +74,9 @@ enum Collection {
     All,
     Rated,
     Edited,
+    Picks,
+    Rejected,
+    Label(u8),
 }
 
 struct Export {
@@ -102,6 +111,22 @@ struct Lumen {
     hsl_tab: usize,
     export_quality: u8,
     export_edge: u32,
+    export_format: usize,
+    export_suffix: String,
+    query: String,
+    sort: usize,
+    picked: Vec<usize>,
+    history: Vec<(usize, Settings)>,
+    future: Vec<(usize, Settings)>,
+    editing: bool,
+    split_view: bool,
+    split_pos: f32,
+    before_tex: Option<(PathBuf, TextureHandle)>,
+    clipping: bool,
+    clip_tex: Option<TextureHandle>,
+    full_zoom: bool,
+    pan: Vec2,
+    preset_name: Option<String>,
 }
 
 impl Lumen {
@@ -134,6 +159,22 @@ impl Lumen {
             hsl_tab: 0,
             export_quality: 92,
             export_edge: 0,
+            export_format: 0,
+            export_suffix: String::new(),
+            query: String::new(),
+            sort: 0,
+            picked: Vec::new(),
+            history: Vec::new(),
+            future: Vec::new(),
+            editing: false,
+            split_view: false,
+            split_pos: 0.5,
+            before_tex: None,
+            clipping: false,
+            clip_tex: None,
+            full_zoom: false,
+            pan: Vec2::ZERO,
+            preset_name: None,
         };
         let arg = std::env::args().nth(1).map(PathBuf::from);
         if let Some(file) = arg.filter(|p| p.is_file() && develop::is_supported(p))
@@ -241,12 +282,24 @@ impl Lumen {
         let Some((path, src)) = &self.source else { return };
         let s = self.catalog.photos.get(path).map(|e| e.settings).unwrap_or_default();
         let key = (path.clone(), s, self.before);
+        if self.split_view && self.before_tex.as_ref().is_none_or(|(p, _)| p != path) {
+            let orig = develop::process(src, &Settings { crop: s.crop, straighten: s.straighten, rotate: s.rotate, flip: s.flip, distortion: s.distortion, ..Settings::default() });
+            self.before_tex = Some((path.clone(), ctx.load_texture("before", color_image(&orig), TextureOptions::LINEAR)));
+        }
         if self.shown.as_ref() == Some(&key) {
             return;
         }
         let used = if self.before { Settings::default() } else { s };
         let img = develop::process(src, &used);
         self.hist = Some(develop::histogram(&img));
+        self.clip_tex = self.clipping.then(|| {
+            let mut px = Vec::with_capacity((img.width() * img.height() * 4) as usize);
+            for p in img.pixels() {
+                let c = p.0;
+                px.extend_from_slice(&if c.iter().any(|v| *v >= 254) { [255, 40, 40, 200] } else if c.iter().all(|v| *v <= 2) { [40, 120, 255, 200] } else { [0, 0, 0, 0] });
+            }
+            ctx.load_texture("clip", egui::ColorImage::from_rgba_unmultiplied([img.width() as usize, img.height() as usize], &px), TextureOptions::NEAREST)
+        });
         let ci = color_image(&img);
         match &mut self.preview {
             Some(t) => t.set(ci, TextureOptions::LINEAR),
@@ -262,13 +315,13 @@ impl Lumen {
     }
 
     fn start_export(&mut self, only_current: bool) {
-        let ids: Vec<usize> = if only_current { self.current.into_iter().collect() } else { self.visible() };
+        let ids: Vec<usize> = if only_current { self.current.into_iter().collect() } else if self.picked.len() > 1 { self.picked.clone() } else { self.visible() };
         let list: Vec<(PathBuf, Settings)> = ids.iter().map(|&i| (self.files[i].clone(), self.get(i).settings)).collect();
         if list.is_empty() {
             return;
         }
         let Some(dir) = rfd::FileDialog::new().set_title("Dossier d'export").pick_folder() else { return };
-        let (quality, edge) = (self.export_quality, self.export_edge);
+        let (quality, edge, format, suffix) = (self.export_quality, self.export_edge, self.export_format, self.export_suffix.clone());
         let done = Arc::new(AtomicUsize::new(0));
         let errors = Arc::new(Mutex::new(Vec::new()));
         self.export = Some(Export { done: done.clone(), total: list.len(), errors: errors.clone() });
@@ -282,9 +335,15 @@ impl Lumen {
                         out = image::imageops::resize(&out, (out.width() as f32 * r).round() as u32, (out.height() as f32 * r).round() as u32, image::imageops::FilterType::Lanczos3);
                     }
                     let name = p.file_stem().unwrap_or_default().to_string_lossy().into_owned();
-                    let file = std::fs::File::create(dir.join(format!("{name}.jpg"))).map_err(|e| e.to_string())?;
-                    let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), quality);
-                    enc.encode_image(&out).map_err(|e| e.to_string())
+                    let ext = ["jpg", "png", "tif"][format.min(2)];
+                    let target = dir.join(format!("{name}{suffix}.{ext}"));
+                    if format == 0 {
+                        let file = std::fs::File::create(&target).map_err(|e| e.to_string())?;
+                        let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), quality);
+                        enc.encode_image(&out).map_err(|e| e.to_string())
+                    } else {
+                        out.save(&target).map_err(|e| e.to_string())
+                    }
                 });
                 if let Err(e) = r
                     && let Ok(mut list) = errors.lock()
@@ -297,17 +356,29 @@ impl Lumen {
     }
 
     fn visible(&self) -> Vec<usize> {
-        (0..self.files.len())
+        let q = self.query.to_lowercase();
+        let mut v: Vec<usize> = (0..self.files.len())
             .filter(|&i| {
                 let e = self.get(i);
-                e.rating >= self.min_rating
+                let name_ok = q.is_empty() || self.files[i].file_name().is_some_and(|n| n.to_string_lossy().to_lowercase().contains(&q));
+                name_ok
+                    && e.rating >= self.min_rating
                     && match self.collection {
-                        Collection::All => true,
+                        Collection::All => e.flag >= 0,
                         Collection::Rated => e.rating >= 3,
                         Collection::Edited => !e.settings.is_default(),
+                        Collection::Picks => e.flag > 0,
+                        Collection::Rejected => e.flag < 0,
+                        Collection::Label(l) => e.label == l,
                     }
             })
-            .collect()
+            .collect();
+        match self.sort {
+            1 => v.sort_by_key(|&i| std::cmp::Reverse(self.get(i).rating)),
+            2 => v.sort_by_key(|&i| std::fs::metadata(&self.files[i]).and_then(|m| m.modified()).ok()),
+            _ => {}
+        }
+        v
     }
 
     fn keys(&mut self, ctx: &egui::Context) {
@@ -327,6 +398,67 @@ impl Lumen {
             }
             (r, i.key_pressed(Key::ArrowRight), i.key_pressed(Key::ArrowLeft), copy, paste, i.key_pressed(Key::D) || i.key_pressed(Key::Enter), i.key_pressed(Key::G) || i.key_pressed(Key::Escape), i.key_down(Key::Backslash), auto)
         });
+        let (pk, xk, uk, lab, undo, redo, zk, jk, yk) = ctx.input_mut(|i| {
+            use egui::{KeyboardShortcut as K, Modifiers as M};
+            let undo = i.consume_shortcut(&K::new(M::COMMAND, Key::Z));
+            let redo = i.consume_shortcut(&K::new(M::COMMAND, Key::Y)) || i.consume_shortcut(&K::new(M::COMMAND | M::SHIFT, Key::Z));
+            let plain = !i.modifiers.command;
+            let mut lab = None;
+            for (n, k) in [Key::Num6, Key::Num7, Key::Num8, Key::Num9].into_iter().enumerate() {
+                if i.key_pressed(k) && plain {
+                    lab = Some(n as u8 + 1);
+                }
+            }
+            (i.key_pressed(Key::P) && plain, i.key_pressed(Key::X) && plain, i.key_pressed(Key::U) && plain, lab, undo, redo, i.key_pressed(Key::Z) && plain, i.key_pressed(Key::J) && plain, i.key_pressed(Key::Y) && plain)
+        });
+        let targets: Vec<usize> = if self.picked.len() > 1 { self.picked.clone() } else { self.current.into_iter().collect() };
+        if pk || xk || uk || lab.is_some() {
+            for &t in &targets {
+                let e = self.entry(t);
+                if pk {
+                    e.flag = 1;
+                }
+                if xk {
+                    e.flag = -1;
+                }
+                if uk {
+                    e.flag = 0;
+                }
+                if let Some(l) = lab {
+                    e.label = if e.label == l { 0 } else { l };
+                }
+            }
+            self.dirty_catalog = true;
+        }
+        if undo
+            && let Some((idx, st)) = self.history.pop()
+            && idx < self.files.len()
+        {
+            let cur = self.get(idx).settings;
+            self.future.push((idx, cur));
+            self.entry(idx).settings = st;
+            self.dirty_catalog = true;
+        }
+        if redo
+            && let Some((idx, st)) = self.future.pop()
+            && idx < self.files.len()
+        {
+            let cur = self.get(idx).settings;
+            self.history.push((idx, cur));
+            self.entry(idx).settings = st;
+            self.dirty_catalog = true;
+        }
+        if zk {
+            self.full_zoom = !self.full_zoom;
+            self.pan = Vec2::ZERO;
+        }
+        if jk {
+            self.clipping = !self.clipping;
+            self.shown = None;
+        }
+        if yk {
+            self.split_view = !self.split_view;
+        }
         self.before = back;
         let vis = self.visible();
         let pos = self.current.and_then(|c| vis.iter().position(|&v| v == c));
@@ -387,6 +519,9 @@ impl eframe::App for Lumen {
                 View::Develop => self.develop(root, ctx),
             }
         }
+        if ctx.input(|i| !i.pointer.any_down()) && !ctx.egui_wants_keyboard_input() {
+            self.editing = false;
+        }
         if self.dirty_catalog && ctx.input(|i| !i.pointer.any_down()) {
             self.catalog.save();
             self.dirty_catalog = false;
@@ -423,6 +558,10 @@ impl Lumen {
                             self.start_export(false);
                         }
                         ui.menu_button("Options d'export", |ui| {
+                            ui.label(RichText::new("Format").size(12.5).color(MUTED));
+                            pro::segmented(ui, &mut self.export_format, &["JPEG", "PNG", "TIFF"]);
+                            ui.label(RichText::new("Suffixe du nom").size(12.5).color(MUTED));
+                            ui.add(egui::TextEdit::singleline(&mut self.export_suffix).hint_text("ex. -web").desired_width(140.0));
                             ui.label(RichText::new("Qualité JPEG").size(12.5).color(MUTED));
                             ui.add(egui::Slider::new(&mut self.export_quality, 40..=100));
                             ui.label(RichText::new("Grand côté").size(12.5).color(MUTED));
@@ -491,6 +630,12 @@ impl Lumen {
                 });
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if !self.files.is_empty() {
+                        let label = if self.picked.len() > 1 { format!("Exporter {}", self.picked.len()) } else if self.view == View::Develop { "Exporter".to_string() } else { format!("Exporter {}", self.visible().len()) };
+                        let dev = self.view == View::Develop && self.picked.len() < 2;
+                        if pro::primary_icon(ui, &label, |p, r, c| export_glyph(p, r, c)).clicked() {
+                            self.start_export(dev);
+                        }
+                        ui.add_space(8.0);
                         let lib = self.view == View::Library;
                         segmented(ui, &mut self.view, self.current.is_some(), lib);
                     }
@@ -507,7 +652,7 @@ impl Lumen {
                     Some(f) => ui.label(small(format!("{} · {} photo(s)", f.display(), self.files.len()))),
                     None => ui.label(small("Aucun dossier ouvert".into())),
                 };
-                ui.label(small("← → naviguer · 0-5 noter · D développer · G bibliothèque · \\ avant/après".into()));
+                ui.label(small("← → naviguer · 0-5 noter · P/X drapeau · 6-9 couleur · D développer · G bibliothèque · Y avant|après · J écrêtage · Z 100 %".into()));
                 if let Some(e) = &self.export {
                     let d = e.done.load(Ordering::Relaxed);
                     let errs = e.errors.lock().map(|l| l.len()).unwrap_or(0);
@@ -568,11 +713,28 @@ impl Lumen {
             let all = self.files.len();
             let rated = (0..all).filter(|&i| self.get(i).rating >= 3).count();
             let edited = (0..all).filter(|&i| !self.get(i).settings.is_default()).count();
-            for (c, label, n) in [(Collection::All, "Toutes les photos", all), (Collection::Rated, "Notées 3★ et plus", rated), (Collection::Edited, "Modifiées", edited)] {
+            let picks = (0..all).filter(|&i| self.get(i).flag > 0).count();
+            let rejected = (0..all).filter(|&i| self.get(i).flag < 0).count();
+            for (c, label, n) in [(Collection::All, "Toutes les photos", all), (Collection::Picks, "Retenues", picks), (Collection::Rated, "Notées 3★ et plus", rated), (Collection::Edited, "Modifiées", edited), (Collection::Rejected, "Rejetées", rejected)] {
                 if nav_row(ui, label, n, self.collection == c) {
                     self.collection = c;
                 }
             }
+            ui.add_space(12.0);
+            heading(ui, "ÉTIQUETTES");
+            ui.horizontal(|ui| {
+                for (k, (name, rgb)) in LABELS.iter().enumerate() {
+                    let (r, resp) = ui.allocate_exact_size(Vec2::splat(26.0), Sense::click());
+                    ui.painter().circle_filled(r.center(), 9.0, Color32::from_rgb(rgb[0], rgb[1], rgb[2]));
+                    if self.collection == Collection::Label(k as u8 + 1) {
+                        ui.painter().circle_stroke(r.center(), 11.5, Stroke::new(1.5, Color32::WHITE));
+                    }
+                    let n = (0..all).filter(|&i| self.get(i).label == k as u8 + 1).count();
+                    if resp.on_hover_text(format!("{name} · {n} photo(s) · touche {}", k + 6)).clicked() {
+                        self.collection = Collection::Label(k as u8 + 1);
+                    }
+                }
+            });
             ui.add_space(16.0);
             heading(ui, "DOSSIERS");
             let current = self.catalog.folder.clone();
@@ -604,17 +766,67 @@ impl Lumen {
                         self.min_rating = r;
                     }
                 }
+                ui.add_space(10.0);
+                pro::toolbar_sep(ui);
+                ui.add(egui::TextEdit::singleline(&mut self.query).hint_text("Rechercher un nom").desired_width(150.0));
+                ui.label(RichText::new("Tri").size(12.5).color(MUTED));
+                pro::segmented(ui, &mut self.sort, &SORTS);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Exporter…").clicked() {
-                        self.start_export(false);
-                    }
-                    ui.add_space(12.0);
                     ui.spacing_mut().slider_width = 110.0;
                     ui.add(egui::Slider::new(&mut self.thumb_size, 120.0..=340.0).show_value(false));
                     ui.label(RichText::new("Taille").size(12.5).color(MUTED));
                 });
             });
         });
+        if self.picked.len() > 1 {
+            egui::Panel::top("lib-sel").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(18, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+                ui.horizontal_centered(|ui| {
+                    ui.label(RichText::new(format!("{} photos sélectionnées", self.picked.len())).font(semibold(13.0)).color(INK_STRONG));
+                    pro::toolbar_sep(ui);
+                    let picked = self.picked.clone();
+                    if pro::secondary(ui, "Synchroniser les réglages").on_hover_text("Copie les réglages de la photo active sur la sélection").clicked()
+                        && let Some(c) = self.current
+                    {
+                        let st = self.get(c).settings;
+                        for &p in &picked {
+                            self.entry(p).settings = st;
+                        }
+                        self.dirty_catalog = true;
+                    }
+                    ui.menu_button("Appliquer un préréglage", |ui| {
+                        let all: Vec<(String, Settings)> = develop::presets().into_iter().map(|(n, s)| (n.to_string(), s)).chain(self.catalog.user_presets.clone()).collect();
+                        for (name, st) in all {
+                            if ui.button(name).clicked() {
+                                for &p in &picked {
+                                    self.entry(p).settings = st;
+                                }
+                                self.dirty_catalog = true;
+                                ui.close();
+                            }
+                        }
+                    });
+                    if pro::secondary(ui, "Réinitialiser").clicked() {
+                        for &p in &picked {
+                            self.entry(p).settings = Settings::default();
+                        }
+                        self.dirty_catalog = true;
+                    }
+                    for (label, flag) in [("Retenir", 1i8), ("Rejeter", -1)] {
+                        if pro::ghost(ui, label).clicked() {
+                            for &p in &picked {
+                                self.entry(p).flag = flag;
+                            }
+                            self.dirty_catalog = true;
+                        }
+                    }
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if pro::ghost(ui, "Tout désélectionner").clicked() {
+                            self.picked.clear();
+                        }
+                    });
+                });
+            });
+        }
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD).inner_margin(Margin { left: 18, right: 18, top: 4, bottom: 8 })).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 let vis = self.visible();
@@ -632,10 +844,31 @@ impl Lumen {
                         for &i in row {
                             match self.tile(ui, i, cell) {
                                 Some(true) => {
+                                    self.picked.clear();
                                     self.select(i, ctx);
                                     self.view = View::Develop;
                                 }
-                                Some(false) => self.select(i, ctx),
+                                Some(false) => {
+                                    let (ctrl, shift) = ui.input(|i| (i.modifiers.command, i.modifiers.shift));
+                                    if ctrl {
+                                        if self.picked.is_empty()
+                                            && let Some(c) = self.current
+                                        {
+                                            self.picked.push(c);
+                                        }
+                                        if let Some(k) = self.picked.iter().position(|p| *p == i) {
+                                            self.picked.remove(k);
+                                        } else {
+                                            self.picked.push(i);
+                                        }
+                                    } else if shift && let Some(c) = self.current {
+                                        let (a, b) = (vis.iter().position(|v| *v == c).unwrap_or(0), vis.iter().position(|v| *v == i).unwrap_or(0));
+                                        self.picked = vis[a.min(b)..=a.max(b)].to_vec();
+                                    } else {
+                                        self.picked.clear();
+                                        self.select(i, ctx);
+                                    }
+                                }
                                 None => {}
                             }
                         }
@@ -648,7 +881,7 @@ impl Lumen {
 
     fn tile(&mut self, ui: &mut Ui, i: usize, size: f32) -> Option<bool> {
         let (rect, resp) = ui.allocate_exact_size(vec2(size, size + 30.0), Sense::click());
-        let on = self.current == Some(i);
+        let on = self.current == Some(i) || self.picked.contains(&i);
         let p = ui.painter();
         p.rect(rect, CornerRadius::same(12), if on || resp.hovered() { Color32::from_rgb(0x2c, 0x2c, 0x32) } else { Color32::from_rgb(0x22, 0x22, 0x26) }, Stroke::new(if on { 2.0 } else { 1.0 }, if on { BLUE } else { LINE }), StrokeKind::Inside);
         let img_area = Rect::from_min_size(rect.min + vec2(8.0, 8.0), Vec2::splat(size - 16.0));
@@ -670,6 +903,18 @@ impl Lumen {
         p.text(pos2(rect.left() + 12.0, y), Align2::LEFT_CENTER, short(&name, (size / 9.0) as usize), FontId::proportional(12.0), MUTED);
         let stars: String = (0..5).map(|k| if k < e.rating { '★' } else { '☆' }).collect();
         p.text(pos2(rect.right() - 12.0, y), Align2::RIGHT_CENTER, stars, FontId::proportional(12.0), if e.rating > 0 { STAR } else { FAINT });
+        if e.flag < 0 {
+            p.rect_filled(img_area, CornerRadius::same(6), Color32::from_black_alpha(150));
+            p.text(img_area.right_top() + vec2(-14.0, 14.0), Align2::CENTER_CENTER, "✕", semibold(14.0), RED);
+        } else if e.flag > 0 {
+            let b = Rect::from_center_size(img_area.right_top() + vec2(-14.0, 14.0), Vec2::splat(20.0));
+            p.circle_filled(b.center(), 10.0, GREEN);
+            p.text(b.center(), Align2::CENTER_CENTER, "✓", semibold(12.0), Color32::WHITE);
+        }
+        if e.label > 0 {
+            let c = LABELS[(e.label - 1) as usize % LABELS.len()].1;
+            p.rect_filled(Rect::from_min_max(pos2(rect.left() + 8.0, rect.bottom() - 4.0), pos2(rect.right() - 8.0, rect.bottom() - 1.0)), CornerRadius::same(2), Color32::from_rgb(c[0], c[1], c[2]));
+        }
         if !e.settings.is_default() {
             let badge = Rect::from_min_size(img_area.min + vec2(6.0, 6.0), vec2(22.0, 22.0));
             p.circle_filled(badge.center(), 10.0, Color32::from_black_alpha(150));
@@ -726,6 +971,53 @@ impl Lumen {
                     self.dirty_catalog = true;
                 }
             }
+            ui.add_space(14.0);
+            heading(ui, "MES PRÉRÉGLAGES");
+            let mut remove = None;
+            for (k, (name, s)) in self.catalog.user_presets.clone().into_iter().enumerate() {
+                let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 32.0), Sense::click());
+                let on = current == s;
+                if on {
+                    ui.painter().rect_filled(rect, CornerRadius::same(8), BLUE.gamma_multiply(0.24));
+                } else if resp.hovered() {
+                    ui.painter().rect_filled(rect, CornerRadius::same(8), Color32::from_white_alpha(8));
+                }
+                ui.painter().text(rect.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, short(&name, 24), FontId::proportional(13.5), if on { INK_STRONG } else { INK });
+                let resp = resp.on_hover_text("Clic droit : supprimer");
+                if resp.clicked() {
+                    self.entry(i).settings = s;
+                    self.dirty_catalog = true;
+                }
+                resp.context_menu(|ui| {
+                    if ui.button("Supprimer ce préréglage").clicked() {
+                        remove = Some(k);
+                        ui.close();
+                    }
+                });
+            }
+            if let Some(k) = remove {
+                self.catalog.user_presets.remove(k);
+                self.dirty_catalog = true;
+            }
+            match &mut self.preset_name {
+                Some(name) => {
+                    let r = ui.add(egui::TextEdit::singleline(name).hint_text("Nom du préréglage").desired_width(f32::INFINITY));
+                    r.request_focus();
+                    if r.lost_focus() {
+                        let n = name.trim().to_string();
+                        if !n.is_empty() {
+                            self.catalog.user_presets.push((n, current));
+                            self.dirty_catalog = true;
+                        }
+                        self.preset_name = None;
+                    }
+                }
+                None => {
+                    if pro::ghost(ui, "+ Enregistrer les réglages actuels").clicked() {
+                        self.preset_name = Some(String::new());
+                    }
+                }
+            }
         });
 
         egui::Panel::right("dev").resizable(false).exact_size(304.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
@@ -765,6 +1057,20 @@ impl Lumen {
                     dev_slider(ui, "Vibrance", &mut s.vibrance, -100.0..=100.0, 1.0);
                     dev_slider(ui, "Saturation", &mut s.saturation, -100.0..=100.0, 1.0);
                     ui.checkbox(&mut s.mono, "Noir et blanc");
+                    ui.add_space(4.0);
+                    ui.label(RichText::new("Balance des blancs").size(12.0).color(FAINT));
+                    ui.horizontal_wrapped(|ui| {
+                        for (name, t, ti) in develop::WB_PRESETS {
+                            if ui.small_button(name).clicked() {
+                                (s.temperature, s.tint) = (t, ti);
+                            }
+                        }
+                        if ui.small_button("Auto").on_hover_text("Neutralise la dominante de couleur").clicked()
+                            && let Some((_, src)) = &self.source
+                        {
+                            (s.temperature, s.tint) = develop::auto_white_balance(src);
+                        }
+                    });
                 });
                 pro::dock_panel(ui, "presence", "Présence", |ui| {
                     dev_slider(ui, "Texture", &mut s.texture, -100.0..=100.0, 1.0);
@@ -796,9 +1102,11 @@ impl Lumen {
                         dev_slider(ui, "", &mut s.hsl[b][*tab], -100.0..=100.0, 1.0);
                     }
                 });
-                pro::dock_panel(ui, "split", "Virage partiel", |ui| {
+                pro::dock_panel(ui, "split", "Étalonnage", |ui| {
                     hue_slider(ui, "Teinte des ombres", &mut s.split_shadow_hue);
                     dev_slider(ui, "Saturation des ombres", &mut s.split_shadow_sat, 0.0..=100.0, 1.0);
+                    hue_slider(ui, "Teinte des tons moyens", &mut s.split_mid_hue);
+                    dev_slider(ui, "Saturation des tons moyens", &mut s.split_mid_sat, 0.0..=100.0, 1.0);
                     hue_slider(ui, "Teinte des hautes lumières", &mut s.split_high_hue);
                     dev_slider(ui, "Saturation des hautes lumières", &mut s.split_high_sat, 0.0..=100.0, 1.0);
                     dev_slider(ui, "Équilibre", &mut s.split_balance, -100.0..=100.0, 1.0);
@@ -807,6 +1115,47 @@ impl Lumen {
                     dev_slider(ui, "Netteté", &mut s.sharpen, 0.0..=150.0, 1.0);
                     dev_slider(ui, "Rayon", &mut s.sharpen_radius, 0.0..=3.0, 0.1);
                     dev_slider(ui, "Réduction du bruit", &mut s.noise, 0.0..=100.0, 1.0);
+                });
+                pro::dock_panel(ui, "masks", "Masques", |ui| {
+                    ui.checkbox(&mut s.grad_on, RichText::new("Filtre gradué").font(semibold(12.5)));
+                    if s.grad_on {
+                        dev_slider(ui, "Angle", &mut s.grad_angle, -180.0..=180.0, 1.0);
+                        let mut pos = s.grad_pos * 100.0;
+                        dev_slider(ui, "Position", &mut pos, 0.0..=100.0, 1.0);
+                        s.grad_pos = pos / 100.0;
+                        let mut f = s.grad_feather * 100.0;
+                        dev_slider(ui, "Fondu", &mut f, 2.0..=100.0, 1.0);
+                        s.grad_feather = f / 100.0;
+                        dev_slider(ui, "Exposition", &mut s.grad_exposure, -3.0..=3.0, 0.01);
+                        dev_slider(ui, "Température", &mut s.grad_temp, -100.0..=100.0, 1.0);
+                        dev_slider(ui, "Saturation", &mut s.grad_sat, -100.0..=100.0, 1.0);
+                        ui.label(RichText::new("Glisse sur la photo pour placer la transition.").size(11.5).color(FAINT));
+                    }
+                    ui.add_space(6.0);
+                    ui.checkbox(&mut s.radial_on, RichText::new("Filtre radial").font(semibold(12.5)));
+                    if s.radial_on {
+                        let mut size = s.radial_size * 100.0;
+                        dev_slider(ui, "Taille", &mut size, 2.0..=100.0, 1.0);
+                        s.radial_size = size / 100.0;
+                        let mut f = s.radial_feather * 100.0;
+                        dev_slider(ui, "Fondu", &mut f, 2.0..=100.0, 1.0);
+                        s.radial_feather = f / 100.0;
+                        dev_slider(ui, "Exposition", &mut s.radial_exposure, -3.0..=3.0, 0.01);
+                        dev_slider(ui, "Température", &mut s.radial_temp, -100.0..=100.0, 1.0);
+                        dev_slider(ui, "Saturation", &mut s.radial_sat, -100.0..=100.0, 1.0);
+                        ui.checkbox(&mut s.radial_invert, "Agir à l'extérieur");
+                        ui.label(RichText::new("Glisse sur la photo pour déplacer le centre.").size(11.5).color(FAINT));
+                    }
+                    if s.grad_on && s.grad_feather == 0.0 {
+                        (s.grad_pos, s.grad_feather) = (0.5, 0.35);
+                    }
+                    if s.radial_on && s.radial_size == 0.0 {
+                        (s.radial_x, s.radial_y, s.radial_size, s.radial_feather) = (0.5, 0.5, 0.3, 0.5);
+                    }
+                });
+                pro::dock_panel(ui, "optics", "Optique", |ui| {
+                    dev_slider(ui, "Correction du vignetage", &mut s.lens_vignette, -100.0..=100.0, 1.0);
+                    dev_slider(ui, "Distorsion", &mut s.distortion, -100.0..=100.0, 1.0);
                 });
                 pro::dock_panel(ui, "effects", "Effets", |ui| {
                     dev_slider(ui, "Vignettage", &mut s.vignette, -100.0..=100.0, 1.0);
@@ -821,6 +1170,22 @@ impl Lumen {
                         dev_slider(ui, label, &mut v, 0.0..=45.0, 0.5);
                         s.crop[k] = v / 100.0;
                     }
+                    ui.label(RichText::new("Format").size(12.0).color(FAINT));
+                    ui.horizontal_wrapped(|ui| {
+                        for (name, ratio) in develop::RATIOS {
+                            if ui.small_button(name).clicked() {
+                                s.crop = match &self.source {
+                                    Some((_, src)) if ratio > 0.0 => {
+                                        let (w, h) = (src.width() as f32, src.height() as f32);
+                                        let (w, h) = if s.rotate % 2 == 1 { (h, w) } else { (w, h) };
+                                        let c = develop::crop_for_ratio(w, h, ratio);
+                                        if s.rotate % 2 == 1 { [c[1], c[0], c[3], c[2]] } else { c }
+                                    }
+                                    _ => [0.0; 4],
+                                };
+                            }
+                        }
+                    });
                     ui.checkbox(&mut s.flip, "Miroir horizontal");
                     ui.add_space(6.0);
                     ui.horizontal(|ui| {
@@ -850,6 +1215,14 @@ impl Lumen {
                         }
                     });
                 });
+                if s != start.0 && !self.editing {
+                    self.history.push((i, start.0));
+                    if self.history.len() > 200 {
+                        self.history.remove(0);
+                    }
+                    self.future.clear();
+                    self.editing = true;
+                }
                 if (s, rating) != start {
                     let e = self.entry(i);
                     e.settings = s;
@@ -868,11 +1241,23 @@ impl Lumen {
                     let name = self.files[i].file_name().unwrap_or_default().to_string_lossy().into_owned();
                     ui.label(RichText::new(name).size(13.0).color(MUTED));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        let held = ui.add(egui::Button::new(RichText::new("Avant / après").size(12.5)).corner_radius(CornerRadius::same(13)).sense(Sense::click_and_drag()));
+                        let held = ui.add(egui::Button::new(RichText::new("Maintenir : original").size(12.5)).corner_radius(CornerRadius::same(7)).sense(Sense::click_and_drag()));
                         if held.is_pointer_button_down_on() {
                             self.before = true;
                         }
                         held.on_hover_text("Maintenir pour voir l'original (ou la touche \\)");
+                        ui.add_space(6.0);
+                        if ui.selectable_label(self.split_view, "Avant | Après").on_hover_text("Comparaison côte à côte (Y)").clicked() {
+                            self.split_view = !self.split_view;
+                        }
+                        if ui.selectable_label(self.clipping, "Écrêtage").on_hover_text("Rouge : blancs brûlés · bleu : noirs bouchés (J)").clicked() {
+                            self.clipping = !self.clipping;
+                            self.shown = None;
+                        }
+                        if ui.selectable_label(self.full_zoom, "100 %").on_hover_text("Zoom 1:1, glisse pour te déplacer (Z ou double-clic)").clicked() {
+                            self.full_zoom = !self.full_zoom;
+                            self.pan = Vec2::ZERO;
+                        }
                     });
                 });
             });
@@ -882,10 +1267,77 @@ impl Lumen {
                 && self.source.as_ref().is_some_and(|(sp, _)| *sp == self.files[i])
             {
                 let [w, h] = t.size();
-                let s = (area.width() / w as f32).min(area.height() / h as f32);
-                let r = Rect::from_center_size(area.center(), vec2(w as f32, h as f32) * s);
-                p.add(egui::epaint::Shadow { offset: [0, 6], blur: 26, spread: 0, color: Color32::from_black_alpha(140) }.as_shape(r, CornerRadius::ZERO));
-                p.image(t.id(), r, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
+                let fit = (area.width() / w as f32).min(area.height() / h as f32);
+                let scale = if self.full_zoom { 1.0 / ui.ctx().pixels_per_point() } else { fit };
+                let r = Rect::from_center_size(area.center() + if self.full_zoom { self.pan } else { Vec2::ZERO }, vec2(w as f32, h as f32) * scale);
+                let painter = ui.painter_at(area.expand(24.0));
+                let uv = Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0));
+                painter.add(egui::epaint::Shadow { offset: [0, 6], blur: 26, spread: 0, color: Color32::from_black_alpha(140) }.as_shape(r, CornerRadius::ZERO));
+                painter.image(t.id(), r, uv, Color32::WHITE);
+                if let Some(ct) = &self.clip_tex {
+                    painter.image(ct.id(), r, uv, Color32::WHITE);
+                }
+                let st = self.catalog.photos.get(&self.files[i]).map(|e| e.settings).unwrap_or_default();
+                if st.radial_on {
+                    let c = pos2(r.left() + st.radial_x * r.width(), r.top() + st.radial_y * r.height());
+                    let rad = st.radial_size * r.width();
+                    painter.circle_stroke(c, rad, Stroke::new(1.5, Color32::WHITE));
+                    painter.circle_stroke(c, rad * (1.0 - st.radial_feather.clamp(0.02, 1.0)), Stroke::new(1.0, Color32::from_white_alpha(110)));
+                    painter.circle(c, 5.0, BLUE, Stroke::new(1.5, Color32::WHITE));
+                }
+                if st.grad_on {
+                    let a = st.grad_angle.to_radians();
+                    let (gdx, gdy) = (a.sin(), -a.cos());
+                    let off = 0.5 - st.grad_pos;
+                    let c = pos2(r.left() + (0.5 - off * gdx) * r.width(), r.top() + (0.5 - off * gdy) * r.height());
+                    let dir = vec2(-gdy * r.width(), gdx * r.height());
+                    painter.line_segment([c - dir, c + dir], Stroke::new(1.5, Color32::WHITE));
+                    painter.circle(c, 5.0, BLUE, Stroke::new(1.5, Color32::WHITE));
+                }
+                if self.split_view
+                    && let Some((bp, bt)) = &self.before_tex
+                    && *bp == self.files[i]
+                {
+                    let sx = r.left() + r.width() * self.split_pos;
+                    painter.image(bt.id(), Rect::from_min_max(r.min, pos2(sx, r.bottom())), Rect::from_min_max(pos2(0.0, 0.0), pos2(self.split_pos, 1.0)), Color32::WHITE);
+                    painter.line_segment([pos2(sx, r.top()), pos2(sx, r.bottom())], Stroke::new(2.0, Color32::WHITE));
+                    painter.circle(pos2(sx, r.center().y), 12.0, Color32::from_black_alpha(160), Stroke::new(2.0, Color32::WHITE));
+                    painter.text(pos2(sx, r.center().y), Align2::CENTER_CENTER, "⇔", FontId::proportional(12.0), Color32::WHITE);
+                    for (txt, x, al) in [("Avant", r.left() + 10.0, Align2::LEFT_TOP), ("Après", r.right() - 10.0, Align2::RIGHT_TOP)] {
+                        painter.text(pos2(x, r.top() + 10.0), al, txt, semibold(12.5), Color32::WHITE);
+                    }
+                    let handle = ui.interact(Rect::from_center_size(pos2(sx, r.center().y), vec2(28.0, r.height())), ui.make_persistent_id("split"), Sense::drag());
+                    if handle.hovered() || handle.dragged() {
+                        ui.ctx().set_cursor_icon(egui::CursorIcon::ResizeHorizontal);
+                    }
+                    if let Some(pp) = handle.interact_pointer_pos() {
+                        self.split_pos = ((pp.x - r.left()) / r.width()).clamp(0.02, 0.98);
+                    }
+                }
+                let img = ui.interact(r, ui.make_persistent_id("photo"), Sense::click_and_drag());
+                if img.double_clicked() {
+                    self.full_zoom = !self.full_zoom;
+                    self.pan = Vec2::ZERO;
+                } else if img.dragged() {
+                    if self.full_zoom {
+                        self.pan += img.drag_delta();
+                    } else if (st.radial_on || st.grad_on)
+                        && let Some(pp) = img.interact_pointer_pos()
+                    {
+                        let (u, v) = (((pp.x - r.left()) / r.width()).clamp(0.0, 1.0), ((pp.y - r.top()) / r.height()).clamp(0.0, 1.0));
+                        let e = self.catalog.photos.entry(self.files[i].clone()).or_default();
+                        if st.radial_on {
+                            (e.settings.radial_x, e.settings.radial_y) = (u, v);
+                        } else {
+                            let a = st.grad_angle.to_radians();
+                            e.settings.grad_pos = ((u - 0.5) * a.sin() + (v - 0.5) * -a.cos() + 0.5).clamp(0.0, 1.0);
+                        }
+                        self.dirty_catalog = true;
+                    }
+                }
+                if self.full_zoom && img.hovered() {
+                    ui.ctx().set_cursor_icon(if img.dragged() { egui::CursorIcon::Grabbing } else { egui::CursorIcon::Grab });
+                }
                 if self.before {
                     let tag = Rect::from_min_size(r.left_top() + vec2(12.0, 12.0), vec2(80.0, 26.0));
                     p.rect_filled(tag, CornerRadius::same(13), Color32::from_black_alpha(170));
@@ -1026,6 +1478,14 @@ fn draw_histogram(ui: &mut Ui, hist: Option<&[[u32; 256]; 4]>) {
         }
         p.add(mesh);
     }
+}
+
+fn export_glyph(p: &egui::Painter, r: Rect, c: Color32) {
+    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
+    p.line_segment([at(0.5, 0.05), at(0.5, 0.65)], Stroke::new(2.0, c));
+    p.line_segment([at(0.5, 0.05), at(0.25, 0.3)], Stroke::new(2.0, c));
+    p.line_segment([at(0.5, 0.05), at(0.75, 0.3)], Stroke::new(2.0, c));
+    p.add(egui::Shape::line(vec![at(0.12, 0.55), at(0.12, 0.95), at(0.88, 0.95), at(0.88, 0.55)], Stroke::new(2.0, c)));
 }
 
 fn short(s: &str, n: usize) -> String {

@@ -51,6 +51,61 @@ pub struct Settings {
     pub straighten: f32,
     pub crop: [f32; 4],
     pub flip: bool,
+    pub grad_on: bool,
+    pub grad_angle: f32,
+    pub grad_pos: f32,
+    pub grad_feather: f32,
+    pub grad_exposure: f32,
+    pub grad_temp: f32,
+    pub grad_sat: f32,
+    pub radial_on: bool,
+    pub radial_x: f32,
+    pub radial_y: f32,
+    pub radial_size: f32,
+    pub radial_feather: f32,
+    pub radial_exposure: f32,
+    pub radial_temp: f32,
+    pub radial_sat: f32,
+    pub radial_invert: bool,
+    pub split_mid_hue: f32,
+    pub split_mid_sat: f32,
+    pub lens_vignette: f32,
+    pub distortion: f32,
+}
+
+pub const WB_PRESETS: [(&str, f32, f32); 6] = [("Lumière du jour", 0.0, 0.0), ("Nuageux", 18.0, 4.0), ("Ombre", 32.0, 6.0), ("Tungstène", -55.0, 8.0), ("Fluorescent", -25.0, 25.0), ("Flash", 10.0, 0.0)];
+pub const RATIOS: [(&str, f32); 6] = [("Libre", 0.0), ("1:1", 1.0), ("4:5", 0.8), ("3:2", 1.5), ("16:9", 16.0 / 9.0), ("9:16", 9.0 / 16.0)];
+
+/// Crop insets giving `ratio` (w / h) centred on an image of size `w × h`.
+pub fn crop_for_ratio(w: f32, h: f32, ratio: f32) -> [f32; 4] {
+    if ratio <= 0.0 {
+        return [0.0; 4];
+    }
+    if w / h > ratio {
+        let keep = h * ratio / w;
+        let side = (1.0 - keep) / 2.0;
+        [side, 0.0, side, 0.0]
+    } else {
+        let keep = w / ratio / h;
+        let side = (1.0 - keep) / 2.0;
+        [0.0, side, 0.0, side]
+    }
+}
+
+/// Temperature and tint that neutralise the average colour (grey world).
+pub fn auto_white_balance(img: &RgbImage) -> (f32, f32) {
+    let n = (img.width() * img.height()).max(1) as f64;
+    let mut sum = [0f64; 3];
+    for p in img.pixels() {
+        for k in 0..3 {
+            sum[k] += to_lin(p.0[k] as f32 / 255.0) as f64;
+        }
+    }
+    let avg = sum.map(|v| (v / n).max(1e-4));
+    let t = ((avg[2] / avg[0]).ln() as f32 * 100.0 / 0.5).clamp(-100.0, 100.0);
+    let g = (avg[0] + avg[2]) / 2.0;
+    let ti = (((avg[1] / g).ln()) as f32 * 100.0 / 0.4).clamp(-100.0, 100.0);
+    ((t * 0.5).round(), (ti * 0.5).round())
 }
 
 impl Settings {
@@ -148,6 +203,24 @@ fn hsl_to_rgb(h: f32, s: f32, l: f32) -> [f32; 3] {
     [f(h + 1.0 / 3.0), f(h), f(h - 1.0 / 3.0)]
 }
 
+fn local_adjust(c: &mut [f32; 3], w: f32, exposure: f32, temp: f32, sat: f32) {
+    if w <= 0.0 {
+        return;
+    }
+    let gain = 2f32.powf(exposure * w);
+    for v in c.iter_mut() {
+        *v *= gain;
+    }
+    let t = temp / 100.0 * 0.12 * w;
+    c[0] += t;
+    c[2] -= t;
+    let l = luma(*c);
+    let k = 1.0 + sat / 100.0 * w;
+    for v in c.iter_mut() {
+        *v = l + (*v - l) * k.max(0.0);
+    }
+}
+
 fn hash(x: u32, y: u32) -> f32 {
     let mut h = x.wrapping_mul(0x9E37_79B1) ^ y.wrapping_mul(0x85EB_CA77);
     h ^= h >> 15;
@@ -170,10 +243,36 @@ fn band_adjust(hsl: &[[f32; 3]; 8], hue: f32) -> [f32; 3] {
 }
 
 /// Straighten (with automatic inner crop so no empty corners show), crop insets, mirror.
+fn undistort(src: &RgbImage, k: f32) -> RgbImage {
+    if k == 0.0 {
+        return src.clone();
+    }
+    let (w, h) = src.dimensions();
+    let (cx, cy) = (w as f32 / 2.0, h as f32 / 2.0);
+    let norm = (cx * cx + cy * cy).sqrt();
+    let k = -k / 100.0 * 0.35;
+    let scale = 1.0 / (1.0 + k.max(0.0));
+    let mut out = RgbImage::new(w, h);
+    let raw = src.as_raw();
+    out.par_chunks_mut(w as usize * 3).enumerate().for_each(|(y, row)| {
+        for x in 0..w as usize {
+            let (dx, dy) = ((x as f32 + 0.5 - cx) / norm, (y as f32 + 0.5 - cy) / norm);
+            let r2 = dx * dx + dy * dy;
+            let f = (1.0 + k * r2) * scale;
+            let sx = ((cx + dx * f * norm) as i64).clamp(0, w as i64 - 1) as usize;
+            let sy = ((cy + dy * f * norm) as i64).clamp(0, h as i64 - 1) as usize;
+            let o = (sy * w as usize + sx) * 3;
+            row[x * 3..x * 3 + 3].copy_from_slice(&raw[o..o + 3]);
+        }
+    });
+    out
+}
+
 fn geometry(src: &RgbImage, s: &Settings) -> Option<RgbImage> {
-    if s.straighten == 0.0 && s.crop == [0.0; 4] && !s.flip {
+    if s.straighten == 0.0 && s.crop == [0.0; 4] && !s.flip && s.distortion == 0.0 {
         return None;
     }
+    let src = &undistort(src, s.distortion);
     let mut img = if s.straighten != 0.0 {
         let (w, h) = (src.width() as f32, src.height() as f32);
         let a = s.straighten.to_radians();
@@ -233,6 +332,10 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
     let use_split = s.split_shadow_sat > 0.0 || s.split_high_sat > 0.0;
     let tint_sh = hsl_to_rgb(s.split_shadow_hue, 1.0, 0.5);
     let tint_hi = hsl_to_rgb(s.split_high_hue, 1.0, 0.5);
+    let tint_mid = hsl_to_rgb(s.split_mid_hue, 1.0, 0.5);
+    let use_split = use_split || s.split_mid_sat > 0.0;
+    let (ga, gs) = (s.grad_angle.to_radians(), (s.grad_feather.clamp(0.02, 1.0)) * 0.5);
+    let (gdx, gdy) = (ga.sin(), -ga.cos());
     let haze = s.dehaze / 100.0;
     let mut out = RgbImage::new(w, h);
     out.par_chunks_mut(w as usize * 3).enumerate().for_each(|(y, row)| {
@@ -240,7 +343,13 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
             let p = src.get_pixel(x as u32, y as u32).0;
             let mut c = [0f32; 3];
             for k in 0..3 {
-                c[k] = to_srgb(lut[p[k] as usize] * wb[k]);
+                let lin = lut[p[k] as usize] * wb[k];
+                c[k] = to_srgb(if s.lens_vignette != 0.0 {
+                    let d2 = ((x as f32 - cx).powi(2) + (y as f32 - cy).powi(2)) / (maxd * maxd);
+                    lin * (1.0 + s.lens_vignette / 100.0 * d2 * 1.2).max(0.0)
+                } else {
+                    lin
+                });
             }
             if haze > 0.0 {
                 let k = haze * 0.12;
@@ -290,9 +399,26 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
                 let bal = s.split_balance / 100.0;
                 let wsh = (1.0 - l3).powi(2) * (1.0 - bal).clamp(0.0, 2.0) * s.split_shadow_sat / 100.0;
                 let whi = l3.powi(2) * (1.0 + bal).clamp(0.0, 2.0) * s.split_high_sat / 100.0;
+                let wmid = 4.0 * l3 * (1.0 - l3) * s.split_mid_sat / 100.0;
                 for k in 0..3 {
-                    c[k] += (tint_sh[k] - 0.5) * wsh * 0.35 + (tint_hi[k] - 0.5) * whi * 0.35;
+                    c[k] += (tint_sh[k] - 0.5) * wsh * 0.35 + (tint_hi[k] - 0.5) * whi * 0.35 + (tint_mid[k] - 0.5) * wmid * 0.35;
                 }
+            }
+            let (u, v) = ((x as f32 + 0.5) / w as f32, (y as f32 + 0.5) / h as f32);
+            if s.grad_on {
+                let t = (u - 0.5) * gdx + (v - 0.5) * gdy + 0.5 - s.grad_pos;
+                let wgt = smooth(-gs, gs, t);
+                local_adjust(&mut c, wgt, s.grad_exposure, s.grad_temp, s.grad_sat);
+            }
+            if s.radial_on {
+                let size = s.radial_size.max(0.02);
+                let d = (((u - s.radial_x) / size).powi(2) + ((v - s.radial_y) / size * h as f32 / w as f32).powi(2)).sqrt();
+                let f = s.radial_feather.clamp(0.02, 1.0);
+                let mut wgt = 1.0 - smooth(1.0 - f, 1.0, d);
+                if s.radial_invert {
+                    wgt = 1.0 - wgt;
+                }
+                local_adjust(&mut c, wgt, s.radial_exposure, s.radial_temp, s.radial_sat);
             }
             if s.vignette != 0.0 {
                 let d = ((x as f32 - cx).powi(2) + (y as f32 - cy).powi(2)).sqrt() / maxd;
@@ -477,5 +603,20 @@ mod tests {
         assert!(grain.pixels().map(|p| p.0[0]).collect::<std::collections::HashSet<_>>().len() > 5);
         let warm = process(&grad, &Settings { split_high_hue: 30.0, split_high_sat: 100.0, ..Default::default() }).get_pixel(50, 5).0;
         assert!(warm[0] > warm[2]);
+
+        let flat = RgbImage::from_pixel(40, 40, image::Rgb([100, 100, 100]));
+        let g = process(&flat, &Settings { grad_on: true, grad_pos: 0.5, grad_feather: 0.1, grad_exposure: -1.5, ..Default::default() });
+        assert!(g.get_pixel(20, 2).0[0] < 80 && g.get_pixel(20, 37).0[0] >= 99, "{:?} {:?}", g.get_pixel(20, 2), g.get_pixel(20, 37));
+        let r = process(&flat, &Settings { radial_on: true, radial_x: 0.5, radial_y: 0.5, radial_size: 0.3, radial_feather: 0.2, radial_exposure: 1.0, ..Default::default() });
+        assert!(r.get_pixel(20, 20).0[0] > 120 && r.get_pixel(1, 1).0[0] <= 101);
+        let ri = process(&flat, &Settings { radial_on: true, radial_x: 0.5, radial_y: 0.5, radial_size: 0.3, radial_feather: 0.2, radial_exposure: 1.0, radial_invert: true, ..Default::default() });
+        assert!(ri.get_pixel(20, 20).0[0] <= 101 && ri.get_pixel(1, 1).0[0] > 120);
+        let lv = process(&flat, &Settings { lens_vignette: 80.0, ..Default::default() });
+        assert!(lv.get_pixel(0, 0).0[0] > lv.get_pixel(20, 20).0[0]);
+        let dist = process(&grad, &Settings { distortion: 50.0, ..Default::default() });
+        assert_eq!(dist.dimensions(), grad.dimensions());
+        assert_eq!(crop_for_ratio(200.0, 100.0, 1.0), [0.25, 0.0, 0.25, 0.0]);
+        let blue_cast = RgbImage::from_pixel(10, 10, image::Rgb([80, 100, 160]));
+        assert!(auto_white_balance(&blue_cast).0 > 0.0);
     }
 }
