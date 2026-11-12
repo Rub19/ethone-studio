@@ -46,7 +46,31 @@ pub struct Item {
     pub blur: f32,
     #[serde(default)]
     pub locked: bool,
+    #[serde(default)]
+    pub blend: u8,
+    #[serde(default)]
+    pub cap: u8,
+    #[serde(default)]
+    pub join: u8,
+    #[serde(default)]
+    pub gap: f32,
+    #[serde(default)]
+    pub arrow_end: bool,
+    #[serde(default)]
+    pub radial: bool,
+    #[serde(default)]
+    pub italic: bool,
+    #[serde(default)]
+    pub tracking: f32,
+    #[serde(default)]
+    pub align: u8,
+    #[serde(default)]
+    pub leading: f32,
 }
+
+pub const BLENDS: [(&str, &str); 7] = [("normal", "Normal"), ("multiply", "Produit"), ("screen", "Superposition"), ("overlay", "Incrustation"), ("darken", "Obscurcir"), ("lighten", "Éclaircir"), ("difference", "Différence")];
+pub const CAPS: [&str; 3] = ["round", "butt", "square"];
+pub const JOINS: [&str; 3] = ["round", "miter", "bevel"];
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -96,6 +120,16 @@ impl Item {
             shadow: false,
             blur: 0.0,
             locked: false,
+            blend: 0,
+            cap: 0,
+            join: 0,
+            gap: 0.0,
+            arrow_end: false,
+            radial: false,
+            italic: false,
+            tracking: 0.0,
+            align: 0,
+            leading: 0.0,
         }
     }
 
@@ -368,16 +402,12 @@ impl Doc {
             let mut paint = String::new();
             match (it.fill, it.fill2) {
                 (Some(a), Some(b)) => {
-                    writeln!(
-                        s,
-                        r#"<defs><linearGradient id="g{idx}" gradientTransform="rotate({} 0.5 0.5)"><stop offset="0" stop-color="{}" stop-opacity="{}"/><stop offset="1" stop-color="{}" stop-opacity="{}"/></linearGradient></defs>"#,
-                        it.grad_angle,
-                        color(a),
-                        a[3] as f32 / 255.0,
-                        color(b),
-                        b[3] as f32 / 255.0
-                    )
-                    .unwrap();
+                    let stops = format!(r#"<stop offset="0" stop-color="{}" stop-opacity="{}"/><stop offset="1" stop-color="{}" stop-opacity="{}"/>"#, color(a), a[3] as f32 / 255.0, color(b), b[3] as f32 / 255.0);
+                    if it.radial {
+                        writeln!(s, r#"<defs><radialGradient id="g{idx}">{stops}</radialGradient></defs>"#).unwrap();
+                    } else {
+                        writeln!(s, r#"<defs><linearGradient id="g{idx}" gradientTransform="rotate({} 0.5 0.5)">{stops}</linearGradient></defs>"#, it.grad_angle).unwrap();
+                    }
                     write!(paint, r#" fill="url(#g{idx})""#).unwrap();
                 }
                 (Some(c), None) => write!(paint, r#" fill="{}" fill-opacity="{}""#, color(c), c[3] as f32 / 255.0).unwrap(),
@@ -395,18 +425,27 @@ impl Doc {
                 write!(paint, r#" filter="url(#f{idx})""#).unwrap();
             }
             if it.dash > 0.0 && it.stroke.is_some() {
-                write!(paint, r#" stroke-dasharray="{} {}""#, it.dash, it.dash).unwrap();
+                write!(paint, r#" stroke-dasharray="{} {}""#, it.dash, if it.gap > 0.0 { it.gap } else { it.dash }).unwrap();
             }
 
             if let Some(c) = it.stroke {
                 write!(
                     paint,
-                    r#" stroke="{}" stroke-opacity="{}" stroke-width="{}" stroke-linejoin="round" stroke-linecap="round""#,
+                    r#" stroke="{}" stroke-opacity="{}" stroke-width="{}" stroke-linejoin="{}" stroke-linecap="{}""#,
                     color(c),
                     c[3] as f32 / 255.0,
-                    it.stroke_w
+                    it.stroke_w,
+                    JOINS[it.join as usize % 3],
+                    CAPS[it.cap as usize % 3]
                 )
                 .unwrap();
+                if it.arrow_end && matches!(it.geom, Geom::Path { closed: false, .. }) {
+                    writeln!(s, r#"<defs><marker id="m{idx}" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="{}"/></marker></defs>"#, color(c)).unwrap();
+                    write!(paint, r#" marker-end="url(#m{idx})""#).unwrap();
+                }
+            }
+            if it.blend > 0 {
+                write!(paint, r#" style="mix-blend-mode:{}""#, BLENDS[it.blend as usize % BLENDS.len()].0).unwrap();
             }
             if it.opacity < 1.0 {
                 write!(paint, r#" opacity="{}""#, it.opacity).unwrap();
@@ -426,15 +465,19 @@ impl Doc {
                     writeln!(s, r#"<path d="{}"{paint}/>"#, path_d(nodes, *closed)).unwrap()
                 }
                 Geom::Text { x, y, text, size, family, bold } => {
+                    let anchor = ["start", "middle", "end"][it.align as usize % 3];
                     write!(
                         s,
-                        r#"<text x="{x}" y="{y}" font-size="{size}" font-family="{}" font-weight="{}"{paint}>"#,
+                        r#"<text x="{x}" y="{y}" font-size="{size}" font-family="{}" font-weight="{}" font-style="{}" letter-spacing="{}" text-anchor="{anchor}"{paint}>"#,
                         esc(family),
-                        if *bold { "bold" } else { "normal" }
+                        if *bold { "bold" } else { "normal" },
+                        if it.italic { "italic" } else { "normal" },
+                        it.tracking
                     )
                     .unwrap();
+                    let lead = if it.leading > 0.0 { it.leading } else { 1.2 };
                     for (i, line) in text.lines().enumerate() {
-                        let dy = if i == 0 { 0.0 } else { size * 1.2 };
+                        let dy = if i == 0 { 0.0 } else { size * lead };
                         write!(s, r#"<tspan x="{x}" dy="{dy}">{}</tspan>"#, esc(line)).unwrap();
                     }
                     writeln!(s, "</text>").unwrap();
@@ -445,11 +488,152 @@ impl Doc {
         s
     }
 
+    /// Every visible item as a thin black outline: shows hidden overlaps and construction.
+    pub fn to_svg_outline(&self) -> String {
+        let mut d = self.clone();
+        d.background = Some([255, 255, 255, 255]);
+        for it in &mut d.items {
+            it.fill = None;
+            it.fill2 = None;
+            it.stroke = Some([20, 20, 24, 255]);
+            it.stroke_w = 1.0;
+            it.shadow = false;
+            it.blur = 0.0;
+            it.opacity = 1.0;
+            it.dash = 0.0;
+            it.blend = 0;
+        }
+        d.to_svg()
+    }
+
+    /// Resizes the artboard to the content plus a margin and moves everything inside.
+    pub fn fit_to_content(&mut self, margin: f32) -> bool {
+        let vis: Vec<BBox> = self.items.iter().filter(|i| i.visible).map(|i| i.bbox()).collect();
+        if vis.is_empty() {
+            return false;
+        }
+        let min = [vis.iter().map(|b| b.min[0]).fold(f32::MAX, f32::min), vis.iter().map(|b| b.min[1]).fold(f32::MAX, f32::min)];
+        let max = [vis.iter().map(|b| b.max[0]).fold(f32::MIN, f32::max), vis.iter().map(|b| b.max[1]).fold(f32::MIN, f32::max)];
+        let d = [margin - min[0], margin - min[1]];
+        for it in &mut self.items {
+            it.translate(d);
+        }
+        self.width = (max[0] - min[0] + 2.0 * margin).max(1.0);
+        self.height = (max[1] - min[1] + 2.0 * margin).max(1.0);
+        true
+    }
+
+    /// Union box of several items.
+    pub fn bounds_of(&self, idx: &[usize]) -> Option<BBox> {
+        let mut it = idx.iter().filter_map(|i| self.items.get(*i)).map(|i| i.bbox());
+        let first = it.next()?;
+        Some(it.fold(first, |a, b| BBox { min: [a.min[0].min(b.min[0]), a.min[1].min(b.min[1])], max: [a.max[0].max(b.max[0]), a.max[1].max(b.max[1])] }))
+    }
     pub fn hit(&self, p: P, tol: f32) -> Option<usize> {
         (0..self.items.len()).rev().find(|&i| self.items[i].visible && !self.items[i].locked && self.items[i].bbox().contains(p, tol))
     }
 }
 
+/// Splits every segment of a path in two (De Casteljau), keeping the exact curve.
+pub fn add_midpoints(nodes: &mut Vec<Node>, closed: bool) {
+    let n = nodes.len();
+    if n < 2 {
+        return;
+    }
+    let mut out = Vec::with_capacity(n * 2);
+    let lerp = |a: P, b: P| [(a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0];
+    let segs = if closed { n } else { n - 1 };
+    let mut cur = nodes[0];
+    for i in 0..segs {
+        let next = nodes[(i + 1) % n];
+        let (p0, p1, p2, p3) = (cur.p, cur.cout, next.cin, next.p);
+        let (a, b, c) = (lerp(p0, p1), lerp(p1, p2), lerp(p2, p3));
+        let (d, e) = (lerp(a, b), lerp(b, c));
+        let m = lerp(d, e);
+        out.push(Node { p: cur.p, cin: cur.cin, cout: a });
+        out.push(Node { p: m, cin: d, cout: e });
+        cur = Node { p: next.p, cin: c, cout: next.cout };
+    }
+    if closed {
+        out[0].cin = cur.cin;
+    } else {
+        out.push(cur);
+    }
+    *nodes = out;
+}
+
+/// Corner ⇄ smooth for one node.
+pub fn toggle_node(nodes: &mut [Node], i: usize, closed: bool) {
+    let n = nodes.len();
+    if i >= n {
+        return;
+    }
+    if nodes[i].cin == nodes[i].p && nodes[i].cout == nodes[i].p {
+        let prev = if i == 0 { if closed { nodes[n - 1].p } else { nodes[0].p } } else { nodes[i - 1].p };
+        let next = if i + 1 == n { if closed { nodes[0].p } else { nodes[n - 1].p } } else { nodes[i + 1].p };
+        let t = [(next[0] - prev[0]) / 6.0, (next[1] - prev[1]) / 6.0];
+        let p = nodes[i].p;
+        nodes[i].cin = [p[0] - t[0], p[1] - t[1]];
+        nodes[i].cout = [p[0] + t[0], p[1] + t[1]];
+    } else {
+        nodes[i] = Node::corner(nodes[i].p);
+    }
+}
+
+pub const SHAPES: [&str; 10] = ["Bulle", "Croix", "Éclair", "Repère", "Nuage", "Coche", "Engrenage", "Goutte", "Lune", "Badge"];
+
+/// Ready-made shapes fitted to a box: (nodes, closed).
+pub fn preset_shape(kind: usize, x: f32, y: f32, w: f32, h: f32) -> (Vec<Node>, bool) {
+    let at = |u: f32, v: f32| [x + u * w, y + v * h];
+    let poly = |pts: &[(f32, f32)]| pts.iter().map(|(u, v)| Node::corner(at(*u, *v))).collect::<Vec<_>>();
+    let round = |pts: &[(f32, f32)]| {
+        let mut n = poly(pts);
+        smooth(&mut n, true);
+        n
+    };
+    let ring = |k: usize, f: &dyn Fn(f32) -> f32| -> Vec<Node> {
+        (0..k).map(|i| {
+            let a = i as f32 / k as f32 * std::f32::consts::TAU - std::f32::consts::FRAC_PI_2;
+            let r = f(a);
+            Node::corner(at(0.5 + a.cos() * 0.5 * r, 0.5 + a.sin() * 0.5 * r))
+        }).collect()
+    };
+    match kind {
+        0 => (poly(&[(0.0, 0.0), (1.0, 0.0), (1.0, 0.75), (0.45, 0.75), (0.2, 1.0), (0.25, 0.75), (0.0, 0.75)]), true),
+        1 => (poly(&[(0.35, 0.0), (0.65, 0.0), (0.65, 0.35), (1.0, 0.35), (1.0, 0.65), (0.65, 0.65), (0.65, 1.0), (0.35, 1.0), (0.35, 0.65), (0.0, 0.65), (0.0, 0.35), (0.35, 0.35)]), true),
+        2 => (poly(&[(0.6, 0.0), (0.15, 0.55), (0.45, 0.55), (0.35, 1.0), (0.85, 0.4), (0.55, 0.4), (0.75, 0.0)]), true),
+        3 => {
+            let mut n = vec![
+                Node { p: at(0.5, 0.0), cin: at(0.2, 0.0), cout: at(0.8, 0.0) },
+                Node { p: at(1.0, 0.38), cin: at(1.0, 0.15), cout: at(1.0, 0.6) },
+                Node::corner(at(0.5, 1.0)),
+                Node { p: at(0.0, 0.38), cin: at(0.0, 0.6), cout: at(0.0, 0.15) },
+            ];
+            n[2].cin = at(0.62, 0.8);
+            n[2].cout = at(0.38, 0.8);
+            (n, true)
+        }
+        4 => (round(&[(0.1, 0.75), (0.05, 0.55), (0.2, 0.4), (0.3, 0.2), (0.5, 0.15), (0.65, 0.25), (0.8, 0.25), (0.95, 0.45), (0.9, 0.7), (0.6, 0.8), (0.35, 0.8)]), true),
+        5 => (poly(&[(0.05, 0.55), (0.38, 0.88), (0.95, 0.15)]), false),
+        6 => (ring(48, &|a| if ((a * 8.0 / std::f32::consts::TAU * 2.0).rem_euclid(2.0)) < 1.0 { 1.0 } else { 0.78 }), true),
+        7 => (round(&[(0.5, 0.0), (0.82, 0.55), (0.75, 0.88), (0.5, 1.0), (0.25, 0.88), (0.18, 0.55)]), true),
+        8 => {
+            let mut pts = Vec::new();
+            for i in 0..=16 {
+                let a = -std::f32::consts::FRAC_PI_2 + i as f32 / 16.0 * std::f32::consts::PI;
+                pts.push((0.5 + a.cos() * 0.5, 0.5 + a.sin() * 0.5));
+            }
+            for i in (0..=16).rev() {
+                let a = -std::f32::consts::FRAC_PI_2 + i as f32 / 16.0 * std::f32::consts::PI;
+                pts.push((0.5 + a.cos() * 0.22, 0.5 + a.sin() * 0.5));
+            }
+            let mut n = poly(&pts);
+            smooth(&mut n, true);
+            (n, true)
+        }
+        _ => (ring(32, &|a| if ((a * 16.0 / std::f32::consts::TAU).rem_euclid(1.0)) < 0.5 { 1.0 } else { 0.84 }), true),
+    }
+}
 /// A regular polygon (`inner` = None) or a star (`inner` = ratio of the inner radius), as path nodes.
 pub fn polygon(cx: f32, cy: f32, r: f32, sides: u32, inner: Option<f32>) -> Vec<Node> {
     let sides = sides.max(3);
@@ -533,6 +717,28 @@ mod tests {
         assert!(svg.contains(r#"fill="url(#g0)""#) && svg.contains("feDropShadow") && svg.contains("stroke-dasharray"));
         let opt = resvg::usvg::Options::default();
         assert!(resvg::usvg::Tree::from_str(&svg, &opt).is_ok());
+        let mut nodes = vec![Node::corner([0.0, 0.0]), Node::corner([10.0, 0.0]), Node::corner([10.0, 10.0])];
+        add_midpoints(&mut nodes, true);
+        assert_eq!(nodes.len(), 6);
+        assert_eq!(nodes[1].p, [5.0, 0.0]);
+        toggle_node(&mut nodes, 1, true);
+        assert_eq!(nodes[1].cin, nodes[1].p);
+        toggle_node(&mut nodes, 1, true);
+        assert_ne!(nodes[1].cin, nodes[1].p);
+        for k in 0..SHAPES.len() {
+            let (n, _) = preset_shape(k, 0.0, 0.0, 100.0, 100.0);
+            assert!(n.len() >= 3, "{k}");
+        }
+        let mut e = Doc::new(500.0, 500.0);
+        e.items.push(Item { geom: Geom::Rect { x: 100.0, y: 200.0, w: 50.0, h: 20.0, r: 0.0 }, fill: Some([0; 4]), radial: true, fill2: Some([255; 4]), blend: 1, ..Item::blank() });
+        e.items.push(Item { geom: Geom::Path { nodes: vec![Node::corner([0.0, 0.0]), Node::corner([10.0, 0.0])], closed: false }, stroke: Some([0; 4]), arrow_end: true, cap: 1, gap: 3.0, dash: 6.0, ..Item::blank() });
+        e.items.push(Item { geom: Geom::Text { x: 0.0, y: 50.0, text: "a\nb".into(), size: 10.0, family: "Arial".into(), bold: false }, italic: true, align: 1, tracking: 2.0, leading: 2.0, ..Item::blank() });
+        let svg = e.to_svg();
+        assert!(svg.contains("radialGradient") && svg.contains("mix-blend-mode:multiply") && svg.contains("marker-end") && svg.contains("stroke-dasharray=\"6 3\"") && svg.contains("italic") && svg.contains("text-anchor=\"middle\"") && svg.contains("dy=\"20\""));
+        assert!(resvg::usvg::Tree::from_str(&svg, &opt).is_ok());
+        assert!(resvg::usvg::Tree::from_str(&e.to_svg_outline(), &opt).is_ok());
+        assert!(e.fit_to_content(10.0));
+        assert_eq!(e.bounds_of(&[0]).unwrap().min, [110.0, 210.0]);
 
     }
 }

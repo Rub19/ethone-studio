@@ -80,6 +80,7 @@ enum Drag {
     NodePart { node: usize, part: u8 },
     PenHandle { node: usize },
     Rotate { center: P, orig: Item, start: f32 },
+    Band { start: P, end: P },
     Pencil,
 }
 
@@ -133,6 +134,12 @@ struct VectorApp {
     arrow_w: f32,
     turns: f32,
     repeat: Option<(u32, f32, f32, f32)>,
+    extra: Vec<usize>,
+    node_mods: (bool, bool),
+    clip: Vec<Item>,
+    outline_view: bool,
+    guides: bool,
+    shift: bool,
 }
 
 fn recents_path() -> PathBuf {
@@ -189,6 +196,12 @@ impl VectorApp {
             arrow_w: 16.0,
             turns: 3.0,
             repeat: None,
+            extra: Vec::new(),
+            node_mods: (false, false),
+            clip: Vec::new(),
+            outline_view: false,
+            guides: false,
+            shift: false,
         };
         if let Some(p) = std::env::args().nth(1) {
             me.open_path(Path::new(&p));
@@ -282,7 +295,8 @@ impl VectorApp {
         let w = (self.doc.width * scale).ceil().max(1.0) as u32;
         let h = (self.doc.height * scale).ceil().max(1.0) as u32;
         let opt = usvg::Options { fontdb: self.fontdb.clone(), ..Default::default() };
-        let tree = match usvg::Tree::from_str(&self.doc.to_svg(), &opt) {
+        let svg = if self.outline_view { self.doc.to_svg_outline() } else { self.doc.to_svg() };
+        let tree = match usvg::Tree::from_str(&svg, &opt) {
             Ok(t) => t,
             Err(e) => {
                 self.error = Some(format!("Rendu impossible : {e}"));
@@ -363,23 +377,181 @@ impl VectorApp {
         }
     }
 
+    fn selection(&self) -> Vec<usize> {
+        let mut v: Vec<usize> = self.sel.into_iter().chain(self.extra.iter().copied()).filter(|i| *i < self.doc.items.len()).collect();
+        v.sort_unstable();
+        v.dedup();
+        v
+    }
+
     fn delete_selected(&mut self) {
-        if let Some(i) = self.sel.take() {
-            self.checkpoint();
-            self.doc.items.remove(i);
-            self.pen = None;
+        let all = self.selection();
+        if all.is_empty() {
+            return;
         }
+        self.checkpoint();
+        for i in all.into_iter().rev() {
+            self.doc.items.remove(i);
+        }
+        self.sel = None;
+        self.extra.clear();
+        self.pen = None;
     }
 
     fn duplicate_selected(&mut self) {
-        if let Some(i) = self.sel {
-            self.checkpoint();
+        let all = self.selection();
+        if all.is_empty() {
+            return;
+        }
+        self.checkpoint();
+        let start = self.doc.items.len();
+        for &i in &all {
             let mut it = self.doc.items[i].clone();
             it.name = format!("{} copie", it.name);
             it.translate([16.0, 16.0]);
-            self.doc.items.insert(i + 1, it);
-            self.sel = Some(i + 1);
+            self.doc.items.push(it);
         }
+        self.sel = Some(start);
+        self.extra = (start + 1..self.doc.items.len()).collect();
+    }
+
+    fn copy_items(&mut self) {
+        self.clip = self.selection().into_iter().map(|i| self.doc.items[i].clone()).collect();
+    }
+
+    fn paste_items(&mut self, offset: bool) {
+        if self.clip.is_empty() {
+            return;
+        }
+        self.checkpoint();
+        let start = self.doc.items.len();
+        for it in self.clip.clone() {
+            let mut it = it;
+            if offset {
+                it.translate([20.0, 20.0]);
+            }
+            self.doc.items.push(it);
+        }
+        if offset {
+            self.clip.iter_mut().for_each(|i| i.translate([20.0, 20.0]));
+        }
+        self.sel = Some(start);
+        self.extra = (start + 1..self.doc.items.len()).collect();
+        self.tool = Tool::Select;
+    }
+
+    fn select_all(&mut self) {
+        let all: Vec<usize> = (0..self.doc.items.len()).filter(|&i| self.doc.items[i].visible && !self.doc.items[i].locked).collect();
+        self.sel = all.first().copied();
+        self.extra = all.into_iter().skip(1).collect();
+        self.tool = Tool::Select;
+    }
+
+    fn select_same_fill(&mut self) {
+        let Some(i) = self.sel else { return };
+        let fill = self.doc.items[i].fill;
+        self.extra = (0..self.doc.items.len()).filter(|&k| k != i && self.doc.items[k].fill == fill && self.doc.items[k].visible && !self.doc.items[k].locked).collect();
+    }
+
+    fn distribute(&mut self, axis: usize) {
+        let mut all = self.selection();
+        if all.len() < 3 {
+            return;
+        }
+        self.checkpoint();
+        all.sort_by(|a, b| self.doc.items[*a].bbox().min[axis].total_cmp(&self.doc.items[*b].bbox().min[axis]));
+        let boxes: Vec<BBox> = all.iter().map(|i| self.doc.items[*i].bbox()).collect();
+        let total: f32 = boxes.iter().map(|b| b.max[axis] - b.min[axis]).sum();
+        let span = boxes.last().unwrap().max[axis] - boxes[0].min[axis];
+        let gap = (span - total) / (all.len() - 1) as f32;
+        let mut cursor = boxes[0].max[axis] + gap;
+        for (k, &i) in all.iter().enumerate().skip(1).take(all.len() - 2) {
+            let mut d = [0.0, 0.0];
+            d[axis] = cursor - boxes[k].min[axis];
+            self.doc.items[i].translate(d);
+            cursor += boxes[k].max[axis] - boxes[k].min[axis] + gap;
+        }
+    }
+
+    fn add_points(&mut self) {
+        let Some(i) = self.sel else { return };
+        self.checkpoint();
+        if let Geom::Path { nodes, closed } = &mut self.doc.items[i].geom {
+            let c = *closed;
+            model::add_midpoints(nodes, c);
+        }
+    }
+
+    fn zoom_to_selection(&mut self) {
+        let Some(b) = self.doc.bounds_of(&self.selection()) else { return };
+        let (bw, bh) = ((b.max[0] - b.min[0]).max(1.0), (b.max[1] - b.min[1]).max(1.0));
+        self.zoom = (700.0 / bw).min(500.0 / bh).clamp(0.05, 32.0);
+        let c = [(b.min[0] + b.max[0]) / 2.0, (b.min[1] + b.max[1]) / 2.0];
+        self.offset = vec2((self.doc.width / 2.0 - c[0]) * self.zoom, (self.doc.height / 2.0 - c[1]) * self.zoom);
+    }
+
+    fn export_menu(&mut self, ui: &mut Ui) {
+        for s in [1.0, 2.0, 4.0] {
+            if ui.button(format!("PNG ×{s}")).clicked() {
+                self.export_png(s);
+                ui.close();
+            }
+        }
+        if ui.button("PNG ×2 fond transparent").clicked() {
+            let bg = self.doc.background.take();
+            self.export_png(2.0);
+            self.doc.background = bg;
+            ui.close();
+        }
+        if ui.button("SVG").clicked() {
+            self.export_svg();
+            ui.close();
+        }
+        if ui.add_enabled(self.sel.is_some(), egui::Button::new("SVG de la sélection")).clicked() {
+            let mut d = Doc::new(self.doc.width, self.doc.height);
+            d.background = None;
+            d.items = self.selection().into_iter().map(|i| self.doc.items[i].clone()).collect();
+            if d.fit_to_content(4.0)
+                && let Some(path) = rfd::FileDialog::new().add_filter("SVG", &["svg"]).set_file_name("selection.svg").save_file()
+                && let Err(e) = std::fs::write(path, d.to_svg())
+            {
+                self.error = Some(format!("Export SVG : {e}"));
+            }
+            ui.close();
+        }
+    }
+
+    fn multi_panel(&mut self, ui: &mut Ui, count: usize) {
+        pro::dock_panel(ui, "multi", &format!("{count} objets sélectionnés"), |ui| {
+            ui.spacing_mut().item_spacing.y = 8.0;
+            ui.label(RichText::new("Aligner entre eux").size(12.5).color(MUTED));
+            ui.horizontal(|ui| {
+                for (tip, axis, to) in [("À gauche", 0, 0.0), ("Centres (horizontal)", 0, 0.5), ("À droite", 0, 1.0), ("En haut", 1, 0.0), ("Milieux (vertical)", 1, 0.5), ("En bas", 1, 1.0)] {
+                    if pro::icon_button(ui, 30.0, false, tip, |p, r, c| align_icon(p, r, axis, to, c)).clicked() {
+                        self.align(axis, to);
+                    }
+                }
+            });
+            ui.horizontal(|ui| {
+                ui.add_enabled_ui(count >= 3, |ui| {
+                    if pro::secondary(ui, "Répartir ↔").clicked() {
+                        self.distribute(0);
+                    }
+                    if pro::secondary(ui, "Répartir ↕").clicked() {
+                        self.distribute(1);
+                    }
+                });
+            });
+            ui.horizontal(|ui| {
+                if pro::secondary(ui, "Dupliquer").clicked() {
+                    self.duplicate_selected();
+                }
+                if pro::secondary(ui, "Supprimer").clicked() {
+                    self.delete_selected();
+                }
+            });
+            ui.label(RichText::new("Maj+clic ajoute ou retire un objet, glisse dans le vide pour sélectionner une zone.").size(12.0).color(FAINT));
+        });
     }
 
     fn reorder(&mut self, by: i32) {
@@ -410,18 +582,29 @@ impl VectorApp {
     }
 
     fn align(&mut self, axis: usize, to: f32) {
-        let Some(i) = self.sel else { return };
+        let all = self.selection();
+        if all.is_empty() {
+            return;
+        }
         self.checkpoint();
-        let b = self.doc.items[i].bbox();
-        let size = [self.doc.width, self.doc.height][axis];
-        let target = match to {
-            t if t < 0.25 => 0.0,
-            t if t > 0.75 => size - (b.max[axis] - b.min[axis]),
-            _ => (size - (b.max[axis] - b.min[axis])) / 2.0,
+        let (lo, hi) = if all.len() > 1 {
+            let b = self.doc.bounds_of(&all).unwrap();
+            (b.min[axis], b.max[axis])
+        } else {
+            (0.0, [self.doc.width, self.doc.height][axis])
         };
-        let mut d = [0.0, 0.0];
-        d[axis] = target - b.min[axis];
-        self.doc.items[i].translate(d);
+        for i in all {
+            let b = self.doc.items[i].bbox();
+            let size = b.max[axis] - b.min[axis];
+            let target = match to {
+                t if t < 0.25 => lo,
+                t if t > 0.75 => hi - size,
+                _ => (lo + hi - size) / 2.0,
+            };
+            let mut d = [0.0, 0.0];
+            d[axis] = target - b.min[axis];
+            self.doc.items[i].translate(d);
+        }
     }
 
     fn set_bbox(&mut self, i: usize, nb: BBox) {
@@ -602,6 +785,25 @@ impl VectorApp {
         if sc(M::COMMAND, Key::D) || sc(M::COMMAND, Key::J) {
             self.duplicate_selected();
         }
+        if sc(M::COMMAND, Key::C) {
+            self.copy_items();
+        }
+        if sc(M::COMMAND, Key::X) {
+            self.copy_items();
+            self.delete_selected();
+        }
+        if sc(M::COMMAND | M::SHIFT, Key::V) {
+            self.paste_items(false);
+        } else if sc(M::COMMAND, Key::V) {
+            self.paste_items(true);
+        }
+        if sc(M::COMMAND, Key::A) {
+            self.select_all();
+        }
+        if sc(M::COMMAND | M::SHIFT, Key::Y) {
+            self.outline_view = !self.outline_view;
+            self.rendered = None;
+        }
         if sc(M::COMMAND | M::SHIFT, Key::S) {
             self.save(true);
         } else if sc(M::COMMAND, Key::S) {
@@ -660,11 +862,11 @@ impl VectorApp {
         if del {
             self.delete_selected();
         }
-        if nudge != [0.0, 0.0]
-            && let Some(i) = self.sel
-        {
+        if nudge != [0.0, 0.0] && self.sel.is_some() {
             self.checkpoint();
-            self.doc.items[i].translate(nudge);
+            for i in self.selection() {
+                self.doc.items[i].translate(nudge);
+            }
         }
     }
 }
@@ -716,8 +918,28 @@ impl eframe::App for VectorApp {
 
 impl VectorApp {
     fn menu_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
-            ui.horizontal_centered(|ui| {
+        egui::Panel::top("menu").exact_size(40.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
+            let full = ui.max_rect();
+            let right_w = if self.home { 0.0 } else { 260.0 };
+            if !self.home {
+                let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
+                ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        let r = pro::primary_icon(ui, "Exporter", |p, r, c| export_glyph(p, r, c)).on_hover_text("PNG ×2 : Ctrl+E · clic droit pour les autres formats");
+                        if r.clicked() {
+                            self.export_png(2.0);
+                        }
+                        r.context_menu(|ui| self.export_menu(ui));
+                        ui.add_space(6.0);
+                        if pro::chip(ui, &format!("{:.0} × {:.0} px", self.doc.width, self.doc.height)).on_hover_text("Plan de travail").clicked() {
+                            self.sel = None;
+                            self.extra.clear();
+                        }
+                    });
+                });
+            }
+            let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
+            ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| ui.horizontal_centered(|ui| {
                 ui.add(egui::Image::new((self.icon.id(), Vec2::splat(20.0))));
                 ui.add_space(6.0);
                 egui::MenuBar::new().ui(ui, |ui| {
@@ -739,6 +961,7 @@ impl VectorApp {
                                 self.place_image();
                             }
                             ui.separator();
+                            ui.menu_button("Plus d'exports", |ui| self.export_menu(ui));
                             if ui.button("Exporter en SVG…").clicked() {
                                 self.export_svg();
                             }
@@ -767,6 +990,27 @@ impl VectorApp {
                             }
                             if ui.add_enabled(self.sel.is_some(), egui::Button::new("Supprimer              Suppr")).clicked() {
                                 self.delete_selected();
+                            }
+                            ui.separator();
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Copier                    Ctrl+C")).clicked() {
+                                self.copy_items();
+                            }
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Couper                    Ctrl+X")).clicked() {
+                                self.copy_items();
+                                self.delete_selected();
+                            }
+                            if ui.add_enabled(!self.clip.is_empty(), egui::Button::new("Coller                     Ctrl+V")).clicked() {
+                                self.paste_items(true);
+                            }
+                            if ui.add_enabled(!self.clip.is_empty(), egui::Button::new("Coller en place         Ctrl+Maj+V")).clicked() {
+                                self.paste_items(false);
+                            }
+                            ui.separator();
+                            if ui.button("Tout sélectionner       Ctrl+A").clicked() {
+                                self.select_all();
+                            }
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Sélectionner même fond")).clicked() {
+                                self.select_same_fill();
                             }
                         });
                         ui.menu_button("Objet", |ui| {
@@ -812,6 +1056,24 @@ impl VectorApp {
                                 self.recolor(false);
                             }
                             ui.separator();
+                            let multi = self.selection().len() >= 3;
+                            if ui.add_enabled(multi, egui::Button::new("Répartir horizontalement")).clicked() {
+                                self.distribute(0);
+                            }
+                            if ui.add_enabled(multi, egui::Button::new("Répartir verticalement")).clicked() {
+                                self.distribute(1);
+                            }
+                            if ui.add_enabled(is_path, egui::Button::new("Ajouter des points")).clicked() {
+                                self.add_points();
+                            }
+                            if ui.button("Ajuster le plan de travail au contenu").clicked() {
+                                self.checkpoint();
+                                if !self.doc.fit_to_content(20.0) {
+                                    self.undo.pop();
+                                }
+                                self.fit_pending = true;
+                            }
+                            ui.separator();
                             if ui.add_enabled(has, egui::Button::new("Verrouiller                Ctrl+2")).clicked() {
                                 self.toggle_lock();
                             }
@@ -829,6 +1091,13 @@ impl VectorApp {
                             }
                             ui.separator();
                             ui.checkbox(&mut self.show_grid, "Grille                     Ctrl+'");
+                            if ui.checkbox(&mut self.outline_view, "Mode contours          Ctrl+Maj+Y").changed() {
+                                self.rendered = None;
+                            }
+                            ui.checkbox(&mut self.guides, "Repères (centre et tiers)");
+                            if ui.add_enabled(self.sel.is_some(), egui::Button::new("Zoom sur la sélection")).clicked() {
+                                self.zoom_to_selection();
+                            }
                             ui.checkbox(&mut self.snap, "Magnétisme de la grille");
                             ui.horizontal(|ui| {
                                 ui.label("Pas");
@@ -838,7 +1107,7 @@ impl VectorApp {
                     });
                     self.help.menu(ui);
                 });
-            });
+            }));
         });
     }
 
@@ -1065,7 +1334,9 @@ impl VectorApp {
         egui::Panel::right("dock").resizable(false).exact_size(300.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                let count = self.selection().len();
                 match self.sel {
+                    Some(_) if count > 1 => self.multi_panel(ui, count),
                     Some(i) if i < self.doc.items.len() => {
                         pro::dock_panel(ui, "transform", "Transformation", |ui| self.transform_panel(ui, i));
                         pro::dock_panel(ui, "appearance", "Apparence", |ui| appearance(ui, &mut self.doc.items[i]));
@@ -1092,6 +1363,82 @@ impl VectorApp {
                             let mut bg = self.doc.background.map(c32);
                             color_toggle(ui, "Fond", &mut bg);
                             self.doc.background = bg.map(|c| c.to_srgba_unmultiplied());
+                        });
+                        let (dw, dh) = (self.doc.width, self.doc.height);
+                        let mut insert = None;
+                        pro::dock_panel(ui, "presets", "Formes prêtes", |ui| {
+                            ui.horizontal_wrapped(|ui| {
+                                ui.spacing_mut().item_spacing = vec2(6.0, 6.0);
+                                for (k, name) in model::SHAPES.iter().enumerate() {
+                                    let (r, resp) = ui.allocate_exact_size(vec2(48.0, 48.0), Sense::click());
+                                    ui.painter().rect_filled(r, CornerRadius::same(8), if resp.hovered() { FIELD } else { Color32::from_rgb(0x26, 0x26, 0x2b) });
+                                    let (nodes, closed) = model::preset_shape(k, r.left() + 10.0, r.top() + 10.0, 28.0, 28.0);
+                                    let mut pts = Vec::new();
+                                    let n = nodes.len();
+                                    let segs = if closed { n } else { n - 1 };
+                                    for s in 0..segs {
+                                        let (a, b) = (nodes[s], nodes[(s + 1) % n]);
+                                        for j in 0..=8 {
+                                            let t = j as f32 / 8.0;
+                                            let u = 1.0 - t;
+                                            let q = |i: usize| u * u * u * a.p[i] + 3.0 * u * u * t * a.cout[i] + 3.0 * u * t * t * b.cin[i] + t * t * t * b.p[i];
+                                            pts.push(pos2(q(0), q(1)));
+                                        }
+                                    }
+                                    if closed {
+                                        ui.painter().add(Shape::closed_line(pts, Stroke::new(1.6, INK)));
+                                    } else {
+                                        ui.painter().add(Shape::line(pts, Stroke::new(2.0, INK)));
+                                    }
+                                    if resp.on_hover_text(*name).clicked() {
+                                        insert = Some(k);
+                                    }
+                                }
+                            });
+                        });
+                        if let Some(k) = insert {
+                            let s = dw.min(dh) * 0.3;
+                            let (nodes, closed) = model::preset_shape(k, (dw - s) / 2.0, (dh - s) / 2.0, s, s);
+                            self.checkpoint();
+                            let mut it = self.new_item(Geom::Path { nodes, closed });
+                            it.name = format!("{} {}", model::SHAPES[k], self.doc.items.len() + 1);
+                            if !closed {
+                                it.stroke_w = it.stroke_w.max(s / 12.0);
+                            }
+                            self.doc.items.push(it);
+                            self.sel = Some(self.doc.items.len() - 1);
+                            self.tool = Tool::Select;
+                        }
+                        const PALETTES: [(&str, [[u8; 3]; 6]); 6] = [
+                            ("Ethone", [[255, 122, 60], [255, 59, 107], [10, 132, 255], [48, 209, 88], [255, 196, 0], [20, 20, 24]]),
+                            ("Pastel", [[255, 209, 220], [255, 234, 167], [204, 236, 214], [196, 222, 255], [221, 208, 255], [250, 250, 250]]),
+                            ("Néon", [[0, 255, 200], [255, 0, 170], [255, 240, 0], [0, 170, 255], [170, 0, 255], [10, 10, 20]]),
+                            ("Terre", [[120, 72, 48], [176, 120, 72], [214, 180, 130], [104, 120, 72], [60, 72, 52], [240, 230, 210]]),
+                            ("Océan", [[2, 48, 71], [2, 119, 189], [79, 195, 247], [178, 235, 242], [0, 150, 136], [255, 255, 255]]),
+                            ("Mono", [[0, 0, 0], [51, 51, 51], [102, 102, 102], [153, 153, 153], [204, 204, 204], [255, 255, 255]]),
+                        ];
+                        pro::dock_panel(ui, "palettes", "Nuancier", |ui| {
+                            ui.spacing_mut().item_spacing.y = 6.0;
+                            for (name, cols) in PALETTES {
+                                ui.horizontal(|ui| {
+                                    ui.label(RichText::new(name).size(12.0).color(MUTED));
+                                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                                        ui.spacing_mut().item_spacing.x = 4.0;
+                                        for c in cols.iter().rev() {
+                                            let col = Color32::from_rgb(c[0], c[1], c[2]);
+                                            let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
+                                            ui.painter().rect(r, CornerRadius::same(5), col, Stroke::new(1.0, LINE), StrokeKind::Inside);
+                                            let resp = resp.on_hover_text("Clic : fond · clic droit : contour");
+                                            if resp.clicked() {
+                                                self.style.fill = Some(col);
+                                            }
+                                            if resp.secondary_clicked() {
+                                                self.style.stroke = Some(col);
+                                            }
+                                        }
+                                    });
+                                });
+                            }
                         });
                     }
                 }
@@ -1229,6 +1576,8 @@ impl VectorApp {
                     i.modifiers.alt,
                 )
             });
+            self.shift = shift;
+            self.node_mods = (alt, ui.input(|i| i.modifiers.command));
             let origin = |zoom: f32, offset: Vec2| area.center() + offset - vec2(w, h) * zoom / 2.0;
             let zoom_at = |zoom: &mut f32, offset: &mut Vec2, f: f32, at: Pos2| {
                 let docp = (at - origin(*zoom, *offset)) / *zoom;
@@ -1286,6 +1635,27 @@ impl VectorApp {
                 if let Drag::Pencil = self.drag {
                     self.finish_pencil(tol);
                 }
+                if let Drag::Band { start, end } = self.drag {
+                    let band = BBox { min: [start[0].min(end[0]), start[1].min(end[1])], max: [start[0].max(end[0]), start[1].max(end[1])] };
+                    let hits: Vec<usize> = (0..self.doc.items.len())
+                        .filter(|&i| {
+                            let it = &self.doc.items[i];
+                            let b = it.bbox();
+                            it.visible && !it.locked && b.max[0] >= band.min[0] && b.min[0] <= band.max[0] && b.max[1] >= band.min[1] && b.min[1] <= band.max[1]
+                        })
+                        .collect();
+                    if !shift {
+                        self.extra.clear();
+                        self.sel = None;
+                    }
+                    for i in hits {
+                        if self.sel.is_none() {
+                            self.sel = Some(i);
+                        } else if self.sel != Some(i) && !self.extra.contains(&i) {
+                            self.extra.push(i);
+                        }
+                    }
+                }
                 if let Drag::Create { .. } = self.drag
                     && let Some(i) = self.sel
                 {
@@ -1334,6 +1704,13 @@ impl VectorApp {
                 let b = self.doc.items[hi].bbox();
                 painter.rect_stroke(Rect::from_min_max(to_scr(b.min), to_scr(b.max)), CornerRadius::ZERO, Stroke::new(1.0, BLUE.gamma_multiply(0.7)), StrokeKind::Middle);
             }
+            if self.guides {
+                let gs = Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 59, 160, 110));
+                for f in [1.0 / 3.0, 0.5, 2.0 / 3.0] {
+                    painter.line_segment([to_scr([w * f, 0.0]), to_scr([w * f, h])], gs);
+                    painter.line_segment([to_scr([0.0, h * f]), to_scr([w, h * f])], gs);
+                }
+            }
             self.overlay(&painter, &to_scr);
 
             if resp.hovered() {
@@ -1366,15 +1743,50 @@ impl VectorApp {
                         });
                         if let Some((node, part)) = hit {
                             self.checkpoint();
+                            let (alt, ctrl) = self.node_mods;
+                            if part == 0 && (alt || ctrl) {
+                                if let Geom::Path { nodes, closed } = &mut self.doc.items[i].geom {
+                                    if alt && nodes.len() > 2 {
+                                        nodes.remove(node);
+                                    } else if ctrl {
+                                        model::toggle_node(nodes, node, *closed);
+                                    }
+                                }
+                                return;
+                            }
                             self.drag = Drag::NodePart { node, part };
                             return;
                         }
                     }
                 }
-                self.sel = self.doc.hit(p, tol);
-                if self.sel.is_some() {
-                    self.checkpoint();
-                    self.drag = Drag::Move { last: p };
+                let hit = self.doc.hit(p, tol);
+                match hit {
+                    Some(h) if self.shift => {
+                        if self.sel == Some(h) {
+                            self.sel = self.extra.pop();
+                        } else if let Some(k) = self.extra.iter().position(|e| *e == h) {
+                            self.extra.remove(k);
+                        } else if self.sel.is_none() {
+                            self.sel = Some(h);
+                        } else {
+                            self.extra.push(h);
+                        }
+                    }
+                    Some(h) => {
+                        if !self.selection().contains(&h) {
+                            self.extra.clear();
+                            self.sel = Some(h);
+                        }
+                        self.checkpoint();
+                        self.drag = Drag::Move { last: p };
+                    }
+                    None => {
+                        if !self.shift {
+                            self.sel = None;
+                            self.extra.clear();
+                        }
+                        self.drag = Drag::Band { start: p, end: p };
+                    }
                 }
             }
             Tool::Pencil => {
@@ -1452,6 +1864,18 @@ impl VectorApp {
             if self.pencil.last().is_none_or(|l| dist(*l, p) > 0.5) {
                 self.pencil.push(p);
             }
+            return;
+        }
+        if let Drag::Band { end, .. } = &mut self.drag {
+            *end = p;
+            return;
+        }
+        if let Drag::Move { last } = self.drag {
+            let d = [p[0] - last[0], p[1] - last[1]];
+            for i in self.selection() {
+                self.doc.items[i].translate(d);
+            }
+            self.drag = Drag::Move { last: p };
             return;
         }
         let Some(i) = self.sel else { return };
@@ -1545,11 +1969,31 @@ impl VectorApp {
                 next.rotate_about(a, *center);
                 *it = next;
             }
-            Drag::Pencil | Drag::None => {}
+            Drag::Pencil | Drag::None | Drag::Band { .. } => {}
         }
     }
 
     fn overlay(&self, painter: &Painter, to_scr: &impl Fn(P) -> Pos2) {
+        if let Drag::Band { start, end } = self.drag {
+            let r = Rect::from_two_pos(to_scr(start), to_scr(end));
+            painter.rect(r, CornerRadius::ZERO, BLUE.gamma_multiply(0.12), Stroke::new(1.0, BLUE), StrokeKind::Middle);
+        }
+        let all = self.selection();
+        if all.len() > 1 {
+            for &k in &all {
+                let b = self.doc.items[k].bbox();
+                painter.rect_stroke(Rect::from_min_max(to_scr(b.min), to_scr(b.max)), CornerRadius::ZERO, Stroke::new(1.0, BLUE.gamma_multiply(0.7)), StrokeKind::Middle);
+            }
+            if let Some(b) = self.doc.bounds_of(&all) {
+                let r = Rect::from_min_max(to_scr(b.min), to_scr(b.max)).expand(4.0);
+                painter.extend(Shape::dashed_line(&[r.left_top(), r.right_top(), r.right_bottom(), r.left_bottom(), r.left_top()], Stroke::new(1.0, BLUE), 4.0, 3.0));
+                let g = painter.layout_no_wrap(format!("{} objets", all.len()), FontId::proportional(11.5), Color32::WHITE);
+                let tag = Rect::from_center_size(pos2(r.center().x, r.bottom() + 16.0), g.size() + vec2(14.0, 6.0));
+                painter.rect_filled(tag, CornerRadius::same(6), BLUE);
+                painter.galley(tag.center() - g.size() / 2.0, g, Color32::WHITE);
+            }
+            return;
+        }
         let Some(i) = self.sel else { return };
         let Some(it) = self.doc.items.get(i) else { return };
         let b = it.bbox();
@@ -1727,14 +2171,47 @@ fn appearance(ui: &mut Ui, it: &mut Item) {
         color_toggle(ui, "Dégradé", &mut grad);
         it.fill2 = grad.map(|c| c.to_srgba_unmultiplied());
         if it.fill2.is_some() {
-            ui.label(RichText::new("Angle du dégradé").size(12.5).color(MUTED));
-            ui.add(egui::Slider::new(&mut it.grad_angle, -180.0..=180.0).suffix("°"));
+            let mut kind = it.radial as usize;
+            if pro::segmented(ui, &mut kind, &["Linéaire", "Radial"]) {
+                it.radial = kind == 1;
+            }
+            if !it.radial {
+                ui.label(RichText::new("Angle du dégradé").size(12.5).color(MUTED));
+                ui.add(egui::Slider::new(&mut it.grad_angle, -180.0..=180.0).suffix("°"));
+            }
         }
     }
     if it.stroke.is_some() {
         ui.label(RichText::new("Pointillés").size(12.5).color(MUTED));
         ui.add(egui::Slider::new(&mut it.dash, 0.0..=60.0).suffix(" px"));
+        if it.dash > 0.0 {
+            ui.label(RichText::new("Espace entre tirets").size(12.5).color(MUTED));
+            ui.add(egui::Slider::new(&mut it.gap, 0.0..=60.0).suffix(" px"));
+        }
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Bouts").size(12.5).color(MUTED));
+            let mut cap = it.cap as usize;
+            if pro::segmented(ui, &mut cap, &["Ronds", "Plats", "Carrés"]) {
+                it.cap = cap as u8;
+            }
+        });
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Angles").size(12.5).color(MUTED));
+            let mut join = it.join as usize;
+            if pro::segmented(ui, &mut join, &["Ronds", "Pointus", "Biseautés"]) {
+                it.join = join as u8;
+            }
+        });
+        if matches!(it.geom, Geom::Path { closed: false, .. }) {
+            ui.checkbox(&mut it.arrow_end, "Pointe de flèche à la fin");
+        }
     }
+    ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
+    egui::ComboBox::from_id_salt("vblend").selected_text(model::BLENDS[it.blend as usize % model::BLENDS.len()].1).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+        for (k, (_, name)) in model::BLENDS.iter().enumerate() {
+            ui.selectable_value(&mut it.blend, k as u8, *name);
+        }
+    });
     ui.checkbox(&mut it.shadow, "Ombre portée");
     ui.label(RichText::new("Flou").size(12.5).color(MUTED));
     ui.add(egui::Slider::new(&mut it.blur, 0.0..=40.0).suffix(" px"));
@@ -1783,7 +2260,22 @@ fn shape_props(ui: &mut Ui, it: &mut Item) {
                     ui.selectable_value(family, f.to_string(), f);
                 }
             });
-            ui.checkbox(bold, "Gras");
+            ui.horizontal(|ui| {
+                ui.toggle_value(bold, RichText::new("G").strong());
+                ui.toggle_value(&mut it.italic, RichText::new("I").italics());
+                ui.add_space(8.0);
+                let mut al = it.align as usize;
+                if pro::segmented(ui, &mut al, &["Gauche", "Centre", "Droite"]) {
+                    it.align = al as u8;
+                }
+            });
+            ui.label(RichText::new("Approche").size(12.5).color(MUTED));
+            ui.add(egui::Slider::new(&mut it.tracking, -5.0..=40.0).suffix(" px"));
+            ui.label(RichText::new("Interligne").size(12.5).color(MUTED));
+            let mut lead = if it.leading > 0.0 { it.leading } else { 1.2 };
+            if ui.add(egui::Slider::new(&mut lead, 0.8..=3.0)).changed() {
+                it.leading = lead;
+            }
         }
         Geom::Ellipse { .. } | Geom::Image { .. } => {}
     }
@@ -1865,6 +2357,13 @@ fn lock_icon(p: &Painter, r: Rect, locked: bool, c: Color32) {
         vec![pos2(body.left() + 2.0, body.top()), pos2(body.left() + 2.0, top.y + 3.0 - shift), pos2(top.x, top.y - shift), pos2(body.right() - 2.0, top.y + 3.0 - shift), pos2(body.right() - 2.0, body.top() - shift)],
         Stroke::new(1.6, c),
     ));
+}
+fn export_glyph(p: &Painter, r: Rect, c: Color32) {
+    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
+    p.line_segment([at(0.5, 0.05), at(0.5, 0.65)], Stroke::new(2.0, c));
+    p.line_segment([at(0.5, 0.05), at(0.25, 0.3)], Stroke::new(2.0, c));
+    p.line_segment([at(0.5, 0.05), at(0.75, 0.3)], Stroke::new(2.0, c));
+    p.add(Shape::line(vec![at(0.12, 0.55), at(0.12, 0.95), at(0.88, 0.95), at(0.88, 0.55)], Stroke::new(2.0, c)));
 }
 fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
     let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();

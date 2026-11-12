@@ -51,5 +51,12 @@ pub const VECTOR: &[Tuto] = &[
     t("Grille et magnétisme", "Ctrl+'", "Aligne le dessin sur une grille régulière.", &["Affichage > Grille pour la voir, Magnétisme pour que les points s'y collent.", "La taille de la grille se règle dans le même menu."]),
     t("Verrouillage", "Ctrl+2", "Empêche de sélectionner ou déplacer un objet par erreur.", &["Objet > Verrouiller, ou le cadenas dans le panneau Calques."]),
     t("Image", "", "Place une photo ou un logo PNG/JPEG dans le dessin.", &["Fichier > Importer une image…", "Redimensionne-la avec les coins comme n'importe quel objet."]),
+    t("Sélection multiple", "Maj+clic", "Travaille sur plusieurs objets à la fois.", &["Maj+clic ajoute ou retire un objet, glisse dans le vide pour sélectionner une zone, Ctrl+A tout.", "Déplace, duplique, supprime ou aligne-les ensemble ; Répartir les espace régulièrement.", "Édition > Sélectionner même fond attrape tous les objets de la même couleur."]),
+    t("Copier et coller", "Ctrl+C / Ctrl+V", "Duplique des objets, aussi au même endroit.", &["Ctrl+V colle décalé, Ctrl+Maj+V colle exactement en place."]),
+    t("Formes prêtes", "", "Bulle, croix, éclair, repère, nuage, coche, engrenage, goutte, lune, badge.", &["Sans rien sélectionner, clique une forme dans le panneau Formes prêtes : elle arrive au centre."]),
+    t("Nuancier", "", "Six palettes harmonieuses prêtes à l'emploi.", &["Clic sur une pastille : couleur de fond des nouveaux objets. Clic droit : couleur de contour."]),
+    t("Points d'ancrage", "Alt / Ctrl+clic", "Retouche fine des tracés.", &["Alt+clic sur un point le supprime, Ctrl+clic le passe d'angle à arrondi et inversement.", "Objet > Ajouter des points double le nombre de points sans changer la forme."]),
+    t("Contour avancé", "", "Tirets, bouts, angles, pointe de flèche.", &["Dans Apparence : pointillés et espace, bouts ronds/plats/carrés, angles ronds/pointus/biseautés.", "Sur un tracé ouvert, coche Pointe de flèche."]),
+    t("Mode contours", "Ctrl+Maj+Y", "Affiche le squelette du dessin pour repérer les objets cachés.", &["Affichage > Mode contours. Les repères (centre et tiers) aident à composer."]),
     t("Exporter", "Ctrl+E", "SVG pour le web, PNG haute définition pour le reste.", &["Fichier > Exporter en SVG ou en PNG ×1, ×2, ×4."]),
 ];
