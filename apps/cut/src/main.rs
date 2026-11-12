@@ -1,7 +1,9 @@
 #![windows_subsystem = "windows"]
 
+mod look;
 mod media;
 mod model;
+mod tutos;
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use eframe::egui::{
@@ -10,7 +12,7 @@ use eframe::egui::{
     vec2,
 };
 use media::{OUT_RATE, VideoReader};
-use model::{Clip, Music, Project, Source};
+use model::{Clip, LOOKS, Music, PLACES, Project, Source, Title};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -20,6 +22,7 @@ use studio_ui::pro::{self, BLUE, CHROME, FAINT, FIELD, GREEN, INK, INK_STRONG, L
 
 const VIDEO: Color32 = Color32::from_rgb(140, 92, 246);
 const MUSIC: Color32 = Color32::from_rgb(48, 180, 110);
+const TITLE: Color32 = Color32::from_rgb(255, 159, 10);
 const PLAYHEAD: Color32 = Color32::from_rgb(255, 69, 58);
 const EXT: [&str; 12] = ["mp4", "mov", "m4v", "mkv", "avi", "wmv", "webm", "mp3", "wav", "m4a", "aac", "wma"];
 const PRESETS: [(&str, &str, u32, u32); 5] = [
@@ -98,6 +101,7 @@ struct ExportJob {
 enum Sel {
     Clip(usize),
     Music(usize),
+    Title(usize),
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -135,6 +139,10 @@ struct Cut {
     error: Option<String>,
     title: String,
     icon: TextureHandle,
+    help: studio_ui::help::Help,
+    composed: Option<(usize, i64, Clip, Vec<Title>, u8)>,
+    looping: bool,
+    quality: usize,
 }
 
 fn recents_path() -> PathBuf {
@@ -179,6 +187,10 @@ impl Cut {
             error: None,
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "cut"),
+            help: studio_ui::help::Help::new("Cut", tutos::CUT),
+            composed: None,
+            looping: false,
+            quality: 1,
         };
         let args: Vec<PathBuf> = std::env::args().skip(1).map(PathBuf::from).filter(|p| p.is_file()).collect();
         if let Some(project) = args.iter().find(|p| p.extension().is_some_and(|e| e.eq_ignore_ascii_case("ecut"))).cloned() {
@@ -285,10 +297,10 @@ impl Cut {
                     let dur = src.duration;
                     self.proj.sources.push(src);
                     if add {
-                        self.proj.clips.push(Clip { src: idx, inp: 0.0, out: dur, volume: 1.0, fade_in: 0.0, fade_out: 0.0 });
+                        self.proj.clips.push(Clip { src: idx, out: dur, ..Default::default() });
                     } else {
                         let start = self.t;
-                        self.proj.music.push(Music { src: idx, start, inp: 0.0, out: dur, volume: 0.6 });
+                        self.proj.music.push(Music { src: idx, start, inp: 0.0, out: dur, volume: 0.6, fade_in: 0.0, fade_out: 0.0 });
                     }
                     self.load_media(idx, ctx);
                 }
@@ -338,11 +350,15 @@ impl Cut {
     fn update_frame(&mut self, ctx: &egui::Context) {
         let Some((ci, st)) = self.proj.clip_at(self.t) else {
             self.shown = None;
+            self.composed = None;
             return;
         };
         let src_i = self.proj.clips[ci].src;
         self.fade = self.proj.fade_at(self.t);
-        if self.shown.is_some_and(|(s, t)| s == src_i && (t - st).abs() < 0.5 / self.proj.fps as f64) {
+        let clip = self.proj.clips[ci].clone();
+        let titles: Vec<Title> = self.proj.titles_at(self.t).into_iter().cloned().collect();
+        let key = (src_i, (st * self.proj.fps as f64 * 2.0).round() as i64, clip.clone(), titles.clone(), (self.fade * 255.0) as u8);
+        if self.composed.as_ref() == Some(&key) {
             return;
         }
         let src = self.proj.sources[src_i].clone();
@@ -357,16 +373,21 @@ impl Cut {
                 }
             }
         }
+        let k = (960.0 / self.proj.width.max(self.proj.height) as f32).min(1.0);
+        let (pw, ph) = (((self.proj.width as f32 * k) as u32).max(2), ((self.proj.height as f32 * k) as u32).max(2));
         let Some(r) = self.readers.get_mut(&src_i) else { return };
-        let (w, h) = (r.width as usize, r.height as usize);
+        let (sw, sh) = (r.width, r.height);
         match r.frame_at(st, src.fps) {
             Ok(Some((_, rgba))) => {
-                let img = egui::ColorImage::from_rgba_unmultiplied([w, h], rgba);
+                let refs: Vec<&Title> = titles.iter().collect();
+                let frame = look::compose(rgba, sw, sh, pw, ph, Some(&clip), self.fade, &refs);
+                let img = egui::ColorImage::from_rgba_unmultiplied([pw as usize, ph as usize], &frame);
                 match &mut self.tex {
                     Some(t) => t.set(img, TextureOptions::LINEAR),
                     None => self.tex = Some(ctx.load_texture("frame", img, TextureOptions::LINEAR)),
                 }
                 self.shown = Some((src_i, st));
+                self.composed = Some(key);
             }
             Ok(None) => {}
             Err(e) => self.error = Some(e),
@@ -381,6 +402,7 @@ impl Cut {
         let Some(path) = rfd::FileDialog::new().add_filter("Vidéo MP4", &["mp4"]).set_file_name("montage.mp4").save_file() else { return };
         let proj = self.proj.clone();
         let data = self.audio_data.clone();
+        let factor = [0.5, 1.0, 2.0][self.quality.min(2)];
         let total = (proj.duration() * proj.fps as f64).ceil() as usize;
         let done = Arc::new(AtomicUsize::new(0));
         let error = Arc::new(Mutex::new(None));
@@ -390,10 +412,9 @@ impl Cut {
                 media::startup();
                 let (w, h, fps) = (proj.width, proj.height, proj.fps);
                 let mix = proj.mix(&|i| data.get(&i).cloned(), OUT_RATE);
-                let mut enc = media::Encoder::new(&p2, w, h, fps, (w * h * fps / 8).max(2_000_000))?;
+                let mut enc = media::Encoder::new(&p2, w, h, fps, ((w * h * fps / 8) as f64 * factor).max(1_500_000.0) as u32)?;
                 let mut readers: HashMap<usize, VideoReader> = HashMap::new();
                 let per = (OUT_RATE / fps) as usize;
-                let black = vec![0u8; (w * h * 4) as usize];
                 for n in 0..total {
                     let t = n as f64 / fps as f64;
                     let frame = match proj.clip_at(t) {
@@ -406,11 +427,11 @@ impl Cut {
                             let r = readers.get_mut(&si).ok_or("lecteur")?;
                             let (sw, sh) = (r.width, r.height);
                             match r.frame_at(st, src.fps)? {
-                                Some((_, rgba)) => fit(rgba, sw, sh, w, h, proj.fade_at(t)),
-                                None => black.clone(),
+                                Some((_, rgba)) => look::compose(rgba, sw, sh, w, h, Some(&proj.clips[ci]), proj.fade_at(t), &proj.titles_at(t)),
+                                None => look::compose(&[], 0, 0, w, h, None, 1.0, &proj.titles_at(t)),
                             }
                         }
-                        None => black.clone(),
+                        None => look::compose(&[], 0, 0, w, h, None, 1.0, &proj.titles_at(t)),
                     };
                     enc.video(&frame)?;
                     let a = (n * per * 2).min(mix.len());
@@ -480,10 +501,83 @@ impl Cut {
             Some(Sel::Music(i)) if i < self.proj.music.len() => {
                 self.proj.music.remove(i);
             }
+            Some(Sel::Title(i)) if i < self.proj.titles.len() => {
+                self.proj.titles.remove(i);
+            }
             _ => {}
         }
     }
 
+    fn duplicate(&mut self) {
+        match self.sel {
+            Some(Sel::Clip(i)) if i < self.proj.clips.len() => {
+                let c = self.proj.clips[i].clone();
+                self.proj.clips.insert(i + 1, c);
+                self.sel = Some(Sel::Clip(i + 1));
+            }
+            Some(Sel::Title(i)) if i < self.proj.titles.len() => {
+                let mut t = self.proj.titles[i].clone();
+                t.start += t.dur;
+                self.proj.titles.push(t);
+                self.sel = Some(Sel::Title(self.proj.titles.len() - 1));
+            }
+            _ => {}
+        }
+    }
+
+    fn add_marker(&mut self) {
+        if let Some(k) = self.proj.markers.iter().position(|m| (m - self.t).abs() < 0.05) {
+            self.proj.markers.remove(k);
+        } else {
+            self.proj.markers.push(self.t);
+            self.proj.markers.sort_by(f64::total_cmp);
+        }
+    }
+
+    fn jump(&mut self, dir: i32) {
+        let mut stops = self.proj.starts();
+        stops.push(self.proj.duration());
+        stops.extend(self.proj.markers.iter().copied());
+        stops.extend(self.proj.titles.iter().map(|t| t.start));
+        let t = self.t;
+        let target = if dir > 0 {
+            stops.into_iter().filter(|s| *s > t + 1e-3).fold(f64::INFINITY, f64::min)
+        } else {
+            stops.into_iter().filter(|s| *s < t - 1e-3).fold(f64::NEG_INFINITY, f64::max)
+        };
+        if target.is_finite() {
+            self.seek(target);
+        }
+    }
+
+    fn add_title(&mut self) {
+        self.proj.titles.push(Title { text: "Ton titre".into(), start: self.t, dur: 3.0, size: 0.08, place: 1, color: [255, 255, 255, 255], band: false });
+        self.sel = Some(Sel::Title(self.proj.titles.len() - 1));
+    }
+
+    fn snapshot(&mut self) {
+        let Some((ci, st)) = self.proj.clip_at(self.t) else {
+            self.error = Some("Aucune image à la tête de lecture".into());
+            return;
+        };
+        let Some(path) = rfd::FileDialog::new().add_filter("PNG", &["png"]).set_file_name("image.png").save_file() else { return };
+        let clip = self.proj.clips[ci].clone();
+        let src = self.proj.sources[clip.src].clone();
+        let (w, h) = (self.proj.width, self.proj.height);
+        let titles: Vec<Title> = self.proj.titles_at(self.t).into_iter().cloned().collect();
+        let fade = self.proj.fade_at(self.t);
+        let r = (|| -> Result<(), String> {
+            let (mut rd, _) = VideoReader::open(Path::new(&src.path))?;
+            let (sw, sh) = (rd.width, rd.height);
+            let Some((_, rgba)) = rd.frame_at(st, src.fps)? else { return Err("image introuvable".into()) };
+            let refs: Vec<&Title> = titles.iter().collect();
+            let frame = look::compose(rgba, sw, sh, w, h, Some(&clip), fade, &refs);
+            image::save_buffer(&path, &frame, w, h, image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())
+        })();
+        if let Err(e) = r {
+            self.error = Some(format!("Image : {e}"));
+        }
+    }
     fn keys(&mut self, ctx: &egui::Context) {
         if ctx.egui_wants_keyboard_input() || self.home {
             return;
@@ -510,7 +604,41 @@ impl Cut {
         if sc(M::COMMAND, Key::M) {
             self.export();
         }
+        if sc(M::COMMAND, Key::D) {
+            self.duplicate();
+        }
         let step = 1.0 / self.proj.fps as f64;
+        let (jkl, marker, trim, jump, title) = ctx.input(|i| {
+            let none = !i.modifiers.command && !i.modifiers.alt;
+            (
+                [i.key_pressed(Key::J), i.key_pressed(Key::K), i.key_pressed(Key::L)].map(|k| k && none),
+                i.key_pressed(Key::M) && none,
+                if i.key_pressed(Key::Q) && none { 1 } else if i.key_pressed(Key::W) && none { 2 } else { 0 },
+                if i.key_pressed(Key::ArrowUp) { -1 } else if i.key_pressed(Key::ArrowDown) { 1 } else { 0 },
+                i.key_pressed(Key::T) && none,
+            )
+        });
+        if jkl[0] {
+            self.seek(self.t - 1.0);
+        }
+        if jkl[1] {
+            self.set_playing(false);
+        }
+        if jkl[2] {
+            self.set_playing(true);
+        }
+        if marker {
+            self.add_marker();
+        }
+        if trim > 0 {
+            self.proj.trim_to(self.t, trim == 1);
+        }
+        if jump != 0 {
+            self.jump(jump);
+        }
+        if title {
+            self.add_title();
+        }
         let (space, s, del, left, right, home, end, v, c, plus, minus) = ctx.input(|i| {
             (
                 i.key_pressed(Key::Space),
@@ -559,32 +687,10 @@ impl Cut {
         if minus {
             self.pps = (self.pps / 1.25).max(4.0);
         }
-        if matches!(self.sel, Some(Sel::Clip(i)) if i >= self.proj.clips.len()) || matches!(self.sel, Some(Sel::Music(i)) if i >= self.proj.music.len()) {
+        if matches!(self.sel, Some(Sel::Clip(i)) if i >= self.proj.clips.len()) || matches!(self.sel, Some(Sel::Music(i)) if i >= self.proj.music.len()) || matches!(self.sel, Some(Sel::Title(i)) if i >= self.proj.titles.len()) {
             self.sel = None;
         }
     }
-}
-
-fn fit(rgba: &[u8], sw: u32, sh: u32, w: u32, h: u32, fade: f32) -> Vec<u8> {
-    let mut out = vec![0u8; (w * h * 4) as usize];
-    for px in out.chunks_exact_mut(4) {
-        px[3] = 255;
-    }
-    let Some(src) = image::RgbaImage::from_raw(sw, sh, rgba.to_vec()) else { return out };
-    let s = (w as f32 / sw as f32).min(h as f32 / sh as f32);
-    let (nw, nh) = (((sw as f32 * s).round() as u32).max(1), ((sh as f32 * s).round() as u32).max(1));
-    let scaled = if (nw, nh) == (sw, sh) { src } else { image::imageops::resize(&src, nw, nh, image::imageops::FilterType::Triangle) };
-    let (ox, oy) = ((w - nw.min(w)) / 2, (h - nh.min(h)) / 2);
-    for y in 0..nh.min(h) {
-        for x in 0..nw.min(w) {
-            let p = scaled.get_pixel(x, y).0;
-            let i = (((oy + y) * w + ox + x) * 4) as usize;
-            out[i] = (p[0] as f32 * fade) as u8;
-            out[i + 1] = (p[1] as f32 * fade) as u8;
-            out[i + 2] = (p[2] as f32 * fade) as u8;
-        }
-    }
-    out
 }
 
 fn tc(t: f64, fps: u32) -> String {
@@ -615,8 +721,12 @@ impl eframe::App for Cut {
             let pos = self.audio.state.lock().map(|s| s.pos).unwrap_or(0.0);
             self.t = if self.audio._stream.is_some() { pos / OUT_RATE as f64 } else { self.t + ctx.input(|i| i.stable_dt) as f64 };
             if self.t >= self.proj.duration() {
-                self.t = self.proj.duration();
-                self.set_playing(false);
+                if self.looping {
+                    self.seek(0.0);
+                } else {
+                    self.t = self.proj.duration();
+                    self.set_playing(false);
+                }
             }
             ctx.request_repaint();
         }
@@ -640,6 +750,7 @@ impl eframe::App for Cut {
             self.inspector(root);
             self.viewer(root, &name);
         }
+        self.help.show(ctx);
 
         if !self.home && self.proj != before && !self.editing {
             self.undo.push(before);
@@ -684,6 +795,14 @@ impl Cut {
                             if ui.button("Exporter en MP4…               Ctrl+M").clicked() {
                                 self.export();
                             }
+                            ui.menu_button("Qualité d'export", |ui| {
+                                for (k, label) in ["Légère (fichier petit)", "Standard", "Haute (YouTube 4K)"].into_iter().enumerate() {
+                                    ui.radio_value(&mut self.quality, k, label);
+                                }
+                            });
+                            if ui.button("Exporter l'image affichée (PNG)…").clicked() {
+                                self.snapshot();
+                            }
                         });
                     });
                     ui.add_enabled_ui(!self.home, |ui| {
@@ -705,6 +824,23 @@ impl Cut {
                             if ui.add_enabled(self.sel.is_some(), egui::Button::new("Supprimer                Suppr")).clicked() {
                                 self.delete_sel();
                             }
+                            if ui.add_enabled(matches!(self.sel, Some(Sel::Clip(_)) | Some(Sel::Title(_))), egui::Button::new("Dupliquer              Ctrl+D")).clicked() {
+                                self.duplicate();
+                            }
+                            ui.separator();
+                            if ui.button("Rogner le début à la tête     Q").clicked() {
+                                self.proj.trim_to(self.t, true);
+                            }
+                            if ui.button("Rogner la fin à la tête        W").clicked() {
+                                self.proj.trim_to(self.t, false);
+                            }
+                            ui.separator();
+                            if ui.button("Ajouter un marqueur             M").clicked() {
+                                self.add_marker();
+                            }
+                            if ui.add_enabled(!self.proj.markers.is_empty(), egui::Button::new("Supprimer les marqueurs")).clicked() {
+                                self.proj.markers.clear();
+                            }
                         });
                         ui.menu_button("Séquence", |ui| {
                             for (label, kind, w, h) in PRESETS {
@@ -719,8 +855,26 @@ impl Cut {
                                     self.proj.fps = f;
                                 }
                             }
+                            ui.separator();
+                            ui.checkbox(&mut self.looping, "Lecture en boucle");
+                        });
+                        ui.menu_button("Titre", |ui| {
+                            if ui.button("Nouveau titre                T").clicked() {
+                                self.add_title();
+                            }
+                            for (label, place, size) in [("Titre centré", 1u8, 0.1f32), ("Sous-titre en bas", 2, 0.055), ("Tiers inférieur", 3, 0.05)] {
+                                if ui.button(label).clicked() {
+                                    self.add_title();
+                                    if let Some(Sel::Title(i)) = self.sel {
+                                        self.proj.titles[i].place = place;
+                                        self.proj.titles[i].size = size;
+                                        self.proj.titles[i].band = place == 3;
+                                    }
+                                }
+                            }
                         });
                     });
+                    self.help.menu(ui);
                 });
                 if !self.home {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -891,11 +1045,11 @@ impl Cut {
                     let s = &self.proj.sources[i];
                     if s.has_video {
                         let d = s.duration;
-                        self.proj.clips.push(Clip { src: i, inp: 0.0, out: d, volume: 1.0, fade_in: 0.0, fade_out: 0.0 });
+                        self.proj.clips.push(Clip { src: i, out: d, ..Default::default() });
                     } else {
                         let d = s.duration;
                         let start = self.t;
-                        self.proj.music.push(Music { src: i, start, inp: 0.0, out: d, volume: 0.6 });
+                        self.proj.music.push(Music { src: i, start, inp: 0.0, out: d, volume: 0.6, fade_in: 0.0, fade_out: 0.0 });
                     }
                 }
             });
@@ -917,6 +1071,41 @@ impl Cut {
                         field_time(ui, "Sortie", &mut c.out, c.inp + 0.05, src.duration);
                         pro::label_value(ui, "Durée", &format!("{:.2} s", c.len()));
                     });
+                    pro::dock_panel(ui, "speed", "Vitesse", |ui| {
+                        ui.spacing_mut().item_spacing.y = 6.0;
+                        ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
+                        ui.add(egui::Slider::new(&mut c.speed, 0.25..=4.0).logarithmic(true).suffix(" ×"));
+                        ui.horizontal(|ui| {
+                            for v in [0.5, 1.0, 1.5, 2.0] {
+                                if ui.small_button(format!("{v}×")).clicked() {
+                                    c.speed = v;
+                                }
+                            }
+                        });
+                    });
+                    pro::dock_panel(ui, "grade", "Couleur", |ui| {
+                        ui.spacing_mut().item_spacing.y = 6.0;
+                        ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
+                        egui::ComboBox::from_id_salt("look").selected_text(LOOKS[c.look as usize % LOOKS.len()]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                            for (k, name) in LOOKS.iter().enumerate() {
+                                ui.selectable_value(&mut c.look, k as u8, *name);
+                            }
+                        });
+                        for (label, v) in [("Luminosité", &mut c.brightness), ("Contraste", &mut c.contrast), ("Saturation", &mut c.saturation), ("Température", &mut c.temperature)] {
+                            ui.label(RichText::new(label).size(12.5).color(MUTED));
+                            ui.add(egui::Slider::new(v, -100.0..=100.0));
+                        }
+                    });
+                    pro::dock_panel(ui, "framing", "Cadrage", |ui| {
+                        ui.spacing_mut().item_spacing.y = 6.0;
+                        ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
+                        ui.label(RichText::new("Échelle").size(12.5).color(MUTED));
+                        let mut z = c.zoom * 100.0;
+                        if ui.add(egui::Slider::new(&mut z, 50.0..=300.0).suffix(" %")).changed() {
+                            c.zoom = z / 100.0;
+                        }
+                        ui.checkbox(&mut c.flip, "Miroir horizontal");
+                    });
                     pro::dock_panel(ui, "audio", "Son et fondus", |ui| {
                         ui.spacing_mut().item_spacing.y = 6.0;
                         ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
@@ -930,6 +1119,7 @@ impl Cut {
                         ui.add(egui::Slider::new(&mut c.fade_in, 0.0..=len.min(5.0)).suffix(" s"));
                         ui.label(RichText::new("Fondu de sortie").size(12.5).color(MUTED));
                         ui.add(egui::Slider::new(&mut c.fade_out, 0.0..=len.min(5.0)).suffix(" s"));
+                        ui.checkbox(&mut c.fade_white, "Fondu au blanc");
                     });
                 }
                 Some(Sel::Music(i)) if i < self.proj.music.len() => {
@@ -947,6 +1137,39 @@ impl Cut {
                         if ui.add(egui::Slider::new(&mut vol, 0.0..=200.0).suffix(" %")).changed() {
                             m.volume = vol / 100.0;
                         }
+                        let len = m.out - m.inp;
+                        ui.label(RichText::new("Fondu d'entrée").size(12.5).color(MUTED));
+                        ui.add(egui::Slider::new(&mut m.fade_in, 0.0..=len.min(10.0)).suffix(" s"));
+                        ui.label(RichText::new("Fondu de sortie").size(12.5).color(MUTED));
+                        ui.add(egui::Slider::new(&mut m.fade_out, 0.0..=len.min(10.0)).suffix(" s"));
+                    });
+                }
+                Some(Sel::Title(i)) if i < self.proj.titles.len() => {
+                    let t = &mut self.proj.titles[i];
+                    pro::dock_panel(ui, "title", "Titre", |ui| {
+                        ui.spacing_mut().item_spacing.y = 6.0;
+                        ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
+                        ui.add(egui::TextEdit::multiline(&mut t.text).desired_rows(2).desired_width(f32::INFINITY));
+                        field_time(ui, "Début", &mut t.start, 0.0, 36000.0);
+                        field_time(ui, "Durée", &mut t.dur, 0.2, 600.0);
+                        ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                        let mut sz = t.size * 100.0;
+                        if ui.add(egui::Slider::new(&mut sz, 2.0..=30.0).suffix(" %")).changed() {
+                            t.size = sz / 100.0;
+                        }
+                        egui::ComboBox::from_id_salt("place").selected_text(PLACES[t.place as usize % PLACES.len()]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                            for (k, name) in PLACES.iter().enumerate() {
+                                ui.selectable_value(&mut t.place, k as u8, *name);
+                            }
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new("Couleur").size(12.5).color(MUTED));
+                            let mut col = Color32::from_rgba_unmultiplied(t.color[0], t.color[1], t.color[2], t.color[3]);
+                            if ui.color_edit_button_srgba(&mut col).changed() {
+                                t.color = col.to_srgba_unmultiplied();
+                            }
+                        });
+                        ui.checkbox(&mut t.band, "Bandeau sombre derrière le texte");
                     });
                 }
                 _ => {
@@ -958,6 +1181,13 @@ impl Cut {
                         pro::label_value(ui, "Durée", &tc(self.proj.duration(), self.proj.fps));
                         ui.add_space(6.0);
                         ui.label(RichText::new("Clique un clip de la timeline pour régler son entrée, sa sortie, son volume et ses fondus.").size(12.0).color(FAINT));
+                        ui.add_space(8.0);
+                        if pro::secondary(ui, "+ Titre à la tête de lecture").clicked() {
+                            self.add_title();
+                        }
+                        if pro::secondary(ui, "?  Tutoriels").clicked() {
+                            self.help.learn("Importer des médias");
+                        }
                     });
                 }
             }
@@ -981,8 +1211,7 @@ impl Cut {
                 let [tw, th] = t.size();
                 let k = (frame.width() / tw as f32).min(frame.height() / th as f32);
                 let r = Rect::from_center_size(frame.center(), vec2(tw as f32, th as f32) * k);
-                let g = (self.fade * 255.0) as u8;
-                p.image(t.id(), r, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::from_rgb(g, g, g));
+                p.image(t.id(), r, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             } else if self.proj.clips.is_empty() {
                 p.text(frame.center(), Align2::CENTER_CENTER, "Importe une vidéo pour commencer", FontId::proportional(16.0), MUTED);
             }
@@ -1059,7 +1288,8 @@ impl Cut {
                 let x_of = |t: f64| x0 + t as f32 * pps;
                 let t_of = |x: f32| ((x - x0) / pps).max(0.0) as f64;
                 let ruler = Rect::from_min_max(pos2(x0, rect.min.y), pos2(rect.max.x, rect.min.y + 24.0));
-                let v1 = Rect::from_min_max(pos2(x0, ruler.max.y + 8.0), pos2(rect.max.x, ruler.max.y + 84.0));
+                let t1 = Rect::from_min_max(pos2(x0, ruler.max.y + 6.0), pos2(rect.max.x, ruler.max.y + 34.0));
+                let v1 = Rect::from_min_max(pos2(x0, t1.max.y + 6.0), pos2(rect.max.x, t1.max.y + 82.0));
                 let a2 = Rect::from_min_max(pos2(x0, v1.max.y + 8.0), pos2(rect.max.x, v1.max.y + 56.0));
                 let p = ui.painter_at(rect);
                 p.rect_filled(ruler, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1d));
@@ -1085,6 +1315,29 @@ impl Cut {
                         } else {
                             self.proj.mute_a2 = !self.proj.mute_a2;
                         }
+                    }
+                }
+                p.rect_filled(t1, CornerRadius::same(6), Color32::from_rgb(0x19, 0x19, 0x1c));
+                let th = Rect::from_min_max(pos2(rect.min.x + 6.0, t1.min.y), pos2(x0 - 6.0, t1.max.y));
+                p.rect_filled(th, CornerRadius::same(6), CHROME);
+                p.text(th.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, "T1  Titres", semibold(12.0), INK);
+                for (i, tt) in self.proj.titles.clone().iter().enumerate() {
+                    let r = Rect::from_min_max(pos2(x_of(tt.start) + 1.0, t1.min.y + 3.0), pos2(x_of(tt.start + tt.dur) - 1.0, t1.max.y - 3.0));
+                    let on = self.sel == Some(Sel::Title(i));
+                    p.rect_filled(r, CornerRadius::same(5), TITLE.gamma_multiply(if on { 0.85 } else { 0.55 }));
+                    p.with_clip_rect(r.shrink(1.0)).text(r.left_center() + vec2(6.0, 0.0), Align2::LEFT_CENTER, tt.text.lines().next().unwrap_or(""), semibold(11.0), Color32::WHITE);
+                    if on {
+                        p.rect_stroke(r, CornerRadius::same(5), Stroke::new(2.0, Color32::WHITE), StrokeKind::Inside);
+                    }
+                    let resp = ui.interact(r, ui.make_persistent_id(("title", i)), Sense::click_and_drag());
+                    if resp.clicked() {
+                        self.sel = Some(Sel::Title(i));
+                    }
+                    if resp.drag_started()
+                        && let Some(pp) = resp.interact_pointer_pos()
+                    {
+                        self.drag = Some((Sel::Title(i), 0, t_of(pp.x), Clip::default(), tt.start));
+                        self.sel = Some(Sel::Title(i));
                     }
                 }
                 let rr = ui.interact(ruler, ui.make_persistent_id("ruler"), Sense::click_and_drag());
@@ -1159,7 +1412,7 @@ impl Cut {
                     if resp.drag_started()
                         && let Some(pp) = resp.interact_pointer_pos()
                     {
-                        self.drag = Some((Sel::Music(i), 0, t_of(pp.x), Clip { src: 0, inp: 0.0, out: 0.0, volume: 0.0, fade_in: 0.0, fade_out: 0.0 }, m.start));
+                        self.drag = Some((Sel::Music(i), 0, t_of(pp.x), Clip::default(), m.start));
                         self.sel = Some(Sel::Music(i));
                     }
                 }
@@ -1179,6 +1432,7 @@ impl Cut {
                                 }
                             }
                             Sel::Music(i) if i < self.proj.music.len() => self.proj.music[i].start = (start0 + d).max(0.0),
+                            Sel::Title(i) if i < self.proj.titles.len() => self.proj.titles[i].start = (start0 + d).max(0.0),
                             _ => {}
                         }
                         if mode == 0 && matches!(sel, Sel::Clip(_)) {
@@ -1206,9 +1460,13 @@ impl Cut {
                 }
 
                 let x = x_of(self.t);
+                for m in &self.proj.markers {
+                    let mx = x_of(*m);
+                    p.add(Shape::convex_polygon(vec![pos2(mx - 5.0, ruler.min.y + 12.0), pos2(mx + 5.0, ruler.min.y + 12.0), pos2(mx, ruler.max.y)], Color32::from_rgb(255, 196, 0), Stroke::NONE));
+                }
                 p.line_segment([pos2(x, ruler.min.y), pos2(x, a2.max.y)], Stroke::new(1.5, PLAYHEAD));
                 p.add(Shape::convex_polygon(vec![pos2(x - 7.0, ruler.min.y), pos2(x + 7.0, ruler.min.y), pos2(x + 7.0, ruler.min.y + 8.0), pos2(x, ruler.min.y + 14.0), pos2(x - 7.0, ruler.min.y + 8.0)], PLAYHEAD, Stroke::NONE));
-                let bg = ui.interact(Rect::from_min_max(pos2(x0, v1.min.y), pos2(rect.max.x, a2.max.y)), ui.make_persistent_id("tracks"), Sense::click());
+                let bg = ui.interact(Rect::from_min_max(pos2(x0, t1.min.y), pos2(rect.max.x, a2.max.y)), ui.make_persistent_id("tracks"), Sense::click());
                 if bg.clicked()
                     && let Some(pp) = bg.interact_pointer_pos()
                 {

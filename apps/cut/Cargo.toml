@@ -4,6 +4,7 @@ version = "0.3.0"
 edition = "2024"
 
 [dependencies]
+ab_glyph = "0.2.32"
 cpal = "0.18.2"
 eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts"] }
 image = { version = "0.25.10", default-features = false, features = ["png"] }
