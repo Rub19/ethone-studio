@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod doc;
+mod inpaint;
 
 use doc::{Area, Brush, Document, hsl_to_rgb, rgb_to_hsl};
 use eframe::egui::{
@@ -19,6 +20,7 @@ enum Tool {
     Marquee,
     Brush,
     Eraser,
+    Remove,
     Fill,
     Gradient,
     Picker,
@@ -26,11 +28,12 @@ enum Tool {
     Zoom,
 }
 
-const TOOLS: [(Tool, &str, Key); 9] = [
+const TOOLS: [(Tool, &str, Key); 10] = [
     (Tool::Move, "Déplacement (V)", Key::V),
     (Tool::Marquee, "Sélection rectangulaire (M)", Key::M),
     (Tool::Brush, "Pinceau (B)", Key::B),
     (Tool::Eraser, "Gomme (E)", Key::E),
+    (Tool::Remove, "Suppression (J)", Key::J),
     (Tool::Fill, "Pot de peinture (K)", Key::K),
     (Tool::Gradient, "Dégradé (G)", Key::G),
     (Tool::Picker, "Pipette (I)", Key::I),
@@ -141,6 +144,8 @@ struct Pixel {
     last: Option<(f32, f32)>,
     cursor: Option<(f32, f32)>,
     drag: Drag,
+    remove_stroke: Vec<(f32, f32)>,
+    filling: Option<(usize, std::sync::mpsc::Receiver<RgbaImage>)>,
     gradient_end: Option<(f32, f32)>,
     new_doc: Option<NewDoc>,
     adjust: Option<(Adjust, RgbaImage)>,
@@ -206,6 +211,8 @@ impl Pixel {
             last: None,
             cursor: None,
             drag: Drag::None,
+            remove_stroke: Vec::new(),
+            filling: None,
             gradient_end: None,
             new_doc: None,
             adjust: None,
@@ -288,6 +295,66 @@ impl Pixel {
             }
             Err(e) => self.error = Some(format!("Export impossible : {e}")),
         }
+    }
+
+    fn start_fill(&mut self, mask: Vec<bool>, ctx: &egui::Context) {
+        if self.filling.is_some() || !mask.iter().any(|m| *m) {
+            return;
+        }
+        let layer = self.doc.active;
+        let img = self.doc.layers[layer].img.clone();
+        let (tx, rx) = std::sync::mpsc::channel();
+        let ctx = ctx.clone();
+        std::thread::spawn(move || {
+            let seed = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos() as u64).unwrap_or(7);
+            let _ = tx.send(inpaint::content_aware_fill(&img, &mask, seed));
+            ctx.request_repaint();
+        });
+        self.filling = Some((layer, rx));
+    }
+
+    fn finish_fill(&mut self) {
+        let Some((layer, rx)) = &self.filling else { return };
+        if let Ok(img) = rx.try_recv() {
+            let layer = *layer;
+            self.filling = None;
+            self.remove_stroke.clear();
+            if layer < self.doc.layers.len() && self.doc.layers[layer].img.dimensions() == img.dimensions() {
+                self.doc.checkpoint();
+                self.doc.layers[layer].img = img;
+                self.doc.touch_all();
+            }
+        }
+    }
+
+    fn stroke_mask(&self) -> Vec<bool> {
+        let (w, h) = (self.doc.width() as i32, self.doc.height() as i32);
+        let mut mask = vec![false; (w * h) as usize];
+        let r = self.brush.radius.max(1.0);
+        let mut pts = Vec::new();
+        for pair in self.remove_stroke.windows(2) {
+            let (a, b) = (pair[0], pair[1]);
+            let n = (((b.0 - a.0).powi(2) + (b.1 - a.1).powi(2)).sqrt() / (r * 0.4)).ceil().max(1.0) as usize;
+            for k in 0..=n {
+                let t = k as f32 / n as f32;
+                pts.push((a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t));
+            }
+        }
+        if self.remove_stroke.len() == 1 {
+            pts.push(self.remove_stroke[0]);
+        }
+        for (cx, cy) in pts {
+            let (x0, x1) = (((cx - r).floor() as i32).max(0), ((cx + r).ceil() as i32).min(w - 1));
+            let (y0, y1) = (((cy - r).floor() as i32).max(0), ((cy + r).ceil() as i32).min(h - 1));
+            for y in y0..=y1 {
+                for x in x0..=x1 {
+                    if (x as f32 + 0.5 - cx).powi(2) + (y as f32 + 0.5 - cy).powi(2) <= r * r {
+                        mask[(y * w + x) as usize] = true;
+                    }
+                }
+            }
+        }
+        mask
     }
 
     fn sync_texture(&mut self, ctx: &egui::Context) {
@@ -459,6 +526,7 @@ impl eframe::App for Pixel {
             self.status_bar(root);
             self.tool_rail(root);
             self.dock(root, ctx);
+            self.finish_fill();
             self.sync_texture(ctx);
             self.canvas(root);
         }
@@ -505,6 +573,14 @@ impl Pixel {
                             ui.separator();
                             if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Effacer la sélection   Suppr")).clicked() {
                                 self.doc.clear_selection();
+                            }
+                            if ui.add_enabled(self.doc.selection.is_some() && self.filling.is_none(), egui::Button::new("Remplir selon le contenu")).clicked()
+                                && let Some(s) = self.doc.selection
+                            {
+                                let w = self.doc.width();
+                                let mask: Vec<bool> = (0..w * self.doc.height()).map(|i| s.contains(i % w, i / w)).collect();
+                                let ctx = ui.ctx().clone();
+                                self.start_fill(mask, &ctx);
                             }
                         });
                         ui.menu_button("Image", |ui| {
@@ -733,6 +809,10 @@ impl Pixel {
                     Tool::Picker => {
                         ui.label(RichText::new("Clique sur l'image pour prendre une couleur").size(12.5).color(MUTED));
                     }
+                    Tool::Remove => {
+                        pro::option_slider(ui, "Taille", &mut self.brush.radius, 2.0..=300.0, " px", true);
+                        ui.label(RichText::new("Peins sur ce qui doit disparaître : le fond est reconstruit autour").size(12.5).color(MUTED));
+                    }
                 }
             });
         });
@@ -764,7 +844,7 @@ impl Pixel {
         egui::Panel::left("tools").resizable(false).exact_size(52.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(7, 10))).show(root, |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             for (i, (tool, tip, _)) in TOOLS.iter().enumerate() {
-                if matches!(i, 2 | 6) {
+                if matches!(i, 2 | 7) {
                     let (sep, _) = ui.allocate_exact_size(vec2(38.0, 9.0), Sense::hover());
                     ui.painter().line_segment([sep.left_center() + vec2(6.0, 0.0), sep.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
                 }
@@ -1002,8 +1082,25 @@ impl Pixel {
             let to_scr = |d: (f32, f32)| pos2(min.x + d.0 * zoom, min.y + d.1 * zoom);
             self.cursor = pointer.filter(|p| area.contains(*p)).map(to_doc);
 
-            let painting = matches!(self.tool, Tool::Brush | Tool::Eraser);
-            if painting && !space && resp.is_pointer_button_down_on() && primary_down {
+            if self.tool == Tool::Remove && self.filling.is_none() && !space {
+                if resp.is_pointer_button_down_on() && primary_down {
+                    if let Some(at) = pointer {
+                        let d = to_doc(at);
+                        if self.remove_stroke.last().is_none_or(|l| (l.0 - d.0).abs() + (l.1 - d.1).abs() > 0.5) {
+                            self.remove_stroke.push(d);
+                        }
+                    }
+                } else if !self.remove_stroke.is_empty() {
+                    let mask = self.stroke_mask();
+                    let ctx = ui.ctx().clone();
+                    self.start_fill(mask, &ctx);
+                    if self.filling.is_none() {
+                        self.remove_stroke.clear();
+                    }
+                }
+            }
+            let painting = matches!(self.tool, Tool::Brush | Tool::Eraser | Tool::Remove);
+            if matches!(self.tool, Tool::Brush | Tool::Eraser) && !space && resp.is_pointer_button_down_on() && primary_down {
                 if let Some(at) = pointer {
                     let cur = to_doc(at);
                     let erase = self.tool == Tool::Eraser;
@@ -1109,6 +1206,30 @@ impl Pixel {
                 painter.line_segment([a, b], Stroke::new(1.5, Color32::WHITE));
                 painter.circle(a, 5.0, self.primary, Stroke::new(1.5, Color32::WHITE));
                 painter.circle(b, 5.0, self.secondary, Stroke::new(1.5, Color32::WHITE));
+            }
+            if !self.remove_stroke.is_empty() {
+                let pts: Vec<Pos2> = self.remove_stroke.iter().map(|d| to_scr(*d)).collect();
+                let width = (self.brush.radius * 2.0 * zoom).max(2.0);
+                let red = Color32::from_rgba_unmultiplied(255, 59, 80, 110);
+                if pts.len() == 1 {
+                    painter.circle_filled(pts[0], width / 2.0, red);
+                } else {
+                    painter.add(Shape::line(pts.clone(), Stroke::new(width, red)));
+                    painter.circle_filled(pts[0], width / 2.0, red);
+                    painter.circle_filled(pts[pts.len() - 1], width / 2.0, red);
+                }
+            }
+            if self.filling.is_some() {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(60));
+                let tag = Rect::from_center_size(area.center_top() + vec2(0.0, 40.0), vec2(260.0, 40.0));
+                painter.rect_filled(tag, CornerRadius::same(20), Color32::from_black_alpha(200));
+                let t = ui.input(|i| i.time) as f32;
+                let c = tag.left_center() + vec2(26.0, 0.0);
+                for k in 0..8 {
+                    let a = t * 6.0 + k as f32 * std::f32::consts::TAU / 8.0;
+                    painter.circle_filled(c + vec2(a.cos(), a.sin()) * 8.0, 2.0, Color32::from_white_alpha(60 + k * 24));
+                }
+                painter.text(tag.left_center() + vec2(46.0, 0.0), Align2::LEFT_CENTER, "Reconstruction du fond…", semibold(13.0), Color32::WHITE);
             }
 
             if resp.hovered() {
@@ -1356,6 +1477,15 @@ fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         Tool::Eraser => {
             p.add(Shape::convex_polygon(vec![at(0.55, 0.1), at(0.95, 0.5), at(0.5, 0.95), at(0.1, 0.55)], Color32::TRANSPARENT, s));
             p.line_segment([at(0.3, 0.35), at(0.7, 0.75)], s);
+        }
+        Tool::Remove => {
+            p.line_segment([at(0.12, 0.88), at(0.6, 0.4)], Stroke::new(4.5, c));
+            p.line_segment([at(0.12, 0.88), at(0.6, 0.4)], Stroke::new(1.8, PANEL));
+            let star = at(0.78, 0.22);
+            let k = r.width() * 0.2;
+            p.line_segment([star - vec2(k, 0.0), star + vec2(k, 0.0)], Stroke::new(1.6, c));
+            p.line_segment([star - vec2(0.0, k), star + vec2(0.0, k)], Stroke::new(1.6, c));
+            p.circle_filled(at(0.9, 0.55), r.width() * 0.07, c);
         }
         Tool::Fill => {
             p.add(Shape::convex_polygon(vec![at(0.1, 0.35), at(0.7, 0.35), at(0.6, 0.95), at(0.2, 0.95)], Color32::TRANSPARENT, s));
