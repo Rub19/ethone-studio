@@ -367,3 +367,84 @@ pub fn sheet(ctx: &Context, id: &str, width: f32, add: impl FnOnce(&mut Ui)) -> 
     }
     keep
 }
+
+/// A tool slot holding related tools, like Adobe's grouped tools: click picks the tool shown,
+/// right-click, a long press or the corner triangle opens the flyout. Returns true when the tool changed.
+pub fn tool_group<T: Copy + PartialEq>(ui: &mut Ui, size: f32, current: &mut T, tools: &[(T, &str, &str)], paint: impl Fn(&egui::Painter, Rect, Color32, T)) -> bool {
+    if tools.is_empty() {
+        return false;
+    }
+    let id = ui.make_persistent_id(("tool-group", tools[0].1));
+    let mem = id.with("shown");
+    let open_id = id.with("open");
+    let mut shown = ui.ctx().data_mut(|d| *d.get_persisted_mut_or(mem, 0usize)).min(tools.len() - 1);
+    if let Some(k) = tools.iter().position(|t| t.0 == *current) {
+        shown = k;
+    }
+    let active = tools.iter().any(|t| t.0 == *current);
+    let (rect, resp) = ui.allocate_exact_size(Vec2::splat(size), Sense::click_and_drag());
+    if active {
+        ui.painter().rect_filled(rect, CornerRadius::same(8), BLUE.gamma_multiply(0.28));
+    } else if resp.hovered() {
+        ui.painter().rect_filled(rect, CornerRadius::same(8), Color32::from_white_alpha(14));
+    }
+    let ink = if active { INK_STRONG } else { INK };
+    paint(ui.painter(), rect.shrink(size * 0.27), ink, tools[shown].0);
+    let multi = tools.len() > 1;
+    let corner = Rect::from_min_max(rect.right_bottom() - vec2(size * 0.32, size * 0.32), rect.right_bottom());
+    if multi {
+        let c = rect.right_bottom() - vec2(5.0, 5.0);
+        ui.painter().add(egui::Shape::convex_polygon(vec![c + vec2(2.5, -3.5), c + vec2(2.5, 2.5), c + vec2(-3.5, 2.5)], if active { INK_STRONG } else { MUTED }, Stroke::NONE));
+    }
+    let mut open = ui.ctx().data_mut(|d| *d.get_temp_mut_or(open_id, false));
+    let mut changed = false;
+    let long_press = resp.is_pointer_button_down_on() && ui.input(|i| i.pointer.press_start_time().is_some_and(|t| i.time - t > 0.35));
+    if multi && (resp.secondary_clicked() || long_press || (resp.clicked() && resp.interact_pointer_pos().is_some_and(|p| corner.contains(p)))) {
+        open = true;
+    } else if resp.clicked() && *current != tools[shown].0 {
+        *current = tools[shown].0;
+        changed = true;
+    }
+    let (name, key) = (tools[shown].1, tools[shown].2);
+    let tip = if key.is_empty() { name.to_string() } else { format!("{name} ({key})") };
+    resp.on_hover_text(if multi { format!("{tip}\nClic droit ou clic maintenu : {} autres outils", tools.len() - 1) } else { tip });
+    if open {
+        let area = egui::Area::new(id.with("flyout")).order(egui::Order::Foreground).fixed_pos(rect.right_top() + vec2(6.0, 0.0)).show(ui.ctx(), |ui| {
+            Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(10)).shadow(Shadow { offset: [0, 8], blur: 24, spread: 0, color: Color32::from_black_alpha(150) }).inner_margin(Margin::same(6)).show(ui, |ui| {
+                ui.spacing_mut().item_spacing.y = 2.0;
+                for (k, (t, n, s)) in tools.iter().enumerate() {
+                    let (r, row) = ui.allocate_exact_size(vec2(230.0, 30.0), Sense::click());
+                    let on = *t == *current;
+                    if on {
+                        ui.painter().rect_filled(r, CornerRadius::same(7), BLUE.gamma_multiply(0.3));
+                    } else if row.hovered() {
+                        ui.painter().rect_filled(r, CornerRadius::same(7), Color32::from_white_alpha(12));
+                    }
+                    if on {
+                        ui.painter().circle_filled(r.left_center() + vec2(7.0, 0.0), 2.5, INK_STRONG);
+                    }
+                    paint(ui.painter(), Rect::from_center_size(r.left_center() + vec2(24.0, 0.0), Vec2::splat(15.0)), if on { INK_STRONG } else { INK }, *t);
+                    ui.painter().text(r.left_center() + vec2(42.0, 0.0), Align2::LEFT_CENTER, *n, FontId::proportional(13.0), if on { INK_STRONG } else { INK });
+                    if !s.is_empty() {
+                        ui.painter().text(r.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, *s, FontId::proportional(11.5), FAINT);
+                    }
+                    if row.clicked() {
+                        *current = *t;
+                        shown = k;
+                        changed = true;
+                        open = false;
+                    }
+                }
+            });
+        });
+        let outside = ui.input(|i| i.pointer.any_pressed() && i.pointer.interact_pos().is_some_and(|p| !area.response.rect.contains(p) && !rect.contains(p)));
+        if outside || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+            open = false;
+        }
+    }
+    ui.ctx().data_mut(|d| {
+        d.insert_persisted(mem, shown);
+        d.insert_temp(open_id, open);
+    });
+    changed
+}
