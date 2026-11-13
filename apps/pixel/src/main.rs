@@ -1,166 +1,60 @@
 #![windows_subsystem = "windows"]
 
+mod canvas;
 mod doc;
 mod filters;
 mod inpaint;
+mod panels;
+mod shapes;
+mod sheets;
+mod tools;
 mod tutos;
 
-use doc::{Area, BLENDS, Brush, Document, Paint};
-use eframe::egui::{
-    self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Pos2,
-    Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2, pos2,
-    vec2,
-};
+use doc::{Area, Blend, Brush, Document, Paint, Xform};
+use eframe::egui::{self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2, pos2, vec2};
 use filters::Kind;
-use image::{RgbaImage, imageops};
+use image::{ImageEncoder, RgbaImage, imageops};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use studio_ui::pro::{self, BLUE, CHROME, FAINT, FIELD, INK, INK_STRONG, LINE, MUTED, PANEL, PASTEBOARD, RED, semibold};
+use studio_ui::pro::{self, BLUE, CHROME, FAINT, INK, INK_STRONG, LINE, MUTED, PANEL, PASTEBOARD, RED, semibold};
+use tools::{GROUPS, Tool};
 
-#[derive(Clone, Copy, PartialEq)]
-enum Tool {
-    Move,
-    Marquee,
-    EllipseMarquee,
-    Lasso,
-    Wand,
-    Crop,
-    Picker,
-    Remove,
-    Clone,
-    Brush,
-    Pencil,
-    Eraser,
-    Gradient,
-    Fill,
-    Blur,
-    Sharpen,
-    Smudge,
-    Dodge,
-    Burn,
-    Sponge,
-    Rect,
-    Ellipse,
-    Line,
-    Text,
-    Hand,
-    Zoom,
+pub use shapes::FONTS;
+
+pub enum Sheet {
+    Canvas { w: u32, h: u32, anchor: usize, relative: bool, ext: usize },
+    ImageSize { w: u32, h: u32, keep: bool, percent: bool, resample: usize, dpi: f32 },
+    Transform(Xform),
+    Effect { kind: u8, size: f32, dist: f32, angle: f32, color: [u8; 4], color2: [u8; 4], position: u8, blend: usize, depth: f32 },
+    SelectBy { kind: u8, px: f32 },
+    ColorRange { mode: usize, fuzz: f32 },
+    Fill { content: usize, opacity: f32, blend: usize },
+    Export { format: usize, quality: u8, scale: f32, bg: usize, level: usize, ico: [bool; 7], selection: bool },
+    RotateCanvas { angle: f32 },
+    Guide { vertical: bool, pos: f32 },
+    Note { idx: Option<usize>, at: (f32, f32), text: String },
+    SaveSelection { name: String },
+    Prefs,
+    Shortcuts,
 }
 
-const TOOLS: [(Tool, &str, Option<Key>); 26] = [
-    (Tool::Move, "Déplacement (V)", Some(Key::V)),
-    (Tool::Marquee, "Sélection rectangulaire (M)", Some(Key::M)),
-    (Tool::EllipseMarquee, "Sélection elliptique (Maj+M)", None),
-    (Tool::Lasso, "Lasso (L)", Some(Key::L)),
-    (Tool::Wand, "Baguette magique (W)", Some(Key::W)),
-    (Tool::Crop, "Recadrage (C)", Some(Key::C)),
-    (Tool::Picker, "Pipette (I)", Some(Key::I)),
-    (Tool::Remove, "Suppression (J)", Some(Key::J)),
-    (Tool::Clone, "Tampon de duplication (S)", Some(Key::S)),
-    (Tool::Brush, "Pinceau (B)", Some(Key::B)),
-    (Tool::Pencil, "Crayon (N)", Some(Key::N)),
-    (Tool::Eraser, "Gomme (E)", Some(Key::E)),
-    (Tool::Gradient, "Dégradé (G)", Some(Key::G)),
-    (Tool::Fill, "Pot de peinture (K)", Some(Key::K)),
-    (Tool::Blur, "Goutte (R)", Some(Key::R)),
-    (Tool::Sharpen, "Netteté (Maj+R)", None),
-    (Tool::Smudge, "Doigt (Maj+R)", None),
-    (Tool::Dodge, "Densité − (O)", Some(Key::O)),
-    (Tool::Burn, "Densité + (Maj+O)", None),
-    (Tool::Sponge, "Éponge (Maj+O)", None),
-    (Tool::Rect, "Rectangle (U)", Some(Key::U)),
-    (Tool::Ellipse, "Ellipse (Maj+U)", None),
-    (Tool::Line, "Trait (Maj+U)", None),
-    (Tool::Text, "Texte (T)", Some(Key::T)),
-    (Tool::Hand, "Main (H, ou Espace)", Some(Key::H)),
-    (Tool::Zoom, "Zoom (Z, Alt pour dézoomer)", Some(Key::Z)),
-];
-
-const GROUPS: [&[Tool]; 16] = [
-    &[Tool::Move],
-    &[Tool::Marquee, Tool::EllipseMarquee],
-    &[Tool::Lasso],
-    &[Tool::Wand],
-    &[Tool::Crop],
-    &[Tool::Picker],
-    &[Tool::Remove, Tool::Clone],
-    &[Tool::Brush, Tool::Pencil],
-    &[Tool::Eraser],
-    &[Tool::Gradient, Tool::Fill],
-    &[Tool::Blur, Tool::Sharpen, Tool::Smudge],
-    &[Tool::Dodge, Tool::Burn, Tool::Sponge],
-    &[Tool::Rect, Tool::Ellipse, Tool::Line],
-    &[Tool::Text],
-    &[Tool::Hand],
-    &[Tool::Zoom],
-];
-
-fn tool_name(t: Tool) -> &'static str {
-    TOOLS.iter().find(|x| x.0 == t).map_or("", |x| x.1.split(" (").next().unwrap_or(""))
+pub struct TextDraft {
+    pub at: (f32, f32),
+    pub text: String,
+    pub vertical: bool,
 }
 
-fn tool_tip(t: Tool) -> &'static str {
-    TOOLS.iter().find(|x| x.0 == t).map_or("", |x| x.1)
-}
-
-fn brushy(t: Tool) -> bool {
-    matches!(t, Tool::Brush | Tool::Pencil | Tool::Eraser | Tool::Clone | Tool::Blur | Tool::Sharpen | Tool::Smudge | Tool::Dodge | Tool::Burn | Tool::Sponge)
-}
-
-enum Sheet {
-    Canvas { w: u32, h: u32, anchor: usize },
-    Transform { scale: f32, angle: f32 },
-    Effect { kind: u8, size: f32, dx: f32, dy: f32, color: [u8; 4] },
-    SelectBy { kind: u8, px: i32 },
-    Export { format: usize, quality: u8, scale: f32 },
-}
-struct TextDraft {
-    at: (f32, f32),
-    text: String,
-    size: f32,
-}
-
-fn render_text(text: &str, size: f32, color: [u8; 4]) -> Option<RgbaImage> {
-    use ab_glyph::{Font, PxScale, ScaleFont, point};
-    let dir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".into());
-    let font = ab_glyph::FontVec::try_from_vec(std::fs::read(format!("{dir}\\Fonts\\segoeui.ttf")).ok()?).ok()?;
-    let scaled = font.as_scaled(PxScale::from(size));
-    let line_h = scaled.height() + scaled.line_gap();
-    let mut glyphs = Vec::new();
-    let mut width = 0f32;
-    let lines: Vec<&str> = text.lines().collect();
-    for (li, line) in lines.iter().enumerate() {
-        let mut x = 0.0;
-        let mut prev = None;
-        for ch in line.chars() {
-            let id = scaled.glyph_id(ch);
-            if let Some(p) = prev {
-                x += scaled.kern(p, id);
-            }
-            glyphs.push(id.with_scale_and_position(size, point(x, scaled.ascent() + li as f32 * line_h)));
-            x += scaled.h_advance(id);
-            prev = Some(id);
-        }
-        width = width.max(x);
-    }
-    let (w, h) = (width.ceil() as u32 + 4, (line_h * lines.len().max(1) as f32).ceil() as u32 + 4);
-    let mut img = RgbaImage::new(w, h);
-    for g in glyphs {
-        if let Some(o) = font.outline_glyph(g) {
-            let b = o.px_bounds();
-            o.draw(|x, y, c| {
-                let (px, py) = (x as i32 + b.min.x as i32, y as i32 + b.min.y as i32);
-                if px >= 0 && py >= 0 && (px as u32) < w && (py as u32) < h {
-                    let a = (c.clamp(0.0, 1.0) * color[3] as f32).round() as u8;
-                    let p = img.get_pixel_mut(px as u32, py as u32);
-                    if a > p.0[3] {
-                        p.0 = [color[0], color[1], color[2], a];
-                    }
-                }
-            });
-        }
-    }
-    Some(img)
+pub struct Adjust {
+    pub kind: Kind,
+    pub vals: Vec<f32>,
+    pub base: RgbaImage,
+    pub layer: Option<usize>,
+    pub old: Vec<f32>,
+    pub opacity: f32,
+    pub blend: usize,
+    pub preview: bool,
+    pub preset_name: String,
+    pub fresh: bool,
 }
 
 struct NewDoc {
@@ -171,20 +65,34 @@ struct NewDoc {
     preset: usize,
 }
 
-const PRESETS: [(&str, &str, u32, u32); 8] = [
+const PRESETS: [(&str, &str, u32, u32); 12] = [
     ("Full HD", "Écran 16:9", 1920, 1080),
     ("4K UHD", "Écran 16:9", 3840, 2160),
     ("Miniature YouTube", "Vidéo", 1280, 720),
     ("Publication carrée", "Réseaux sociaux", 1080, 1080),
+    ("Portrait 4:5", "Réseaux sociaux", 1080, 1350),
     ("Story", "Réseaux sociaux", 1080, 1920),
     ("A4 300 ppp", "Impression", 2480, 3508),
+    ("A5 300 ppp", "Impression", 1748, 2480),
+    ("Carte de visite", "Impression", 1050, 600),
     ("Icône", "Interface", 1024, 1024),
     ("Bannière", "Web", 1500, 500),
+    ("Fond d'écran", "Bureau", 2560, 1440),
 ];
 
-const BACKGROUNDS: [&str; 4] = ["Blanc", "Transparent", "Noir", "Couleur principale"];
+const BACKGROUNDS: [&str; 5] = ["Blanc", "Transparent", "Noir", "Couleur principale", "Couleur secondaire"];
 
-enum Drag {
+pub const SWATCH_SETS: [(&str, &[[u8; 3]]); 7] = [
+    ("Essentiel", &[[20, 20, 24], [255, 255, 255], [255, 69, 58], [255, 159, 10], [255, 214, 10], [48, 209, 88], [10, 132, 255], [191, 90, 242]]),
+    ("Pastel", &[[255, 209, 220], [255, 229, 180], [255, 250, 205], [204, 255, 229], [204, 229, 255], [229, 204, 255], [240, 240, 240], [200, 220, 210]]),
+    ("Terre", &[[94, 60, 40], [140, 90, 60], [190, 140, 90], [225, 190, 140], [110, 120, 70], [70, 90, 60], [160, 110, 70], [60, 45, 35]]),
+    ("Néon", &[[255, 0, 128], [0, 255, 200], [255, 240, 0], [0, 160, 255], [180, 0, 255], [255, 90, 0], [57, 255, 20], [255, 255, 255]]),
+    ("Gris", &[[0, 0, 0], [36, 36, 36], [73, 73, 73], [109, 109, 109], [146, 146, 146], [182, 182, 182], [219, 219, 219], [255, 255, 255]]),
+    ("Peau", &[[255, 224, 196], [240, 200, 160], [224, 172, 132], [198, 134, 98], [160, 104, 72], [120, 76, 52], [86, 54, 38], [60, 38, 28]]),
+    ("Matériel", &[[244, 67, 54], [233, 30, 99], [156, 39, 176], [63, 81, 181], [3, 169, 244], [0, 150, 136], [139, 195, 74], [255, 193, 7]]),
+];
+
+pub enum Drag {
     None,
     Marquee((f32, f32)),
     Move { from: (f32, f32), original: RgbaImage },
@@ -192,9 +100,13 @@ enum Drag {
     Lasso(Vec<(f32, f32)>),
     Crop((f32, f32)),
     Shape((f32, f32)),
+    Ruler((f32, f32)),
+    Patch { from: (f32, f32) },
+    Guide { idx: Option<usize>, vertical: bool },
+    Rotate { start: f32, from: f32 },
 }
 
-struct Pixel {
+pub struct Pixel {
     doc: Document,
     home: bool,
     recents: Vec<PathBuf>,
@@ -203,53 +115,134 @@ struct Pixel {
     tex_filter: TextureOptions,
     checker: TextureHandle,
     icon: TextureHandle,
-    thumbs: Vec<TextureHandle>,
+    thumbs: Vec<(TextureHandle, Option<TextureHandle>)>,
     thumbs_version: u64,
     tool: Tool,
+    picks: [Tool; GROUPS.len()],
     brush: Brush,
+    brush_preset: usize,
+    smoothing: f32,
     primary: Color32,
     secondary: Color32,
     swatches: Vec<Color32>,
+    swatch_set: usize,
+    recent_colors: Vec<Color32>,
+    color_mode: usize,
     tolerance: u8,
+    contiguous: bool,
+    sample_all: bool,
+    sel_mode: u8,
+    feather: f32,
+    marquee_style: usize,
+    marquee_ratio: (f32, f32),
+    marquee_size: (u32, u32),
+    sel_prev: Option<Vec<u8>>,
+    last_sel: Option<Vec<u8>>,
+    poly: Vec<(f32, f32)>,
+    mag_width: f32,
     zoom: f32,
     offset: Vec2,
+    view_angle: f32,
     fit_pending: bool,
     last: Option<(f32, f32)>,
+    smooth_pos: Option<(f32, f32)>,
     cursor: Option<(f32, f32)>,
     drag: Drag,
     remove_stroke: Vec<(f32, f32)>,
     filling: Option<(usize, std::sync::mpsc::Receiver<RgbaImage>)>,
     gradient_end: Option<(f32, f32)>,
     new_doc: Option<NewDoc>,
-    adjust: Option<(Kind, Vec<f32>, RgbaImage)>,
-    picks: [Tool; 16],
+    adjust: Option<Adjust>,
     paint: Option<Paint>,
     clone_src: Option<(f32, f32)>,
     clone_offset: Option<(f32, f32)>,
+    clone_aligned: bool,
+    history_src: Option<RgbaImage>,
+    erase_history: bool,
     sponge_saturate: bool,
-    contiguous: bool,
+    dodge_range: u8,
+    mixer_wet: f32,
+    finger_paint: bool,
+    bg_tol: f32,
+    bg_continuous: bool,
+    fill_opacity: f32,
+    grad_kind: usize,
+    grad_reverse: bool,
+    grad_opacity: f32,
+    grad_dither: bool,
+    grad_preset: usize,
+    grad_mode: Blend,
+    shape_fill: bool,
+    shape_stroke: bool,
+    stroke_w: f32,
+    corner: f32,
+    sides: u32,
+    star: bool,
+    inset: f32,
+    custom: usize,
+    arrow_start: bool,
+    arrow_end: bool,
     shape_layer: bool,
-    crop: Option<Area>,
+    shape_mode: Blend,
+    text_font: usize,
+    text_size: f32,
+    text_bold: bool,
+    text_italic: bool,
+    text_underline: bool,
+    text_align: usize,
+    tracking: f32,
+    leading: f32,
     text: Option<TextDraft>,
+    crop: Option<Area>,
+    crop_ratio: usize,
+    crop_overlay: usize,
+    auto_select: bool,
+    show_bounds: bool,
+    zoom_out: bool,
+    picker_size: usize,
+    samplers: Vec<(f32, f32)>,
+    ruler: Option<((f32, f32), (f32, f32))>,
+    notes: Vec<((f32, f32), String)>,
+    patch_diffusion: f32,
     mask_tex: Option<(usize, TextureHandle)>,
     help: studio_ui::help::Help,
-    resize: Option<(u32, u32, bool)>,
     renaming: Option<(usize, String)>,
     error: Option<String>,
     title: String,
     clipboard: Option<RgbaImage>,
     symmetry: bool,
-    radial: bool,
-    outline: bool,
-    grid: u32,
+    symmetry_v: bool,
     show_grid: bool,
+    grid: u32,
+    grid_sub: u32,
+    grid_color: usize,
+    pixel_grid: bool,
+    rulers: bool,
+    guides: Vec<(bool, f32)>,
+    show_guides: bool,
+    lock_guides: bool,
+    snap: bool,
+    extras: bool,
+    pasteboard: usize,
+    cursor_mode: usize,
+    hide_panels: bool,
     sheet: Option<Sheet>,
     view_doc: Option<Rect>,
-    hist: Option<(u64, [u32; 256])>,
+    hist: Option<(u64, [[u32; 256]; 4])>,
+    hist_channel: usize,
+    saved_sel: Vec<(String, Vec<u8>)>,
+    last_filter: Option<(Kind, Vec<f32>)>,
+    user_presets: Vec<(Kind, String, Vec<f32>)>,
 }
 
-fn recents_path() -> PathBuf {
-    studio_core::data_dir().join("pixel").join("recents.txt")
+fn data_file(name: &str) -> PathBuf {
+    studio_core::data_dir().join("pixel").join(name)
+}
+
+fn write_data(name: &str, text: &str) {
+    let file = data_file(name);
+    let _ = std::fs::create_dir_all(file.parent().unwrap_or(Path::new(".")));
+    let _ = std::fs::write(file, text);
 }
 
 impl Pixel {
@@ -263,14 +256,25 @@ impl Pixel {
                     px.extend_from_slice(&[v, v, v, 255]);
                 }
             }
-            cc.egui_ctx.load_texture(
-                "checker",
-                egui::ColorImage::from_rgba_unmultiplied([16, 16], &px),
-                TextureOptions { wrap_mode: egui::TextureWrapMode::Repeat, ..TextureOptions::NEAREST },
-            )
+            cc.egui_ctx.load_texture("checker", egui::ColorImage::from_rgba_unmultiplied([16, 16], &px), TextureOptions { wrap_mode: egui::TextureWrapMode::Repeat, ..TextureOptions::NEAREST })
         };
-        let recents = std::fs::read_to_string(recents_path())
-            .map(|s| s.lines().map(PathBuf::from).filter(|p| p.exists()).collect())
+        let recents = std::fs::read_to_string(data_file("recents.txt")).map(|s| s.lines().map(PathBuf::from).filter(|p| p.exists()).collect()).unwrap_or_default();
+        let swatches: Vec<Color32> = std::fs::read_to_string(data_file("swatches.txt"))
+            .ok()
+            .map(|s| s.lines().filter_map(|l| u32::from_str_radix(l.trim().trim_start_matches('#'), 16).ok()).map(|v| Color32::from_rgb((v >> 16) as u8, (v >> 8) as u8, v as u8)).collect::<Vec<_>>())
+            .filter(|v| !v.is_empty())
+            .unwrap_or_else(|| SWATCH_SETS[0].1.iter().map(|c| Color32::from_rgb(c[0], c[1], c[2])).collect());
+        let user_presets = std::fs::read_to_string(data_file("presets.txt"))
+            .map(|s| {
+                s.lines()
+                    .filter_map(|l| {
+                        let mut it = l.splitn(3, '|');
+                        let (k, n, v) = (it.next()?, it.next()?, it.next()?);
+                        let kind = filters::ADJUSTMENTS.iter().chain(filters::QUICK).chain(filters::FILTERS.iter().flat_map(|g| g.1.iter())).find(|x| format!("{x:?}") == k)?;
+                        Some((*kind, n.to_string(), v.split(',').filter_map(|x| x.parse().ok()).collect()))
+                    })
+                    .collect()
+            })
             .unwrap_or_default();
         let mut me = Self {
             doc: Document::new(1920, 1080, Some([255, 255, 255, 255])),
@@ -284,24 +288,34 @@ impl Pixel {
             thumbs: Vec::new(),
             thumbs_version: u64::MAX,
             tool: Tool::Brush,
-            brush: Brush { radius: 12.0, hardness: 0.8, flow: 1.0 },
+            picks: GROUPS.map(|g| g[0]),
+            brush: Brush::new(12.0, 0.8, 1.0),
+            brush_preset: 0,
+            smoothing: 0.0,
             primary: Color32::from_rgb(20, 20, 24),
             secondary: Color32::WHITE,
-            swatches: vec![
-                Color32::from_rgb(20, 20, 24),
-                Color32::WHITE,
-                Color32::from_rgb(255, 69, 58),
-                Color32::from_rgb(255, 159, 10),
-                Color32::from_rgb(255, 214, 10),
-                Color32::from_rgb(48, 209, 88),
-                Color32::from_rgb(10, 132, 255),
-                Color32::from_rgb(191, 90, 242),
-            ],
+            swatches,
+            swatch_set: 0,
+            recent_colors: Vec::new(),
+            color_mode: 0,
             tolerance: 32,
+            contiguous: true,
+            sample_all: false,
+            sel_mode: 0,
+            feather: 0.0,
+            marquee_style: 0,
+            marquee_ratio: (16.0, 9.0),
+            marquee_size: (512, 512),
+            sel_prev: None,
+            last_sel: None,
+            poly: Vec::new(),
+            mag_width: 10.0,
             zoom: 1.0,
             offset: Vec2::ZERO,
+            view_angle: 0.0,
             fit_pending: true,
             last: None,
+            smooth_pos: None,
             cursor: None,
             drag: Drag::None,
             remove_stroke: Vec::new(),
@@ -309,30 +323,86 @@ impl Pixel {
             gradient_end: None,
             new_doc: None,
             adjust: None,
-            picks: GROUPS.map(|g| g[0]),
             paint: None,
             clone_src: None,
             clone_offset: None,
+            clone_aligned: true,
+            history_src: None,
+            erase_history: false,
             sponge_saturate: false,
-            contiguous: true,
+            dodge_range: 1,
+            mixer_wet: 0.5,
+            finger_paint: false,
+            bg_tol: 0.25,
+            bg_continuous: true,
+            fill_opacity: 1.0,
+            grad_kind: 0,
+            grad_reverse: false,
+            grad_opacity: 1.0,
+            grad_dither: true,
+            grad_preset: 0,
+            grad_mode: Blend::Normal,
+            shape_fill: true,
+            shape_stroke: false,
+            stroke_w: 6.0,
+            corner: 0.0,
+            sides: 6,
+            star: false,
+            inset: 0.5,
+            custom: 0,
+            arrow_start: false,
+            arrow_end: false,
             shape_layer: true,
-            crop: None,
+            shape_mode: Blend::Normal,
+            text_font: 0,
+            text_size: 72.0,
+            text_bold: false,
+            text_italic: false,
+            text_underline: false,
+            text_align: 0,
+            tracking: 0.0,
+            leading: 1.0,
             text: None,
+            crop: None,
+            crop_ratio: 0,
+            crop_overlay: 1,
+            auto_select: false,
+            show_bounds: false,
+            zoom_out: false,
+            picker_size: 0,
+            samplers: Vec::new(),
+            ruler: None,
+            notes: Vec::new(),
+            patch_diffusion: 6.0,
             mask_tex: None,
             help: studio_ui::help::Help::new("Pixel", tutos::PIXEL),
-            resize: None,
-            clipboard: None,
-            symmetry: false,
-            radial: false,
-            outline: false,
-            grid: 32,
-            show_grid: false,
-            sheet: None,
-            view_doc: None,
-            hist: None,
             renaming: None,
             error: None,
             title: String::new(),
+            clipboard: None,
+            symmetry: false,
+            symmetry_v: false,
+            show_grid: false,
+            grid: 32,
+            grid_sub: 1,
+            grid_color: 0,
+            pixel_grid: true,
+            rulers: false,
+            guides: Vec::new(),
+            show_guides: true,
+            lock_guides: false,
+            snap: true,
+            extras: true,
+            pasteboard: 0,
+            cursor_mode: 0,
+            hide_panels: false,
+            sheet: None,
+            view_doc: None,
+            hist: None,
+            hist_channel: 0,
+            saved_sel: Vec::new(),
+            last_filter: None,
+            user_presets,
         };
         if let Some(path) = std::env::args().nth(1) {
             me.open_path(Path::new(&path));
@@ -341,22 +411,38 @@ impl Pixel {
     }
 
     fn set_doc(&mut self, doc: Document) {
+        self.history_src = Some(doc.layers[0].img.clone());
         self.doc = doc;
         self.tex = None;
         self.fit_pending = true;
         self.renaming = None;
         self.home = false;
         self.thumbs_version = u64::MAX;
+        self.view_angle = 0.0;
+        self.samplers.clear();
+        self.notes.clear();
+        self.ruler = None;
+        self.guides.clear();
+        self.crop = None;
+        self.poly.clear();
     }
 
     fn remember(&mut self, path: &Path) {
         self.recents.retain(|p| p != path);
         self.recents.insert(0, path.to_path_buf());
         self.recents.truncate(8);
-        let file = recents_path();
-        let _ = std::fs::create_dir_all(file.parent().unwrap_or(Path::new(".")));
         let text: Vec<String> = self.recents.iter().map(|p| p.display().to_string()).collect();
-        let _ = std::fs::write(file, text.join("\n"));
+        write_data("recents.txt", &text.join("\n"));
+    }
+
+    pub fn save_swatches(&self) {
+        let text: Vec<String> = self.swatches.iter().map(|c| format!("{:02X}{:02X}{:02X}", c.r(), c.g(), c.b())).collect();
+        write_data("swatches.txt", &text.join("\n"));
+    }
+
+    pub fn save_presets(&self) {
+        let text: Vec<String> = self.user_presets.iter().map(|(k, n, v)| format!("{k:?}|{}|{}", n.replace('|', " "), v.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","))).collect();
+        write_data("presets.txt", &text.join("\n"));
     }
 
     fn open_path(&mut self, path: &Path) {
@@ -381,6 +467,7 @@ impl Pixel {
             match image::open(&p) {
                 Ok(img) => {
                     let name = p.file_stem().map(|s| s.to_string_lossy().into_owned());
+                    self.doc.next_label = Some("Importer".into());
                     self.doc.add_layer(name, Some(img.into_rgba8()));
                 }
                 Err(e) => self.error = Some(format!("Impossible d'importer : {e}")),
@@ -388,18 +475,22 @@ impl Pixel {
         }
     }
 
-    fn copy(&mut self) {
-        let img = match self.doc.copy_selection() {
-            Some((img, _, _)) => img,
-            None => self.doc.layers[self.doc.active].img.clone(),
-        };
+    fn copy_image(&mut self, img: RgbaImage) {
         if let Ok(mut cb) = arboard::Clipboard::new() {
             let _ = cb.set_image(arboard::ImageData { width: img.width() as usize, height: img.height() as usize, bytes: std::borrow::Cow::Owned(img.as_raw().clone()) });
         }
         self.clipboard = Some(img);
     }
 
-    fn paste(&mut self) {
+    fn copy(&mut self) {
+        let img = match self.doc.copy_selection() {
+            Some((img, _, _)) => img,
+            None => self.doc.layers[self.doc.active].img.clone(),
+        };
+        self.copy_image(img);
+    }
+
+    fn paste(&mut self, in_place: bool) {
         let from_system = arboard::Clipboard::new().ok().and_then(|mut cb| cb.get_image().ok()).and_then(|d| RgbaImage::from_raw(d.width as u32, d.height as u32, d.bytes.into_owned()));
         let Some(img) = from_system.or_else(|| self.clipboard.clone()) else {
             self.error = Some("Le presse-papiers ne contient pas d'image".into());
@@ -409,24 +500,70 @@ impl Pixel {
             self.set_doc(Document::from_image("Collage".into(), img));
             return;
         }
-        let at = ((self.doc.width() as i64 - img.width() as i64) / 2, (self.doc.height() as i64 - img.height() as i64) / 2);
+        let at = match (in_place, self.doc.selection) {
+            (true, Some(s)) => (s.x0 as i64, s.y0 as i64),
+            _ => ((self.doc.width() as i64 - img.width() as i64) / 2, (self.doc.height() as i64 - img.height() as i64) / 2),
+        };
+        self.doc.next_label = Some("Coller".into());
         self.doc.paste_image(img, at, "Collage");
     }
 
-    fn export_with(&mut self, format: usize, quality: u8, scale: f32) {
-        let ext = ["png", "jpg", "webp"][format.min(2)];
+    fn doc_from_clipboard(&mut self) {
+        match arboard::Clipboard::new().ok().and_then(|mut cb| cb.get_image().ok()).and_then(|d| RgbaImage::from_raw(d.width as u32, d.height as u32, d.bytes.into_owned())).or_else(|| self.clipboard.clone()) {
+            Some(img) => self.set_doc(Document::from_image("Presse-papiers".into(), img)),
+            None => self.error = Some("Le presse-papiers ne contient pas d'image".into()),
+        }
+    }
+
+    pub fn export_with(&mut self, format: usize, quality: u8, scale: f32, bg: usize, level: usize, ico: [bool; 7], selection: bool) {
+        let exts = ["png", "jpg", "webp", "bmp", "tif", "gif", "ico"];
+        let ext = exts[format.min(6)];
         let Some(path) = rfd::FileDialog::new().set_file_name(format!("{}.{ext}", self.doc.name)).add_filter(ext.to_uppercase(), &[ext]).save_file() else { return };
-        let mut flat = self.doc.flatten();
+        let mut flat = if selection { self.doc.copy_merged() } else { self.doc.flatten() };
         if (scale - 100.0).abs() > 0.5 {
             let k = scale / 100.0;
             flat = imageops::resize(&flat, ((flat.width() as f32 * k) as u32).max(1), ((flat.height() as f32 * k) as u32).max(1), imageops::FilterType::Lanczos3);
         }
+        let bg_color = match bg {
+            0 => [255, 255, 255, 255],
+            1 => [0, 0, 0, 255],
+            _ => self.secondary.to_array(),
+        };
+        let matte = |img: &RgbaImage| {
+            let mut out = RgbaImage::from_pixel(img.width(), img.height(), image::Rgba(bg_color));
+            imageops::overlay(&mut out, img, 0, 0);
+            out
+        };
         let result = (|| -> Result<(), String> {
+            let file = || std::fs::File::create(&path).map(std::io::BufWriter::new).map_err(|e| e.to_string());
             match format {
+                0 => {
+                    use image::codecs::png::{CompressionType, FilterType, PngEncoder};
+                    let c = [CompressionType::Fast, CompressionType::Default, CompressionType::Best][level.min(2)];
+                    PngEncoder::new_with_quality(file()?, c, FilterType::Adaptive).write_image(flat.as_raw(), flat.width(), flat.height(), image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())
+                }
                 1 => {
-                    let file = std::fs::File::create(&path).map_err(|e| e.to_string())?;
-                    let rgb = image::DynamicImage::ImageRgba8(flat).to_rgb8();
-                    image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), quality).encode_image(&rgb).map_err(|e| e.to_string())
+                    let rgb = image::DynamicImage::ImageRgba8(matte(&flat)).to_rgb8();
+                    image::codecs::jpeg::JpegEncoder::new_with_quality(file()?, quality).encode_image(&rgb).map_err(|e| e.to_string())
+                }
+                3 => image::DynamicImage::ImageRgba8(matte(&flat)).to_rgb8().save(&path).map_err(|e| e.to_string()),
+                6 => {
+                    let sizes = [16u32, 24, 32, 48, 64, 128, 256];
+                    let mut frames = Vec::new();
+                    for (s, on) in sizes.iter().zip(ico) {
+                        if !on {
+                            continue;
+                        }
+                        let k = *s as f32 / flat.width().max(flat.height()) as f32;
+                        let small = imageops::resize(&flat, ((flat.width() as f32 * k) as u32).max(1), ((flat.height() as f32 * k) as u32).max(1), imageops::FilterType::Lanczos3);
+                        let mut sq = RgbaImage::new(*s, *s);
+                        imageops::overlay(&mut sq, &small, ((*s - small.width()) / 2) as i64, ((*s - small.height()) / 2) as i64);
+                        frames.push(image::codecs::ico::IcoFrame::as_png(sq.as_raw(), *s, *s, image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())?);
+                    }
+                    if frames.is_empty() {
+                        return Err("choisis au moins une taille d'icône".into());
+                    }
+                    image::codecs::ico::IcoEncoder::new(file()?).encode_images(&frames).map_err(|e| e.to_string())
                 }
                 _ => flat.save(&path).map_err(|e| e.to_string()),
             }
@@ -440,156 +577,27 @@ impl Pixel {
         }
     }
 
-    fn extra_sheet(&mut self, ctx: &egui::Context) {
-        let Some(mut sheet) = self.sheet.take() else { return };
-        let mut apply = false;
-        let mut cancel = false;
-        let title = match &sheet {
-            Sheet::Canvas { .. } => "Taille de la zone de travail",
-            Sheet::Transform { .. } => "Transformation du calque",
-            Sheet::Effect { kind: 0, .. } => "Ombre portée",
-            Sheet::Effect { kind: 1, .. } => "Lueur externe",
-            Sheet::Effect { kind: 2, .. } => "Contour du calque",
-            Sheet::Effect { .. } => "Contour de la sélection",
-            Sheet::SelectBy { kind: 0, .. } => "Agrandir la sélection",
-            Sheet::SelectBy { kind: 1, .. } => "Réduire la sélection",
-            Sheet::SelectBy { .. } => "Bordure de sélection",
-            Sheet::Export { .. } => "Exporter",
-        };
-        let keep = pro::sheet(ctx, "extra", 380.0, |ui| {
-            ui.label(RichText::new(title).font(semibold(18.0)).color(INK_STRONG));
-            ui.add_space(12.0);
-            ui.spacing_mut().slider_width = 240.0;
-            let label = |ui: &mut Ui, t: &str| {
-                ui.label(RichText::new(t).size(12.5).color(MUTED));
-            };
-            match &mut sheet {
-                Sheet::Canvas { w, h, anchor } => {
-                    ui.horizontal(|ui| {
-                        ui.add(egui::DragValue::new(w).range(1..=16384).prefix("L ").suffix(" px"));
-                        ui.add(egui::DragValue::new(h).range(1..=16384).prefix("H ").suffix(" px"));
-                    });
-                    ui.add_space(8.0);
-                    label(ui, "Position de l'image actuelle");
-                    for row in 0..3 {
-                        ui.horizontal(|ui| {
-                            for col in 0..3 {
-                                let k = row * 3 + col;
-                                let (r, resp) = ui.allocate_exact_size(Vec2::splat(30.0), Sense::click());
-                                ui.painter().rect(r, CornerRadius::same(5), if *anchor == k { BLUE } else { FIELD }, Stroke::new(1.0, LINE), StrokeKind::Inside);
-                                if resp.clicked() {
-                                    *anchor = k;
-                                }
-                            }
-                        });
-                    }
-                    ui.label(RichText::new("La zone ajoutée prend la couleur secondaire sur le fond.").size(12.0).color(FAINT));
-                }
-                Sheet::Transform { scale, angle } => {
-                    label(ui, "Échelle");
-                    ui.add(egui::Slider::new(scale, 5.0..=400.0).suffix(" %"));
-                    label(ui, "Rotation");
-                    ui.add(egui::Slider::new(angle, -180.0..=180.0).suffix("°"));
-                    ui.horizontal(|ui| {
-                        for a in [-90.0, -45.0, 45.0, 90.0] {
-                            if ui.small_button(format!("{a:+}°")).clicked() {
-                                *angle = a;
-                            }
-                        }
-                    });
-                }
-                Sheet::Effect { kind, size, dx, dy, color } => {
-                    label(ui, if *kind == 0 { "Flou" } else if *kind == 1 { "Taille" } else { "Épaisseur" });
-                    ui.add(egui::Slider::new(size, 0.0..=60.0).suffix(" px"));
-                    if *kind == 0 {
-                        label(ui, "Décalage");
-                        ui.horizontal(|ui| {
-                            ui.add(egui::DragValue::new(dx).range(-200.0..=200.0).prefix("X "));
-                            ui.add(egui::DragValue::new(dy).range(-200.0..=200.0).prefix("Y "));
-                        });
-                    }
-                    ui.horizontal(|ui| {
-                        label(ui, "Couleur");
-                        let mut c = Color32::from_rgba_unmultiplied(color[0], color[1], color[2], color[3]);
-                        if ui.color_edit_button_srgba(&mut c).changed() {
-                            *color = c.to_srgba_unmultiplied();
-                        }
-                    });
-                    if *kind < 3 {
-                        ui.label(RichText::new("L'effet est créé sur un nouveau calque sous le calque actif.").size(12.0).color(FAINT));
-                    }
-                }
-                Sheet::SelectBy { px, .. } => {
-                    ui.add(egui::Slider::new(px, 1..=200).suffix(" px"));
-                }
-                Sheet::Export { format, quality, scale } => {
-                    label(ui, "Format");
-                    pro::segmented(ui, format, &["PNG", "JPEG", "WebP"]);
-                    ui.add_space(6.0);
-                    if *format == 1 {
-                        label(ui, "Qualité");
-                        ui.add(egui::Slider::new(quality, 30..=100));
-                    }
-                    label(ui, "Échelle");
-                    ui.add(egui::Slider::new(scale, 10.0..=400.0).suffix(" %"));
-                    let (w, h) = ((self.doc.width() as f32 * *scale / 100.0) as u32, (self.doc.height() as f32 * *scale / 100.0) as u32);
-                    ui.label(RichText::new(format!("{w} × {h} px{}", if *format == 0 { " · transparence conservée" } else if *format == 1 { " · sans transparence" } else { " · sans perte" })).size(12.0).color(FAINT));
-                }
-            }
-            ui.add_space(14.0);
-            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if pro::primary(ui, if matches!(sheet, Sheet::Export { .. }) { "Exporter…" } else { "Appliquer" }).clicked() {
-                    apply = true;
-                }
-                if pro::secondary(ui, "Annuler").clicked() {
-                    cancel = true;
-                }
-            });
-        });
-        if apply {
-            match sheet {
-                Sheet::Canvas { w, h, anchor } => {
-                    self.doc.canvas_size(w, h, ((anchor % 3) as f32 / 2.0, (anchor / 3) as f32 / 2.0), Some(self.secondary.to_array()));
-                    self.fit_pending = true;
-                }
-                Sheet::Transform { scale, angle } => self.doc.transform_layer(scale / 100.0, angle),
-                Sheet::Effect { kind, size, dx, dy, color } => match kind {
-                    0 => self.doc.drop_shadow(dx as i64, dy as i64, size, color),
-                    1 => self.doc.outer_glow(size, color),
-                    2 => self.doc.layer_outline(size.max(1.0) as u32, color),
-                    _ => self.doc.stroke_selection(color, size.max(1.0) as u32),
-                },
-                Sheet::SelectBy { kind, px } => match kind {
-                    0 => self.doc.grow_selection(px),
-                    1 => self.doc.grow_selection(-px),
-                    _ => self.doc.border_selection(px as u32),
-                },
-                Sheet::Export { format, quality, scale } => self.export_with(format, quality, scale),
-            }
-        } else if keep && !cancel {
-            self.sheet = Some(sheet);
-        }
+    fn quick_export(&mut self) {
+        self.export_with(0, 90, 100.0, 0, 1, [false; 7], false);
     }
-    fn export(&mut self) {
-        let Some(path) = rfd::FileDialog::new()
-            .set_file_name(format!("{}.png", self.doc.name))
-            .add_filter("PNG", &["png"])
-            .add_filter("JPEG", &["jpg", "jpeg"])
-            .add_filter("WebP", &["webp"])
-            .save_file()
-        else {
-            return;
-        };
-        let flat = self.doc.flatten();
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
-        let result = if ext == "jpg" || ext == "jpeg" { image::DynamicImage::ImageRgba8(flat).to_rgb8().save(&path) } else { flat.save(&path) };
-        match result {
-            Ok(()) => {
-                self.doc.modified = false;
-                self.remember(&path);
+
+    fn export_layers(&mut self) {
+        let Some(dir) = rfd::FileDialog::new().pick_folder() else { return };
+        let mut n = 0;
+        for (i, l) in self.doc.layers.iter().enumerate() {
+            if l.adjust.is_some() {
+                continue;
             }
-            Err(e) => self.error = Some(format!("Export impossible : {e}")),
+            let name: String = l.name.chars().map(|c| if c.is_alphanumeric() || c == ' ' || c == '-' { c } else { '_' }).collect();
+            if l.img.save(dir.join(format!("{:02} {}.png", i + 1, name.trim()))).is_ok() {
+                n += 1;
+            }
         }
+        self.error = Some(format!("{n} calque(s) exporté(s) en PNG"));
+    }
+
+    pub fn export_sheet(&mut self) {
+        self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0, bg: 0, level: 1, ico: [true, false, true, true, false, false, true], selection: false });
     }
 
     fn start_fill(&mut self, mask: Vec<bool>, ctx: &egui::Context) {
@@ -615,11 +623,21 @@ impl Pixel {
             self.filling = None;
             self.remove_stroke.clear();
             if layer < self.doc.layers.len() && self.doc.layers[layer].img.dimensions() == img.dimensions() {
+                self.doc.next_label = Some("Suppression intelligente".into());
                 self.doc.checkpoint();
                 self.doc.layers[layer].img = img;
                 self.doc.touch_all();
             }
         }
+    }
+
+    pub fn content_fill_selection(&mut self, ctx: &egui::Context) {
+        if self.doc.selection.is_none() {
+            return;
+        }
+        let w = self.doc.width();
+        let mask: Vec<bool> = (0..w * self.doc.height()).map(|i| self.doc.selected(i % w, i / w)).collect();
+        self.start_fill(mask, ctx);
     }
 
     fn stroke_mask(&self) -> Vec<bool> {
@@ -691,44 +709,12 @@ impl Pixel {
         let (w, h) = (self.doc.width(), self.doc.height());
         let s = 44.0 / w.max(h) as f32;
         let (tw, th) = (((w as f32 * s) as u32).max(1), ((h as f32 * s) as u32).max(1));
-        self.thumbs = self
-            .doc
-            .layers
-            .iter()
-            .enumerate()
-            .map(|(i, l)| {
-                let t = imageops::thumbnail(&l.img, tw, th);
-                ctx.load_texture(format!("thumb{i}"), egui::ColorImage::from_rgba_unmultiplied([tw as usize, th as usize], t.as_raw()), TextureOptions::LINEAR)
-            })
-            .collect();
+        let load = |name: String, img: &RgbaImage| {
+            let t = imageops::thumbnail(img, tw, th);
+            ctx.load_texture(name, egui::ColorImage::from_rgba_unmultiplied([tw as usize, th as usize], t.as_raw()), TextureOptions::LINEAR)
+        };
+        self.thumbs = self.doc.layers.iter().enumerate().map(|(i, l)| (load(format!("thumb{i}"), &l.img), l.mask.as_ref().map(|m| load(format!("mthumb{i}"), m)))).collect();
         self.thumbs_version = self.doc.version;
-    }
-
-    fn select_tool(&mut self, t: Tool) {
-        self.tool = t;
-        if let Some(g) = GROUPS.iter().position(|g| g.contains(&t)) {
-            self.picks[g] = t;
-        }
-    }
-
-    fn make_paint(&mut self, at: (f32, f32)) -> Option<Paint> {
-        Some(match self.tool {
-            Tool::Brush => Paint::Color(self.primary.to_array()),
-            Tool::Pencil => Paint::Pencil(self.primary.to_array()),
-            Tool::Eraser => Paint::Erase,
-            Tool::Dodge => Paint::Dodge,
-            Tool::Burn => Paint::Burn,
-            Tool::Sponge => Paint::Sponge(if self.sponge_saturate { 1.0 } else { -1.0 }),
-            Tool::Blur => Paint::Blur(self.doc.layers[self.doc.active].img.clone()),
-            Tool::Sharpen => Paint::Sharpen(self.doc.layers[self.doc.active].img.clone()),
-            Tool::Smudge => Paint::Smudge(None),
-            Tool::Clone => {
-                let src = self.clone_src?;
-                let off = *self.clone_offset.get_or_insert((src.0 - at.0, src.1 - at.1));
-                Paint::Clone { src: self.doc.layers[self.doc.active].img.clone(), dx: off.0, dy: off.1 }
-            }
-            _ => return None,
-        })
     }
 
     fn sync_mask(&mut self, ctx: &egui::Context) {
@@ -741,14 +727,15 @@ impl Pixel {
             return;
         }
         let (w, h) = (self.doc.width() as usize, self.doc.height() as usize);
+        let on = |i: usize| mask[i] > 127;
         let mut px = vec![0u8; w * h * 4];
         for y in 0..h {
             for x in 0..w {
                 let i = y * w + x;
-                if !mask[i] {
+                if !on(i) {
                     continue;
                 }
-                let edge = x == 0 || y == 0 || x + 1 == w || y + 1 == h || !mask[i - 1] || !mask[i + 1] || !mask[i - w] || !mask[i + w];
+                let edge = x == 0 || y == 0 || x + 1 == w || y + 1 == h || !on(i - 1) || !on(i + 1) || !on(i - w) || !on(i + w);
                 if edge {
                     let v = if (x + y) / 4 % 2 == 0 { 255 } else { 0 };
                     px[i * 4..i * 4 + 4].copy_from_slice(&[v, v, v, 255]);
@@ -763,12 +750,95 @@ impl Pixel {
         self.new_doc = Some(NewDoc { name: "Sans titre".into(), w: 1920, h: 1080, background: 0, preset: 0 });
     }
 
+    pub fn snapshot_history(&mut self) {
+        self.history_src = Some(self.doc.layers[self.doc.active].img.clone());
+    }
+
+    pub fn commit_crop(&mut self) {
+        if let Some(c) = self.crop.take() {
+            self.doc.next_label = Some("Recadrage".into());
+            self.doc.crop_to(c);
+            self.fit_pending = true;
+            self.guides.clear();
+        }
+    }
+
+    pub fn use_color(&mut self, c: Color32) {
+        self.recent_colors.retain(|x| *x != c);
+        self.recent_colors.insert(0, c);
+        self.recent_colors.truncate(12);
+    }
+
+    pub fn sample_color(&self, x: f32, y: f32) -> Option<Color32> {
+        let src = if self.sample_all { &self.composite } else { &self.doc.layers[self.doc.active].img };
+        let (w, h) = src.dimensions();
+        if x < 0.0 || y < 0.0 || x >= w as f32 || y >= h as f32 {
+            return None;
+        }
+        let r = [0i32, 1, 2, 5, 15][self.picker_size.min(4)];
+        let (cx, cy) = (x as i32, y as i32);
+        let mut acc = [0u32; 4];
+        let mut n = 0;
+        for yy in (cy - r).max(0)..=(cy + r).min(h as i32 - 1) {
+            for xx in (cx - r).max(0)..=(cx + r).min(w as i32 - 1) {
+                let p = src.get_pixel(xx as u32, yy as u32).0;
+                for k in 0..4 {
+                    acc[k] += p[k] as u32;
+                }
+                n += 1;
+            }
+        }
+        let a = acc.map(|v| (v / n.max(1)) as u8);
+        Some(Color32::from_rgb(a[0], a[1], a[2]))
+    }
+
+    pub fn start_adjust(&mut self, k: Kind) {
+        let base = self.doc.active_target();
+        if k.params().is_empty() {
+            let out = k.apply(&base, &[]);
+            self.doc.next_label = Some(k.title().to_string());
+            self.doc.checkpoint();
+            self.doc.put_filtered(&base, &out);
+            self.last_filter = Some((k, Vec::new()));
+        } else {
+            self.adjust = Some(Adjust { kind: k, vals: k.defaults(), base, layer: None, old: Vec::new(), opacity: 1.0, blend: 0, preview: true, preset_name: String::new(), fresh: true });
+        }
+    }
+
+    pub fn repeat_filter(&mut self) {
+        if let Some((k, v)) = self.last_filter.clone() {
+            let base = self.doc.active_target();
+            let out = k.apply(&base, &v);
+            self.doc.next_label = Some(k.title().to_string());
+            self.doc.checkpoint();
+            self.doc.put_filtered(&base, &out);
+        }
+    }
+
+    pub fn edit_adjustment_layer(&mut self, i: usize) {
+        if let Some((k, v)) = self.doc.layers[i].adjust.clone() {
+            self.adjust = Some(Adjust { kind: k, vals: v.clone(), base: RgbaImage::new(1, 1), layer: Some(i), old: v, opacity: 1.0, blend: 0, preview: true, preset_name: String::new(), fresh: false });
+        }
+    }
+
+    pub fn new_adjustment_layer(&mut self, k: Kind) {
+        self.doc.next_label = Some(format!("Calque de réglage {}", k.title()));
+        self.doc.add_adjustment(k, k.defaults());
+        if !k.params().is_empty() {
+            let i = self.doc.active;
+            self.edit_adjustment_layer(i);
+        }
+    }
+
     fn shortcuts(&mut self, ctx: &egui::Context) {
         if ctx.egui_wants_keyboard_input() || self.new_doc.is_some() || self.adjust.is_some() || self.text.is_some() || self.sheet.is_some() {
             return;
         }
         use egui::{KeyboardShortcut as K, Modifiers as M};
         let sc = |m, k| ctx.input_mut(|i| i.consume_shortcut(&K::new(m, k)));
+        let cs = M::COMMAND | M::SHIFT;
+        let ca = M::COMMAND | M::ALT;
+        let csa = M::COMMAND | M::SHIFT | M::ALT;
         if sc(M::COMMAND, Key::N) {
             self.new_doc_sheet();
         }
@@ -778,9 +848,12 @@ impl Pixel {
         if self.home {
             return;
         }
-        if sc(M::COMMAND | M::SHIFT, Key::Z) || sc(M::COMMAND, Key::Y) {
+        if sc(M::COMMAND, Key::W) {
+            self.home = true;
+        }
+        if sc(cs, Key::Z) || sc(M::COMMAND, Key::Y) {
             self.doc.redo();
-        } else if sc(M::COMMAND, Key::Z) {
+        } else if sc(ca, Key::Z) || sc(M::COMMAND, Key::Z) {
             self.doc.undo();
         }
         if sc(M::COMMAND, Key::Num0) {
@@ -790,53 +863,141 @@ impl Pixel {
             self.zoom = 1.0;
             self.offset = Vec2::ZERO;
         }
-        if sc(M::COMMAND | M::SHIFT, Key::S) || sc(M::COMMAND, Key::E) {
-            self.export();
+        if sc(csa, Key::S) {
+            self.quick_export();
+        }
+        if sc(cs, Key::S) || sc(M::COMMAND, Key::E) {
+            self.export_sheet();
         }
         if sc(M::COMMAND, Key::A) {
             self.doc.set_selection(Some(self.doc.full()), None);
         }
-        if sc(M::COMMAND, Key::D) {
-            self.doc.set_selection(None, None);
+        if sc(cs, Key::D) {
+            if let Some(m) = self.last_sel.clone() {
+                self.doc.select_mask(m);
+            }
+        } else if sc(M::COMMAND, Key::D) {
+            self.deselect();
         }
-        if sc(M::COMMAND | M::SHIFT, Key::I) {
+        if sc(cs, Key::I) {
             self.doc.invert_selection();
         }
-        if sc(M::COMMAND, Key::L) {
+        if sc(M::SHIFT, Key::F6) {
+            self.sheet = Some(Sheet::SelectBy { kind: 3, px: 4.0 });
+        }
+        if sc(csa, Key::L) {
+            self.start_adjust(Kind::AutoContrast);
+        } else if sc(cs, Key::L) {
+            self.start_adjust(Kind::AutoTone);
+        } else if sc(M::COMMAND, Key::L) {
             self.start_adjust(Kind::Levels);
         }
-        if sc(M::COMMAND, Key::U) {
+        if sc(M::COMMAND, Key::M) {
+            self.start_adjust(Kind::Curves);
+        }
+        if sc(cs, Key::U) {
+            self.start_adjust(Kind::BlackWhite);
+        } else if sc(M::COMMAND, Key::U) {
             self.start_adjust(Kind::HueSat);
         }
-        if sc(M::COMMAND | M::SHIFT, Key::J) {
-            self.doc.layer_from_selection(true);
-        } else if sc(M::COMMAND, Key::J) && !self.doc.layer_from_selection(false) {
-            self.doc.duplicate_layer();
+        if sc(csa, Key::B) {
+            self.start_adjust(Kind::BlackWhiteMix);
+        } else if sc(cs, Key::B) {
+            self.start_adjust(Kind::AutoColor);
+        } else if sc(M::COMMAND, Key::B) {
+            self.start_adjust(Kind::ColorBalance);
         }
-        if sc(M::COMMAND, Key::C) {
+        if sc(ca, Key::I) {
+            self.sheet = Some(Sheet::ImageSize { w: self.doc.width(), h: self.doc.height(), keep: true, percent: false, resample: 3, dpi: 72.0 });
+        } else if sc(M::COMMAND, Key::I) {
+            self.start_adjust(Kind::Invert);
+        }
+        if sc(ca, Key::C) {
+            self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4, relative: false, ext: 0 });
+        } else if sc(cs, Key::C) {
+            let img = self.doc.copy_merged();
+            self.copy_image(img);
+        } else if sc(M::COMMAND, Key::C) {
             self.copy();
+        }
+        if sc(ca, Key::F) {
+            self.repeat_filter();
+        }
+        if sc(cs, Key::J) {
+            self.doc.next_label = Some("Calque par coupure".into());
+            self.doc.layer_from_selection(true);
+        } else if sc(M::COMMAND, Key::J) {
+            self.doc.next_label = Some("Calque par copie".into());
+            if !self.doc.layer_from_selection(false) {
+                self.doc.duplicate_layer();
+            }
         }
         if sc(M::COMMAND, Key::X) {
             self.copy();
+            self.doc.next_label = Some("Couper".into());
             self.doc.clear_selection();
         }
-        if sc(M::COMMAND, Key::V) {
-            self.paste();
+        if sc(cs, Key::V) {
+            self.paste(true);
+        } else if sc(M::COMMAND, Key::V) {
+            self.paste(false);
         }
         if sc(M::COMMAND, Key::T) {
-            self.sheet = Some(Sheet::Transform { scale: 100.0, angle: 0.0 });
+            self.sheet = Some(Sheet::Transform(Xform::identity()));
         }
-        if sc(M::COMMAND | M::SHIFT, Key::E) {
+        if sc(cs, Key::E) {
+            self.doc.next_label = Some("Fusionner les calques visibles".into());
             self.doc.merge_visible();
+        } else if sc(ca, Key::E) {
+            self.doc.next_label = Some("Fusionner avec le dessous".into());
+            self.doc.merge_down();
         }
         if sc(M::SHIFT, Key::F5) {
+            self.sheet = Some(Sheet::Fill { content: 0, opacity: 100.0, blend: 0 });
+        }
+        if sc(M::ALT, Key::Backspace) {
+            self.doc.next_label = Some("Remplir (principale)".into());
             self.doc.fill_selection(self.primary.to_array());
+        } else if sc(M::COMMAND, Key::Backspace) {
+            self.doc.next_label = Some("Remplir (secondaire)".into());
+            self.doc.fill_selection(self.secondary.to_array());
         }
         if sc(M::COMMAND, Key::Quote) {
             self.show_grid = !self.show_grid;
         }
-        if sc(M::COMMAND | M::SHIFT, Key::N) {
+        if sc(M::COMMAND, Key::R) {
+            self.rulers = !self.rulers;
+        }
+        if sc(cs, Key::Semicolon) {
+            self.snap = !self.snap;
+        } else if sc(ca, Key::Semicolon) {
+            self.lock_guides = !self.lock_guides;
+        } else if sc(M::COMMAND, Key::Semicolon) {
+            self.show_guides = !self.show_guides;
+        }
+        if sc(M::COMMAND, Key::H) {
+            self.extras = !self.extras;
+        }
+        if sc(cs, Key::N) {
+            self.doc.next_label = Some("Nouveau calque".into());
             self.doc.add_layer(None, None);
+        }
+        if sc(ca, Key::G) {
+            let a = self.doc.active;
+            if a > 0 {
+                self.doc.layers[a].clip = !self.doc.layers[a].clip;
+                self.doc.touch_all();
+            }
+        }
+        if sc(cs, Key::CloseBracket) {
+            self.doc.move_layer_to(true);
+        } else if sc(M::COMMAND, Key::CloseBracket) {
+            self.doc.move_layer(true);
+        }
+        if sc(cs, Key::OpenBracket) {
+            self.doc.move_layer_to(false);
+        } else if sc(M::COMMAND, Key::OpenBracket) {
+            self.doc.move_layer(false);
         }
         if sc(M::COMMAND, Key::Plus) || sc(M::COMMAND, Key::Equals) {
             self.zoom = (self.zoom * 1.25).min(64.0);
@@ -844,49 +1005,58 @@ impl Pixel {
         if sc(M::COMMAND, Key::Minus) {
             self.zoom = (self.zoom / 1.25).max(0.02);
         }
-        let (keys, del, swap, reset, smaller, bigger, enter_key, escape_key) = ctx.input(|i| {
+        if sc(M::NONE, Key::Tab) {
+            self.hide_panels = !self.hide_panels;
+        }
+        if sc(M::NONE, Key::Backslash) {
+            self.toggle_mask_edit();
+        }
+        let input = ctx.input(|i| {
             let mut pick = None;
-            if !i.modifiers.command {
-                for (tool, _, key) in TOOLS {
-                    if key.is_some_and(|k| i.key_pressed(k)) {
-                        let group = GROUPS.iter().find(|g| g.contains(&tool)).copied().unwrap_or(&[]);
-                        pick = Some(if i.modifiers.shift && group.contains(&self.tool) {
-                            group[(group.iter().position(|t| *t == self.tool).unwrap_or(0) + 1) % group.len()]
-                        } else if group.contains(&self.tool) {
-                            self.tool
-                        } else {
-                            tool
-                        });
+            if !i.modifiers.command && !i.modifiers.alt {
+                for (_, _, key, _) in tools::TOOLS {
+                    if i.key_pressed(*key) {
+                        pick = Some((*key, i.modifiers.shift));
                     }
                 }
             }
-            let enter = i.key_pressed(Key::Enter);
-            let escape = i.key_pressed(Key::Escape);
+            let digit = (0..10).find(|d| i.key_pressed([Key::Num0, Key::Num1, Key::Num2, Key::Num3, Key::Num4, Key::Num5, Key::Num6, Key::Num7, Key::Num8, Key::Num9][*d]) && !i.modifiers.command);
+            let arrows = [Key::ArrowLeft, Key::ArrowRight, Key::ArrowUp, Key::ArrowDown].map(|k| i.key_pressed(k));
             (
                 pick,
-                i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace),
+                i.key_pressed(Key::Delete) || (i.key_pressed(Key::Backspace) && !i.modifiers.any()),
                 i.key_pressed(Key::X) && !i.modifiers.command,
                 i.key_pressed(Key::D) && !i.modifiers.command,
-                i.key_pressed(Key::OpenBracket),
-                i.key_pressed(Key::CloseBracket),
-                enter,
-                escape,
+                i.key_pressed(Key::OpenBracket) && !i.modifiers.command,
+                i.key_pressed(Key::CloseBracket) && !i.modifiers.command,
+                i.key_pressed(Key::Enter),
+                i.key_pressed(Key::Escape),
+                i.modifiers.shift,
+                digit,
+                arrows,
             )
         });
-        if let Some(t) = keys {
-            self.select_tool(t);
+        let (pick, del, swap, reset, smaller, bigger, enter, escape, shift, digit, arrows) = input;
+        if let Some((k, s)) = pick
+            && !matches!(k, Key::X | Key::D)
+        {
+            self.key_tool(k, s);
         }
-        if let Some(c) = self.crop {
-            if enter_key {
-                self.doc.set_selection(Some(c), None);
-                self.doc.crop_to_selection();
-                self.crop = None;
-                self.fit_pending = true;
-            } else if escape_key {
-                self.crop = None;
+        if enter {
+            if self.crop.is_some() {
+                self.commit_crop();
+            } else if self.poly.len() >= 3 {
+                let pts = std::mem::take(&mut self.poly);
+                self.finish_lasso(&pts);
             }
         }
+        if escape {
+            self.crop = None;
+            self.poly.clear();
+            self.drag = Drag::None;
+        }
         if del {
+            self.doc.next_label = Some("Effacer".into());
             self.doc.clear_selection();
         }
         if swap {
@@ -897,11 +1067,60 @@ impl Pixel {
             self.secondary = Color32::WHITE;
         }
         if smaller {
-            self.brush.radius = (self.brush.radius / 1.2).max(0.5);
+            if shift {
+                self.brush.hardness = (self.brush.hardness - 0.25).max(0.0);
+            } else {
+                self.brush.radius = (self.brush.radius / 1.2).max(0.5);
+            }
         }
         if bigger {
-            self.brush.radius = (self.brush.radius * 1.2).min(500.0);
+            if shift {
+                self.brush.hardness = (self.brush.hardness + 0.25).min(1.0);
+            } else {
+                self.brush.radius = (self.brush.radius * 1.2).min(500.0);
+            }
         }
+        if let Some(d) = digit {
+            let v = if d == 0 { 1.0 } else { d as f32 / 10.0 };
+            match self.tool {
+                Tool::Gradient => self.grad_opacity = v,
+                Tool::Fill | Tool::MagicEraser => self.fill_opacity = v,
+                _ => self.brush.flow = v,
+            }
+        }
+        if self.tool == Tool::Move && arrows.iter().any(|a| *a) && !self.doc.layers[self.doc.active].lock_pos {
+            let step = if shift { 10 } else { 1 };
+            let dx = (arrows[1] as i32 - arrows[0] as i32) * step;
+            let dy = (arrows[3] as i32 - arrows[2] as i32) * step;
+            self.doc.next_label = Some("Déplacement".into());
+            self.doc.nudge(dx, dy);
+        }
+    }
+
+    pub fn deselect(&mut self) {
+        if self.doc.selection.is_some() {
+            self.last_sel = Some(self.doc.sel_mask());
+        }
+        self.doc.set_selection(None, None);
+    }
+
+    pub fn finish_lasso(&mut self, pts: &[(f32, f32)]) {
+        let prev = self.sel_prev.take().or_else(|| (self.sel_mode != 0 && self.doc.selection.is_some()).then(|| self.doc.sel_mask()));
+        self.doc.select_polygon(pts);
+        self.doc.feather_selection(self.feather);
+        self.doc.combine_selection(prev, self.sel_mode);
+    }
+
+    fn mi(&mut self, ui: &mut Ui, label: &str, shortcut: &str) -> bool {
+        self.mie(ui, true, label, shortcut)
+    }
+
+    fn mie(&mut self, ui: &mut Ui, enabled: bool, label: &str, shortcut: &str) -> bool {
+        let clicked = ui.add_enabled(enabled, egui::Button::new(label).shortcut_text(RichText::new(shortcut).color(FAINT))).clicked();
+        if clicked {
+            self.doc.next_label = Some(label.trim_end_matches('…').to_string());
+        }
+        clicked
     }
 }
 
@@ -912,18 +1131,24 @@ impl eframe::App for Pixel {
             if self.help.open {
                 self.help.open = false;
             } else {
-                self.help.learn(tool_name(self.tool));
+                self.help.learn(tools::tutorial_for(self.tool));
             }
         }
         self.shortcuts(ctx);
         if let Some(f) = ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf()).filter(|p| !p.as_os_str().is_empty())) {
-            self.open_path(&f);
+            if self.home {
+                self.open_path(&f);
+            } else {
+                match image::open(&f) {
+                    Ok(img) => {
+                        self.doc.next_label = Some("Importer".into());
+                        self.doc.add_layer(f.file_stem().map(|s| s.to_string_lossy().into_owned()), Some(img.into_rgba8()));
+                    }
+                    Err(e) => self.error = Some(format!("Impossible d'importer : {e}")),
+                }
+            }
         }
-        let title = if self.home {
-            "Pixel".to_string()
-        } else {
-            format!("{}{} — Pixel", self.doc.name, if self.doc.modified { " •" } else { "" })
-        };
+        let title = if self.home { "Pixel".to_string() } else { format!("{}{} — Pixel", self.doc.name, if self.doc.modified { " •" } else { "" }) };
         if title != self.title {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.title = title;
@@ -935,8 +1160,10 @@ impl eframe::App for Pixel {
         } else {
             self.options_bar(root);
             self.status_bar(root);
-            self.tool_rail(root);
-            self.dock(root, ctx);
+            if !self.hide_panels {
+                self.tool_rail(root);
+                self.dock(root, ctx);
+            }
             self.finish_fill();
             self.sync_texture(ctx);
             self.sync_mask(ctx);
@@ -944,6 +1171,7 @@ impl eframe::App for Pixel {
         }
         self.sheets(ctx);
         self.help.show(ctx);
+        self.doc.next_label = None;
     }
 }
 
@@ -957,257 +1185,554 @@ impl Pixel {
                 ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if pro::primary_icon(ui, "Exporter", |p, r, c| export_glyph(p, r, c)).on_hover_text("Ctrl+E").clicked() {
-                            self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0 });
+                            self.export_sheet();
                         }
                         ui.add_space(6.0);
                         if pro::chip(ui, &format!("{} × {} px", self.doc.width(), self.doc.height())).on_hover_text("Taille de la zone de travail").clicked() {
-                            self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4 });
+                            self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4, relative: false, ext: 0 });
                         }
                     });
                 });
             }
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
-            ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| ui.horizontal_centered(|ui| {
-                ui.add(egui::Image::new((self.icon.id(), Vec2::splat(20.0))));
-                ui.add_space(6.0);
-                egui::MenuBar::new().ui(ui, |ui| {
-                    ui.menu_button("Fichier", |ui| {
-                        if ui.button("Nouveau…                Ctrl+N").clicked() {
-                            self.new_doc_sheet();
-                        }
-                        if ui.button("Ouvrir…                   Ctrl+O").clicked() {
-                            self.open_dialog();
-                        }
+            ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| {
+                ui.horizontal_centered(|ui| {
+                    ui.add(egui::Image::new((self.icon.id(), Vec2::splat(20.0))));
+                    ui.add_space(6.0);
+                    egui::MenuBar::new().ui(ui, |ui| {
+                        self.menu_file(ui);
                         ui.add_enabled_ui(!self.home, |ui| {
-                            if ui.button("Importer comme calque…").clicked() {
-                                self.import_layer();
-                            }
-                            ui.separator();
-                            if ui.button("Exporter…                Ctrl+E").clicked() {
-                                self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0 });
-                            }
-                            if ui.button("Enregistrer une copie PNG/JPEG…").clicked() {
-                                self.export();
-                            }
-                            ui.separator();
-                            if ui.button("Fermer").clicked() {
-                                self.home = true;
-                            }
+                            self.menu_edit(ui);
+                            self.menu_image(ui);
+                            self.menu_layer(ui);
+                            self.menu_select(ui);
+                            self.menu_filter(ui);
+                            self.menu_view(ui);
                         });
+                        self.help.menu(ui);
                     });
-                    ui.add_enabled_ui(!self.home, |ui| {
-                        ui.menu_button("Édition", |ui| {
-                            if ui.add_enabled(self.doc.can_undo(), egui::Button::new("Annuler                    Ctrl+Z")).clicked() {
-                                self.doc.undo();
-                            }
-                            if ui.add_enabled(self.doc.can_redo(), egui::Button::new("Rétablir                   Ctrl+Y")).clicked() {
-                                self.doc.redo();
-                            }
-                            ui.separator();
-                            let has_sel = self.doc.selection.is_some();
-                            if ui.button("Copier                         Ctrl+C").clicked() {
-                                self.copy();
-                            }
-                            if ui.add_enabled(has_sel, egui::Button::new("Couper                         Ctrl+X")).clicked() {
-                                self.copy();
-                                self.doc.clear_selection();
-                            }
-                            if ui.button("Coller (aussi une capture d'écran)   Ctrl+V").clicked() {
-                                self.paste();
-                            }
-                            ui.separator();
-                            if ui.add_enabled(has_sel, egui::Button::new("Remplir avec la couleur principale   Maj+F5")).clicked() {
-                                self.doc.fill_selection(self.primary.to_array());
-                            }
-                            if ui.add_enabled(has_sel, egui::Button::new("Contour de la sélection…")).clicked() {
-                                self.sheet = Some(Sheet::Effect { kind: 3, size: 4.0, dx: 0.0, dy: 0.0, color: self.primary.to_array() });
-                            }
-                            if ui.button("Transformation du calque…        Ctrl+T").clicked() {
-                                self.sheet = Some(Sheet::Transform { scale: 100.0, angle: 0.0 });
-                            }
-                            ui.separator();
-                            if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Effacer la sélection   Suppr")).clicked() {
-                                self.doc.clear_selection();
-                            }
-                            if ui.add_enabled(self.doc.selection.is_some() && self.filling.is_none(), egui::Button::new("Remplir selon le contenu")).clicked()
-                                && let Some(s) = self.doc.selection
-                            {
-                                let w = self.doc.width();
-                                let mask: Vec<bool> = (0..w * self.doc.height()).map(|i| s.contains(i % w, i / w)).collect();
-                                let ctx = ui.ctx().clone();
-                                self.start_fill(mask, &ctx);
-                            }
-                        });
-                        ui.menu_button("Image", |ui| {
-                            ui.menu_button("Réglages", |ui| {
-                                for k in filters::ADJUSTMENTS {
-                                    if ui.button(format!("{}…", k.title())).clicked() {
-                                        self.start_adjust(*k);
-                                    }
-                                }
-                                ui.separator();
-                                for k in filters::QUICK {
-                                    if ui.button(k.title()).clicked() {
-                                        self.start_adjust(*k);
-                                    }
-                                }
-                            });
-                            ui.separator();
-                            if ui.button("Taille de l'image…").clicked() {
-                                self.resize = Some((self.doc.width(), self.doc.height(), true));
-                            }
-                            if ui.button("Taille de la zone de travail…").clicked() {
-                                self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4 });
-                            }
-                            if ui.button("Rogner les bords transparents").clicked() {
-                                if self.doc.trim() {
-                                    self.fit_pending = true;
-                                } else {
-                                    self.error = Some("Aucun bord transparent à rogner".into());
-                                }
-                            }
-                            if ui.button("Mappage de dégradé (couleurs principale → secondaire)").clicked() {
-                                self.doc.gradient_map(self.primary.to_array(), self.secondary.to_array());
-                            }
-                            if ui.button("Aplatir l'image").clicked() {
-                                self.doc.flatten_all();
-                            }
-                            if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Recadrer sur la sélection")).clicked() {
-                                self.doc.crop_to_selection();
-                                self.fit_pending = true;
-                            }
-                            ui.separator();
-                            if ui.button("Rotation 90° horaire").clicked() {
-                                self.doc.set_selection(None, None);
-                                self.doc.transform(imageops::rotate90);
-                                self.fit_pending = true;
-                            }
-                            if ui.button("Rotation 90° antihoraire").clicked() {
-                                self.doc.set_selection(None, None);
-                                self.doc.transform(imageops::rotate270);
-                                self.fit_pending = true;
-                            }
-                            if ui.button("Symétrie horizontale").clicked() {
-                                self.doc.transform(imageops::flip_horizontal);
-                            }
-                            if ui.button("Symétrie verticale").clicked() {
-                                self.doc.transform(imageops::flip_vertical);
-                            }
-                        });
-                        ui.menu_button("Calque", |ui| {
-                            if ui.button("Nouveau calque            Ctrl+Maj+N").clicked() {
-                                self.doc.add_layer(None, None);
-                            }
-                            if ui.button("Dupliquer le calque       Ctrl+J").clicked() {
-                                self.doc.duplicate_layer();
-                            }
-                            if ui.button("Fusionner avec le dessous").clicked() {
-                                self.doc.merge_down();
-                            }
-                            if ui.button("Supprimer le calque").clicked() {
-                                self.doc.delete_layer();
-                            }
-                            ui.separator();
-                            let has_sel = self.doc.selection.is_some();
-                            if ui.add_enabled(has_sel, egui::Button::new("Calque par copie                 Ctrl+J")).clicked() {
-                                self.doc.layer_from_selection(false);
-                            }
-                            if ui.add_enabled(has_sel, egui::Button::new("Calque par coupure            Ctrl+Maj+J")).clicked() {
-                                self.doc.layer_from_selection(true);
-                            }
-                            if ui.button("Fusionner les calques visibles   Ctrl+Maj+E").clicked() {
-                                self.doc.merge_visible();
-                            }
-                            if ui.button("Aplatir l'image").clicked() {
-                                self.doc.flatten_all();
-                            }
-                            ui.separator();
-                            let active = self.doc.active;
-                            let locked = self.doc.layers[active].locked;
-                            if ui.button(if locked { "Déverrouiller le calque" } else { "Verrouiller le calque" }).clicked() {
-                                self.doc.layers[active].locked = !locked;
-                            }
-                            ui.menu_button("Effets de calque", |ui| {
-                                if ui.button("Ombre portée…").clicked() {
-                                    self.sheet = Some(Sheet::Effect { kind: 0, size: 12.0, dx: 8.0, dy: 10.0, color: [0, 0, 0, 160] });
-                                }
-                                if ui.button("Lueur externe…").clicked() {
-                                    self.sheet = Some(Sheet::Effect { kind: 1, size: 18.0, dx: 0.0, dy: 0.0, color: [255, 230, 120, 220] });
-                                }
-                                if ui.button("Contour…").clicked() {
-                                    self.sheet = Some(Sheet::Effect { kind: 2, size: 6.0, dx: 0.0, dy: 0.0, color: [255, 255, 255, 255] });
-                                }
-                            });
-                        });
-                        ui.menu_button("Sélection", |ui| {
-                            if ui.button("Tout sélectionner         Ctrl+A").clicked() {
-                                self.doc.set_selection(Some(self.doc.full()), None);
-                            }
-                            if ui.button("Désélectionner            Ctrl+D").clicked() {
-                                self.doc.set_selection(None, None);
-                            }
-                            if ui.add_enabled(self.doc.selection.is_some(), egui::Button::new("Intervertir          Ctrl+Maj+I")).clicked() {
-                                self.doc.invert_selection();
-                            }
-                            ui.separator();
-                            let has = self.doc.selection.is_some();
-                            for (label, kind) in [("Agrandir…", 0u8), ("Réduire…", 1), ("Bordure…", 2)] {
-                                if ui.add_enabled(has, egui::Button::new(label)).clicked() {
-                                    self.sheet = Some(Sheet::SelectBy { kind, px: 4 });
-                                }
-                            }
-                            if ui.button("Pixels du calque").clicked() {
-                                self.doc.select_layer_alpha();
-                            }
-                        });
-                        ui.menu_button("Filtre", |ui| {
-                            for (group, kinds) in filters::FILTERS {
-                                ui.menu_button(*group, |ui| {
-                                    for k in *kinds {
-                                        let label = if k.params().is_empty() { k.title().to_string() } else { format!("{}…", k.title()) };
-                                        if ui.button(label).clicked() {
-                                            self.start_adjust(*k);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        ui.menu_button("Affichage", |ui| {
-                            if ui.button("Ajuster à l'écran         Ctrl+0").clicked() {
-                                self.fit_pending = true;
-                            }
-                            if ui.button("Taille réelle (100 %)   Ctrl+1").clicked() {
-                                self.zoom = 1.0;
-                                self.offset = Vec2::ZERO;
-                            }
-                            for z in [0.5, 2.0, 4.0, 8.0] {
-                                if ui.button(format!("{:.0} %", z * 100.0)).clicked() {
-                                    self.zoom = z;
-                                }
-                            }
-                            ui.separator();
-                            ui.checkbox(&mut self.show_grid, "Grille                       Ctrl+'");
-                            ui.horizontal(|ui| {
-                                ui.label("Pas de la grille");
-                                ui.add(egui::DragValue::new(&mut self.grid).range(2..=1000).suffix(" px"));
-                            });
-                        });
-                    });
-                    self.help.menu(ui);
                 });
-            }));
+            });
         });
     }
 
-    fn start_adjust(&mut self, k: Kind) {
-        let base = self.doc.layers[self.doc.active].img.clone();
-        if k.params().is_empty() {
-            let out = k.apply(&base, &[]);
-            self.doc.checkpoint();
-            self.doc.put_filtered(&base, &out);
-        } else {
-            self.adjust = Some((k, Vec::new(), base));
-        }
+    fn menu_file(&mut self, ui: &mut Ui) {
+        ui.menu_button("Fichier", |ui| {
+            if self.mi(ui, "Nouveau…", "Ctrl+N") {
+                self.new_doc_sheet();
+            }
+            if self.mi(ui, "Nouveau depuis le presse-papiers", "") {
+                self.doc_from_clipboard();
+            }
+            if self.mi(ui, "Ouvrir…", "Ctrl+O") {
+                self.open_dialog();
+            }
+            ui.menu_button("Ouvrir les fichiers récents", |ui| {
+                let mut open = None;
+                for p in &self.recents {
+                    if ui.button(p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()).clicked() {
+                        open = Some(p.clone());
+                    }
+                }
+                if self.recents.is_empty() {
+                    ui.label(RichText::new("Aucun fichier récent").color(FAINT));
+                }
+                if let Some(p) = open {
+                    self.open_path(&p);
+                }
+            });
+            let home = self.home;
+            if self.mie(ui, !home, "Importer comme calque…", "") {
+                self.import_layer();
+            }
+            ui.separator();
+            if self.mie(ui, !home, "Exporter…", "Ctrl+E") {
+                self.export_sheet();
+            }
+            if self.mie(ui, !home, "Exportation rapide en PNG…", "Ctrl+Maj+Alt+S") {
+                self.quick_export();
+            }
+            if self.mie(ui, !home && self.doc.selection.is_some(), "Exporter la sélection…", "") {
+                self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0, bg: 0, level: 1, ico: [true; 7], selection: true });
+            }
+            if self.mie(ui, !home, "Exporter les calques en PNG…", "") {
+                self.export_layers();
+            }
+            ui.separator();
+            if self.mie(ui, !home, "Fermer", "Ctrl+W") {
+                self.home = true;
+            }
+        });
+    }
+
+    fn menu_edit(&mut self, ui: &mut Ui) {
+        ui.menu_button("Édition", |ui| {
+            if self.mie(ui, self.doc.can_undo(), "Annuler", "Ctrl+Z") {
+                self.doc.undo();
+            }
+            if self.mie(ui, self.doc.can_redo(), "Rétablir", "Ctrl+Y") {
+                self.doc.redo();
+            }
+            if self.mie(ui, self.last_filter.is_some(), "Répéter le dernier filtre", "Ctrl+Alt+F") {
+                self.repeat_filter();
+            }
+            ui.separator();
+            let has_sel = self.doc.selection.is_some();
+            if self.mie(ui, has_sel, "Couper", "Ctrl+X") {
+                self.copy();
+                self.doc.clear_selection();
+            }
+            if self.mi(ui, "Copier", "Ctrl+C") {
+                self.copy();
+            }
+            if self.mi(ui, "Copier avec fusion", "Ctrl+Maj+C") {
+                let img = self.doc.copy_merged();
+                self.copy_image(img);
+            }
+            if self.mi(ui, "Coller", "Ctrl+V") {
+                self.paste(false);
+            }
+            if self.mi(ui, "Coller en place", "Ctrl+Maj+V") {
+                self.paste(true);
+            }
+            if self.mie(ui, has_sel, "Effacer", "Suppr") {
+                self.doc.clear_selection();
+            }
+            ui.separator();
+            if self.mi(ui, "Remplir…", "Maj+F5") {
+                self.sheet = Some(Sheet::Fill { content: 0, opacity: 100.0, blend: 0 });
+            }
+            if self.mie(ui, has_sel, "Contour…", "") {
+                self.open_sheet_effect(3);
+            }
+            if self.mie(ui, has_sel && self.filling.is_none(), "Remplir selon le contenu", "") {
+                let ctx = ui.ctx().clone();
+                self.content_fill_selection(&ctx);
+            }
+            ui.separator();
+            if self.mi(ui, "Transformation manuelle…", "Ctrl+T") {
+                self.sheet = Some(Sheet::Transform(Xform::identity()));
+            }
+            ui.menu_button("Transformation", |ui| {
+                if self.mi(ui, "Rotation 180°", "") {
+                    self.doc.transform_layer_full(&Xform { angle: 180.0, nearest: true, ..Xform::identity() });
+                }
+                if self.mi(ui, "Rotation 90° horaire", "") {
+                    self.doc.transform_layer_full(&Xform { angle: 90.0, nearest: true, ..Xform::identity() });
+                }
+                if self.mi(ui, "Rotation 90° antihoraire", "") {
+                    self.doc.transform_layer_full(&Xform { angle: -90.0, nearest: true, ..Xform::identity() });
+                }
+                if self.mi(ui, "Symétrie axe horizontal", "") {
+                    self.doc.flip_layer(true);
+                }
+                if self.mi(ui, "Symétrie axe vertical", "") {
+                    self.doc.flip_layer(false);
+                }
+                ui.separator();
+                if ui.button("Inclinaison…").clicked() {
+                    self.sheet = Some(Sheet::Transform(Xform { skew_x: 15.0, ..Xform::identity() }));
+                }
+                if ui.button("Perspective…").clicked() {
+                    self.sheet = Some(Sheet::Transform(Xform { persp_y: 20.0, ..Xform::identity() }));
+                }
+            });
+            ui.separator();
+            if ui.button("Raccourcis clavier…").clicked() {
+                self.sheet = Some(Sheet::Shortcuts);
+            }
+            if ui.button("Préférences…").clicked() {
+                self.sheet = Some(Sheet::Prefs);
+            }
+        });
+    }
+
+    fn menu_image(&mut self, ui: &mut Ui) {
+        ui.menu_button("Image", |ui| {
+            ui.menu_button("Réglages", |ui| {
+                let keys = [(Kind::Levels, "Ctrl+L"), (Kind::Curves, "Ctrl+M"), (Kind::HueSat, "Ctrl+U"), (Kind::ColorBalance, "Ctrl+B"), (Kind::BlackWhiteMix, "Ctrl+Alt+Maj+B")];
+                for k in filters::ADJUSTMENTS {
+                    let sc = keys.iter().find(|x| x.0 == *k).map_or("", |x| x.1);
+                    if self.mi(ui, &format!("{}…", k.title()), sc) {
+                        self.start_adjust(*k);
+                    }
+                }
+                ui.separator();
+                for (k, sc) in [(Kind::BlackWhite, "Ctrl+Maj+U"), (Kind::Invert, "Ctrl+I"), (Kind::Sepia, ""), (Kind::Equalize, ""), (Kind::Solarize, "")] {
+                    if self.mi(ui, k.title(), sc) {
+                        self.start_adjust(k);
+                    }
+                }
+                ui.separator();
+                if self.mi(ui, "Mappage principale → secondaire", "") {
+                    self.doc.gradient_map(self.primary.to_array(), self.secondary.to_array());
+                }
+            });
+            ui.separator();
+            for (k, sc) in [(Kind::AutoTone, "Ctrl+Maj+L"), (Kind::AutoContrast, "Ctrl+Alt+Maj+L"), (Kind::AutoColor, "Ctrl+Maj+B")] {
+                if self.mi(ui, k.title(), sc) {
+                    self.start_adjust(k);
+                }
+            }
+            ui.separator();
+            if self.mi(ui, "Taille de l'image…", "Ctrl+Alt+I") {
+                self.sheet = Some(Sheet::ImageSize { w: self.doc.width(), h: self.doc.height(), keep: true, percent: false, resample: 3, dpi: 72.0 });
+            }
+            if self.mi(ui, "Taille de la zone de travail…", "Ctrl+Alt+C") {
+                self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4, relative: false, ext: 0 });
+            }
+            ui.menu_button("Rotation de l'image", |ui| {
+                for (label, f) in [("180°", 0u8), ("90° horaire", 1), ("90° antihoraire", 2), ("Symétrie horizontale de la zone de travail", 3), ("Symétrie verticale de la zone de travail", 4)] {
+                    if self.mi(ui, label, "") {
+                        self.doc.set_selection(None, None);
+                        match f {
+                            0 => self.doc.transform(imageops::rotate180),
+                            1 => self.doc.transform(imageops::rotate90),
+                            2 => self.doc.transform(imageops::rotate270),
+                            3 => self.doc.transform(imageops::flip_horizontal),
+                            _ => self.doc.transform(imageops::flip_vertical),
+                        }
+                        self.fit_pending = true;
+                    }
+                }
+                if ui.button("Paramétrée…").clicked() {
+                    self.sheet = Some(Sheet::RotateCanvas { angle: 15.0 });
+                }
+            });
+            if self.mie(ui, self.doc.selection.is_some(), "Recadrer", "") {
+                self.doc.crop_to_selection();
+                self.fit_pending = true;
+            }
+            if self.mi(ui, "Rogner les bords transparents", "") {
+                if self.doc.trim() {
+                    self.fit_pending = true;
+                } else {
+                    self.error = Some("Aucun bord transparent à rogner".into());
+                }
+            }
+            if self.mi(ui, "Tout faire apparaître", "") {
+                let (w, h) = (self.doc.width(), self.doc.height());
+                let mut b = Area { x0: 0, y0: 0, x1: w, y1: h };
+                for i in 0..self.doc.layers.len() {
+                    if let Some(lb) = self.doc.layer_bounds(i) {
+                        b = Area { x0: b.x0.min(lb.x0), y0: b.y0.min(lb.y0), x1: b.x1.max(lb.x1), y1: b.y1.max(lb.y1) };
+                    }
+                }
+                self.error = Some(if (b.x0, b.y0, b.x1, b.y1) == (0, 0, w, h) { "Tout le contenu est déjà visible".into() } else { "Contenu déjà dans la zone de travail".into() });
+            }
+            ui.separator();
+            if self.mi(ui, "Mode niveaux de gris", "") {
+                self.doc.transform(|img| Kind::BlackWhite.apply(img, &[]));
+            }
+            if self.mi(ui, "Aplatir l'image", "") {
+                self.doc.flatten_all();
+            }
+        });
+    }
+
+    fn menu_layer(&mut self, ui: &mut Ui) {
+        ui.menu_button("Calque", |ui| {
+            if self.mi(ui, "Nouveau calque", "Ctrl+Maj+N") {
+                self.doc.add_layer(None, None);
+            }
+            ui.menu_button("Nouveau calque de remplissage", |ui| {
+                let (w, h) = (self.doc.width(), self.doc.height());
+                if self.mi(ui, "Couleur unie (principale)", "") {
+                    self.doc.add_layer(Some("Couleur unie".into()), Some(RgbaImage::from_pixel(w, h, image::Rgba(self.primary.to_array()))));
+                }
+                if self.mi(ui, "Dégradé (principale → secondaire)", "") {
+                    self.doc.add_layer(Some("Dégradé".into()), None);
+                    self.doc.gradient_kind((0.0, 0.0), (0.0, h as f32), self.primary.to_array(), self.secondary.to_array(), false);
+                }
+                if self.mi(ui, "Motif damier", "") {
+                    let (a, b) = (self.primary.to_array(), self.secondary.to_array());
+                    let cell = (w.max(h) / 16).max(4);
+                    self.doc.add_layer(Some("Motif".into()), Some(RgbaImage::from_fn(w, h, |x, y| image::Rgba(if (x / cell + y / cell) % 2 == 0 { a } else { b }))));
+                }
+                if self.mi(ui, "Bruit (texture)", "") {
+                    self.doc.add_layer(Some("Bruit".into()), Some(RgbaImage::from_fn(w, h, |x, y| {
+                        let v = (filters::hash(x, y, 5) * 255.0) as u8;
+                        image::Rgba([v, v, v, 255])
+                    })));
+                    let a = self.doc.active;
+                    self.doc.layers[a].blend = Blend::Overlay;
+                    self.doc.layers[a].opacity = 0.3;
+                }
+            });
+            ui.menu_button("Nouveau calque de réglage", |ui| {
+                for k in filters::ADJUSTMENTS.iter().chain([Kind::BlackWhite, Kind::Invert, Kind::Sepia, Kind::Solarize].iter()) {
+                    if ui.button(format!("{}…", k.title())).clicked() {
+                        self.new_adjustment_layer(*k);
+                        ui.close();
+                    }
+                }
+            });
+            if self.mi(ui, "Dupliquer le calque", "Ctrl+J") {
+                self.doc.duplicate_layer();
+            }
+            if self.mi(ui, "Supprimer le calque", "") {
+                self.doc.delete_layer();
+            }
+            ui.separator();
+            let has_sel = self.doc.selection.is_some();
+            if self.mie(ui, has_sel, "Calque par copie", "Ctrl+J") {
+                self.doc.layer_from_selection(false);
+            }
+            if self.mie(ui, has_sel, "Calque par coupure", "Ctrl+Maj+J") {
+                self.doc.layer_from_selection(true);
+            }
+            ui.separator();
+            ui.menu_button("Masque de fusion", |ui| {
+                let has = self.doc.layers[self.doc.active].mask.is_some();
+                if self.mie(ui, !has, "Tout faire apparaître", "") {
+                    self.doc.add_mask(0);
+                }
+                if self.mie(ui, !has, "Tout masquer", "") {
+                    self.doc.add_mask(1);
+                }
+                if self.mie(ui, !has && has_sel, "Faire apparaître la sélection", "") {
+                    self.doc.add_mask(2);
+                }
+                ui.separator();
+                let a = self.doc.active;
+                let on = self.doc.layers[a].mask_on;
+                if self.mie(ui, has, if on { "Désactiver le masque" } else { "Activer le masque" }, "") {
+                    self.doc.layers[a].mask_on = !on;
+                    self.doc.touch_all();
+                }
+                if self.mie(ui, has, if self.doc.edit_mask { "Modifier le calque" } else { "Modifier le masque" }, "\\") {
+                    self.doc.edit_mask = !self.doc.edit_mask;
+                }
+                if self.mie(ui, has, "Intervertir le masque", "") {
+                    self.doc.invert_mask();
+                }
+                if self.mie(ui, has, "Sélection depuis le masque", "") {
+                    self.doc.select_from_mask();
+                }
+                if self.mie(ui, has, "Appliquer le masque", "") {
+                    self.doc.apply_mask();
+                }
+                if self.mie(ui, has, "Supprimer le masque", "") {
+                    self.doc.delete_mask();
+                }
+            });
+            let a = self.doc.active;
+            let clip = self.doc.layers[a].clip;
+            if self.mie(ui, a > 0, if clip { "Annuler le masque d'écrêtage" } else { "Créer un masque d'écrêtage" }, "Ctrl+Alt+G") {
+                self.doc.layers[a].clip = !clip;
+                self.doc.touch_all();
+            }
+            ui.menu_button("Disposition", |ui| {
+                if self.mi(ui, "Premier plan", "Ctrl+Maj+]") {
+                    self.doc.move_layer_to(true);
+                }
+                if self.mi(ui, "En avant", "Ctrl+]") {
+                    self.doc.move_layer(true);
+                }
+                if self.mi(ui, "En arrière", "Ctrl+[") {
+                    self.doc.move_layer(false);
+                }
+                if self.mi(ui, "Arrière-plan", "Ctrl+Maj+[") {
+                    self.doc.move_layer_to(false);
+                }
+            });
+            ui.menu_button("Verrouillage", |ui| {
+                let l = &mut self.doc.layers[a];
+                ui.checkbox(&mut l.lock_alpha, "Pixels transparents");
+                ui.checkbox(&mut l.lock_pos, "Position");
+                ui.checkbox(&mut l.locked, "Tout");
+            });
+            ui.menu_button("Effets de calque", |ui| {
+                for (k, label) in [(0u8, "Ombre portée…"), (4, "Ombre interne…"), (1, "Lueur externe…"), (5, "Lueur interne…"), (6, "Biseau et estampage…"), (2, "Contour…"), (7, "Incrustation couleur…"), (8, "Incrustation dégradé…")] {
+                    if ui.button(label).clicked() {
+                        self.open_sheet_effect(k);
+                        ui.close();
+                    }
+                }
+            });
+            ui.separator();
+            if self.mi(ui, "Fusionner avec le dessous", "Ctrl+Alt+E") {
+                self.doc.merge_down();
+            }
+            if self.mi(ui, "Fusionner les calques visibles", "Ctrl+Maj+E") {
+                self.doc.merge_visible();
+            }
+            if self.mi(ui, "Aplatir l'image", "") {
+                self.doc.flatten_all();
+            }
+        });
+    }
+
+    fn menu_select(&mut self, ui: &mut Ui) {
+        ui.menu_button("Sélection", |ui| {
+            if self.mi(ui, "Tout sélectionner", "Ctrl+A") {
+                self.doc.set_selection(Some(self.doc.full()), None);
+            }
+            if self.mi(ui, "Désélectionner", "Ctrl+D") {
+                self.deselect();
+            }
+            if self.mie(ui, self.last_sel.is_some(), "Resélectionner", "Ctrl+Maj+D") {
+                if let Some(m) = self.last_sel.clone() {
+                    self.doc.select_mask(m);
+                }
+            }
+            let has = self.doc.selection.is_some();
+            if self.mie(ui, has, "Intervertir", "Ctrl+Maj+I") {
+                self.doc.invert_selection();
+            }
+            ui.separator();
+            if self.mi(ui, "Pixels du calque", "") {
+                self.doc.select_layer_alpha();
+            }
+            if ui.button("Plage de couleurs…").clicked() {
+                self.sheet = Some(Sheet::ColorRange { mode: 0, fuzz: 40.0 });
+            }
+            ui.separator();
+            ui.add_enabled_ui(has, |ui| {
+                ui.menu_button("Modifier", |ui| {
+                    for (label, kind, sc) in [("Bordure…", 2u8, ""), ("Lisser…", 4, ""), ("Dilater…", 0, ""), ("Contracter…", 1, ""), ("Contour progressif…", 3, "Maj+F6")] {
+                        if ui.add(egui::Button::new(label).shortcut_text(RichText::new(sc).color(FAINT))).clicked() {
+                            self.sheet = Some(Sheet::SelectBy { kind, px: 4.0 });
+                            ui.close();
+                        }
+                    }
+                });
+                if self.mi(ui, "Étendre", "") {
+                    self.doc.grow_similar(self.tolerance, true);
+                }
+                if self.mi(ui, "Généraliser", "") {
+                    self.doc.grow_similar(self.tolerance, false);
+                }
+            });
+            ui.separator();
+            if self.mie(ui, has, "Mémoriser la sélection…", "") {
+                self.sheet = Some(Sheet::SaveSelection { name: format!("Sélection {}", self.saved_sel.len() + 1) });
+            }
+            ui.add_enabled_ui(!self.saved_sel.is_empty(), |ui| {
+                ui.menu_button("Récupérer la sélection", |ui| {
+                    let mut load = None;
+                    let mut del = None;
+                    for (i, (name, _)) in self.saved_sel.iter().enumerate() {
+                        ui.horizontal(|ui| {
+                            if ui.button(name).clicked() {
+                                load = Some(i);
+                            }
+                            if ui.small_button("×").on_hover_text("Supprimer").clicked() {
+                                del = Some(i);
+                            }
+                        });
+                    }
+                    if let Some(i) = load {
+                        let m = self.saved_sel[i].1.clone();
+                        if m.len() == (self.doc.width() * self.doc.height()) as usize {
+                            self.doc.select_mask(m);
+                        } else {
+                            self.error = Some("La taille du document a changé depuis la mémorisation".into());
+                        }
+                    }
+                    if let Some(i) = del {
+                        self.saved_sel.remove(i);
+                    }
+                });
+            });
+        });
+    }
+
+    fn menu_filter(&mut self, ui: &mut Ui) {
+        ui.menu_button("Filtre", |ui| {
+            let last = self.last_filter.as_ref().map(|l| l.0.title().to_string());
+            if self.mie(ui, last.is_some(), &format!("Dernier filtre{}", last.map(|t| format!(" : {t}")).unwrap_or_default()), "Ctrl+Alt+F") {
+                self.repeat_filter();
+            }
+            ui.separator();
+            for (group, kinds) in filters::FILTERS {
+                ui.menu_button(*group, |ui| {
+                    for k in *kinds {
+                        let label = if k.params().is_empty() { k.title().to_string() } else { format!("{}…", k.title()) };
+                        if ui.button(label).clicked() {
+                            self.start_adjust(*k);
+                            ui.close();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    fn menu_view(&mut self, ui: &mut Ui) {
+        ui.menu_button("Affichage", |ui| {
+            if self.mi(ui, "Zoom avant", "Ctrl++") {
+                self.zoom = (self.zoom * 1.25).min(64.0);
+            }
+            if self.mi(ui, "Zoom arrière", "Ctrl+−") {
+                self.zoom = (self.zoom / 1.25).max(0.02);
+            }
+            if self.mi(ui, "Ajuster à l'écran", "Ctrl+0") {
+                self.fit_pending = true;
+            }
+            if self.mi(ui, "Taille réelle (100 %)", "Ctrl+1") {
+                self.zoom = 1.0;
+                self.offset = Vec2::ZERO;
+            }
+            ui.menu_button("Zoom prédéfini", |ui| {
+                for z in [0.25, 0.5, 2.0, 3.0, 4.0, 8.0, 16.0] {
+                    if ui.button(format!("{:.0} %", z * 100.0)).clicked() {
+                        self.zoom = z;
+                    }
+                }
+            });
+            ui.menu_button("Rotation de la vue", |ui| {
+                for a in [-90.0f32, -45.0, -15.0, 0.0, 15.0, 45.0, 90.0, 180.0] {
+                    if ui.button(if a == 0.0 { "Réinitialiser".to_string() } else { format!("{a:+.0}°") }).clicked() {
+                        self.view_angle = a;
+                    }
+                }
+            });
+            ui.separator();
+            ui.add(egui::Checkbox::new(&mut self.extras, "Extras (contours de sélection, repères)"));
+            ui.checkbox(&mut self.rulers, "Règles (Ctrl+R)");
+            ui.checkbox(&mut self.show_grid, "Grille (Ctrl+')");
+            ui.checkbox(&mut self.pixel_grid, "Grille de pixels (à partir de 1000 %)");
+            ui.checkbox(&mut self.show_guides, "Repères (Ctrl+;)");
+            ui.checkbox(&mut self.lock_guides, "Verrouiller les repères (Ctrl+Alt+;)");
+            ui.checkbox(&mut self.snap, "Magnétisme (Ctrl+Maj+;)");
+            ui.separator();
+            if ui.button("Nouveau repère…").clicked() {
+                self.sheet = Some(Sheet::Guide { vertical: true, pos: self.doc.width() as f32 / 2.0 });
+            }
+            if ui.button("Repères au centre").clicked() {
+                self.guides.push((true, self.doc.width() as f32 / 2.0));
+                self.guides.push((false, self.doc.height() as f32 / 2.0));
+                self.show_guides = true;
+            }
+            if ui.button("Repères aux tiers").clicked() {
+                for k in [1.0, 2.0] {
+                    self.guides.push((true, self.doc.width() as f32 * k / 3.0));
+                    self.guides.push((false, self.doc.height() as f32 * k / 3.0));
+                }
+                self.show_guides = true;
+            }
+            if ui.add_enabled(!self.guides.is_empty(), egui::Button::new("Effacer les repères")).clicked() {
+                self.guides.clear();
+            }
+            ui.separator();
+            ui.horizontal(|ui| {
+                ui.label("Pas de la grille");
+                ui.add(egui::DragValue::new(&mut self.grid).range(2..=1000).suffix(" px"));
+            });
+            ui.horizontal(|ui| {
+                ui.label("Subdivisions");
+                ui.add(egui::DragValue::new(&mut self.grid_sub).range(1..=10));
+            });
+            ui.horizontal(|ui| {
+                ui.label("Couleur");
+                tools::combo(ui, "gridcol", &mut self.grid_color, &GRID_COLORS.map(|c| c.0), 110.0);
+            });
+            ui.separator();
+            if ui.button(if self.hide_panels { "Afficher les panneaux (Tab)" } else { "Masquer les panneaux (Tab)" }).clicked() {
+                self.hide_panels = !self.hide_panels;
+            }
+        });
     }
 
     fn home_screen(&mut self, root: &mut Ui) {
@@ -1218,6 +1743,10 @@ impl Pixel {
             ui.add_space(8.0);
             if pro::secondary(ui, "Ouvrir…").clicked() {
                 self.open_dialog();
+            }
+            ui.add_space(8.0);
+            if pro::secondary(ui, "Depuis le presse-papiers").clicked() {
+                self.doc_from_clipboard();
             }
             ui.add_space(26.0);
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::hover());
@@ -1259,7 +1788,7 @@ impl Pixel {
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose une image n'importe où pour l'ouvrir", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "PNG, JPEG, WebP ou BMP", FontId::proportional(13.0), MUTED);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO", FontId::proportional(13.0), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -1286,154 +1815,23 @@ impl Pixel {
         });
     }
 
-    fn options_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("options").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
-            ui.horizontal_centered(|ui| {
-                let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
-                ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
-                tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
-                ui.label(RichText::new(tool_name(self.tool)).font(semibold(13.0)).color(INK));
-                ui.add_space(8.0);
-                let (sep, _) = ui.allocate_exact_size(vec2(1.0, 22.0), Sense::hover());
-                ui.painter().rect_filled(sep, CornerRadius::ZERO, LINE);
-                ui.add_space(8.0);
-                match self.tool {
-                    t if brushy(t) => {
-                        pro::option_slider(ui, "Taille", &mut self.brush.radius, 0.5..=300.0, " px", true);
-                        if t != Tool::Pencil {
-                            pro::option_slider(ui, "Dureté", &mut self.brush.hardness, 0.0..=1.0, "", false);
-                        }
-                        pro::option_slider(ui, if matches!(t, Tool::Brush | Tool::Pencil | Tool::Eraser | Tool::Clone) { "Flux" } else { "Force" }, &mut self.brush.flow, 0.01..=1.0, "", false);
-                        pro::toolbar_sep(ui);
-                        ui.checkbox(&mut self.symmetry, "Symétrie").on_hover_text("Peint aussi en miroir de l'autre côté de l'image");
-                        match t {
-                            Tool::Sponge => {
-                                ui.selectable_value(&mut self.sponge_saturate, false, "Désaturer");
-                                ui.selectable_value(&mut self.sponge_saturate, true, "Saturer");
-                            }
-                            Tool::Clone => {
-                                let hint = if self.clone_src.is_some() { "Peins pour recopier · Alt+clic pour changer de source" } else { "Alt+clic sur la zone à recopier" };
-                                ui.label(RichText::new(hint).size(12.5).color(MUTED));
-                            }
-                            _ => {}
-                        }
-                    }
-                    Tool::Fill => {
-                        pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
-                    }
-                    Tool::Wand => {
-                        pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
-                        ui.checkbox(&mut self.contiguous, "Contiguë");
-                        if self.doc.selection.is_some() && pro::secondary(ui, "Intervertir").clicked() {
-                            self.doc.invert_selection();
-                        }
-                    }
-                    Tool::Lasso | Tool::EllipseMarquee => {
-                        if self.doc.selection.is_some() {
-                            if pro::secondary(ui, "Désélectionner").clicked() {
-                                self.doc.set_selection(None, None);
-                            }
-                            if pro::secondary(ui, "Intervertir").clicked() {
-                                self.doc.invert_selection();
-                            }
-                        } else {
-                            ui.label(RichText::new("Glisse sur l'image pour sélectionner").size(12.5).color(MUTED));
-                        }
-                    }
-                    Tool::Crop => {
-                        if let Some(c) = self.crop {
-                            ui.label(RichText::new(format!("{} × {} px", c.width(), c.height())).size(12.5).color(INK));
-                            if pro::primary(ui, "Valider").clicked() {
-                                self.doc.set_selection(Some(c), None);
-                                self.doc.crop_to_selection();
-                                self.crop = None;
-                                self.fit_pending = true;
-                            }
-                            if pro::secondary(ui, "Annuler").clicked() {
-                                self.crop = None;
-                            }
-                        } else {
-                            ui.label(RichText::new("Glisse pour tracer le cadre à conserver").size(12.5).color(MUTED));
-                        }
-                    }
-                    Tool::Rect | Tool::Ellipse | Tool::Line => {
-                        if self.tool == Tool::Line {
-                            pro::option_slider(ui, "Épaisseur", &mut self.brush.radius, 0.5..=100.0, " px", true);
-                        }
-                        if self.tool != Tool::Line {
-                            ui.checkbox(&mut self.outline, "Contour seulement");
-                            if self.outline {
-                                pro::option_slider(ui, "Épaisseur", &mut self.brush.radius, 0.5..=100.0, " px", true);
-                            }
-                        }
-                        ui.checkbox(&mut self.shape_layer, "Sur un nouveau calque");
-                    }
-                    Tool::Text => {
-                        ui.label(RichText::new("Clique sur l'image pour placer du texte").size(12.5).color(MUTED));
-                    }
-                    Tool::Gradient => {
-                        let mut kind = self.radial as usize;
-                        if pro::segmented(ui, &mut kind, &["Linéaire", "Radial"]) {
-                            self.radial = kind == 1;
-                        }
-                        ui.add_space(8.0);
-                        ui.label(RichText::new("Glisse sur l'image : couleur principale → secondaire").size(12.5).color(MUTED));
-                    }
-                    Tool::Marquee => {
-                        if pro::secondary(ui, "Tout sélectionner").clicked() {
-                            self.doc.set_selection(Some(self.doc.full()), None);
-                        }
-                        if self.doc.selection.is_some() {
-                            if pro::secondary(ui, "Désélectionner").clicked() {
-                                self.doc.set_selection(None, None);
-                            }
-                            if pro::secondary(ui, "Recadrer").clicked() {
-                                self.doc.crop_to_selection();
-                                self.fit_pending = true;
-                            }
-                        }
-                    }
-                    Tool::Move => {
-                        ui.label(RichText::new("Glisse pour déplacer le calque actif").size(12.5).color(MUTED));
-                    }
-                    Tool::Hand | Tool::Zoom => {
-                        if pro::secondary(ui, "Ajuster à l'écran").clicked() {
-                            self.fit_pending = true;
-                        }
-                        if pro::secondary(ui, "100 %").clicked() {
-                            self.zoom = 1.0;
-                            self.offset = Vec2::ZERO;
-                        }
-                    }
-                    Tool::Picker => {
-                        ui.label(RichText::new("Clique sur l'image pour prendre une couleur").size(12.5).color(MUTED));
-                    }
-                    Tool::Remove => {
-                        pro::option_slider(ui, "Taille", &mut self.brush.radius, 2.0..=300.0, " px", true);
-                        ui.label(RichText::new("Peins sur ce qui doit disparaître : le fond est reconstruit autour").size(12.5).color(MUTED));
-                    }
-                    _ => {}
-                }
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::secondary(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
-                        self.help.learn(tool_name(self.tool));
-                    }
-                });
-            });
-        });
-    }
-
     fn status_bar(&mut self, root: &mut Ui) {
         egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 ui.label(small(format!("{:.0} %", self.zoom * 100.0)));
+                if self.view_angle != 0.0 {
+                    ui.label(small(format!("vue {:+.0}°", self.view_angle)));
+                }
                 ui.label(small(format!("{} × {} px", self.doc.width(), self.doc.height())));
                 if let Some(s) = self.doc.selection {
                     ui.label(small(format!("Sélection {} × {}", s.width(), s.height())));
                 }
                 if let Some((x, y)) = self.cursor {
                     ui.label(small(format!("x {:.0}  y {:.0}", x.floor(), y.floor())));
+                }
+                if self.doc.edit_mask && self.doc.layers[self.doc.active].mask.is_some() {
+                    ui.label(RichText::new("Masque en cours de modification").size(12.0).color(BLUE));
                 }
                 if let Some(e) = self.error.clone() {
                     ui.label(RichText::new(e).size(12.0).color(RED));
@@ -1444,939 +1842,16 @@ impl Pixel {
             });
         });
     }
-
-    fn tool_rail(&mut self, root: &mut Ui) {
-        egui::Panel::left("tools").resizable(false).exact_size(52.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(7, 10))).show(root, |ui| {
-            ui.spacing_mut().item_spacing.y = 3.0;
-            for (gi, group) in GROUPS.iter().enumerate() {
-                if matches!(gi, 6 | 10 | 14) {
-                    let (sep, _) = ui.allocate_exact_size(vec2(38.0, 7.0), Sense::hover());
-                    ui.painter().line_segment([sep.left_center() + vec2(6.0, 0.0), sep.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
-                }
-                let shown = if group.contains(&self.tool) { self.tool } else { self.picks[gi] };
-                let tip = if group.len() > 1 { format!("{}  ·  clic droit : autres outils", tool_tip(shown)) } else { tool_tip(shown).to_string() };
-                let resp = pro::icon_button(ui, 36.0, group.contains(&self.tool), &tip, |p, r, c| {
-                    tool_icon(p, r, shown, c);
-                    if group.len() > 1 {
-                        let k = r.right_bottom() + vec2(5.0, 5.0);
-                        p.add(Shape::convex_polygon(vec![k, k - vec2(4.0, 0.0), k - vec2(0.0, 4.0)], c.gamma_multiply(0.7), Stroke::NONE));
-                    }
-                });
-                if resp.clicked() {
-                    self.select_tool(shown);
-                }
-                if group.len() > 1 {
-                    resp.context_menu(|ui| {
-                        for t in *group {
-                            if ui.selectable_label(self.tool == *t, tool_tip(*t)).clicked() {
-                                self.select_tool(*t);
-                                ui.close();
-                            }
-                        }
-                    });
-                }
-            }
-            ui.add_space(12.0);
-            let (rect, resp) = ui.allocate_exact_size(vec2(38.0, 44.0), Sense::click());
-            let back = Rect::from_min_size(rect.min + vec2(14.0, 16.0), Vec2::splat(20.0));
-            let front = Rect::from_min_size(rect.min + vec2(4.0, 6.0), Vec2::splat(20.0));
-            ui.painter().rect(back, CornerRadius::same(5), self.secondary, Stroke::new(1.0, MUTED), StrokeKind::Outside);
-            ui.painter().rect(front, CornerRadius::same(5), self.primary, Stroke::new(1.5, INK), StrokeKind::Outside);
-            if resp.on_hover_text("Couleurs principale et secondaire (X pour inverser, D par défaut)").clicked() {
-                std::mem::swap(&mut self.primary, &mut self.secondary);
-            }
-        });
-    }
-
-    fn dock(&mut self, root: &mut Ui, ctx: &egui::Context) {
-        self.sync_thumbs(ctx);
-        egui::Panel::right("dock").resizable(false).exact_size(296.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
-            egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
-                ui.spacing_mut().item_spacing.y = 0.0;
-                pro::dock_panel(ui, "color", "Couleur", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    let w = ui.available_width();
-                    pro::color_picker(ui, &mut self.primary, w);
-                    ui.add_space(4.0);
-                    ui.horizontal_wrapped(|ui| {
-                        ui.spacing_mut().item_spacing.x = 6.0;
-                        for c in self.swatches.clone() {
-                            let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
-                            ui.painter().rect(r, CornerRadius::same(6), c, Stroke::new(1.0, LINE), StrokeKind::Inside);
-                            if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
-                                self.primary = c;
-                            }
-                        }
-                        let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
-                        ui.painter().rect(r, CornerRadius::same(6), FIELD, Stroke::NONE, StrokeKind::Inside);
-                        ui.painter().text(r.center(), Align2::CENTER_CENTER, "+", FontId::proportional(16.0), INK);
-                        if resp.on_hover_text("Ajouter la couleur principale").clicked() && !self.swatches.contains(&self.primary) {
-                            self.swatches.push(self.primary);
-                        }
-                    });
-                });
-                pro::dock_panel(ui, "props", "Propriétés", |ui| {
-                    ui.spacing_mut().item_spacing.y = 4.0;
-                    pro::label_value(ui, "Document", &format!("{} × {} px", self.doc.width(), self.doc.height()));
-                    pro::label_value(ui, "Calques", &self.doc.layers.len().to_string());
-                    if let Some(s) = self.doc.selection {
-                        pro::label_value(ui, "Sélection", &format!("{} × {} à ({}, {})", s.width(), s.height(), s.x0, s.y0));
-                    }
-                    ui.add_space(6.0);
-                    let mut op = self.doc.layers[self.doc.active].opacity * 100.0;
-                    ui.horizontal(|ui| {
-                        ui.label(RichText::new("Opacité du calque").size(12.5).color(MUTED));
-                    });
-                    ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-                    if ui.add(egui::Slider::new(&mut op, 0.0..=100.0).suffix(" %").trailing_fill(true)).changed() {
-                        self.doc.layers[self.doc.active].opacity = op / 100.0;
-                        self.doc.touch_all();
-                        self.doc.modified = true;
-                    }
-                    ui.add_space(4.0);
-                    ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
-                    let active = self.doc.active;
-                    let current = BLENDS.iter().find(|b| b.0 == self.doc.layers[active].blend).map_or("Normal", |b| b.1);
-                    egui::ComboBox::from_id_salt("blend").selected_text(current).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
-                        for (b, name) in BLENDS {
-                            if ui.selectable_label(self.doc.layers[active].blend == b, name).clicked() {
-                                self.doc.layers[active].blend = b;
-                                self.doc.touch_all();
-                                self.doc.modified = true;
-                            }
-                        }
-                    });
-                });
-                let (dw, dh) = (self.doc.width() as f32, self.doc.height() as f32);
-                let tex = self.tex.as_ref().map(|t| t.id());
-                let view = self.view_doc;
-                let mut jump = None;
-                pro::dock_panel(ui, "navigator", "Navigateur", |ui| {
-                    let wv = ui.available_width();
-                    let k = (wv / dw).min(150.0 / dh);
-                    let (r, resp) = ui.allocate_exact_size(vec2(wv, dh * k), Sense::click_and_drag());
-                    let img = Rect::from_center_size(r.center(), vec2(dw, dh) * k);
-                    ui.painter().image(self.checker.id(), img, Rect::from_min_max(pos2(0.0, 0.0), pos2(img.width() / 16.0, img.height() / 16.0)), Color32::WHITE);
-                    if let Some(id) = tex {
-                        ui.painter().image(id, img, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
-                    }
-                    if let Some(v) = view {
-                        let vr = Rect::from_min_max(img.min + v.min.to_vec2() * k, img.min + v.max.to_vec2() * k).intersect(img);
-                        ui.painter().rect_stroke(vr, CornerRadius::same(2), Stroke::new(1.5, RED), StrokeKind::Middle);
-                    }
-                    if let Some(pp) = resp.interact_pointer_pos() {
-                        jump = Some(((pp - img.min) / k).to_pos2());
-                    }
-                    ui.add_space(4.0);
-                    ui.horizontal(|ui| {
-                        ui.spacing_mut().slider_width = (wv - 70.0).max(60.0);
-                        ui.add(egui::Slider::new(&mut self.zoom, 0.02..=64.0).logarithmic(true).custom_formatter(|v, _| format!("{:.0} %", v * 100.0)));
-                    });
-                });
-                if let Some(d) = jump {
-                    self.offset = vec2((dw / 2.0 - d.x) * self.zoom, (dh / 2.0 - d.y) * self.zoom);
-                }
-                if self.hist.as_ref().is_none_or(|h| h.0 != self.doc.version) && self.last.is_none() {
-                    let mut hst = [0u32; 256];
-                    for p in self.composite.pixels().step_by(3) {
-                        let l = (0.2126 * p.0[0] as f32 + 0.7152 * p.0[1] as f32 + 0.0722 * p.0[2] as f32) as usize;
-                        hst[l.min(255)] += 1;
-                    }
-                    self.hist = Some((self.doc.version, hst));
-                }
-                let under = self.cursor.filter(|(x, y)| *x >= 0.0 && *y >= 0.0 && (*x as u32) < self.composite.width() && (*y as u32) < self.composite.height()).map(|(x, y)| (x as u32, y as u32, self.composite.get_pixel(x as u32, y as u32).0));
-                let hist = self.hist.map(|h| h.1);
-                pro::dock_panel(ui, "info", "Infos", |ui| {
-                    if let Some(h) = hist {
-                        let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 60.0), Sense::hover());
-                        ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x14, 0x14, 0x17));
-                        let max = *h.iter().max().unwrap_or(&1) as f32;
-                        for (k, v) in h.iter().enumerate() {
-                            let x = r.left() + r.width() * k as f32 / 256.0;
-                            let hh = (*v as f32 / max.max(1.0)).sqrt() * (r.height() - 4.0);
-                            ui.painter().line_segment([pos2(x, r.bottom() - 2.0), pos2(x, r.bottom() - 2.0 - hh)], Stroke::new(1.0, Color32::from_gray(150)));
-                        }
-                        ui.add_space(6.0);
-                    }
-                    match under {
-                        Some((x, y, c)) => {
-                            ui.horizontal(|ui| {
-                                let (r, _) = ui.allocate_exact_size(Vec2::splat(18.0), Sense::hover());
-                                ui.painter().rect(r, CornerRadius::same(4), Color32::from_rgb(c[0], c[1], c[2]), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                                ui.label(RichText::new(format!("#{:02X}{:02X}{:02X}  R {} V {} B {} A {}", c[0], c[1], c[2], c[0], c[1], c[2], c[3])).size(12.0).monospace().color(INK));
-                            });
-                            ui.label(RichText::new(format!("x {x}  y {y}")).size(12.0).color(MUTED));
-                        }
-                        None => {
-                            ui.label(RichText::new("Survole l'image pour lire la couleur").size(12.0).color(FAINT));
-                        }
-                    }
-                });
-                pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
-            });
-        });
-    }
-
-    fn layers_panel(&mut self, ui: &mut Ui) {
-        ui.spacing_mut().item_spacing.y = 4.0;
-        let active = self.doc.active;
-        let mut visibility = None;
-        let mut select = None;
-        for i in (0..self.doc.layers.len()).rev() {
-            let selected = i == active;
-            let (row, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 52.0), Sense::click());
-            let p = ui.painter();
-            if selected {
-                p.rect_filled(row, CornerRadius::same(9), BLUE.gamma_multiply(0.24));
-            } else if resp.hovered() {
-                p.rect_filled(row, CornerRadius::same(9), Color32::from_white_alpha(8));
-            }
-            let eye = Rect::from_center_size(row.left_center() + vec2(16.0, 0.0), Vec2::splat(20.0));
-            let visible = self.doc.layers[i].visible;
-            let ec = if visible { INK } else { FAINT };
-            p.add(Shape::convex_polygon(
-                vec![eye.left_center() + vec2(1.0, 0.0), eye.center() - vec2(0.0, 5.0), eye.right_center() - vec2(1.0, 0.0), eye.center() + vec2(0.0, 5.0)],
-                Color32::TRANSPARENT,
-                Stroke::new(1.3, ec),
-            ));
-            if visible {
-                p.circle_filled(eye.center(), 2.5, ec);
-            } else {
-                p.line_segment([eye.left_top() + vec2(3.0, 3.0), eye.right_bottom() - vec2(3.0, 3.0)], Stroke::new(1.3, ec));
-            }
-            let thumb = Rect::from_min_size(pos2(row.left() + 34.0, row.top() + 6.0), Vec2::splat(40.0));
-            p.image(self.checker.id(), thumb, Rect::from_min_max(pos2(0.0, 0.0), pos2(2.5, 2.5)), Color32::WHITE);
-            if let Some(t) = self.thumbs.get(i) {
-                let [tw, th] = t.size();
-                let s = (40.0 / tw as f32).min(40.0 / th as f32);
-                let fit = Rect::from_center_size(thumb.center(), vec2(tw as f32, th as f32) * s);
-                p.image(t.id(), fit, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
-            }
-            p.rect_stroke(thumb, CornerRadius::same(3), Stroke::new(1.0, if selected { BLUE } else { LINE }), StrokeKind::Outside);
-            let eye_resp = ui.interact(eye.expand(4.0), ui.make_persistent_id(("eye", i)), Sense::click());
-            if eye_resp.on_hover_text("Afficher ou masquer").clicked() {
-                visibility = Some(i);
-            }
-            let name_pos = pos2(thumb.right() + 10.0, row.center().y);
-            if let Some((ri, text)) = &mut self.renaming
-                && *ri == i
-            {
-                let edit_rect = Rect::from_min_max(name_pos - vec2(0.0, 12.0), pos2(row.right() - 8.0, name_pos.y + 12.0));
-                let r = ui.put(edit_rect, egui::TextEdit::singleline(text));
-                if r.lost_focus() {
-                    let name = text.trim().to_string();
-                    if !name.is_empty() {
-                        self.doc.layers[i].name = name;
-                    }
-                    self.renaming = None;
-                } else {
-                    r.request_focus();
-                }
-            } else {
-                let l = &self.doc.layers[i];
-                ui.painter().text(name_pos - vec2(0.0, 7.0), Align2::LEFT_CENTER, &l.name, if selected { semibold(13.5) } else { FontId::proportional(13.5) }, if selected { INK_STRONG } else { INK });
-                ui.painter().text(name_pos + vec2(0.0, 10.0), Align2::LEFT_CENTER, format!("{:.0} %", l.opacity * 100.0), FontId::proportional(11.5), FAINT);
-            }
-            let lock_r = Rect::from_center_size(row.right_center() - vec2(16.0, 0.0), Vec2::splat(20.0));
-            let locked = self.doc.layers[i].locked;
-            if locked || resp.hovered() {
-                lock_glyph(ui.painter(), lock_r, locked, if locked { INK } else { FAINT });
-            }
-            if ui.interact(lock_r.expand(3.0), ui.make_persistent_id(("lock", i)), Sense::click()).on_hover_text("Verrouiller le calque").clicked() {
-                self.doc.layers[i].locked = !locked;
-            } else if resp.double_clicked() {
-                self.renaming = Some((i, self.doc.layers[i].name.clone()));
-            } else if resp.clicked() {
-                select = Some(i);
-            }
-        }
-        if let Some(i) = visibility {
-            self.doc.layers[i].visible = !self.doc.layers[i].visible;
-            self.doc.touch_all();
-        }
-        if let Some(i) = select {
-            self.doc.active = i;
-        }
-        ui.add_space(8.0);
-        ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 4.0;
-            let b = |ui: &mut Ui, tip: &str, glyph: &str| {
-                let (r, resp) = ui.allocate_exact_size(vec2(36.0, 28.0), Sense::click());
-                if resp.hovered() {
-                    ui.painter().rect_filled(r, CornerRadius::same(7), Color32::from_white_alpha(14));
-                }
-                ui.painter().text(r.center(), Align2::CENTER_CENTER, glyph, FontId::proportional(15.0), INK);
-                resp.on_hover_text(tip).clicked()
-            };
-            if b(ui, "Nouveau calque", "+") {
-                self.doc.add_layer(None, None);
-            }
-            if b(ui, "Dupliquer", "⧉") {
-                self.doc.duplicate_layer();
-            }
-            if b(ui, "Monter", "↑") {
-                self.doc.move_layer(true);
-            }
-            if b(ui, "Descendre", "↓") {
-                self.doc.move_layer(false);
-            }
-            if b(ui, "Fusionner avec le dessous", "⤓") {
-                self.doc.merge_down();
-            }
-            if b(ui, "Supprimer", "🗑") {
-                self.doc.delete_layer();
-            }
-        });
-    }
-
-    fn canvas(&mut self, root: &mut Ui) {
-        egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD)).show(root, |ui| {
-            let full = ui.max_rect();
-            let tab_h = 32.0;
-            let tab_bar = Rect::from_min_max(full.min, pos2(full.right(), full.top() + tab_h));
-            let p = ui.painter();
-            p.rect_filled(tab_bar, CornerRadius::ZERO, PANEL);
-            let label = format!("{} @ {:.0} %{}", self.doc.name, self.zoom * 100.0, if self.doc.modified { " •" } else { "" });
-            let g = p.layout_no_wrap(label, FontId::proportional(12.5), INK);
-            let tab = Rect::from_min_size(tab_bar.min + vec2(8.0, 4.0), vec2(g.size().x + 28.0, tab_h - 4.0));
-            p.rect_filled(tab, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, PASTEBOARD);
-            p.galley(tab.left_center() + vec2(14.0, -g.size().y / 2.0), g, INK);
-
-            let area = Rect::from_min_max(pos2(full.left(), tab_bar.bottom()), full.max);
-            let resp = ui.allocate_rect(area, Sense::click_and_drag());
-            let (w, h) = (self.doc.width() as f32, self.doc.height() as f32);
-            if self.fit_pending {
-                self.zoom = ((area.width() - 80.0) / w).min((area.height() - 80.0) / h).clamp(0.02, 1.0);
-                self.offset = Vec2::ZERO;
-                self.fit_pending = false;
-            }
-            let canvas_min = |zoom: f32, offset: Vec2| area.center() + offset - vec2(w, h) * zoom / 2.0;
-            let (scroll, pinch, space, pointer, primary_down, middle_down, delta, alt, pressed, released) = ui.input(|i| {
-                (
-                    i.smooth_scroll_delta.y,
-                    i.zoom_delta(),
-                    i.key_down(Key::Space),
-                    i.pointer.hover_pos(),
-                    i.pointer.primary_down(),
-                    i.pointer.middle_down(),
-                    i.pointer.delta(),
-                    i.modifiers.alt,
-                    i.pointer.primary_pressed(),
-                    i.pointer.primary_released(),
-                )
-            });
-            let zoom_at = |zoom: &mut f32, offset: &mut Vec2, factor: f32, at: Pos2| {
-                let doc_pt = (at - canvas_min(*zoom, *offset)) / *zoom;
-                let nz = (*zoom * factor).clamp(0.02, 64.0);
-                *offset = at.to_vec2() - doc_pt * nz + vec2(w, h) * nz / 2.0 - area.center().to_vec2();
-                *zoom = nz;
-            };
-            if resp.hovered() {
-                let factor = pinch * (scroll / 400.0).exp();
-                if (factor - 1.0).abs() > 1e-4
-                    && let Some(at) = pointer
-                {
-                    zoom_at(&mut self.zoom, &mut self.offset, factor, at);
-                }
-            }
-            let panning = (resp.dragged() && (self.tool == Tool::Hand || space)) || (resp.hovered() && middle_down);
-            if panning {
-                self.offset += delta;
-            }
-            let min = canvas_min(self.zoom, self.offset);
-            let zoom = self.zoom;
-            let rect = Rect::from_min_size(min, vec2(w, h) * zoom);
-            let to_doc = |p: Pos2| ((p.x - min.x) / zoom, (p.y - min.y) / zoom);
-            let to_scr = |d: (f32, f32)| pos2(min.x + d.0 * zoom, min.y + d.1 * zoom);
-            self.cursor = pointer.filter(|p| area.contains(*p)).map(to_doc);
-
-            if self.tool == Tool::Remove && self.filling.is_none() && !space {
-                if resp.is_pointer_button_down_on() && primary_down {
-                    if let Some(at) = pointer {
-                        let d = to_doc(at);
-                        if self.remove_stroke.last().is_none_or(|l| (l.0 - d.0).abs() + (l.1 - d.1).abs() > 0.5) {
-                            self.remove_stroke.push(d);
-                        }
-                    }
-                } else if !self.remove_stroke.is_empty() {
-                    let mask = self.stroke_mask();
-                    let ctx = ui.ctx().clone();
-                    self.start_fill(mask, &ctx);
-                    if self.filling.is_none() {
-                        self.remove_stroke.clear();
-                    }
-                }
-            }
-            let painting = brushy(self.tool) || self.tool == Tool::Remove;
-            if self.tool == Tool::Clone && alt && pressed && resp.hovered()
-                && let Some(at) = pointer
-            {
-                self.clone_src = Some(to_doc(at));
-                self.clone_offset = None;
-            } else if brushy(self.tool) && !space && !(self.tool == Tool::Clone && alt) && resp.is_pointer_button_down_on() && primary_down {
-                if let Some(at) = pointer {
-                    let cur = to_doc(at);
-                    match self.last {
-                        None => {
-                            if self.doc.layers[self.doc.active].locked {
-                                self.error = Some("Ce calque est verrouillé".into());
-                            } else {
-                                self.paint = self.make_paint(cur);
-                            }
-                            let mirror = self.doc.width() as f32 - cur.0;
-                            if let Some(paint) = &mut self.paint {
-                                self.doc.checkpoint();
-                                self.doc.stamp_paint(cur.0, cur.1, &self.brush, paint);
-                                if self.symmetry {
-                                    self.doc.stamp_paint(mirror, cur.1, &self.brush, paint);
-                                }
-                            }
-                        }
-                        Some(prev) => {
-                            let w = self.doc.width() as f32;
-                            if let Some(paint) = &mut self.paint {
-                                self.doc.stroke_paint(prev, cur, &self.brush, paint);
-                                if self.symmetry {
-                                    self.doc.stroke_paint((w - prev.0, prev.1), (w - cur.0, cur.1), &self.brush, paint);
-                                }
-                            }
-                        }
-                    }
-                    self.last = Some(cur);
-                }
-            } else {
-                self.last = None;
-                self.paint = None;
-            }
-
-            if !space && resp.hovered() && pressed
-                && let Some(at) = pointer
-            {
-                let d = to_doc(at);
-                match self.tool {
-                    Tool::Marquee | Tool::EllipseMarquee => self.drag = Drag::Marquee(d),
-                    Tool::Lasso => self.drag = Drag::Lasso(vec![d]),
-                    Tool::Crop => self.drag = Drag::Crop(d),
-                    Tool::Rect | Tool::Ellipse | Tool::Line => {
-                        self.gradient_end = None;
-                        self.drag = Drag::Shape(d);
-                    }
-                    Tool::Move => {
-                        self.doc.checkpoint();
-                        self.drag = Drag::Move { from: d, original: self.doc.layers[self.doc.active].img.clone() };
-                    }
-                    Tool::Gradient => self.drag = Drag::Gradient(d),
-                    _ => {}
-                }
-            }
-            if let Some(at) = pointer {
-                let d = to_doc(at);
-                match &mut self.drag {
-                    Drag::Marquee(start) => {
-                        let a = Area::from_points(*start, d, w as u32, h as u32);
-                        self.doc.set_selection(a, None);
-                    }
-                    Drag::Lasso(pts) => {
-                        if pts.last().is_none_or(|l| (l.0 - d.0).abs() + (l.1 - d.1).abs() > 1.0) {
-                            pts.push(d);
-                        }
-                    }
-                    Drag::Crop(start) => self.crop = Area::from_points(*start, d, w as u32, h as u32),
-                    Drag::Shape(_) => self.gradient_end = Some(d),
-                    Drag::Move { from, original } => {
-                        let (dx, dy) = ((d.0 - from.0).round() as i32, (d.1 - from.1).round() as i32);
-                        let original = original.clone();
-                        self.doc.place_layer(&original, dx, dy);
-                    }
-                    Drag::Gradient(_) => self.gradient_end = Some(d),
-                    Drag::None => {}
-                }
-            }
-            if released {
-                match std::mem::replace(&mut self.drag, Drag::None) {
-                    Drag::Gradient(start) => {
-                        if let Some(end) = self.gradient_end.take() {
-                            self.doc.gradient_kind(start, end, self.primary.to_array(), self.secondary.to_array(), self.radial);
-                        }
-                    }
-                    Drag::Marquee(_) => {
-                        if self.doc.selection.is_some_and(|s| s.width() < 2 && s.height() < 2) {
-                            self.doc.set_selection(None, None);
-                        } else if self.tool == Tool::EllipseMarquee
-                            && let Some(a) = self.doc.selection
-                        {
-                            self.doc.select_ellipse(a);
-                        }
-                    }
-                    Drag::Lasso(pts) => self.doc.select_polygon(&pts),
-                    Drag::Crop(_) => {
-                        if self.crop.is_some_and(|c| c.width() < 4 || c.height() < 4) {
-                            self.crop = None;
-                        }
-                    }
-                    Drag::Shape(start) => {
-                        if let Some(end) = self.gradient_end.take() {
-                            let color = self.primary.to_array();
-                            let name = tool_name(self.tool).to_string();
-                            if self.shape_layer {
-                                let n = self.doc.layers.len() + 1;
-                                self.doc.add_layer(Some(format!("{name} {n}")), None);
-                            }
-                            match self.tool {
-                                Tool::Line => {
-                                    self.doc.checkpoint();
-                                    let b = Brush { radius: self.brush.radius, hardness: 0.9, flow: 1.0 };
-                                    self.doc.stamp(start.0, start.1, &b, color, false);
-                                    self.doc.stroke(start, end, &b, color, false);
-                                }
-                                t => {
-                                    if let Some(a) = Area::from_points(start, end, w as u32, h as u32) {
-                                        if self.outline {
-                                            self.doc.checkpoint();
-                                            let b = Brush { radius: self.brush.radius, hardness: 0.95, flow: 1.0 };
-                                            let pts: Vec<(f32, f32)> = if t == Tool::Ellipse {
-                                                let (cx, cy, rx, ry) = ((a.x0 + a.x1) as f32 / 2.0, (a.y0 + a.y1) as f32 / 2.0, a.width() as f32 / 2.0, a.height() as f32 / 2.0);
-                                                (0..=72).map(|k| {
-                                                    let ang = k as f32 / 72.0 * std::f32::consts::TAU;
-                                                    (cx + ang.cos() * rx, cy + ang.sin() * ry)
-                                                }).collect()
-                                            } else {
-                                                let (x0, y0, x1, y1) = (a.x0 as f32, a.y0 as f32, a.x1 as f32, a.y1 as f32);
-                                                vec![(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)]
-                                            };
-                                            for pair in pts.windows(2) {
-                                                self.doc.stroke(pair[0], pair[1], &b, color, false);
-                                            }
-                                        } else {
-                                            self.doc.fill_shape(a, t == Tool::Ellipse, color);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-            }
-
-            if resp.clicked() && !space
-                && let Some(at) = pointer
-            {
-                let (x, y) = to_doc(at);
-                let inside = x >= 0.0 && y >= 0.0 && x < w && y < h;
-                match self.tool {
-                    Tool::Fill if inside => {
-                        self.doc.checkpoint();
-                        self.doc.flood_fill(x as u32, y as u32, self.primary.to_array(), self.tolerance);
-                    }
-                    Tool::Wand if inside => self.doc.select_color(x as u32, y as u32, self.tolerance, self.contiguous),
-                    Tool::Text if inside => self.text = Some(TextDraft { at: (x, y), text: String::new(), size: (h / 12.0).clamp(12.0, 400.0).round() }),
-                    Tool::Picker if inside => {
-                        let c = self.composite.get_pixel(x as u32, y as u32).0;
-                        self.primary = Color32::from_rgb(c[0], c[1], c[2]);
-                    }
-                    Tool::Zoom => zoom_at(&mut self.zoom, &mut self.offset, if alt { 0.8 } else { 1.25 }, at),
-                    _ => {}
-                }
-            }
-
-            let painter = ui.painter_at(area);
-            painter.add(egui::epaint::Shadow { offset: [0, 6], blur: 24, spread: 0, color: Color32::from_black_alpha(120) }.as_shape(rect, CornerRadius::ZERO));
-            painter.image(self.checker.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(rect.width() / 16.0, rect.height() / 16.0)), Color32::WHITE);
-            if let Some(t) = &self.tex {
-                painter.image(t.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
-            }
-            self.view_doc = Some(Rect::from_min_max(pos2((area.left() - min.x) / zoom, (area.top() - min.y) / zoom), pos2((area.right() - min.x) / zoom, (area.bottom() - min.y) / zoom)));
-            if self.show_grid {
-                let g = self.grid.max(2) as f32;
-                if g * zoom >= 6.0 {
-                    let gs = Stroke::new(1.0, Color32::from_rgba_unmultiplied(10, 132, 255, 60));
-                    let mut x = 0.0;
-                    while x <= w {
-                        painter.line_segment([to_scr((x, 0.0)), to_scr((x, h))], gs);
-                        x += g;
-                    }
-                    let mut y = 0.0;
-                    while y <= h {
-                        painter.line_segment([to_scr((0.0, y)), to_scr((w, y))], gs);
-                        y += g;
-                    }
-                }
-            }
-            if zoom >= 10.0 {
-                let ps = Stroke::new(1.0, Color32::from_black_alpha(40));
-                let (x0, x1) = (((area.left() - min.x) / zoom).floor().max(0.0), ((area.right() - min.x) / zoom).ceil().min(w));
-                let (y0, y1) = (((area.top() - min.y) / zoom).floor().max(0.0), ((area.bottom() - min.y) / zoom).ceil().min(h));
-                let mut x = x0;
-                while x <= x1 {
-                    painter.line_segment([to_scr((x, y0)), to_scr((x, y1))], ps);
-                    x += 1.0;
-                }
-                let mut y = y0;
-                while y <= y1 {
-                    painter.line_segment([to_scr((x0, y)), to_scr((x1, y))], ps);
-                    y += 1.0;
-                }
-            }
-            if let Some((_, t)) = &self.mask_tex {
-                painter.image(t.id(), rect, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
-            } else if let Some(s) = self.doc.selection {
-                let r = Rect::from_min_max(to_scr((s.x0 as f32, s.y0 as f32)), to_scr((s.x1 as f32, s.y1 as f32)));
-                let t = ui.input(|i| i.time) as f32;
-                ui.ctx().request_repaint_after(std::time::Duration::from_millis(80));
-                painter.rect_stroke(r, CornerRadius::ZERO, Stroke::new(1.0, Color32::BLACK), StrokeKind::Middle);
-                let dash = Shape::dashed_line_with_offset(
-                    &[r.left_top(), r.right_top(), r.right_bottom(), r.left_bottom(), r.left_top()],
-                    Stroke::new(1.0, Color32::WHITE),
-                    &[5.0],
-                    &[5.0],
-                    t * 20.0 % 10.0,
-                );
-                painter.extend(dash);
-            }
-            if let (Drag::Gradient(start), Some(end)) = (&self.drag, self.gradient_end) {
-                let (a, b) = (to_scr(*start), to_scr(end));
-                painter.line_segment([a, b], Stroke::new(3.0, Color32::from_black_alpha(160)));
-                painter.line_segment([a, b], Stroke::new(1.5, Color32::WHITE));
-                painter.circle(a, 5.0, self.primary, Stroke::new(1.5, Color32::WHITE));
-                painter.circle(b, 5.0, self.secondary, Stroke::new(1.5, Color32::WHITE));
-            }
-            if let Drag::Lasso(pts) = &self.drag {
-                let pts: Vec<Pos2> = pts.iter().map(|d| to_scr(*d)).collect();
-                painter.add(Shape::line(pts.clone(), Stroke::new(2.5, Color32::from_black_alpha(160))));
-                painter.add(Shape::line(pts, Stroke::new(1.0, Color32::WHITE)));
-            }
-            if let (Drag::Marquee(_), Tool::EllipseMarquee, Some(s)) = (&self.drag, self.tool, self.doc.selection) {
-                let r = Rect::from_min_max(to_scr((s.x0 as f32, s.y0 as f32)), to_scr((s.x1 as f32, s.y1 as f32)));
-                painter.add(egui::epaint::EllipseShape { center: r.center(), radius: r.size() / 2.0, fill: Color32::TRANSPARENT, stroke: Stroke::new(1.0, Color32::WHITE), angle: 0.0 });
-            }
-            if let Some(c) = self.crop {
-                let r = Rect::from_min_max(to_scr((c.x0 as f32, c.y0 as f32)), to_scr((c.x1 as f32, c.y1 as f32)));
-                let shade = Color32::from_black_alpha(150);
-                for band in [
-                    Rect::from_min_max(rect.min, pos2(rect.right(), r.top())),
-                    Rect::from_min_max(pos2(rect.left(), r.bottom()), rect.max),
-                    Rect::from_min_max(pos2(rect.left(), r.top()), pos2(r.left(), r.bottom())),
-                    Rect::from_min_max(pos2(r.right(), r.top()), pos2(rect.right(), r.bottom())),
-                ] {
-                    painter.rect_filled(band, CornerRadius::ZERO, shade);
-                }
-                painter.rect_stroke(r, CornerRadius::ZERO, Stroke::new(1.5, Color32::WHITE), StrokeKind::Middle);
-                for k in 1..3 {
-                    let fx = r.left() + r.width() * k as f32 / 3.0;
-                    let fy = r.top() + r.height() * k as f32 / 3.0;
-                    painter.line_segment([pos2(fx, r.top()), pos2(fx, r.bottom())], Stroke::new(0.8, Color32::from_white_alpha(110)));
-                    painter.line_segment([pos2(r.left(), fy), pos2(r.right(), fy)], Stroke::new(0.8, Color32::from_white_alpha(110)));
-                }
-            }
-            if let (Drag::Shape(start), Some(end)) = (&self.drag, self.gradient_end) {
-                let (a, b) = (to_scr(*start), to_scr(end));
-                let fill = self.primary.gamma_multiply(0.6);
-                match self.tool {
-                    Tool::Line => {
-                        painter.line_segment([a, b], Stroke::new((self.brush.radius * 2.0 * zoom).max(1.0), fill));
-                    }
-                    Tool::Ellipse => {
-                        let r = Rect::from_two_pos(a, b);
-                        painter.add(egui::epaint::EllipseShape { center: r.center(), radius: r.size() / 2.0, fill, stroke: Stroke::new(1.0, Color32::WHITE), angle: 0.0 });
-                    }
-                    _ => {
-                        painter.rect(Rect::from_two_pos(a, b), CornerRadius::ZERO, fill, Stroke::new(1.0, Color32::WHITE), StrokeKind::Middle);
-                    }
-                }
-            }
-            if let (Tool::Clone, Some(src)) = (self.tool, self.clone_src) {
-                let c = to_scr(match (self.last, self.clone_offset) {
-                    (Some(l), Some(o)) => (l.0 + o.0, l.1 + o.1),
-                    _ => src,
-                });
-                painter.circle_stroke(c, 6.0, Stroke::new(1.5, Color32::WHITE));
-                painter.line_segment([c - vec2(9.0, 0.0), c + vec2(9.0, 0.0)], Stroke::new(1.0, Color32::WHITE));
-                painter.line_segment([c - vec2(0.0, 9.0), c + vec2(0.0, 9.0)], Stroke::new(1.0, Color32::WHITE));
-            }
-            if !self.remove_stroke.is_empty() {
-                let pts: Vec<Pos2> = self.remove_stroke.iter().map(|d| to_scr(*d)).collect();
-                let width = (self.brush.radius * 2.0 * zoom).max(2.0);
-                let red = Color32::from_rgba_unmultiplied(255, 59, 80, 110);
-                if pts.len() == 1 {
-                    painter.circle_filled(pts[0], width / 2.0, red);
-                } else {
-                    painter.add(Shape::line(pts.clone(), Stroke::new(width, red)));
-                    painter.circle_filled(pts[0], width / 2.0, red);
-                    painter.circle_filled(pts[pts.len() - 1], width / 2.0, red);
-                }
-            }
-            if self.filling.is_some() {
-                ui.ctx().request_repaint_after(std::time::Duration::from_millis(60));
-                let tag = Rect::from_center_size(area.center_top() + vec2(0.0, 40.0), vec2(260.0, 40.0));
-                painter.rect_filled(tag, CornerRadius::same(20), Color32::from_black_alpha(200));
-                let t = ui.input(|i| i.time) as f32;
-                let c = tag.left_center() + vec2(26.0, 0.0);
-                for k in 0..8 {
-                    let a = t * 6.0 + k as f32 * std::f32::consts::TAU / 8.0;
-                    painter.circle_filled(c + vec2(a.cos(), a.sin()) * 8.0, 2.0, Color32::from_white_alpha(60 + k * 24));
-                }
-                painter.text(tag.left_center() + vec2(46.0, 0.0), Align2::LEFT_CENTER, "Reconstruction du fond…", semibold(13.0), Color32::WHITE);
-            }
-
-            if resp.hovered() {
-                ui.ctx().set_cursor_icon(match self.tool {
-                    _ if panning || space => egui::CursorIcon::Grabbing,
-                    Tool::Hand => egui::CursorIcon::Grab,
-                    t if brushy(t) => egui::CursorIcon::None,
-                    Tool::Text => egui::CursorIcon::Text,
-                    Tool::Move => egui::CursorIcon::Move,
-                    Tool::Zoom => if alt { egui::CursorIcon::ZoomOut } else { egui::CursorIcon::ZoomIn },
-                    _ => egui::CursorIcon::Crosshair,
-                });
-                if painting && !space
-                    && let Some(at) = pointer
-                {
-                    let r = (self.brush.radius * zoom).max(2.0);
-                    painter.circle_stroke(at, r, Stroke::new(1.0, Color32::from_black_alpha(200)));
-                    painter.circle_stroke(at, r + 1.0, Stroke::new(1.0, Color32::from_white_alpha(200)));
-                }
-            }
-        });
-    }
-
-    fn sheets(&mut self, ctx: &egui::Context) {
-        self.extra_sheet(ctx);
-        if let Some(mut nd) = self.new_doc.take() {
-            let mut create = false;
-            let keep = pro::sheet(ctx, "new", 760.0, |ui| {
-                ui.label(RichText::new("Nouveau document").font(semibold(20.0)).color(INK_STRONG));
-                ui.add_space(14.0);
-                ui.horizontal_top(|ui| {
-                    ui.vertical(|ui| {
-                        ui.set_width(450.0);
-                        ui.label(RichText::new("Préréglages").font(semibold(13.0)).color(MUTED));
-                        ui.add_space(6.0);
-                        for row in PRESETS.chunks(3).enumerate() {
-                            ui.horizontal(|ui| {
-                                ui.spacing_mut().item_spacing.x = 10.0;
-                                for (k, (name, kind, w, h)) in row.1.iter().enumerate() {
-                                    let idx = row.0 * 3 + k;
-                                    if preset_card(ui, name, &format!("{w} × {h} · {kind}"), *w, *h, nd.preset == idx, 142.0).clicked() {
-                                        nd.preset = idx;
-                                        nd.w = *w;
-                                        nd.h = *h;
-                                    }
-                                }
-                            });
-                            ui.add_space(10.0);
-                        }
-                    });
-                    ui.add_space(16.0);
-                    ui.vertical(|ui| {
-                        ui.label(RichText::new("Détails").font(semibold(13.0)).color(MUTED));
-                        ui.add_space(6.0);
-                        ui.add(egui::TextEdit::singleline(&mut nd.name).desired_width(f32::INFINITY));
-                        ui.add_space(10.0);
-                        ui.label(RichText::new("Largeur").size(12.5).color(MUTED));
-                        ui.add(egui::DragValue::new(&mut nd.w).range(1..=16384).suffix(" px"));
-                        ui.label(RichText::new("Hauteur").size(12.5).color(MUTED));
-                        ui.add(egui::DragValue::new(&mut nd.h).range(1..=16384).suffix(" px"));
-                        ui.add_space(6.0);
-                        ui.horizontal(|ui| {
-                            ui.label(RichText::new("Orientation").size(12.5).color(MUTED));
-                            if ui.selectable_label(nd.w >= nd.h, "Paysage").clicked() && nd.w < nd.h {
-                                std::mem::swap(&mut nd.w, &mut nd.h);
-                            }
-                            if ui.selectable_label(nd.h > nd.w, "Portrait").clicked() && nd.w >= nd.h {
-                                std::mem::swap(&mut nd.w, &mut nd.h);
-                            }
-                        });
-                        ui.add_space(6.0);
-                        ui.label(RichText::new("Arrière-plan").size(12.5).color(MUTED));
-                        egui::ComboBox::from_id_salt("bg").selected_text(BACKGROUNDS[nd.background]).width(200.0).show_ui(ui, |ui| {
-                            for (k, b) in BACKGROUNDS.iter().enumerate() {
-                                ui.selectable_value(&mut nd.background, k, *b);
-                            }
-                        });
-                    });
-                });
-                ui.add_space(16.0);
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Créer").clicked() {
-                        create = true;
-                    }
-                    if pro::secondary(ui, "Annuler").clicked() {
-                        nd.preset = usize::MAX;
-                    }
-                });
-            });
-            if create {
-                let fill = match nd.background {
-                    0 => Some([255, 255, 255, 255]),
-                    1 => None,
-                    2 => Some([0, 0, 0, 255]),
-                    _ => Some(self.primary.to_array()),
-                };
-                let mut doc = Document::new(nd.w, nd.h, fill);
-                doc.name = if nd.name.trim().is_empty() { "Sans titre".into() } else { nd.name.trim().to_string() };
-                self.set_doc(doc);
-            } else if keep && nd.preset != usize::MAX {
-                self.new_doc = Some(nd);
-            }
-        }
-
-        if let Some((kind, mut vals, base)) = self.adjust.take() {
-            let fresh = vals.is_empty();
-            if fresh {
-                vals = kind.defaults();
-            }
-            let before = vals.clone();
-            let mut apply = false;
-            let mut cancel = false;
-            let mut reset = false;
-            let keep = pro::sheet(ctx, "adjust", 380.0, |ui| {
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new(kind.title()).font(semibold(18.0)).color(INK_STRONG));
-                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.add(egui::Button::new(RichText::new("Réinitialiser").color(BLUE)).frame(false)).clicked() {
-                            reset = true;
-                        }
-                    });
-                });
-                ui.add_space(12.0);
-                ui.spacing_mut().slider_width = 250.0;
-                for (v, p) in vals.iter_mut().zip(kind.params()) {
-                    ui.label(RichText::new(p.label).size(12.5).color(MUTED));
-                    if p.min == 0.0 && p.max == 1.0 && p.suffix.is_empty() {
-                        let mut on = *v >= 0.5;
-                        if ui.checkbox(&mut on, "Activé").changed() {
-                            *v = if on { 1.0 } else { 0.0 };
-                        }
-                    } else {
-                        let decimals = if p.max - p.min <= 10.0 { 2 } else { 0 };
-                        ui.add(egui::Slider::new(v, p.min..=p.max).suffix(p.suffix).fixed_decimals(decimals));
-                    }
-                    ui.add_space(4.0);
-                }
-                ui.add_space(4.0);
-                let scope = if self.doc.selection.is_some() { "Aperçu en direct · limité à la sélection" } else { "Aperçu en direct sur le calque actif" };
-                ui.label(RichText::new(scope).size(12.0).color(FAINT));
-                ui.add_space(12.0);
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Appliquer").clicked() {
-                        apply = true;
-                    }
-                    if pro::secondary(ui, "Annuler").clicked() {
-                        cancel = true;
-                    }
-                });
-            });
-            if reset {
-                vals = kind.defaults();
-            }
-            let active = self.doc.active;
-            if apply {
-                let out = kind.apply(&base, &vals);
-                self.doc.layers[active].img = base.clone();
-                self.doc.checkpoint();
-                self.doc.put_filtered(&base, &out);
-            } else if cancel || !keep {
-                self.doc.layers[active].img = base;
-                self.doc.touch_all();
-            } else {
-                if fresh || vals != before {
-                    let out = kind.apply(&base, &vals);
-                    self.doc.put_filtered(&base, &out);
-                }
-                self.adjust = Some((kind, vals, base));
-            }
-        }
-
-        if let Some(mut draft) = self.text.take() {
-            let mut add = false;
-            let mut cancel = false;
-            let keep = pro::sheet(ctx, "text", 420.0, |ui| {
-                ui.label(RichText::new("Texte").font(semibold(18.0)).color(INK_STRONG));
-                ui.add_space(10.0);
-                let r = ui.add(egui::TextEdit::multiline(&mut draft.text).hint_text("Ton texte").desired_rows(3).desired_width(f32::INFINITY));
-                if draft.text.is_empty() {
-                    r.request_focus();
-                }
-                ui.add_space(8.0);
-                ui.label(RichText::new("Taille").size(12.5).color(MUTED));
-                ui.spacing_mut().slider_width = 260.0;
-                ui.add(egui::Slider::new(&mut draft.size, 6.0..=600.0).suffix(" px").logarithmic(true));
-                ui.add_space(4.0);
-                ui.label(RichText::new("Police Segoe UI · couleur principale").size(12.0).color(FAINT));
-                ui.add_space(12.0);
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Ajouter").clicked() {
-                        add = true;
-                    }
-                    if pro::secondary(ui, "Annuler").clicked() {
-                        cancel = true;
-                    }
-                });
-            });
-            if add && !draft.text.trim().is_empty() {
-                match render_text(&draft.text, draft.size, self.primary.to_array()) {
-                    Some(glyphs) => {
-                        let mut canvas = RgbaImage::new(self.doc.width(), self.doc.height());
-                        imageops::overlay(&mut canvas, &glyphs, draft.at.0 as i64, draft.at.1 as i64 - (draft.size * 0.2) as i64);
-                        let name: String = draft.text.lines().next().unwrap_or("Texte").chars().take(24).collect();
-                        self.doc.add_layer(Some(name), Some(canvas));
-                    }
-                    None => self.error = Some("Police Segoe UI introuvable".into()),
-                }
-            } else if keep && !cancel && !add {
-                self.text = Some(draft);
-            }
-        }
-
-        if let Some((mut w, mut h, mut keep_ratio)) = self.resize.take() {
-            let mut apply = false;
-            let mut cancel = false;
-            let ratio = self.doc.width() as f32 / self.doc.height() as f32;
-            let keep = pro::sheet(ctx, "resize", 340.0, |ui| {
-                ui.label(RichText::new("Taille de l'image").font(semibold(18.0)).color(INK_STRONG));
-                ui.add_space(12.0);
-                ui.label(RichText::new("Largeur").size(12.5).color(MUTED));
-                if ui.add(egui::DragValue::new(&mut w).range(1..=16384).suffix(" px")).changed() && keep_ratio {
-                    h = ((w as f32 / ratio).round() as u32).max(1);
-                }
-                ui.label(RichText::new("Hauteur").size(12.5).color(MUTED));
-                if ui.add(egui::DragValue::new(&mut h).range(1..=16384).suffix(" px")).changed() && keep_ratio {
-                    w = ((h as f32 * ratio).round() as u32).max(1);
-                }
-                ui.checkbox(&mut keep_ratio, "Conserver les proportions");
-                ui.add_space(12.0);
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Appliquer").clicked() {
-                        apply = true;
-                    }
-                    if pro::secondary(ui, "Annuler").clicked() {
-                        cancel = true;
-                    }
-                });
-            });
-            if apply {
-                self.doc.set_selection(None, None);
-                self.doc.transform(|img| imageops::resize(img, w, h, imageops::FilterType::Lanczos3));
-                self.fit_pending = true;
-            } else if keep && !cancel {
-                self.resize = Some((w, h, keep_ratio));
-            }
-        }
-    }
 }
+
+pub const GRID_COLORS: [(&str, [u8; 3]); 5] = [("Bleu", [10, 132, 255]), ("Gris", [150, 150, 150]), ("Rouge", [255, 69, 58]), ("Vert", [48, 209, 88]), ("Magenta", [255, 0, 200])];
+pub const PASTEBOARDS: [(&str, Color32); 4] = [("Sombre", PASTEBOARD), ("Gris moyen", Color32::from_rgb(0x3a, 0x3a, 0x3f)), ("Clair", Color32::from_rgb(0xb8, 0xb8, 0xbd)), ("Noir", Color32::BLACK)];
 
 fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: u32, h: u32, selected: bool, width: f32) -> egui::Response {
     let (r, resp) = ui.allocate_exact_size(vec2(width, 132.0), Sense::click());
     let hover = resp.hovered();
     let p = ui.painter();
-    p.rect(
-        r,
-        CornerRadius::same(12),
-        if hover { Color32::from_rgb(0x2f, 0x2f, 0x35) } else { Color32::from_rgb(0x27, 0x27, 0x2c) },
-        Stroke::new(if selected { 2.0 } else { 1.0 }, if selected { BLUE } else { LINE }),
-        StrokeKind::Inside,
-    );
+    p.rect(r, CornerRadius::same(12), if hover { Color32::from_rgb(0x2f, 0x2f, 0x35) } else { Color32::from_rgb(0x27, 0x27, 0x2c) }, Stroke::new(if selected { 2.0 } else { 1.0 }, if selected { BLUE } else { LINE }), StrokeKind::Inside);
     let area = Rect::from_center_size(r.center_top() + vec2(0.0, 44.0), vec2(width - 40.0, 56.0));
     let s = (area.width() / w as f32).min(area.height() / h as f32);
     let shape = Rect::from_center_size(area.center(), vec2(w as f32, h as f32) * s);
@@ -2394,7 +1869,7 @@ fn export_glyph(p: &Painter, r: Rect, c: Color32) {
     p.add(Shape::line(vec![at(0.12, 0.55), at(0.12, 0.95), at(0.88, 0.95), at(0.88, 0.55)], Stroke::new(2.0, c)));
 }
 
-fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
+pub fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
     let body = Rect::from_min_max(r.min + vec2(4.0, 9.0), r.max - vec2(4.0, 2.0));
     p.rect_filled(body, CornerRadius::same(2), c);
     let lift = if locked { 0.0 } else { 4.0 };
@@ -2403,168 +1878,14 @@ fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
         Stroke::new(1.6, c),
     ));
 }
-fn image_dialog() -> rfd::FileDialog {
-    rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "bmp"])
-}
 
-fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
-    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
-    let s = Stroke::new(1.8, c);
-    match tool {
-        Tool::Move => {
-            let m = r.center();
-            let d = r.width() * 0.5;
-            let k = r.width() * 0.18;
-            p.line_segment([m - vec2(d, 0.0), m + vec2(d, 0.0)], s);
-            p.line_segment([m - vec2(0.0, d), m + vec2(0.0, d)], s);
-            for u in [vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0)] {
-                let tip = m + u * d;
-                let back = tip - u * k;
-                let perp = vec2(-u.y, u.x) * k;
-                p.add(Shape::convex_polygon(vec![tip, back + perp, back - perp], c, Stroke::NONE));
-            }
-        }
-        Tool::Marquee => {
-            let rr = Rect::from_min_max(at(0.05, 0.15), at(0.95, 0.85));
-            p.extend(Shape::dashed_line(&[rr.left_top(), rr.right_top(), rr.right_bottom(), rr.left_bottom(), rr.left_top()], s, 3.0, 2.5));
-        }
-        Tool::Brush => {
-            p.line_segment([at(0.95, 0.05), at(0.42, 0.58)], s);
-            p.circle_filled(at(0.28, 0.72), r.width() * 0.2, c);
-        }
-        Tool::Eraser => {
-            p.add(Shape::convex_polygon(vec![at(0.55, 0.1), at(0.95, 0.5), at(0.5, 0.95), at(0.1, 0.55)], Color32::TRANSPARENT, s));
-            p.line_segment([at(0.3, 0.35), at(0.7, 0.75)], s);
-        }
-        Tool::Remove => {
-            p.line_segment([at(0.12, 0.88), at(0.6, 0.4)], Stroke::new(4.5, c));
-            p.line_segment([at(0.12, 0.88), at(0.6, 0.4)], Stroke::new(1.8, PANEL));
-            let star = at(0.78, 0.22);
-            let k = r.width() * 0.2;
-            p.line_segment([star - vec2(k, 0.0), star + vec2(k, 0.0)], Stroke::new(1.6, c));
-            p.line_segment([star - vec2(0.0, k), star + vec2(0.0, k)], Stroke::new(1.6, c));
-            p.circle_filled(at(0.9, 0.55), r.width() * 0.07, c);
-        }
-        Tool::Fill => {
-            p.add(Shape::convex_polygon(vec![at(0.1, 0.35), at(0.7, 0.35), at(0.6, 0.95), at(0.2, 0.95)], Color32::TRANSPARENT, s));
-            p.line_segment([at(0.1, 0.35), at(0.4, 0.05)], s);
-            p.circle_filled(at(0.88, 0.7), r.width() * 0.11, c);
-        }
-        Tool::Gradient => {
-            let rr = Rect::from_min_max(at(0.0, 0.15), at(1.0, 0.85));
-            let n = 6;
-            for k in 0..n {
-                let x0 = rr.left() + rr.width() * k as f32 / n as f32;
-                let cell = Rect::from_min_max(pos2(x0, rr.top()), pos2(x0 + rr.width() / n as f32, rr.bottom()));
-                p.rect_filled(cell, CornerRadius::ZERO, c.gamma_multiply(1.0 - k as f32 / n as f32));
-            }
-            p.rect_stroke(rr, CornerRadius::same(2), s, StrokeKind::Middle);
-        }
-        Tool::Picker => {
-            p.line_segment([at(0.08, 0.92), at(0.62, 0.38)], Stroke::new(2.3, c));
-            p.circle_filled(at(0.75, 0.25), r.width() * 0.2, c);
-        }
-        Tool::Hand => {
-            for (k, h) in [0.55, 0.75, 0.8, 0.7].iter().enumerate() {
-                let x = 0.22 + k as f32 * 0.19;
-                p.line_segment([at(x, 0.62), at(x, 0.62 - h * 0.6)], Stroke::new(2.4, c));
-            }
-            p.add(Shape::convex_polygon(vec![at(0.12, 0.6), at(0.85, 0.6), at(0.75, 1.0), at(0.25, 1.0)], c, Stroke::NONE));
-        }
-        Tool::Zoom => {
-            p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
-            p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.4, c));
-        }
-        Tool::EllipseMarquee => {
-            let rr = Rect::from_min_max(at(0.02, 0.15), at(0.98, 0.85));
-            let pts: Vec<Pos2> = (0..=24).map(|k| {
-                let a = k as f32 / 24.0 * std::f32::consts::TAU;
-                rr.center() + vec2(a.cos() * rr.width() / 2.0, a.sin() * rr.height() / 2.0)
-            }).collect();
-            p.extend(Shape::dashed_line(&pts, s, 3.0, 2.5));
-        }
-        Tool::Lasso => {
-            let pts: Vec<Pos2> = (0..=20).map(|k| {
-                let a = k as f32 / 20.0 * std::f32::consts::TAU;
-                at(0.5 + a.cos() * 0.45, 0.4 + a.sin() * 0.3)
-            }).collect();
-            p.add(Shape::line(pts, s));
-            p.line_segment([at(0.3, 0.68), at(0.22, 1.0)], s);
-        }
-        Tool::Wand => {
-            p.line_segment([at(0.05, 0.95), at(0.6, 0.4)], Stroke::new(2.2, c));
-            let k = at(0.75, 0.25);
-            for (dx, dy) in [(1.0, 0.0), (0.0, 1.0), (0.7, 0.7), (0.7, -0.7)] {
-                let v = vec2(dx, dy) * r.width() * 0.2;
-                p.line_segment([k - v, k + v], Stroke::new(1.4, c));
-            }
-        }
-        Tool::Crop => {
-            p.line_segment([at(0.25, 0.0), at(0.25, 0.75)], s);
-            p.line_segment([at(0.25, 0.75), at(1.0, 0.75)], s);
-            p.line_segment([at(0.0, 0.25), at(0.75, 0.25)], s);
-            p.line_segment([at(0.75, 0.25), at(0.75, 1.0)], s);
-        }
-        Tool::Clone => {
-            p.rect_filled(Rect::from_min_max(at(0.15, 0.62), at(0.85, 0.8)), CornerRadius::same(2), c);
-            p.line_segment([at(0.15, 0.95), at(0.85, 0.95)], s);
-            p.line_segment([at(0.5, 0.62), at(0.5, 0.35)], Stroke::new(2.4, c));
-            p.circle_filled(at(0.5, 0.2), r.width() * 0.16, c);
-        }
-        Tool::Pencil => {
-            p.line_segment([at(0.85, 0.15), at(0.25, 0.75)], Stroke::new(4.0, c));
-            p.add(Shape::convex_polygon(vec![at(0.18, 0.68), at(0.32, 0.82), at(0.05, 0.95)], c, Stroke::NONE));
-        }
-        Tool::Blur => {
-            p.add(Shape::convex_polygon(vec![at(0.5, 0.05), at(0.78, 0.55), at(0.5, 0.95), at(0.22, 0.55)], c, Stroke::NONE));
-            p.circle_filled(at(0.5, 0.65), r.width() * 0.3, c);
-        }
-        Tool::Sharpen => {
-            p.add(Shape::convex_polygon(vec![at(0.5, 0.02), at(0.68, 0.98), at(0.32, 0.98)], Color32::TRANSPARENT, s));
-        }
-        Tool::Smudge => {
-            p.line_segment([at(0.3, 0.95), at(0.45, 0.35)], Stroke::new(3.2, c));
-            p.circle_filled(at(0.48, 0.25), r.width() * 0.12, c);
-            p.line_segment([at(0.6, 0.6), at(0.95, 0.45)], Stroke::new(1.4, c));
-            p.line_segment([at(0.6, 0.78), at(0.95, 0.7)], Stroke::new(1.4, c));
-        }
-        Tool::Dodge => {
-            p.circle_stroke(at(0.5, 0.35), r.width() * 0.3, s);
-            p.line_segment([at(0.5, 0.65), at(0.5, 1.0)], Stroke::new(2.4, c));
-        }
-        Tool::Burn => {
-            p.line_segment([at(0.3, 0.1), at(0.3, 0.5)], Stroke::new(2.4, c));
-            p.circle_filled(at(0.55, 0.62), r.width() * 0.3, c);
-        }
-        Tool::Sponge => {
-            p.rect_stroke(Rect::from_min_max(at(0.1, 0.25), at(0.9, 0.85)), CornerRadius::same(5), s, StrokeKind::Middle);
-            for (x, y) in [(0.3, 0.45), (0.55, 0.6), (0.72, 0.42), (0.38, 0.7)] {
-                p.circle_filled(at(x, y), r.width() * 0.06, c);
-            }
-        }
-        Tool::Rect => {
-            p.rect_filled(Rect::from_min_max(at(0.08, 0.2), at(0.92, 0.8)), CornerRadius::same(2), c);
-        }
-        Tool::Ellipse => {
-            p.add(egui::epaint::EllipseShape { center: r.center(), radius: vec2(r.width() * 0.45, r.height() * 0.33), fill: c, stroke: Stroke::NONE, angle: 0.0 });
-        }
-        Tool::Line => {
-            p.line_segment([at(0.05, 0.95), at(0.95, 0.05)], Stroke::new(2.2, c));
-        }
-        Tool::Text => {
-            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(r.width() * 1.05), c);
-        }
-    }
+fn image_dialog() -> rfd::FileDialog {
+    rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "ico"])
 }
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_title("Pixel")
-            .with_icon(Arc::new(studio_ui::app_window_icon("pixel")))
-            .with_inner_size([1440.0, 900.0])
-            .with_min_inner_size([1000.0, 640.0])
-            .with_drag_and_drop(true),
+        viewport: egui::ViewportBuilder::default().with_title("Pixel").with_icon(Arc::new(studio_ui::app_window_icon("pixel"))).with_inner_size([1440.0, 900.0]).with_min_inner_size([1000.0, 640.0]).with_drag_and_drop(true),
         ..Default::default()
     };
     eframe::run_native("Pixel", options, Box::new(|cc| Ok(Box::new(Pixel::new(cc)))))
