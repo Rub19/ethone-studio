@@ -208,7 +208,12 @@ pub struct Encoder {
 }
 
 impl Encoder {
+    #[allow(dead_code)]
     pub fn new(path: &Path, width: u32, height: u32, fps: u32, bitrate: u32) -> Result<Self, String> {
+        Self::with_audio(path, width, height, fps, bitrate, 24_000)
+    }
+
+    pub fn with_audio(path: &Path, width: u32, height: u32, fps: u32, bitrate: u32, audio_bytes: u32) -> Result<Self, String> {
         startup();
         unsafe {
             let mut attrs: Option<IMFAttributes> = None;
@@ -244,7 +249,7 @@ impl Encoder {
             aout.SetUINT32(&MF_MT_AUDIO_BITS_PER_SAMPLE, 16).map_err(err)?;
             aout.SetUINT32(&MF_MT_AUDIO_SAMPLES_PER_SECOND, OUT_RATE).map_err(err)?;
             aout.SetUINT32(&MF_MT_AUDIO_NUM_CHANNELS, 2).map_err(err)?;
-            aout.SetUINT32(&MF_MT_AUDIO_AVG_BYTES_PER_SECOND, 24_000).map_err(err)?;
+            aout.SetUINT32(&MF_MT_AUDIO_AVG_BYTES_PER_SECOND, audio_bytes).map_err(err)?;
             let as_ = w.AddStream(&aout).map_err(err)?;
             let ain = MFCreateMediaType().map_err(err)?;
             ain.SetGUID(&MF_MT_MAJOR_TYPE, &MFMediaType_Audio).map_err(err)?;

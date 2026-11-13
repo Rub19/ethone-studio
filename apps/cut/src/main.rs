@@ -1,8 +1,11 @@
 #![windows_subsystem = "windows"]
 
+mod inspect;
 mod look;
 mod media;
 mod model;
+mod render;
+mod timeline;
 mod tutos;
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -12,10 +15,10 @@ use eframe::egui::{
     vec2,
 };
 use media::{OUT_RATE, VideoReader};
-use model::{ANIMS, Clip, FONTS, LABELS, LOOKS, Music, PLACES, Project, Source, Title};
+use model::{Clip, GENERATORS, LABELS, MARKER_COLORS, Marker, Music, Project, STILL_EXT, Source, Title};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::mpsc::{Receiver, Sender, channel};
 use std::sync::{Arc, Mutex};
 use studio_ui::pro::{self, BLUE, CHROME, FAINT, FIELD, GREEN, INK, INK_STRONG, LINE, MUTED, PANEL, PASTEBOARD, RED, WELL, semibold};
@@ -24,17 +27,42 @@ const MUSIC: Color32 = Color32::from_rgb(48, 180, 110);
 const TITLE: Color32 = Color32::from_rgb(255, 159, 10);
 const PLAYHEAD: Color32 = Color32::from_rgb(255, 69, 58);
 const MARK: Color32 = Color32::from_rgb(255, 196, 0);
-const EXT: [&str; 12] = ["mp4", "mov", "m4v", "mkv", "avi", "wmv", "webm", "mp3", "wav", "m4a", "aac", "wma"];
-const PRESETS: [(&str, &str, u32, u32); 6] = [
+const EXT: [&str; 18] = ["mp4", "mov", "m4v", "mkv", "avi", "wmv", "webm", "mp3", "wav", "m4a", "aac", "wma", "png", "jpg", "jpeg", "bmp", "webp", "gif"];
+const PRESETS: [(&str, &str, u32, u32); 12] = [
     ("1080p", "Paysage 16:9", 1920, 1080),
     ("4K UHD", "Paysage 16:9", 3840, 2160),
+    ("1440p", "Paysage 16:9", 2560, 1440),
     ("720p", "Paysage 16:9", 1280, 720),
     ("Vertical", "Shorts, Reels, TikTok", 1080, 1920),
     ("Carré", "Publication 1:1", 1080, 1080),
+    ("Portrait 4:5", "Instagram", 1080, 1350),
     ("Cinéma", "21:9", 2560, 1080),
+    ("Scope", "2,39:1", 2560, 1072),
+    ("4:3", "Format TV", 1440, 1080),
+    ("4K DCI", "Cinéma 17:9", 4096, 2160),
+    ("Vertical 720", "Stories légères", 720, 1280),
 ];
-const RESOLUTIONS: [(&str, u32); 4] = [("Séquence", 0), ("720p", 720), ("1080p", 1080), ("4K", 2160)];
-const QUALITIES: [(&str, f64); 3] = [("Légère", 0.5), ("Standard", 1.0), ("Haute", 2.0)];
+const FPS: [u32; 8] = [12, 15, 24, 25, 30, 48, 50, 60];
+const KINDS: [&str; 6] = ["Vidéo MP4", "Audio WAV", "GIF animé", "Séquence PNG", "Image PNG", "Image JPEG"];
+const ABR: [(&str, u32); 4] = [("96 kb/s", 12_000), ("128 kb/s", 16_000), ("160 kb/s", 20_000), ("192 kb/s", 24_000)];
+const EXPORT_PRESETS: [(&str, usize, u32, u32, u32, f32, bool); 16] = [
+    ("YouTube 1080p", 0, 1920, 1080, 0, 12.0, false),
+    ("YouTube 1440p", 0, 2560, 1440, 0, 24.0, false),
+    ("YouTube 4K", 0, 3840, 2160, 0, 45.0, false),
+    ("YouTube 720p", 0, 1280, 720, 0, 7.5, false),
+    ("TikTok · Reels · Shorts", 0, 1080, 1920, 30, 12.0, true),
+    ("Instagram carré", 0, 1080, 1080, 30, 8.0, true),
+    ("Instagram portrait", 0, 1080, 1350, 30, 8.0, true),
+    ("X / Twitter", 0, 1280, 720, 30, 6.0, false),
+    ("Vimeo HD", 0, 1920, 1080, 0, 20.0, false),
+    ("Master haute qualité", 0, 0, 0, 0, 60.0, false),
+    ("Brouillon rapide", 0, 854, 480, 0, 2.5, false),
+    ("GIF animé", 2, 480, 0, 15, 0.0, false),
+    ("Audio WAV", 1, 0, 0, 0, 0.0, false),
+    ("Séquence PNG", 3, 0, 0, 0, 0.0, false),
+    ("Image PNG", 4, 0, 0, 0, 0.0, false),
+    ("Image JPEG", 5, 0, 0, 0, 0.0, false),
+];
 
 struct PlayState {
     mix: Arc<Vec<f32>>,
@@ -98,41 +126,83 @@ struct ExportJob {
     done: Arc<AtomicUsize>,
     total: usize,
     error: Arc<Mutex<Option<String>>>,
+    cancel: Arc<AtomicBool>,
     path: PathBuf,
+    open_after: bool,
+    seen: bool,
 }
 
+#[derive(Clone)]
 struct ExportOpts {
-    res: usize,
-    quality: usize,
+    preset: usize,
+    kind: usize,
+    w: u32,
+    h: u32,
+    fps: u32,
+    mbps: f32,
+    abr: usize,
+    fill: bool,
     range: usize,
-    audio_only: bool,
+    open_after: bool,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+impl ExportOpts {
+    fn from_preset(k: usize) -> Self {
+        let (_, kind, w, h, fps, mbps, fill) = EXPORT_PRESETS[k];
+        ExportOpts { preset: k, kind, w, h, fps, mbps, abr: 3, fill, range: 0, open_after: false }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
 enum Sel {
     Clip(usize),
+    Over(usize),
     Music(usize),
     Title(usize),
+    Gap(usize),
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 enum Tool {
     Select,
-    Blade,
-    Slip,
+    TrackFwd,
+    TrackBack,
+    Ripple,
+    Rolling,
     Rate,
+    Blade,
+    BladeAll,
+    Slip,
+    Slide,
+    Pen,
+    Rect,
+    Ellipse,
     Hand,
     Zoom,
+    Text,
+    TextV,
 }
 
-const TOOLS: [(Tool, &str, G); 6] = [
-    (Tool::Select, "Sélection (V)", G::Select),
-    (Tool::Blade, "Lame (C) : clique un clip pour le couper", G::Blade),
-    (Tool::Slip, "Glissement (Y) : décale le contenu sans changer la durée", G::Slip),
-    (Tool::Rate, "Vitesse (R) : tire le bord droit pour accélérer ou ralentir", G::Rate),
-    (Tool::Hand, "Main (H) : fait défiler la timeline", G::Hand),
-    (Tool::Zoom, "Zoom (Z) : clic pour zoomer, Alt pour dézoomer", G::Zoom),
+type Group = (Key, &'static [(Tool, &'static str, &'static str)]);
+
+const GROUPS: [Group; 7] = [
+    (Key::V, &[(Tool::Select, "Sélection", "V"), (Tool::TrackFwd, "Sélection de piste avant", "A"), (Tool::TrackBack, "Sélection de piste arrière", "Maj+A")]),
+    (Key::B, &[(Tool::Ripple, "Modification par propagation", "B"), (Tool::Rolling, "Modification par déplacement", "N"), (Tool::Rate, "Allongement de la durée", "R")]),
+    (Key::C, &[(Tool::Blade, "Cutter", "C"), (Tool::BladeAll, "Couper toutes les pistes", "Maj+C")]),
+    (Key::Y, &[(Tool::Slip, "Glissement", "Y"), (Tool::Slide, "Déplacement", "U")]),
+    (Key::P, &[(Tool::Pen, "Plume (masque)", "P"), (Tool::Rect, "Rectangle (masque)", "P"), (Tool::Ellipse, "Ellipse (masque)", "P")]),
+    (Key::H, &[(Tool::Hand, "Main", "H"), (Tool::Zoom, "Zoom", "Z")]),
+    (Key::T, &[(Tool::Text, "Texte", "T"), (Tool::TextV, "Texte vertical", "T")]),
 ];
+
+#[derive(Clone)]
+struct Drag {
+    sel: Sel,
+    mode: u8,
+    from: f64,
+    orig: Project,
+    start0: f64,
+}
 
 struct Cut {
     proj: Project,
@@ -146,15 +216,18 @@ struct Cut {
     audio_data: HashMap<usize, Arc<Vec<f32>>>,
     thumbs: HashMap<usize, TextureHandle>,
     mixed: Option<Project>,
-    readers: HashMap<usize, VideoReader>,
+    pics: render::Pics,
     tex: Option<TextureHandle>,
-    shown: Option<(usize, f64)>,
+    shown: bool,
     t: f64,
     playing: bool,
+    shuttle: f64,
     sel: Option<Sel>,
+    extra: Vec<Sel>,
     tool: Tool,
+    group_last: [usize; 7],
     pps: f32,
-    drag: Option<(Sel, u8, f64, Clip, f64)>,
+    drag: Option<Drag>,
     audio: Audio,
     tx: Sender<Msg>,
     rx: Receiver<Msg>,
@@ -163,29 +236,45 @@ struct Cut {
     title: String,
     icon: TextureHandle,
     help: studio_ui::help::Help,
-    composed: Option<(usize, i64, Clip, Vec<Title>, u8, [u8; 4])>,
+    composed: Option<(i64, Project, u32, u32)>,
     looping: bool,
     snap: bool,
     show_waves: bool,
     show_thumbs: bool,
     track_scale: f32,
     clip_board: Option<Clip>,
+    grade_board: Option<Clip>,
     mark_in: Option<f64>,
     mark_out: Option<f64>,
     tab: usize,
+    color_ch: usize,
     export: Option<ExportOpts>,
     seq_sheet: bool,
+    speed_sheet: bool,
+    marker_edit: Option<usize>,
     bin_query: String,
     bin_list: usize,
+    bin_sort: usize,
+    bin_filter: usize,
     volume: f32,
     safe: bool,
+    grid: bool,
+    guides: bool,
+    quality: usize,
     focus: bool,
     tl_scroll: f32,
     force_scroll: Option<f32>,
+    pen: Vec<[f32; 2]>,
+    view_drag: Option<(u8, Pos2, Project, Sel, usize)>,
+    ctx_clone: Option<egui::Context>,
 }
 
 fn recents_path() -> PathBuf {
     studio_core::data_dir().join("cut").join("recents.txt")
+}
+
+fn is_still(p: &Path) -> bool {
+    p.extension().is_some_and(|e| STILL_EXT.iter().any(|x| e.eq_ignore_ascii_case(x)))
 }
 
 impl Cut {
@@ -207,13 +296,16 @@ impl Cut {
             audio_data: HashMap::new(),
             thumbs: HashMap::new(),
             mixed: None,
-            readers: HashMap::new(),
+            pics: render::Pics::default(),
             tex: None,
-            shown: None,
+            shown: false,
             t: 0.0,
             playing: false,
+            shuttle: 1.0,
             sel: None,
+            extra: Vec::new(),
             tool: Tool::Select,
+            group_last: [0; 7],
             pps: 60.0,
             drag: None,
             audio: Audio::new(),
@@ -231,18 +323,30 @@ impl Cut {
             show_thumbs: true,
             track_scale: 1.0,
             clip_board: None,
+            grade_board: None,
             mark_in: None,
             mark_out: None,
             tab: 0,
+            color_ch: 0,
             export: None,
             seq_sheet: false,
+            speed_sheet: false,
+            marker_edit: None,
             bin_query: String::new(),
             bin_list: 0,
+            bin_sort: 0,
+            bin_filter: 0,
             volume: 1.0,
             safe: false,
+            grid: false,
+            guides: false,
+            quality: 0,
             focus: false,
             tl_scroll: 0.0,
             force_scroll: None,
+            pen: Vec::new(),
+            view_drag: None,
+            ctx_clone: None,
         };
         let args: Vec<PathBuf> = std::env::args().skip(1).map(PathBuf::from).filter(|p| p.is_file()).collect();
         if let Some(project) = args.iter().find(|p| p.extension().is_some_and(|e| e.eq_ignore_ascii_case("ecut"))).cloned() {
@@ -269,15 +373,16 @@ impl Cut {
         self.proj = Project { width: w, height: h, ..Project::new() };
         self.saved = self.proj.clone();
         self.file = None;
-        self.readers.clear();
+        self.pics.clear();
         self.audio_data.clear();
         self.thumbs.clear();
         self.mixed = None;
-        self.shown = None;
+        self.shown = false;
         self.composed = None;
         self.undo.clear();
         self.redo.clear();
         self.sel = None;
+        self.extra.clear();
         self.t = 0.0;
         self.mark_in = None;
         self.mark_out = None;
@@ -297,15 +402,11 @@ impl Cut {
             let ctx = ctx.clone();
             std::thread::spawn(move || {
                 media::startup();
-                let r = VideoReader::open(&p).map(|(_, i)| Source {
-                    path: p.to_string_lossy().into_owned(),
-                    duration: i.duration,
-                    width: i.width,
-                    height: i.height,
-                    fps: i.fps,
-                    has_video: i.has_video,
-                    has_audio: i.has_audio || !i.has_video,
-                });
+                let r = if is_still(&p) {
+                    render::probe_still(&p)
+                } else {
+                    VideoReader::open(&p).map(|(_, i)| Source { path: p.to_string_lossy().into_owned(), duration: i.duration, width: i.width, height: i.height, fps: i.fps, has_video: i.has_video, has_audio: i.has_audio || !i.has_video, label: 0 })
+                };
                 let _ = tx.send(Msg::Probed(p, r));
                 ctx.request_repaint();
             });
@@ -324,49 +425,118 @@ impl Cut {
                 ctx.request_repaint();
             });
         }
-        if src.has_video {
-            let (tx, ctx) = (self.tx.clone(), ctx.clone());
-            std::thread::spawn(move || {
-                media::startup();
-                let Ok((mut r, info)) = VideoReader::open(&path) else { return };
-                let (w, h) = (r.width, r.height);
-                if let Ok(Some((_, rgba))) = r.frame_at((info.duration / 3.0).min(1.0), info.fps)
-                    && let Some(img) = image::RgbaImage::from_raw(w, h, rgba.clone())
-                {
-                    let tw = 240u32;
-                    let th = ((h as f32 * tw as f32 / w.max(1) as f32) as u32).max(1);
-                    let small = image::imageops::resize(&img, tw, th, image::imageops::FilterType::Triangle);
-                    let _ = tx.send(Msg::Thumb(idx, tw, th, small.into_raw()));
-                    ctx.request_repaint();
-                }
-            });
+        if !src.has_video {
+            return;
         }
+        let (tx, ctx) = (self.tx.clone(), ctx.clone());
+        std::thread::spawn(move || {
+            media::startup();
+            let pic: Option<(u32, u32, Vec<u8>)> = if src.is_generator() {
+                Some((160, 90, render::generate(&src.path, 160, 90)))
+            } else if src.is_still() {
+                render::load_still(&src.path).ok().map(|(w, h, px)| (w, h, px.to_vec()))
+            } else {
+                VideoReader::open(&path).ok().and_then(|(mut r, info)| {
+                    let (w, h) = (r.width, r.height);
+                    r.frame_at((info.duration / 3.0).min(1.0), info.fps).ok().flatten().map(|(_, px)| (w, h, px.clone()))
+                })
+            };
+            if let Some((w, h, rgba)) = pic
+                && let Some(img) = image::RgbaImage::from_raw(w, h, rgba)
+            {
+                let tw = 240u32;
+                let th = ((h as f32 * tw as f32 / w.max(1) as f32) as u32).max(1);
+                let small = image::imageops::resize(&img, tw, th, image::imageops::FilterType::Triangle);
+                let _ = tx.send(Msg::Thumb(idx, tw, th, small.into_raw()));
+                ctx.request_repaint();
+            }
+        });
+    }
+
+    fn new_clip(&self, i: usize) -> Clip {
+        let s = &self.proj.sources[i];
+        let out = if s.is_generator() || s.is_still() { 5.0 } else { s.duration };
+        Clip { src: i, out, ..Default::default() }
     }
 
     fn add_source(&mut self, i: usize) {
-        let s = &self.proj.sources[i];
-        let d = s.duration;
-        if s.has_video {
-            self.proj.clips.push(Clip { src: i, out: d, ..Default::default() });
-            self.sel = Some(Sel::Clip(self.proj.clips.len() - 1));
+        if self.proj.sources[i].has_video {
+            let c = self.new_clip(i);
+            self.proj.clips.push(c);
+            self.select_one(Sel::Clip(self.proj.clips.len() - 1));
         } else {
             self.add_music(i);
         }
     }
 
+    fn insert_source(&mut self, i: usize) {
+        if !self.proj.sources[i].has_video {
+            self.add_music(i);
+            return;
+        }
+        let c = self.new_clip(i);
+        let at = match self.proj.local_at(self.t) {
+            Some((k, local)) if local < 0.05 => k,
+            Some((k, _)) => {
+                self.proj.split(self.t);
+                k + 1
+            }
+            None => self.proj.starts().iter().position(|s| *s > self.t).unwrap_or(self.proj.clips.len()),
+        };
+        let len = c.len();
+        self.proj.shift_after(self.t, len);
+        self.proj.clips.insert(at, c);
+        self.select_one(Sel::Clip(at));
+    }
+
+    fn overlay_source(&mut self, i: usize) {
+        if !self.proj.sources[i].has_video {
+            return;
+        }
+        let c = Clip { start: self.t, ..self.new_clip(i) };
+        self.proj.overlays.push(c);
+        self.select_one(Sel::Over(self.proj.overlays.len() - 1));
+    }
+
+    fn replace_source(&mut self, i: usize) {
+        let Some(s) = self.sel else { return };
+        let dur = self.proj.sources[i].duration;
+        let still = self.proj.sources[i].is_still() || self.proj.sources[i].is_generator();
+        if let Some(c) = self.clip_mut(s) {
+            let len = c.out - c.inp;
+            c.src = i;
+            if !still && c.out > dur {
+                c.inp = (dur - len).max(0.0);
+                c.out = dur;
+            }
+        }
+    }
+
     fn add_music(&mut self, i: usize) {
         let d = self.proj.sources[i].duration;
-        self.proj.music.push(Music { src: i, start: self.t, inp: 0.0, out: d, volume: 0.6, fade_in: 0.0, fade_out: 0.0, mute: false, pan: 0.0 });
-        self.sel = Some(Sel::Music(self.proj.music.len() - 1));
+        self.proj.music.push(Music { src: i, start: self.t, inp: 0.0, out: d, volume: 0.6, ..Default::default() });
+        self.select_one(Sel::Music(self.proj.music.len() - 1));
+    }
+
+    fn add_generator(&mut self, k: usize) {
+        let (w, h) = (self.proj.width, self.proj.height);
+        self.proj.sources.push(Source { path: GENERATORS[k].0.to_string(), duration: 3600.0, width: w, height: h, fps: self.proj.fps as f64, has_video: true, has_audio: false, label: 0 });
+        let i = self.proj.sources.len() - 1;
+        self.thumbs.remove(&i);
+        let ctx = self.ctx_clone.clone();
+        if let Some(ctx) = ctx {
+            self.load_media(i, &ctx);
+        }
+        self.insert_source(i);
     }
 
     fn remove_source(&mut self, i: usize) {
-        if self.proj.clips.iter().any(|c| c.src == i) || self.proj.music.iter().any(|m| m.src == i) {
+        if self.uses(i) > 0 {
             self.error = Some("Ce média est utilisé dans la timeline".into());
             return;
         }
         self.proj.sources.remove(i);
-        for c in &mut self.proj.clips {
+        for c in self.proj.clips.iter_mut().chain(self.proj.overlays.iter_mut()) {
             if c.src > i {
                 c.src -= 1;
             }
@@ -386,12 +556,46 @@ impl Cut {
         }
         shift(&mut self.thumbs, i);
         shift(&mut self.audio_data, i);
-        self.readers.clear();
+        self.pics.clear();
         self.composed = None;
         self.mixed = None;
     }
 
+    fn uses(&self, i: usize) -> usize {
+        self.proj.clips.iter().chain(&self.proj.overlays).filter(|c| c.src == i).count() + self.proj.music.iter().filter(|m| m.src == i).count()
+    }
+
+    fn remove_unused(&mut self) {
+        for i in (0..self.proj.sources.len()).rev() {
+            if self.uses(i) == 0 {
+                self.remove_source(i);
+            }
+        }
+    }
+
+    fn relink(&mut self, i: usize, ctx: &egui::Context) {
+        let Some(p) = rfd::FileDialog::new().add_filter("Médias", &EXT).pick_file() else { return };
+        let probe = if is_still(&p) {
+            render::probe_still(&p)
+        } else {
+            VideoReader::open(&p).map(|(_, info)| Source { path: p.to_string_lossy().into_owned(), duration: info.duration, width: info.width, height: info.height, fps: info.fps, has_video: info.has_video, has_audio: info.has_audio || !info.has_video, label: 0 })
+        };
+        match probe {
+            Ok(mut s) => {
+                s.label = self.proj.sources[i].label;
+                self.proj.sources[i] = s;
+                self.pics.clear();
+                self.thumbs.remove(&i);
+                self.audio_data.remove(&i);
+                self.mixed = None;
+                self.load_media(i, ctx);
+            }
+            Err(e) => self.error = Some(e),
+        }
+    }
+
     fn pump(&mut self, ctx: &egui::Context) {
+        self.ctx_clone = Some(ctx.clone());
         while let Ok(m) = self.rx.try_recv() {
             match m {
                 Msg::Probed(_, Ok(src)) => {
@@ -414,7 +618,7 @@ impl Cut {
     }
 
     fn remix(&mut self) {
-        if self.mixed.as_ref() == Some(&self.proj) {
+        if self.mixed.as_ref() == Some(&self.proj) || self.drag.is_some() {
             return;
         }
         let data = &self.audio_data;
@@ -427,13 +631,27 @@ impl Cut {
 
     fn set_playing(&mut self, on: bool) {
         self.playing = on && self.proj.duration() > 0.0;
-        if self.playing && self.t >= self.proj.duration() - 0.01 {
+        if !self.playing {
+            self.shuttle = 1.0;
+        }
+        if self.playing && self.shuttle > 0.0 && self.t >= self.proj.duration() - 0.01 {
             self.t = self.mark_in.unwrap_or(0.0);
         }
+        self.sync_audio();
+    }
+
+    fn sync_audio(&mut self) {
         if let Ok(mut s) = self.audio.state.lock() {
             s.pos = self.t * OUT_RATE as f64;
-            s.playing = self.playing;
+            s.playing = self.playing && (self.shuttle - 1.0).abs() < 1e-6;
         }
+    }
+
+    fn shuttle(&mut self, dir: f64) {
+        let next = if self.playing && self.shuttle.signum() == dir { (self.shuttle.abs() * 2.0).min(8.0) * dir } else { dir };
+        self.shuttle = next;
+        self.playing = self.proj.duration() > 0.0;
+        self.sync_audio();
     }
 
     fn seek(&mut self, t: f64) {
@@ -444,58 +662,30 @@ impl Cut {
     }
 
     fn preview_size(&self) -> (u32, u32) {
-        let k = (960.0 / self.proj.width.max(self.proj.height) as f32).min(1.0);
+        let base = [960.0, 640.0, 400.0][self.quality.min(2)];
+        let k = (base / self.proj.width.max(self.proj.height) as f32).min(1.0);
         (((self.proj.width as f32 * k) as u32).max(2), ((self.proj.height as f32 * k) as u32).max(2))
     }
 
     fn update_frame(&mut self, ctx: &egui::Context) {
         let (pw, ph) = self.preview_size();
-        let titles: Vec<Title> = self.proj.titles_at(self.t).into_iter().cloned().collect();
-        let bg = self.proj.background;
-        let Some((ci, st)) = self.proj.clip_at(self.t) else {
-            let key = (usize::MAX, (self.t * 30.0) as i64, Clip::default(), titles.clone(), 255, bg);
-            if self.composed.as_ref() != Some(&key) {
-                let refs: Vec<&Title> = titles.iter().collect();
-                let frame = look::compose(&[], 0, 0, pw, ph, &look::Frame { clip: None, fade: 1.0, progress: 0.0, background: bg, titles: &refs, t: self.t });
-                self.set_tex(ctx, pw, ph, &frame);
-                self.composed = Some(key);
-            }
-            self.shown = Some((usize::MAX, 0.0));
-            return;
-        };
-        let src_i = self.proj.clips[ci].src;
-        let fade = self.proj.fade_at(self.t);
-        let clip = self.proj.clips[ci].clone();
-        let progress = self.proj.local_at(self.t).map_or(0.0, |(_, l)| (l / clip.len().max(1e-6)) as f32);
-        let key = (src_i, (st * self.proj.fps as f64 * 2.0).round() as i64 + (progress * 1000.0) as i64 * (clip.zoom_end > 0.0) as i64, clip.clone(), titles.clone(), (fade * 255.0) as u8, bg);
-        if self.composed.as_ref() == Some(&key) {
+        let fi = (self.t * self.proj.fps as f64).floor() as i64;
+        if let Some((f, p, w, h)) = &self.composed
+            && *f == fi
+            && *w == pw
+            && *h == ph
+            && *p == self.proj
+        {
             return;
         }
-        let src = self.proj.sources[src_i].clone();
-        if !self.readers.contains_key(&src_i) {
-            match VideoReader::open(Path::new(&src.path)) {
-                Ok((r, _)) => {
-                    self.readers.insert(src_i, r);
-                }
-                Err(e) => {
-                    self.error = Some(e);
-                    return;
-                }
+        match render::render(&self.proj, self.t, pw, ph, &mut self.pics) {
+            Ok(px) => {
+                self.set_tex(ctx, pw, ph, &px);
+                self.shown = true;
             }
-        }
-        let Some(r) = self.readers.get_mut(&src_i) else { return };
-        let (sw, sh) = (r.width, r.height);
-        match r.frame_at(st, src.fps) {
-            Ok(Some((_, rgba))) => {
-                let refs: Vec<&Title> = titles.iter().collect();
-                let frame = look::compose(rgba, sw, sh, pw, ph, &look::Frame { clip: Some(&clip), fade, progress, background: bg, titles: &refs, t: self.t });
-                self.set_tex(ctx, pw, ph, &frame);
-                self.shown = Some((src_i, st));
-                self.composed = Some(key);
-            }
-            Ok(None) => {}
             Err(e) => self.error = Some(e),
         }
+        self.composed = Some((fi, self.proj.clone(), pw, ph));
     }
 
     fn set_tex(&mut self, ctx: &egui::Context, w: u32, h: u32, rgba: &[u8]) {
@@ -506,93 +696,153 @@ impl Cut {
         }
     }
 
+    fn out_size(&self, o: &ExportOpts) -> (u32, u32) {
+        let (pw, ph) = (self.proj.width, self.proj.height);
+        let even = |v: u32| (v / 2 * 2).max(2);
+        match (o.w, o.h) {
+            (0, 0) => (even(pw), even(ph)),
+            (w, 0) => (even(w), even((w as f64 * ph as f64 / pw.max(1) as f64) as u32)),
+            (w, h) => (even(w), even(h)),
+        }
+    }
+
+    fn export_range(&self, range: usize) -> (f64, f64) {
+        let (a, b) = match (range, self.sel) {
+            (1, _) => (self.mark_in.unwrap_or(0.0), self.mark_out.unwrap_or(self.proj.duration())),
+            (2, Some(Sel::Clip(i))) if i < self.proj.clips.len() => {
+                let s = self.proj.starts()[i];
+                (s, s + self.proj.clips[i].len())
+            }
+            (2, Some(Sel::Over(i))) if i < self.proj.overlays.len() => (self.proj.overlays[i].start, self.proj.overlays[i].start + self.proj.overlays[i].len()),
+            _ => (0.0, self.proj.duration()),
+        };
+        (a.min(b), b.max(a))
+    }
+
     fn run_export(&mut self, opts: &ExportOpts) {
-        if self.proj.clips.is_empty() && self.proj.music.is_empty() {
+        if self.proj.duration() <= 0.0 {
             self.error = Some("La timeline est vide".into());
             return;
         }
-        let (a, b) = if opts.range == 1 { (self.mark_in.unwrap_or(0.0), self.mark_out.unwrap_or(self.proj.duration())) } else { (0.0, self.proj.duration()) };
-        let (a, b) = (a.min(b), b.max(a));
+        let (a, b) = self.export_range(opts.range);
         let stem = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("montage".into());
         let proj = self.proj.clone();
         let data = self.audio_data.clone();
+        let (w, h) = self.out_size(opts);
+        let fill = opts.fill;
         let done = Arc::new(AtomicUsize::new(0));
         let error = Arc::new(Mutex::new(None));
-        let (d2, e2) = (done.clone(), error.clone());
-        if opts.audio_only {
-            let Some(path) = rfd::FileDialog::new().add_filter("Audio WAV", &["wav"]).set_file_name(format!("{stem}.wav")).save_file() else { return };
-            let p2 = path.clone();
-            std::thread::spawn(move || {
-                let mix = proj.mix(&|i| data.get(&i).cloned(), OUT_RATE);
-                let s = ((a * OUT_RATE as f64) as usize * 2).min(mix.len());
-                let e = ((b * OUT_RATE as f64) as usize * 2).min(mix.len());
-                if let Err(err) = write_wav(&p2, &mix[s..e]) {
-                    *e2.lock().unwrap() = Some(err);
-                }
-                d2.store(usize::MAX, Ordering::Relaxed);
-            });
-            self.job = Some(ExportJob { done, total: 1, error, path });
-            return;
-        }
-        let Some(path) = rfd::FileDialog::new().add_filter("Vidéo MP4", &["mp4"]).set_file_name(format!("{stem}.mp4")).save_file() else { return };
-        let target = RESOLUTIONS[opts.res].1;
-        let (w, h) = if target == 0 {
-            (proj.width, proj.height)
-        } else {
-            let k = target as f64 / proj.width.min(proj.height) as f64;
-            (((proj.width as f64 * k) as u32 / 2 * 2).max(2), ((proj.height as f64 * k) as u32 / 2 * 2).max(2))
-        };
-        let factor = QUALITIES[opts.quality].1;
-        let fps = proj.fps;
-        let first = (a * fps as f64).round() as usize;
+        let cancel = Arc::new(AtomicBool::new(false));
+        let (d2, e2, c2) = (done.clone(), error.clone(), cancel.clone());
+        let fps = if opts.fps == 0 { proj.fps } else { opts.fps };
         let total = ((b - a) * fps as f64).ceil().max(1.0) as usize;
-        let p2 = path.clone();
-        std::thread::spawn(move || {
-            let r = (|| -> Result<(), String> {
-                media::startup();
-                let mix = proj.mix(&|i| data.get(&i).cloned(), OUT_RATE);
-                let mut enc = media::Encoder::new(&p2, w, h, fps, ((w * h * fps / 8) as f64 * factor).max(1_500_000.0) as u32)?;
-                let mut readers: HashMap<usize, VideoReader> = HashMap::new();
-                let per = (OUT_RATE / fps) as usize;
-                for n in 0..total {
-                    let t = (first + n) as f64 / fps as f64;
-                    let titles = proj.titles_at(t);
-                    let base = look::Frame { clip: None, fade: 1.0, progress: 0.0, background: proj.background, titles: &titles, t };
-                    let frame = match proj.clip_at(t) {
-                        Some((ci, st)) => {
-                            let c = &proj.clips[ci];
-                            let src = &proj.sources[c.src];
-                            if !readers.contains_key(&c.src) {
-                                readers.insert(c.src, VideoReader::open(Path::new(&src.path))?.0);
-                            }
-                            let rd = readers.get_mut(&c.src).ok_or("lecteur")?;
-                            let (sw, sh) = (rd.width, rd.height);
-                            let progress = proj.local_at(t).map_or(0.0, |(_, l)| (l / c.len().max(1e-6)) as f32);
-                            match rd.frame_at(st, src.fps)? {
-                                Some((_, rgba)) => look::compose(rgba, sw, sh, w, h, &look::Frame { clip: Some(c), fade: proj.fade_at(t), progress, ..base }),
-                                None => look::compose(&[], 0, 0, w, h, &base),
-                            }
-                        }
-                        None => look::compose(&[], 0, 0, w, h, &base),
-                    };
-                    enc.video(&frame)?;
-                    let s = ((first + n) * per * 2).min(mix.len());
-                    let e = ((first + n + 1) * per * 2).min(mix.len());
-                    let mut chunk = mix[s..e].to_vec();
-                    chunk.resize(per * 2, 0.0);
-                    enc.audio(&chunk)?;
-                    d2.fetch_add(1, Ordering::Relaxed);
-                }
-                enc.finish()
-            })();
+        let finish = move |r: Result<(), String>| {
             if let Err(e) = r
                 && let Ok(mut slot) = e2.lock()
             {
                 *slot = Some(e);
             }
             d2.store(usize::MAX, Ordering::Relaxed);
-        });
-        self.job = Some(ExportJob { done, total, error, path });
+        };
+        let d3 = done.clone();
+        let path = match opts.kind {
+            1 => {
+                let Some(path) = rfd::FileDialog::new().add_filter("Audio WAV", &["wav"]).set_file_name(format!("{stem}.wav")).save_file() else { return };
+                let p2 = path.clone();
+                std::thread::spawn(move || {
+                    let mix = proj.mix(&|i| data.get(&i).cloned(), OUT_RATE);
+                    let s = ((a * OUT_RATE as f64) as usize * 2).min(mix.len());
+                    let e = ((b * OUT_RATE as f64) as usize * 2).min(mix.len());
+                    finish(write_wav(&p2, &mix[s..e]));
+                });
+                path
+            }
+            4 | 5 => {
+                let ext = if opts.kind == 4 { "png" } else { "jpg" };
+                let Some(path) = rfd::FileDialog::new().add_filter(if opts.kind == 4 { "Image PNG" } else { "Image JPEG" }, &[ext]).set_file_name(format!("{stem}.{ext}")).save_file() else { return };
+                let mut pics = render::Pics::default();
+                let r = render::render_fit(&proj, self.t, w, h, fill, &mut pics).and_then(|px| save_image(&path, &px, w, h));
+                finish(r);
+                path
+            }
+            3 => {
+                let Some(dir) = rfd::FileDialog::new().set_title("Dossier de la séquence d'images").pick_folder() else { return };
+                let p2 = dir.clone();
+                std::thread::spawn(move || {
+                    let mut pics = render::Pics::default();
+                    let r = (|| -> Result<(), String> {
+                        media::startup();
+                        for n in 0..total {
+                            if c2.load(Ordering::Relaxed) {
+                                return Err("export annulé".into());
+                            }
+                            let px = render::render_fit(&proj, a + n as f64 / fps as f64, w, h, fill, &mut pics)?;
+                            save_image(&p2.join(format!("{stem}_{:05}.png", n + 1)), &px, w, h)?;
+                            d3.fetch_add(1, Ordering::Relaxed);
+                        }
+                        Ok(())
+                    })();
+                    finish(r);
+                });
+                dir
+            }
+            2 => {
+                let Some(path) = rfd::FileDialog::new().add_filter("GIF animé", &["gif"]).set_file_name(format!("{stem}.gif")).save_file() else { return };
+                let p2 = path.clone();
+                std::thread::spawn(move || {
+                    let mut pics = render::Pics::default();
+                    let r = (|| -> Result<(), String> {
+                        media::startup();
+                        let file = std::fs::File::create(&p2).map_err(|e| e.to_string())?;
+                        let mut enc = image::codecs::gif::GifEncoder::new_with_speed(std::io::BufWriter::new(file), 10);
+                        enc.set_repeat(image::codecs::gif::Repeat::Infinite).map_err(|e| e.to_string())?;
+                        for n in 0..total {
+                            if c2.load(Ordering::Relaxed) {
+                                return Err("export annulé".into());
+                            }
+                            let px = render::render_fit(&proj, a + n as f64 / fps as f64, w, h, fill, &mut pics)?;
+                            let img = image::RgbaImage::from_raw(w, h, px).ok_or("image")?;
+                            enc.encode_frame(image::Frame::from_parts(img, 0, 0, image::Delay::from_numer_denom_ms(1000, fps))).map_err(|e| e.to_string())?;
+                            d3.fetch_add(1, Ordering::Relaxed);
+                        }
+                        Ok(())
+                    })();
+                    finish(r);
+                });
+                path
+            }
+            _ => {
+                let Some(path) = rfd::FileDialog::new().add_filter("Vidéo MP4", &["mp4"]).set_file_name(format!("{stem}.mp4")).save_file() else { return };
+                let bitrate = (opts.mbps.max(0.5) * 1_000_000.0) as u32;
+                let abr = ABR[opts.abr.min(3)].1;
+                let p2 = path.clone();
+                std::thread::spawn(move || {
+                    let r = (|| -> Result<(), String> {
+                        media::startup();
+                        let mix = proj.mix(&|i| data.get(&i).cloned(), OUT_RATE);
+                        let mut enc = media::Encoder::with_audio(&p2, w, h, fps, bitrate, abr)?;
+                        let mut pics = render::Pics::default();
+                        for n in 0..total {
+                            if c2.load(Ordering::Relaxed) {
+                                return Err("export annulé".into());
+                            }
+                            let t = a + n as f64 / fps as f64;
+                            enc.video(&render::render_fit(&proj, t, w, h, fill, &mut pics)?)?;
+                            let s = (t * OUT_RATE as f64).round() as usize;
+                            let e = ((t + 1.0 / fps as f64) * OUT_RATE as f64).round() as usize;
+                            let mut chunk = mix[(s * 2).min(mix.len())..(e * 2).min(mix.len())].to_vec();
+                            chunk.resize((e - s) * 2, 0.0);
+                            enc.audio(&chunk)?;
+                            d3.fetch_add(1, Ordering::Relaxed);
+                        }
+                        enc.finish()
+                    })();
+                    finish(r);
+                });
+                path
+            }
+        };
+        self.job = Some(ExportJob { done, total, error, cancel, path, open_after: opts.open_after, seen: false });
     }
 
     fn save(&mut self, as_new: bool) {
@@ -635,69 +885,184 @@ impl Cut {
         }
     }
 
-    fn delete_sel(&mut self) {
-        match self.sel.take() {
-            Some(Sel::Clip(i)) if i < self.proj.clips.len() => {
-                self.proj.clips.remove(i);
-            }
-            Some(Sel::Music(i)) if i < self.proj.music.len() => {
-                self.proj.music.remove(i);
-            }
-            Some(Sel::Title(i)) if i < self.proj.titles.len() => {
-                self.proj.titles.remove(i);
-            }
-            _ => {}
+    fn clip_ref(&self, s: Sel) -> Option<&Clip> {
+        match s {
+            Sel::Clip(i) => self.proj.clips.get(i),
+            Sel::Over(i) => self.proj.overlays.get(i),
+            _ => None,
         }
+    }
+
+    fn clip_mut(&mut self, s: Sel) -> Option<&mut Clip> {
+        match s {
+            Sel::Clip(i) => self.proj.clips.get_mut(i),
+            Sel::Over(i) => self.proj.overlays.get_mut(i),
+            _ => None,
+        }
+    }
+
+    fn is_sel(&self, s: Sel) -> bool {
+        self.sel == Some(s) || self.extra.contains(&s)
+    }
+
+    fn select_one(&mut self, s: Sel) {
+        self.sel = Some(s);
+        self.extra.clear();
+    }
+
+    fn all_sel(&self) -> Vec<Sel> {
+        self.sel.into_iter().chain(self.extra.iter().copied()).collect()
+    }
+
+    fn click_select(&mut self, s: Sel, toggle: bool, range: bool) {
+        match self.tool {
+            Tool::TrackFwd | Tool::TrackBack if matches!(s, Sel::Clip(_)) => {
+                let Sel::Clip(i) = s else { return };
+                let starts = self.proj.starts();
+                let (t0, fwd) = (starts[i], self.tool == Tool::TrackFwd);
+                let end_i = starts[i] + self.proj.clips[i].len();
+                let mut v: Vec<Sel> = if fwd { (i..self.proj.clips.len()).map(Sel::Clip).collect() } else { (0..=i).map(Sel::Clip).collect() };
+                let keep = |a: f64, b: f64| if fwd { a >= t0 - 1e-6 } else { b <= end_i + 1e-6 };
+                v.extend(self.proj.overlays.iter().enumerate().filter(|(_, o)| keep(o.start, o.start + o.len())).map(|(k, _)| Sel::Over(k)));
+                v.extend(self.proj.titles.iter().enumerate().filter(|(_, t)| keep(t.start, t.start + t.dur)).map(|(k, _)| Sel::Title(k)));
+                v.extend(self.proj.music.iter().enumerate().filter(|(_, m)| keep(m.start, m.end())).map(|(k, _)| Sel::Music(k)));
+                self.sel = Some(s);
+                self.extra = v.into_iter().filter(|x| *x != s).collect();
+            }
+            _ if toggle => {
+                if self.sel == Some(s) {
+                    self.sel = self.extra.pop();
+                } else if let Some(k) = self.extra.iter().position(|x| *x == s) {
+                    self.extra.remove(k);
+                } else {
+                    if let Some(old) = self.sel {
+                        self.extra.push(old);
+                    }
+                    self.sel = Some(s);
+                }
+            }
+            _ if range => {
+                if let (Some(Sel::Clip(a)), Sel::Clip(b)) = (self.sel, s) {
+                    self.extra = (a.min(b)..=a.max(b)).map(Sel::Clip).filter(|x| *x != s).collect();
+                    self.sel = Some(s);
+                } else {
+                    self.select_one(s);
+                }
+            }
+            _ => self.select_one(s),
+        }
+    }
+
+    fn select_all(&mut self) {
+        let mut v: Vec<Sel> = (0..self.proj.clips.len()).map(Sel::Clip).collect();
+        v.extend((0..self.proj.overlays.len()).map(Sel::Over));
+        v.extend((0..self.proj.titles.len()).map(Sel::Title));
+        v.extend((0..self.proj.music.len()).map(Sel::Music));
+        self.sel = v.first().copied();
+        self.extra = v.into_iter().skip(1).collect();
+    }
+
+    fn delete_sel(&mut self) {
+        self.remove_sel(0);
+    }
+
+    fn remove_sel(&mut self, how: u8) {
+        let mut all = self.all_sel();
+        all.sort_by_key(|s| std::cmp::Reverse(match s {
+            Sel::Clip(i) | Sel::Over(i) | Sel::Music(i) | Sel::Title(i) | Sel::Gap(i) => *i,
+        }));
+        for s in all {
+            match s {
+                Sel::Clip(i) if i < self.proj.clips.len() => match how {
+                    1 => self.proj.lift(i),
+                    _ => self.proj.ripple_delete(i),
+                },
+                Sel::Over(i) if i < self.proj.overlays.len() => {
+                    self.proj.overlays.remove(i);
+                }
+                Sel::Music(i) if i < self.proj.music.len() => {
+                    self.proj.music.remove(i);
+                }
+                Sel::Title(i) if i < self.proj.titles.len() => {
+                    self.proj.titles.remove(i);
+                }
+                Sel::Gap(i) if i < self.proj.clips.len() => self.proj.clips[i].gap = 0.0,
+                _ => {}
+            }
+        }
+        self.sel = None;
+        self.extra.clear();
     }
 
     fn duplicate(&mut self) {
         match self.sel {
             Some(Sel::Clip(i)) if i < self.proj.clips.len() => {
-                let c = self.proj.clips[i].clone();
+                let c = Clip { gap: 0.0, ..self.proj.clips[i].clone() };
                 self.proj.clips.insert(i + 1, c);
-                self.sel = Some(Sel::Clip(i + 1));
+                self.select_one(Sel::Clip(i + 1));
+            }
+            Some(Sel::Over(i)) if i < self.proj.overlays.len() => {
+                let mut c = self.proj.overlays[i].clone();
+                c.start += c.len();
+                self.proj.overlays.push(c);
+                self.select_one(Sel::Over(self.proj.overlays.len() - 1));
             }
             Some(Sel::Title(i)) if i < self.proj.titles.len() => {
                 let mut t = self.proj.titles[i].clone();
                 t.start += t.dur;
                 self.proj.titles.push(t);
-                self.sel = Some(Sel::Title(self.proj.titles.len() - 1));
+                self.select_one(Sel::Title(self.proj.titles.len() - 1));
             }
             Some(Sel::Music(i)) if i < self.proj.music.len() => {
                 let mut m = self.proj.music[i].clone();
                 m.start += m.out - m.inp;
                 self.proj.music.push(m);
-                self.sel = Some(Sel::Music(self.proj.music.len() - 1));
+                self.select_one(Sel::Music(self.proj.music.len() - 1));
             }
             _ => {}
         }
     }
 
+    fn copy_sel(&mut self) {
+        if let Some(s) = self.sel {
+            self.clip_board = self.clip_ref(s).cloned();
+        }
+    }
+
     fn paste_clip(&mut self) {
         let Some(c) = self.clip_board.clone() else { return };
-        let at = match self.proj.clip_at(self.t) {
+        let c = Clip { gap: 0.0, ..c };
+        let at = match self.proj.local_at(self.t) {
+            Some((i, local)) if local < 0.05 => i,
             Some((i, _)) => {
                 self.proj.split(self.t);
-                let starts = self.proj.starts();
-                starts.iter().position(|s| (*s - self.t).abs() < 1e-6).unwrap_or(i + 1)
+                i + 1
             }
             None => self.proj.clips.len(),
         };
         self.proj.clips.insert(at, c);
-        self.sel = Some(Sel::Clip(at));
+        self.select_one(Sel::Clip(at));
+    }
+
+    fn paste_grade(&mut self, targets: &[Sel]) {
+        let Some(g) = self.grade_board.clone() else { return };
+        for s in targets {
+            if let Some(c) = self.clip_mut(*s) {
+                (c.brightness, c.contrast, c.saturation, c.temperature, c.tint, c.look, c.look_amt) = (g.brightness, g.contrast, g.saturation, g.temperature, g.tint, g.look, g.look_amt);
+                (c.exposure, c.highlights, c.shadows, c.whites, c.blacks, c.vibrance, c.hue, c.wheels, c.curves) = (g.exposure, g.highlights, g.shadows, g.whites, g.blacks, g.vibrance, g.hue, g.wheels, g.curves);
+            }
+        }
     }
 
     fn freeze_frame(&mut self) {
-        let Some((i, st)) = self.proj.clip_at(self.t) else { return };
+        let Some((i, local)) = self.proj.local_at(self.t) else { return };
         let mut still = self.proj.clips[i].clone();
-        still.inp = st;
-        still.out = st + 0.04;
-        still.hold = 2.0;
-        still.fade_in = 0.0;
-        still.fade_out = 0.0;
-        let at = if self.proj.split(self.t) { i + 1 } else if self.proj.local_at(self.t).is_some_and(|(_, l)| l < 0.05) { i } else { i + 1 };
+        let st = still.src_at(local);
+        (still.inp, still.out, still.hold, still.fade_in, still.fade_out, still.gap, still.trans, still.reverse) = (st, st + 0.04, 2.0, 0.0, 0.0, 0.0, 0, false);
+        still.keys.clear();
+        let at = if self.proj.split(self.t) { i + 1 } else if local < 0.05 { i } else { i + 1 };
         self.proj.clips.insert(at, still);
-        self.sel = Some(Sel::Clip(at));
+        self.select_one(Sel::Clip(at));
     }
 
     fn nudge_clip(&mut self, by: i32) {
@@ -705,25 +1070,121 @@ impl Cut {
         let to = i as i32 + by;
         if to >= 0 && (to as usize) < self.proj.clips.len() {
             self.proj.clips.swap(i, to as usize);
-            self.sel = Some(Sel::Clip(to as usize));
+            self.select_one(Sel::Clip(to as usize));
+        }
+    }
+
+    fn detach_audio(&mut self, s: Sel) {
+        let start = match s {
+            Sel::Clip(i) if i < self.proj.clips.len() => self.proj.starts()[i],
+            Sel::Over(i) if i < self.proj.overlays.len() => self.proj.overlays[i].start,
+            _ => return,
+        };
+        let Some(c) = self.clip_ref(s).cloned() else { return };
+        if c.hold > 0.0 || !self.proj.sources[c.src].has_audio {
+            self.error = Some("Ce clip n'a pas de son à détacher".into());
+            return;
+        }
+        if (c.speed - 1.0).abs() > 1e-3 || c.reverse {
+            self.error = Some("Détacher l'audio demande un clip à vitesse normale".into());
+            return;
+        }
+        self.proj.music.push(Music { src: c.src, start, inp: c.inp, out: c.out, volume: c.volume, fade_in: c.fade_in, fade_out: c.fade_out, mute: false, pan: c.pan, label: c.label });
+        if let Some(c) = self.clip_mut(s) {
+            c.mute = true;
+        }
+        self.select_one(Sel::Music(self.proj.music.len() - 1));
+    }
+
+    fn normalize(&mut self, s: Sel, db: f32) {
+        let (src, inp, out) = match s {
+            Sel::Music(i) => {
+                let m = &self.proj.music[i];
+                (m.src, m.inp, m.out)
+            }
+            _ => match self.clip_ref(s) {
+                Some(c) => (c.src, c.inp, c.out),
+                None => return,
+            },
+        };
+        let Some(data) = self.audio_data.get(&src) else {
+            self.error = Some("Le son de ce média n'est pas encore chargé".into());
+            return;
+        };
+        let a = ((inp * OUT_RATE as f64) as usize * 2).min(data.len());
+        let b = ((out * OUT_RATE as f64) as usize * 2).min(data.len());
+        let peak = data[a..b].iter().fold(0f32, |m, v| m.max(v.abs()));
+        if peak < 1e-4 {
+            self.error = Some("Ce passage est silencieux".into());
+            return;
+        }
+        let g = (10f32.powf(db / 20.0) / peak).min(16.0);
+        match s {
+            Sel::Music(i) => self.proj.music[i].volume = g,
+            _ => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.volume = g;
+                    c.keys.retain(|k| k.prop != 9);
+                }
+            }
+        }
+    }
+
+    fn move_track(&mut self, s: Sel) {
+        match s {
+            Sel::Clip(i) if i < self.proj.clips.len() => {
+                let start = self.proj.starts()[i];
+                let c = self.proj.clips[i].clone();
+                self.proj.lift(i);
+                self.proj.overlays.push(Clip { start, gap: 0.0, trans: 0, ..c });
+                self.select_one(Sel::Over(self.proj.overlays.len() - 1));
+            }
+            Sel::Over(i) if i < self.proj.overlays.len() => {
+                let o = self.proj.overlays.remove(i);
+                let t = o.start;
+                let at = match self.proj.local_at(t) {
+                    Some((k, l)) if l < 0.05 => k,
+                    Some((k, _)) => {
+                        self.proj.split(t);
+                        k + 1
+                    }
+                    None => {
+                        let starts = self.proj.starts();
+                        starts.iter().position(|s| *s > t).unwrap_or(self.proj.clips.len())
+                    }
+                };
+                let len = o.len();
+                let gap = if at == self.proj.clips.len() { (t - self.proj.v1_end()).max(0.0) } else { 0.0 };
+                self.proj.shift_after(t, len);
+                self.proj.clips.insert(at, Clip { start: 0.0, gap, ..o });
+                self.select_one(Sel::Clip(at));
+            }
+            _ => {}
         }
     }
 
     fn add_marker(&mut self) {
-        if let Some(k) = self.proj.markers.iter().position(|m| (m - self.t).abs() < 0.05) {
-            self.proj.markers.remove(k);
+        if let Some(k) = self.proj.markers.iter().position(|m| (m.t - self.t).abs() < 0.05) {
+            self.marker_edit = Some(k);
         } else {
-            self.proj.markers.push(self.t);
-            self.proj.markers.sort_by(f64::total_cmp);
+            let color = self.proj.markers.last().map_or(0, |m| m.color);
+            self.proj.markers.push(Marker { t: self.t, color, ..Default::default() });
+            self.proj.markers.sort_by(|a, b| a.t.total_cmp(&b.t));
         }
+    }
+
+    fn remove_marker(&mut self) {
+        self.proj.markers.retain(|m| (m.t - self.t).abs() >= 0.05);
     }
 
     fn edit_points(&self) -> Vec<f64> {
         let mut stops = self.proj.starts();
+        stops.extend(self.proj.clips.iter().zip(self.proj.starts()).map(|(c, s)| s + c.len()));
         stops.push(self.proj.duration());
-        stops.extend(self.proj.markers.iter().copied());
+        stops.extend(self.proj.markers.iter().map(|m| m.t));
         stops.extend(self.proj.titles.iter().flat_map(|t| [t.start, t.start + t.dur]));
-        stops.extend(self.proj.music.iter().flat_map(|m| [m.start, m.start + m.out - m.inp]));
+        stops.extend(self.proj.music.iter().flat_map(|m| [m.start, m.end()]));
+        stops.extend(self.proj.overlays.iter().flat_map(|o| [o.start, o.start + o.len()]));
         stops.extend(self.mark_in.iter().chain(self.mark_out.iter()).copied());
         stops
     }
@@ -731,11 +1192,16 @@ impl Cut {
     fn jump(&mut self, dir: i32) {
         let t = self.t;
         let stops = self.edit_points();
-        let target = if dir > 0 {
-            stops.into_iter().filter(|s| *s > t + 1e-3).fold(f64::INFINITY, f64::min)
-        } else {
-            stops.into_iter().filter(|s| *s < t - 1e-3).fold(f64::NEG_INFINITY, f64::max)
-        };
+        let target = if dir > 0 { stops.into_iter().filter(|s| *s > t + 1e-3).fold(f64::INFINITY, f64::min) } else { stops.into_iter().filter(|s| *s < t - 1e-3).fold(f64::NEG_INFINITY, f64::max) };
+        if target.is_finite() {
+            self.seek(target);
+        }
+    }
+
+    fn jump_marker(&mut self, dir: i32) {
+        let t = self.t;
+        let ms = self.proj.markers.iter().map(|m| m.t);
+        let target = if dir > 0 { ms.filter(|s| *s > t + 1e-3).fold(f64::INFINITY, f64::min) } else { ms.filter(|s| *s < t - 1e-3).fold(f64::NEG_INFINITY, f64::max) };
         if target.is_finite() {
             self.seek(target);
         }
@@ -747,7 +1213,20 @@ impl Cut {
         }
         let mut best = t;
         let mut dist = tol;
-        for s in self.edit_points().into_iter().chain([0.0, self.t]) {
+        let points = match &self.drag {
+            Some(d) => {
+                let mut me = Vec::new();
+                let p = &d.orig;
+                me.extend(p.starts());
+                me.extend(p.clips.iter().zip(p.starts()).map(|(c, s)| s + c.len()));
+                me.extend(p.markers.iter().map(|m| m.t));
+                me.extend(p.titles.iter().flat_map(|t| [t.start, t.start + t.dur]));
+                me.extend(p.music.iter().flat_map(|m| [m.start, m.end()]));
+                me
+            }
+            None => self.edit_points(),
+        };
+        for s in points.into_iter().chain([0.0, self.t]) {
             if (s - t).abs() < dist {
                 dist = (s - t).abs();
                 best = s;
@@ -756,40 +1235,134 @@ impl Cut {
         best
     }
 
-    fn add_title(&mut self) {
-        self.proj.titles.push(Title { text: "Ton titre".into(), start: self.t, dur: 3.0, size: 0.08, place: 1, color: [255, 255, 255, 255], band: false, anim: 1, shadow: true, font: 0, dx: 0.0, dy: 0.0 });
-        self.sel = Some(Sel::Title(self.proj.titles.len() - 1));
+    fn add_title_at(&mut self, dx: f32, dy: f32, vertical: bool) {
+        self.proj.titles.push(Title { start: self.t, dx, dy, vertical, ..Title::default() });
+        self.select_one(Sel::Title(self.proj.titles.len() - 1));
         self.tab = 0;
     }
 
-    fn snapshot(&mut self) {
-        let Some((ci, st)) = self.proj.clip_at(self.t) else {
-            self.error = Some("Aucune image à la tête de lecture".into());
-            return;
-        };
-        let Some(path) = rfd::FileDialog::new().add_filter("PNG", &["png"]).set_file_name("image.png").save_file() else { return };
-        let clip = self.proj.clips[ci].clone();
-        let src = self.proj.sources[clip.src].clone();
-        let (w, h) = (self.proj.width, self.proj.height);
-        let titles: Vec<Title> = self.proj.titles_at(self.t).into_iter().cloned().collect();
-        let fade = self.proj.fade_at(self.t);
-        let progress = self.proj.local_at(self.t).map_or(0.0, |(_, l)| (l / clip.len().max(1e-6)) as f32);
-        let (bg, t) = (self.proj.background, self.t);
-        let r = (|| -> Result<(), String> {
-            let (mut rd, _) = VideoReader::open(Path::new(&src.path))?;
-            let (sw, sh) = (rd.width, rd.height);
-            let Some((_, rgba)) = rd.frame_at(st, src.fps)? else { return Err("image introuvable".into()) };
-            let refs: Vec<&Title> = titles.iter().collect();
-            let frame = look::compose(rgba, sw, sh, w, h, &look::Frame { clip: Some(&clip), fade, progress, background: bg, titles: &refs, t });
-            image::save_buffer(&path, &frame, w, h, image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())
-        })();
-        if let Err(e) = r {
-            self.error = Some(format!("Image : {e}"));
+    fn set_tool(&mut self, t: Tool) {
+        self.tool = t;
+        if !matches!(t, Tool::Pen) {
+            self.pen.clear();
         }
     }
 
-    fn select_tool(&mut self, t: Tool) {
-        self.tool = t;
+    fn press_group(&mut self, g: usize) {
+        let tools = GROUPS[g].1;
+        let next = match tools.iter().position(|x| x.0 == self.tool) {
+            Some(k) => (k + 1) % tools.len(),
+            None => self.group_last[g].min(tools.len() - 1),
+        };
+        self.group_last[g] = next;
+        self.set_tool(tools[next].0);
+    }
+
+    fn history_to(&mut self, k: usize) {
+        while self.undo.len() > k {
+            if let Some(p) = self.undo.pop() {
+                self.redo.push(std::mem::replace(&mut self.proj, p));
+            }
+        }
+    }
+
+    fn undo_step(&mut self) {
+        if let Some(p) = self.undo.pop() {
+            self.redo.push(std::mem::replace(&mut self.proj, p));
+        }
+    }
+
+    fn redo_step(&mut self) {
+        if let Some(p) = self.redo.pop() {
+            self.undo.push(std::mem::replace(&mut self.proj, p));
+        }
+    }
+
+    fn menu_action(&mut self, s: Sel, act: u8) {
+        self.select_one(s);
+        match act {
+            0 => self.delete_sel(),
+            1 => self.duplicate(),
+            2 => {
+                self.proj.split(self.t);
+            }
+            3 => self.copy_sel(),
+            4 => match s {
+                Sel::Title(i) => self.proj.titles[i].start = self.t,
+                Sel::Music(i) => self.proj.music[i].start = self.t,
+                _ => {}
+            },
+            5 => match s {
+                Sel::Music(i) => self.proj.music[i].mute = !self.proj.music[i].mute,
+                _ => {
+                    if let Some(c) = self.clip_mut(s) {
+                        c.mute = !c.mute;
+                    }
+                }
+            },
+            6 => self.normalize(s, -1.0),
+            7 => self.freeze_frame(),
+            8 => self.speed_sheet = true,
+            9 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.reverse = !c.reverse;
+                    c.keys.clear();
+                }
+            }
+            10 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.disabled = !c.disabled;
+                }
+            }
+            11 => self.detach_audio(s),
+            12 => self.move_track(s),
+            13 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.reset_look();
+                }
+            }
+            14 => self.remove_sel(1),
+            15 => self.remove_sel(0),
+            100..=106 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.speed = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0][(act - 100) as usize];
+                }
+            }
+            120..=145 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.trans = act - 120;
+                }
+            }
+            160..=179 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.look = act - 160;
+                }
+            }
+            190..=199 => {
+                if let Some(c) = self.clip_mut(s) {
+                    inspect::effect_preset(c, (act - 190) as usize);
+                }
+            }
+            210..=217 => {
+                if let Some(c) = self.clip_mut(s) {
+                    c.label = act - 210;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn apply_default_transition(&mut self) {
+        let targets: Vec<Sel> = self.all_sel();
+        for s in targets {
+            if let Sel::Clip(i) = s
+                && i > 0
+                && let Some(c) = self.proj.clips.get_mut(i)
+            {
+                c.trans = 1;
+                c.trans_dur = 1.0;
+            }
+        }
     }
 
     fn keys(&mut self, ctx: &egui::Context) {
@@ -799,13 +1372,9 @@ impl Cut {
         use egui::{KeyboardShortcut as K, Modifiers as M};
         let sc = |m, k| ctx.input_mut(|i| i.consume_shortcut(&K::new(m, k)));
         if sc(M::COMMAND | M::SHIFT, Key::Z) || sc(M::COMMAND, Key::Y) {
-            if let Some(p) = self.redo.pop() {
-                self.undo.push(std::mem::replace(&mut self.proj, p));
-            }
-        } else if sc(M::COMMAND, Key::Z)
-            && let Some(p) = self.undo.pop()
-        {
-            self.redo.push(std::mem::replace(&mut self.proj, p));
+            self.redo_step();
+        } else if sc(M::COMMAND, Key::Z) {
+            self.undo_step();
         }
         if sc(M::COMMAND | M::SHIFT, Key::S) {
             self.save(true);
@@ -815,31 +1384,54 @@ impl Cut {
         if sc(M::COMMAND, Key::I) {
             self.import_dialog(ctx);
         }
+        if sc(M::COMMAND | M::SHIFT, Key::E) {
+            let mut o = ExportOpts::from_preset(14);
+            o.range = 0;
+            self.run_export(&o);
+        }
         if sc(M::COMMAND, Key::M) {
-            self.export = Some(ExportOpts { res: 0, quality: 1, range: 0, audio_only: false });
+            self.export = Some(ExportOpts::from_preset(0));
         }
         if sc(M::COMMAND | M::SHIFT, Key::F) {
             self.freeze_frame();
         }
+        if sc(M::COMMAND | M::SHIFT, Key::D) {
+            self.apply_default_transition();
+        }
         if sc(M::COMMAND, Key::D) {
             self.duplicate();
         }
-        if sc(M::COMMAND, Key::K) {
+        if sc(M::COMMAND | M::SHIFT, Key::K) {
+            self.proj.split_all(self.t);
+        } else if sc(M::COMMAND, Key::K) {
             self.proj.split(self.t);
         }
-        if sc(M::COMMAND, Key::C)
-            && let Some(Sel::Clip(i)) = self.sel
-        {
-            self.clip_board = self.proj.clips.get(i).cloned();
+        if sc(M::COMMAND, Key::C) {
+            self.copy_sel();
         }
-        if sc(M::COMMAND, Key::X)
-            && let Some(Sel::Clip(i)) = self.sel
-        {
-            self.clip_board = self.proj.clips.get(i).cloned();
+        if sc(M::COMMAND, Key::X) {
+            self.copy_sel();
             self.delete_sel();
         }
         if sc(M::COMMAND, Key::V) {
             self.paste_clip();
+        }
+        if sc(M::COMMAND | M::SHIFT, Key::A) {
+            self.sel = None;
+            self.extra.clear();
+        } else if sc(M::COMMAND, Key::A) {
+            self.select_all();
+        }
+        if sc(M::COMMAND, Key::T) {
+            self.add_title_at(0.0, 0.0, false);
+        }
+        if sc(M::COMMAND, Key::R) && matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_))) {
+            self.speed_sheet = true;
+        }
+        if sc(M::COMMAND, Key::L)
+            && let Some(s) = self.sel
+        {
+            self.detach_audio(s);
         }
         if sc(M::ALT, Key::ArrowLeft) {
             self.nudge_clip(-1);
@@ -851,14 +1443,55 @@ impl Cut {
             self.mark_in = None;
             self.mark_out = None;
         }
+        if sc(M::ALT, Key::Delete) || sc(M::ALT, Key::Backspace) {
+            self.remove_sel(1);
+        }
+        if sc(M::SHIFT, Key::Delete) || sc(M::SHIFT, Key::Backspace) {
+            self.remove_sel(0);
+        }
+        if sc(M::SHIFT, Key::A) {
+            self.set_tool(Tool::TrackBack);
+        }
+        if sc(M::SHIFT, Key::C) {
+            self.set_tool(Tool::BladeAll);
+        }
+        if sc(M::SHIFT, Key::S) {
+            self.snap = !self.snap;
+        }
+        if sc(M::SHIFT, Key::M) {
+            self.remove_marker();
+        }
+        if sc(M::SHIFT, Key::I)
+            && let Some(t) = self.mark_in
+        {
+            self.seek(t);
+        }
+        if sc(M::SHIFT, Key::O)
+            && let Some(t) = self.mark_out
+        {
+            self.seek(t);
+        }
+        if sc(M::SHIFT, Key::E) {
+            for s in self.all_sel() {
+                if let Some(c) = self.clip_mut(s) {
+                    c.disabled = !c.disabled;
+                }
+            }
+        }
+        if sc(M::SHIFT, Key::ArrowUp) {
+            self.jump_marker(-1);
+        }
+        if sc(M::SHIFT, Key::ArrowDown) {
+            self.jump_marker(1);
+        }
         let fps = self.proj.fps as f64;
         let k = ctx.input(|i| {
-            let plain = !i.modifiers.command && !i.modifiers.alt;
+            let plain = !i.modifiers.command && !i.modifiers.alt && !i.modifiers.shift;
             let p = |k: Key| i.key_pressed(k) && plain;
             (
                 i.key_pressed(Key::Space),
                 p(Key::S),
-                i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace),
+                (i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace)) && plain,
                 i.key_pressed(Key::ArrowLeft) && !i.modifiers.alt,
                 i.key_pressed(Key::ArrowRight) && !i.modifiers.alt,
                 i.key_pressed(Key::Home),
@@ -866,15 +1499,17 @@ impl Cut {
                 i.key_pressed(Key::Plus) || i.key_pressed(Key::Equals),
                 i.key_pressed(Key::Minus),
                 i.modifiers.shift,
-                [p(Key::V), p(Key::C), p(Key::Y), p(Key::R), p(Key::H), p(Key::Z)],
-                [p(Key::J), p(Key::K), p(Key::L), p(Key::M), p(Key::T), p(Key::I), p(Key::O), p(Key::N), p(Key::F), p(Key::Backslash)],
+                GROUPS.map(|g| p(g.0)),
+                [p(Key::A), p(Key::N), p(Key::R), p(Key::U), p(Key::Z)],
+                [p(Key::J), p(Key::K), p(Key::L), p(Key::M), p(Key::I), p(Key::O), p(Key::F), p(Key::Backslash), p(Key::Enter), p(Key::Escape)],
                 if p(Key::Q) { 1 } else if p(Key::W) { 2 } else { 0 },
-                if i.key_pressed(Key::ArrowUp) { -1 } else if i.key_pressed(Key::ArrowDown) { 1 } else { 0 },
+                if i.key_pressed(Key::ArrowUp) && plain { -1 } else if i.key_pressed(Key::ArrowDown) && plain { 1 } else { 0 },
             )
         });
-        let (space, s, del, left, right, home, end, plus, minus, shift, tools, keys, trim, jump) = k;
+        let (space, s, del, left, right, home, end, plus, minus, shift, groups, direct, keys, trim, jump) = k;
         let step = if shift { 1.0 } else { 1.0 / fps };
         if space {
+            self.shuttle = 1.0;
             self.set_playing(!self.playing);
         }
         if s {
@@ -901,26 +1536,28 @@ impl Cut {
         if minus {
             self.pps = (self.pps / 1.25).max(2.0);
         }
-        for (pressed, (tool, _, _)) in tools.iter().zip(TOOLS) {
+        for (g, pressed) in groups.iter().enumerate() {
             if *pressed {
-                self.select_tool(tool);
+                self.press_group(g);
             }
         }
-        let [j, kk, l, m, t, i, o, n, f, fit] = keys;
+        for (pressed, tool) in direct.iter().zip([Tool::TrackFwd, Tool::Rolling, Tool::Rate, Tool::Slide, Tool::Zoom]) {
+            if *pressed {
+                self.set_tool(tool);
+            }
+        }
+        let [j, kk, l, m, i, o, f, fit, enter, esc] = keys;
         if j {
-            self.seek(self.t - 1.0);
+            self.shuttle(-1.0);
         }
         if kk {
             self.set_playing(false);
         }
         if l {
-            self.set_playing(true);
+            self.shuttle(1.0);
         }
         if m {
             self.add_marker();
-        }
-        if t {
-            self.add_title();
         }
         if i {
             self.mark_in = Some(self.t);
@@ -928,14 +1565,17 @@ impl Cut {
         if o {
             self.mark_out = Some(self.t);
         }
-        if n {
-            self.snap = !self.snap;
-        }
         if f {
             self.focus = !self.focus;
         }
         if fit {
             self.pps = 0.0;
+        }
+        if enter {
+            self.close_pen();
+        }
+        if esc {
+            self.pen.clear();
         }
         if trim > 0 {
             self.proj.trim_to(self.t, trim == 1);
@@ -943,9 +1583,54 @@ impl Cut {
         if jump != 0 {
             self.jump(jump);
         }
-        if matches!(self.sel, Some(Sel::Clip(i)) if i >= self.proj.clips.len()) || matches!(self.sel, Some(Sel::Music(i)) if i >= self.proj.music.len()) || matches!(self.sel, Some(Sel::Title(i)) if i >= self.proj.titles.len()) {
+        let valid = |s: &Sel, p: &Project| match *s {
+            Sel::Clip(i) | Sel::Gap(i) => i < p.clips.len(),
+            Sel::Over(i) => i < p.overlays.len(),
+            Sel::Music(i) => i < p.music.len(),
+            Sel::Title(i) => i < p.titles.len(),
+        };
+        if self.sel.is_some_and(|s| !valid(&s, &self.proj)) {
             self.sel = None;
         }
+        let p = self.proj.clone();
+        self.extra.retain(|s| valid(s, &p));
+    }
+
+    fn mask_target(&self) -> Option<(Sel, f64)> {
+        match self.sel {
+            Some(Sel::Clip(i)) if self.proj.local_at(self.t).is_some_and(|(k, _)| k == i) => return self.proj.local_at(self.t).map(|(_, l)| (Sel::Clip(i), l)),
+            Some(Sel::Over(i)) => {
+                if let Some((_, l)) = self.proj.overlays_at(self.t).into_iter().find(|(k, _)| *k == i) {
+                    return Some((Sel::Over(i), l));
+                }
+            }
+            _ => {}
+        }
+        self.proj.local_at(self.t).map(|(i, l)| (Sel::Clip(i), l))
+    }
+
+    fn close_pen(&mut self) {
+        if self.pen.len() >= 3
+            && let Some((s, _)) = self.mask_target()
+        {
+            let pts = std::mem::take(&mut self.pen);
+            if let Some(c) = self.clip_mut(s) {
+                c.mask = Some(model::Mask { kind: 2, pts, feather: 4.0, invert: false });
+            }
+            self.select_one(s);
+            self.tab = 2;
+        }
+        self.pen.clear();
+    }
+}
+
+fn save_image(path: &Path, px: &[u8], w: u32, h: u32) -> Result<(), String> {
+    let jpeg = path.extension().is_some_and(|e| e.eq_ignore_ascii_case("jpg") || e.eq_ignore_ascii_case("jpeg"));
+    if jpeg {
+        let rgb: Vec<u8> = px.chunks_exact(4).flat_map(|p| [p[0], p[1], p[2]]).collect();
+        image::save_buffer(path, &rgb, w, h, image::ExtendedColorType::Rgb8).map_err(|e| e.to_string())
+    } else {
+        image::save_buffer(path, px, w, h, image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())
     }
 }
 
@@ -982,6 +1667,55 @@ fn short(s: &str, n: usize) -> String {
     if s.chars().count() <= n { s.to_string() } else { format!("{}…", s.chars().take(n.saturating_sub(1)).collect::<String>()) }
 }
 
+fn chapters(p: &Project) -> String {
+    let mut lines = Vec::new();
+    if p.markers.first().is_none_or(|m| m.t > 0.5) {
+        lines.push("0:00 Introduction".to_string());
+    }
+    for (k, m) in p.markers.iter().enumerate() {
+        let s = m.t.max(0.0) as u64;
+        let stamp = if s >= 3600 { format!("{}:{:02}:{:02}", s / 3600, s / 60 % 60, s % 60) } else { format!("{}:{:02}", s / 60, s % 60) };
+        let name = if m.name.is_empty() { format!("Chapitre {}", k + 1) } else { m.name.clone() };
+        lines.push(format!("{stamp} {name}"));
+    }
+    lines.join("\n")
+}
+
+fn markers_csv(p: &Project) -> String {
+    let mut out = String::from("Temps;Nom;Commentaire;Couleur;Durée\n");
+    for m in &p.markers {
+        out.push_str(&format!("{};{};{};{};{:.2}\n", tc(m.t, p.fps), m.name.replace(';', ","), m.note.replace(';', ",").replace('\n', " "), MARKER_COLORS[m.color as usize % MARKER_COLORS.len()].0, m.dur));
+    }
+    out
+}
+
+fn describe(a: &Project, b: &Project) -> String {
+    let n = |x: usize, y: usize, what: &str| match x.cmp(&y) {
+        std::cmp::Ordering::Less => Some(format!("{what} ajouté")),
+        std::cmp::Ordering::Greater => Some(format!("{what} supprimé")),
+        _ => None,
+    };
+    n(a.clips.len(), b.clips.len(), "Clip")
+        .or_else(|| n(a.overlays.len(), b.overlays.len(), "Clip V2"))
+        .or_else(|| n(a.titles.len(), b.titles.len(), "Titre"))
+        .or_else(|| n(a.music.len(), b.music.len(), "Son"))
+        .or_else(|| n(a.markers.len(), b.markers.len(), "Marqueur"))
+        .or_else(|| n(a.sources.len(), b.sources.len(), "Média"))
+        .unwrap_or_else(|| {
+            if a.clips != b.clips || a.overlays != b.overlays {
+                "Clip modifié".into()
+            } else if a.titles != b.titles {
+                "Titre modifié".into()
+            } else if a.music != b.music {
+                "Son modifié".into()
+            } else if a.markers != b.markers {
+                "Marqueur modifié".into()
+            } else {
+                "Séquence modifiée".into()
+            }
+        })
+}
+
 impl eframe::App for Cut {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
@@ -998,10 +1732,17 @@ impl eframe::App for Cut {
             s.volume = self.volume;
         }
         if self.playing {
-            let pos = self.audio.state.lock().map(|s| s.pos).unwrap_or(0.0);
-            self.t = if self.audio._stream.is_some() { pos / OUT_RATE as f64 } else { self.t + ctx.input(|i| i.stable_dt) as f64 };
+            let manual = (self.shuttle - 1.0).abs() > 1e-6 || self.audio._stream.is_none();
+            if manual {
+                self.t += ctx.input(|i| i.stable_dt) as f64 * self.shuttle;
+            } else {
+                self.t = self.audio.state.lock().map(|s| s.pos).unwrap_or(0.0) / OUT_RATE as f64;
+            }
             let end = if self.looping { self.mark_out.unwrap_or(self.proj.duration()) } else { self.proj.duration() };
-            if self.t >= end {
+            if self.t < 0.0 {
+                self.t = 0.0;
+                self.set_playing(false);
+            } else if self.t >= end {
                 if self.looping {
                     self.seek(self.mark_in.unwrap_or(0.0));
                 } else {
@@ -1019,6 +1760,15 @@ impl eframe::App for Cut {
         if title != self.title {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.title = title;
+        }
+        if let Some(j) = &mut self.job
+            && !j.seen
+            && j.done.load(Ordering::Relaxed) == usize::MAX
+        {
+            j.seen = true;
+            if j.open_after && j.error.lock().map(|e| e.is_none()).unwrap_or(false) {
+                let _ = std::process::Command::new("explorer").arg(format!("/select,{}", j.path.display())).spawn();
+            }
         }
 
         self.top_bar(root, ctx, &name);
@@ -1054,7 +1804,7 @@ impl Cut {
     fn top_bar(&mut self, root: &mut Ui, ctx: &egui::Context, name: &str) {
         egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = ui.max_rect();
-            let right_w = if self.home { 0.0 } else { 300.0 };
+            let right_w = if self.home { 0.0 } else { 330.0 };
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
             ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| {
                 ui.horizontal_centered(|ui| {
@@ -1083,10 +1833,15 @@ impl Cut {
                     if busy {
                         let j = self.job.as_ref().unwrap();
                         let d = j.done.load(Ordering::Relaxed);
+                        if pro::secondary(ui, "Annuler").clicked() {
+                            j.cancel.store(true, Ordering::Relaxed);
+                        }
                         ui.add(egui::ProgressBar::new(d as f32 / j.total.max(1) as f32).desired_width(140.0).corner_radius(CornerRadius::same(6)).text(format!("Export {:.0} %", d as f32 * 100.0 / j.total.max(1) as f32)));
                         ui.ctx().request_repaint_after(std::time::Duration::from_millis(200));
                     } else if pro::primary_icon(ui, "Exporter", |p, r, c| glyph(p, r, G::Export, c)).on_hover_text("Ctrl+M").clicked() {
-                        self.export = Some(ExportOpts { res: 0, quality: 1, range: if self.mark_in.is_some() || self.mark_out.is_some() { 1 } else { 0 }, audio_only: false });
+                        let mut o = ExportOpts::from_preset(0);
+                        o.range = if self.mark_in.is_some() || self.mark_out.is_some() { 1 } else { 0 };
+                        self.export = Some(o);
                     }
                     ui.add_space(6.0);
                     if pro::chip(ui, &format!("{} × {} · {} i/s", self.proj.width, self.proj.height, self.proj.fps)).on_hover_text("Réglages de la séquence").clicked() {
@@ -1098,144 +1853,322 @@ impl Cut {
     }
 
     fn menus(&mut self, ui: &mut Ui, ctx: &egui::Context) {
+        let row = |ui: &mut Ui, on: bool, label: &str, key: &str| -> bool { ui.add_enabled(on, egui::Button::new(label).shortcut_text(key)).clicked() };
         ui.menu_button("Fichier", |ui| {
-            if ui.button("Nouveau projet").clicked() {
+            if row(ui, true, "Nouveau projet", "") {
                 self.home = true;
             }
-            if ui.button("Ouvrir un projet…").clicked() {
+            if row(ui, true, "Ouvrir un projet…", "") {
                 self.open(ctx);
             }
-            if ui.button("Importer des médias…        Ctrl+I").clicked() {
+            if row(ui, true, "Importer des médias…", "Ctrl+I") {
                 self.import_dialog(ctx);
             }
             ui.add_enabled_ui(!self.home, |ui| {
+                ui.menu_button("Nouvel élément", |ui| {
+                    for (k, (_, name)) in GENERATORS.iter().enumerate() {
+                        if ui.button(*name).clicked() {
+                            self.add_generator(k);
+                            ui.close();
+                        }
+                    }
+                });
                 ui.separator();
-                if ui.button("Enregistrer                        Ctrl+S").clicked() {
+                if row(ui, true, "Enregistrer", "Ctrl+S") {
                     self.save(false);
                 }
-                if ui.button("Enregistrer sous…             Ctrl+Maj+S").clicked() {
+                if row(ui, true, "Enregistrer sous…", "Ctrl+Maj+S") {
                     self.save(true);
                 }
                 ui.separator();
-                if ui.button("Exporter…                          Ctrl+M").clicked() {
-                    self.export = Some(ExportOpts { res: 0, quality: 1, range: 0, audio_only: false });
+                if row(ui, true, "Exporter…", "Ctrl+M") {
+                    self.export = Some(ExportOpts::from_preset(0));
                 }
-                if ui.button("Exporter l'image affichée (PNG)…").clicked() {
-                    self.snapshot();
+                ui.menu_button("Exporter avec un préréglage", |ui| {
+                    for (k, p) in EXPORT_PRESETS.iter().enumerate() {
+                        if ui.button(p.0).clicked() {
+                            self.export = Some(ExportOpts::from_preset(k));
+                            ui.close();
+                        }
+                    }
+                });
+                if row(ui, true, "Exporter l'image affichée (PNG)…", "Ctrl+Maj+E") {
+                    self.run_export(&ExportOpts::from_preset(14));
+                }
+                if row(ui, !self.proj.markers.is_empty(), "Exporter les marqueurs (CSV)…", "")
+                    && let Some(p) = rfd::FileDialog::new().add_filter("CSV", &["csv"]).set_file_name("marqueurs.csv").save_file()
+                    && let Err(e) = std::fs::write(&p, markers_csv(&self.proj))
+                {
+                    self.error = Some(e.to_string());
+                }
+                ui.separator();
+                if row(ui, self.proj.sources.iter().enumerate().any(|(i, _)| self.uses(i) == 0), "Retirer les médias inutilisés", "") {
+                    self.remove_unused();
                 }
             });
         });
         ui.add_enabled_ui(!self.home, |ui| {
             ui.menu_button("Édition", |ui| {
-                if ui.add_enabled(!self.undo.is_empty(), egui::Button::new("Annuler                         Ctrl+Z")).clicked()
-                    && let Some(p) = self.undo.pop()
-                {
-                    self.redo.push(std::mem::replace(&mut self.proj, p));
+                if row(ui, !self.undo.is_empty(), "Annuler", "Ctrl+Z") {
+                    self.undo_step();
                 }
-                if ui.add_enabled(!self.redo.is_empty(), egui::Button::new("Rétablir                        Ctrl+Y")).clicked()
-                    && let Some(p) = self.redo.pop()
-                {
-                    self.undo.push(std::mem::replace(&mut self.proj, p));
+                if row(ui, !self.redo.is_empty(), "Rétablir", "Ctrl+Y") {
+                    self.redo_step();
                 }
                 ui.separator();
-                let is_clip = matches!(self.sel, Some(Sel::Clip(_)));
-                if ui.add_enabled(is_clip, egui::Button::new("Couper le clip                 Ctrl+X")).clicked()
-                    && let Some(Sel::Clip(i)) = self.sel
-                {
-                    self.clip_board = self.proj.clips.get(i).cloned();
+                let is_clip = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_)));
+                if row(ui, is_clip, "Couper", "Ctrl+X") {
+                    self.copy_sel();
                     self.delete_sel();
                 }
-                if ui.add_enabled(is_clip, egui::Button::new("Copier le clip                 Ctrl+C")).clicked()
-                    && let Some(Sel::Clip(i)) = self.sel
-                {
-                    self.clip_board = self.proj.clips.get(i).cloned();
+                if row(ui, is_clip, "Copier", "Ctrl+C") {
+                    self.copy_sel();
                 }
-                if ui.add_enabled(self.clip_board.is_some(), egui::Button::new("Coller à la tête de lecture  Ctrl+V")).clicked() {
+                if row(ui, self.clip_board.is_some(), "Coller à la tête de lecture", "Ctrl+V") {
                     self.paste_clip();
                 }
-                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Dupliquer                      Ctrl+D")).clicked() {
+                if row(ui, self.sel.is_some(), "Dupliquer", "Ctrl+D") {
                     self.duplicate();
                 }
-                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Supprimer                       Suppr")).clicked() {
+                if row(ui, self.sel.is_some(), "Effacer", "Suppr") {
                     self.delete_sel();
                 }
+                if row(ui, is_clip, "Supprimer et refermer", "Maj+Suppr") {
+                    self.remove_sel(0);
+                }
+                if row(ui, is_clip, "Lever (laisser un vide)", "Alt+Suppr") {
+                    self.remove_sel(1);
+                }
                 ui.separator();
-                if ui.button("Scinder à la tête de lecture    S").clicked() {
-                    self.proj.split(self.t);
+                if row(ui, true, "Tout sélectionner", "Ctrl+A") {
+                    self.select_all();
                 }
-                if ui.button("Rogner le début à la tête       Q").clicked() {
-                    self.proj.trim_to(self.t, true);
+                if row(ui, self.sel.is_some(), "Tout désélectionner", "Ctrl+Maj+A") {
+                    self.sel = None;
+                    self.extra.clear();
                 }
-                if ui.button("Rogner la fin à la tête          W").clicked() {
-                    self.proj.trim_to(self.t, false);
+                if let Some(Sel::Clip(i)) = self.sel
+                    && row(ui, true, "Sélectionner la même étiquette", "")
+                {
+                    let l = self.proj.clips[i].label;
+                    self.extra = self.proj.clips.iter().enumerate().filter(|(k, c)| c.label == l && *k != i).map(|(k, _)| Sel::Clip(k)).collect();
                 }
-                if ui.button("Figer l'image (2 s)            Ctrl+Maj+F").clicked() {
-                    self.freeze_frame();
+                ui.separator();
+                if row(ui, self.grade_board.is_some() && is_clip, "Coller l'étalonnage", "") {
+                    let all = self.all_sel();
+                    self.paste_grade(&all);
                 }
-                if ui.add_enabled(is_clip, egui::Button::new("Déplacer le clip à gauche   Alt+←")).clicked() {
+            });
+            ui.menu_button("Clip", |ui| {
+                let s = self.sel;
+                let is_clip = matches!(s, Some(Sel::Clip(_) | Sel::Over(_)));
+                if row(ui, is_clip, "Vitesse/Durée…", "Ctrl+R") {
+                    self.speed_sheet = true;
+                }
+                if row(ui, is_clip, "Activer / désactiver", "Maj+E")
+                    && let Some(s) = s
+                {
+                    self.menu_action(s, 10);
+                }
+                if row(ui, is_clip, "Inverser la lecture", "")
+                    && let Some(s) = s
+                {
+                    self.menu_action(s, 9);
+                }
+                if row(ui, is_clip, "Détacher l'audio", "Ctrl+L")
+                    && let Some(s) = s
+                {
+                    self.detach_audio(s);
+                }
+                if row(ui, is_clip, "Changer de piste (V1 ↔ V2)", "")
+                    && let Some(s) = s
+                {
+                    self.move_track(s);
+                }
+                if row(ui, matches!(s, Some(Sel::Clip(i)) if i > 0), "Appliquer la transition par défaut", "Ctrl+Maj+D") {
+                    self.apply_default_transition();
+                }
+                if row(ui, is_clip || matches!(s, Some(Sel::Music(_))), "Normaliser l'audio (−1 dB)", "")
+                    && let Some(s) = s
+                {
+                    self.normalize(s, -1.0);
+                }
+                if row(ui, is_clip, "Réinitialiser les effets", "")
+                    && let Some(s) = s
+                {
+                    self.menu_action(s, 13);
+                }
+                ui.separator();
+                if row(ui, is_clip, "Déplacer à gauche", "Alt+←") {
                     self.nudge_clip(-1);
                 }
-                if ui.add_enabled(is_clip, egui::Button::new("Déplacer le clip à droite    Alt+→")).clicked() {
+                if row(ui, is_clip, "Déplacer à droite", "Alt+→") {
                     self.nudge_clip(1);
                 }
             });
+            ui.menu_button("Séquence", |ui| {
+                if row(ui, true, "Réglages de la séquence…", "") {
+                    self.seq_sheet = true;
+                }
+                ui.separator();
+                if row(ui, true, "Scinder à la tête de lecture", "S") {
+                    self.proj.split(self.t);
+                }
+                if row(ui, true, "Scinder toutes les pistes", "Ctrl+Maj+K") {
+                    self.proj.split_all(self.t);
+                }
+                if row(ui, true, "Rogner le début à la tête", "Q") {
+                    self.proj.trim_to(self.t, true);
+                }
+                if row(ui, true, "Rogner la fin à la tête", "W") {
+                    self.proj.trim_to(self.t, false);
+                }
+                if row(ui, true, "Figer l'image (2 s)", "Ctrl+Maj+F") {
+                    self.freeze_frame();
+                }
+                if row(ui, self.proj.clips.iter().any(|c| c.gap > 0.0), "Supprimer tous les espaces vides", "") {
+                    self.proj.close_gaps();
+                }
+                ui.separator();
+                if row(ui, true, "Insérer un titre", "Ctrl+T") {
+                    self.add_title_at(0.0, 0.0, false);
+                }
+                ui.menu_button("Titre prédéfini", |ui| {
+                    for (k, n) in inspect::TITLE_PRESETS.iter().enumerate() {
+                        if ui.button(*n).clicked() {
+                            self.add_title_at(0.0, 0.0, false);
+                            if let Some(Sel::Title(i)) = self.sel {
+                                inspect::title_preset(&mut self.proj.titles[i], k);
+                                if k == 4 {
+                                    self.proj.titles[i].text = "Réalisation\nTon nom\n\nMontage\nCut — Ethone Studio\n\nMerci d'avoir regardé".into();
+                                    self.proj.titles[i].dur = 8.0;
+                                }
+                            }
+                            ui.close();
+                        }
+                    }
+                });
+                ui.separator();
+                if row(ui, self.proj.solo != 0, "Désactiver tous les solos", "") {
+                    self.proj.solo = 0;
+                }
+                if row(ui, true, "Déverrouiller toutes les pistes", "") {
+                    self.proj.lock = [false; 4];
+                }
+                if row(ui, true, "Afficher toutes les pistes", "") {
+                    self.proj.hide = [false; 3];
+                }
+            });
             ui.menu_button("Marqueurs", |ui| {
-                if ui.button("Ajouter un marqueur              M").clicked() {
+                if row(ui, true, "Ajouter / modifier un marqueur", "M") {
                     self.add_marker();
                 }
-                if ui.button("Point d'entrée                    I").clicked() {
+                if row(ui, true, "Supprimer le marqueur", "Maj+M") {
+                    self.remove_marker();
+                }
+                if row(ui, true, "Marqueur précédent", "Maj+↑") {
+                    self.jump_marker(-1);
+                }
+                if row(ui, true, "Marqueur suivant", "Maj+↓") {
+                    self.jump_marker(1);
+                }
+                ui.separator();
+                if row(ui, true, "Point d'entrée", "I") {
                     self.mark_in = Some(self.t);
                 }
-                if ui.button("Point de sortie                   O").clicked() {
+                if row(ui, true, "Point de sortie", "O") {
                     self.mark_out = Some(self.t);
                 }
-                if ui.button("Effacer entrée et sortie       Alt+X").clicked() {
+                if row(ui, self.mark_in.is_some(), "Aller à l'entrée", "Maj+I")
+                    && let Some(t) = self.mark_in
+                {
+                    self.seek(t);
+                }
+                if row(ui, self.mark_out.is_some(), "Aller à la sortie", "Maj+O")
+                    && let Some(t) = self.mark_out
+                {
+                    self.seek(t);
+                }
+                if let Some(s @ (Sel::Clip(_) | Sel::Over(_))) = self.sel
+                    && row(ui, true, "Entrée/sortie sur le clip", "")
+                {
+                    let (a, b) = {
+                        let save = self.sel;
+                        self.sel = Some(s);
+                        let r = self.export_range(2);
+                        self.sel = save;
+                        r
+                    };
+                    (self.mark_in, self.mark_out) = (Some(a), Some(b));
+                }
+                if row(ui, true, "Effacer entrée et sortie", "Alt+X") {
                     self.mark_in = None;
                     self.mark_out = None;
                 }
                 ui.separator();
-                if ui.button("Point de montage précédent     ↑").clicked() {
+                if row(ui, true, "Point de montage précédent", "↑") {
                     self.jump(-1);
                 }
-                if ui.button("Point de montage suivant        ↓").clicked() {
+                if row(ui, true, "Point de montage suivant", "↓") {
                     self.jump(1);
                 }
-                if ui.add_enabled(!self.proj.markers.is_empty(), egui::Button::new("Supprimer tous les marqueurs")).clicked() {
+                ui.separator();
+                if row(ui, !self.proj.markers.is_empty(), "Copier comme chapitres YouTube", "") {
+                    ui.ctx().copy_text(chapters(&self.proj));
+                }
+                if row(ui, !self.proj.markers.is_empty(), "Supprimer tous les marqueurs", "") {
                     self.proj.markers.clear();
                 }
             });
-            ui.menu_button("Titre", |ui| {
-                if ui.button("Nouveau titre                      T").clicked() {
-                    self.add_title();
-                }
-                for (label, place, size, band) in [("Titre centré", 1u8, 0.1f32, false), ("Sous-titre en bas", 2, 0.055, false), ("Tiers inférieur", 3, 0.05, true), ("Titre en haut", 0, 0.07, false)] {
-                    if ui.button(label).clicked() {
-                        self.add_title();
-                        if let Some(Sel::Title(i)) = self.sel {
-                            let t = &mut self.proj.titles[i];
-                            (t.place, t.size, t.band) = (place, size, band);
+            ui.menu_button("Outils", |ui| {
+                for (g, (_, tools)) in GROUPS.iter().enumerate() {
+                    for (k, (tool, name, key)) in tools.iter().enumerate() {
+                        if ui.add(egui::Button::selectable(self.tool == *tool, *name).shortcut_text(*key)).clicked() {
+                            self.group_last[g] = k;
+                            self.set_tool(*tool);
+                            ui.close();
                         }
+                    }
+                    if g + 1 < GROUPS.len() {
+                        ui.separator();
                     }
                 }
             });
             ui.menu_button("Affichage", |ui| {
-                ui.checkbox(&mut self.snap, "Magnétisme                         N");
+                ui.checkbox(&mut self.snap, "Magnétisme (Maj+S)");
                 ui.checkbox(&mut self.looping, "Lecture en boucle");
+                ui.checkbox(&mut self.focus, "Mode visionneuse (F)");
+                ui.separator();
                 ui.checkbox(&mut self.safe, "Zones de sécurité");
-                ui.checkbox(&mut self.focus, "Mode visionneuse                  F");
+                ui.checkbox(&mut self.grid, "Grille des tiers");
+                ui.checkbox(&mut self.guides, "Repères vertical 9:16");
+                ui.horizontal(|ui| {
+                    ui.label("Qualité de lecture");
+                    for (k, label) in ["Complète", "1/2", "1/4"].iter().enumerate() {
+                        if ui.selectable_label(self.quality == k, *label).clicked() {
+                            self.quality = k;
+                        }
+                    }
+                });
                 ui.separator();
                 ui.checkbox(&mut self.show_thumbs, "Vignettes des clips");
                 ui.checkbox(&mut self.show_waves, "Formes d'onde");
                 ui.horizontal(|ui| {
                     ui.label("Hauteur des pistes");
-                    for (label, k) in [("S", 0.75), ("M", 1.0), ("L", 1.4)] {
+                    for (label, k) in [("S", 0.75), ("M", 1.0), ("L", 1.4), ("XL", 1.8)] {
                         if ui.selectable_label((self.track_scale - k).abs() < 0.01, label).clicked() {
                             self.track_scale = k;
                         }
                     }
                 });
-                if ui.button("Ajuster la timeline               \\").clicked() {
+                if row(ui, true, "Ajuster la timeline", "\\") {
                     self.pps = 0.0;
+                }
+                if row(ui, true, "Zoom avant", "+") {
+                    self.pps = (self.pps * 1.25).min(600.0);
+                }
+                if row(ui, true, "Zoom arrière", "−") {
+                    self.pps = (self.pps / 1.25).max(2.0);
                 }
             });
         });
@@ -1247,24 +2180,44 @@ impl Cut {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 if !self.home {
+                    let n = self.all_sel().len();
                     let sel = match self.sel {
-                        Some(Sel::Clip(i)) => self.proj.clips.get(i).map(|c| format!("Clip · {} · {}", short(&self.proj.sources[c.src].name(), 26), tc(c.len(), self.proj.fps))),
+                        _ if n > 1 => Some(format!("{n} éléments sélectionnés")),
+                        Some(s @ (Sel::Clip(_) | Sel::Over(_))) => self.clip_ref(s).map(|c| format!("Clip · {} · {}", short(&self.proj.sources[c.src].name(), 26), tc(c.len(), self.proj.fps))),
                         Some(Sel::Music(i)) => self.proj.music.get(i).map(|m| format!("Musique · {}", short(&self.proj.sources[m.src].name(), 26))),
                         Some(Sel::Title(i)) => self.proj.titles.get(i).map(|t| format!("Titre · {}", short(t.text.lines().next().unwrap_or(""), 26))),
+                        Some(Sel::Gap(i)) => self.proj.clips.get(i).map(|c| format!("Espace vide · {}", tc(c.gap, self.proj.fps))),
                         None => None,
                     };
-                    ui.label(small(sel.unwrap_or(format!("{} clip(s) · {} titre(s) · {}", self.proj.clips.len(), self.proj.titles.len(), tc(self.proj.duration(), self.proj.fps)))));
+                    ui.label(small(sel.unwrap_or(format!("{} clip(s) · {} titre(s) · {}", self.proj.clips.len() + self.proj.overlays.len(), self.proj.titles.len(), tc(self.proj.duration(), self.proj.fps)))));
                     if let (Some(a), Some(b)) = (self.mark_in, self.mark_out) {
                         ui.label(RichText::new(format!("Entrée/sortie {}", tc((b - a).abs(), self.proj.fps))).size(12.0).color(MARK));
                     }
+                    if (self.shuttle - 1.0).abs() > 1e-6 && self.playing {
+                        ui.label(RichText::new(format!("Navette {}{}×", if self.shuttle < 0.0 { "◀ " } else { "▶ " }, self.shuttle.abs())).size(12.0).color(BLUE));
+                    }
+                    if self.tool == Tool::Pen && !self.pen.is_empty() {
+                        ui.label(RichText::new(format!("Plume : {} point(s) · Entrée pour fermer · Échap pour annuler", self.pen.len())).size(12.0).color(BLUE));
+                    }
                 }
+                let mut open_dir = None;
                 if let Some(j) = &self.job
                     && j.done.load(Ordering::Relaxed) == usize::MAX
                 {
                     match j.error.lock().ok().and_then(|e| e.clone()) {
-                        Some(e) => ui.label(RichText::new(format!("Export : {e}")).size(12.0).color(RED)),
-                        None => ui.label(RichText::new(format!("Exporté : {}", j.path.display())).size(12.0).color(GREEN)),
-                    };
+                        Some(e) => {
+                            ui.label(RichText::new(format!("Export : {e}")).size(12.0).color(RED));
+                        }
+                        None => {
+                            ui.label(RichText::new(format!("Exporté : {}", j.path.display())).size(12.0).color(GREEN));
+                            if ui.small_button("Afficher").clicked() {
+                                open_dir = Some(j.path.clone());
+                            }
+                        }
+                    }
+                }
+                if let Some(p) = open_dir {
+                    let _ = std::process::Command::new("explorer").arg(format!("/select,{}", p.display())).spawn();
                 }
                 if let Some(e) = self.error.clone() {
                     ui.label(RichText::new(e).size(12.0).color(RED));
@@ -1274,7 +2227,8 @@ impl Cut {
                 }
                 if !self.home {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.label(small(if self.snap { "Magnétisme activé".into() } else { "Magnétisme désactivé".into() }));
+                        let tool = GROUPS.iter().flat_map(|g| g.1.iter()).find(|x| x.0 == self.tool).map_or("", |x| x.1);
+                        ui.label(small(format!("{tool} · {}", if self.snap { "Magnétisme activé" } else { "Magnétisme désactivé" })));
                     });
                 }
             });
@@ -1307,7 +2261,7 @@ impl Cut {
                     ui.add_space(8.0);
                     ui.vertical(|ui| {
                         ui.label(RichText::new("Bienvenue dans Cut").font(semibold(28.0)).color(INK_STRONG));
-                        ui.label(RichText::new("Monte, coupe, étalonne et exporte tes vidéos en MP4").color(MUTED));
+                        ui.label(RichText::new("Monte, coupe, étalonne et exporte tes vidéos").color(MUTED));
                     });
                 });
                 ui.add_space(28.0);
@@ -1316,9 +2270,9 @@ impl Cut {
                 let mut chosen = None;
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = vec2(14.0, 14.0);
-                    for (name, kind, w, h) in PRESETS {
-                        if preset_card(ui, name, &format!("{w} × {h} · {kind}"), w as f32, h as f32).clicked() {
-                            chosen = Some((w, h));
+                    for (name, kind, w, h) in PRESETS.iter().take(8) {
+                        if preset_card(ui, name, &format!("{w} × {h} · {kind}"), *w as f32, *h as f32).clicked() {
+                            chosen = Some((*w, *h));
                         }
                     }
                 });
@@ -1332,8 +2286,8 @@ impl Cut {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 110.0), Sense::hover());
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose des vidéos ou de la musique n'importe où", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "MP4, MOV, MKV, MP3, WAV, M4A…", FontId::proportional(13.0), MUTED);
+                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose des vidéos, des photos ou de la musique n'importe où", semibold(15.0), INK);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…", FontId::proportional(13.0), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -1358,6 +2312,7 @@ impl Cut {
 
     fn bin(&mut self, root: &mut Ui, ctx: &egui::Context) {
         egui::Panel::left("bin").resizable(false).exact_size(272.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(12, 12))).show(root, |ui| {
+            let mut gen_k = None;
             ui.horizontal(|ui| {
                 ui.label(RichText::new("Médias").font(semibold(13.5)).color(INK_STRONG));
                 ui.label(RichText::new(self.proj.sources.len().to_string()).size(12.0).color(FAINT));
@@ -1365,23 +2320,67 @@ impl Cut {
                     if pro::secondary_icon(ui, "", |p, r, c| glyph(p, r, G::Plus, c)).on_hover_text("Importer des médias (Ctrl+I)").clicked() {
                         self.import_dialog(ctx);
                     }
+                    ui.menu_button(RichText::new("✦").color(MUTED), |ui| {
+                        ui.label(RichText::new("Nouvel élément").size(12.0).color(FAINT));
+                        for (k, (_, name)) in GENERATORS.iter().enumerate() {
+                            if ui.button(*name).clicked() {
+                                gen_k = Some(k);
+                                ui.close();
+                            }
+                        }
+                    })
+                    .response
+                    .on_hover_text("Nouvel élément : cache couleur, dégradé, mire…");
                 });
             });
+            if let Some(k) = gen_k {
+                self.add_generator(k);
+            }
             ui.add_space(8.0);
             ui.horizontal(|ui| {
                 ui.add(egui::TextEdit::singleline(&mut self.bin_query).hint_text("Rechercher").desired_width(ui.available_width() - 84.0));
                 pro::segmented(ui, &mut self.bin_list, &["▦", "☰"]);
+            });
+            ui.add_space(6.0);
+            ui.horizontal(|ui| {
+                pro::segmented(ui, &mut self.bin_filter, &["Tout", "Vidéo", "Son", "Image"]);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    ui.menu_button(RichText::new("⇅").color(MUTED), |ui| {
+                        ui.label(RichText::new("Trier par").size(12.0).color(FAINT));
+                        for (k, n) in ["Ordre d'import", "Nom", "Durée", "Type", "Étiquette"].iter().enumerate() {
+                            if ui.selectable_label(self.bin_sort == k, *n).clicked() {
+                                self.bin_sort = k;
+                                ui.close();
+                            }
+                        }
+                    })
+                    .response
+                    .on_hover_text("Trier les médias");
+                });
             });
             ui.add_space(8.0);
             if self.proj.sources.is_empty() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 120.0), Sense::hover());
                 ui.painter().rect(r, CornerRadius::same(10), Color32::from_white_alpha(3), Stroke::new(1.0, LINE), StrokeKind::Inside);
                 ui.painter().text(r.center() - vec2(0.0, 8.0), Align2::CENTER_CENTER, "Glisse tes fichiers ici", semibold(13.0), INK);
-                ui.painter().text(r.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, "Vidéos et musiques", FontId::proportional(11.5), FAINT);
+                ui.painter().text(r.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, "Vidéos, photos et musiques", FontId::proportional(11.5), FAINT);
                 return;
             }
             let q = self.bin_query.to_lowercase();
-            let items: Vec<usize> = (0..self.proj.sources.len()).filter(|i| q.is_empty() || self.proj.sources[*i].name().to_lowercase().contains(&q)).collect();
+            let mut items: Vec<usize> = (0..self.proj.sources.len())
+                .filter(|i| {
+                    let s = &self.proj.sources[*i];
+                    (q.is_empty() || s.name().to_lowercase().contains(&q)) && (self.bin_filter == 0 || s.kind() as usize + 1 == self.bin_filter)
+                })
+                .collect();
+            let srcs = &self.proj.sources;
+            match self.bin_sort {
+                1 => items.sort_by_key(|i| srcs[*i].name().to_lowercase()),
+                2 => items.sort_by(|a, b| srcs[*b].duration.total_cmp(&srcs[*a].duration)),
+                3 => items.sort_by_key(|i| srcs[*i].kind()),
+                4 => items.sort_by_key(|i| (srcs[*i].label == 0, srcs[*i].label)),
+                _ => {}
+            }
             let mut action: Option<(u8, usize)> = None;
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 if self.bin_list == 1 {
@@ -1393,8 +2392,9 @@ impl Cut {
                         }
                         let pic = Rect::from_min_size(r.min + vec2(4.0, 6.0), vec2(56.0, 32.0));
                         self.media_thumb(ui.painter(), pic, i);
+                        self.label_tag(ui.painter(), pic, i);
                         ui.painter().text(pic.right_top() + vec2(10.0, 2.0), Align2::LEFT_TOP, short(&s.name(), 22), FontId::proportional(12.5), INK);
-                        ui.painter().text(pic.right_bottom() + vec2(10.0, -2.0), Align2::LEFT_BOTTOM, format!("{} · {}", if s.has_video { format!("{}×{}", s.width, s.height) } else { "Audio".into() }, tc(s.duration, 30)), FontId::proportional(11.0), FAINT);
+                        ui.painter().text(pic.right_bottom() + vec2(10.0, -2.0), Align2::LEFT_BOTTOM, format!("{} · {}{}", kind_label(s), if s.kind() == 2 { "image".into() } else { tc(s.duration, 30) }, match self.uses(i) { 0 => String::new(), n => format!(" · {n}×") }), FontId::proportional(11.0), FAINT);
                         let resp = resp.on_hover_text(media_info(s));
                         if resp.double_clicked() {
                             action = Some((0, i));
@@ -1411,10 +2411,14 @@ impl Cut {
                                 let (r, resp) = ui.allocate_exact_size(vec2(w, w * 0.56 + 38.0), Sense::click());
                                 let pic = Rect::from_min_size(r.min, vec2(w, w * 0.56));
                                 self.media_thumb(ui.painter(), pic, i);
+                                self.label_tag(ui.painter(), pic, i);
                                 let p = ui.painter();
                                 let tag = Rect::from_min_size(pic.right_bottom() - vec2(50.0, 21.0), vec2(46.0, 17.0));
                                 p.rect_filled(tag, CornerRadius::same(5), Color32::from_black_alpha(170));
-                                p.text(tag.center(), Align2::CENTER_CENTER, tc(s.duration, 30).chars().take(5).collect::<String>(), FontId::proportional(10.5), Color32::WHITE);
+                                p.text(tag.center(), Align2::CENTER_CENTER, if s.kind() == 2 { "Image".to_string() } else { tc(s.duration, 30).chars().take(5).collect::<String>() }, FontId::proportional(10.5), Color32::WHITE);
+                                if self.uses(i) > 0 {
+                                    p.circle_filled(pic.left_bottom() + vec2(10.0, -10.0), 4.0, GREEN);
+                                }
                                 if resp.hovered() {
                                     p.rect_stroke(pic, CornerRadius::same(8), Stroke::new(1.5, BLUE), StrokeKind::Inside);
                                     let plus = Rect::from_min_size(pic.right_top() + vec2(-26.0, 4.0), Vec2::splat(22.0));
@@ -1422,7 +2426,7 @@ impl Cut {
                                     glyph(p, plus.shrink(5.0), G::Plus, Color32::WHITE);
                                 }
                                 p.text(pos2(r.left() + 2.0, pic.bottom() + 8.0), Align2::LEFT_TOP, short(&s.name(), (w / 7.2) as usize), FontId::proportional(12.0), INK);
-                                p.text(pos2(r.left() + 2.0, pic.bottom() + 23.0), Align2::LEFT_TOP, if s.has_video { format!("{} × {}", s.width, s.height) } else { "Audio".into() }, FontId::proportional(10.5), FAINT);
+                                p.text(pos2(r.left() + 2.0, pic.bottom() + 23.0), Align2::LEFT_TOP, kind_label(s), FontId::proportional(10.5), FAINT);
                                 let resp = resp.on_hover_text(media_info(s));
                                 let plus_hit = resp.interact_pointer_pos().is_some_and(|pp| pp.x > pic.right() - 28.0 && pp.y < pic.top() + 28.0);
                                 if resp.double_clicked() || (resp.clicked() && plus_hit) {
@@ -1442,9 +2446,22 @@ impl Cut {
                     let _ = std::process::Command::new("explorer").arg(format!("/select,{}", self.proj.sources[i].path)).spawn();
                 }
                 Some((3, i)) => self.remove_source(i),
+                Some((4, i)) => self.insert_source(i),
+                Some((5, i)) => self.overlay_source(i),
+                Some((6, i)) => self.replace_source(i),
+                Some((7, i)) => self.relink(i, ctx),
+                Some((k, i)) if k >= 20 => self.proj.sources[i].label = k - 20,
                 _ => {}
             }
         });
+    }
+
+    fn label_tag(&self, p: &Painter, pic: Rect, i: usize) {
+        let l = self.proj.sources[i].label;
+        if l > 0 {
+            let rgb = LABELS[(l as usize - 1) % LABELS.len()].1;
+            p.rect_filled(Rect::from_min_size(pic.left_top() + vec2(4.0, 4.0), vec2(4.0, 14.0)), CornerRadius::same(2), Color32::from_rgb(rgb[0], rgb[1], rgb[2]));
+        }
     }
 
     fn media_thumb(&self, p: &Painter, pic: Rect, i: usize) {
@@ -1467,329 +2484,52 @@ impl Cut {
         }
     }
 
-    fn inspector(&mut self, root: &mut Ui) {
-        egui::Panel::right("inspector").resizable(false).exact_size(296.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
-            let w = ui.available_width();
-            egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
-                ui.set_max_width(w);
-                ui.spacing_mut().item_spacing.y = 0.0;
-                match self.sel {
-                    Some(Sel::Clip(i)) if i < self.proj.clips.len() => self.clip_inspector(ui, i),
-                    Some(Sel::Music(i)) if i < self.proj.music.len() => self.music_inspector(ui, i),
-                    Some(Sel::Title(i)) if i < self.proj.titles.len() => self.title_inspector(ui, i),
-                    _ => self.sequence_inspector(ui),
-                }
-            });
-        });
-    }
-
-    fn clip_inspector(&mut self, ui: &mut Ui, i: usize) {
-        let src = self.proj.sources[self.proj.clips[i].src].clone();
-        Frame::new().inner_margin(Margin::symmetric(12, 10)).show(ui, |ui| {
-            ui.horizontal(|ui| {
-                let c = LABELS[self.proj.clips[i].label as usize % LABELS.len()].1;
-                let (r, _) = ui.allocate_exact_size(vec2(4.0, 30.0), Sense::hover());
-                ui.painter().rect_filled(r, CornerRadius::same(2), Color32::from_rgb(c[0], c[1], c[2]));
-                ui.vertical(|ui| {
-                    ui.label(RichText::new(short(&src.name(), 30)).font(semibold(13.5)).color(INK_STRONG));
-                    ui.label(RichText::new(format!("{} × {} · {:.0} i/s · {}", src.width, src.height, src.fps, tc(self.proj.clips[i].len(), self.proj.fps))).size(11.5).color(FAINT));
-                });
-            });
-            ui.add_space(8.0);
-            let mut tab = self.tab;
-            if pro::segmented(ui, &mut tab, &["Clip", "Image", "Couleur", "Audio"]) {
-                self.tab = tab;
-            }
-        });
-        let fps = self.proj.fps as f64;
-        let c = &mut self.proj.clips[i];
-        let mut reset = false;
-        match self.tab {
-            0 => {
-                pro::dock_panel(ui, "clip-time", "Durée et vitesse", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    field_time(ui, "Entrée", &mut c.inp, 0.0, c.out - 0.05);
-                    field_time(ui, "Sortie", &mut c.out, c.inp + 0.05, src.duration);
-                    row_slider(ui, "Vitesse", &mut c.speed, 0.25..=4.0, " ×", true);
-                    ui.horizontal_wrapped(|ui| {
-                        for v in [0.25, 0.5, 1.0, 1.5, 2.0, 4.0] {
-                            if ui.selectable_label((c.speed - v).abs() < 1e-3, format!("{v}×")).clicked() {
-                                c.speed = v;
-                            }
-                        }
-                    });
-                    let mut frozen = c.hold > 0.0;
-                    if ui.checkbox(&mut frozen, "Image figée").changed() {
-                        c.hold = if frozen { 2.0 } else { 0.0 };
-                        if frozen {
-                            c.out = (c.inp + 1.0 / fps).min(src.duration);
-                        }
-                    }
-                    if c.hold > 0.0 {
-                        field_time(ui, "Durée figée", &mut c.hold, 0.1, 60.0);
-                    }
-                });
-                pro::dock_panel(ui, "clip-trans", "Transitions", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    let len = c.len();
-                    row_slider(ui, "Fondu d'entrée", &mut c.fade_in, 0.0..=len.min(5.0), " s", false);
-                    row_slider(ui, "Fondu de sortie", &mut c.fade_out, 0.0..=len.min(5.0), " s", false);
-                    let mut white = c.fade_white as usize;
-                    ui.horizontal(|ui| {
-                        ui.label(RichText::new("Fondu vers").size(12.5).color(MUTED));
-                        if pro::segmented(ui, &mut white, &["Noir", "Blanc"]) {
-                            c.fade_white = white == 1;
-                        }
-                    });
-                });
-                pro::dock_panel(ui, "clip-label", "Étiquette", |ui| {
-                    ui.horizontal(|ui| {
-                        for (k, (name, rgb)) in LABELS.iter().enumerate() {
-                            let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
-                            ui.painter().circle_filled(r.center(), 8.0, Color32::from_rgb(rgb[0], rgb[1], rgb[2]));
-                            if c.label as usize == k {
-                                ui.painter().circle_stroke(r.center(), 10.5, Stroke::new(1.5, Color32::WHITE));
-                            }
-                            if resp.on_hover_text(*name).clicked() {
-                                c.label = k as u8;
-                            }
-                        }
-                    });
-                });
-            }
-            1 => {
-                pro::dock_panel(ui, "clip-frame", "Cadrage", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    pct_slider(ui, "Échelle", &mut c.zoom, 0.1..=4.0);
-                    let mut kb = c.zoom_end > 0.0;
-                    if ui.checkbox(&mut kb, "Zoom progressif (Ken Burns)").changed() {
-                        c.zoom_end = if kb { c.zoom * 1.15 } else { 0.0 };
-                    }
-                    if c.zoom_end > 0.0 {
-                        pct_slider(ui, "Échelle finale", &mut c.zoom_end, 0.1..=4.0);
-                    }
-                    row_slider(ui, "Position X", &mut c.pos_x, -1.0..=1.0, "", false);
-                    row_slider(ui, "Position Y", &mut c.pos_y, -1.0..=1.0, "", false);
-                    row_slider(ui, "Rotation", &mut c.rotation, -180.0..=180.0, "°", false);
-                    ui.horizontal(|ui| {
-                        if ui.small_button("↺ 90°").clicked() {
-                            c.rotation = (c.rotation - 90.0 + 540.0) % 360.0 - 180.0;
-                        }
-                        if ui.small_button("↻ 90°").clicked() {
-                            c.rotation = (c.rotation + 90.0 + 540.0) % 360.0 - 180.0;
-                        }
-                        ui.checkbox(&mut c.flip, "Miroir");
-                    });
-                    pct_slider(ui, "Opacité", &mut c.opacity, 0.0..=1.0);
-                });
-                pro::dock_panel(ui, "clip-crop", "Recadrage", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    for (k, label) in ["Gauche", "Haut", "Droite", "Bas"].into_iter().enumerate() {
-                        pct_slider(ui, label, &mut c.crop[k], 0.0..=0.45);
-                    }
-                });
-                pro::dock_panel(ui, "clip-fx", "Effets", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    row_slider(ui, "Flou", &mut c.blur, 0.0..=100.0, "", false);
-                    row_slider(ui, "Vignettage", &mut c.vignette, -100.0..=100.0, "", false);
-                    ui.add_space(4.0);
-                    if pro::secondary(ui, "Réinitialiser l'image").clicked() {
-                        reset = true;
-                    }
-                });
-            }
-            2 => {
-                pro::dock_panel(ui, "clip-look", "Look", |ui| {
-                    ui.horizontal_wrapped(|ui| {
-                        for (k, name) in LOOKS.iter().enumerate() {
-                            if ui.selectable_label(c.look as usize == k, *name).clicked() {
-                                c.look = k as u8;
-                            }
-                        }
-                    });
-                });
-                pro::dock_panel(ui, "clip-grade", "Correction", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    for (label, v) in [("Luminosité", &mut c.brightness), ("Contraste", &mut c.contrast), ("Saturation", &mut c.saturation), ("Température", &mut c.temperature), ("Teinte", &mut c.tint)] {
-                        row_slider(ui, label, v, -100.0..=100.0, "", false);
-                    }
-                    ui.add_space(4.0);
-                    if pro::secondary(ui, "Réinitialiser la couleur").clicked() {
-                        (c.brightness, c.contrast, c.saturation, c.temperature, c.tint, c.look) = (0.0, 0.0, 0.0, 0.0, 0.0, 0);
-                    }
-                });
-            }
-            _ => {
-                pro::dock_panel(ui, "clip-audio", "Son du clip", |ui| {
-                    ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.checkbox(&mut c.mute, "Couper le son du clip");
-                    let mut db = 20.0 * c.volume.max(1e-4).log10();
-                    if row_slider(ui, "Volume", &mut db, -40.0..=12.0, " dB", false) {
-                        c.volume = 10f32.powf(db / 20.0);
-                    }
-                    row_slider(ui, "Balance", &mut c.pan, -1.0..=1.0, "", false);
-                    if c.hold > 0.0 {
-                        ui.label(RichText::new("Une image figée n'a pas de son.").size(12.0).color(FAINT));
-                    }
-                });
-            }
-        }
-        if reset {
-            c.reset_look();
-        }
-    }
-
-    fn music_inspector(&mut self, ui: &mut Ui, i: usize) {
-        let src = self.proj.sources[self.proj.music[i].src].clone();
-        let m = &mut self.proj.music[i];
-        pro::dock_panel(ui, "music", "Musique", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.label(RichText::new(short(&src.name(), 30)).font(semibold(13.5)).color(INK));
-            field_time(ui, "Début", &mut m.start, 0.0, 36000.0);
-            field_time(ui, "Entrée", &mut m.inp, 0.0, m.out - 0.05);
-            field_time(ui, "Sortie", &mut m.out, m.inp + 0.05, src.duration);
-        });
-        pro::dock_panel(ui, "music-mix", "Mixage", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.checkbox(&mut m.mute, "Couper");
-            let mut db = 20.0 * m.volume.max(1e-4).log10();
-            if row_slider(ui, "Volume", &mut db, -40.0..=12.0, " dB", false) {
-                m.volume = 10f32.powf(db / 20.0);
-            }
-            row_slider(ui, "Balance", &mut m.pan, -1.0..=1.0, "", false);
-            let len = m.out - m.inp;
-            row_slider(ui, "Fondu d'entrée", &mut m.fade_in, 0.0..=len.min(10.0), " s", false);
-            row_slider(ui, "Fondu de sortie", &mut m.fade_out, 0.0..=len.min(10.0), " s", false);
-        });
-    }
-
-    fn title_inspector(&mut self, ui: &mut Ui, i: usize) {
-        let t = &mut self.proj.titles[i];
-        pro::dock_panel(ui, "title-text", "Texte", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.add(egui::TextEdit::multiline(&mut t.text).desired_rows(3).desired_width(f32::INFINITY));
-            ui.horizontal(|ui| {
-                ui.label(RichText::new("Police").size(12.5).color(MUTED));
-                egui::ComboBox::from_id_salt("font").selected_text(FONTS[t.font as usize % FONTS.len()].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
-                    for (k, (name, _)) in FONTS.iter().enumerate() {
-                        ui.selectable_value(&mut t.font, k as u8, *name);
-                    }
-                });
-            });
-            pct_slider(ui, "Taille", &mut t.size, 0.02..=0.3);
-            ui.horizontal(|ui| {
-                ui.label(RichText::new("Couleur").size(12.5).color(MUTED));
-                let mut col = Color32::from_rgba_unmultiplied(t.color[0], t.color[1], t.color[2], t.color[3]);
-                if ui.color_edit_button_srgba(&mut col).changed() {
-                    t.color = col.to_srgba_unmultiplied();
-                }
-                ui.checkbox(&mut t.shadow, "Ombre");
-                ui.checkbox(&mut t.band, "Bandeau");
-            });
-        });
-        pro::dock_panel(ui, "title-place", "Position et durée", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            let mut place = t.place as usize;
-            if pro::segmented(ui, &mut place, &["Haut", "Centre", "Bas", "Tiers"]) {
-                t.place = place as u8;
-            }
-            row_slider(ui, "Décalage X", &mut t.dx, -0.5..=0.5, "", false);
-            row_slider(ui, "Décalage Y", &mut t.dy, -0.5..=0.5, "", false);
-            field_time(ui, "Début", &mut t.start, 0.0, 36000.0);
-            field_time(ui, "Durée", &mut t.dur, 0.2, 600.0);
-        });
-        pro::dock_panel(ui, "title-anim", "Animation", |ui| {
-            ui.horizontal_wrapped(|ui| {
-                for (k, name) in ANIMS.iter().enumerate() {
-                    if ui.selectable_label(t.anim as usize == k, *name).clicked() {
-                        t.anim = k as u8;
-                    }
-                }
-            });
-            ui.label(RichText::new(PLACES.join(" · ")).size(1.0).color(Color32::TRANSPARENT));
-        });
-    }
-
-    fn sequence_inspector(&mut self, ui: &mut Ui) {
-        pro::dock_panel(ui, "sequence", "Séquence", |ui| {
-            ui.spacing_mut().item_spacing.y = 5.0;
-            pro::label_value(ui, "Format", &format!("{} × {}", self.proj.width, self.proj.height));
-            pro::label_value(ui, "Images/s", &self.proj.fps.to_string());
-            pro::label_value(ui, "Durée", &tc(self.proj.duration(), self.proj.fps));
-            pro::label_value(ui, "Clips · titres · musiques", &format!("{} · {} · {}", self.proj.clips.len(), self.proj.titles.len(), self.proj.music.len()));
-            ui.add_space(6.0);
-            if pro::secondary(ui, "Réglages de la séquence…").clicked() {
-                self.seq_sheet = true;
-            }
-        });
-        pro::dock_panel(ui, "quick", "Ajouter", |ui| {
-            ui.horizontal_wrapped(|ui| {
-                if pro::secondary_icon(ui, "Titre", |p, r, c| glyph(p, r, G::Title, c)).clicked() {
-                    self.add_title();
-                }
-                if pro::secondary_icon(ui, "Marqueur", |p, r, c| glyph(p, r, G::Marker, c)).clicked() {
-                    self.add_marker();
-                }
-            });
-        });
-        if !self.proj.markers.is_empty() {
-            let fps = self.proj.fps;
-            let mut go = None;
-            pro::dock_panel(ui, "markers", "Marqueurs", |ui| {
-                for (k, m) in self.proj.markers.iter().enumerate() {
-                    if pro::ghost(ui, &format!("◆  {}   {}", k + 1, tc(*m, fps))).clicked() {
-                        go = Some(*m);
-                    }
-                }
-            });
-            if let Some(m) = go {
-                self.seek(m);
-            }
-        }
-        pro::dock_panel(ui, "shortcuts", "Raccourcis", |ui| {
-            for (k, d) in [("Espace", "Lecture"), ("J K L", "Reculer · pause · lire"), ("S", "Scinder"), ("Q / W", "Rogner début / fin"), ("I / O", "Entrée / sortie"), ("M", "Marqueur"), ("T", "Titre"), ("↑ ↓", "Point de montage"), ("N", "Magnétisme"), ("F", "Mode visionneuse")] {
-                ui.horizontal(|ui| {
-                    pro::kbd(ui, k);
-                    ui.label(RichText::new(d).size(12.0).color(MUTED));
-                });
-            }
-            ui.add_space(4.0);
-            if pro::ghost(ui, "Tous les tutoriels  →").clicked() {
-                self.help.learn("Lecture et navigation");
-            }
-        });
-    }
-
     fn viewer(&mut self, root: &mut Ui) {
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD)).show(root, |ui| {
             let full = ui.max_rect();
             let head = Rect::from_min_size(full.min, vec2(full.width(), 34.0));
             ui.painter().text(head.left_center() + vec2(16.0, 0.0), Align2::LEFT_CENTER, "Programme", semibold(12.5), INK);
-            if let Some((i, _)) = self.proj.clip_at(self.t) {
+            if let Some((i, _)) = self.proj.local_at(self.t) {
                 let src = &self.proj.sources[self.proj.clips[i].src];
                 ui.painter().text(head.left_center() + vec2(100.0, 0.0), Align2::LEFT_CENTER, short(&src.name(), 40), FontId::proportional(12.0), FAINT);
             }
             let controls_h = 62.0;
-            let screen = Rect::from_min_max(pos2(full.left() + 16.0, head.bottom()), pos2(full.right() - 16.0, full.bottom() - controls_h));
+            let screen = Rect::from_min_max(pos2(full.left() + 16.0, head.bottom()), pos2(full.right() - 34.0, full.bottom() - controls_h));
             let (w, h) = (self.proj.width as f32, self.proj.height as f32);
             let s = (screen.width() / w).min(screen.height() / h);
             let frame = Rect::from_center_size(screen.center(), vec2(w, h) * s);
             let p = ui.painter();
             p.add(egui::epaint::Shadow { offset: [0, 8], blur: 28, spread: 0, color: Color32::from_black_alpha(150) }.as_shape(frame, CornerRadius::same(6)));
             p.rect_filled(frame, CornerRadius::same(6), Color32::BLACK);
-            if let (Some(t), Some(_)) = (&self.tex, self.shown) {
+            if let (Some(t), true) = (&self.tex, self.shown) {
                 p.image(t.id(), frame, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             } else if self.proj.clips.is_empty() {
                 p.text(frame.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Importe une vidéo pour commencer", semibold(16.0), INK);
                 p.text(frame.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Glisse un fichier ici ou Ctrl+I", FontId::proportional(12.5), MUTED);
             }
+            let guide = Stroke::new(1.0, Color32::from_white_alpha(70));
             if self.safe {
                 for k in [0.9, 0.8] {
-                    p.rect_stroke(Rect::from_center_size(frame.center(), frame.size() * k), CornerRadius::ZERO, Stroke::new(1.0, Color32::from_white_alpha(70)), StrokeKind::Middle);
+                    p.rect_stroke(Rect::from_center_size(frame.center(), frame.size() * k), CornerRadius::ZERO, guide, StrokeKind::Middle);
                 }
-                p.line_segment([frame.center() - vec2(8.0, 0.0), frame.center() + vec2(8.0, 0.0)], Stroke::new(1.0, Color32::from_white_alpha(90)));
-                p.line_segment([frame.center() - vec2(0.0, 8.0), frame.center() + vec2(0.0, 8.0)], Stroke::new(1.0, Color32::from_white_alpha(90)));
+                p.line_segment([frame.center() - vec2(8.0, 0.0), frame.center() + vec2(8.0, 0.0)], guide);
+                p.line_segment([frame.center() - vec2(0.0, 8.0), frame.center() + vec2(0.0, 8.0)], guide);
             }
+            if self.grid {
+                for k in [1.0 / 3.0, 2.0 / 3.0] {
+                    p.line_segment([pos2(frame.left() + frame.width() * k, frame.top()), pos2(frame.left() + frame.width() * k, frame.bottom())], guide);
+                    p.line_segment([pos2(frame.left(), frame.top() + frame.height() * k), pos2(frame.right(), frame.top() + frame.height() * k)], guide);
+                }
+            }
+            if self.guides {
+                let vw = (frame.height() * 9.0 / 16.0).min(frame.width());
+                let r = Rect::from_center_size(frame.center(), vec2(vw, frame.height()));
+                p.rect_filled(Rect::from_min_max(frame.min, pos2(r.left(), frame.bottom())), CornerRadius::ZERO, Color32::from_black_alpha(110));
+                p.rect_filled(Rect::from_min_max(pos2(r.right(), frame.top()), frame.max), CornerRadius::ZERO, Color32::from_black_alpha(110));
+                p.rect_stroke(r, CornerRadius::ZERO, Stroke::new(1.0, BLUE), StrokeKind::Middle);
+            }
+            self.viewer_tools(ui, frame);
+            self.meter(ui, Rect::from_min_max(pos2(full.right() - 26.0, head.bottom() + 6.0), pos2(full.right() - 12.0, full.bottom() - controls_h - 6.0)));
 
             let bar = Rect::from_min_max(pos2(full.left() + 16.0, full.bottom() - controls_h + 10.0), pos2(full.right() - 16.0, full.bottom() - 10.0));
             let p = ui.painter();
@@ -1809,7 +2549,10 @@ impl Cut {
                     match kind {
                         0 => self.jump(-1),
                         1 => self.seek(self.t - step),
-                        2 => self.set_playing(!self.playing),
+                        2 => {
+                            self.shuttle = 1.0;
+                            self.set_playing(!self.playing);
+                        }
                         3 => self.seek(self.t + step),
                         _ => self.jump(1),
                     }
@@ -1825,6 +2568,9 @@ impl Cut {
                     if pro::icon_button(ui, 30.0, self.safe, "Zones de sécurité", |p, r, c| glyph(p, r, G::Safe, c)).clicked() {
                         self.safe = !self.safe;
                     }
+                    if pro::icon_button(ui, 30.0, self.grid, "Grille des tiers", |p, r, c| glyph(p, r, G::Grid, c)).clicked() {
+                        self.grid = !self.grid;
+                    }
                     if pro::icon_button(ui, 30.0, self.looping, "Lecture en boucle (entre entrée et sortie)", |p, r, c| glyph(p, r, G::Loop, c)).clicked() {
                         self.looping = !self.looping;
                     }
@@ -1835,7 +2581,7 @@ impl Cut {
                         self.mark_in = Some(self.t);
                     }
                     pro::toolbar_sep(ui);
-                    ui.spacing_mut().slider_width = 70.0;
+                    ui.spacing_mut().slider_width = 60.0;
                     ui.add(egui::Slider::new(&mut self.volume, 0.0..=1.5).show_value(false)).on_hover_text("Volume d'écoute");
                     let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
                     speaker(ui.painter(), r.center(), self.volume == 0.0, if resp.hovered() { INK_STRONG } else { MUTED });
@@ -1847,541 +2593,319 @@ impl Cut {
         });
     }
 
-    fn timeline(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("timeline").resizable(true).default_size(320.0).min_size(250.0).frame(Frame::new().fill(PANEL).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
-            let head_h = 42.0;
-            let full = ui.max_rect();
-            let head = Rect::from_min_size(full.min, vec2(full.width(), head_h));
-            ui.painter().rect_filled(head, CornerRadius::ZERO, CHROME);
-            ui.painter().line_segment([head.left_bottom(), head.right_bottom()], Stroke::new(1.0, LINE));
-            ui.scope_builder(egui::UiBuilder::new().max_rect(head.shrink2(vec2(10.0, 6.0))), |ui| {
-                ui.horizontal_centered(|ui| {
-                    ui.spacing_mut().item_spacing.x = 2.0;
-                    for (tool, tip, g) in TOOLS {
-                        if pro::icon_button(ui, 30.0, self.tool == tool, tip, |p, r, c| glyph(p, r, g, c)).clicked() {
-                            self.select_tool(tool);
-                        }
-                    }
-                    pro::toolbar_sep(ui);
-                    let actions: [(G, &str, u8); 5] = [(G::Split, "Scinder à la tête de lecture (S)", 0), (G::Trash, "Supprimer la sélection (Suppr)", 1), (G::Freeze, "Figer l'image 2 s (Ctrl+Maj+F)", 2), (G::Title, "Ajouter un titre (T)", 3), (G::Marker, "Ajouter un marqueur (M)", 4)];
-                    for (g, tip, k) in actions {
-                        if pro::icon_button(ui, 30.0, false, tip, |p, r, c| glyph(p, r, g, c)).clicked() {
-                            match k {
-                                0 => {
-                                    self.proj.split(self.t);
-                                }
-                                1 => self.delete_sel(),
-                                2 => self.freeze_frame(),
-                                3 => self.add_title(),
-                                _ => self.add_marker(),
-                            }
-                        }
-                    }
-                    pro::toolbar_sep(ui);
-                    if pro::icon_button(ui, 30.0, self.snap, "Magnétisme (N)", |p, r, c| glyph(p, r, G::Magnet, c)).clicked() {
-                        self.snap = !self.snap;
-                    }
-                    if pro::icon_button(ui, 30.0, self.show_thumbs, "Vignettes", |p, r, c| glyph(p, r, G::Film, c)).clicked() {
-                        self.show_thumbs = !self.show_thumbs;
-                    }
-                    if pro::icon_button(ui, 30.0, self.show_waves, "Formes d'onde", |p, r, c| glyph(p, r, G::Wave, c)).clicked() {
-                        self.show_waves = !self.show_waves;
-                    }
-                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.spacing_mut().item_spacing.x = 4.0;
-                        if pro::icon_button(ui, 28.0, false, "Ajuster à la fenêtre (\\)", |p, r, c| glyph(p, r, G::Fit, c)).clicked() {
-                            self.pps = 0.0;
-                        }
-                        if pro::icon_button(ui, 28.0, false, "Zoom avant (+)", |p, r, c| glyph(p, r, G::Plus, c)).clicked() {
-                            self.pps = (self.pps * 1.4).min(600.0);
-                        }
-                        ui.spacing_mut().slider_width = 120.0;
-                        ui.add(egui::Slider::new(&mut self.pps, 2.0..=600.0).logarithmic(true).show_value(false));
-                        if pro::icon_button(ui, 28.0, false, "Zoom arrière (−)", |p, r, c| glyph(p, r, G::Minus, c)).clicked() {
-                            self.pps = (self.pps / 1.4).max(2.0);
-                        }
-                    });
-                });
-            });
-
-            let label_w = 148.0;
-            let body = Rect::from_min_max(pos2(full.left(), head.bottom()), full.max);
-            if self.pps <= 0.0 {
-                self.pps = ((body.width() - label_w - 40.0) / self.proj.duration().max(5.0) as f32).clamp(2.0, 600.0);
-                self.force_scroll = Some(0.0);
+    fn meter(&self, ui: &mut Ui, r: Rect) {
+        let (mut l, mut rr) = (0f32, 0f32);
+        if let Ok(s) = self.audio.state.lock() {
+            let end = (self.t * OUT_RATE as f64) as usize;
+            let start = end.saturating_sub(OUT_RATE as usize / 20);
+            for k in start..end {
+                if k * 2 + 1 < s.mix.len() {
+                    l = l.max(s.mix[k * 2].abs());
+                    rr = rr.max(s.mix[k * 2 + 1].abs());
+                }
             }
-            let dur = self.proj.duration().max(10.0) + 8.0;
-            let ts = self.track_scale;
-            let mut sa = egui::ScrollArea::horizontal().auto_shrink(false);
-            if let Some(x) = self.force_scroll.take() {
-                sa = sa.horizontal_scroll_offset(x.max(0.0));
-            }
-            let out = ui.scope_builder(egui::UiBuilder::new().max_rect(body), |ui| sa.show(ui, |ui| {
-                let width = (dur as f32 * self.pps).max(ui.available_width() - label_w);
-                let (rect, _) = ui.allocate_exact_size(vec2(width + label_w, ui.available_height().max(170.0)), Sense::hover());
-                let x0 = rect.min.x + label_w;
-                let pps = self.pps;
-                let x_of = |t: f64| x0 + t as f32 * pps;
-                let t_of = |x: f32| ((x - x0) / pps).max(0.0) as f64;
-                let ruler = Rect::from_min_max(pos2(x0, rect.min.y), pos2(rect.max.x, rect.min.y + 26.0));
-                let t1 = Rect::from_min_max(pos2(x0, ruler.max.y + 6.0), pos2(rect.max.x, ruler.max.y + 6.0 + 30.0 * ts));
-                let v1 = Rect::from_min_max(pos2(x0, t1.max.y + 6.0), pos2(rect.max.x, t1.max.y + 6.0 + 76.0 * ts));
-                let a2 = Rect::from_min_max(pos2(x0, v1.max.y + 6.0), pos2(rect.max.x, v1.max.y + 6.0 + 50.0 * ts));
-                let p = ui.painter_at(rect);
-                p.rect_filled(ruler, CornerRadius::ZERO, WELL);
-                if let (Some(a), Some(b)) = (self.mark_in.or(Some(0.0)), self.mark_out.or(Some(self.proj.duration())))
-                    && (self.mark_in.is_some() || self.mark_out.is_some())
-                {
-                    let r = Rect::from_min_max(pos2(x_of(a.min(b)), ruler.min.y), pos2(x_of(a.max(b)), a2.max.y));
-                    p.rect_filled(r, CornerRadius::ZERO, MARK.gamma_multiply(0.06));
-                    p.rect_filled(Rect::from_min_max(pos2(r.left(), ruler.bottom() - 4.0), pos2(r.right(), ruler.bottom())), CornerRadius::ZERO, MARK.gamma_multiply(0.7));
-                }
-                let step = [0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0].into_iter().find(|s| *s as f32 * pps >= 80.0).unwrap_or(600.0);
-                let minor = step / 5.0;
-                let mut k = 0u64;
-                while k as f64 * minor <= dur {
-                    let tt = k as f64 * minor;
-                    let x = x_of(tt);
-                    let major = k % 5 == 0;
-                    k += 1;
-                    p.line_segment([pos2(x, ruler.max.y - if major { 10.0 } else { 4.0 }), pos2(x, ruler.max.y)], Stroke::new(1.0, if major { MUTED } else { FAINT }));
-                    if major {
-                        p.text(pos2(x + 4.0, ruler.min.y + 4.0), Align2::LEFT_TOP, tc(tt, self.proj.fps), FontId::monospace(10.0), MUTED);
-                    }
-                }
-                let tracks = [(t1, "T1", "Titres", 2u8), (v1, "V1", "Vidéo", 0), (a2, "A2", "Musique", 1)];
-                for (r, id, label, kind) in tracks {
-                    p.rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x19, 0x19, 0x1c));
-                    let head_r = Rect::from_min_max(pos2(rect.min.x + 6.0, r.min.y), pos2(x0 - 6.0, r.max.y));
-                    p.rect_filled(head_r, CornerRadius::same(6), CHROME);
-                    p.text(head_r.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, id, semibold(11.5), MUTED);
-                    p.text(head_r.left_center() + vec2(34.0, 0.0), Align2::LEFT_CENTER, label, FontId::proportional(12.0), INK);
-                    if kind < 2 {
-                        let muted = if kind == 0 { self.proj.mute_v1 } else { self.proj.mute_a2 };
-                        let mr = Rect::from_center_size(pos2(head_r.right() - 16.0, head_r.center().y), Vec2::splat(22.0));
-                        let mresp = ui.interact(mr, ui.make_persistent_id(("mute", kind)), Sense::click()).on_hover_text(if muted { "Réactiver le son de la piste" } else { "Couper le son de la piste" });
-                        if mresp.hovered() {
-                            p.rect_filled(mr, CornerRadius::same(5), FIELD);
-                        }
-                        speaker(&p, mr.center(), muted, if muted { RED } else if mresp.hovered() { INK } else { MUTED });
-                        if mresp.clicked() {
-                            if kind == 0 {
-                                self.proj.mute_v1 = !self.proj.mute_v1;
-                            } else {
-                                self.proj.mute_a2 = !self.proj.mute_a2;
-                            }
-                        }
-                    }
-                }
-                let rr = ui.interact(ruler, ui.make_persistent_id("ruler"), Sense::click_and_drag());
-                if let Some(pp) = rr.interact_pointer_pos() {
-                    let t = t_of(pp.x);
-                    let t = if ui.input(|i| i.modifiers.shift) { self.snap_time(t, 8.0 / pps as f64) } else { t };
-                    self.seek(t);
-                }
-                let snap_tol = 8.0 / pps as f64;
+        }
+        let vol = self.volume;
+        let p = ui.painter();
+        let db = |v: f32| ((20.0 * (v * vol).max(1e-5).log10() + 48.0) / 48.0).clamp(0.0, 1.0);
+        for (k, v) in [l, rr].into_iter().enumerate() {
+            let col = Rect::from_min_max(pos2(r.left() + k as f32 * 7.0, r.top()), pos2(r.left() + k as f32 * 7.0 + 5.0, r.bottom()));
+            p.rect_filled(col, CornerRadius::same(2), WELL);
+            let level = db(v);
+            let top = col.bottom() - col.height() * level;
+            let color = if level > 0.94 { RED } else if level > 0.8 { Color32::from_rgb(255, 196, 0) } else { GREEN };
+            p.rect_filled(Rect::from_min_max(pos2(col.left(), top), col.max), CornerRadius::same(2), color);
+        }
+        for mark in [0.0, -6.0, -12.0, -24.0, -36.0] {
+            let y = r.bottom() - r.height() * ((mark + 48.0) / 48.0);
+            p.line_segment([pos2(r.left() - 3.0, y), pos2(r.left() - 1.0, y)], Stroke::new(1.0, FAINT));
+        }
+        ui.interact(r, ui.make_persistent_id("meter"), Sense::hover()).on_hover_text("Niveau audio du programme (crête, dBFS)");
+        if self.playing {
+            ui.ctx().request_repaint();
+        }
+    }
 
-                for (i, tt) in self.proj.titles.clone().iter().enumerate() {
-                    let r = Rect::from_min_max(pos2(x_of(tt.start) + 1.0, t1.min.y + 3.0), pos2(x_of(tt.start + tt.dur) - 1.0, t1.max.y - 3.0));
-                    let on = self.sel == Some(Sel::Title(i));
-                    p.rect_filled(r, CornerRadius::same(5), TITLE.gamma_multiply(if on { 0.85 } else { 0.55 }));
-                    glyph(&p.with_clip_rect(r), Rect::from_min_size(r.left_center() + vec2(6.0, -6.0), Vec2::splat(12.0)), G::Title, Color32::WHITE);
-                    p.with_clip_rect(r.shrink(1.0)).text(r.left_center() + vec2(22.0, 0.0), Align2::LEFT_CENTER, tt.text.lines().next().unwrap_or(""), semibold(11.0), Color32::WHITE);
-                    if on {
-                        p.rect_stroke(r, CornerRadius::same(5), Stroke::new(2.0, Color32::WHITE), StrokeKind::Inside);
-                    }
-                    let resp = ui.interact(r, ui.make_persistent_id(("title", i)), Sense::click_and_drag());
-                    if resp.clicked() {
-                        self.sel = Some(Sel::Title(i));
-                    }
-                    if resp.drag_started()
-                        && let Some(pp) = resp.interact_pointer_pos()
-                    {
-                        let mode = if r.max.x - pp.x < 8.0 { 2 } else { 0 };
-                        self.drag = Some((Sel::Title(i), mode, t_of(pp.x), Clip { out: tt.dur, ..Clip::default() }, tt.start));
-                        self.sel = Some(Sel::Title(i));
-                    }
-                    if resp.hover_pos().is_some_and(|hp| r.max.x - hp.x < 8.0) {
-                        ui.ctx().set_cursor_icon(egui::CursorIcon::ResizeHorizontal);
-                    }
-                    resp.context_menu(|ui| {
-                        if ui.button("Dupliquer").clicked() {
-                            self.sel = Some(Sel::Title(i));
-                            self.duplicate();
-                            ui.close();
-                        }
-                        if ui.button("Supprimer").clicked() {
-                            self.sel = Some(Sel::Title(i));
-                            self.delete_sel();
-                            ui.close();
-                        }
-                    });
-                }
-
-                let starts = self.proj.starts();
-                for (i, c) in self.proj.clips.clone().iter().enumerate() {
-                    let r = Rect::from_min_max(pos2(x_of(starts[i]) + 1.0, v1.min.y + 3.0), pos2(x_of(starts[i] + c.len()) - 1.0, v1.max.y - 3.0));
-                    let on = self.sel == Some(Sel::Clip(i));
-                    let lc = LABELS[c.label as usize % LABELS.len()].1;
-                    let col = Color32::from_rgb(lc[0], lc[1], lc[2]);
-                    p.rect_filled(r, CornerRadius::same(6), col.gamma_multiply(if on { 0.7 } else { 0.45 }));
-                    let clip_p = p.with_clip_rect(r.shrink(1.0));
-                    let thumb_h = if self.show_waves && !c.mute { r.height() * 0.62 } else { r.height() };
-                    if self.show_thumbs
-                        && let Some(t) = self.thumbs.get(&c.src)
-                    {
-                        let [tw, th] = t.size();
-                        let tw_w = thumb_h * tw as f32 / th as f32;
-                        let mut x = r.left();
-                        while x < r.right() && x < r.left() + tw_w * 8.0 {
-                            clip_p.image(t.id(), Rect::from_min_size(pos2(x, r.top()), vec2(tw_w, thumb_h)), Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::from_white_alpha(if c.hold > 0.0 { 120 } else { 200 }));
-                            x += tw_w;
-                            if c.hold > 0.0 {
-                                break;
-                            }
-                        }
-                    }
-                    if self.show_waves
-                        && !c.mute
-                        && c.hold <= 0.0
-                        && let Some(data) = self.audio_data.get(&c.src)
-                    {
-                        let wave = Rect::from_min_max(pos2(r.left(), r.top() + thumb_h + 2.0), r.max);
-                        waveform(&clip_p, wave, data, c.inp, c.out, Color32::from_white_alpha(170));
-                    }
-                    let mut badge = String::new();
-                    if (c.speed - 1.0).abs() > 1e-3 && c.hold <= 0.0 {
-                        badge.push_str(&format!("  {:.2}×", c.speed));
-                    }
-                    if c.hold > 0.0 {
-                        badge.push_str("  ❄ figée");
-                    }
-                    if c.look != 0 || c.brightness != 0.0 || c.contrast != 0.0 || c.saturation != 0.0 {
-                        badge.push_str("  fx");
-                    }
-                    let name_bg = Rect::from_min_size(r.left_top() + vec2(4.0, 4.0), vec2((r.width() - 8.0).min(260.0).max(0.0), 18.0));
-                    clip_p.rect_filled(name_bg, CornerRadius::same(4), Color32::from_black_alpha(110));
-                    clip_p.text(name_bg.left_center() + vec2(6.0, 0.0), Align2::LEFT_CENTER, format!("{}{badge}", self.proj.sources[c.src].name()), semibold(11.0), Color32::WHITE);
-                    if c.fade_in > 0.0 {
-                        let fw = (c.fade_in as f32 * pps).min(r.width());
-                        clip_p.add(Shape::convex_polygon(vec![r.left_top(), pos2(r.left() + fw, r.top()), r.left_bottom()], Color32::from_black_alpha(90), Stroke::NONE));
-                    }
-                    if c.fade_out > 0.0 {
-                        let fw = (c.fade_out as f32 * pps).min(r.width());
-                        clip_p.add(Shape::convex_polygon(vec![r.right_top(), r.right_bottom(), pos2(r.right() - fw, r.top())], Color32::from_black_alpha(90), Stroke::NONE));
-                    }
-                    p.rect_stroke(r, CornerRadius::same(6), Stroke::new(if on { 2.0 } else { 1.0 }, if on { Color32::WHITE } else { col }), StrokeKind::Inside);
-                    let resp = ui.interact(r, ui.make_persistent_id(("clip", i)), Sense::click_and_drag());
-                    match self.tool {
-                        Tool::Blade => {
-                            if let Some(hp) = resp.hover_pos() {
-                                p.line_segment([pos2(hp.x, v1.min.y), pos2(hp.x, v1.max.y)], Stroke::new(1.5, Color32::WHITE));
-                            }
-                            if resp.clicked()
-                                && let Some(pp) = resp.interact_pointer_pos()
-                            {
-                                let t = self.snap_time(t_of(pp.x), snap_tol);
-                                self.proj.split(t);
-                            }
-                        }
-                        Tool::Hand | Tool::Zoom => {}
-                        _ => {
-                            if resp.clicked() {
-                                self.sel = Some(Sel::Clip(i));
-                            }
-                            if resp.drag_started()
-                                && let Some(pp) = resp.interact_pointer_pos()
-                            {
-                                let edge = if pp.x - r.min.x < 8.0 { 1 } else if r.max.x - pp.x < 8.0 { 2 } else { 0 };
-                                let mode = match self.tool {
-                                    Tool::Slip => 3,
-                                    Tool::Rate if edge == 2 => 4,
-                                    _ => edge,
-                                };
-                                self.drag = Some((Sel::Clip(i), mode, t_of(pp.x), c.clone(), starts[i]));
-                                self.sel = Some(Sel::Clip(i));
-                            }
-                            if let Some(hp) = resp.hover_pos() {
-                                if self.tool == Tool::Slip {
-                                    ui.ctx().set_cursor_icon(egui::CursorIcon::ResizeColumn);
-                                } else if hp.x - r.min.x < 8.0 || r.max.x - hp.x < 8.0 {
-                                    ui.ctx().set_cursor_icon(egui::CursorIcon::ResizeHorizontal);
-                                }
-                            }
-                        }
-                    }
-                    resp.context_menu(|ui| {
-                        self.sel = Some(Sel::Clip(i));
-                        if ui.button("Scinder à la tête de lecture").clicked() {
-                            self.proj.split(self.t);
-                            ui.close();
-                        }
-                        if ui.button("Dupliquer").clicked() {
-                            self.duplicate();
-                            ui.close();
-                        }
-                        if ui.button("Copier").clicked() {
-                            self.clip_board = Some(c.clone());
-                            ui.close();
-                        }
-                        if ui.button("Figer l'image à la tête").clicked() {
-                            self.freeze_frame();
-                            ui.close();
-                        }
-                        ui.menu_button("Vitesse", |ui| {
-                            for v in [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0] {
-                                if ui.button(format!("{v}×")).clicked() {
-                                    self.proj.clips[i].speed = v;
-                                    ui.close();
-                                }
-                            }
-                        });
-                        ui.menu_button("Look", |ui| {
-                            for (k, name) in LOOKS.iter().enumerate() {
-                                if ui.button(*name).clicked() {
-                                    self.proj.clips[i].look = k as u8;
-                                    ui.close();
-                                }
-                            }
-                        });
-                        ui.menu_button("Étiquette", |ui| {
-                            for (k, (name, _)) in LABELS.iter().enumerate() {
-                                if ui.button(*name).clicked() {
-                                    self.proj.clips[i].label = k as u8;
-                                    ui.close();
-                                }
-                            }
-                        });
-                        let mute = self.proj.clips[i].mute;
-                        if ui.button(if mute { "Réactiver le son" } else { "Couper le son" }).clicked() {
-                            self.proj.clips[i].mute = !mute;
-                            ui.close();
-                        }
-                        if ui.button("Réinitialiser les effets").clicked() {
-                            self.proj.clips[i].reset_look();
-                            ui.close();
-                        }
-                        ui.separator();
-                        if ui.button("Supprimer").clicked() {
-                            self.delete_sel();
-                            ui.close();
-                        }
-                    });
-                }
-                for (i, m) in self.proj.music.clone().iter().enumerate() {
-                    let r = Rect::from_min_max(pos2(x_of(m.start) + 1.0, a2.min.y + 3.0), pos2(x_of(m.start + m.out - m.inp) - 1.0, a2.max.y - 3.0));
-                    let on = self.sel == Some(Sel::Music(i));
-                    p.rect_filled(r, CornerRadius::same(6), MUSIC.gamma_multiply(if on { 0.7 } else { 0.45 }));
-                    let clip_p = p.with_clip_rect(r.shrink(1.0));
-                    if self.show_waves
-                        && !m.mute
-                        && let Some(data) = self.audio_data.get(&m.src)
-                    {
-                        waveform(&clip_p, r.shrink2(vec2(0.0, 4.0)), data, m.inp, m.out, Color32::from_white_alpha(170));
-                    }
-                    clip_p.text(r.left_top() + vec2(8.0, 3.0), Align2::LEFT_TOP, format!("{}{}", self.proj.sources[m.src].name(), if m.mute { "  (coupé)" } else { "" }), semibold(11.0), Color32::WHITE);
-                    p.rect_stroke(r, CornerRadius::same(6), Stroke::new(if on { 2.0 } else { 1.0 }, if on { Color32::WHITE } else { MUSIC }), StrokeKind::Inside);
-                    let resp = ui.interact(r, ui.make_persistent_id(("music", i)), Sense::click_and_drag());
-                    if resp.clicked() {
-                        self.sel = Some(Sel::Music(i));
-                    }
-                    if resp.drag_started()
-                        && let Some(pp) = resp.interact_pointer_pos()
-                    {
-                        self.drag = Some((Sel::Music(i), 0, t_of(pp.x), Clip::default(), m.start));
-                        self.sel = Some(Sel::Music(i));
-                    }
-                    resp.context_menu(|ui| {
-                        if ui.button("Placer à la tête de lecture").clicked() {
-                            self.proj.music[i].start = self.t;
-                            ui.close();
-                        }
-                        let mute = self.proj.music[i].mute;
-                        if ui.button(if mute { "Réactiver" } else { "Couper le son" }).clicked() {
-                            self.proj.music[i].mute = !mute;
-                            ui.close();
-                        }
-                        if ui.button("Supprimer").clicked() {
-                            self.sel = Some(Sel::Music(i));
-                            self.delete_sel();
-                            ui.close();
-                        }
-                    });
-                }
-
-                if let Some((sel, mode, from, orig, start0)) = self.drag.clone() {
-                    let (down, pos) = ui.input(|i| (i.pointer.primary_down(), i.pointer.hover_pos()));
-                    if let (true, Some(pp)) = (down, pos) {
-                        let d = t_of(pp.x) - from;
-                        match sel {
-                            Sel::Clip(i) if i < self.proj.clips.len() => {
-                                let max = self.proj.sources[orig.src].duration;
-                                let snapped_end = self.snap_time(start0 + orig.len() + d, snap_tol);
-                                let c = &mut self.proj.clips[i];
-                                let sp = orig.speed.max(0.05);
-                                match mode {
-                                    1 => c.inp = (orig.inp + d * sp).clamp(0.0, c.out - 0.1),
-                                    2 if c.hold > 0.0 => c.hold = (snapped_end - start0).max(0.1),
-                                    2 => c.out = (orig.inp + (snapped_end - start0) * sp).clamp(c.inp + 0.1, max),
-                                    3 => {
-                                        let len = orig.out - orig.inp;
-                                        let inp = (orig.inp - d * sp).clamp(0.0, (max - len).max(0.0));
-                                        (c.inp, c.out) = (inp, inp + len);
-                                    }
-                                    4 => {
-                                        let new_len = (snapped_end - start0).max(0.1);
-                                        c.speed = ((orig.out - orig.inp) / new_len).clamp(0.25, 4.0);
-                                    }
-                                    _ => {}
-                                }
-                            }
-                            Sel::Music(i) if i < self.proj.music.len() => {
-                                let start = self.snap_time(start0 + d, snap_tol);
-                                self.proj.music[i].start = start.max(0.0);
-                            }
-                            Sel::Title(i) if i < self.proj.titles.len() => {
-                                if mode == 2 {
-                                    let end = self.snap_time(start0 + orig.out + d, snap_tol);
-                                    self.proj.titles[i].dur = (end - start0).max(0.2);
-                                } else {
-                                    self.proj.titles[i].start = self.snap_time(start0 + d, snap_tol).max(0.0);
-                                }
-                            }
-                            _ => {}
-                        }
-                        if mode == 0 && matches!(sel, Sel::Clip(_)) {
-                            p.line_segment([pos2(pp.x, v1.min.y), pos2(pp.x, v1.max.y)], Stroke::new(2.0, Color32::WHITE));
-                        }
-                        if mode == 3 {
-                            p.text(pp + vec2(12.0, -18.0), Align2::LEFT_BOTTOM, "Glissement", semibold(11.0), Color32::WHITE);
-                        }
+    fn viewer_tools(&mut self, ui: &mut Ui, frame: Rect) {
+        let resp = ui.interact(frame, ui.make_persistent_id("program"), Sense::click_and_drag());
+        let norm = |p: Pos2| [((p.x - frame.left()) / frame.width()).clamp(0.0, 1.0), ((p.y - frame.top()) / frame.height()).clamp(0.0, 1.0)];
+        let to_screen = |n: [f32; 2]| pos2(frame.left() + n[0] * frame.width(), frame.top() + n[1] * frame.height());
+        let target = self.mask_target();
+        let mask = target.and_then(|(s, _)| self.clip_ref(s).and_then(|c| c.mask.clone()));
+        let painter = ui.painter().with_clip_rect(frame.expand(6.0));
+        let shows_mask = matches!(self.tool, Tool::Select | Tool::Pen | Tool::Rect | Tool::Ellipse) && (matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_))) || matches!(self.tool, Tool::Pen | Tool::Rect | Tool::Ellipse));
+        let mut handles: Vec<Pos2> = Vec::new();
+        if let Some(m) = &mask
+            && shows_mask
+        {
+            let stroke = Stroke::new(1.5, Color32::from_rgb(255, 214, 10));
+            match m.kind {
+                0 | 1 if m.pts.len() >= 2 => {
+                    let r = Rect::from_two_pos(to_screen(m.pts[0]), to_screen(m.pts[1]));
+                    if m.kind == 0 {
+                        painter.rect_stroke(r, CornerRadius::ZERO, stroke, StrokeKind::Middle);
                     } else {
-                        if mode == 0
-                            && let (Sel::Clip(i), Some(pp)) = (sel, pos)
-                            && i < self.proj.clips.len()
-                            && (t_of(pp.x) - from).abs() > 0.1
-                        {
-                            let t = t_of(pp.x);
-                            let starts = self.proj.starts();
-                            let mut to = starts.iter().zip(&self.proj.clips).filter(|(s, c)| t > **s + c.len() / 2.0).count();
-                            let clip = self.proj.clips.remove(i);
-                            if to > i {
-                                to -= 1;
+                        let pts: Vec<Pos2> = (0..64).map(|k| {
+                            let a = k as f32 / 64.0 * std::f32::consts::TAU;
+                            r.center() + vec2(a.cos() * r.width() / 2.0, a.sin() * r.height() / 2.0)
+                        }).collect();
+                        painter.add(Shape::closed_line(pts, stroke));
+                    }
+                    handles = vec![to_screen(m.pts[0]), to_screen(m.pts[1])];
+                }
+                _ => {
+                    let pts: Vec<Pos2> = m.pts.iter().map(|p| to_screen(*p)).collect();
+                    painter.add(Shape::closed_line(pts.clone(), stroke));
+                    handles = pts;
+                }
+            }
+            for h in &handles {
+                painter.rect(Rect::from_center_size(*h, Vec2::splat(8.0)), CornerRadius::same(1), Color32::WHITE, Stroke::new(1.0, Color32::BLACK), StrokeKind::Middle);
+            }
+        }
+        if !self.pen.is_empty() {
+            let pts: Vec<Pos2> = self.pen.iter().map(|p| to_screen(*p)).collect();
+            painter.add(Shape::line(pts.clone(), Stroke::new(1.5, BLUE)));
+            if let Some(hp) = resp.hover_pos() {
+                painter.line_segment([*pts.last().unwrap_or(&hp), hp], Stroke::new(1.0, BLUE.gamma_multiply(0.6)));
+            }
+            for (k, p) in pts.iter().enumerate() {
+                painter.circle(*p, if k == 0 { 5.0 } else { 3.5 }, if k == 0 { BLUE } else { Color32::WHITE }, Stroke::new(1.0, BLUE));
+            }
+        }
+        if let Some(Sel::Title(i)) = self.sel
+            && let Some(t) = self.proj.titles.get(i)
+            && self.t >= t.start
+            && self.t < t.start + t.dur
+            && self.tool == Tool::Select
+        {
+            let c = to_screen([0.5 + t.dx, 0.5 + t.dy]);
+            painter.circle_stroke(c, 6.0, Stroke::new(1.5, TITLE));
+        }
+        match self.tool {
+            Tool::Text | Tool::TextV => ui.ctx().set_cursor_icon(egui::CursorIcon::Text),
+            Tool::Pen | Tool::Rect | Tool::Ellipse => ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair),
+            Tool::Select if resp.hovered() => ui.ctx().set_cursor_icon(egui::CursorIcon::Move),
+            _ => {}
+        }
+        match self.tool {
+            Tool::Text | Tool::TextV => {
+                if resp.clicked()
+                    && let Some(pp) = resp.interact_pointer_pos()
+                {
+                    let n = norm(pp);
+                    self.add_title_at(n[0] - 0.5, n[1] - 0.5, self.tool == Tool::TextV);
+                }
+            }
+            Tool::Pen => {
+                if resp.clicked()
+                    && let Some(pp) = resp.interact_pointer_pos()
+                {
+                    if self.pen.len() >= 3 && to_screen(self.pen[0]).distance(pp) < 9.0 {
+                        self.close_pen();
+                    } else {
+                        self.pen.push(norm(pp));
+                    }
+                }
+                if resp.double_clicked() {
+                    self.close_pen();
+                }
+            }
+            Tool::Rect | Tool::Ellipse => {
+                if resp.drag_started()
+                    && let (Some(pp), Some((s, _))) = (resp.interact_pointer_pos(), target)
+                {
+                    self.view_drag = Some((1, pp, self.proj.clone(), s, 0));
+                }
+                if let Some((1, start, _, s, _)) = self.view_drag.clone()
+                    && let Some(pp) = resp.interact_pointer_pos()
+                {
+                    let kind = if self.tool == Tool::Rect { 0 } else { 1 };
+                    if let Some(c) = self.clip_mut(s) {
+                        let feather = c.mask.as_ref().map_or(5.0, |m| m.feather);
+                        c.mask = Some(model::Mask { kind, pts: vec![norm(start), norm(pp)], feather, invert: false });
+                    }
+                    self.sel = Some(s);
+                }
+            }
+            Tool::Select => {
+                if resp.drag_started()
+                    && let Some(pp) = resp.interact_pointer_pos()
+                {
+                    if let Some(k) = handles.iter().position(|h| h.distance(pp) < 9.0)
+                        && let Some((s, _)) = target
+                    {
+                        self.view_drag = Some((2, pp, self.proj.clone(), s, k));
+                    } else if let Some(s) = self.sel {
+                        self.view_drag = Some((0, pp, self.proj.clone(), s, 0));
+                    } else if let Some((s, _)) = target {
+                        self.select_one(s);
+                        self.view_drag = Some((0, pp, self.proj.clone(), s, 0));
+                    }
+                }
+                if let Some((mode, start, orig, s, k)) = self.view_drag.clone()
+                    && let Some(pp) = resp.interact_pointer_pos()
+                {
+                    let d = pp - start;
+                    let (dx, dy) = (d.x / frame.width(), d.y / frame.height());
+                    let local = target.map_or(0.0, |(_, l)| l);
+                    self.proj = orig.clone();
+                    match (mode, s) {
+                        (2, _) => {
+                            let n = norm(pp);
+                            if let Some(m) = self.clip_mut(s).and_then(|c| c.mask.as_mut())
+                                && k < m.pts.len()
+                            {
+                                m.pts[k] = n;
                             }
-                            let to = to.min(self.proj.clips.len());
-                            self.proj.clips.insert(to, clip);
-                            self.sel = Some(Sel::Clip(to));
                         }
-                        self.drag = None;
-                    }
-                }
-
-                for m in &self.proj.markers {
-                    let mx = x_of(*m);
-                    p.add(Shape::convex_polygon(vec![pos2(mx - 5.0, ruler.min.y + 14.0), pos2(mx + 5.0, ruler.min.y + 14.0), pos2(mx, ruler.max.y)], MARK, Stroke::NONE));
-                    p.line_segment([pos2(mx, ruler.max.y), pos2(mx, a2.max.y)], Stroke::new(1.0, MARK.gamma_multiply(0.35)));
-                }
-                for (m, label) in [(self.mark_in, "{"), (self.mark_out, "}")] {
-                    if let Some(m) = m {
-                        p.text(pos2(x_of(m), ruler.max.y - 2.0), Align2::CENTER_BOTTOM, label, semibold(13.0), MARK);
-                    }
-                }
-                let x = x_of(self.t);
-                p.line_segment([pos2(x, ruler.min.y), pos2(x, a2.max.y)], Stroke::new(1.5, PLAYHEAD));
-                p.add(Shape::convex_polygon(vec![pos2(x - 7.0, ruler.min.y), pos2(x + 7.0, ruler.min.y), pos2(x + 7.0, ruler.min.y + 8.0), pos2(x, ruler.min.y + 14.0), pos2(x - 7.0, ruler.min.y + 8.0)], PLAYHEAD, Stroke::NONE));
-                let bg = ui.interact(Rect::from_min_max(pos2(x0, t1.min.y), pos2(rect.max.x, a2.max.y)), ui.make_persistent_id("tracks"), Sense::click_and_drag());
-                match self.tool {
-                    Tool::Hand => {
-                        ui.ctx().set_cursor_icon(if bg.dragged() { egui::CursorIcon::Grabbing } else { egui::CursorIcon::Grab });
-                        if bg.dragged() {
-                            self.force_scroll = Some(self.tl_scroll - bg.drag_delta().x);
+                        (_, Sel::Title(i)) if i < self.proj.titles.len() => {
+                            let t = &mut self.proj.titles[i];
+                            t.dx = (t.dx + dx).clamp(-0.6, 0.6);
+                            t.dy = (t.dy + dy).clamp(-0.6, 0.6);
                         }
-                    }
-                    Tool::Zoom => {
-                        if bg.clicked()
-                            && let Some(pp) = bg.interact_pointer_pos()
-                        {
-                            let at = t_of(pp.x);
-                            let f = if ui.input(|i| i.modifiers.alt) { 1.0 / 1.5 } else { 1.5 };
-                            self.pps = (self.pps * f).clamp(2.0, 600.0);
-                            self.force_scroll = Some(at as f32 * self.pps - (pp.x - rect.min.x - label_w) + self.tl_scroll * 0.0);
+                        (_, Sel::Clip(_) | Sel::Over(_)) => {
+                            if let Some(c) = self.clip_mut(s) {
+                                let ev = c.eval(local);
+                                let (nx, ny) = (ev.pos_x + dx * 2.0, ev.pos_y + dy * 2.0);
+                                for (prop, v) in [(1u8, nx), (2u8, ny)] {
+                                    if c.has_keys(prop) {
+                                        c.set_key(prop, local, v);
+                                    } else {
+                                        c.set_prop(prop, v);
+                                    }
+                                }
+                            }
                         }
-                    }
-                    _ => {
-                        if bg.clicked()
-                            && let Some(pp) = bg.interact_pointer_pos()
-                        {
-                            self.seek(t_of(pp.x));
-                            self.sel = None;
-                        }
+                        _ => {}
                     }
                 }
-                if self.playing {
-                    let view_right = self.tl_scroll + ui.clip_rect().width() - label_w;
-                    let px = self.t as f32 * pps;
-                    if px > view_right - 40.0 || px < self.tl_scroll {
-                        self.force_scroll = Some((px - 60.0).max(0.0));
-                    }
-                }
-            }));
-            self.tl_scroll = out.inner.state.clamped_offset().x;
-        });
+            }
+            _ => {}
+        }
+        if !resp.dragged() && !resp.drag_started() && ui.input(|i| !i.pointer.primary_down()) {
+            self.view_drag = None;
+        }
     }
 
     fn sheets(&mut self, ctx: &egui::Context) {
         if let Some(mut opts) = self.export.take() {
             let mut go = false;
             let mut cancel = false;
-            let keep = pro::sheet(ctx, "export", 440.0, |ui| {
+            let keep = pro::sheet(ctx, "export", 520.0, |ui| {
                 ui.horizontal(|ui| {
                     let (r, _) = ui.allocate_exact_size(Vec2::splat(36.0), Sense::hover());
                     ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.25));
                     glyph(ui.painter(), r.shrink(9.0), G::Export, BLUE);
                     ui.vertical(|ui| {
                         ui.label(RichText::new("Exporter").font(semibold(18.0)).color(INK_STRONG));
-                        ui.label(RichText::new("MP4 H.264 + AAC, compatible partout").size(12.0).color(MUTED));
+                        ui.label(RichText::new("MP4 H.264 + AAC, GIF, WAV, PNG ou JPEG").size(12.0).color(MUTED));
                     });
                 });
-                ui.add_space(14.0);
-                let row = |ui: &mut Ui, label: &str| {
-                    ui.label(RichText::new(label).size(12.5).color(MUTED));
-                };
-                let mut kind = opts.audio_only as usize;
-                row(ui, "Format");
-                if pro::segmented(ui, &mut kind, &["Vidéo MP4", "Audio WAV"]) {
-                    opts.audio_only = kind == 1;
-                }
-                ui.add_space(8.0);
-                if !opts.audio_only {
-                    row(ui, "Résolution");
-                    let labels: Vec<&str> = RESOLUTIONS.iter().map(|r| r.0).collect();
-                    pro::segmented(ui, &mut opts.res, &labels);
-                    ui.add_space(8.0);
-                    row(ui, "Qualité");
-                    let labels: Vec<&str> = QUALITIES.iter().map(|q| q.0).collect();
-                    pro::segmented(ui, &mut opts.quality, &labels);
-                    ui.add_space(8.0);
-                }
-                row(ui, "Plage");
-                let has_marks = self.mark_in.is_some() || self.mark_out.is_some();
-                ui.add_enabled_ui(has_marks, |ui| {
-                    pro::segmented(ui, &mut opts.range, &["Toute la séquence", "Entre entrée et sortie"]);
-                });
-                if !has_marks {
-                    opts.range = 0;
-                }
                 ui.add_space(12.0);
-                let (a, b) = if opts.range == 1 { (self.mark_in.unwrap_or(0.0), self.mark_out.unwrap_or(self.proj.duration())) } else { (0.0, self.proj.duration()) };
-                let secs = (b - a).abs();
-                let size = if opts.audio_only {
-                    secs * OUT_RATE as f64 * 4.0
-                } else {
-                    let target = RESOLUTIONS[opts.res].1;
-                    let (w, h) = if target == 0 { (self.proj.width as f64, self.proj.height as f64) } else { let k = target as f64 / self.proj.width.min(self.proj.height) as f64; (self.proj.width as f64 * k, self.proj.height as f64 * k) };
-                    let rate = (w * h * self.proj.fps as f64 / 8.0 * QUALITIES[opts.quality].1).max(1_500_000.0);
-                    secs * (rate + 192_000.0) / 8.0
+                let label = |ui: &mut Ui, t: &str| {
+                    ui.label(RichText::new(t).size(12.5).color(MUTED));
                 };
-                ui.label(RichText::new(format!("Durée {} · environ {:.0} Mo", tc(secs, self.proj.fps), size / 1_000_000.0)).size(12.5).color(FAINT));
+                label(ui, "Préréglage");
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
+                    for (k, p) in EXPORT_PRESETS.iter().enumerate() {
+                        if ui.selectable_label(opts.preset == k, p.0).clicked() {
+                            let keep_range = opts.range;
+                            opts = ExportOpts::from_preset(k);
+                            opts.range = keep_range;
+                        }
+                    }
+                });
+                ui.add_space(10.0);
+                ui.separator();
+                ui.add_space(6.0);
+                egui::Grid::new("export-grid").num_columns(2).spacing(vec2(14.0, 8.0)).show(ui, |ui| {
+                    label(ui, "Format");
+                    egui::ComboBox::from_id_salt("exp-kind").selected_text(KINDS[opts.kind]).width(200.0).show_ui(ui, |ui| {
+                        for (k, n) in KINDS.iter().enumerate() {
+                            ui.selectable_value(&mut opts.kind, k, *n);
+                        }
+                    });
+                    ui.end_row();
+                    if opts.kind != 1 {
+                        label(ui, "Taille");
+                        ui.horizontal(|ui| {
+                            let mut seq = opts.w == 0 && opts.h == 0;
+                            if ui.checkbox(&mut seq, "Séquence").changed() {
+                                (opts.w, opts.h) = if seq { (0, 0) } else { (self.proj.width, self.proj.height) };
+                            }
+                            if !seq {
+                                ui.add(egui::DragValue::new(&mut opts.w).range(16..=7680).suffix(" px"));
+                                ui.label("×");
+                                ui.add(egui::DragValue::new(&mut opts.h).range(0..=4320).suffix(" px"));
+                            }
+                        });
+                        ui.end_row();
+                        label(ui, "Cadrage");
+                        let mut f = opts.fill as usize;
+                        if pro::segmented(ui, &mut f, &["Ajuster (bandes)", "Remplir (recadrer)"]) {
+                            opts.fill = f == 1;
+                        }
+                        ui.end_row();
+                    }
+                    if matches!(opts.kind, 0 | 2 | 3) {
+                        label(ui, "Images/s");
+                        ui.horizontal(|ui| {
+                            if ui.selectable_label(opts.fps == 0, "Séquence").clicked() {
+                                opts.fps = 0;
+                            }
+                            for f in [10, 15, 24, 25, 30, 60] {
+                                if ui.selectable_label(opts.fps == f, f.to_string()).clicked() {
+                                    opts.fps = f;
+                                }
+                            }
+                        });
+                        ui.end_row();
+                    }
+                    if opts.kind == 0 {
+                        label(ui, "Débit vidéo");
+                        ui.horizontal(|ui| {
+                            ui.spacing_mut().slider_width = 200.0;
+                            ui.add(egui::Slider::new(&mut opts.mbps, 1.0..=80.0).logarithmic(true).suffix(" Mb/s").max_decimals(1));
+                        });
+                        ui.end_row();
+                        label(ui, "Audio AAC");
+                        let names: Vec<&str> = ABR.iter().map(|a| a.0).collect();
+                        pro::segmented(ui, &mut opts.abr, &names);
+                        ui.end_row();
+                    }
+                    if opts.kind < 4 {
+                        label(ui, "Plage");
+                        let has_marks = self.mark_in.is_some() || self.mark_out.is_some();
+                        let has_clip = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_)));
+                        egui::ComboBox::from_id_salt("exp-range").selected_text(["Toute la séquence", "Entre entrée et sortie", "Clip sélectionné"][opts.range.min(2)]).width(200.0).show_ui(ui, |ui| {
+                            ui.selectable_value(&mut opts.range, 0, "Toute la séquence");
+                            if has_marks {
+                                ui.selectable_value(&mut opts.range, 1, "Entre entrée et sortie");
+                            }
+                            if has_clip {
+                                ui.selectable_value(&mut opts.range, 2, "Clip sélectionné");
+                            }
+                        });
+                        ui.end_row();
+                    }
+                });
+                ui.add_space(6.0);
+                ui.checkbox(&mut opts.open_after, "Afficher le fichier une fois terminé");
+                ui.add_space(8.0);
+                let (a, b) = self.export_range(opts.range);
+                let secs = b - a;
+                let (w, h) = self.out_size(&opts);
+                let fps = if opts.fps == 0 { self.proj.fps } else { opts.fps } as f64;
+                let info = match opts.kind {
+                    1 => format!("Durée {} · environ {:.0} Mo", tc(secs, self.proj.fps), secs * OUT_RATE as f64 * 4.0 / 1e6),
+                    2 => format!("{w} × {h} · {} images · environ {:.0} Mo", (secs * fps).ceil(), w as f64 * h as f64 * secs * fps * 0.25 / 1e6),
+                    3 => format!("{w} × {h} · {} images PNG", (secs * fps).ceil()),
+                    4 | 5 => format!("{w} × {h} · image à {}", tc(self.t, self.proj.fps)),
+                    _ => format!("{w} × {h} · {} i/s · durée {} · environ {:.0} Mo", fps, tc(secs, self.proj.fps), secs * (opts.mbps as f64 * 1e6 + ABR[opts.abr.min(3)].1 as f64 * 8.0) / 8e6),
+                };
+                ui.label(RichText::new(info).size(12.5).color(FAINT));
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::primary(ui, "Exporter…").clicked() {
@@ -2400,11 +2924,13 @@ impl Cut {
         }
         if self.seq_sheet {
             let mut close = false;
-            let keep = pro::sheet(ctx, "sequence", 460.0, |ui| {
+            let first = self.proj.clips.first().map(|c| self.proj.sources[c.src].clone());
+            let keep = pro::sheet(ctx, "sequence", 500.0, |ui| {
                 ui.label(RichText::new("Réglages de la séquence").font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
                 ui.label(RichText::new("Format").size(12.5).color(MUTED));
                 ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                     for (label, kind, w, h) in PRESETS {
                         if ui.selectable_label(self.proj.width == w && self.proj.height == h, format!("{label} · {kind}")).clicked() {
                             self.proj.width = w;
@@ -2415,11 +2941,21 @@ impl Cut {
                 ui.horizontal(|ui| {
                     ui.add(egui::DragValue::new(&mut self.proj.width).range(16..=7680).prefix("L ").suffix(" px"));
                     ui.add(egui::DragValue::new(&mut self.proj.height).range(16..=4320).prefix("H ").suffix(" px"));
+                    if ui.small_button("⇄").on_hover_text("Inverser largeur et hauteur").clicked() {
+                        (self.proj.width, self.proj.height) = (self.proj.height, self.proj.width);
+                    }
+                    if let Some(s) = &first
+                        && s.width > 0
+                        && ui.small_button("Comme le 1er clip").clicked()
+                    {
+                        (self.proj.width, self.proj.height) = (s.width / 2 * 2, s.height / 2 * 2);
+                        self.proj.fps = s.fps.round().clamp(1.0, 120.0) as u32;
+                    }
                 });
                 ui.add_space(8.0);
                 ui.label(RichText::new("Images par seconde").size(12.5).color(MUTED));
                 ui.horizontal(|ui| {
-                    for f in [24, 25, 30, 50, 60] {
+                    for f in FPS {
                         if ui.selectable_label(self.proj.fps == f, format!("{f}")).clicked() {
                             self.proj.fps = f;
                         }
@@ -2433,6 +2969,11 @@ impl Cut {
                     if ui.color_edit_button_srgba(&mut col).changed() {
                         self.proj.background = [col.r(), col.g(), col.b(), 255];
                     }
+                    for (name, c) in [("Noir", [0, 0, 0]), ("Blanc", [255, 255, 255]), ("Gris", [40, 40, 44])] {
+                        if ui.small_button(name).clicked() {
+                            self.proj.background = [c[0], c[1], c[2], 255];
+                        }
+                    }
                 });
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -2443,60 +2984,182 @@ impl Cut {
             });
             self.seq_sheet = keep && !close;
         }
+        if self.speed_sheet {
+            let mut close = false;
+            let s = self.sel;
+            let max = s.and_then(|s| self.clip_ref(s)).map_or(0.0, |c| self.proj.sources[c.src].duration);
+            let Some(c) = s.and_then(|s| self.clip_mut(s)) else {
+                self.speed_sheet = false;
+                return;
+            };
+            let keep = pro::sheet(ctx, "speed", 380.0, |ui| {
+                ui.label(RichText::new("Vitesse/Durée du clip").font(semibold(18.0)).color(INK_STRONG));
+                ui.add_space(12.0);
+                egui::Grid::new("speed-grid").num_columns(2).spacing(vec2(14.0, 10.0)).show(ui, |ui| {
+                    ui.label(RichText::new("Vitesse").color(MUTED));
+                    let mut pct = c.speed * 100.0;
+                    if ui.add(egui::DragValue::new(&mut pct).range(10.0..=800.0).suffix(" %").speed(1.0)).changed() {
+                        c.speed = pct / 100.0;
+                    }
+                    ui.end_row();
+                    ui.label(RichText::new("Durée").color(MUTED));
+                    let mut dur = c.len();
+                    if ui.add(egui::DragValue::new(&mut dur).range(0.1..=3600.0).suffix(" s").speed(0.05).max_decimals(2)).changed() {
+                        if c.hold > 0.0 {
+                            c.hold = dur;
+                        } else {
+                            c.speed = ((c.out - c.inp) / dur.max(0.1)).clamp(0.1, 8.0);
+                        }
+                    }
+                    ui.end_row();
+                    ui.label(RichText::new("Options").color(MUTED));
+                    ui.vertical(|ui| {
+                        if ui.checkbox(&mut c.reverse, "Lecture inversée").changed() {
+                            c.keys.clear();
+                        }
+                        let mut frozen = c.hold > 0.0;
+                        if ui.checkbox(&mut frozen, "Image figée (maintien)").changed() {
+                            c.hold = if frozen { c.len().max(0.5) } else { 0.0 };
+                            if frozen {
+                                c.out = (c.inp + 0.04).min(max);
+                            }
+                        }
+                        ui.checkbox(&mut c.mute, "Couper le son");
+                    });
+                    ui.end_row();
+                });
+                ui.add_space(8.0);
+                ui.horizontal_wrapped(|ui| {
+                    for (name, v) in [("Ralenti ×0,25", 0.25), ("×0,5", 0.5), ("Normal", 1.0), ("×2", 2.0), ("Accéléré ×4", 4.0)] {
+                        if ui.selectable_label((c.speed - v).abs() < 1e-3, name).clicked() {
+                            c.speed = v;
+                        }
+                    }
+                });
+                ui.add_space(14.0);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    if pro::primary(ui, "Terminé").clicked() {
+                        close = true;
+                    }
+                });
+            });
+            self.speed_sheet = keep && !close;
+        }
+        if let Some(k) = self.marker_edit {
+            if k >= self.proj.markers.len() {
+                self.marker_edit = None;
+                return;
+            }
+            let mut close = false;
+            let mut delete = false;
+            let fps = self.proj.fps;
+            let m = &mut self.proj.markers[k];
+            let keep = pro::sheet(ctx, "marker", 400.0, |ui| {
+                ui.label(RichText::new(format!("Marqueur · {}", tc(m.t, fps))).font(semibold(18.0)).color(INK_STRONG));
+                ui.add_space(12.0);
+                ui.add(egui::TextEdit::singleline(&mut m.name).hint_text("Nom (chapitre)").desired_width(f32::INFINITY));
+                ui.add_space(6.0);
+                ui.add(egui::TextEdit::multiline(&mut m.note).hint_text("Commentaire").desired_rows(3).desired_width(f32::INFINITY));
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("Couleur").color(MUTED));
+                    for (c, (name, rgb)) in MARKER_COLORS.iter().enumerate() {
+                        let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
+                        ui.painter().circle_filled(r.center(), 7.5, Color32::from_rgb(rgb[0], rgb[1], rgb[2]));
+                        if m.color as usize == c {
+                            ui.painter().circle_stroke(r.center(), 10.0, Stroke::new(1.5, Color32::WHITE));
+                        }
+                        if resp.on_hover_text(*name).clicked() {
+                            m.color = c as u8;
+                        }
+                    }
+                });
+                ui.add_space(6.0);
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("Durée").color(MUTED));
+                    ui.add(egui::DragValue::new(&mut m.dur).range(0.0..=3600.0).suffix(" s").speed(0.05));
+                });
+                ui.add_space(14.0);
+                ui.horizontal(|ui| {
+                    if pro::secondary(ui, "Supprimer").clicked() {
+                        delete = true;
+                    }
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if pro::primary(ui, "Terminé").clicked() {
+                            close = true;
+                        }
+                    });
+                });
+            });
+            if delete {
+                self.proj.markers.remove(k);
+            }
+            if !keep || close || delete {
+                self.marker_edit = None;
+            }
+        }
+    }
+}
+
+fn kind_label(s: &Source) -> String {
+    match s.kind() {
+        2 if s.is_generator() => "Élément généré".into(),
+        2 => format!("Image · {}×{}", s.width, s.height),
+        0 => format!("{}×{}", s.width, s.height),
+        _ => "Audio".into(),
     }
 }
 
 fn media_info(s: &Source) -> String {
-    let mut info = format!("{}\nDurée {}", s.name(), tc(s.duration, 30));
+    let mut info = s.name();
+    if s.kind() != 2 {
+        info.push_str(&format!("\nDurée {}", tc(s.duration, 30)));
+    }
     if s.has_video {
-        info.push_str(&format!("\n{} × {} · {:.2} i/s", s.width, s.height, s.fps));
+        info.push_str(&format!("\n{} × {}", s.width, s.height));
+        if s.kind() == 0 {
+            info.push_str(&format!(" · {:.2} i/s", s.fps));
+        }
     }
     info.push_str(if s.has_audio { "\nAvec son" } else { "\nSans son" });
-    info.push_str("\nDouble-clic : ajouter à la timeline");
+    info.push_str("\nDouble-clic : ajouter à la fin de la timeline");
     info
 }
 
 fn media_menu(ui: &mut Ui, s: &Source, i: usize, action: &mut Option<(u8, usize)>) {
-    if s.has_video && ui.button("Ajouter à la timeline").clicked() {
-        *action = Some((0, i));
-        ui.close();
+    let item = |ui: &mut Ui, label: &str, code: u8, action: &mut Option<(u8, usize)>| {
+        if ui.button(label).clicked() {
+            *action = Some((code, i));
+            ui.close();
+        }
+    };
+    if s.has_video {
+        item(ui, "Ajouter à la fin de V1", 0, action);
+        item(ui, "Insérer à la tête de lecture", 4, action);
+        item(ui, "Incruster sur V2 à la tête", 5, action);
+        item(ui, "Remplacer le clip sélectionné", 6, action);
     }
-    if s.has_audio && ui.button("Ajouter comme musique (A2)").clicked() {
-        *action = Some((1, i));
-        ui.close();
+    if s.has_audio {
+        item(ui, "Ajouter comme musique (A2)", 1, action);
     }
-    if ui.button("Afficher dans l'explorateur").clicked() {
-        *action = Some((2, i));
-        ui.close();
-    }
-    ui.separator();
-    if ui.button("Retirer du projet").clicked() {
-        *action = Some((3, i));
-        ui.close();
-    }
-}
-
-fn row_slider<N: egui::emath::Numeric>(ui: &mut Ui, label: &str, v: &mut N, range: std::ops::RangeInclusive<N>, suffix: &str, log: bool) -> bool {
-    let reset = ui.horizontal(|ui| {
-        let r = ui.add(egui::Label::new(RichText::new(label).size(12.5).color(MUTED)).sense(Sense::click()));
-        r.on_hover_text("Double-clic pour réinitialiser").double_clicked()
+    ui.menu_button("Étiquette", |ui| {
+        if ui.button("Aucune").clicked() {
+            *action = Some((20, i));
+            ui.close();
+        }
+        for (k, (name, _)) in LABELS.iter().enumerate() {
+            if ui.button(*name).clicked() {
+                *action = Some((21 + k as u8, i));
+                ui.close();
+            }
+        }
     });
-    ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
-    let mut changed = ui.add(egui::Slider::new(v, range.clone()).suffix(suffix).logarithmic(log).max_decimals(2)).changed();
-    if reset.inner {
-        let zero = N::from_f64(if range.contains(&N::from_f64(0.0)) { 0.0 } else { range.start().to_f64() });
-        let one = N::from_f64(1.0);
-        *v = if log && range.contains(&one) { one } else { zero };
-        changed = true;
+    ui.separator();
+    if !s.is_generator() {
+        item(ui, "Remplacer le fichier…", 7, action);
+        item(ui, "Afficher dans l'explorateur", 2, action);
     }
-    changed
-}
-
-fn pct_slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>) {
-    let mut p = *v * 100.0;
-    if row_slider(ui, label, &mut p, range.start() * 100.0..=range.end() * 100.0, " %", false) {
-        *v = p / 100.0;
-    }
+    item(ui, "Retirer du projet", 3, action);
 }
 
 fn waveform(p: &Painter, r: Rect, data: &[f32], inp: f64, out: f64, color: Color32) {
@@ -2589,6 +3252,84 @@ enum G {
     Out,
     Safe,
     Focus,
+    Grid,
+    Gap,
+    Eye,
+    Lock,
+}
+
+fn tool_glyph(p: &Painter, r: Rect, c: Color32, t: Tool) {
+    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
+    let s = Stroke::new(1.6, c);
+    let arrow = |p: &Painter, tip: Pos2, dir: f32| {
+        p.line_segment([tip, tip + vec2(-dir * 3.5, -3.0)], s);
+        p.line_segment([tip, tip + vec2(-dir * 3.5, 3.0)], s);
+    };
+    match t {
+        Tool::Select => glyph(p, r, G::Select, c),
+        Tool::TrackFwd | Tool::TrackBack => {
+            let d = if t == Tool::TrackFwd { 1.0 } else { -1.0 };
+            let x0 = if d > 0.0 { 0.15 } else { 0.85 };
+            p.line_segment([at(x0, 0.5), at(1.0 - x0, 0.5)], s);
+            arrow(p, at(1.0 - x0, 0.5), d);
+            arrow(p, at(1.0 - x0 - 0.25 * d, 0.5), d);
+            p.line_segment([at(x0, 0.15), at(x0, 0.85)], Stroke::new(2.0, c));
+        }
+        Tool::Ripple => {
+            p.add(Shape::line(vec![at(0.3, 0.1), at(0.5, 0.1), at(0.5, 0.9), at(0.3, 0.9)], s));
+            p.line_segment([at(0.6, 0.5), at(1.0, 0.5)], s);
+            arrow(p, at(1.0, 0.5), 1.0);
+        }
+        Tool::Rolling => {
+            p.line_segment([at(0.5, 0.05), at(0.5, 0.95)], Stroke::new(2.0, c));
+            p.line_segment([at(0.0, 0.5), at(0.35, 0.5)], s);
+            p.line_segment([at(0.65, 0.5), at(1.0, 0.5)], s);
+            arrow(p, at(0.0, 0.5), -1.0);
+            arrow(p, at(1.0, 0.5), 1.0);
+        }
+        Tool::Rate => glyph(p, r, G::Rate, c),
+        Tool::Blade => glyph(p, r, G::Blade, c),
+        Tool::BladeAll => {
+            glyph(p, Rect::from_min_size(r.min, r.size() * 0.8), G::Blade, c);
+            p.line_segment([at(0.75, 0.95), at(1.0, 0.95)], s);
+            p.line_segment([at(0.75, 0.75), at(1.0, 0.75)], s);
+        }
+        Tool::Slip => glyph(p, r, G::Slip, c),
+        Tool::Slide => {
+            p.rect_filled(Rect::from_min_max(at(0.3, 0.25), at(0.7, 0.75)), CornerRadius::same(2), c);
+            p.line_segment([at(0.0, 0.25), at(0.0, 0.75)], s);
+            p.line_segment([at(1.0, 0.25), at(1.0, 0.75)], s);
+            arrow(p, at(0.15, 0.5), -1.0);
+            arrow(p, at(0.85, 0.5), 1.0);
+        }
+        Tool::Pen => {
+            p.add(Shape::convex_polygon(vec![at(0.5, 0.0), at(0.85, 0.55), at(0.5, 1.0), at(0.15, 0.55)], Color32::TRANSPARENT, s));
+            p.circle_filled(at(0.5, 0.55), 1.8, c);
+            p.line_segment([at(0.5, 0.0), at(0.5, 0.45)], Stroke::new(1.0, c));
+        }
+        Tool::Rect => {
+            p.rect_stroke(Rect::from_min_max(at(0.08, 0.2), at(0.92, 0.8)), CornerRadius::ZERO, s, StrokeKind::Middle);
+        }
+        Tool::Ellipse => {
+            let pts: Vec<Pos2> = (0..32).map(|k| {
+                let a = k as f32 / 32.0 * std::f32::consts::TAU;
+                at(0.5 + a.cos() * 0.45, 0.5 + a.sin() * 0.33)
+            }).collect();
+            p.add(Shape::closed_line(pts, s));
+        }
+        Tool::Hand => glyph(p, r, G::Hand, c),
+        Tool::Zoom => glyph(p, r, G::Zoom, c),
+        Tool::Text => {
+            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(r.height() * 1.25), c);
+        }
+        Tool::TextV => {
+            p.text(at(0.38, 0.5), Align2::CENTER_CENTER, "T", semibold(r.height() * 1.05), c);
+            p.line_segment([at(0.85, 0.05), at(0.85, 0.95)], s);
+            arrow(p, at(0.85, 0.95), 0.0);
+            p.line_segment([at(0.85, 0.95), at(0.72, 0.8)], s);
+            p.line_segment([at(0.85, 0.95), at(0.98, 0.8)], s);
+        }
+    }
 }
 
 fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
@@ -2654,10 +3395,12 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
             p.add(Shape::convex_polygon(vec![at(0.5, 0.0), at(0.95, 0.45), at(0.5, 0.9), at(0.05, 0.45)], c, Stroke::NONE));
         }
         G::Magnet => {
-            let pts: Vec<Pos2> = (0..=16).map(|k| {
-                let a = std::f32::consts::PI * k as f32 / 16.0;
-                at(0.5 + a.cos() * 0.38, 0.5 + a.sin() * 0.38)
-            }).collect();
+            let pts: Vec<Pos2> = (0..=16)
+                .map(|k| {
+                    let a = std::f32::consts::PI * k as f32 / 16.0;
+                    at(0.5 + a.cos() * 0.38, 0.5 + a.sin() * 0.38)
+                })
+                .collect();
             p.add(Shape::line(pts, Stroke::new(3.0, c)));
             p.line_segment([at(0.12, 0.5), at(0.12, 0.1)], Stroke::new(3.0, c));
             p.line_segment([at(0.88, 0.5), at(0.88, 0.1)], Stroke::new(3.0, c));
@@ -2697,10 +3440,12 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
             p.add(Shape::line(vec![at(0.12, 0.55), at(0.12, 0.95), at(0.88, 0.95), at(0.88, 0.55)], Stroke::new(2.0, c)));
         }
         G::Loop => {
-            let pts: Vec<Pos2> = (0..=20).map(|k| {
-                let a = -0.6 + k as f32 * 0.26;
-                at(0.5 + a.cos() * 0.4, 0.5 + a.sin() * 0.4)
-            }).collect();
+            let pts: Vec<Pos2> = (0..=20)
+                .map(|k| {
+                    let a = -0.6 + k as f32 * 0.26;
+                    at(0.5 + a.cos() * 0.4, 0.5 + a.sin() * 0.4)
+                })
+                .collect();
             let tip = pts[0];
             p.add(Shape::line(pts, s));
             p.add(Shape::convex_polygon(vec![tip + vec2(-4.0, -2.0), tip + vec2(3.0, -4.0), tip + vec2(1.0, 3.0)], c, Stroke::NONE));
@@ -2722,16 +3467,34 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
                 p.line_segment([o, o + vec2(0.0, dy * 5.0)], s);
             }
         }
+        G::Grid => {
+            p.rect_stroke(Rect::from_min_max(at(0.0, 0.1), at(1.0, 0.9)), CornerRadius::same(2), s, StrokeKind::Middle);
+            for k in [0.36, 0.64] {
+                p.line_segment([at(k, 0.1), at(k, 0.9)], Stroke::new(1.0, c));
+                p.line_segment([at(0.0, 0.1 + 0.8 * (k - 0.2) / 0.6 * 0.6 + 0.08), at(1.0, 0.1 + 0.8 * (k - 0.2) / 0.6 * 0.6 + 0.08)], Stroke::new(1.0, c));
+            }
+        }
+        G::Gap => {
+            p.rect_filled(Rect::from_min_max(at(0.0, 0.25), at(0.3, 0.75)), CornerRadius::same(1), c);
+            p.rect_filled(Rect::from_min_max(at(0.7, 0.25), at(1.0, 0.75)), CornerRadius::same(1), c);
+            p.line_segment([at(0.35, 0.5), at(0.65, 0.5)], s);
+            p.line_segment([at(0.35, 0.5), at(0.45, 0.4)], s);
+            p.line_segment([at(0.65, 0.5), at(0.55, 0.4)], s);
+        }
+        G::Eye => {
+            let pts: Vec<Pos2> = (0..=12).map(|k| at(k as f32 / 12.0, 0.5 - (k as f32 / 12.0 * std::f32::consts::PI).sin() * 0.32)).chain((0..=12).rev().map(|k| at(k as f32 / 12.0, 0.5 + (k as f32 / 12.0 * std::f32::consts::PI).sin() * 0.32))).collect();
+            p.add(Shape::closed_line(pts, s));
+            p.circle_filled(at(0.5, 0.5), r.width() * 0.13, c);
+        }
+        G::Lock => {
+            p.rect_filled(Rect::from_min_max(at(0.15, 0.45), at(0.85, 1.0)), CornerRadius::same(2), c);
+            let pts: Vec<Pos2> = (0..=12).map(|k| {
+                let a = std::f32::consts::PI * (1.0 + k as f32 / 12.0);
+                at(0.5 + a.cos() * 0.25, 0.42 + a.sin() * 0.32)
+            }).collect();
+            p.add(Shape::line(pts, s));
+        }
     }
-}
-
-fn field_time(ui: &mut Ui, label: &str, v: &mut f64, min: f64, max: f64) {
-    ui.horizontal(|ui| {
-        ui.label(RichText::new(label).size(12.5).color(MUTED));
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.add(egui::DragValue::new(v).range(min..=max.max(min)).speed(0.02).max_decimals(2).suffix(" s"));
-        });
-    });
 }
 
 fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32) -> egui::Response {
@@ -2754,8 +3517,8 @@ fn main() -> eframe::Result {
         viewport: egui::ViewportBuilder::default()
             .with_title("Cut")
             .with_icon(Arc::new(studio_ui::app_window_icon("cut")))
-            .with_inner_size([1520.0, 940.0])
-            .with_min_inner_size([1100.0, 680.0])
+            .with_inner_size([1560.0, 960.0])
+            .with_min_inner_size([1180.0, 700.0])
             .with_drag_and_drop(true),
         ..Default::default()
     };
