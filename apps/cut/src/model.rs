@@ -263,6 +263,8 @@ pub struct Clip {
     pub mask: Option<Mask>,
     #[serde(default)]
     pub keys: Vec<Keyframe>,
+    #[serde(default)]
+    pub effects: Vec<studio_fx::stack::Fx>,
 }
 
 pub const LABELS: [(&str, [u8; 3]); 8] = [
@@ -336,6 +338,7 @@ impl Default for Clip {
             key_tol: tol(),
             key_soft: soft(),
             mask: None,
+            effects: Vec::new(),
             keys: Vec::new(),
         }
     }

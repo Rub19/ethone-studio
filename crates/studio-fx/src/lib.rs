@@ -1,5 +1,6 @@
 pub mod filters;
 pub mod fx;
+pub mod stack;
 
 pub fn rgb_to_hsl(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
     let max = r.max(g).max(b);

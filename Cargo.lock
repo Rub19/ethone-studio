@@ -685,6 +685,7 @@ dependencies = [
  "serde",
  "serde_json",
  "studio-core",
+ "studio-fx",
  "studio-ui",
  "windows",
  "winresource",
@@ -3503,6 +3504,7 @@ version = "0.1.0"
 dependencies = [
  "image",
  "rayon",
+ "serde",
 ]
 
 [[package]]
@@ -3514,6 +3516,7 @@ dependencies = [
  "resvg 0.49.0",
  "serde",
  "serde_json",
+ "studio-fx",
  "ureq",
 ]
 

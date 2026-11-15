@@ -118,12 +118,12 @@ pub fn render(proj: &Project, t: f64, w: u32, h: u32, pics: &mut Pics) -> Result
             if !cb.disabled
                 && let Some(pic) = pics.get(proj, cb.src, 0, cb.src_at(b.b_local))?
             {
-                base = Some(Part { pic, clip: cb.eval(b.b_local.max(0.0)), progress: (b.b_local / cb.len().max(1e-6)) as f32 });
+                base = Some(Part { pic: fx_pic(pic, cb), clip: cb.eval(b.b_local.max(0.0)), progress: (b.b_local / cb.len().max(1e-6)) as f32 });
             }
             if !ca.disabled
                 && let Some(pic) = pics.get(proj, ca.src, 1, ca.src_at(b.a_local))?
             {
-                from = Some((Part { pic, clip: ca.eval(b.a_local.min(ca.len())), progress: (b.a_local / ca.len().max(1e-6)) as f32 }, b.p, cb.trans));
+                from = Some((Part { pic: fx_pic(pic, ca), clip: ca.eval(b.a_local.min(ca.len())), progress: (b.a_local / ca.len().max(1e-6)) as f32 }, b.p, cb.trans));
             }
         } else if let Some((i, local)) = proj.local_at(t) {
             let c = &proj.clips[i];
@@ -132,7 +132,7 @@ pub fn render(proj: &Project, t: f64, w: u32, h: u32, pics: &mut Pics) -> Result
             if !c.disabled
                 && let Some(pic) = pics.get(proj, c.src, 0, c.src_at(local))?
             {
-                base = Some(Part { pic, clip: c.eval(local), progress: (local / c.len().max(1e-6)) as f32 });
+                base = Some(Part { pic: fx_pic(pic, c), clip: c.eval(local), progress: (local / c.len().max(1e-6)) as f32 });
             }
         }
     }
@@ -146,7 +146,7 @@ pub fn render(proj: &Project, t: f64, w: u32, h: u32, pics: &mut Pics) -> Result
             if let Some(pic) = pics.get(proj, o.src, 2 + k, o.src_at(local))? {
                 let mut clip = o.eval(local);
                 clip.opacity *= fade(o, local);
-                overs.push(Part { pic, clip, progress: (local / o.len().max(1e-6)) as f32 });
+                overs.push(Part { pic: fx_pic(pic, o), clip, progress: (local / o.len().max(1e-6)) as f32 });
             }
         }
     }
@@ -167,6 +167,15 @@ pub fn render(proj: &Project, t: f64, w: u32, h: u32, pics: &mut Pics) -> Result
             t,
         },
     ))
+}
+
+fn fx_pic(pic: Pic, c: &Clip) -> Pic {
+    if !studio_fx::stack::active(&c.effects) {
+        return pic;
+    }
+    let Some(mut img) = image::RgbaImage::from_raw(pic.0, pic.1, pic.2.to_vec()) else { return pic };
+    studio_fx::stack::apply(&mut img, &c.effects);
+    (pic.0, pic.1, Arc::new(img.into_raw()))
 }
 
 fn layer(p: &Part, seed: u32) -> look::Layer<'_> {

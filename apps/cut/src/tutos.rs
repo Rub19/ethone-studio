@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const CUT: &[Tuto] = &[
+    t("Bibliothèque d'effets", "", "Plus de 100 effets image empilables sur chaque clip.", &["Inspecteur > onglet Effets > Bibliothèque d'effets > + Ajouter un effet.", "Relight, brume, looks, lueur, glitch, VHS, écran cathodique, pluie, neige, aquarelle… chacun avec intensité, réglages et préréglages.", "Les effets suivent le clip et sont rendus à l'export."]),
     t("Importer des médias", "Ctrl+I", "Vidéos, photos (PNG, JPG…) et sons (MP3, WAV, M4A…).", &[
         "Fichier > Importer des médias, ou glisse les fichiers sur la fenêtre.",
         "Les vidéos et photos se placent à la suite sur V1, les sons sur A2 à la tête de lecture.",

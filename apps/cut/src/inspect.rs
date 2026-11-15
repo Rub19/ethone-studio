@@ -465,6 +465,9 @@ impl Cut {
                 });
             }
             2 => {
+                pro::dock_panel(ui, "fx-stack", "Bibliothèque d'effets", |ui| {
+                    studio_ui::fxpanel::effects_panel(ui, "cut", &mut c.effects);
+                });
                 pro::dock_panel(ui, "fx-presets", "Préréglages d'effets", |ui| {
                     if let Some(k) = chips(ui, &EFFECT_PRESETS, None) {
                         effect_preset(c, k);
