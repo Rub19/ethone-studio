@@ -44,7 +44,7 @@ pub struct Def {
     pub presets: &'static [(&'static str, &'static [f32])],
 }
 
-pub const CATS: [&str; 11] = ["Amplitude", "Dynamique", "Filtres", "Restauration", "Distorsion", "Délai et écho", "Réverbération", "Modulation", "Voix et créatif", "Stéréo", "Temps et hauteur"];
+pub const CATS: [&str; 12] = ["Amplitude", "Dynamique", "Filtres", "Restauration", "Distorsion", "Délai et écho", "Réverbération", "Modulation", "Voix et créatif", "Stéréo", "Temps et hauteur", "Ambiances et voix"];
 
 const MIX: P = p("Mélange", 0.0, 1.0, 0.4, "");
 const FB: P = p("Réinjection", 0.0, 0.9, 0.35, "");
@@ -113,10 +113,54 @@ pub const DEFS: &[Def] = &[
     Def { id: "speed", cat: 10, name: "Vitesse", hint: "Comme une bande : la hauteur suit.", params: &[p("Vitesse", 25.0, 400.0, 100.0, " %")], presets: &[("Demi", &[50.0]), ("×1,25", &[125.0]), ("Double", &[200.0])] },
     Def { id: "tempo", cat: 10, name: "Tempo", hint: "Change la durée sans changer la hauteur.", params: &[p("Tempo", 50.0, 200.0, 100.0, " %")], presets: &[("−10 %", &[90.0]), ("+10 %", &[110.0]), ("+25 %", &[125.0])] },
     Def { id: "pitch", cat: 10, name: "Hauteur", hint: "Change la hauteur sans changer la durée.", params: &[p("Demi-tons", -24.0, 24.0, 0.0, ""), p("Centièmes", -100.0, 100.0, 0.0, "")], presets: &[("Octave grave", &[-12.0, 0.0]), ("Quinte", &[7.0, 0.0]), ("Quarte", &[5.0, 0.0]), ("Tierce", &[4.0, 0.0]), ("Chipmunk", &[9.0, 0.0]), ("Démon", &[-7.0, 0.0]), ("Accordage 432 Hz", &[0.0, -32.0])] },
+    Def { id: "geq10", cat: 2, name: "Égaliseur graphique 10 bandes", hint: "Dix curseurs de 31 Hz à 16 kHz.", params: &[db("31 Hz", -12.0, 12.0, 0.0), db("62 Hz", -12.0, 12.0, 0.0), db("125 Hz", -12.0, 12.0, 0.0), db("250 Hz", -12.0, 12.0, 0.0), db("500 Hz", -12.0, 12.0, 0.0), db("1 kHz", -12.0, 12.0, 0.0), db("2 kHz", -12.0, 12.0, 0.0), db("4 kHz", -12.0, 12.0, 0.0), db("8 kHz", -12.0, 12.0, 0.0), db("16 kHz", -12.0, 12.0, 0.0)], presets: &[("Basses", &[6.0, 5.0, 3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), ("Voix", &[-6.0, -4.0, -2.0, 0.0, 1.0, 2.0, 3.0, 3.0, 1.0, 0.0]), ("Brillant", &[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 3.0, 5.0, 6.0]), ("Sourire", &[5.0, 4.0, 2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 4.0, 5.0]), ("Médiums creusés", &[0.0, 0.0, 0.0, -2.0, -4.0, -4.0, -2.0, 0.0, 0.0, 0.0]), ("Petit volume", &[4.0, 3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 3.0, 4.0])] },
+    Def { id: "peq4", cat: 2, name: "Égaliseur paramétrique 4 bandes", hint: "Quatre cloches réglables en fréquence, gain et largeur.", params: &[hz("Bande 1", 20.0, 20000.0, 100.0), db("Gain 1", -18.0, 18.0, 0.0), p("Q 1", 0.2, 10.0, 1.0, ""), hz("Bande 2", 20.0, 20000.0, 500.0), db("Gain 2", -18.0, 18.0, 0.0), p("Q 2", 0.2, 10.0, 1.0, ""), hz("Bande 3", 20.0, 20000.0, 2500.0), db("Gain 3", -18.0, 18.0, 0.0), p("Q 3", 0.2, 10.0, 1.0, ""), hz("Bande 4", 20.0, 20000.0, 8000.0), db("Gain 4", -18.0, 18.0, 0.0), p("Q 4", 0.2, 10.0, 1.0, "")], presets: &[("Voix chaude", &[150.0, 3.0, 0.8, 400.0, -3.0, 1.2, 3000.0, 3.0, 1.0, 10000.0, 2.0, 0.7]), ("Guitare", &[100.0, -4.0, 0.7, 800.0, 2.0, 1.0, 3000.0, 3.0, 1.2, 9000.0, 2.0, 0.8]), ("Grosse caisse", &[60.0, 5.0, 1.0, 350.0, -6.0, 1.5, 2500.0, 4.0, 1.5, 10000.0, 0.0, 1.0]), ("Podcast", &[90.0, -3.0, 0.7, 250.0, -2.0, 1.0, 4000.0, 2.0, 1.0, 12000.0, 1.0, 0.7])] },
+    Def { id: "maxim", cat: 0, name: "Maximiseur", hint: "Pousse le volume au maximum sans saturer.", params: &[db("Gain", 0.0, 18.0, 6.0), db("Plafond", -3.0, 0.0, -0.3), ms("Relâchement", 5.0, 500.0, 60.0)], presets: &[("Doux", &[3.0, -1.0, 120.0]), ("Fort", &[9.0, -0.3, 40.0]), ("Écrasé", &[15.0, -0.1, 20.0])] },
+    Def { id: "lufs", cat: 0, name: "Volume perçu cible (LUFS)", hint: "Règle le volume perçu sur la norme d'une plateforme.", params: &[p("Cible", -30.0, -8.0, -14.0, " LUFS"), db("Plafond", -3.0, 0.0, -1.0)], presets: &[("Spotify, YouTube", &[-14.0, -1.0]), ("Apple Music", &[-16.0, -1.0]), ("Podcast", &[-16.0, -1.0]), ("Télévision", &[-23.0, -1.0]), ("Cinéma", &[-27.0, -2.0]), ("Club", &[-9.0, -0.3])] },
+    Def { id: "radio", cat: 11, name: "Radio AM", hint: "Bande étroite, saturation et grésillement.", params: &[p("Intensité", 0.0, 1.0, 0.8, ""), p("Grésillement", 0.0, 1.0, 0.3, "")], presets: &[("Propre", &[0.6, 0.0]), ("Ancienne", &[1.0, 0.6])] },
+    Def { id: "phone", cat: 11, name: "Téléphone", hint: "La voix comme au bout du fil.", params: &[pick("Ligne", &["Fixe", "Portable", "Mauvaise ligne"], 0.0)], presets: &[] },
+    Def { id: "megaphone", cat: 11, name: "Mégaphone", hint: "Voix criée dans un porte-voix.", params: &[p("Saturation", 0.0, 1.0, 0.6, "")], presets: &[("Manifestation", &[0.8]), ("Léger", &[0.3])] },
+    Def { id: "underwater", cat: 11, name: "Sous l'eau", hint: "Son étouffé et ondulant.", params: &[p("Profondeur", 0.0, 1.0, 0.6, "")], presets: &[("Piscine", &[0.4]), ("Abysses", &[1.0])] },
+    Def { id: "nextroom", cat: 11, name: "Pièce voisine", hint: "Comme entendu à travers un mur.", params: &[p("Distance", 0.0, 1.0, 0.5, "")], presets: &[("Porte fermée", &[0.4]), ("Chez le voisin", &[0.9])] },
+    Def { id: "cave", cat: 11, name: "Grotte", hint: "Grande résonance minérale avec écho.", params: &[p("Taille", 0.0, 1.0, 0.6, "")], presets: &[("Tunnel", &[0.3]), ("Caverne", &[1.0])] },
+    Def { id: "stadium", cat: 11, name: "Stade", hint: "Annonce dans un grand stade.", params: &[p("Écho", 0.0, 1.0, 0.35, "")], presets: &[("Stade", &[0.35]), ("Hall de gare", &[0.2])] },
+    Def { id: "cassette", cat: 11, name: "Cassette", hint: "Pleurage, souffle et aigus doux.", params: &[p("Pleurage", 0.0, 1.0, 0.4, ""), p("Souffle", 0.0, 1.0, 0.3, "")], presets: &[("Neuve", &[0.15, 0.1]), ("Usée", &[0.8, 0.6])] },
+    Def { id: "vinyl", cat: 11, name: "Vinyle", hint: "Craquements et souffle de disque.", params: &[p("Craquements", 0.0, 1.0, 0.4, ""), p("Souffle", 0.0, 1.0, 0.2, "")], presets: &[("78 tours", &[0.9, 0.5]), ("Léger", &[0.2, 0.1])] },
+    Def { id: "lofi", cat: 11, name: "Lo-fi", hint: "Bits réduits, aigus coupés, légère ondulation.", params: &[int("Bits", 4.0, 16.0, 10.0, ""), hz("Filtre", 1000.0, 16000.0, 5000.0)], presets: &[("Chill", &[12.0, 6000.0]), ("Cassé", &[6.0, 2500.0])] },
+    Def { id: "deep", cat: 11, name: "Voix grave", hint: "Abaisse la voix sans changer la durée.", params: &[p("Demi-tons", -12.0, 0.0, -4.0, "")], presets: &[("Grave", &[-3.0]), ("Très grave", &[-7.0])] },
+    Def { id: "high", cat: 11, name: "Voix aiguë", hint: "Monte la voix sans changer la durée.", params: &[p("Demi-tons", 0.0, 12.0, 4.0, "")], presets: &[("Aiguë", &[3.0]), ("Très aiguë", &[8.0])] },
+    Def { id: "monster", cat: 11, name: "Monstre", hint: "Voix caverneuse et granuleuse.", params: &[p("Grave", 3.0, 12.0, 8.0, " dt"), p("Grain", 0.0, 1.0, 0.4, "")], presets: &[("Ogre", &[6.0, 0.3]), ("Démon", &[10.0, 0.7])] },
+    Def { id: "angel", cat: 11, name: "Ange", hint: "Voix céleste, plus aiguë et réverbérée.", params: &[p("Hauteur", 0.0, 7.0, 3.0, " dt"), p("Réverbération", 0.0, 1.0, 0.5, "")], presets: &[("Chœur", &[2.0, 0.6]), ("Céleste", &[5.0, 0.8])] },
+    Def { id: "ghost", cat: 11, name: "Fantôme", hint: "Souffle inversé et ondulation.", params: &[p("Intensité", 0.0, 1.0, 0.6, "")], presets: &[("Hantise", &[0.8])] },
+    Def { id: "alien", cat: 11, name: "Extraterrestre", hint: "Modulation métallique et ondulante.", params: &[p("Vitesse", 0.5, 12.0, 5.0, " Hz")], presets: &[("Martien", &[3.0]), ("Insecte", &[11.0])] },
+    Def { id: "pa", cat: 11, name: "Sono de gare", hint: "Annonce diffusée dans un grand hall.", params: &[p("Intensité", 0.0, 1.0, 0.7, "")], presets: &[("Aéroport", &[0.5]), ("Gare", &[0.8])] },
+    Def { id: "walkie", cat: 11, name: "Talkie-walkie", hint: "Bande très étroite et saturée.", params: &[p("Saturation", 0.0, 1.0, 0.7, "")], presets: &[("Police", &[0.8]), ("Jouet", &[0.4])] },
+    Def { id: "drunk", cat: 11, name: "Ivresse", hint: "Hauteur qui tangue et son qui se promène.", params: &[p("Pleurage", 0.0, 1.0, 0.5, "")], presets: &[("Pompette", &[0.3]), ("Mal de mer", &[1.0])] },
+    Def { id: "space", cat: 11, name: "Espace lointain", hint: "Immense réverbération et échos qui tournent.", params: &[p("Taille", 0.0, 1.0, 0.7, "")], presets: &[("Station", &[0.5]), ("Galaxie", &[1.0])] },
 ];
 
 pub fn defaults(k: usize) -> Vec<f32> {
     DEFS[k].params.iter().map(|p| p.def).collect()
+}
+
+fn narrow(c: &mut Clip, a: usize, b: usize, lo: f32, hi: f32, stages: usize) {
+    c.band(a, b, 4, lo, 0.0, 0.707, stages);
+    if hi < c.rate as f32 / 2.0 {
+        c.band(a, b, 3, hi, 0.0, 0.707, stages);
+    }
+}
+
+fn hiss(c: &mut Clip, a: usize, b: usize, amount: f32, crackle: f32) {
+    let mut s: u32 = 0x9E37_79B9;
+    let gate = (crackle * 40.0) as u32;
+    c.each(a, b, |_, v| {
+        s ^= s << 13;
+        s ^= s >> 17;
+        s ^= s << 5;
+        let r = s as f32 / u32::MAX as f32 - 0.5;
+        let pop = if s % 4000 < gate { r * 1.2 } else { 0.0 };
+        v + r * amount * 0.04 + pop * 0.4
+    });
 }
 
 pub fn run(id: &str, c: &mut Clip, a: usize, b: usize, p: &[f32]) -> Option<String> {
@@ -200,6 +244,119 @@ pub fn run(id: &str, c: &mut Clip, a: usize, b: usize, p: &[f32]) -> Option<Stri
         "speed" => c.speed(a, b, v(0) / 100.0),
         "tempo" => c.stretch(a, b, 100.0 / v(0).max(1.0)),
         "pitch" => c.pitch(a, b, v(0) + v(1) / 100.0),
+        "geq10" => {
+            for (k, f) in [31.0, 62.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0].into_iter().enumerate() {
+                if v(k) != 0.0 && f < c.rate as f32 / 2.0 {
+                    c.band(a, b, 0, f, v(k), 1.4, 1);
+                }
+            }
+        }
+        "peq4" => {
+            for k in 0..4 {
+                if v(k * 3 + 1) != 0.0 && v(k * 3) < c.rate as f32 / 2.0 {
+                    c.band(a, b, 0, v(k * 3), v(k * 3 + 1), v(k * 3 + 2), 1);
+                }
+            }
+        }
+        "maxim" => {
+            c.gain_db(a, b, v(0));
+            c.limit(a, b, v(1), v(2));
+        }
+        "lufs" => {
+            c.loudness_normalize(a, b, v(0));
+            c.limit(a, b, v(1), 80.0);
+        }
+        "radio" => {
+            narrow(c, a, b, 500.0, 3500.0, 1);
+            c.distort(a, b, 0, 0.35, 4000.0, v(0));
+            hiss(c, a, b, v(1), v(1) * 0.3);
+        }
+        "phone" => {
+            let q = v(0).round() as u8;
+            narrow(c, a, b, [300.0, 400.0, 500.0][q as usize % 3], [3400.0, 3000.0, 2500.0][q as usize % 3], 2);
+            if q >= 1 {
+                c.bitcrush(a, b, if q == 1 { 10.0 } else { 6.0 }, q as usize);
+            }
+            if q == 2 {
+                hiss(c, a, b, 0.4, 0.2);
+            }
+        }
+        "megaphone" => {
+            narrow(c, a, b, 600.0, 4000.0, 2);
+            c.distort(a, b, 1, v(0), 5000.0, 1.0);
+            c.band(a, b, 0, 2000.0, 6.0, 1.0, 1);
+        }
+        "underwater" => {
+            c.band(a, b, 3, 2000.0 - v(0) * 1700.0, 0.0, 0.707, 2);
+            c.mod_delay(a, b, 10.0, 3.0, 0.4, 0.0, 0.4);
+            c.freeverb(a, b, 0.6, 0.8, 10.0, 0.5, 0.3);
+        }
+        "nextroom" => {
+            c.band(a, b, 3, 900.0 - v(0) * 500.0, 0.0, 0.707, 2);
+            c.gain_db(a, b, -6.0 * v(0));
+            c.freeverb(a, b, 0.3, 0.9, 5.0, 0.5, 0.15 + v(0) * 0.2);
+        }
+        "cave" => {
+            c.freeverb(a, b, 0.85 + v(0) * 0.14, 0.3, 40.0, 1.0, 0.45);
+            c.echo_filtered(a, b, 300.0 + v(0) * 400.0, 0.4, 3000.0, 0.25);
+        }
+        "stadium" => {
+            c.freeverb(a, b, 0.95, 0.2, 60.0, 1.0, 0.4);
+            c.echo(a, b, 450.0, 0.35, v(0));
+        }
+        "cassette" => {
+            c.vibrato(a, b, 0.8, v(0) * 3.0 + 0.05);
+            c.band(a, b, 3, 9000.0, 0.0, 0.707, 1);
+            c.distort(a, b, 0, 0.1, 9000.0, 0.4);
+            hiss(c, a, b, v(1), 0.0);
+        }
+        "vinyl" => {
+            narrow(c, a, b, 40.0, 12000.0, 1);
+            hiss(c, a, b, v(1), v(0));
+        }
+        "lofi" => {
+            c.bitcrush(a, b, v(0), 2);
+            c.band(a, b, 3, v(1), 0.0, 0.707, 2);
+            c.vibrato(a, b, 0.5, 1.0);
+        }
+        "deep" | "high" => c.pitch(a, b, v(0)),
+        "monster" => {
+            c.pitch(a, b, -v(0));
+            c.distort(a, b, 0, v(1), 3000.0, 0.5);
+        }
+        "angel" => {
+            c.pitch(a, b, v(0));
+            c.mod_delay(a, b, 20.0, 6.0, 0.6, 0.0, 0.4);
+            c.freeverb(a, b, 0.9, 0.3, 30.0, 1.0, v(1));
+        }
+        "ghost" => {
+            c.reverse_reverb(a, b, 0.9, v(0));
+            c.vibrato(a, b, 3.0, 1.5);
+            c.band(a, b, 4, 300.0, 0.0, 0.707, 1);
+        }
+        "alien" => {
+            c.ring_mix(a, b, 30.0 + v(0) * 20.0, 0.5);
+            c.vibrato(a, b, v(0), 2.0);
+        }
+        "pa" => {
+            narrow(c, a, b, 400.0, 3500.0, 1);
+            c.freeverb(a, b, 0.8, 0.4, 30.0, 1.0, 0.35 * v(0));
+            c.echo(a, b, 220.0, 0.3, 0.25 * v(0));
+        }
+        "walkie" => {
+            narrow(c, a, b, 700.0, 2600.0, 2);
+            c.distort(a, b, 1, v(0), 3000.0, 1.0);
+            hiss(c, a, b, 0.2, 0.0);
+        }
+        "drunk" => {
+            c.vibrato(a, b, 0.3, v(0) * 8.0 + 0.1);
+            c.auto_pan(a, b, 0.2, 0.6 * v(0));
+        }
+        "space" => {
+            c.freeverb(a, b, 0.9 + v(0) * 0.08, 0.1, 80.0, 1.0, 0.5);
+            c.echo_filtered(a, b, 700.0, 0.6, 1500.0, 0.35);
+            c.auto_pan(a, b, 0.1, 0.5);
+        }
         _ => {}
     }
     None

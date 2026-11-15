@@ -5,6 +5,8 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const SOUND: &[Tuto] = &[
+    t("Ambiances et voix", "", "Radio, téléphone, mégaphone, sous l'eau, cassette, vinyle, monstre, ange…", &["Rack d'effets > catégorie Ambiances et voix : 20 transformations prêtes, chacune avec son réglage principal et ses préréglages.", "▶ Écouter essaie sur 15 s, Appliquer agit sur la sélection ou tout le fichier."]),
+    t("Égaliseurs", "", "Graphique 10 bandes et paramétrique 4 bandes.", &["Rack d'effets > Filtres. Le graphique règle 10 fréquences fixes, le paramétrique 4 cloches libres (fréquence, gain, Q)."]),
     t("Sélection temporelle", "V", "Sélectionne une durée sur la forme d'onde.", &["Glisse pour sélectionner, tire les bords pour ajuster, Maj+clic pour étendre.", "Double-clic : sélectionne l'espace entre deux marqueurs."]),
     t("Main (défilement)", "H", "Fait défiler la vue sans toucher à la sélection.", &["Glisse à gauche ou à droite. H une seconde fois passe au zoom."]),
     t("Zoom", "H", "Zoome au clic ou sur une zone.", &["Clic : zoom avant au point cliqué. Alt+clic ou clic droit : zoom arrière.", "Glisse une zone pour la faire remplir l'écran."]),
