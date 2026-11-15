@@ -3456,6 +3456,7 @@ dependencies = [
  "hound",
  "rfd",
  "studio-core",
+ "studio-fx",
  "studio-ui",
  "symphonia",
  "winresource",

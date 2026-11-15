@@ -151,6 +151,46 @@ pub enum Kind {
     Fisheye,
     FrostedGlass,
     Turbulence,
+    FilmSim,
+    NegativeFilm,
+    Colorize,
+    ColorSplash,
+    Tritone,
+    FalseColor,
+    ChannelSwap,
+    GradientOverlay,
+    SkyGradient,
+    LocalContrast,
+    DodgeBurn,
+    Backlight,
+    SoftGlare,
+    VignettePro,
+    EdgeBlur,
+    Deband,
+    PopArt,
+    Warhol,
+    CmykHalftone,
+    Engraving,
+    Crosshatch,
+    Charcoal,
+    InkSketch,
+    LiquidChrome,
+    TileMosaic,
+    HexPixel,
+    LowPoly,
+    PixelArt,
+    WaterReflection,
+    CameraShake,
+    RadialChroma,
+    ZoomBurst,
+    Anaglyph,
+    CineBars,
+    PhotoFrame,
+    Texture,
+    Fireworks,
+    Confetti,
+    Glitter,
+    Bubbles,
 }
 
 pub const ADJUSTMENTS: &[Kind] = &[
@@ -1591,7 +1631,7 @@ mod tests {
     #[test]
     fn every_filter_runs_and_keeps_alpha() {
         let img = RgbaImage::from_fn(40, 30, |x, y| image::Rgba([(x * 6) as u8, (y * 8) as u8, 120, if x < 3 { 0 } else { 255 }]));
-        let all: Vec<Kind> = ADJUSTMENTS.iter().chain(QUICK).chain(FILTERS.iter().chain(crate::fx::GROUPS).flat_map(|f| f.1.iter())).copied().collect();
+        let all: Vec<Kind> = ADJUSTMENTS.iter().chain(QUICK).chain(FILTERS.iter().chain(crate::fx::GROUPS).chain(crate::fx2::GROUPS).flat_map(|f| f.1.iter())).copied().collect();
         assert!(all.len() >= 70);
         for k in all {
             let out = k.apply(&img, &k.defaults());

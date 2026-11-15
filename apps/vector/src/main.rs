@@ -316,6 +316,7 @@ struct VectorApp {
     title: String,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
     grid: f32,
     show_grid: bool,
     snap: bool,
@@ -477,6 +478,7 @@ impl VectorApp {
             title: String::new(),
             help: studio_ui::help::Help::new("Vector", tutos::VECTOR),
             inbox: studio_ui::handoff::Receiver::new("vector"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
             grid: 20.0,
             show_grid: false,
             snap: false,
@@ -2170,6 +2172,33 @@ fn apply_affine(it: &mut Item, m: [f32; 4], c: P, strokes: bool) -> bool {
 }
 
 impl VectorApp {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher en image"), ("page", "placer le dessin"), ("motion", "animer le dessin"), ("cut", "ajouter au montage"), ("lumen", "développer")]));
+        v.extend(studio_ui::palette::effect_cmds());
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+            self.checkpoint();
+            self.doc.raster_fx.push(studio_fx::stack::Fx::new(k));
+            studio_ui::handoff::toast(ctx, format!("{} ajouté aux effets bitmap de l'export", k.title()), true);
+            return;
+        }
+        match id {
+
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let parts = self.export_area(0);
         let Some((name, r, d)) = parts.into_iter().next() else { return };
@@ -2198,6 +2227,13 @@ impl eframe::App for VectorApp {
             self.receive(&p);
         }
         let before = self.doc.clone();
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
+        }
         if !self.home && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
             if self.help.open {
                 self.help.open = false;

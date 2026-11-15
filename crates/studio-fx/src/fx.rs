@@ -163,7 +163,7 @@ pub fn title(k: Kind) -> &'static str {
         Kind::Fisheye => "Fisheye",
         Kind::FrostedGlass => "Verre dépoli",
         Kind::Turbulence => "Turbulence",
-        _ => "",
+        _ => crate::fx2::title(k),
     }
 }
 
@@ -256,7 +256,7 @@ pub fn params(k: Kind) -> &'static [Param] {
         Kind::Fisheye => const { &[p("Intensité", 0.0, 100.0, 60.0, " %"), p("Zoom", 50.0, 150.0, 100.0, " %")] },
         Kind::FrostedGlass => const { &[p("Dispersion", 1.0, 30.0, 6.0, " px"), on("Adoucir", 1.0)] },
         Kind::Turbulence => const { &[p("Force", 0.0, 100.0, 25.0, " px"), p("Échelle", 10.0, 400.0, 80.0, " px"), p("Détail", 1.0, 6.0, 3.0, ""), p("Graine", 0.0, 999.0, 1.0, "")] },
-        _ => &[],
+        _ => crate::fx2::params(k),
     }
 }
 
@@ -350,11 +350,11 @@ pub fn presets(k: Kind) -> &'static [(&'static str, &'static [f32])] {
         Kind::Fisheye => &[("Léger", &[30.0, 100.0]), ("Fort", &[90.0, 110.0])],
         Kind::FrostedGlass => &[("Douche", &[12.0, 1.0]), ("Fin", &[3.0, 0.0])],
         Kind::Turbulence => &[("Chaleur", &[8.0, 30.0, 4.0, 1.0]), ("Liquide", &[40.0, 150.0, 3.0, 2.0])],
-        _ => &[],
+        _ => crate::fx2::presets(k),
     }
 }
 
-fn hsl(h_deg: f32, s: f32, l: f32) -> [f32; 3] {
+pub(crate) fn hsl(h_deg: f32, s: f32, l: f32) -> [f32; 3] {
     let (r, g, b) = hsl_to_rgb((h_deg / 360.0).rem_euclid(1.0), s.clamp(0.0, 1.0), l.clamp(0.0, 1.0));
     [r, g, b]
 }
@@ -373,7 +373,7 @@ pub fn kelvin(k: f32) -> [f32; 3] {
     [r, g, b].map(|v| (v / 255.0).clamp(0.0, 1.0))
 }
 
-fn look_px(c: [f32; 3], v: &[f32; 9], bw: bool) -> [f32; 3] {
+pub(crate) fn look_px(c: [f32; 3], v: &[f32; 9], bw: bool) -> [f32; 3] {
     let mut o = [c[0] + v[0] * 0.1, c[1] - v[1] * 0.08, c[2] - v[0] * 0.1];
     let l = luma(o);
     o = if bw { [l; 3] } else { o.map(|x| l + (x - l) * (1.0 + v[2])) };
@@ -384,35 +384,35 @@ fn look_px(c: [f32; 3], v: &[f32; 9], bw: bool) -> [f32; 3] {
     std::array::from_fn(|k| o[k] + (sh[k] - 0.5) * v[6] * (1.0 - l).powi(2) + (hi[k] - 0.5) * v[8] * l * l)
 }
 
-fn norm3(v: [f32; 3]) -> [f32; 3] {
+pub(crate) fn norm3(v: [f32; 3]) -> [f32; 3] {
     let n = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt().max(1e-6);
     v.map(|x| x / n)
 }
 
-fn screen(a: f32, b: f32) -> f32 {
+pub(crate) fn screen(a: f32, b: f32) -> f32 {
     1.0 - (1.0 - a) * (1.0 - b.clamp(0.0, 1.0))
 }
 
-fn is_skin(c: [f32; 3]) -> bool {
+pub(crate) fn is_skin(c: [f32; 3]) -> bool {
     let (h, s, l) = rgb_to_hsl(c[0], c[1], c[2]);
     (h < 50.0 / 360.0 || h > 340.0 / 360.0) && (0.1..0.75).contains(&s) && (0.15..0.92).contains(&l)
 }
 
-fn lum_vec(img: &RgbaImage) -> Vec<f32> {
+pub(crate) fn lum_vec(img: &RgbaImage) -> Vec<f32> {
     img.pixels().map(|q| luma(rgb(q.0))).collect()
 }
 
-fn grad(lv: &[f32], w: usize, h: usize, x: usize, y: usize) -> (f32, f32) {
+pub(crate) fn grad(lv: &[f32], w: usize, h: usize, x: usize, y: usize) -> (f32, f32) {
     let at = |dx: i32, dy: i32| lv[((y as i32 + dy).clamp(0, h as i32 - 1) as usize) * w + (x as i32 + dx).clamp(0, w as i32 - 1) as usize];
     (at(1, 0) - at(-1, 0), at(0, 1) - at(0, -1))
 }
 
-fn px(img: &RgbaImage, x: f32, y: f32) -> [f32; 3] {
+pub(crate) fn px(img: &RgbaImage, x: f32, y: f32) -> [f32; 3] {
     let (w, h) = img.dimensions();
     rgb(img.get_pixel((x.max(0.0) as u32).min(w - 1), (y.max(0.0) as u32).min(h - 1)).0)
 }
 
-fn overlay(img: &RgbaImage, buf: Vec<[f32; 3]>, opacity: f32) -> RgbaImage {
+pub(crate) fn overlay(img: &RgbaImage, buf: Vec<[f32; 3]>, opacity: f32) -> RgbaImage {
     let w = img.width() as usize;
     map_xy(img, move |x, y, c| {
         let b = buf[y as usize * w + x as usize];
@@ -420,7 +420,7 @@ fn overlay(img: &RgbaImage, buf: Vec<[f32; 3]>, opacity: f32) -> RgbaImage {
     })
 }
 
-fn disk(buf: &mut [[f32; 3]], w: usize, h: usize, cx: f32, cy: f32, r: f32, col: [f32; 3], soft: f32) {
+pub(crate) fn disk(buf: &mut [[f32; 3]], w: usize, h: usize, cx: f32, cy: f32, r: f32, col: [f32; 3], soft: f32) {
     let r = r.max(0.5);
     let (x0, x1) = ((cx - r).floor().max(0.0) as usize, ((cx + r).ceil() as usize).min(w.saturating_sub(1)));
     let (y0, y1) = ((cy - r).floor().max(0.0) as usize, ((cy + r).ceil() as usize).min(h.saturating_sub(1)));
@@ -441,7 +441,7 @@ fn disk(buf: &mut [[f32; 3]], w: usize, h: usize, cx: f32, cy: f32, r: f32, col:
     }
 }
 
-fn kernel(shape: u32) -> Vec<(f32, f32)> {
+pub(crate) fn kernel(shape: u32) -> Vec<(f32, f32)> {
     let mut v = vec![(0.0, 0.0)];
     for ring in 1..=4 {
         let n = ring * 8;
@@ -503,7 +503,7 @@ fn dither(img: &RgbaImage, pal: &[[u8; 3]], method: u32, ps: u32) -> RgbaImage {
     map_xy(img, move |x, y, _| s[(y as u32 / ps) as usize * swu + (x as u32 / ps) as usize])
 }
 
-fn dist2(a: [f32; 3], b: [f32; 3]) -> f32 {
+pub(crate) fn dist2(a: [f32; 3], b: [f32; 3]) -> f32 {
     (a[0] - b[0]).powi(2) * 0.3 + (a[1] - b[1]).powi(2) * 0.59 + (a[2] - b[2]).powi(2) * 0.11
 }
 
@@ -1219,7 +1219,7 @@ pub fn apply(k: Kind, img: &RgbaImage, g: &dyn Fn(usize) -> f32) -> RgbaImage {
                 [q[0], q[1], q[2], at(x as f32, y as f32)[3]]
             })
         }
-        _ => img.clone(),
+        _ => crate::fx2::apply(k, img, g),
     }
 }
 

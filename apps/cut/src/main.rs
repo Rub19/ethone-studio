@@ -237,6 +237,7 @@ struct Cut {
     icon: TextureHandle,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
     composed: Option<(i64, Project, u32, u32)>,
     looping: bool,
     snap: bool,
@@ -318,6 +319,7 @@ impl Cut {
             icon: studio_ui::icon_texture(&cc.egui_ctx, "cut"),
             help: studio_ui::help::Help::new("Cut", tutos::CUT),
             inbox: studio_ui::handoff::Receiver::new("cut"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
             composed: None,
             looping: false,
             snap: true,
@@ -1719,6 +1721,34 @@ fn describe(a: &Project, b: &Project) -> String {
 }
 
 impl Cut {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));
+        v.extend(studio_ui::palette::effect_cmds());
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+            match self.sel.and_then(|s| self.clip_mut(s)) {
+                Some(c) => c.effects.push(studio_fx::stack::Fx::new(k)),
+                None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un clip".into(), false),
+            }
+            return;
+        }
+        match id {
+
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let (w, h) = (self.proj.width.max(2), self.proj.height.max(2));
         let p = studio_core::handoff::outgoing("cut", "image de la vidéo", "png");
@@ -1741,6 +1771,13 @@ impl eframe::App for Cut {
             self.receive(&p, ctx);
         }
         let before = self.proj.clone();
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
+        }
         self.pump(ctx);
         self.keys(ctx);
         let dropped: Vec<PathBuf> = ctx.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).filter(|p| !p.as_os_str().is_empty()).collect());

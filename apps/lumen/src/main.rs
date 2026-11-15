@@ -197,6 +197,7 @@ struct Lumen {
     icon: TextureHandle,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
     hsl_tab: usize,
     curve_channel: usize,
     query: String,
@@ -289,6 +290,7 @@ impl Lumen {
             icon: studio_ui::icon_texture(&cc.egui_ctx, "lumen"),
             help: studio_ui::help::Help::new("Lumen", tutos::LUMEN),
             inbox: studio_ui::handoff::Receiver::new("lumen"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
             hsl_tab: 0,
             curve_channel: 0,
             query: String::new(),
@@ -1214,6 +1216,38 @@ fn text_mark(ctx: &egui::Context, text: &str) -> Option<meta::Mark> {
 }
 
 impl Lumen {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]));
+        v.extend(studio_ui::palette::effect_cmds());
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+            if let Some(i) = self.current.filter(|i| *i < self.files.len()) {
+                let mut s = self.settings(i);
+                s.creative.push(studio_fx::stack::Fx::new(k));
+                self.set_settings(i, s);
+                self.view = View::Develop;
+            } else {
+                studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
+            }
+            return;
+        }
+        match id {
+
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let Some(i) = self.current.filter(|i| *i < self.files.len()) else {
             studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
@@ -1247,6 +1281,13 @@ impl eframe::App for Lumen {
         let ctx = &root.ctx().clone();
         for p in self.inbox.poll(ctx) {
             self.receive(&p, ctx);
+        }
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
         }
         self.pump(ctx);
         self.ensure_exif();

@@ -1,6 +1,7 @@
 pub mod fxpanel;
 pub mod handoff;
 pub mod help;
+pub mod palette;
 pub mod pro;
 use egui::epaint::CubicBezierShape;
 use egui::{

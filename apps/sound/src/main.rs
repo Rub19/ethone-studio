@@ -278,6 +278,7 @@ struct Sound {
     icon: egui::TextureHandle,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
     tool: Tool,
     spec_sel: Option<SpecSel>,
     spec_log: bool,
@@ -370,6 +371,7 @@ impl Sound {
             icon: studio_ui::icon_texture(&cc.egui_ctx, "sound"),
             help: studio_ui::help::Help::new("Sound", tutos::SOUND),
             inbox: studio_ui::handoff::Receiver::new("sound"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
             tool: Tool::Select,
             spec_sel: None,
             spec_log: true,
@@ -1018,6 +1020,49 @@ fn db(v: f32) -> f32 {
 }
 
 impl Sound {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+            studio_ui::palette::Cmd::new("Ouvrir un son…", "Ctrl+O", "open"),
+            studio_ui::palette::Cmd::new("Exporter…", "Ctrl+E", "export"),
+            studio_ui::palette::Cmd::new("Tout sélectionner", "Ctrl+A", "select-all"),
+            studio_ui::palette::Cmd::new("Lecture / pause", "Espace", "play"),
+            studio_ui::palette::Cmd::new("Ajouter un marqueur", "M", "marker"),
+            studio_ui::palette::Cmd::new("Annuler", "Ctrl+Z", "undo"),
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage (sélection ou tout)")]));
+        for (k, d) in effects::DEFS.iter().enumerate() {
+            v.push(studio_ui::palette::Cmd::new(format!("Effet audio : {}", d.name), effects::CATS[d.cat], format!("rack:{k}")));
+            v.push(studio_ui::palette::Cmd::new(format!("Appliquer : {}", d.name), "Réglages actuels", format!("apply:{k}")));
+        }
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("rack:").and_then(|k| k.parse::<usize>().ok()).filter(|k| *k < effects::DEFS.len()) {
+            self.rack_pick = k;
+            self.rack_cat = effects::DEFS[k].cat;
+            return;
+        }
+        if let Some(k) = id.strip_prefix("apply:").and_then(|k| k.parse::<usize>().ok()).filter(|k| *k < effects::DEFS.len()) {
+            self.run_rack(k, false);
+            return;
+        }
+        match id {
+            "open" => self.open_dialog(),
+            "export" => self.export = Some(self.export_opts()),
+            "select-all" => self.sel = Some((0, self.clip.len())),
+            "play" => self.toggle_play(),
+            "marker" => self.add_marker(),
+            "undo" => self.undo(),
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let (a, b) = self.range();
         let stem = self.file.as_ref().and_then(|p| p.file_stem()).map_or("audio".into(), |s| s.to_string_lossy().into_owned());
@@ -1045,6 +1090,13 @@ impl eframe::App for Sound {
         let ctx = &root.ctx().clone();
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
+        }
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
         }
         self.keys(ctx);
         if let Some(p) = ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf())).filter(|p| !p.as_os_str().is_empty()) {

@@ -196,6 +196,7 @@ struct Motion {
     icon: TextureHandle,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
     tool: Tool,
     zoom: Option<f32>,
     pan: Vec2,
@@ -317,6 +318,7 @@ impl Motion {
             icon: studio_ui::icon_texture(&cc.egui_ctx, "motion"),
             help: studio_ui::help::Help::new("Motion", tutos::MOTION),
             inbox: studio_ui::handoff::Receiver::new("motion"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
             tool: Tool::Select,
             zoom: None,
             pan: Vec2::ZERO,
@@ -1427,6 +1429,31 @@ impl Motion {
 }
 
 impl Motion {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage"), ("pixel", "retoucher l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("lumen", "développer")]));
+        v.extend(studio_ui::palette::effect_cmds());
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+            self.comp.effects.push(studio_fx::stack::Fx::new(k));
+            return;
+        }
+        match id {
+
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let p = studio_core::handoff::outgoing("motion", "image de l'animation", "png");
         match render(&self.comp, self.t, self.comp.width, self.comp.height, &self.fontdb, false).and_then(|pix| pix.save_png(&p).map_err(|e| e.to_string())) {
@@ -1452,6 +1479,13 @@ impl eframe::App for Motion {
             self.receive(&p);
         }
         let before = self.comp.clone();
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
+        }
         self.keys(ctx);
         if self.playing {
             let dt = ctx.input(|i| i.stable_dt).min(0.1);

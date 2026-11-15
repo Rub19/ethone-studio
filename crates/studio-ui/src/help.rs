@@ -125,6 +125,10 @@ impl Help {
         Self { app, tutos, open: false, tab: Tab::Learn, query: String::new(), selected: None, ai: Ai::Unknown, chat: Vec::new(), input: String::new(), waiting: false, tx, rx }
     }
 
+    pub fn titles(&self) -> Vec<&'static str> {
+        self.tutos.iter().map(|t| t.title).collect()
+    }
+
     pub fn toggle(&mut self) {
         self.open = !self.open;
     }

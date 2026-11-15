@@ -208,6 +208,7 @@ pub struct Pixel {
     mask_tex: Option<(usize, TextureHandle)>,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
     renaming: Option<(usize, String)>,
     error: Option<String>,
     title: String,
@@ -275,7 +276,7 @@ impl Pixel {
                     .filter_map(|l| {
                         let mut it = l.splitn(3, '|');
                         let (k, n, v) = (it.next()?, it.next()?, it.next()?);
-                        let kind = filters::ADJUSTMENTS.iter().chain(filters::QUICK).chain(filters::FILTERS.iter().chain(fx::GROUPS).flat_map(|g| g.1.iter())).find(|x| format!("{x:?}") == k)?;
+                        let kind = filters::ADJUSTMENTS.iter().chain(filters::QUICK).chain(filters::FILTERS.iter().chain(fx::GROUPS).chain(studio_fx::fx2::GROUPS).flat_map(|g| g.1.iter())).find(|x| format!("{x:?}") == k)?;
                         Some((*kind, n.to_string(), v.split(',').filter_map(|x| x.parse().ok()).collect()))
                     })
                     .collect()
@@ -382,6 +383,7 @@ impl Pixel {
             mask_tex: None,
             help: studio_ui::help::Help::new("Pixel", tutos::PIXEL),
             inbox: studio_ui::handoff::Receiver::new("pixel"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
             renaming: None,
             error: None,
             title: String::new(),
@@ -1135,6 +1137,55 @@ impl Pixel {
 }
 
 impl Pixel {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+            studio_ui::palette::Cmd::new("Ouvrir une image…", "Ctrl+O", "open"),
+            studio_ui::palette::Cmd::new("Exporter…", "Ctrl+E", "export"),
+            studio_ui::palette::Cmd::new("Comparaison rapide avant / après", "Affichage", "compare"),
+            studio_ui::palette::Cmd::new("Créer un timelapse GIF", "Fichier", "timelapse"),
+            studio_ui::palette::Cmd::new("Agrandir ×2 (super-résolution)", "Image", "up2"),
+            studio_ui::palette::Cmd::new("Agrandir ×4 (super-résolution)", "Image", "up4"),
+            studio_ui::palette::Cmd::new("Appliquer des LUT .cube", "Image", "luts"),
+            studio_ui::palette::Cmd::new("Répéter le dernier filtre", "Ctrl+Alt+F", "repeat"),
+            studio_ui::palette::Cmd::new("Répéter la dernière suppression", "Édition", "repeat-remove"),
+            studio_ui::palette::Cmd::new("Inverser la sélection", "Sélection", "invert"),
+            studio_ui::palette::Cmd::new("Désélectionner", "Ctrl+D", "deselect"),
+            studio_ui::palette::Cmd::new("Barre de tâches contextuelle (afficher / masquer)", "Affichage", "taskbar"),
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]));
+        v.extend(studio_ui::palette::effect_cmds());
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+            if !self.home {
+                self.start_adjust(k);
+            }
+            return;
+        }
+        match id {
+            "open" => self.open_dialog(),
+            "export" => self.export_sheet(),
+            "compare" => self.toggle_compare(ctx),
+            "timelapse" => self.export_timelapse(true),
+            "up2" => self.upscale(2),
+            "up4" => self.upscale(4),
+            "luts" => self.apply_cube_luts(),
+            "repeat" => self.repeat_filter(),
+            "repeat-remove" => self.repeat_removal(ctx),
+            "invert" => self.doc.invert_selection(),
+            "deselect" => self.deselect(),
+            "taskbar" => self.task_bar = !self.task_bar,
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let stem = Path::new(&self.doc.name).file_stem().map_or("image".into(), |s| s.to_string_lossy().into_owned());
         let p = studio_core::handoff::outgoing("pixel", &stem, "png");
@@ -1165,6 +1216,13 @@ impl eframe::App for Pixel {
         let ctx = &root.ctx().clone();
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
+        }
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
         }
         if !self.home && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
             if self.help.open {
@@ -1710,7 +1768,7 @@ impl Pixel {
                 self.repeat_filter();
             }
             ui.separator();
-            for (group, kinds) in filters::FILTERS.iter().chain(fx::GROUPS) {
+            for (group, kinds) in filters::FILTERS.iter().chain(fx::GROUPS).chain(studio_fx::fx2::GROUPS) {
                 ui.menu_button(*group, |ui| {
                     for k in *kinds {
                         let label = if k.params().is_empty() { k.title().to_string() } else { format!("{}…", k.title()) };

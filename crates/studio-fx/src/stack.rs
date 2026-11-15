@@ -19,6 +19,7 @@ impl Fx {
 pub fn groups() -> Vec<(&'static str, &'static [Kind])> {
     let mut g: Vec<(&'static str, &'static [Kind])> = vec![("Réglages", ADJUSTMENTS), ("Rapides", QUICK)];
     g.extend(crate::fx::GROUPS.iter().copied());
+    g.extend(crate::fx2::GROUPS.iter().copied());
     g.extend(FILTERS.iter().copied());
     g
 }
@@ -61,6 +62,7 @@ mod tests {
         assert_eq!(img.get_pixel(0, 0).0, [100, 120, 140, 255]);
         apply(&mut img, &[Fx::new(Kind::Invert)]);
         assert_eq!(img.get_pixel(0, 0).0, [155, 135, 115, 255]);
-        assert!(count() > 100);
+        assert!(count() > 150);
+        println!("fx2 options: {}", crate::fx2::option_count());
     }
 }

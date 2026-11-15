@@ -143,6 +143,7 @@ struct PageApp {
     icon: TextureHandle,
     help: studio_ui::help::Help,
     inbox: studio_ui::handoff::Receiver,
+    palette: studio_ui::palette::Palette,
 }
 
 fn recents_path() -> PathBuf {
@@ -214,6 +215,7 @@ impl PageApp {
             icon: studio_ui::icon_texture(&cc.egui_ctx, "page"),
             help: studio_ui::help::Help::new("Page", tutos::PAGE),
             inbox: studio_ui::handoff::Receiver::new("page"),
+            palette: studio_ui::palette::Palette::new(&cc.egui_ctx),
         };
         if let Some(p) = std::env::args().nth(1).map(PathBuf::from).filter(|p| p.is_file()) {
             me.receive(&p);
@@ -984,6 +986,35 @@ impl PageApp {
 }
 
 impl PageApp {
+
+    fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let mut v = vec![
+
+        ];
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
+        v.extend(studio_ui::palette::effect_cmds());
+        v
+    }
+
+    fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(t) = id.strip_prefix("send:") {
+            let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
+            self.send_to(t, ctx);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+            let i = self.sel.filter(|i| matches!(self.frames_ref().get(*i).map(|f| &f.kind), Some(Kind::Image { .. })));
+            match i {
+                Some(i) => self.frames()[i].effects.push(studio_fx::stack::Fx::new(k)),
+                None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un bloc image".into(), false),
+            }
+            return;
+        }
+        match id {
+
+            _ => {}
+        }
+    }
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let cur = if self.page == MASTER { 0 } else { self.page.min(self.doc.pages.len().saturating_sub(1)) };
         let svg = self.export_svg(&self.doc, &[cur], &RenderOpts::screen(false));
@@ -1011,6 +1042,13 @@ impl eframe::App for PageApp {
             self.receive(&p);
         }
         let before = self.doc.clone();
+        self.palette.keys(ctx);
+        if self.palette.open {
+            let cmds = self.commands();
+            if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
+                self.run_cmd(&id, ctx);
+            }
+        }
         self.keys(ctx);
         let name = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("Sans titre".into());
         let title = if self.home { "Page".to_string() } else { format!("{name}{} — Page", if self.doc != self.saved { " •" } else { "" }) };
