@@ -1,6 +1,9 @@
 #![windows_subsystem = "windows"]
 
 mod model;
+mod panels;
+mod templates;
+mod tools;
 mod tutos;
 
 use eframe::egui::{
@@ -9,7 +12,9 @@ use eframe::egui::{
     pos2, vec2,
 };
 use krilla_svg::{SurfaceExt, SvgSettings};
-use model::{Doc, FILTERS, Frame, Guide, Kind, LISTS, MASTER, Page, TextStyle};
+use model::{BLENDS, BULLETS, CORNERS, CharStyle, Doc, FILTERS, Frame, Guide, Kind, LISTS, MASTER, Node, Page, RenderOpts, TextStyle, WRAPS};
+use templates::{LOREM, PRESETS, TEMPLATES, starter, template};
+use tools::{Drag, Tool, tool_icon, tool_name};
 use resvg::{tiny_skia, usvg};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -20,7 +25,6 @@ const FONTS: [&str; 22] = [
     "Segoe UI", "Segoe UI Semibold", "Arial", "Arial Black", "Bahnschrift", "Calibri", "Candara", "Corbel", "Century Gothic", "Franklin Gothic Medium", "Trebuchet MS", "Verdana",
     "Georgia", "Cambria", "Constantia", "Garamond", "Palatino Linotype", "Book Antiqua", "Times New Roman", "Consolas", "Impact", "Comic Sans MS",
 ];
-const LOREM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
 const STYLES: [(&str, f32, bool, bool, f32); 8] = [
     ("Titre 1", 32.0, true, false, 1.1),
     ("Titre 2", 21.0, true, false, 1.15),
@@ -31,68 +35,28 @@ const STYLES: [(&str, f32, bool, bool, f32); 8] = [
     ("Citation", 16.0, false, true, 1.35),
     ("Petit texte", 7.5, false, false, 1.3),
 ];
-const PRESETS: [(&str, &str, f32, f32); 10] = [
-    ("A4", "Document, magazine", 595.0, 842.0),
-    ("A5", "Livret, flyer", 420.0, 595.0),
-    ("A3", "Affiche", 842.0, 1191.0),
-    ("Lettre US", "Document", 612.0, 792.0),
-    ("Carte de visite", "85 × 55 mm", 241.0, 156.0),
-    ("Carte postale", "A6", 298.0, 420.0),
-    ("Carré", "Publication 1:1", 810.0, 810.0),
-    ("Portrait 4:5", "Instagram", 810.0, 1012.0),
-    ("Story", "Réseaux sociaux", 540.0, 960.0),
-    ("Présentation", "16:9", 960.0, 540.0),
-];
-const TEMPLATES: [(&str, &str); 6] = [("Magazine", "A4, en-tête, colonnes"), ("Flyer", "A5, événement"), ("CV", "A4, colonne latérale"), ("Carte de visite", "85 × 55 mm"), ("Menu", "A4, carte et prix"), ("Affiche", "A3, grand titre")];
 const FORMATS: [&str; 4] = ["PDF", "PNG", "JPEG", "SVG"];
-const DPIS: [(&str, f32); 3] = [("72 dpi", 72.0), ("150 dpi", 150.0), ("300 dpi", 300.0)];
+const DPIS: [(&str, f32); 5] = [("72", 72.0), ("96", 96.0), ("150", 150.0), ("300", 300.0), ("600", 600.0)];
+const PDF_PRESETS: [(&str, &str); 4] = [("Impression haute qualité", "Vectoriel, images d'origine, sans repères"), ("PDF/X (imprimeur)", "Fond perdu, traits de coupe, repères de montage et infos"), ("Web léger", "Images réduites et recompressées pour l'écran"), ("Personnalisé", "Tes propres réglages")];
+const FITS: [(&str, &str); 5] = [("Remplir le cadre proportionnellement", "Ctrl+Alt+Maj+E"), ("Ajuster le contenu proportionnellement", "Ctrl+Alt+Maj+C"), ("Ajuster le contenu au cadre", ""), ("Centrer le contenu", "Ctrl+Maj+E"), ("Ajuster le cadre au contenu", "Ctrl+Alt+C")];
+const TRACKS: [f32; 8] = [-2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0, 5.0];
 const MM: f32 = 72.0 / 25.4;
-
-#[derive(Clone, Copy, PartialEq)]
-enum Tool {
-    Select,
-    Text,
-    Image,
-    Rect,
-    Ellipse,
-    Polygon,
-    Line,
-    Table,
-    Pipette,
-}
-
-const TOOLS: [(Tool, &str, Key); 9] = [
-    (Tool::Select, "Sélection (V)", Key::V),
-    (Tool::Text, "Texte (T)", Key::T),
-    (Tool::Image, "Image (I)", Key::I),
-    (Tool::Rect, "Rectangle (M)", Key::M),
-    (Tool::Ellipse, "Ellipse (L)", Key::L),
-    (Tool::Polygon, "Polygone et étoile (P)", Key::P),
-    (Tool::Line, "Ligne (\\)", Key::Backslash),
-    (Tool::Table, "Tableau (G)", Key::G),
-    (Tool::Pipette, "Pipette de style (E)", Key::E),
-];
-
-fn tool_name(t: Tool) -> &'static str {
-    TOOLS.iter().find(|x| x.0 == t).map_or("", |x| x.1.split(" (").next().unwrap_or(""))
-}
-
-enum Drag {
-    None,
-    Move { last: [f32; 2], acc: [f32; 2], origin: [f32; 2] },
-    Create { start: [f32; 2] },
-    Resize { orig: [f32; 4], hx: f32, hy: f32 },
-    Guide { index: usize },
-}
 
 struct ExportOpts {
     format: usize,
+    preset: usize,
     pages: usize,
-    from: usize,
-    to: usize,
+    range: String,
     dpi: usize,
     quality: u8,
     marks: bool,
+    reg: bool,
+    info: bool,
+    spreads: bool,
+    gray: bool,
+    transparent: bool,
+    nonprint: bool,
+    light: bool,
     open_after: bool,
 }
 
@@ -147,15 +111,34 @@ struct PageApp {
     preview: bool,
     snap_lines: Vec<(bool, f32)>,
     new_guide: Option<bool>,
-    find: Option<(String, String, Option<usize>)>,
+    find: Option<panels::FindState>,
     notice: Option<(String, bool)>,
     export: Option<ExportOpts>,
     doc_sheet: bool,
     edit_text: Option<usize>,
+    edit_cursor: (usize, usize),
     style_name: Option<String>,
-    clip: Option<Frame>,
+    clip: Vec<Frame>,
     polygon_sides: u32,
     polygon_inner: f32,
+    star_points: u32,
+    picks: Vec<usize>,
+    pen: Vec<Node>,
+    pencil: Vec<[f32; 2]>,
+    measure_line: Option<([f32; 2], [f32; 2])>,
+    grad_line: Option<([f32; 2], [f32; 2])>,
+    layer: usize,
+    note_edit: Option<usize>,
+    tab: usize,
+    show_notes: bool,
+    edges: bool,
+    step: Option<panels::StepOpts>,
+    toc: Option<panels::TocOpts>,
+    sections_sheet: bool,
+    char_sheet: Option<CharStyle>,
+    obj_name: Option<String>,
+    preflight: Option<(Doc, Vec<panels::Issue>)>,
+    families: std::collections::HashSet<String>,
     title: String,
     icon: TextureHandle,
     help: studio_ui::help::Help,
@@ -165,171 +148,12 @@ fn recents_path() -> PathBuf {
     studio_core::data_dir().join("page").join("recents.txt")
 }
 
-fn txt(text: &str, size: f32, bold: bool, color: [u8; 4], align: u8) -> Kind {
-    let mut k = Kind::text(text, size, bold);
-    if let Kind::Text { color: c, align: a, .. } = &mut k {
-        *c = color;
-        *a = align;
-    }
-    k
-}
-
-fn styled(mut k: Kind, family: &str, italic: bool, leading: f32, tracking: f32) -> Kind {
-    if let Kind::Text { family: f, italic: i, leading: l, tracking: t, .. } = &mut k {
-        *f = family.into();
-        *i = italic;
-        *l = leading;
-        *t = tracking;
-    }
-    k
-}
-
-fn starter(w: f32, h: f32) -> Doc {
-    let mut doc = Doc { width: w, height: h, margin: (w.min(h) * 0.067).round(), ..Doc::a4() };
-    let m = doc.margin;
-    let title_size = (w * 0.055).clamp(14.0, 40.0);
-    doc.pages[0].frames.push(Frame::new(m, m + 20.0, w - 2.0 * m, title_size * 1.6, Kind::text("Titre du document", title_size, true)));
-    doc.master.frames.push(Frame::new(m, h - m * 0.75, w - 2.0 * m, 14.0, txt("{page} / {pages}", 8.0, false, [120, 120, 130, 255], 2)));
-    doc
-}
-
-fn template(k: usize) -> Doc {
-    let dark = [24, 24, 30, 255];
-    let white = [255, 255, 255, 255];
-    let accent = [255, 112, 52, 255];
-    match k {
-        0 => {
-            let mut d = Doc { grid: 2, title: "Ethone Mag".into(), swatches: vec![accent, dark, [255, 214, 10, 255], [10, 132, 255, 255]], ..Doc::a4() };
-            let (w, m) = (d.width, d.margin);
-            let mut head = Frame::new(-9.0, -9.0, w + 18.0, 200.0, Kind::Rect { fill: accent, radius: 0.0 });
-            head.fill2 = Some([255, 64, 96, 255]);
-            head.grad_angle = 0.0;
-            d.bleed = 9.0;
-            let p = &mut d.pages[0].frames;
-            p.push(head);
-            p.push(Frame::new(m, 60.0, w - 2.0 * m, 44.0, txt("Le magazine Ethone", 34.0, true, white, 0)));
-            p.push(Frame::new(m, 110.0, w * 0.6, 40.0, styled(txt("Mise en page, colonnes liées, styles et export PDF prêt pour l'imprimeur.", 12.0, false, white, 0), "Segoe UI", true, 1.35, 0.0)));
-            p.push(Frame::new(m, 230.0, w - 2.0 * m, 160.0, Kind::Image { path: String::new(), cover: true, radius: 6.0, filter: 0, flip: false }));
-            let mut body = Frame::new(m, 410.0, w - 2.0 * m, 250.0, txt(&format!("{LOREM}\n{LOREM}\n{LOREM}\n{LOREM}"), 9.5, false, dark, 3));
-            if let Kind::Text { columns, para_space, family, indent, .. } = &mut body.kind {
-                *columns = 2;
-                *para_space = 6.0;
-                *indent = 12.0;
-                *family = "Georgia".into();
-            }
-            p.push(body);
-            let mut quote = Frame::new(m, 680.0, w - 2.0 * m, 70.0, styled(txt("« Une suite créative entièrement écrite en Rust. »", 16.0, false, accent, 1), "Georgia", true, 1.3, 0.0));
-            if let Kind::Text { background, padding, valign, .. } = &mut quote.kind {
-                *background = Some([255, 243, 236, 255]);
-                *padding = 12.0;
-                *valign = 1;
-            }
-            p.push(quote);
-            d.pages.push(Page::default());
-            d.master.frames.push(Frame::new(m, d.height - 30.0, w - 2.0 * m, 12.0, txt("{title} · {page} / {pages}", 7.5, false, [130, 130, 140, 255], 2)));
-            d
-        }
-        1 => {
-            let mut d = Doc { width: 420.0, height: 595.0, margin: 28.0, bleed: 9.0, ..Doc::a4() };
-            let (w, h, m) = (d.width, d.height, d.margin);
-            let mut bg = Frame::new(-9.0, -9.0, w + 18.0, h + 18.0, Kind::Rect { fill: [36, 18, 90, 255], radius: 0.0 });
-            bg.fill2 = Some([255, 64, 120, 255]);
-            let p = &mut d.pages[0].frames;
-            p.push(bg);
-            p.push(Frame::new(w - 150.0, 40.0, 120.0, 120.0, Kind::Polygon { sides: 12, inner: 0.8, fill: [255, 214, 10, 255] }));
-            p.push(Frame::new(w - 150.0, 82.0, 120.0, 36.0, txt("GRATUIT", 15.0, true, dark, 1)));
-            p.push(Frame::new(m, 200.0, w - 2.0 * m, 140.0, styled(txt("SOIRÉE\nCRÉATIVE", 46.0, true, white, 0), "Bahnschrift", false, 1.0, 2.0)));
-            p.push(Frame::new(m, 350.0, w - 2.0 * m, 24.0, txt("Samedi 14 décembre · 20 h", 14.0, true, [255, 214, 10, 255], 0)));
-            let mut l = Frame::new(m, 385.0, 120.0, 6.0, Kind::Line { color: white, width: 2.0, arrow: false });
-            l.dash = 0.0;
-            p.push(l);
-            p.push(Frame::new(m, 405.0, w - 2.0 * m, 120.0, txt("Ateliers de design\nConcerts\nExposition photo\nBuvette et surprises", 12.0, false, white, 0)));
-            if let Kind::Text { list, .. } = &mut p.last_mut().unwrap().kind {
-                *list = 1;
-            }
-            p.push(Frame::new(m, h - 50.0, w - 2.0 * m, 14.0, txt("ethone.dev · entrée libre", 9.0, false, [220, 220, 240, 255], 0)));
-            d
-        }
-        2 => {
-            let mut d = Doc { margin: 36.0, ..Doc::a4() };
-            let (w, h) = (d.width, d.height);
-            let side = 190.0;
-            let p = &mut d.pages[0].frames;
-            p.push(Frame::new(0.0, 0.0, side, h, Kind::Rect { fill: [28, 36, 54, 255], radius: 0.0 }));
-            p.push(Frame::new(45.0, 40.0, 100.0, 100.0, Kind::Image { path: String::new(), cover: true, radius: 50.0, filter: 0, flip: false }));
-            p.push(Frame::new(24.0, 165.0, side - 48.0, 16.0, txt("CONTACT", 9.0, true, [140, 170, 255, 255], 0)));
-            p.push(Frame::new(24.0, 185.0, side - 48.0, 70.0, txt("prenom@exemple.fr\n06 00 00 00 00\nParis, France", 9.0, false, white, 0)));
-            p.push(Frame::new(24.0, 270.0, side - 48.0, 16.0, txt("COMPÉTENCES", 9.0, true, [140, 170, 255, 255], 0)));
-            let mut skills = Frame::new(24.0, 290.0, side - 48.0, 120.0, txt("Design graphique\nMise en page\nMontage vidéo\nPhotographie", 9.0, false, white, 0));
-            if let Kind::Text { list, para_space, .. } = &mut skills.kind {
-                *list = 1;
-                *para_space = 3.0;
-            }
-            p.push(skills);
-            let x = side + 30.0;
-            let cw = w - x - 36.0;
-            p.push(Frame::new(x, 46.0, cw, 40.0, txt("Prénom Nom", 30.0, true, dark, 0)));
-            p.push(Frame::new(x, 88.0, cw, 18.0, styled(txt("Graphiste et monteur vidéo", 13.0, false, [90, 100, 130, 255], 0), "Segoe UI", true, 1.2, 0.0)));
-            p.push(Frame::new(x, 120.0, cw, 4.0, Kind::Line { color: [28, 36, 54, 255], width: 1.5, arrow: false }));
-            for (k, (title, body)) in [("EXPÉRIENCE", "2022 – aujourd'hui · Studio créatif\nConception d'identités visuelles et de supports imprimés.\n\n2019 – 2022 · Agence web\nMaquettes, vidéos courtes et réseaux sociaux."), ("FORMATION", "2019 · Diplôme en design graphique\nÉcole d'arts appliqués")].iter().enumerate() {
-                let y = 140.0 + k as f32 * 210.0;
-                p.push(Frame::new(x, y, cw, 18.0, txt(title, 11.0, true, [60, 90, 200, 255], 0)));
-                let mut b = Frame::new(x, y + 24.0, cw, 170.0, txt(body, 10.0, false, dark, 0));
-                if let Kind::Text { para_space, .. } = &mut b.kind {
-                    *para_space = 2.0;
-                }
-                p.push(b);
-            }
-            d
-        }
-        3 => {
-            let mut d = Doc { width: 241.0, height: 156.0, margin: 14.0, bleed: 6.0, ..Doc::a4() };
-            let p = &mut d.pages[0].frames;
-            p.push(Frame::new(-6.0, -6.0, 78.0, 168.0, Kind::Rect { fill: [10, 132, 255, 255], radius: 0.0 }));
-            p.push(Frame::new(16.0, 52.0, 40.0, 40.0, Kind::Polygon { sides: 6, inner: 1.0, fill: white }));
-            p.push(Frame::new(88.0, 34.0, 140.0, 20.0, txt("Prénom Nom", 15.0, true, dark, 0)));
-            p.push(Frame::new(88.0, 56.0, 140.0, 14.0, styled(txt("Directeur artistique", 8.5, false, [10, 132, 255, 255], 0), "Segoe UI", true, 1.2, 0.0)));
-            p.push(Frame::new(88.0, 76.0, 60.0, 4.0, Kind::Line { color: [200, 200, 210, 255], width: 1.0, arrow: false }));
-            p.push(Frame::new(88.0, 86.0, 140.0, 50.0, txt("06 00 00 00 00\nprenom@exemple.fr\nexemple.fr", 7.5, false, [70, 70, 80, 255], 0)));
-            d
-        }
-        4 => {
-            let mut d = Doc { margin: 50.0, paper: [250, 246, 238, 255], ..Doc::a4() };
-            let (w, m) = (d.width, d.margin);
-            let brown = [92, 58, 34, 255];
-            let p = &mut d.pages[0].frames;
-            p.push(Frame::new(m, 50.0, w - 2.0 * m, 50.0, styled(txt("La Table", 38.0, false, brown, 1), "Georgia", true, 1.1, 1.0)));
-            p.push(Frame::new(m, 104.0, w - 2.0 * m, 16.0, styled(txt("CUISINE DE SAISON", 9.0, true, [160, 120, 80, 255], 1), "Segoe UI", false, 1.2, 3.0)));
-            p.push(Frame::new(w / 2.0 - 40.0, 128.0, 80.0, 4.0, Kind::Line { color: brown, width: 1.0, arrow: false }));
-            for (k, (title, rows)) in [("Entrées", [("Velouté de potimarron", "9 €"), ("Burrata et tomates anciennes", "12 €"), ("Œuf parfait, champignons", "11 €")]), ("Plats", [("Risotto aux cèpes", "19 €"), ("Filet de bar, beurre blanc", "24 €"), ("Joue de bœuf confite", "22 €")]), ("Desserts", [("Tarte au citron meringuée", "8 €"), ("Mousse au chocolat noir", "7 €"), ("Fromages affinés", "9 €")])].iter().enumerate() {
-                let y = 160.0 + k as f32 * 200.0;
-                p.push(Frame::new(m, y, w - 2.0 * m, 26.0, styled(txt(title, 20.0, false, brown, 1), "Georgia", true, 1.1, 0.0)));
-                let cells = rows.iter().map(|(a, b)| vec![a.to_string(), b.to_string()]).collect();
-                p.push(Frame::new(m + 20.0, y + 40.0, w - 2.0 * m - 40.0, 96.0, Kind::Table { cells, size: 11.0, family: "Georgia".into(), color: [60, 40, 30, 255], line: [250, 246, 238, 0], header: None, stripe: Some([243, 236, 224, 255]) }));
-            }
-            d
-        }
-        _ => {
-            let mut d = Doc { width: 842.0, height: 1191.0, margin: 50.0, ..Doc::a4() };
-            let (w, h, m) = (d.width, d.height, d.margin);
-            let p = &mut d.pages[0].frames;
-            p.push(Frame::new(0.0, 0.0, w, h * 0.55, Kind::Image { path: String::new(), cover: true, radius: 0.0, filter: 0, flip: false }));
-            p.push(Frame::new(0.0, h * 0.55, w, h * 0.45, Kind::Rect { fill: [14, 14, 18, 255], radius: 0.0 }));
-            p.push(Frame::new(m, h * 0.58, w - 2.0 * m, 220.0, styled(txt("FESTIVAL\nLUMIÈRE", 92.0, true, white, 0), "Bahnschrift", false, 0.95, 4.0)));
-            p.push(Frame::new(m, h * 0.78, w - 2.0 * m, 40.0, txt("12 — 15 juin · Parc des expositions", 26.0, false, [255, 214, 10, 255], 0)));
-            p.push(Frame::new(w - m - 150.0, h * 0.5, 150.0, 150.0, Kind::Polygon { sides: 16, inner: 0.82, fill: [255, 214, 10, 255] }));
-            p.push(Frame::new(w - m - 150.0, h * 0.5 + 55.0, 150.0, 40.0, txt("4 JOURS", 22.0, true, dark, 1)));
-            p.push(Frame::new(m, h - 90.0, w - 2.0 * m, 30.0, txt("billetterie sur festival-lumiere.fr", 16.0, false, [180, 180, 190, 255], 0)));
-            d
-        }
-    }
-}
-
 impl PageApp {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
         let mut db = fontdb::Database::new();
         db.load_system_fonts();
+        let families = db.faces().flat_map(|f| f.families.iter().map(|(n, _)| n.clone())).collect();
         let doc = starter(595.0, 842.0);
         let recents = std::fs::read_to_string(recents_path()).map(|s| s.lines().map(PathBuf::from).filter(|p| p.exists()).collect()).unwrap_or_default();
         let mut me = Self {
@@ -362,10 +186,29 @@ impl PageApp {
             export: None,
             doc_sheet: false,
             edit_text: None,
+            edit_cursor: (0, 0),
             style_name: None,
-            clip: None,
-            polygon_sides: 5,
+            clip: Vec::new(),
+            polygon_sides: 6,
             polygon_inner: 0.5,
+            star_points: 5,
+            picks: Vec::new(),
+            pen: Vec::new(),
+            pencil: Vec::new(),
+            measure_line: None,
+            grad_line: None,
+            layer: 0,
+            note_edit: None,
+            tab: 0,
+            show_notes: true,
+            edges: true,
+            step: None,
+            toc: None,
+            sections_sheet: false,
+            char_sheet: None,
+            obj_name: None,
+            preflight: None,
+            families,
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "page"),
             help: studio_ui::help::Help::new("Page", tutos::PAGE),
@@ -407,13 +250,17 @@ impl PageApp {
         usvg::Options { fontdb: self.fonts.db.clone(), ..Default::default() }
     }
 
-    fn page_svg(&self, index: usize, marks: bool) -> String {
-        self.doc.to_svg_with(index, &self.measure(), false, marks).0
+    fn render_opts(&self, o: &ExportOpts) -> RenderOpts {
+        let name = self.file.as_ref().and_then(|p| p.file_name()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("document".into());
+        RenderOpts { guides: false, marks: o.marks && self.doc.bleed >= 0.0, reg: o.reg, info: o.info.then(|| format!("{name} · {}", model::today())), print: !o.nonprint, transparent: o.transparent && o.format == 1, gray: o.gray }
     }
 
-    fn raster(&self, index: usize, dpi: f32, marks: bool) -> Result<tiny_skia::Pixmap, String> {
-        let svg = self.page_svg(index, marks);
-        let tree = usvg::Tree::from_str(&svg, &self.opts()).map_err(|e| e.to_string())?;
+    fn export_svg(&self, doc: &Doc, group: &[usize], ro: &RenderOpts) -> String {
+        if group.len() > 1 { doc.spread_svg(group, &self.measure(), ro) } else { doc.to_svg_opts(group[0], &self.measure(), ro).0 }
+    }
+
+    fn raster_svg(&self, svg: &str, dpi: f32) -> Result<tiny_skia::Pixmap, String> {
+        let tree = usvg::Tree::from_str(svg, &self.opts()).map_err(|e| e.to_string())?;
         let scale = dpi / 72.0;
         let size = tree.size();
         let mut pix = tiny_skia::Pixmap::new((size.width() * scale).ceil() as u32, (size.height() * scale).ceil() as u32).ok_or("taille")?;
@@ -422,7 +269,38 @@ impl PageApp {
     }
 
     fn default_export(&self) -> ExportOpts {
-        ExportOpts { format: 0, pages: 0, from: 1, to: self.doc.pages.len(), dpi: 2, quality: 90, marks: false, open_after: true }
+        ExportOpts { format: 0, preset: 0, pages: 0, range: format!("1-{}", self.doc.pages.len()), dpi: 3, quality: 90, marks: false, reg: false, info: false, spreads: false, gray: false, transparent: false, nonprint: false, light: false, open_after: true }
+    }
+
+    fn apply_preset(o: &mut ExportOpts) {
+        match o.preset {
+            0 => (o.marks, o.reg, o.info, o.light) = (false, false, false, false),
+            1 => (o.marks, o.reg, o.info, o.light) = (true, true, true, false),
+            2 => (o.marks, o.reg, o.info, o.light) = (false, false, false, true),
+            _ => {}
+        }
+    }
+
+    fn light_doc(&self) -> Doc {
+        let mut doc = self.doc.clone();
+        let dir = std::env::temp_dir().join("ethone-page-web");
+        let _ = std::fs::create_dir_all(&dir);
+        for f in doc.pages.iter_mut().flat_map(|p| p.frames.iter_mut()).chain(doc.master.frames.iter_mut()) {
+            if let Kind::Image { path, .. } = &mut f.kind
+                && !path.is_empty()
+                && let Ok(img) = image::open(&*path)
+            {
+                let small = img.thumbnail(1600, 1600).to_rgb8();
+                let out = dir.join(format!("{:x}.jpg", path.bytes().fold(1469598103934665603u64, |h, b| (h ^ b as u64).wrapping_mul(1099511628211))));
+                if let Ok(file) = std::fs::File::create(&out) {
+                    let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), 75);
+                    if enc.encode_image(&small).is_ok() {
+                        *path = out.to_string_lossy().into_owned();
+                    }
+                }
+            }
+        }
+        doc
     }
 
     fn run_export(&mut self, o: &ExportOpts) {
@@ -430,31 +308,44 @@ impl PageApp {
         let cur = if self.page == MASTER { 0 } else { self.page };
         let list: Vec<usize> = match o.pages {
             1 => vec![cur],
-            2 => (o.from.clamp(1, n) - 1..o.to.clamp(1, n)).collect(),
+            2 => panels::parse_range(&o.range, n),
             _ => (0..n).collect(),
         };
         if list.is_empty() {
-            self.notice = Some(("Aucune page à exporter".into(), false));
+            self.notice = Some(("Aucune page à exporter : vérifie la plage".into(), false));
             return;
         }
+        let groups: Vec<Vec<usize>> = if o.spreads && self.doc.facing {
+            let mut g: Vec<Vec<usize>> = Vec::new();
+            for &i in &list {
+                match g.last_mut() {
+                    Some(last) if i % 2 == 0 && i > 0 && last.len() == 1 && last[0] + 1 == i && last[0] % 2 == 1 => last.push(i),
+                    _ => g.push(vec![i]),
+                }
+            }
+            g
+        } else {
+            list.iter().map(|i| vec![*i]).collect()
+        };
         let ext = ["pdf", "png", "jpg", "svg"][o.format];
         let base = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("document".into());
-        let single = o.format == 0 || list.len() == 1;
+        let single = o.format == 0 || groups.len() == 1;
         let target = if single {
             rfd::FileDialog::new().add_filter(FORMATS[o.format], &[ext]).set_file_name(format!("{base}.{ext}")).save_file()
         } else {
             rfd::FileDialog::new().set_title("Dossier d'export").pick_folder()
         };
         let Some(target) = target else { return };
-        let marks = o.marks && self.doc.bleed >= 0.0;
+        let ro = self.render_opts(o);
+        let doc = if o.light && o.format == 0 { self.light_doc() } else { self.doc.clone() };
         let dpi = DPIS[o.dpi].1;
         let result = (|| -> Result<PathBuf, String> {
             match o.format {
                 0 => {
                     let opt = self.opts();
                     let mut document = krilla::Document::new();
-                    for &i in &list {
-                        let svg = self.page_svg(i, marks);
+                    for g in &groups {
+                        let svg = self.export_svg(&doc, g, &ro);
                         let tree = usvg::Tree::from_str(&svg, &opt).map_err(|e| e.to_string())?;
                         let size = krilla::geom::Size::from_wh(tree.size().width(), tree.size().height()).ok_or("taille invalide")?;
                         let mut page = document.start_page_with(krilla::page::PageSettings::new(size));
@@ -468,13 +359,14 @@ impl PageApp {
                     Ok(target.clone())
                 }
                 f => {
-                    for &i in &list {
-                        let path = if single { target.clone() } else { target.join(format!("{base}-{:02}.{ext}", self.doc.page_label(i))) };
+                    for g in &groups {
+                        let path = if single { target.clone() } else { target.join(format!("{base}-{}.{ext}", g.iter().map(|i| doc.page_label(*i)).collect::<Vec<_>>().join("-"))) };
+                        let svg = self.export_svg(&doc, g, &ro);
                         match f {
-                            3 => std::fs::write(&path, self.page_svg(i, marks)).map_err(|e| e.to_string())?,
-                            1 => self.raster(i, dpi, marks)?.save_png(&path).map_err(|e| e.to_string())?,
+                            3 => std::fs::write(&path, svg).map_err(|e| e.to_string())?,
+                            1 => self.raster_svg(&svg, dpi)?.save_png(&path).map_err(|e| e.to_string())?,
                             _ => {
-                                let pix = self.raster(i, dpi, marks)?;
+                                let pix = self.raster_svg(&svg, dpi)?;
                                 let mut rgb = image::RgbImage::new(pix.width(), pix.height());
                                 for (d, s) in rgb.pixels_mut().zip(pix.pixels()) {
                                     let c = s.demultiply();
@@ -500,6 +392,50 @@ impl PageApp {
                 (format!("{} exporté : {}", FORMATS[o.format], p.display()), true)
             }
             Err(e) => (format!("Export {} : {e}", FORMATS[o.format]), false),
+        });
+    }
+
+    fn package(&mut self) {
+        let Some(dir) = rfd::FileDialog::new().set_title("Dossier où assembler le document").pick_folder() else { return };
+        let base = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("document".into());
+        let root = dir.join(format!("{base} dossier"));
+        let links = root.join("Liens");
+        let result = (|| -> Result<(usize, usize), String> {
+            std::fs::create_dir_all(&links).map_err(|e| e.to_string())?;
+            let mut doc = self.doc.clone();
+            let (mut ok, mut missing) = (0, 0);
+            let mut fonts = std::collections::BTreeSet::new();
+            for f in doc.pages.iter_mut().flat_map(|p| p.frames.iter_mut()).chain(doc.master.frames.iter_mut()) {
+                match &mut f.kind {
+                    Kind::Image { path, .. } if !path.is_empty() => {
+                        let src = PathBuf::from(&*path);
+                        match src.file_name() {
+                            Some(name) if src.is_file() => {
+                                let dst = links.join(name);
+                                std::fs::copy(&src, &dst).map_err(|e| e.to_string())?;
+                                *path = dst.to_string_lossy().into_owned();
+                                ok += 1;
+                            }
+                            _ => missing += 1,
+                        }
+                    }
+                    Kind::Text { family, .. } | Kind::Table { family, .. } | Kind::TextPath { family, .. } => {
+                        fonts.insert(family.clone());
+                    }
+                    _ => {}
+                }
+            }
+            std::fs::write(root.join(format!("{base}.epage")), serde_json::to_vec_pretty(&doc).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+            let report = format!("Assemblage de {base}\n\nPages : {}\nImages copiées : {ok}\nImages manquantes : {missing}\nPolices utilisées :\n{}\n", doc.pages.len(), fonts.iter().map(|f| format!("  - {f}")).collect::<Vec<_>>().join("\n"));
+            std::fs::write(root.join("Instructions.txt"), report).map_err(|e| e.to_string())?;
+            Ok((ok, missing))
+        })();
+        self.notice = Some(match result {
+            Ok((ok, missing)) => {
+                let _ = std::process::Command::new("explorer").arg(&root).spawn();
+                (format!("Assemblé dans {} : {ok} image(s), {missing} manquante(s)", root.display()), missing == 0)
+            }
+            Err(e) => (format!("Assemblage : {e}"), false),
         });
     }
 
@@ -570,19 +506,16 @@ impl PageApp {
     }
 
     fn duplicate(&mut self) {
-        if let Some(i) = self.sel {
-            let mut f = self.frames()[i].clone();
-            f.x += 12.0;
-            f.y += 12.0;
-            if let Kind::Text { link, .. } = &mut f.kind {
-                *link = None;
-            }
-            self.push_frame(f);
-        }
+        self.copy_sel();
+        self.paste(false);
     }
 
     fn paste(&mut self, in_place: bool) {
-        if let Some(mut f) = self.clip.clone() {
+        if self.clip.is_empty() {
+            return;
+        }
+        let base = self.frames_ref().len();
+        for mut f in self.clip.clone() {
             if !in_place {
                 f.x += 12.0;
                 f.y += 12.0;
@@ -590,8 +523,11 @@ impl PageApp {
             if let Kind::Text { link, .. } = &mut f.kind {
                 *link = None;
             }
-            self.push_frame(f);
+            self.frames().push(f);
         }
+        let n = self.frames_ref().len();
+        self.sel = Some(n - 1);
+        self.picks = if n - base > 1 { (base..n).collect() } else { Vec::new() };
     }
 
     fn order(&mut self, to: i32) {
@@ -685,29 +621,6 @@ impl PageApp {
         }
     }
 
-    fn replace_all(&mut self, find: &str, with: &str) -> usize {
-        if find.is_empty() {
-            return 0;
-        }
-        let mut n = 0;
-        for f in self.doc.pages.iter_mut().flat_map(|p| p.frames.iter_mut()).chain(self.doc.master.frames.iter_mut()) {
-            match &mut f.kind {
-                Kind::Text { text, .. } => {
-                    n += text.matches(find).count();
-                    *text = text.replace(find, with);
-                }
-                Kind::Table { cells, .. } => {
-                    for c in cells.iter_mut().flatten() {
-                        n += c.matches(find).count();
-                        *c = c.replace(find, with);
-                    }
-                }
-                _ => {}
-            }
-        }
-        n
-    }
-
     fn word_count(&self) -> usize {
         self.doc.pages.iter().flat_map(|p| p.frames.iter()).map(|f| match &f.kind {
             Kind::Text { text, .. } => text.split_whitespace().count(),
@@ -717,53 +630,40 @@ impl PageApp {
     }
 
     fn apply_style(&mut self, k: usize) {
-        let Some(i) = self.sel else { return };
         let user = self.doc.styles.clone();
-        if let Kind::Text { size, bold, italic, leading, family, color, tracking, para_space, .. } = &mut self.frames()[i].kind {
-            if k < STYLES.len() {
-                let (_, sz, b, it, lead) = STYLES[k];
-                (*size, *bold, *italic, *leading) = (sz, b, it, lead);
-            } else if let Some(s) = user.get(k - STYLES.len()) {
-                (*size, *bold, *italic, *leading, *tracking, *para_space) = (s.size, s.bold, s.italic, s.leading, s.tracking, s.para_space);
-                *family = s.family.clone();
-                *color = s.color;
+        for i in self.selection() {
+            if let Kind::Text { size, bold, italic, leading, family, color, tracking, para_space, align, indent, upper, opts, .. } = &mut self.frames()[i].kind {
+                if k < STYLES.len() {
+                    let (name, sz, b, it, lead) = STYLES[k];
+                    (*size, *bold, *italic, *leading) = (sz, b, it, lead);
+                    opts.style = name.into();
+                } else if let Some(s) = user.get(k - STYLES.len()) {
+                    (*size, *bold, *italic, *leading, *tracking, *para_space, *align, *indent, *upper) = (s.size, s.bold, s.italic, s.leading, s.tracking, s.para_space, s.align, s.indent, s.upper);
+                    opts.space_before = s.space_before;
+                    *family = s.family.clone();
+                    *color = s.color;
+                    opts.style = s.name.clone();
+                }
             }
         }
     }
 
     fn save_style(&mut self, name: String) {
         let Some(i) = self.sel else { return };
-        if let Kind::Text { size, bold, italic, leading, family, color, tracking, para_space, .. } = &self.frames_ref()[i].kind {
-            let st = TextStyle { name, size: *size, family: family.clone(), bold: *bold, italic: *italic, leading: *leading, tracking: *tracking, color: *color, para_space: *para_space };
+        if let Kind::Text { size, bold, italic, leading, family, color, tracking, para_space, align, indent, upper, opts, .. } = &self.frames_ref()[i].kind {
+            let st = TextStyle { name, size: *size, family: family.clone(), bold: *bold, italic: *italic, leading: *leading, tracking: *tracking, color: *color, para_space: *para_space, align: *align, indent: *indent, upper: *upper, space_before: opts.space_before };
             self.doc.styles.retain(|s| s.name != st.name);
+            let name = st.name.clone();
             self.doc.styles.push(st);
+            if let Kind::Text { opts, .. } = &mut self.frames()[i].kind {
+                opts.style = name;
+            }
         }
     }
 
     fn copy_style(&mut self, from: usize, to: usize) {
         let src = self.frames_ref()[from].clone();
-        let dst = &mut self.frames()[to];
-        dst.opacity = src.opacity;
-        dst.stroke = src.stroke;
-        dst.stroke_w = src.stroke_w;
-        dst.shadow = src.shadow;
-        dst.dash = src.dash;
-        dst.fill2 = src.fill2;
-        dst.grad_angle = src.grad_angle;
-        match (&src.kind, &mut dst.kind) {
-            (Kind::Text { size, family, bold, color, align, leading, italic, tracking, background, padding, underline, upper, para_space, .. }, Kind::Text { size: s2, family: f2, bold: b2, color: c2, align: a2, leading: l2, italic: i2, tracking: t2, background: bg2, padding: p2, underline: u2, upper: up2, para_space: ps2, .. }) => {
-                (*s2, *b2, *c2, *a2, *l2, *i2, *t2, *bg2, *p2, *u2, *up2, *ps2) = (*size, *bold, *color, *align, *leading, *italic, *tracking, *background, *padding, *underline, *upper, *para_space);
-                *f2 = family.clone();
-            }
-            (Kind::Rect { fill, radius }, Kind::Rect { fill: f2, radius: r2 }) => {
-                *f2 = *fill;
-                *r2 = *radius;
-            }
-            (Kind::Rect { fill, .. } | Kind::Ellipse { fill } | Kind::Polygon { fill, .. }, Kind::Rect { fill: f2, .. } | Kind::Ellipse { fill: f2 } | Kind::Polygon { fill: f2, .. }) => *f2 = *fill,
-            (Kind::Line { color, width, arrow }, Kind::Line { color: c2, width: w2, arrow: a2 }) => (*c2, *w2, *a2) = (*color, *width, *arrow),
-            (Kind::Image { radius, filter, .. }, Kind::Image { radius: r2, filter: f2, .. }) => (*r2, *f2) = (*radius, *filter),
-            _ => {}
-        }
+        panels::copy_look(&src, &mut self.frames()[to]);
     }
 
     fn undo_step(&mut self) {
@@ -775,6 +675,20 @@ impl PageApp {
     fn redo_step(&mut self) {
         if let Some(d) = self.redo.pop() {
             self.undo.push(std::mem::replace(&mut self.doc, d));
+        }
+    }
+
+    fn cur_size(&self) -> (f32, f32) {
+        if self.page == MASTER { (self.doc.width, self.doc.height) } else { self.doc.page_size(self.page) }
+    }
+
+    fn copy_sel(&mut self) {
+        self.clip = self.selection().into_iter().filter_map(|i| self.frames_ref().get(i).cloned()).collect();
+    }
+
+    fn text_sel(&mut self, f: impl Fn(&mut Kind)) {
+        for i in self.selection() {
+            f(&mut self.frames()[i].kind);
         }
     }
 
@@ -796,12 +710,15 @@ impl PageApp {
         if self.home {
             return;
         }
-        if sc(M::COMMAND | M::SHIFT, Key::Z) || sc(M::COMMAND, Key::Y) {
+        let ca = M::COMMAND | M::ALT;
+        let cs = M::COMMAND | M::SHIFT;
+        let cas = M::COMMAND | M::ALT | M::SHIFT;
+        if sc(cs, Key::Z) || sc(M::COMMAND, Key::Y) {
             self.redo_step();
         } else if sc(M::COMMAND, Key::Z) {
             self.undo_step();
         }
-        if sc(M::COMMAND | M::SHIFT, Key::S) {
+        if sc(cs, Key::S) {
             self.save(true);
         } else if sc(M::COMMAND, Key::S) {
             self.save(false);
@@ -812,45 +729,134 @@ impl PageApp {
         if sc(M::COMMAND, Key::K) {
             self.doc_sheet = true;
         }
+        if sc(cs, Key::I) && self.sel.is_none_or(|i| !matches!(self.frames_ref()[i].kind, Kind::Text { .. })) {
+            self.place_image();
+        }
+        if sc(ca, Key::U) && self.sel.is_some() {
+            self.step = Some(panels::StepOpts { count: 3, dx: 20.0, dy: 20.0, rot: 0.0, grid: false, rows: 2, cols: 2 });
+        }
+        if sc(cas, Key::C) {
+            self.fitting(1);
+        } else if sc(ca, Key::C) {
+            self.fitting(4);
+        }
+        if sc(cas, Key::E) {
+            self.fitting(0);
+        } else if sc(cs, Key::E) {
+            self.fitting(3);
+        }
+        if sc(cs, Key::G) {
+            self.group(false);
+        } else if sc(M::COMMAND, Key::G) {
+            self.group(true);
+        }
+        if sc(cs, Key::A) {
+            self.sel = None;
+            self.picks.clear();
+        } else if sc(M::COMMAND, Key::A) {
+            self.select_all();
+        }
+        if sc(ca, Key::Num3) {
+            self.frames().iter_mut().for_each(|f| f.hidden = false);
+        } else if sc(M::COMMAND, Key::Num3) {
+            for i in self.selection() {
+                self.frames()[i].hidden = true;
+            }
+            self.sel = None;
+            self.picks.clear();
+        }
         if sc(M::COMMAND, Key::D) {
             self.duplicate();
         }
-        if sc(M::COMMAND, Key::C)
-            && let Some(i) = self.sel
-        {
-            self.clip = self.frames_ref().get(i).cloned();
+        if sc(M::COMMAND, Key::C) {
+            self.copy_sel();
         }
-        if sc(M::COMMAND, Key::X)
-            && let Some(i) = self.sel
-        {
-            self.clip = self.frames_ref().get(i).cloned();
-            self.remove_frame(i);
+        if sc(M::COMMAND, Key::X) {
+            self.copy_sel();
+            self.delete_selection();
         }
-        if sc(M::COMMAND | M::SHIFT, Key::V) {
+        if sc(cs, Key::V) {
             self.paste(true);
         } else if sc(M::COMMAND, Key::V) {
             self.paste(false);
         }
         if sc(M::COMMAND, Key::F) {
-            self.find = Some((String::new(), String::new(), None));
+            self.find = Some(panels::FindState::new(String::new()));
         }
-        if sc(M::COMMAND, Key::L)
-            && let Some(i) = self.sel.take()
-        {
-            self.frames()[i].locked = true;
+        if sc(M::COMMAND, Key::L) {
+            for i in self.selection() {
+                self.frames()[i].locked = true;
+            }
+            self.sel = None;
+            self.picks.clear();
         }
         if sc(M::COMMAND, Key::R) {
             self.rulers = !self.rulers;
         }
-        if sc(M::COMMAND | M::SHIFT, Key::CloseBracket) {
+        if sc(M::COMMAND, Key::H) {
+            self.edges = !self.edges;
+        }
+        if sc(M::COMMAND, Key::Semicolon) {
+            self.guides = !self.guides;
+        }
+        if sc(cs, Key::CloseBracket) {
             self.order(i32::MAX);
         } else if sc(M::COMMAND, Key::CloseBracket) {
             self.order(1);
         }
-        if sc(M::COMMAND | M::SHIFT, Key::OpenBracket) {
+        if sc(cs, Key::OpenBracket) {
             self.order(i32::MIN);
         } else if sc(M::COMMAND, Key::OpenBracket) {
             self.order(-1);
+        }
+        for (k, v) in [(Key::B, 0usize), (Key::Slash, 1), (Key::K, 2), (Key::H, 3)] {
+            if sc(cs, k) {
+                self.text_sel(|kind| {
+                    if let Kind::Text { bold, upper, opts, .. } = kind {
+                        match v {
+                            0 => *bold = !*bold,
+                            1 => opts.strike = !opts.strike,
+                            2 => *upper = !*upper,
+                            _ => opts.small_caps = !opts.small_caps,
+                        }
+                    }
+                });
+            }
+        }
+        if sc(cs, Key::U) {
+            self.text_sel(|kind| {
+                if let Kind::Text { underline, .. } = kind {
+                    *underline = !*underline;
+                }
+            });
+        }
+        for (k, a) in [(Key::L, 0u8), (Key::C, 1), (Key::R, 2), (Key::J, 3), (Key::F, 4)] {
+            if sc(cs, k) {
+                self.text_sel(|kind| {
+                    if let Kind::Text { align, .. } = kind {
+                        *align = a;
+                    }
+                });
+            }
+        }
+        for (k, d) in [(Key::Period, 2.0f32), (Key::Comma, -2.0)] {
+            if sc(cs, k) {
+                self.text_sel(|kind| {
+                    if let Kind::Text { size, .. } | Kind::TextPath { size, .. } | Kind::Table { size, .. } = kind {
+                        *size = (*size + d).clamp(4.0, 400.0);
+                    }
+                });
+            }
+        }
+        for (k, dt, dl) in [(Key::ArrowLeft, -0.5f32, 0.0f32), (Key::ArrowRight, 0.5, 0.0), (Key::ArrowUp, 0.0, -0.05), (Key::ArrowDown, 0.0, 0.05)] {
+            if sc(M::ALT, k) {
+                self.text_sel(|kind| {
+                    if let Kind::Text { tracking, leading, .. } = kind {
+                        *tracking = (*tracking + dt).clamp(-5.0, 50.0);
+                        *leading = (*leading + dl).clamp(0.6, 4.0);
+                    }
+                });
+            }
         }
         if sc(M::COMMAND, Key::Num0) {
             self.fit_pending = true;
@@ -858,74 +864,119 @@ impl PageApp {
         if sc(M::COMMAND, Key::Num1) {
             self.zoom = 1.0;
         }
+        if sc(M::COMMAND, Key::Num2) {
+            self.zoom = 2.0;
+        }
+        if sc(M::COMMAND, Key::Num5) {
+            self.zoom = 0.5;
+        }
         if sc(M::COMMAND, Key::Plus) || sc(M::COMMAND, Key::Equals) {
-            self.zoom = (self.zoom * 1.25).min(6.0);
+            self.zoom = (self.zoom * 1.25).min(8.0);
         }
         if sc(M::COMMAND, Key::Minus) {
-            self.zoom = (self.zoom / 1.25).max(0.1);
+            self.zoom = (self.zoom / 1.25).max(0.05);
         }
-        let (del, pick, nudge, pg, w_key, enter, esc) = ctx.input(|i| {
-            let mut pick = None;
-            if !i.modifiers.command {
-                for (t, _, k) in TOOLS {
-                    if i.key_pressed(k) {
-                        pick = Some(t);
+        if sc(M::NONE, Key::F7) {
+            self.tab = if self.tab == 1 { 0 } else { 1 };
+        }
+        if sc(cs, Key::D) {
+            self.tab = if self.tab == 2 { 0 } else { 2 };
+        }
+        if sc(cas, Key::F) {
+            self.tab = if self.tab == 3 { 0 } else { 3 };
+        }
+        let (del, pressed, nudge, pg, w_key, enter, esc, home_end) = ctx.input(|i| {
+            let mut pressed = Vec::new();
+            if !i.modifiers.command && !i.modifiers.alt {
+                for e in &i.events {
+                    if let egui::Event::Key { key, pressed: true, repeat: false, modifiers, .. } = e {
+                        pressed.push((*key, modifiers.shift));
                     }
                 }
             }
             let step = if i.modifiers.shift { 10.0 } else { 1.0 };
             let mut n = [0.0, 0.0];
-            if i.key_pressed(Key::ArrowLeft) {
-                n[0] -= step;
-            }
-            if i.key_pressed(Key::ArrowRight) {
-                n[0] += step;
-            }
-            if i.key_pressed(Key::ArrowUp) {
-                n[1] -= step;
-            }
-            if i.key_pressed(Key::ArrowDown) {
-                n[1] += step;
+            if !i.modifiers.alt {
+                if i.key_pressed(Key::ArrowLeft) {
+                    n[0] -= step;
+                }
+                if i.key_pressed(Key::ArrowRight) {
+                    n[0] += step;
+                }
+                if i.key_pressed(Key::ArrowUp) {
+                    n[1] -= step;
+                }
+                if i.key_pressed(Key::ArrowDown) {
+                    n[1] += step;
+                }
             }
             let pg = if i.key_pressed(Key::PageDown) { 1 } else if i.key_pressed(Key::PageUp) { -1 } else { 0 };
-            (i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace), pick, n, pg, i.key_pressed(Key::W) && !i.modifiers.command, i.key_pressed(Key::Enter), i.key_pressed(Key::Escape))
+            let he = if i.key_pressed(Key::Home) { -1 } else if i.key_pressed(Key::End) { 1 } else { 0 };
+            (i.key_pressed(Key::Delete) || i.key_pressed(Key::Backspace), pressed, n, pg, i.key_pressed(Key::W) && !i.modifiers.command && !i.modifiers.shift, i.key_pressed(Key::Enter), i.key_pressed(Key::Escape), he)
         });
-        if let Some(t) = pick {
+        if let Some(t) = tools::pick_tool(self.tool, &pressed) {
+            if self.tool == Tool::Pen && t != Tool::Pen {
+                self.commit_pen(false);
+            }
             self.tool = t;
         }
         if w_key {
             self.preview = !self.preview;
         }
         if esc {
-            self.edit_text = None;
+            if !self.pen.is_empty() {
+                self.commit_pen(false);
+            } else {
+                self.edit_text = None;
+                self.sel = None;
+                self.picks.clear();
+                self.measure_line = None;
+                self.tool = Tool::Select;
+            }
+        }
+        if enter {
+            if !self.pen.is_empty() {
+                self.commit_pen(false);
+            } else if let Some(i) = self.sel.filter(|i| matches!(self.frames_ref().get(*i).map(|f| &f.kind), Some(Kind::Text { .. } | Kind::TextPath { .. }))) {
+                self.edit_text = Some(i);
+            }
+        }
+        if del && self.pen.pop().is_none() && self.sel.is_some() {
+            self.delete_selection();
+        }
+        if nudge != [0.0, 0.0] {
+            for i in self.selection() {
+                let f = &mut self.frames()[i];
+                f.x += nudge[0];
+                f.y += nudge[1];
+            }
+        }
+        if (pg != 0 || home_end != 0) && self.page != MASTER {
+            let last = self.doc.pages.len() as i32 - 1;
+            self.page = match home_end {
+                -1 => 0,
+                1 => last as usize,
+                _ => (self.page as i32 + pg).clamp(0, last) as usize,
+            };
             self.sel = None;
-            self.tool = Tool::Select;
-        }
-        if enter && let Some(i) = self.sel.filter(|i| matches!(self.frames_ref().get(*i).map(|f| &f.kind), Some(Kind::Text { .. }))) {
-            self.edit_text = Some(i);
-        }
-        if del && let Some(i) = self.sel {
-            self.remove_frame(i);
-        }
-        if nudge != [0.0, 0.0]
-            && let Some(i) = self.sel
-        {
-            let f = &mut self.frames()[i];
-            f.x += nudge[0];
-            f.y += nudge[1];
-        }
-        if pg != 0 && self.page != MASTER {
-            self.page = (self.page as i32 + pg).clamp(0, self.doc.pages.len() as i32 - 1) as usize;
-            self.sel = None;
+            self.picks.clear();
         }
         if self.page != MASTER {
             self.page = self.page.min(self.doc.pages.len() - 1);
         }
-        if self.sel.is_some_and(|i| i >= self.frames_ref().len()) {
+        let n = self.frames_ref().len();
+        if self.sel.is_some_and(|i| i >= n) {
             self.sel = None;
         }
-        if self.edit_text.is_some_and(|i| i >= self.frames_ref().len()) {
+        self.picks.retain(|i| *i < n);
+        if self.sel.is_none() {
+            self.picks.clear();
+        }
+        if self.edit_text.is_some_and(|i| i >= n) {
             self.edit_text = None;
+        }
+        if self.note_edit.is_some_and(|i| i >= n) {
+            self.note_edit = None;
         }
     }
 }
@@ -1003,10 +1054,10 @@ impl PageApp {
 
     fn menus(&mut self, ui: &mut Ui) {
         ui.menu_button("Fichier", |ui| {
-            if ui.button("Nouveau…                    Ctrl+N").clicked() {
+            if mi(ui, true, "Nouveau…", "Ctrl+N") {
                 self.home = true;
             }
-            if ui.button("Ouvrir…                       Ctrl+O").clicked() {
+            if mi(ui, true, "Ouvrir…", "Ctrl+O") {
                 self.open();
             }
             ui.menu_button("Ouvrir un document récent", |ui| {
@@ -1025,18 +1076,50 @@ impl PageApp {
             });
             ui.add_enabled_ui(!self.home, |ui| {
                 ui.separator();
-                if ui.button("Enregistrer                   Ctrl+S").clicked() {
+                if mi(ui, true, "Enregistrer", "Ctrl+S") {
                     self.save(false);
                 }
-                if ui.button("Enregistrer sous…      Ctrl+Maj+S").clicked() {
+                if mi(ui, true, "Enregistrer sous…", "Ctrl+Maj+S") {
                     self.save(true);
                 }
+                if mi(ui, self.file.is_some() && self.doc != self.saved, "Revenir à la version enregistrée", "") {
+                    self.doc = self.saved.clone();
+                    self.sel = None;
+                }
                 ui.separator();
-                if ui.button("Exporter…                      Ctrl+E").clicked() {
+                if mi(ui, true, "Placer une image…", "Ctrl+Maj+I") {
+                    self.place_image();
+                }
+                if mi(ui, true, "Assembler…", "") {
+                    self.package();
+                }
+                ui.separator();
+                if mi(ui, true, "Exporter…", "Ctrl+E") {
                     self.export = Some(self.default_export());
                 }
-                if ui.button("Format du document…    Ctrl+K").clicked() {
+                ui.menu_button("Exporter avec un préréglage", |ui| {
+                    for (k, (name, _)) in PDF_PRESETS.iter().enumerate().take(3) {
+                        if ui.button(format!("PDF · {name}")).clicked() {
+                            let mut o = self.default_export();
+                            o.preset = k;
+                            Self::apply_preset(&mut o);
+                            self.export = Some(o);
+                        }
+                    }
+                    for (k, name) in [(1usize, "PNG 300 ppp"), (2, "JPEG 150 ppp"), (3, "SVG")] {
+                        if ui.button(name).clicked() {
+                            let mut o = self.default_export();
+                            o.format = k;
+                            o.dpi = if k == 2 { 2 } else { 3 };
+                            self.export = Some(o);
+                        }
+                    }
+                });
+                if mi(ui, true, "Format du document…", "Ctrl+K") {
                     self.doc_sheet = true;
+                }
+                if mi(ui, true, "Fermer", "") {
+                    self.home = true;
                 }
             });
         });
@@ -1045,87 +1128,256 @@ impl PageApp {
             return;
         }
         let has = self.sel.is_some();
+        let multi = self.selection().len() > 1;
         ui.menu_button("Édition", |ui| {
-            if ui.add_enabled(!self.undo.is_empty(), egui::Button::new("Annuler                    Ctrl+Z")).clicked() {
+            if mi(ui, !self.undo.is_empty(), "Annuler", "Ctrl+Z") {
                 self.undo_step();
             }
-            if ui.add_enabled(!self.redo.is_empty(), egui::Button::new("Rétablir                   Ctrl+Y")).clicked() {
+            if mi(ui, !self.redo.is_empty(), "Rétablir", "Ctrl+Y") {
                 self.redo_step();
             }
             ui.separator();
-            if ui.add_enabled(has, egui::Button::new("Couper                       Ctrl+X")).clicked()
-                && let Some(i) = self.sel
-            {
-                self.clip = self.frames_ref().get(i).cloned();
-                self.remove_frame(i);
+            if mi(ui, has, "Couper", "Ctrl+X") {
+                self.copy_sel();
+                self.delete_selection();
             }
-            if ui.add_enabled(has, egui::Button::new("Copier                       Ctrl+C")).clicked()
-                && let Some(i) = self.sel
-            {
-                self.clip = self.frames_ref().get(i).cloned();
+            if mi(ui, has, "Copier", "Ctrl+C") {
+                self.copy_sel();
             }
-            if ui.add_enabled(self.clip.is_some(), egui::Button::new("Coller                        Ctrl+V")).clicked() {
+            if mi(ui, !self.clip.is_empty(), "Coller", "Ctrl+V") {
                 self.paste(false);
             }
-            if ui.add_enabled(self.clip.is_some(), egui::Button::new("Coller sur place        Ctrl+Maj+V")).clicked() {
+            if mi(ui, !self.clip.is_empty(), "Coller sur place", "Ctrl+Maj+V") {
                 self.paste(true);
             }
-            if ui.add_enabled(has, egui::Button::new("Dupliquer                  Ctrl+D")).clicked() {
+            if mi(ui, has, "Dupliquer", "Ctrl+D") {
                 self.duplicate();
             }
-            if ui.add_enabled(has, egui::Button::new("Supprimer                  Suppr")).clicked()
-                && let Some(i) = self.sel
-            {
-                self.remove_frame(i);
+            if mi(ui, has, "Dupliquer et décaler…", "Ctrl+Alt+U") {
+                self.step = Some(panels::StepOpts { count: 3, dx: 20.0, dy: 20.0, rot: 0.0, grid: false, rows: 2, cols: 2 });
+            }
+            if mi(ui, has, "Supprimer", "Suppr") {
+                self.delete_selection();
             }
             ui.separator();
-            if ui.button("Rechercher et remplacer…   Ctrl+F").clicked() {
-                self.find = Some((String::new(), String::new(), None));
+            if mi(ui, true, "Tout sélectionner", "Ctrl+A") {
+                self.select_all();
             }
+            if mi(ui, has, "Tout désélectionner", "Ctrl+Maj+A") {
+                self.sel = None;
+                self.picks.clear();
+            }
+            ui.separator();
+            if mi(ui, true, "Rechercher et remplacer…", "Ctrl+F") {
+                self.find = Some(panels::FindState::new(String::new()));
+            }
+            ui.menu_button("Corrections typographiques", |ui| {
+                for (k, t) in panels::TYPO.iter().enumerate() {
+                    if ui.button(*t).clicked() {
+                        let n = self.typo_all(&[k]);
+                        self.notice = Some((format!("{t} : {n} bloc(s) corrigé(s)"), true));
+                    }
+                }
+                ui.separator();
+                if ui.button("Tout corriger").clicked() {
+                    let n = self.typo_all(&[0, 1, 2, 3, 4]);
+                    self.notice = Some((format!("Corrections typographiques : {n} bloc(s)"), true));
+                }
+            });
         });
         ui.menu_button("Objet", |ui| {
-            for (label, to) in [("Premier plan          Ctrl+Maj+]", i32::MAX), ("Avancer                    Ctrl+]", 1), ("Reculer                     Ctrl+[", -1), ("Arrière-plan           Ctrl+Maj+[", i32::MIN)] {
-                if ui.add_enabled(has, egui::Button::new(label)).clicked() {
-                    self.order(to);
-                }
-            }
-            ui.separator();
             ui.add_enabled_ui(has, |ui| {
-                ui.menu_button("Aligner sur les marges", |ui| {
-                    for (label, axis, to) in [("Gauche", 0, 0.0), ("Centre horizontal", 0, 0.5), ("Droite", 0, 1.0), ("Haut", 1, 0.0), ("Centre vertical", 1, 0.5), ("Bas", 1, 1.0)] {
-                        if ui.button(label).clicked() {
-                            self.align(axis, to, false);
+                ui.menu_button("Disposition", |ui| {
+                    for (label, key, to) in [("Premier plan", "Ctrl+Maj+]", i32::MAX), ("En avant", "Ctrl+]", 1), ("En arrière", "Ctrl+[", -1), ("Arrière-plan", "Ctrl+Maj+[", i32::MIN)] {
+                        if mi(ui, true, label, key) {
+                            self.order(to);
                         }
                     }
                 });
+                if mi(ui, multi, "Grouper", "Ctrl+G") {
+                    self.group(true);
+                }
+                if mi(ui, true, "Dissocier", "Ctrl+Maj+G") {
+                    self.group(false);
+                }
+                ui.menu_button("Transformation", |ui| {
+                    for (label, a) in [("Rotation de 90° horaire", 90.0), ("Rotation de 90° antihoraire", -90.0), ("Rotation de 180°", 180.0)] {
+                        if ui.button(label).clicked() {
+                            self.rotate_by(a);
+                        }
+                    }
+                    if ui.button("Symétrie horizontale").clicked() {
+                        self.flip(true);
+                    }
+                    if ui.button("Symétrie verticale").clicked() {
+                        self.flip(false);
+                    }
+                    if ui.button("Effacer les transformations").clicked() {
+                        for i in self.selection() {
+                            let f = &mut self.frames()[i];
+                            (f.rotation, f.fx.skew, f.fx.flip_h, f.fx.flip_v) = (0.0, 0.0, false, false);
+                        }
+                    }
+                });
+                ui.menu_button("Aligner", |ui| {
+                    for (label, axis, to) in [("Gauche", 0, 0.0), ("Centre horizontal", 0, 0.5), ("Droite", 0, 1.0), ("Haut", 1, 0.0), ("Centre vertical", 1, 0.5), ("Bas", 1, 1.0)] {
+                        if ui.button(label).clicked() {
+                            self.align_to(axis, to, if multi { 0 } else { 1 });
+                        }
+                    }
+                    ui.separator();
+                    if ui.add_enabled(multi, egui::Button::new("Répartir horizontalement")).clicked() {
+                        self.distribute(0, None);
+                    }
+                    if ui.add_enabled(multi, egui::Button::new("Répartir verticalement")).clicked() {
+                        self.distribute(1, None);
+                    }
+                });
                 if ui.button("Centrer sur la page").clicked() {
-                    self.align(0, 0.5, true);
-                    self.align(1, 0.5, true);
+                    self.align_to(0, 0.5, 2);
+                    self.align_to(1, 0.5, 2);
                 }
                 if ui.button("Remplir la page (fond perdu compris)").clicked()
                     && let Some(i) = self.sel
                 {
-                    let (w, h, b) = (self.doc.width, self.doc.height, self.doc.bleed);
+                    let (w, h) = self.cur_size();
+                    let b = self.doc.bleed;
                     let f = &mut self.frames()[i];
                     (f.x, f.y, f.w, f.h) = (-b, -b, w + 2.0 * b, h + 2.0 * b);
                 }
+                ui.separator();
+                ui.menu_button("Ajustement", |ui| {
+                    for (k, (label, key)) in FITS.iter().enumerate() {
+                        if mi(ui, true, label, key) {
+                            self.fitting(k);
+                        }
+                    }
+                });
+                ui.menu_button("Options d'angle", |ui| {
+                    for (k, t) in CORNERS.iter().enumerate() {
+                        if ui.button(*t).clicked() {
+                            for i in self.selection() {
+                                self.frames()[i].fx.corner = k as u8;
+                            }
+                        }
+                    }
+                });
+                ui.menu_button("Habillage", |ui| {
+                    for (k, t) in WRAPS.iter().enumerate() {
+                        if ui.button(*t).clicked() {
+                            for i in self.selection() {
+                                self.frames()[i].fx.wrap = k as u8;
+                            }
+                        }
+                    }
+                });
+                ui.menu_button("Effets", |ui| {
+                    for (k, t) in ["Ombre portée", "Lueur externe", "Contour progressif", "Contour progressif directionnel"].iter().enumerate() {
+                        if ui.button(*t).clicked() {
+                            for i in self.selection() {
+                                let f = &mut self.frames()[i];
+                                match k {
+                                    0 => f.shadow = !f.shadow,
+                                    1 => f.fx.glow = !f.fx.glow,
+                                    2 => f.fx.feather = if f.fx.feather > 0.0 { 0.0 } else { 8.0 },
+                                    _ => f.fx.gfeather = !f.fx.gfeather,
+                                }
+                            }
+                        }
+                    }
+                    ui.menu_button("Mode de fusion", |ui| {
+                        for (k, (t, _)) in BLENDS.iter().enumerate() {
+                            if ui.button(*t).clicked() {
+                                for i in self.selection() {
+                                    self.frames()[i].fx.blend = k as u8;
+                                }
+                            }
+                        }
+                    });
+                    if ui.button("Effacer les effets").clicked() {
+                        for i in self.selection() {
+                            let f = &mut self.frames()[i];
+                            f.shadow = false;
+                            (f.fx.glow, f.fx.feather, f.fx.gfeather, f.fx.blend) = (false, 0.0, false, 0);
+                        }
+                    }
+                });
+                ui.menu_button("Styles d'objet", |ui| {
+                    let names: Vec<String> = self.doc.obj_styles.iter().map(|s| s.name.clone()).collect();
+                    for (k, n) in names.iter().enumerate() {
+                        if ui.button(n).clicked() {
+                            self.apply_obj_style(k);
+                        }
+                    }
+                    if !names.is_empty() {
+                        ui.separator();
+                    }
+                    if ui.button("Nouveau à partir de la sélection…").clicked() {
+                        self.obj_name = Some(format!("Objet {}", names.len() + 1));
+                    }
+                });
+                if ui.button("Convertir en tracé").on_hover_text("Rectangle, ellipse, polygone ou trait deviennent des tracés modifiables à la Plume").clicked() {
+                    for i in self.selection() {
+                        self.as_path(i);
+                    }
+                }
+                if mi(ui, true, "Note…", "") {
+                    self.note_edit = self.sel;
+                }
             });
             ui.separator();
-            if ui.add_enabled(has, egui::Button::new("Verrouiller                 Ctrl+L")).clicked()
-                && let Some(i) = self.sel.take()
-            {
-                self.frames()[i].locked = true;
+            if mi(ui, has, "Verrouiller", "Ctrl+L") {
+                for i in self.selection() {
+                    self.frames()[i].locked = true;
+                }
+                self.sel = None;
             }
-            if ui.button("Tout déverrouiller").clicked() {
+            if mi(ui, true, "Tout déverrouiller", "") {
                 self.frames().iter_mut().for_each(|f| f.locked = false);
             }
-            if ui.button("Tout afficher").clicked() {
+            if mi(ui, has, "Masquer", "Ctrl+3") {
+                for i in self.selection() {
+                    self.frames()[i].hidden = true;
+                }
+                self.sel = None;
+            }
+            if mi(ui, true, "Tout afficher", "Ctrl+Alt+3") {
                 self.frames().iter_mut().for_each(|f| f.hidden = false);
+            }
+            if mi(ui, has, "Non imprimable", "") {
+                for i in self.selection() {
+                    let f = &mut self.frames()[i];
+                    f.fx.nonprint = !f.fx.nonprint;
+                }
             }
         });
         ui.menu_button("Texte", |ui| {
-            let is_text = self.sel.is_some_and(|i| matches!(self.frames_ref()[i].kind, Kind::Text { .. }));
+            let is_text = self.sel.is_some_and(|i| matches!(self.frames_ref().get(i).map(|f| &f.kind), Some(Kind::Text { .. } | Kind::TextPath { .. })));
             ui.add_enabled_ui(is_text, |ui| {
+                ui.menu_button("Police", |ui| {
+                    egui::ScrollArea::vertical().max_height(360.0).show(ui, |ui| {
+                        for name in FONTS {
+                            if ui.button(RichText::new(name)).clicked() {
+                                self.text_sel(|k| {
+                                    if let Kind::Text { family, .. } | Kind::TextPath { family, .. } = k {
+                                        *family = name.into();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+                ui.menu_button("Corps", |ui| {
+                    for s in [6.0, 8.0, 9.0, 10.0, 11.0, 12.0, 14.0, 18.0, 24.0, 30.0, 36.0, 48.0, 60.0, 72.0] {
+                        if ui.button(format!("{s:.0} pt")).clicked() {
+                            self.text_sel(|k| {
+                                if let Kind::Text { size, .. } | Kind::TextPath { size, .. } = k {
+                                    *size = s;
+                                }
+                            });
+                        }
+                    }
+                });
                 ui.menu_button("Style de paragraphe", |ui| {
                     for (k, (name, ..)) in STYLES.iter().enumerate() {
                         if ui.button(*name).clicked() {
@@ -1142,18 +1394,66 @@ impl PageApp {
                         }
                     }
                 });
-                if ui.button("Modifier le texte              Entrée").clicked() {
+                ui.menu_button("Casse", |ui| {
+                    for (k, t) in panels::CASES.iter().enumerate() {
+                        if ui.button(*t).clicked() {
+                            self.case_sel(k);
+                        }
+                    }
+                });
+                ui.menu_button("Listes", |ui| {
+                    for (k, t) in LISTS.iter().enumerate() {
+                        if ui.button(*t).clicked() {
+                            self.text_sel(|kind| {
+                                if let Kind::Text { list, .. } = kind {
+                                    *list = k as u8;
+                                }
+                            });
+                        }
+                    }
+                });
+                ui.menu_button("Lettrine", |ui| {
+                    for (n, t) in [(0u32, "Aucune"), (2, "Sur 2 lignes"), (3, "Sur 3 lignes"), (4, "Sur 4 lignes")] {
+                        if ui.button(t).clicked() {
+                            self.text_sel(|kind| {
+                                if let Kind::Text { opts, .. } = kind {
+                                    opts.drop_lines = n;
+                                }
+                            });
+                        }
+                    }
+                });
+                ui.menu_button("Insérer une variable", |ui| {
+                    for (v, t) in [("{page}", "Numéro de page"), ("{pages}", "Nombre de pages"), ("{title}", "Titre du document"), ("{date}", "Date du jour"), ("{section}", "Nom de section")] {
+                        if ui.button(t).clicked() {
+                            self.text_sel(|k| {
+                                if let Kind::Text { text, .. } | Kind::TextPath { text, .. } = k {
+                                    text.push_str(v);
+                                }
+                            });
+                        }
+                    }
+                });
+                if mi(ui, true, "Modifier le texte", "Entrée") {
                     self.edit_text = self.sel;
                 }
-                if ui.button("Ajuster la hauteur au texte").clicked() {
+                if mi(ui, true, "Ajuster la hauteur au texte", "") {
                     self.fit_text();
                 }
-                if ui.button("Remplir avec du faux texte").clicked() {
+                if mi(ui, true, "Remplir avec du faux texte", "") {
                     self.lorem();
                 }
             });
             ui.separator();
-            ui.label(RichText::new("Variables : {page} {pages} {title} {date}").size(11.5).color(FAINT));
+            if mi(ui, true, "Créer la table des matières…", "") {
+                self.open_toc();
+            }
+            if mi(ui, true, "Nouveau style de caractère…", "") {
+                self.char_sheet = Some(CharStyle { name: format!("Caractère {}", self.doc.char_styles.len() + 1), bold: true, italic: false, underline: false, strike: false, caps: false, color: None, scale: 1.0 });
+            }
+            ui.separator();
+            ui.label(RichText::new("Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>").size(11.5).color(FAINT));
+            ui.label(RichText::new("Variables : {page} {pages} {title} {date} {section}").size(11.5).color(FAINT));
         });
         ui.menu_button("Page", |ui| {
             let cur = if self.page == MASTER { 0 } else { self.page };
@@ -1176,31 +1476,64 @@ impl PageApp {
                 self.delete_page(self.page);
             }
             ui.separator();
+            if mi(ui, true, "Première page", "Début") {
+                self.page = 0;
+            }
+            if mi(ui, true, "Dernière page", "Fin") {
+                self.page = self.doc.pages.len() - 1;
+            }
+            ui.separator();
+            if mi(ui, self.page != MASTER, "Format de cette page…", "Maj+P") {
+                self.tool = Tool::PageTool;
+            }
+            if mi(ui, true, "Numérotation et sections…", "") {
+                self.sections_sheet = true;
+            }
+            ui.checkbox(&mut self.doc.facing, "Pages en vis-à-vis");
+            ui.separator();
             if ui.button("Modifier le gabarit").clicked() {
                 self.page = MASTER;
                 self.sel = None;
             }
+            if ui.button("Appliquer le gabarit à toutes les pages").clicked() {
+                self.doc.pages.iter_mut().for_each(|p| p.no_master = false);
+            }
+            if ui.button("Retirer le gabarit de toutes les pages").clicked() {
+                self.doc.pages.iter_mut().for_each(|p| p.no_master = true);
+            }
         });
         ui.menu_button("Affichage", |ui| {
-            if ui.button("Ajuster à la fenêtre        Ctrl+0").clicked() {
+            if mi(ui, true, "Ajuster à la fenêtre", "Ctrl+0") {
                 self.fit_pending = true;
             }
-            if ui.button("Taille réelle                    Ctrl+1").clicked() {
+            if mi(ui, true, "Taille réelle", "Ctrl+1") {
                 self.zoom = 1.0;
             }
-            for z in [0.5, 1.5, 2.0] {
-                if ui.button(format!("{:.0} %", z * 100.0)).clicked() {
-                    self.zoom = z;
+            ui.menu_button("Zoom", |ui| {
+                for z in [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0] {
+                    if ui.button(format!("{:.0} %", z * 100.0)).clicked() {
+                        self.zoom = z;
+                    }
                 }
-            }
+            });
             ui.separator();
             ui.checkbox(&mut self.preview, "Aperçu (masquer les repères)   W");
-            ui.checkbox(&mut self.guides, "Marges, colonnes et grille de base");
-            ui.checkbox(&mut self.rulers, "Règles                                Ctrl+R");
+            ui.checkbox(&mut self.guides, "Marges, colonnes et grille   Ctrl+;");
+            ui.checkbox(&mut self.edges, "Bords des blocs   Ctrl+H");
+            ui.checkbox(&mut self.rulers, "Règles   Ctrl+R");
             ui.checkbox(&mut self.snap, "Magnétisme");
+            ui.checkbox(&mut self.show_notes, "Notes");
+            ui.checkbox(&mut self.doc.facing, "Pages en vis-à-vis");
             ui.separator();
             if ui.add_enabled(!self.doc.guides.is_empty(), egui::Button::new("Effacer tous les repères")).clicked() {
                 self.doc.guides.clear();
+            }
+        });
+        ui.menu_button("Fenêtre", |ui| {
+            for (k, (t, key)) in [("Propriétés", ""), ("Calques", "F7"), ("Liens", "Ctrl+Maj+D"), ("Contrôle en amont", "Ctrl+Alt+Maj+F")].iter().enumerate() {
+                if mi(ui, true, &format!("{}{t}", if self.tab == k { "✓ " } else { "" }), key) {
+                    self.tab = k;
+                }
             }
         });
         self.help.menu(ui);
@@ -1292,32 +1625,47 @@ impl PageApp {
                 pro::toolbar_sep(ui);
                 let swatches = self.doc.swatches.clone();
                 let sel = self.sel.filter(|i| *i < self.frames_ref().len());
-                match (self.tool, sel) {
-                    (Tool::Polygon, _) => {
-                        ui.label(RichText::new("Côtés").size(12.5).color(MUTED));
-                        ui.add(egui::DragValue::new(&mut self.polygon_sides).range(3..=24));
-                        ui.label(RichText::new("Creux").size(12.5).color(MUTED));
-                        ui.add(egui::Slider::new(&mut self.polygon_inner, 0.2..=1.0).show_value(false));
-                        ui.label(RichText::new(if self.polygon_inner < 0.99 { "étoile" } else { "polygone" }).size(12.0).color(FAINT));
+                let n_sel = self.selection().len();
+                let select_like = matches!(self.tool, Tool::Select | Tool::Direct | Tool::FreeTransform);
+                match (select_like, sel) {
+                    (true, Some(_)) if n_sel > 1 => {
+                        ui.label(RichText::new(format!("{n_sel} blocs")).size(12.5).color(MUTED));
+                        for (t, axis, to) in [("⇤", 0, 0.0), ("↔", 0, 0.5), ("⇥", 0, 1.0), ("⤒", 1, 0.0), ("↕", 1, 0.5), ("⤓", 1, 1.0)] {
+                            if ui.button(t).on_hover_text("Aligner sur la sélection").clicked() {
+                                self.align_to(axis, to, 0);
+                            }
+                        }
+                        pro::toolbar_sep(ui);
+                        if ui.button("Répartir ↔").clicked() {
+                            self.distribute(0, None);
+                        }
+                        if ui.button("Répartir ↕").clicked() {
+                            self.distribute(1, None);
+                        }
+                        if ui.button("Grouper").on_hover_text("Ctrl+G").clicked() {
+                            self.group(true);
+                        }
                     }
-                    (Tool::Select, Some(i)) => {
+                    (true, Some(i)) => {
                         let mut style = None;
                         let f = &mut self.frames()[i];
                         match &mut f.kind {
-                            Kind::Text { family, size, bold, italic, underline, upper, align, color, .. } => {
-                                egui::ComboBox::from_id_salt("ofont").width(150.0).selected_text(family.as_str()).show_ui(ui, |ui| {
+                            Kind::Text { family, size, bold, italic, underline, upper, align, color, leading, tracking, .. } => {
+                                egui::ComboBox::from_id_salt("ofont").width(140.0).selected_text(family.as_str()).show_ui(ui, |ui| {
                                     for name in FONTS {
                                         ui.selectable_value(family, name.to_string(), name);
                                     }
                                 });
-                                ui.add(egui::DragValue::new(size).range(4.0..=400.0).speed(0.2).suffix(" pt").max_decimals(1));
-                                ui.toggle_value(bold, RichText::new("G").strong()).on_hover_text("Gras");
+                                ui.add(egui::DragValue::new(size).range(4.0..=400.0).speed(0.2).suffix(" pt").max_decimals(1)).on_hover_text("Corps · Ctrl+Maj+< / >");
+                                ui.add(egui::DragValue::new(leading).range(0.6..=4.0).speed(0.01).prefix("↕ ").max_decimals(2)).on_hover_text("Interligne · Alt+↑ / ↓");
+                                ui.add(egui::DragValue::new(tracking).range(-5.0..=50.0).speed(0.05).prefix("↔ ").max_decimals(1)).on_hover_text("Approche · Alt+← / →");
+                                ui.toggle_value(bold, RichText::new("G").strong()).on_hover_text("Gras · Ctrl+Maj+B");
                                 ui.toggle_value(italic, RichText::new("I").italics()).on_hover_text("Italique");
-                                ui.toggle_value(underline, RichText::new("S").underline()).on_hover_text("Souligné");
-                                ui.toggle_value(upper, RichText::new("AA")).on_hover_text("Majuscules");
+                                ui.toggle_value(underline, RichText::new("S").underline()).on_hover_text("Souligné · Ctrl+Maj+U");
+                                ui.toggle_value(upper, RichText::new("AA")).on_hover_text("Majuscules · Ctrl+Maj+K");
                                 pro::toolbar_sep(ui);
-                                let mut a = *align as usize;
-                                if pro::segmented(ui, &mut a, &["Gauche", "Centre", "Droite", "Justifié"]) {
+                                let mut a = (*align as usize).min(3);
+                                if pro::segmented(ui, &mut a, &["≡ G", "≡ C", "≡ D", "≡ J"]) {
                                     *align = a as u8;
                                 }
                                 pro::toolbar_sep(ui);
@@ -1342,41 +1690,48 @@ impl PageApp {
                                     swatch_button(ui, c, &swatches);
                                     ui.add(egui::DragValue::new(&mut f.stroke_w).range(0.25..=40.0).speed(0.1).suffix(" pt"));
                                 }
+                                ui.add(egui::DragValue::new(&mut f.rotation).range(-180.0..=180.0).suffix("°").prefix("⟳ "));
                             }
-                            Kind::Line { color, width, arrow } => {
+                            Kind::Path { fill, color, width, .. } => {
+                                let mut on = fill.is_some();
+                                if ui.checkbox(&mut on, "Fond").changed() {
+                                    *fill = on.then_some([255, 196, 0, 255]);
+                                }
+                                if let Some(c) = fill {
+                                    swatch_button(ui, c, &swatches);
+                                }
+                                ui.label(RichText::new("Trait").size(12.5).color(MUTED));
+                                swatch_button(ui, color, &swatches);
+                                ui.add(egui::DragValue::new(width).range(0.0..=40.0).speed(0.1).suffix(" pt"));
+                            }
+                            Kind::Line { color, width, arrow, start_arrow, .. } => {
                                 swatch_button(ui, color, &swatches);
                                 ui.add(egui::DragValue::new(width).range(0.25..=40.0).speed(0.1).suffix(" pt"));
+                                ui.checkbox(start_arrow, "Début");
                                 ui.checkbox(arrow, "Flèche");
                             }
-                            Kind::Image { cover, filter, .. } => {
-                                let mut c = if *cover { 0 } else { 1 };
-                                if pro::segmented(ui, &mut c, &["Remplir", "Ajuster"]) {
-                                    *cover = c == 0;
+                            Kind::Image { cover, filter, zoom, stretch, .. } => {
+                                let mut c = if *stretch { 2 } else if *cover { 0 } else { 1 };
+                                if pro::segmented(ui, &mut c, &["Remplir", "Ajuster", "Déformer"]) {
+                                    (*cover, *stretch) = (c == 0, c == 2);
                                 }
-                                let mut fl = *filter as usize;
-                                if pro::segmented(ui, &mut fl, &FILTERS) {
-                                    *filter = fl as u8;
-                                }
+                                ui.add(egui::DragValue::new(zoom).range(0.05..=20.0).speed(0.01).prefix("Échelle ").max_decimals(2));
+                                egui::ComboBox::from_id_salt("ofilter").selected_text(FILTERS[(*filter as usize).min(FILTERS.len() - 1)]).show_ui(ui, |ui| {
+                                    for (k, n) in FILTERS.iter().enumerate() {
+                                        ui.selectable_value(filter, k as u8, *n);
+                                    }
+                                });
                             }
-                            Kind::Table { size, .. } => {
+                            Kind::Table { size, .. } | Kind::TextPath { size, .. } => {
                                 ui.label(RichText::new("Taille du texte").size(12.5).color(MUTED));
-                                ui.add(egui::DragValue::new(size).range(4.0..=72.0).speed(0.2).suffix(" pt"));
+                                ui.add(egui::DragValue::new(size).range(4.0..=200.0).speed(0.2).suffix(" pt"));
                             }
                         }
                         if let Some(k) = style {
                             self.apply_style(k);
                         }
                     }
-                    _ => {
-                        let hint = match self.tool {
-                            Tool::Select => "Clique un bloc pour le modifier · double-clic sur un texte pour l'écrire · glisse depuis les règles pour poser un repère",
-                            Tool::Image => "Trace le cadre puis choisis l'image",
-                            Tool::Table => "Trace le tableau, puis règle lignes et colonnes à droite",
-                            Tool::Pipette => "Sélectionne un bloc, puis clique un autre bloc pour lui prendre son style",
-                            _ => "Trace le bloc sur la page · Maj garde les proportions",
-                        };
-                        ui.label(RichText::new(hint).size(12.5).color(MUTED));
-                    }
+                    _ => self.tool_options(ui),
                 }
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::ghost(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
@@ -1388,11 +1743,23 @@ impl PageApp {
     }
 
     fn status(&mut self, root: &mut Ui) {
+        let busy = root.ctx().input(|i| i.pointer.any_down()) || self.edit_text.is_some();
+        let errors = if busy { self.preflight.as_ref().map_or(0, |p| p.1.iter().filter(|i| i.error).count()) } else { self.issues().iter().filter(|i| i.error).count() };
         egui::Panel::bottom("status").exact_size(28.0).frame(EFrame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
-                let where_ = if self.page == MASTER { "Gabarit".to_string() } else { format!("Page {} sur {}", self.page + 1, self.doc.pages.len()) };
-                ui.label(small(format!("{where_} · {:.0} × {:.0} mm · {} mots", self.doc.width / MM, self.doc.height / MM, self.word_count())));
+                let (dot, resp) = ui.allocate_exact_size(vec2(14.0, 14.0), Sense::click());
+                ui.painter().circle_filled(dot.center(), 5.0, if errors > 0 { RED } else { GREEN });
+                if resp.on_hover_text(if errors > 0 { format!("{errors} erreur(s) de contrôle en amont") } else { "Aucune erreur de contrôle en amont".into() }).clicked() {
+                    self.tab = 3;
+                }
+                let (w, h) = self.cur_size();
+                let where_ = if self.page == MASTER { "Gabarit".to_string() } else { format!("Page {} sur {}", self.doc.page_label(self.page), self.doc.pages.len()) };
+                ui.label(small(format!("{where_} · {:.0} × {:.0} mm · {} mots", w / MM, h / MM, self.word_count())));
+                let n = self.selection().len();
+                if n > 1 {
+                    ui.label(small(format!("· {n} blocs sélectionnés")));
+                }
                 if self.overflow.iter().any(|o| *o) {
                     ui.label(RichText::new("· texte en excès sur cette page").size(12.0).color(RED));
                 }
@@ -1407,11 +1774,11 @@ impl PageApp {
                         self.fit_pending = true;
                     }
                     if ui.small_button("+").clicked() {
-                        self.zoom = (self.zoom * 1.25).min(6.0);
+                        self.zoom = (self.zoom * 1.25).min(8.0);
                     }
                     ui.label(RichText::new(format!("{:.0} %", self.zoom * 100.0)).size(12.0).color(INK).monospace());
                     if ui.small_button("−").clicked() {
-                        self.zoom = (self.zoom / 1.25).max(0.1);
+                        self.zoom = (self.zoom / 1.25).max(0.05);
                     }
                     ui.add_space(8.0);
                     ui.toggle_value(&mut self.preview, RichText::new("Aperçu").size(12.0)).on_hover_text("Masque cadres et repères (W)");
@@ -1422,17 +1789,20 @@ impl PageApp {
 
     fn tool_rail(&mut self, root: &mut Ui) {
         egui::Panel::left("tools").resizable(false).exact_size(52.0).frame(EFrame::new().fill(PANEL).inner_margin(Margin::symmetric(7, 10))).show(root, |ui| {
-            ui.spacing_mut().item_spacing.y = 4.0;
-            for (i, (tool, tip, _)) in TOOLS.iter().enumerate() {
-                if i == 1 || i == 8 {
-                    let (sep, _) = ui.allocate_exact_size(vec2(38.0, 9.0), Sense::hover());
-                    ui.painter().line_segment([sep.left_center() + vec2(6.0, 0.0), sep.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
+            ui.spacing_mut().item_spacing.y = 3.0;
+            egui::ScrollArea::vertical().scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
+                for (k, g) in tools::GROUPS.iter().enumerate() {
+                    if [1, 4, 8, 11, 13].contains(&k) {
+                        let (sep, _) = ui.allocate_exact_size(vec2(38.0, 7.0), Sense::hover());
+                        ui.painter().line_segment([sep.left_center() + vec2(6.0, 0.0), sep.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
+                    }
+                    let before = self.tool;
+                    pro::tool_group(ui, 38.0, &mut self.tool, g, |p, r, c, t| tool_icon(p, r, t, c));
+                    if before == Tool::Pen && self.tool != Tool::Pen {
+                        self.commit_pen(false);
+                    }
                 }
-                let t = *tool;
-                if pro::icon_button(ui, 38.0, self.tool == t, tip, |p, r, c| tool_icon(p, r, t, c)).clicked() {
-                    self.tool = t;
-                }
-            }
+            });
         });
     }
 
@@ -1471,7 +1841,7 @@ impl PageApp {
                 Kind::Line { color, .. } => {
                     pc.line_segment([fr.left_center(), fr.right_center()], Stroke::new(1.0, Color32::from_rgb(color[0], color[1], color[2])));
                 }
-                Kind::Table { .. } => {
+                Kind::Table { .. } | Kind::Path { .. } | Kind::TextPath { .. } => {
                     pc.rect_stroke(fr, CornerRadius::ZERO, Stroke::new(0.8, Color32::from_gray(150)), StrokeKind::Inside);
                 }
             }
@@ -1547,11 +1917,27 @@ impl PageApp {
         egui::Panel::right("props").resizable(false).exact_size(304.0).frame(EFrame::new().fill(PANEL)).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
-                match self.sel.filter(|i| *i < self.frames_ref().len()) {
-                    Some(i) => self.frame_panels(ui, i),
-                    None => self.doc_panel(ui),
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.add_space(10.0);
+                    pro::segmented(ui, &mut self.tab, &["Propriétés", "Calques", "Liens", "Contrôle"]);
+                });
+                ui.add_space(8.0);
+                match self.tab {
+                    1 => {
+                        self.layers_panel(ui);
+                        self.objects_panel(ui);
+                    }
+                    2 => self.links_panel(ui),
+                    3 => self.preflight_panel(ui),
+                    _ => {
+                        match self.sel.filter(|i| *i < self.frames_ref().len()) {
+                            Some(i) => self.frame_panels(ui, i),
+                            None => self.doc_panel(ui),
+                        }
+                        self.styles_panels(ui);
+                    }
                 }
-                self.objects_panel(ui);
             });
         });
     }
@@ -1589,7 +1975,7 @@ impl PageApp {
             });
         });
         match &mut f.kind {
-            Kind::Text { text, size, family, bold, color, align: al, leading, italic, tracking, columns, gutter, background, padding, underline, upper, list, para_space, indent, valign, link } => {
+            Kind::Text { text, size, family, bold, color, align: al, leading, italic, tracking, columns, gutter, background, padding, underline, upper, list, para_space, indent, valign, link, opts } => {
                 pro::dock_panel(ui, "text", "Texte", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     egui::ScrollArea::vertical().id_salt("textbox").max_height(170.0).show(ui, |ui| {
@@ -1626,6 +2012,32 @@ impl PageApp {
                         ui.toggle_value(upper, RichText::new(" AA "));
                     });
                     color_row(ui, "Couleur", color, &swatches);
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut opts.small_caps, "Petites capitales");
+                        ui.checkbox(&mut opts.strike, "Barré");
+                    });
+                    ui.label(RichText::new("Décalage de la ligne de base").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(&mut opts.baseline_shift, -30.0..=30.0).suffix(" pt"));
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Échelle H").size(12.5).color(MUTED));
+                        let mut h = opts.hscale * 100.0;
+                        if ui.add(egui::DragValue::new(&mut h).range(40.0..=250.0).suffix(" %").max_decimals(0)).changed() {
+                            opts.hscale = h / 100.0;
+                        }
+                        ui.label(RichText::new("V").size(12.5).color(MUTED));
+                        let mut v = opts.vscale * 100.0;
+                        if ui.add(egui::DragValue::new(&mut v).range(40.0..=250.0).suffix(" %").max_decimals(0)).changed() {
+                            opts.vscale = v / 100.0;
+                        }
+                    });
+                    let mut on = opts.outline.is_some();
+                    if ui.checkbox(&mut on, "Contour des lettres").changed() {
+                        opts.outline = on.then_some([255, 255, 255, 255]);
+                    }
+                    if let Some(c) = &mut opts.outline {
+                        color_row(ui, "Couleur du contour", c, &swatches);
+                        ui.add(egui::Slider::new(&mut opts.outline_w, 0.1..=6.0).suffix(" pt"));
+                    }
                 });
                 pro::dock_panel(ui, "para", "Paragraphe", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
@@ -1640,10 +2052,25 @@ impl PageApp {
                     ui.add(egui::Slider::new(para_space, 0.0..=40.0).suffix(" pt"));
                     ui.label(RichText::new("Retrait de première ligne").size(12.5).color(MUTED));
                     ui.add(egui::Slider::new(indent, 0.0..=60.0).suffix(" pt"));
-                    ui.label(RichText::new("Liste").size(12.5).color(MUTED));
-                    let mut l = *list as usize;
-                    if pro::segmented(ui, &mut l, &LISTS) {
-                        *list = l as u8;
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Liste").size(12.5).color(MUTED));
+                        egui::ComboBox::from_id_salt("list").selected_text(LISTS[(*list as usize).min(LISTS.len() - 1)]).width(90.0).show_ui(ui, |ui| {
+                            for (k, n) in LISTS.iter().enumerate() {
+                                ui.selectable_value(list, k as u8, *n);
+                            }
+                        });
+                        if *list == 1 {
+                            egui::ComboBox::from_id_salt("bullet").selected_text(opts.bullet.as_str()).width(50.0).show_ui(ui, |ui| {
+                                for b in BULLETS {
+                                    ui.selectable_value(&mut opts.bullet, b.to_string(), b);
+                                }
+                            });
+                        } else if *list > 1 {
+                            ui.add(egui::DragValue::new(&mut opts.list_start).range(1..=999).prefix("début "));
+                        }
+                    });
+                    if *list > 0 {
+                        ui.checkbox(&mut opts.hang, "Retrait négatif (texte aligné après la puce)");
                     }
                     ui.horizontal(|ui| {
                         ui.label(RichText::new("Style").size(12.5).color(MUTED));
@@ -1664,6 +2091,46 @@ impl PageApp {
                         save_style = true;
                     }
                 });
+                pro::dock_panel(ui, "para2", "Paragraphe avancé", |ui| {
+                    ui.spacing_mut().item_spacing.y = 6.0;
+                    ui.spacing_mut().slider_width = (ui.available_width() - 100.0).max(80.0);
+                    ui.label(RichText::new("Espace avant paragraphe").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(&mut opts.space_before, 0.0..=40.0).suffix(" pt"));
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Retrait gauche").size(12.5).color(MUTED));
+                        ui.add(egui::DragValue::new(&mut opts.indent_left).range(0.0..=200.0).suffix(" pt"));
+                        ui.label(RichText::new("droit").size(12.5).color(MUTED));
+                        ui.add(egui::DragValue::new(&mut opts.indent_right).range(0.0..=200.0).suffix(" pt"));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Lettrine sur").size(12.5).color(MUTED));
+                        ui.add(egui::DragValue::new(&mut opts.drop_lines).range(0..=6).suffix(" lignes"));
+                    });
+                    ui.checkbox(&mut opts.hyphen, "Césure des mots longs");
+                    ui.checkbox(&mut opts.orphans, "Éviter les lignes veuves et orphelines");
+                    ui.checkbox(&mut opts.grid_align, "Aligner sur la grille de base");
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Tabulation tous les").size(12.5).color(MUTED));
+                        ui.add(egui::DragValue::new(&mut opts.tab).range(4.0..=400.0).suffix(" pt"));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut opts.leader, "Points de conduite");
+                        ui.checkbox(&mut opts.tab_right, "Caler à droite");
+                    });
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut opts.rule_above, "Filet au-dessus");
+                        ui.checkbox(&mut opts.rule_below, "en dessous");
+                    });
+                    if opts.rule_above || opts.rule_below {
+                        color_row(ui, "Couleur du filet", &mut opts.rule_color, &swatches);
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+                            ui.add(egui::DragValue::new(&mut opts.rule_w).range(0.1..=20.0).speed(0.1).suffix(" pt"));
+                            ui.label(RichText::new("Écart").size(12.5).color(MUTED));
+                            ui.add(egui::DragValue::new(&mut opts.rule_off).range(0.0..=40.0).suffix(" pt"));
+                        });
+                    }
+                });
                 pro::dock_panel(ui, "tframe", "Bloc de texte", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
@@ -1672,6 +2139,14 @@ impl PageApp {
                         ui.add(egui::DragValue::new(columns).range(1..=6));
                         ui.label(RichText::new("Gouttière").size(12.5).color(MUTED));
                         ui.add(egui::DragValue::new(gutter).range(0.0..=80.0).suffix(" pt"));
+                    });
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut opts.balance, "Équilibrer");
+                        ui.checkbox(&mut opts.col_rule, "Filet entre colonnes");
+                    });
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut opts.auto_h, "Hauteur auto");
+                        ui.checkbox(&mut opts.no_wrap, "Ignorer l'habillage");
                     });
                     ui.label(RichText::new("Alignement vertical").size(12.5).color(MUTED));
                     let mut v = *valign as usize;
@@ -1698,7 +2173,7 @@ impl PageApp {
                     ui.label(RichText::new("Le texte qui ne tient pas continue dans ce bloc (texte chaîné).").size(11.5).color(FAINT));
                 });
             }
-            Kind::Image { path, cover, radius, filter, flip } => {
+            Kind::Image { path, cover, radius, filter, flip, ox, oy, zoom, stretch, shape, sides } => {
                 pro::dock_panel(ui, "img", "Image", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
@@ -1717,11 +2192,37 @@ impl PageApp {
                     if pro::segmented(ui, &mut c, &["Remplir le cadre", "Ajuster dans le cadre"]) {
                         *cover = c == 0;
                     }
-                    ui.label(RichText::new("Filtre").size(12.5).color(MUTED));
-                    let mut fl = *filter as usize;
-                    if pro::segmented(ui, &mut fl, &FILTERS) {
-                        *filter = fl as u8;
+                    ui.checkbox(stretch, "Étirer sans garder les proportions");
+                    ui.label(RichText::new("Zoom de l'image dans le cadre").size(12.5).color(MUTED));
+                    let mut z = *zoom * 100.0;
+                    if ui.add(egui::Slider::new(&mut z, 10.0..=600.0).logarithmic(true).suffix(" %")).changed() {
+                        *zoom = z / 100.0;
                     }
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Décalage X").size(12.5).color(MUTED));
+                        ui.add(egui::DragValue::new(ox).speed(0.5).suffix(" pt"));
+                        ui.label(RichText::new("Y").size(12.5).color(MUTED));
+                        ui.add(egui::DragValue::new(oy).speed(0.5).suffix(" pt"));
+                        if ui.small_button("Centrer").clicked() {
+                            (*ox, *oy, *zoom) = (0.0, 0.0, 1.0);
+                        }
+                    });
+                    ui.label(RichText::new("Forme du cadre").size(12.5).color(MUTED));
+                    let mut sh = *shape as usize;
+                    if pro::segmented(ui, &mut sh, &["Rectangle", "Ellipse", "Polygone"]) {
+                        *shape = sh as u8;
+                    }
+                    if *shape == 2 {
+                        ui.add(egui::DragValue::new(sides).range(3..=24).prefix("Côtés "));
+                    }
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Filtre").size(12.5).color(MUTED));
+                        egui::ComboBox::from_id_salt("ifilter").selected_text(FILTERS[(*filter as usize).min(FILTERS.len() - 1)]).width(150.0).show_ui(ui, |ui| {
+                            for (k, n) in FILTERS.iter().enumerate() {
+                                ui.selectable_value(filter, k as u8, *n);
+                            }
+                        });
+                    });
                     ui.label(RichText::new("Arrondi des coins").size(12.5).color(MUTED));
                     ui.add(egui::Slider::new(radius, 0.0..=300.0).suffix(" pt"));
                     ui.checkbox(flip, "Miroir horizontal");
@@ -1759,7 +2260,7 @@ impl PageApp {
                     gradient_row(ui, &mut f.fill2, &mut f.grad_angle, &swatches);
                 });
             }
-            Kind::Line { color, width, arrow } => {
+            Kind::Line { color, width, arrow, start_arrow, cap, dir } => {
                 pro::dock_panel(ui, "shape", "Ligne", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
@@ -1768,10 +2269,66 @@ impl PageApp {
                     ui.add(egui::Slider::new(width, 0.25..=30.0).suffix(" pt"));
                     ui.label(RichText::new("Pointillés (0 = plein)").size(12.5).color(MUTED));
                     ui.add(egui::Slider::new(&mut f.dash, 0.0..=40.0).suffix(" pt"));
-                    ui.checkbox(arrow, "Pointe de flèche");
+                    ui.horizontal(|ui| {
+                        ui.checkbox(arrow, "Flèche à la fin");
+                        ui.checkbox(start_arrow, "au début");
+                    });
+                    ui.label(RichText::new("Extrémités").size(12.5).color(MUTED));
+                    let mut c = *cap as usize;
+                    if pro::segmented(ui, &mut c, &["Rondes", "Carrées", "Droites"]) {
+                        *cap = c as u8;
+                    }
+                    ui.label(RichText::new("Direction").size(12.5).color(MUTED));
+                    let mut d = *dir as usize;
+                    if pro::segmented(ui, &mut d, &["—", "|", "╲", "╱"]) {
+                        *dir = d as u8;
+                    }
                 });
             }
-            Kind::Table { cells, size, family, color, line, header, stripe } => {
+            Kind::Path { closed, fill, color, width, .. } => {
+                pro::dock_panel(ui, "shape", "Tracé", |ui| {
+                    ui.spacing_mut().item_spacing.y = 6.0;
+                    ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
+                    ui.checkbox(closed, "Tracé fermé");
+                    let mut on = fill.is_some();
+                    if ui.checkbox(&mut on, "Fond").changed() {
+                        *fill = on.then_some([120, 200, 255, 255]);
+                    }
+                    if let Some(c) = fill {
+                        color_row(ui, "Couleur du fond", c, &swatches);
+                    }
+                    color_row(ui, "Couleur du trait", color, &swatches);
+                    ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(width, 0.0..=30.0).suffix(" pt"));
+                    ui.label(RichText::new("Sélection directe (A) pour déplacer les points et leurs poignées.").size(11.5).color(FAINT));
+                });
+            }
+            Kind::TextPath { text, size, family, bold, italic, color, tracking, closed, offset, show_path, .. } => {
+                pro::dock_panel(ui, "text", "Texte sur tracé", |ui| {
+                    ui.spacing_mut().item_spacing.y = 6.0;
+                    ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
+                    ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY));
+                    egui::ComboBox::from_id_salt("tpfont").selected_text(family.as_str()).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                        for name in FONTS {
+                            ui.selectable_value(family, name.to_string(), name);
+                        }
+                    });
+                    ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(size, 4.0..=200.0).logarithmic(true).suffix(" pt"));
+                    ui.label(RichText::new("Approche").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(tracking, -2.0..=30.0).suffix(" pt"));
+                    ui.label(RichText::new("Départ le long du tracé").size(12.5).color(MUTED));
+                    ui.add(egui::Slider::new(offset, 0.0..=1.0));
+                    ui.horizontal(|ui| {
+                        ui.toggle_value(bold, RichText::new(" G ").strong());
+                        ui.toggle_value(italic, RichText::new(" I ").italics());
+                        ui.checkbox(show_path, "Voir le tracé");
+                        ui.checkbox(closed, "Fermé");
+                    });
+                    color_row(ui, "Couleur", color, &swatches);
+                });
+            }
+            Kind::Table { cells, size, family, color, line, header, stripe, align: talign, first_col } => {
                 pro::dock_panel(ui, "table", "Tableau", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let cols = cells.iter().map(|r| r.len()).max().unwrap_or(1);
@@ -1815,6 +2372,11 @@ impl PageApp {
                     });
                     color_row(ui, "Texte", color, &swatches);
                     color_row(ui, "Traits", line, &swatches);
+                    let mut a = *talign as usize;
+                    if pro::segmented(ui, &mut a, &["Gauche", "Centre", "Droite"]) {
+                        *talign = a as u8;
+                    }
+                    ui.checkbox(first_col, "Première colonne en gras");
                     let mut on = header.is_some();
                     if ui.checkbox(&mut on, "Ligne d'en-tête").changed() {
                         *header = on.then_some([30, 30, 40, 255]);
@@ -1852,16 +2414,91 @@ impl PageApp {
                     ui.add(egui::Slider::new(&mut f.dash, 0.0..=40.0).suffix(" pt"));
                 }
             }
-            ui.checkbox(&mut f.shadow, "Ombre portée");
+            ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
+            egui::ComboBox::from_id_salt("fblend").selected_text(BLENDS[(f.fx.blend as usize).min(BLENDS.len() - 1)].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                for (k, (n, _)) in BLENDS.iter().enumerate() {
+                    ui.selectable_value(&mut f.fx.blend, k as u8, *n);
+                }
+            });
             ui.horizontal(|ui| {
                 ui.checkbox(&mut f.locked, "Verrouillé");
                 ui.checkbox(&mut f.hidden, "Masqué");
             });
+            ui.checkbox(&mut f.fx.nonprint, "Non imprimable (visible à l'écran seulement)");
             if let Kind::Rect { fill, .. } | Kind::Ellipse { fill } | Kind::Polygon { fill, .. } = &f.kind
                 && pro::ghost(ui, "+ Ajouter la couleur au nuancier").clicked()
             {
                 add_swatch = Some(*fill);
             }
+        });
+        pro::dock_panel(ui, "fx", "Effets", |ui| {
+            ui.spacing_mut().item_spacing.y = 6.0;
+            ui.spacing_mut().slider_width = (ui.available_width() - 100.0).max(80.0);
+            ui.checkbox(&mut f.shadow, "Ombre portée");
+            if f.shadow {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("X").size(12.5).color(MUTED));
+                    ui.add(egui::DragValue::new(&mut f.fx.shadow_dx).range(-60.0..=60.0).speed(0.2).suffix(" pt"));
+                    ui.label(RichText::new("Y").size(12.5).color(MUTED));
+                    ui.add(egui::DragValue::new(&mut f.fx.shadow_dy).range(-60.0..=60.0).speed(0.2).suffix(" pt"));
+                    ui.label(RichText::new("Flou").size(12.5).color(MUTED));
+                    ui.add(egui::DragValue::new(&mut f.fx.shadow_blur).range(0.0..=60.0).speed(0.2));
+                });
+                color_row(ui, "Couleur de l'ombre", &mut f.fx.shadow_color, &swatches);
+            }
+            ui.checkbox(&mut f.fx.glow, "Lueur externe");
+            if f.fx.glow {
+                color_row(ui, "Couleur de la lueur", &mut f.fx.glow_color, &swatches);
+                ui.add(egui::Slider::new(&mut f.fx.glow_size, 0.5..=40.0).suffix(" pt"));
+            }
+            ui.label(RichText::new("Contour progressif").size(12.5).color(MUTED));
+            ui.add(egui::Slider::new(&mut f.fx.feather, 0.0..=60.0).suffix(" pt"));
+            ui.checkbox(&mut f.fx.gfeather, "Contour progressif dégradé");
+            if f.fx.gfeather {
+                ui.add(egui::Slider::new(&mut f.fx.gf_angle, -180.0..=180.0).suffix("°"));
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("De").size(12.5).color(MUTED));
+                    ui.add(egui::DragValue::new(&mut f.fx.gf_start).range(0.0..=1.0).speed(0.01));
+                    ui.label(RichText::new("à").size(12.5).color(MUTED));
+                    ui.add(egui::DragValue::new(&mut f.fx.gf_end).range(0.0..=1.0).speed(0.01));
+                });
+            }
+            ui.horizontal(|ui| {
+                ui.label(RichText::new("Angles").size(12.5).color(MUTED));
+                egui::ComboBox::from_id_salt("corner").selected_text(CORNERS[(f.fx.corner as usize).min(CORNERS.len() - 1)]).width(120.0).show_ui(ui, |ui| {
+                    for (k, n) in CORNERS.iter().enumerate() {
+                        ui.selectable_value(&mut f.fx.corner, k as u8, *n);
+                    }
+                });
+                if f.fx.corner > 0 {
+                    ui.add(egui::DragValue::new(&mut f.fx.corner_r).range(0.0..=200.0).suffix(" pt"));
+                }
+            });
+            ui.checkbox(&mut f.fx.radial, "Dégradé radial (si un dégradé est actif)");
+            ui.horizontal(|ui| {
+                ui.label(RichText::new("Inclinaison").size(12.5).color(MUTED));
+                ui.add(egui::DragValue::new(&mut f.fx.skew).range(-60.0..=60.0).speed(0.5).suffix("°"));
+                ui.checkbox(&mut f.fx.flip_h, "Miroir ↔");
+                ui.checkbox(&mut f.fx.flip_v, "↕");
+            });
+        });
+        pro::dock_panel(ui, "wrap", "Habillage du texte", |ui| {
+            ui.spacing_mut().item_spacing.y = 6.0;
+            egui::ComboBox::from_id_salt("wrapk").selected_text(model::WRAPS[(f.fx.wrap as usize).min(3)]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                for (k, n) in model::WRAPS.iter().enumerate() {
+                    ui.selectable_value(&mut f.fx.wrap, k as u8, *n);
+                }
+            });
+            if f.fx.wrap > 0 {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("Distance").size(12.5).color(MUTED));
+                    ui.add(egui::DragValue::new(&mut f.fx.wrap_off).range(0.0..=80.0).suffix(" pt"));
+                });
+                ui.label(RichText::new("Les textes voisins contournent ce bloc.").size(11.5).color(FAINT));
+            }
+        });
+        pro::dock_panel(ui, "note", "Note", |ui| {
+            ui.add(egui::TextEdit::multiline(&mut f.fx.note).desired_rows(2).hint_text("Remarque pour toi ou un relecteur (non imprimée)").desired_width(f32::INFINITY));
         });
         pro::dock_panel(ui, "arrange", "Disposition", |ui| {
             ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
@@ -2055,6 +2692,8 @@ impl PageApp {
                     Kind::Line { .. } => 4,
                     Kind::Polygon { .. } => 5,
                     Kind::Table { .. } => 6,
+                    Kind::Path { .. } => 7,
+                    Kind::TextPath { .. } => 8,
                 };
                 (i, f.title(), f.hidden, f.locked, k)
             })
@@ -2072,7 +2711,7 @@ impl PageApp {
                 } else if resp.hovered() {
                     p.rect_filled(r, CornerRadius::same(6), Color32::from_white_alpha(8));
                 }
-                let t = [Tool::Text, Tool::Image, Tool::Rect, Tool::Ellipse, Tool::Line, Tool::Polygon, Tool::Table][k as usize];
+                let t = [Tool::Text, Tool::FrameRect, Tool::Rect, Tool::Ellipse, Tool::Line, Tool::Polygon, Tool::Table, Tool::Pen, Tool::TextPath][k as usize];
                 tool_icon(p, Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), Vec2::splat(12.0)), t, MUTED);
                 p.text(r.left_center() + vec2(28.0, 0.0), Align2::LEFT_CENTER, name, FontId::proportional(12.5), if hidden { FAINT } else { INK });
                 for (n, (label, on)) in [("👁", !hidden), ("🔒", locked)].into_iter().enumerate() {
@@ -2254,8 +2893,8 @@ impl PageApp {
                                     self.edit_text = Some(i);
                                 }
                             } else if resp.drag_started() || (resp.clicked() && matches!(self.drag, Drag::None)) {
-                                let shift = ui.input(|i| i.modifiers.shift);
-                                self.press(p, tol, shift);
+                                let mods = ui.input(|i| i.modifiers);
+                                self.press(p, tol, mods);
                             }
                             if resp.dragged() {
                                 let shift = ui.input(|i| i.modifiers.shift);
@@ -2263,36 +2902,17 @@ impl PageApp {
                             }
                         }
                         if resp.drag_stopped() || resp.clicked() {
-                            if let (Drag::Create { .. }, Some(i)) = (&self.drag, self.sel)
-                                && self.frames()[i].w < 4.0
-                            {
-                                let kind = self.frames()[i].kind.clone();
-                                let f = &mut self.frames()[i];
-                                (f.w, f.h) = match kind {
-                                    Kind::Text { .. } => (240.0, 80.0),
-                                    Kind::Line { .. } => (200.0, 6.0),
-                                    Kind::Table { .. } => (280.0, 110.0),
-                                    _ => (160.0, 120.0),
-                                };
-                            }
-                            if let Drag::Guide { index } = self.drag
-                                && let Some(g) = self.doc.guides.get(index)
-                            {
-                                let span = if g.vertical { self.doc.width } else { self.doc.height };
-                                if g.pos < -30.0 || g.pos > span + 30.0 {
-                                    self.doc.guides.remove(index);
-                                }
-                            }
-                            if matches!(self.drag, Drag::Create { .. }) {
-                                if let Some(i) = self.sel
-                                    && matches!(self.frames_ref()[i].kind, Kind::Text { .. })
+                            self.release();
+                        }
+                        if !self.preview {
+                            self.tool_overlay(ui.painter(), &to_scr);
+                            for k in self.selection() {
+                                if Some(k) != self.sel
+                                    && let Some(f) = self.frames_ref().get(k)
                                 {
-                                    self.edit_text = Some(i);
+                                    ui.painter().rect_stroke(Rect::from_min_max(to_scr([f.x, f.y]), to_scr([f.x + f.w, f.y + f.h])), CornerRadius::ZERO, Stroke::new(1.2, BLUE.gamma_multiply(0.7)), StrokeKind::Middle);
                                 }
-                                self.tool = Tool::Select;
                             }
-                            self.drag = Drag::None;
-                            self.snap_lines.clear();
                         }
                         if resp.hovered()
                             && let Some(hp) = resp.hover_pos()
@@ -2310,8 +2930,7 @@ impl PageApp {
                                         _ => egui::CursorIcon::ResizeNeSw,
                                     })
                                     .unwrap_or(egui::CursorIcon::Default),
-                                Tool::Pipette => egui::CursorIcon::Copy,
-                                _ => egui::CursorIcon::Crosshair,
+                                t => tools::cursor(t),
                             };
                             ui.ctx().set_cursor_icon(cursor);
                         }
@@ -2392,158 +3011,6 @@ impl PageApp {
         }
     }
 
-    fn press(&mut self, p: [f32; 2], tol: f32, _shift: bool) {
-        self.snap_lines.clear();
-        match self.tool {
-            Tool::Select | Tool::Pipette => {
-                if self.tool == Tool::Select
-                    && let Some(i) = self.sel
-                    && let Some(f) = self.frames_ref().get(i)
-                    && !f.locked
-                    && let Some((hx, hy)) = HANDLES.iter().find(|(hx, hy)| (f.x + f.w * hx - p[0]).abs() <= tol && (f.y + f.h * hy - p[1]).abs() <= tol)
-                {
-                    self.drag = Drag::Resize { orig: [f.x, f.y, f.w, f.h], hx: *hx, hy: *hy };
-                    return;
-                }
-                let hit = (0..self.frames_ref().len()).rev().find(|&i| !self.frames_ref()[i].locked && !self.frames_ref()[i].hidden && self.frames_ref()[i].contains(p, tol));
-                if self.tool == Tool::Pipette {
-                    match (self.sel, hit) {
-                        (Some(to), Some(from)) if to != from => {
-                            self.copy_style(from, to);
-                            self.notice = Some(("Style copié".into(), true));
-                        }
-                        (None, Some(from)) => {
-                            self.sel = Some(from);
-                            self.notice = Some(("Bloc cible choisi : clique maintenant le bloc dont tu veux le style".into(), true));
-                        }
-                        _ => {}
-                    }
-                    return;
-                }
-                if hit.is_none()
-                    && !self.preview
-                    && let Some(g) = self.doc.guides.iter().position(|g| ((if g.vertical { p[0] } else { p[1] }) - g.pos).abs() <= tol)
-                {
-                    self.drag = Drag::Guide { index: g };
-                    return;
-                }
-                if hit != self.sel {
-                    self.edit_text = None;
-                }
-                self.sel = hit;
-                if let Some(i) = self.sel {
-                    let f = &self.frames_ref()[i];
-                    self.drag = Drag::Move { last: p, acc: [0.0, 0.0], origin: [f.x, f.y] };
-                }
-            }
-            tool => {
-                let kind = match tool {
-                    Tool::Text => Kind::text("", 12.0, false),
-                    Tool::Image => Kind::Image { path: String::new(), cover: true, radius: 0.0, filter: 0, flip: false },
-                    Tool::Ellipse => Kind::Ellipse { fill: [255, 120, 60, 255] },
-                    Tool::Line => Kind::Line { color: [20, 20, 24, 255], width: 1.5, arrow: false },
-                    Tool::Polygon => Kind::Polygon { sides: self.polygon_sides, inner: self.polygon_inner, fill: [255, 196, 0, 255] },
-                    Tool::Table => Kind::table(4, 3),
-                    _ => Kind::Rect { fill: [255, 120, 60, 255], radius: 0.0 },
-                };
-                let pick = matches!(kind, Kind::Image { .. });
-                self.push_frame(Frame::new(p[0], p[1], 0.0, 0.0, kind));
-                self.drag = Drag::Create { start: p };
-                if pick
-                    && let Some(path) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "gif", "svg"]).pick_file()
-                    && let Some(i) = self.sel
-                    && let Kind::Image { path: pp, .. } = &mut self.frames()[i].kind
-                {
-                    *pp = path.to_string_lossy().into_owned();
-                }
-            }
-        }
-    }
-
-    fn drag_to(&mut self, p: [f32; 2], tol: f32, shift: bool) {
-        if let Drag::Guide { index } = self.drag {
-            if let Some(g) = self.doc.guides.get_mut(index) {
-                g.pos = if g.vertical { p[0] } else { p[1] };
-            }
-            return;
-        }
-        let Some(i) = self.sel else { return };
-        let (fw, fh) = (self.frames_ref()[i].w, self.frames_ref()[i].h);
-        self.snap_lines.clear();
-        let moved = match &mut self.drag {
-            Drag::Move { last, acc, origin } => {
-                acc[0] += p[0] - last[0];
-                acc[1] += p[1] - last[1];
-                *last = p;
-                let mut t = [origin[0] + acc[0], origin[1] + acc[1]];
-                if shift {
-                    if acc[0].abs() > acc[1].abs() {
-                        t[1] = origin[1];
-                    } else {
-                        t[0] = origin[0];
-                    }
-                }
-                Some(t)
-            }
-            _ => None,
-        };
-        if let Some([x, y]) = moved {
-            let (x, lx) = self.snap_value(x, fw, 0, tol, Some(i));
-            let (y, ly) = self.snap_value(y, fh, 1, tol, Some(i));
-            self.snap_lines.extend(lx.map(|v| (true, v)).into_iter().chain(ly.map(|v| (false, v))));
-            let f = &mut self.frames()[i];
-            f.x = x;
-            f.y = y;
-            return;
-        }
-        let (qx, lx) = self.snap_value(p[0], 0.0, 0, tol, Some(i));
-        let (qy, ly) = self.snap_value(p[1], 0.0, 1, tol, Some(i));
-        self.snap_lines.extend(lx.map(|v| (true, v)).into_iter().chain(ly.map(|v| (false, v))));
-        let mut q = [qx, qy];
-        match self.drag {
-            Drag::Create { start } => {
-                if shift {
-                    let d = (q[0] - start[0]).abs().max((q[1] - start[1]).abs());
-                    q = [start[0] + d * (q[0] - start[0]).signum(), start[1] + d * (q[1] - start[1]).signum()];
-                }
-                let f = &mut self.frames()[i];
-                f.x = start[0].min(q[0]);
-                f.y = start[1].min(q[1]);
-                f.w = (q[0] - start[0]).abs();
-                f.h = (q[1] - start[1]).abs();
-            }
-            Drag::Resize { orig, hx, hy } => {
-                let (mut x0, mut y0, mut x1, mut y1) = (orig[0], orig[1], orig[0] + orig[2], orig[1] + orig[3]);
-                if hx == 0.0 {
-                    x0 = q[0];
-                } else if hx == 1.0 {
-                    x1 = q[0];
-                }
-                if hy == 0.0 {
-                    y0 = q[1];
-                } else if hy == 1.0 {
-                    y1 = q[1];
-                }
-                if shift && hx != 0.5 && hy != 0.5 && orig[3] > 0.0 {
-                    let ratio = orig[2] / orig[3];
-                    let w = (x1 - x0).abs();
-                    let h = w / ratio;
-                    if hy == 0.0 {
-                        y0 = y1 - h * (y1 - y0).signum();
-                    } else {
-                        y1 = y0 + h * (y1 - y0).signum();
-                    }
-                }
-                let f = &mut self.frames()[i];
-                f.x = x0.min(x1);
-                f.y = y0.min(y1);
-                f.w = (x1 - x0).abs().max(1.0);
-                f.h = (y1 - y0).abs().max(1.0);
-            }
-            _ => {}
-        }
-    }
-
     fn text_editor(&mut self, ctx: &egui::Context) {
         let Some(i) = self.edit_text else { return };
         let page = self.page;
@@ -2560,6 +3027,11 @@ impl PageApp {
         };
         let fam = family.clone();
         let sz = *size;
+        let styles: Vec<String> = self.doc.char_styles.iter().map(|c| c.name.clone()).collect();
+        let mut wrap: Option<(String, String)> = None;
+        let mut map: Option<u8> = None;
+        let mut track: Option<f32> = None;
+        let mut cursor = self.edit_cursor;
         egui::Window::new("Modifier le texte")
             .id(egui::Id::NULL.with("text-editor"))
             .collapsible(false)
@@ -2572,7 +3044,56 @@ impl PageApp {
                     ui.label(RichText::new(format!("{fam} · {sz:.1} pt")).size(12.0).color(MUTED));
                     ui.label(RichText::new("Le rendu se met à jour sur la page en direct").size(11.5).color(FAINT));
                 });
-                let r = ui.add(egui::TextEdit::multiline(text).desired_rows(8).desired_width(f32::INFINITY).font(FontId::proportional(14.0)));
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing = vec2(3.0, 3.0);
+                    for (label, tip, open, close) in [
+                        ("G", "Gras", "<b>", "</b>"),
+                        ("I", "Italique", "<i>", "</i>"),
+                        ("x²", "Exposant", "<sup>", "</sup>"),
+                        ("x₂", "Indice", "<sub>", "</sub>"),
+                        ("Pc", "Petites capitales", "<sc>", "</sc>"),
+                    ] {
+                        if ui.small_button(label).on_hover_text(format!("{tip} sur la sélection")).clicked() {
+                            wrap = Some((open.into(), close.into()));
+                        }
+                    }
+                    for (k, label, tip) in [(0u8, "AA", "Majuscules"), (1, "aa", "Minuscules"), (2, "Aa", "Majuscule à chaque mot"), (3, "Aa.", "Majuscule en début de phrase"), (4, "«»", "Guillemets français autour"), (5, "⎵", "Espaces multiples réduits")] {
+                        if ui.small_button(label).on_hover_text(tip).clicked() {
+                            map = Some(k);
+                        }
+                    }
+                    ui.menu_button("Couleur", |ui| {
+                        for (name, hex) in [("Rouge", "#e5383b"), ("Bleu", "#2f6fed"), ("Vert", "#2a9d4b"), ("Orange", "#f08c00"), ("Violet", "#7b4ddb"), ("Gris", "#777777"), ("Noir", "#000000"), ("Blanc", "#ffffff")] {
+                            if ui.button(name).clicked() {
+                                wrap = Some((format!("<c={hex}>"), "</c>".into()));
+                                ui.close();
+                            }
+                        }
+                    });
+                    if !styles.is_empty() {
+                        ui.menu_button("Style de caractère", |ui| {
+                            for n in &styles {
+                                if ui.button(n).clicked() {
+                                    wrap = Some((format!("<st={}>", n.replace(' ', "_")), "</st>".into()));
+                                    ui.close();
+                                }
+                            }
+                        });
+                    }
+                    ui.menu_button("Approche", |ui| {
+                        for t in TRACKS {
+                            if ui.button(format!("{t:+} pt")).clicked() {
+                                track = Some(t);
+                                ui.close();
+                            }
+                        }
+                    });
+                });
+                let out = egui::TextEdit::multiline(text).desired_rows(8).desired_width(f32::INFINITY).font(FontId::proportional(14.0)).show(ui);
+                if let Some(cr) = out.cursor_range {
+                    cursor = (cr.primary.index.0, cr.secondary.index.0);
+                }
+                let r = out.response;
                 if !r.has_focus() && ui.memory(|m| m.focused().is_none()) {
                     r.request_focus();
                 }
@@ -2589,6 +3110,35 @@ impl PageApp {
                     });
                 });
             });
+        self.edit_cursor = cursor;
+        if let Some((o, c)) = wrap {
+            self.wrap_selection(&o, &c);
+        }
+        if let Some(k) = map {
+            self.map_selection(|t| match k {
+                0 => t.to_uppercase(),
+                1 => t.to_lowercase(),
+                2 => t.split(' ').map(cap_first).collect::<Vec<_>>().join(" "),
+                3 => {
+                    let mut up = true;
+                    t.chars().map(|c| {
+                        let o = if up && c.is_alphabetic() { up = false; c.to_uppercase().collect::<String>() } else { c.to_string() };
+                        if ".!?\n".contains(c) {
+                            up = true;
+                        }
+                        o
+                    }).collect()
+                }
+                4 => format!("« {} »", t.trim()),
+                _ => t.split(' ').filter(|w| !w.is_empty()).collect::<Vec<_>>().join(" "),
+            });
+        }
+        if let Some(t) = track
+            && let Some(f) = self.frames().get_mut(i)
+            && let Kind::Text { tracking, .. } = &mut f.kind
+        {
+            *tracking = t;
+        }
         if fit {
             self.sel = Some(i);
             self.fit_text();
@@ -2624,8 +3174,7 @@ impl PageApp {
                 ui.horizontal(|ui| {
                     pro::segmented(ui, &mut o.pages, &["Toutes", "Page affichée", "Plage"]);
                     if o.pages == 2 {
-                        ui.add(egui::DragValue::new(&mut o.from).range(1..=n).prefix("de "));
-                        ui.add(egui::DragValue::new(&mut o.to).range(1..=n).prefix("à "));
+                        ui.add(egui::TextEdit::singleline(&mut o.range).hint_text(format!("ex. 1-3, 5 (sur {n})")).desired_width(120.0));
                     }
                 });
                 ui.add_space(8.0);
@@ -2765,39 +3314,15 @@ impl PageApp {
                 self.style_name = Some(name);
             }
         }
-        let Some((mut find, mut with, mut count)) = self.find.take() else { return };
-        let mut run = false;
-        let mut close = false;
-        let keep = pro::sheet(ctx, "find", 380.0, |ui| {
-            ui.label(RichText::new("Rechercher et remplacer").font(semibold(18.0)).color(INK_STRONG));
-            ui.add_space(10.0);
-            ui.label(RichText::new("Rechercher").size(12.5).color(MUTED));
-            ui.add(egui::TextEdit::singleline(&mut find).desired_width(f32::INFINITY));
-            ui.label(RichText::new("Remplacer par").size(12.5).color(MUTED));
-            ui.add(egui::TextEdit::singleline(&mut with).desired_width(f32::INFINITY));
-            if let Some(n) = count {
-                ui.label(RichText::new(format!("{n} remplacement(s) dans tout le document, tableaux compris")).size(12.5).color(if n > 0 { GREEN } else { MUTED }));
-            }
-            ui.add_space(12.0);
-            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if pro::primary(ui, "Tout remplacer").clicked() {
-                    run = true;
-                }
-                if pro::secondary(ui, "Fermer").clicked() {
-                    close = true;
-                }
-            });
-        });
-        if run {
-            count = Some(self.replace_all(&find, &with));
-        }
-        if keep && !close {
-            self.find = Some((find, with, count));
-        }
+        self.extra_sheets(ctx);
     }
 }
 
 const HANDLES: [(f32, f32); 8] = [(0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (1.0, 0.5), (1.0, 1.0), (0.5, 1.0), (0.0, 1.0), (0.0, 0.5)];
+
+fn mi(ui: &mut Ui, enabled: bool, label: &str, key: &str) -> bool {
+    ui.add_enabled(enabled, egui::Button::new(label).shortcut_text(key)).clicked()
+}
 
 fn swatch_button(ui: &mut Ui, c: &mut [u8; 4], swatches: &[[u8; 4]]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
@@ -2877,56 +3402,6 @@ fn preset_card(ui: &mut Ui, name: &str, kind: &str, w: f32, h: f32, template: bo
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
-fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
-    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
-    let s = Stroke::new(1.8, c);
-    match tool {
-        Tool::Select => {
-            p.add(Shape::convex_polygon(vec![at(0.2, 0.0), at(0.85, 0.6), at(0.52, 0.62), at(0.33, 1.0)], c, Stroke::NONE));
-        }
-        Tool::Text => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.0), at(1.0, 1.0)), CornerRadius::same(2), Stroke::new(1.2, c), StrokeKind::Middle);
-            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(r.width() * 0.8), c);
-        }
-        Tool::Image => {
-            p.rect_stroke(r.shrink(1.0), CornerRadius::same(3), s, StrokeKind::Middle);
-            p.circle_filled(at(0.3, 0.3), r.width() * 0.1, c);
-            p.add(Shape::convex_polygon(vec![at(0.1, 0.9), at(0.5, 0.45), at(0.9, 0.9)], c, Stroke::NONE));
-        }
-        Tool::Rect => {
-            p.rect_filled(Rect::from_min_max(at(0.05, 0.15), at(0.95, 0.85)), CornerRadius::same(2), c);
-        }
-        Tool::Ellipse => {
-            p.circle_stroke(r.center(), r.width() * 0.45, s);
-        }
-        Tool::Polygon => {
-            let pts: Vec<Pos2> = (0..10)
-                .map(|k| {
-                    let a = -std::f32::consts::FRAC_PI_2 + k as f32 * std::f32::consts::TAU / 10.0;
-                    let rr = if k % 2 == 1 { 0.22 } else { 0.5 };
-                    r.center() + vec2(a.cos(), a.sin()) * r.width() * rr
-                })
-                .collect();
-            p.add(Shape::closed_line(pts, Stroke::new(1.5, c)));
-        }
-        Tool::Line => {
-            p.line_segment([at(0.0, 0.5), at(1.0, 0.5)], Stroke::new(2.4, c));
-        }
-        Tool::Table => {
-            let b = Rect::from_min_max(at(0.0, 0.1), at(1.0, 0.9));
-            p.rect_stroke(b, CornerRadius::same(2), Stroke::new(1.4, c), StrokeKind::Middle);
-            p.rect_filled(Rect::from_min_max(b.min, pos2(b.right(), b.top() + b.height() / 3.0)), CornerRadius::same(2), c);
-            p.line_segment([pos2(b.left(), b.top() + b.height() * 2.0 / 3.0), pos2(b.right(), b.top() + b.height() * 2.0 / 3.0)], Stroke::new(1.0, c));
-            p.line_segment([pos2(b.center().x, b.top()), pos2(b.center().x, b.bottom())], Stroke::new(1.0, c));
-        }
-        Tool::Pipette => {
-            p.line_segment([at(0.15, 0.85), at(0.62, 0.38)], Stroke::new(2.4, c));
-            p.circle_filled(at(0.72, 0.28), r.width() * 0.2, c);
-            p.circle_filled(at(0.12, 0.88), r.width() * 0.07, c);
-        }
-    }
-}
-
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -2991,4 +3466,9 @@ mod dump {
         let Ok(path) = std::env::var("PAGE_DEMO") else { return };
         std::fs::write(path, serde_json::to_vec_pretty(&super::template(0)).unwrap()).unwrap();
     }
+}
+
+fn cap_first(w: &str) -> String {
+    let mut c = w.chars();
+    c.next().map_or(String::new(), |f| f.to_uppercase().chain(c.flat_map(|x| x.to_lowercase())).collect())
 }
