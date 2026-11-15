@@ -196,6 +196,7 @@ struct Lumen {
     dirty_catalog: bool,
     icon: TextureHandle,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
     hsl_tab: usize,
     curve_channel: usize,
     query: String,
@@ -287,6 +288,7 @@ impl Lumen {
             dirty_catalog: false,
             icon: studio_ui::icon_texture(&cc.egui_ctx, "lumen"),
             help: studio_ui::help::Help::new("Lumen", tutos::LUMEN),
+            inbox: studio_ui::handoff::Receiver::new("lumen"),
             hsl_tab: 0,
             curve_channel: 0,
             query: String::new(),
@@ -1211,9 +1213,41 @@ fn text_mark(ctx: &egui::Context, text: &str) -> Option<meta::Mark> {
     alpha.iter().any(|a| *a > 0).then_some(meta::Mark { w, h, alpha })
 }
 
+impl Lumen {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let Some(i) = self.current.filter(|i| *i < self.files.len()) else {
+            studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
+            return;
+        };
+        let (path, s) = (self.files[i].clone(), self.settings(i));
+        let stem = path.file_stem().map_or("photo".into(), |s| s.to_string_lossy().into_owned());
+        let (target, ctx) = (target.to_string(), ctx.clone());
+        studio_ui::handoff::toast(&ctx, "Développement en pleine résolution…".into(), true);
+        std::thread::spawn(move || {
+            let out = studio_core::handoff::outgoing("lumen", &stem, "png");
+            match develop::load(&path, 12_000).map(|img| develop::process(&img, &s)).and_then(|img| img.save(&out).map_err(|e| e.to_string())) {
+                Ok(()) => studio_ui::handoff::send(&ctx, &target, &out),
+                Err(e) => studio_ui::handoff::toast(&ctx, format!("Envoi impossible : {e}"), false),
+            }
+        });
+    }
+
+    fn receive(&mut self, p: &Path, ctx: &egui::Context) {
+        let Some(dir) = p.parent().map(|d| d.to_path_buf()) else { return };
+        self.open_folder(dir, ctx);
+        if let Some(i) = self.files.iter().position(|f| f == p) {
+            self.select(i, ctx);
+            self.view = View::Develop;
+        }
+    }
+}
+
 impl eframe::App for Lumen {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p, ctx);
+        }
         self.pump(ctx);
         self.ensure_exif();
         let snap = self.current.filter(|i| *i < self.files.len()).map(|i| (i, self.settings(i)));
@@ -1284,6 +1318,11 @@ impl Lumen {
 
     fn file_menu(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         ui.menu_button("Fichier", |ui| {
+            if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]) {
+                let ctx = ui.ctx().clone();
+                self.send_to(t, &ctx);
+            }
+            ui.separator();
             if ui.button("Ouvrir un dossier…").clicked() {
                 self.pick_folder(ctx);
             }

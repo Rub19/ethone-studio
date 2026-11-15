@@ -446,7 +446,12 @@ impl PageApp {
     }
 
     pub fn place_image(&mut self) {
-        let Some(p) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "gif", "svg"]).pick_file() else { return };
+        if let Some(p) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "gif", "svg"]).pick_file() {
+            self.place_image_path(&p);
+        }
+    }
+
+    pub fn place_image_path(&mut self, p: &std::path::Path) {
         let path = p.to_string_lossy().into_owned();
         if let Some(i) = self.sel
             && let Kind::Image { path: pp, .. } = &mut self.frames()[i].kind

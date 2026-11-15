@@ -195,6 +195,7 @@ struct Motion {
     title: String,
     icon: TextureHandle,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
     tool: Tool,
     zoom: Option<f32>,
     pan: Vec2,
@@ -315,6 +316,7 @@ impl Motion {
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "motion"),
             help: studio_ui::help::Help::new("Motion", tutos::MOTION),
+            inbox: studio_ui::handoff::Receiver::new("motion"),
             tool: Tool::Select,
             zoom: None,
             pan: Vec2::ZERO,
@@ -332,6 +334,8 @@ impl Motion {
         if let Some(p) = std::env::args().nth(1).map(PathBuf::from) {
             if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("emot")) {
                 me.open_path(&p);
+            } else if p.is_file() {
+                me.receive(&p);
             } else if p.as_os_str() == "--demo" {
                 me.home = false;
                 me.t = 1.2;
@@ -498,7 +502,12 @@ impl Motion {
     }
 
     fn add_image(&mut self) {
-        let Some(p) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "gif", "webp", "svg"]).pick_file() else { return };
+        if let Some(p) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "gif", "webp", "svg"]).pick_file() {
+            self.add_image_path(&p);
+        }
+    }
+
+    fn add_image_path(&mut self, p: &Path) {
         let dims = if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("svg")) {
             std::fs::read(&p).ok().and_then(|b| usvg::Tree::from_data(&b, &usvg::Options::default()).ok()).map(|t| (t.size().width() as u32, t.size().height() as u32)).ok_or("SVG illisible".to_string())
         } else {
@@ -1417,9 +1426,31 @@ impl Motion {
 
 }
 
+impl Motion {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let p = studio_core::handoff::outgoing("motion", "image de l'animation", "png");
+        match render(&self.comp, self.t, self.comp.width, self.comp.height, &self.fontdb, false).and_then(|pix| pix.save_png(&p).map_err(|e| e.to_string())) {
+            Ok(()) => studio_ui::handoff::send(ctx, target, &p),
+            Err(e) => studio_ui::handoff::toast(ctx, format!("Envoi impossible : {e}"), false),
+        }
+    }
+
+    fn receive(&mut self, p: &Path) {
+        if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("emot")) {
+            self.open_path(p);
+        } else {
+            self.home = false;
+            self.add_image_path(p);
+        }
+    }
+}
+
 impl eframe::App for Motion {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p);
+        }
         let before = self.comp.clone();
         self.keys(ctx);
         if self.playing {

@@ -236,6 +236,7 @@ struct Cut {
     title: String,
     icon: TextureHandle,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
     composed: Option<(i64, Project, u32, u32)>,
     looping: bool,
     snap: bool,
@@ -316,6 +317,7 @@ impl Cut {
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "cut"),
             help: studio_ui::help::Help::new("Cut", tutos::CUT),
+            inbox: studio_ui::handoff::Receiver::new("cut"),
             composed: None,
             looping: false,
             snap: true,
@@ -1716,9 +1718,28 @@ fn describe(a: &Project, b: &Project) -> String {
         })
 }
 
+impl Cut {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let (w, h) = (self.proj.width.max(2), self.proj.height.max(2));
+        let p = studio_core::handoff::outgoing("cut", "image de la vidéo", "png");
+        let mut pics = render::Pics::default();
+        match render::render_fit(&self.proj, self.t, w, h, false, &mut pics).and_then(|px| save_image(&p, &px, w, h)) {
+            Ok(()) => studio_ui::handoff::send(ctx, target, &p),
+            Err(e) => studio_ui::handoff::toast(ctx, format!("Envoi impossible : {e}"), false),
+        }
+    }
+
+    fn receive(&mut self, p: &Path, ctx: &egui::Context) {
+        self.import(vec![p.to_path_buf()], ctx);
+    }
+}
+
 impl eframe::App for Cut {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p, ctx);
+        }
         let before = self.proj.clone();
         self.pump(ctx);
         self.keys(ctx);
@@ -1855,6 +1876,11 @@ impl Cut {
     fn menus(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         let row = |ui: &mut Ui, on: bool, label: &str, key: &str| -> bool { ui.add_enabled(on, egui::Button::new(label).shortcut_text(key)).clicked() };
         ui.menu_button("Fichier", |ui| {
+            if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]) {
+                let ctx = ui.ctx().clone();
+                self.send_to(t, &ctx);
+            }
+            ui.separator();
             if row(ui, true, "Nouveau projet", "") {
                 self.home = true;
             }

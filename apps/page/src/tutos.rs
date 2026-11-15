@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const PAGE: &[Tuto] = &[
+    t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Effets de l'image", "", "Plus de 100 effets non destructifs sur les blocs image.", &["Sélectionne un bloc image > panneau Effets de l'image > + Ajouter un effet.", "Looks, Relight, bichromie, tramage rétro, aquarelle… L'image d'origine n'est jamais modifiée : l'effet est recalculé à l'affichage et à l'export PDF."]),
     t("Nouveau document", "Ctrl+N", "10 formats et 6 modèles prêts : magazine, flyer, CV, carte de visite, menu, affiche.", &[
         "Choisis un format ou un modèle sur l'accueil.",

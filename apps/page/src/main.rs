@@ -142,6 +142,7 @@ struct PageApp {
     title: String,
     icon: TextureHandle,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
 }
 
 fn recents_path() -> PathBuf {
@@ -212,9 +213,10 @@ impl PageApp {
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "page"),
             help: studio_ui::help::Help::new("Page", tutos::PAGE),
+            inbox: studio_ui::handoff::Receiver::new("page"),
         };
         if let Some(p) = std::env::args().nth(1).map(PathBuf::from).filter(|p| p.is_file()) {
-            me.open_path(&p);
+            me.receive(&p);
         }
         me
     }
@@ -981,9 +983,33 @@ impl PageApp {
     }
 }
 
+impl PageApp {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let cur = if self.page == MASTER { 0 } else { self.page.min(self.doc.pages.len().saturating_sub(1)) };
+        let svg = self.export_svg(&self.doc, &[cur], &RenderOpts::screen(false));
+        let p = studio_core::handoff::outgoing("page", &format!("page {}", cur + 1), "png");
+        match self.raster_svg(&svg, 150.0).and_then(|pix| pix.save_png(&p).map_err(|e| e.to_string())) {
+            Ok(()) => studio_ui::handoff::send(ctx, target, &p),
+            Err(e) => studio_ui::handoff::toast(ctx, format!("Envoi impossible : {e}"), false),
+        }
+    }
+
+    fn receive(&mut self, p: &Path) {
+        let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+        if ["png", "jpg", "jpeg", "webp", "gif", "svg"].contains(&ext.as_str()) {
+            self.place_image_path(p);
+        } else {
+            self.open_path(p);
+        }
+    }
+}
+
 impl eframe::App for PageApp {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p);
+        }
         let before = self.doc.clone();
         self.keys(ctx);
         let name = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("Sans titre".into());
@@ -1054,6 +1080,11 @@ impl PageApp {
 
     fn menus(&mut self, ui: &mut Ui) {
         ui.menu_button("Fichier", |ui| {
+            if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]) {
+                let ctx = ui.ctx().clone();
+                self.send_to(t, &ctx);
+            }
+            ui.separator();
             if mi(ui, true, "Nouveau…", "Ctrl+N") {
                 self.home = true;
             }

@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const PIXEL: &[Tuto] = &[
+    t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Rééclairer (Relight)", "", "Ajoute une ou deux lumières virtuelles à une photo.", &["Filtre > Nouveautés 2027 > Rééclairer, ou le bouton Rééclairer de la barre de tâches.", "Règle la température (K), la position gauche/droite et bas/haut, la distance, l'intensité et la diffusion.", "Active la deuxième lumière pour un éclairage croisé (néon rose et bleu par exemple). Les préréglages Rembrandt, Papillon, Contre-jour… donnent un point de départ."]),
     t("Comparaison rapide", "", "Avant / après en glissant un séparateur.", &["Affichage > Comparaison rapide, ou Comparer dans la barre de tâches.", "Glisse la poignée blanche sur l'image ou le curseur de la barre : à gauche l'image à l'ouverture, à droite l'état actuel."]),
     t("Supprimer la brume", "", "Retire brume, brouillard et voile atmosphérique.", &["Filtre > Nouveautés 2027 > Supprimer la brume et les effets d'ambiance.", "Quantité positive : retire le voile. Négative : en ajoute. Protéger le ciel évite de noircir un ciel blanc."]),

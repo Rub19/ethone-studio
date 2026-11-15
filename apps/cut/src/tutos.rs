@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const CUT: &[Tuto] = &[
+    t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Bibliothèque d'effets", "", "Plus de 100 effets image empilables sur chaque clip.", &["Inspecteur > onglet Effets > Bibliothèque d'effets > + Ajouter un effet.", "Relight, brume, looks, lueur, glitch, VHS, écran cathodique, pluie, neige, aquarelle… chacun avec intensité, réglages et préréglages.", "Les effets suivent le clip et sont rendus à l'export."]),
     t("Importer des médias", "Ctrl+I", "Vidéos, photos (PNG, JPG…) et sons (MP3, WAV, M4A…).", &[
         "Fichier > Importer des médias, ou glisse les fichiers sur la fenêtre.",

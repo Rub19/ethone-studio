@@ -315,6 +315,7 @@ struct VectorApp {
     info: Option<String>,
     title: String,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
     grid: f32,
     show_grid: bool,
     snap: bool,
@@ -475,6 +476,7 @@ impl VectorApp {
             info: None,
             title: String::new(),
             help: studio_ui::help::Help::new("Vector", tutos::VECTOR),
+            inbox: studio_ui::handoff::Receiver::new("vector"),
             grid: 20.0,
             show_grid: false,
             snap: false,
@@ -2167,9 +2169,34 @@ fn apply_affine(it: &mut Item, m: [f32; 4], c: P, strokes: bool) -> bool {
     ok
 }
 
+impl VectorApp {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let parts = self.export_area(0);
+        let Some((name, r, d)) = parts.into_iter().next() else { return };
+        let svg_target = matches!(target, "page" | "motion");
+        let p = studio_core::handoff::outgoing("vector", &name, if svg_target { "svg" } else { "png" });
+        let res = if svg_target {
+            std::fs::write(&p, d.export_svg(r[0], r[1], r[2], r[3], 1.0)).map_err(|e| e.to_string())
+        } else {
+            self.rasterize(&d.export_svg(r[0], r[1], r[2], r[3], 2.0), r[2], r[3], 2.0).and_then(|pix| pix.save_png(&p).map_err(|e| e.to_string()))
+        };
+        match res {
+            Ok(()) => studio_ui::handoff::send(ctx, target, &p),
+            Err(e) => studio_ui::handoff::toast(ctx, format!("Envoi impossible : {e}"), false),
+        }
+    }
+
+    fn receive(&mut self, p: &Path) {
+        self.open_path(p);
+    }
+}
+
 impl eframe::App for VectorApp {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p);
+        }
         let before = self.doc.clone();
         if !self.home && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
             if self.help.open {
@@ -2261,6 +2288,11 @@ impl VectorApp {
     }
 
     fn menu_file(&mut self, ui: &mut Ui) {
+        if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher en image"), ("page", "placer le dessin"), ("motion", "animer le dessin"), ("cut", "ajouter au montage"), ("lumen", "développer")]) {
+            let ctx = ui.ctx().clone();
+            self.send_to(t, &ctx);
+        }
+        ui.separator();
         if mi(ui, "Nouveau…", "Ctrl+N", true) {
             self.new_doc = Some(NewDoc { w: 1000.0, h: 1000.0, preset: 0, transparent: false });
         }

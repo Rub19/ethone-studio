@@ -277,6 +277,7 @@ struct Sound {
     title: String,
     icon: egui::TextureHandle,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
     tool: Tool,
     spec_sel: Option<SpecSel>,
     spec_log: bool,
@@ -368,6 +369,7 @@ impl Sound {
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "sound"),
             help: studio_ui::help::Help::new("Sound", tutos::SOUND),
+            inbox: studio_ui::handoff::Receiver::new("sound"),
             tool: Tool::Select,
             spec_sel: None,
             spec_log: true,
@@ -1015,9 +1017,35 @@ fn db(v: f32) -> f32 {
     20.0 * v.max(1e-6).log10()
 }
 
+impl Sound {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let (a, b) = self.range();
+        let stem = self.file.as_ref().and_then(|p| p.file_stem()).map_or("audio".into(), |s| s.to_string_lossy().into_owned());
+        let p = studio_core::handoff::outgoing("sound", &stem, "wav");
+        match dsp::export_wav(&self.clip.slice(a, b), &p, 16, 1, &[], &[]) {
+            Ok(()) => studio_ui::handoff::send(ctx, target, &p),
+            Err(e) => studio_ui::handoff::toast(ctx, format!("Envoi impossible : {e}"), false),
+        }
+    }
+
+    fn receive(&mut self, p: &Path) {
+        if self.file.is_none() && !self.modified {
+            self.open_path(p);
+            return;
+        }
+        match Clip::decode(p) {
+            Ok(c) => self.insert_clip(c, "Reçu"),
+            Err(e) => self.notice = Some((format!("Fichier reçu illisible : {e}"), false)),
+        }
+    }
+}
+
 impl eframe::App for Sound {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p);
+        }
         self.keys(ctx);
         if let Some(p) = ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf())).filter(|p| !p.as_os_str().is_empty()) {
             self.open_path(&p);
@@ -1080,6 +1108,11 @@ impl Sound {
 
     fn menus(&mut self, ui: &mut Ui) {
         ui.menu_button("Fichier", |ui| {
+            if let Some(t) = studio_ui::handoff::menu(ui, &[("cut", "ajouter au montage (sélection ou tout)")]) {
+                let ctx = ui.ctx().clone();
+                self.send_to(t, &ctx);
+            }
+            ui.separator();
             if ui.button("Nouveau (5 s de silence)").clicked() {
                 self.clip = Clip { rate: 44_100, ch: vec![vec![0.0; 44_100 * 5]; 2] };
                 self.file = None;

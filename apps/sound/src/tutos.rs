@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const SOUND: &[Tuto] = &[
+    t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Ambiances et voix", "", "Radio, téléphone, mégaphone, sous l'eau, cassette, vinyle, monstre, ange…", &["Rack d'effets > catégorie Ambiances et voix : 20 transformations prêtes, chacune avec son réglage principal et ses préréglages.", "▶ Écouter essaie sur 15 s, Appliquer agit sur la sélection ou tout le fichier."]),
     t("Égaliseurs", "", "Graphique 10 bandes et paramétrique 4 bandes.", &["Rack d'effets > Filtres. Le graphique règle 10 fréquences fixes, le paramétrique 4 cloches libres (fréquence, gain, Q)."]),
     t("Sélection temporelle", "V", "Sélectionne une durée sur la forme d'onde.", &["Glisse pour sélectionner, tire les bords pour ajuster, Maj+clic pour étendre.", "Double-clic : sélectionne l'espace entre deux marqueurs."]),

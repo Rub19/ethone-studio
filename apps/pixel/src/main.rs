@@ -207,6 +207,7 @@ pub struct Pixel {
     patch_diffusion: f32,
     mask_tex: Option<(usize, TextureHandle)>,
     help: studio_ui::help::Help,
+    inbox: studio_ui::handoff::Receiver,
     renaming: Option<(usize, String)>,
     error: Option<String>,
     title: String,
@@ -380,6 +381,7 @@ impl Pixel {
             patch_diffusion: 6.0,
             mask_tex: None,
             help: studio_ui::help::Help::new("Pixel", tutos::PIXEL),
+            inbox: studio_ui::handoff::Receiver::new("pixel"),
             renaming: None,
             error: None,
             title: String::new(),
@@ -1132,9 +1134,38 @@ impl Pixel {
     }
 }
 
+impl Pixel {
+    fn send_to(&mut self, target: &str, ctx: &egui::Context) {
+        let stem = Path::new(&self.doc.name).file_stem().map_or("image".into(), |s| s.to_string_lossy().into_owned());
+        let p = studio_core::handoff::outgoing("pixel", &stem, "png");
+        match self.doc.flatten().save(&p) {
+            Ok(()) => studio_ui::handoff::send(ctx, target, &p),
+            Err(e) => studio_ui::handoff::toast(ctx, format!("Envoi impossible : {e}"), false),
+        }
+    }
+
+    fn receive(&mut self, p: &Path) {
+        if self.home {
+            self.open_path(p);
+            return;
+        }
+        match image::open(p) {
+            Ok(img) => {
+                let name = p.file_stem().map(|s| s.to_string_lossy().into_owned());
+                self.doc.next_label = Some("Reçu".into());
+                self.doc.add_layer(name, Some(img.into_rgba8()));
+            }
+            Err(e) => self.error = Some(format!("Fichier reçu illisible : {e}")),
+        }
+    }
+}
+
 impl eframe::App for Pixel {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        for p in self.inbox.poll(ctx) {
+            self.receive(&p);
+        }
         if !self.home && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
             if self.help.open {
                 self.help.open = false;
@@ -1226,6 +1257,11 @@ impl Pixel {
 
     fn menu_file(&mut self, ui: &mut Ui) {
         ui.menu_button("Fichier", |ui| {
+            if let Some(t) = studio_ui::handoff::menu(ui, &[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]) {
+                let ctx = ui.ctx().clone();
+                self.send_to(t, &ctx);
+            }
+            ui.separator();
             if self.mi(ui, "Nouveau…", "Ctrl+N") {
                 self.new_doc_sheet();
             }

@@ -25,6 +25,11 @@ impl Motion {
     pub(crate) fn menus(&mut self, ui: &mut Ui) {
         let has = self.sel.is_some();
         ui.menu_button("Fichier", |ui| {
+            if let Some(t) = studio_ui::handoff::menu(ui, &[("cut", "ajouter au montage"), ("pixel", "retoucher l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("lumen", "développer")]) {
+                let ctx = ui.ctx().clone();
+                self.send_to(t, &ctx);
+            }
+            ui.separator();
             if item(ui, true, "Nouvelle composition", "") {
                 self.home = true;
             }
