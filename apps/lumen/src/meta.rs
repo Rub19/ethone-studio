@@ -89,6 +89,7 @@ pub const FIELDS: &[(&str, &str, usize)] = &[
     ("cal_blue_hue", "Primaire bleue", 11),
     ("cal_blue_sat", "Primaire bleue", 11),
     ("masks", "Masques", 12),
+    ("creative", "Effets créatifs", 10),
     ("grad_on", "Filtre gradué", 12),
     ("grad_angle", "Filtre gradué", 12),
     ("grad_pos", "Filtre gradué", 12),

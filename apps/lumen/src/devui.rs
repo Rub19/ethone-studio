@@ -740,6 +740,7 @@ impl Lumen {
                     });
                     ui.checkbox(&mut self.catalog.solo, "Mode solo : un seul panneau ouvert");
                 });
+                solo_dock(solo, ui, &mut opened, "creative", "Effets créatifs", |ui| creative_panel(ui, &mut s));
                 if let Some(id) = opened {
                     for (pid, _, _) in PANELS {
                         if pid != id {
@@ -1047,5 +1048,79 @@ impl Lumen {
             painter.rect_filled(tag, CornerRadius::same(13), Color32::from_black_alpha(170));
             painter.text(tag.center(), Align2::CENTER_CENTER, "Original", FontId::proportional(12.5), Color32::WHITE);
         }
+    }
+}
+
+fn creative_panel(ui: &mut Ui, s: &mut Settings) {
+    ui.spacing_mut().item_spacing.y = 4.0;
+    caption(ui, "Effets de Pixel empilés après le développement, chacun avec son intensité");
+    ui.menu_button(RichText::new("+ Ajouter un effet").size(12.5), |ui| {
+        for (g, kinds) in develop::creative_groups() {
+            ui.menu_button(g, |ui| {
+                egui::ScrollArea::vertical().max_height(420.0).show(ui, |ui| {
+                    for k in kinds {
+                        if ui.button(k.title()).clicked() {
+                            s.creative.push(develop::Creative { kind: format!("{k:?}"), vals: k.defaults(), amount: 100.0, on: true });
+                            ui.close();
+                        }
+                    }
+                });
+            });
+        }
+    });
+    let (mut remove, mut up) = (None, None);
+    let n = s.creative.len();
+    for (i, c) in s.creative.iter_mut().enumerate() {
+        let Some(k) = develop::creative_kind(&c.kind) else { continue };
+        ui.add_space(4.0);
+        ui.horizontal(|ui| {
+            ui.checkbox(&mut c.on, "");
+            ui.label(RichText::new(k.title()).size(12.5).color(INK_STRONG));
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                if ui.small_button("×").on_hover_text("Retirer").clicked() {
+                    remove = Some(i);
+                }
+                if i > 0 && ui.small_button("▲").on_hover_text("Monter").clicked() {
+                    up = Some(i);
+                }
+            });
+        });
+        ui.add(egui::Slider::new(&mut c.amount, 0.0..=100.0).suffix(" %").text("Intensité"));
+        egui::CollapsingHeader::new(RichText::new("Réglages").size(12.0).color(MUTED)).id_salt(("creative", i, n)).show(ui, |ui| {
+            if !k.presets().is_empty() {
+                ui.horizontal_wrapped(|ui| {
+                    for (name, vals) in k.presets() {
+                        if ui.small_button(*name).clicked() {
+                            c.vals = vals.to_vec();
+                        }
+                    }
+                });
+            }
+            c.vals.resize(k.params().len(), 0.0);
+            for (pi, prm) in k.params().iter().enumerate() {
+                let v = &mut c.vals[pi];
+                if !prm.choices.is_empty() {
+                    let mut idx = (v.round().max(0.0) as usize).min(prm.choices.len() - 1);
+                    egui::ComboBox::from_id_salt(("creative-c", i, pi)).width(180.0).selected_text(format!("{} : {}", prm.label, prm.choices[idx])).show_ui(ui, |ui| {
+                        for (j, ch) in prm.choices.iter().enumerate() {
+                            ui.selectable_value(&mut idx, j, *ch);
+                        }
+                    });
+                    *v = idx as f32;
+                } else if prm.is_toggle() {
+                    let mut b = *v >= 0.5;
+                    ui.checkbox(&mut b, prm.label);
+                    *v = b as u8 as f32;
+                } else {
+                    ui.add(egui::Slider::new(v, prm.min..=prm.max).text(prm.label).suffix(prm.suffix));
+                }
+            }
+        });
+    }
+    if let Some(i) = remove {
+        s.creative.remove(i);
+    }
+    if let Some(i) = up {
+        s.creative.swap(i, i - 1);
     }
 }

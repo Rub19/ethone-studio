@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const LUMEN: &[Tuto] = &[
+    t("Effets créatifs", "", "Plus de 100 effets de Pixel empilés sur le développement.", &["Panneau Effets créatifs > + Ajouter un effet : Relight, brume, looks, lueur, glitch, aquarelle, pluie, neige…", "Chaque effet a son intensité, ses réglages et ses préréglages ; ▲ change l'ordre, la case l'active ou le désactive.", "Les effets sont enregistrés avec la photo, copiables vers d'autres photos et appliqués à l'export."]),
     t("Importer des photos", "", "Lumen travaille sur un dossier : tes originaux ne sont jamais modifiés.", &[
         "Fichier > Ouvrir un dossier… (JPEG, PNG, TIFF, WebP et RAW : CR2, CR3, NEF, ARW, DNG, RAF…).",
         "Coche Inclure les sous-dossiers pour tout voir d'un coup ; le panneau Dossiers liste les sous-dossiers et le dossier parent.",

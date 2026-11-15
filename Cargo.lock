@@ -1816,6 +1816,7 @@ dependencies = [
  "serde",
  "serde_json",
  "studio-core",
+ "studio-fx",
  "studio-ui",
  "winresource",
 ]

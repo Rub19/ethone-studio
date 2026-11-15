@@ -1,6 +1,7 @@
 use image::{GrayImage, RgbImage, imageops};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use studio_fx::filters::Kind;
 use std::borrow::Cow;
 use std::path::Path;
 
@@ -296,6 +297,44 @@ pub struct Settings {
     pub spots: Vec<Spot>,
     pub red_eyes: Vec<RedEye>,
     pub masks: Vec<Mask>,
+    pub creative: Vec<Creative>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Creative {
+    pub kind: String,
+    pub vals: Vec<f32>,
+    pub amount: f32,
+    pub on: bool,
+}
+
+pub fn creative_groups() -> Vec<(&'static str, &'static [Kind])> {
+    let mut g: Vec<(&'static str, &'static [Kind])> = vec![("Réglages", studio_fx::filters::ADJUSTMENTS), ("Rapides", studio_fx::filters::QUICK)];
+    g.extend(studio_fx::fx::GROUPS.iter().copied());
+    g.extend(studio_fx::filters::FILTERS.iter().copied());
+    g
+}
+
+pub fn creative_kind(name: &str) -> Option<Kind> {
+    creative_groups().into_iter().flat_map(|g| g.1.iter().copied()).find(|k| format!("{k:?}") == name)
+}
+
+fn apply_creative(out: RgbImage, list: &[Creative]) -> RgbImage {
+    let live: Vec<(Kind, &Creative)> = list.iter().filter(|c| c.on && c.amount > 0.0).filter_map(|c| creative_kind(&c.kind).map(|k| (k, c))).collect();
+    if live.is_empty() {
+        return out;
+    }
+    let mut img = image::DynamicImage::ImageRgb8(out).into_rgba8();
+    for (k, c) in live {
+        let fx = k.apply(&img, &c.vals);
+        let a = (c.amount / 100.0).clamp(0.0, 1.0);
+        img.pixels_mut().zip(fx.pixels()).for_each(|(p, q)| {
+            for i in 0..3 {
+                p.0[i] = (p.0[i] as f32 + (q.0[i] as f32 - p.0[i] as f32) * a).round() as u8;
+            }
+        });
+    }
+    image::DynamicImage::ImageRgba8(img).into_rgb8()
 }
 
 pub const PROFILES: [&str; 6] = ["Couleur", "Vif", "Neutre", "Paysage", "Portrait", "Monochrome"];
@@ -1473,6 +1512,7 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
         }
     });
     local(&mut out, s, &maps, &masks);
+    let out = apply_creative(out, &s.creative);
     match s.rotate % 4 {
         1 => imageops::rotate90(&out),
         2 => imageops::rotate180(&out),
