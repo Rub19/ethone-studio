@@ -64,6 +64,19 @@ fn handle(method: &str, params: &Value) -> Result<Value, (i64, String)> {
 
 fn main() {
     std::panic::set_hook(Box::new(|_| {}));
+    let argv: Vec<String> = std::env::args().collect();
+    if argv.get(1).map(String::as_str) == Some("--call") {
+        let name = argv.get(2).cloned().unwrap_or_default();
+        let args: Value = argv.get(3).and_then(|p| std::fs::read_to_string(p).ok()).and_then(|s| serde_json::from_str(s.trim_start_matches('\u{feff}')).ok()).unwrap_or(json!({}));
+        let r = std::panic::catch_unwind(|| tools::call(&name, &args)).unwrap_or_else(|_| Err(format!("{name} : erreur interne")));
+        let ok = r.is_ok();
+        let text: Vec<String> = match r {
+            Ok(c) => c.iter().filter_map(|v| v["text"].as_str().map(String::from)).collect(),
+            Err(e) => vec![e],
+        };
+        println!("{}", json!({ "ok": ok, "text": text.join("\n") }));
+        std::process::exit(if ok { 0 } else { 1 });
+    }
     let stdin = std::io::stdin();
     let mut out = std::io::stdout().lock();
     for line in stdin.lock().lines() {
