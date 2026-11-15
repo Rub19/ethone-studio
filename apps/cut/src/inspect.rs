@@ -294,6 +294,7 @@ impl Cut {
         let has_clipboard = self.grade_board.is_some();
         let max = src.duration;
         let tab = self.tab;
+        let sides_id = egui::Id::NULL.with("cut-poly-sides");
         let Some(c) = self.clip_mut(s) else { return };
         match tab {
             0 => {
@@ -520,7 +521,14 @@ impl Cut {
                         row_slider(ui, "Contour progressif", &mut m.feather, 0.0..=100.0, "", false);
                         ui.checkbox(&mut m.invert, "Inverser le masque");
                     }
-                    ui.label(RichText::new("Dessine-le dans le moniteur avec la Plume (P), le Rectangle ou l'Ellipse ; déplace ses points avec la Sélection.").size(11.5).color(FAINT));
+                    let mut sides = ui.ctx().data(|d| d.get_temp::<u32>(sides_id)).unwrap_or(6);
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new("Côtés du polygone").size(12.0).color(MUTED));
+                        if ui.add(egui::DragValue::new(&mut sides).range(3..=24)).changed() {
+                            ui.ctx().data_mut(|d| d.insert_temp(sides_id, sides));
+                        }
+                    });
+                    ui.label(RichText::new("Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.").size(11.5).color(FAINT));
                 });
                 pro::dock_panel(ui, "fx-reset", "Réinitialiser", |ui| {
                     if pro::secondary(ui, "Réinitialiser tous les effets").clicked() {

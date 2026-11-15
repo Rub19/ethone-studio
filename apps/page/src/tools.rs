@@ -34,6 +34,7 @@ pub enum Tool {
     GradFeather,
     Note,
     Pipette,
+    ColorTheme,
     Measure,
     Hand,
     Zoom,
@@ -54,7 +55,7 @@ pub const GROUPS: &[&[(Tool, &str, &str)]] = &[
     &[(FreeTransform, "Transformation manuelle", "E"), (Rotate, "Rotation", "R"), (Scale, "Mise à l'échelle", "S"), (Shear, "Déformation", "O")],
     &[(Gradient, "Nuancier de dégradé", "G"), (GradFeather, "Contour progressif du dégradé", "Maj+G")],
     &[(Note, "Note", "")],
-    &[(Pipette, "Pipette", "I"), (Measure, "Mesure", "K")],
+    &[(Pipette, "Pipette", "I"), (ColorTheme, "Thème de couleur", "Maj+I"), (Measure, "Mesure", "K")],
     &[(Hand, "Main", "H")],
     &[(Zoom, "Zoom", "Z")],
 ];
@@ -140,6 +141,7 @@ pub fn hint(t: Tool) -> &'static str {
         GradFeather => "Glisse pour fondre le bloc vers la transparence",
         Note => "Clique un bloc pour y attacher une note (non imprimée)",
         Pipette => "Sélectionne un bloc, puis clique un autre bloc pour lui prendre son style",
+        ColorTheme => "Clique une image ou un bloc : ses 5 couleurs dominantes rejoignent le nuancier",
         Measure => "Glisse pour mesurer une distance et un angle",
         Hand => "Glisse pour faire défiler · Espace maintenu marche avec tous les outils",
         Zoom => "Clic pour zoomer · Alt+clic pour dézoomer",
@@ -375,6 +377,22 @@ impl PageApp {
         self.snap_lines.clear();
         let (shift, alt) = (mods.shift, mods.alt);
         match self.tool {
+            ColorTheme => {
+                let Some(i) = self.hit(p, tol) else { return };
+                let f = &self.frames_ref()[i];
+                let colors = match &f.kind {
+                    Kind::Image { path, .. } => image::open(path).map(|im| theme_colors(&im.thumbnail(96, 96).to_rgba8(), 5)).unwrap_or_default(),
+                    _ => f.stroke.into_iter().collect(),
+                };
+                let mut added = 0;
+                for c in colors {
+                    if !self.doc.swatches.contains(&c) {
+                        self.doc.swatches.push(c);
+                        added += 1;
+                    }
+                }
+                self.notice = Some((if added > 0 { format!("{added} couleur(s) ajoutée(s) au nuancier") } else { "Aucune nouvelle couleur trouvée".into() }, added > 0));
+            }
             Select | FreeTransform | Pipette => {
                 if self.tool != Pipette
                     && let Some(i) = self.sel
@@ -994,7 +1012,7 @@ impl PageApp {
 pub fn cursor(t: Tool) -> egui::CursorIcon {
     match t {
         Select | Direct | FreeTransform => egui::CursorIcon::Default,
-        Pipette => egui::CursorIcon::Copy,
+        Pipette | ColorTheme => egui::CursorIcon::Copy,
         Hand => egui::CursorIcon::Grab,
         Zoom => egui::CursorIcon::ZoomIn,
         Gap => egui::CursorIcon::ResizeColumn,
@@ -1163,6 +1181,12 @@ pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
             p.circle_filled(at(0.72, 0.28), r.width() * 0.2, c);
             p.circle_filled(at(0.12, 0.88), r.width() * 0.07, c);
         }
+        ColorTheme => {
+            p.line_segment([at(0.1, 0.9), at(0.5, 0.5)], Stroke::new(2.2, c));
+            for (k, col) in [(0, Color32::from_rgb(255, 107, 53)), (1, Color32::from_rgb(255, 204, 0)), (2, Color32::from_rgb(10, 132, 255))] {
+                p.rect_filled(Rect::from_min_size(at(0.5 + k as f32 * 0.17, 0.05), vec2(r.width() * 0.15, r.height() * 0.4)), CornerRadius::same(1), col);
+            }
+        }
         Measure => {
             p.line_segment([at(0.0, 0.85), at(1.0, 0.15)], Stroke::new(1.6, c));
             for k in 1..5 {
@@ -1182,4 +1206,39 @@ pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         }
     }
     let _ = FAINT;
+}
+
+pub fn theme_colors(img: &image::RgbaImage, n: usize) -> Vec<[u8; 4]> {
+    let mut bins: std::collections::HashMap<u16, (u32, [u64; 3])> = std::collections::HashMap::new();
+    for px in img.pixels().filter(|p| p.0[3] > 128) {
+        let [r, g, b, _] = px.0;
+        let e = bins.entry(((r as u16 >> 4) << 8) | ((g as u16 >> 4) << 4) | (b as u16 >> 4)).or_default();
+        e.0 += 1;
+        e.1[0] += r as u64;
+        e.1[1] += g as u64;
+        e.1[2] += b as u64;
+    }
+    let mut v: Vec<(u32, [u8; 4])> = bins.into_values().map(|(k, s)| (k, [(s[0] / k as u64) as u8, (s[1] / k as u64) as u8, (s[2] / k as u64) as u8, 255])).collect();
+    v.sort_by(|a, b| b.0.cmp(&a.0));
+    let mut out: Vec<[u8; 4]> = Vec::new();
+    for (_, c) in v {
+        if out.iter().all(|o| (0..3).map(|k| (o[k] as i32 - c[k] as i32).abs()).sum::<i32>() > 60) {
+            out.push(c);
+            if out.len() == n {
+                break;
+            }
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod theme_tests {
+    #[test]
+    fn dominant_colors() {
+        let img = image::RgbaImage::from_fn(10, 10, |x, _| if x < 7 { image::Rgba([200, 30, 30, 255]) } else { image::Rgba([20, 40, 220, 255]) });
+        let c = super::theme_colors(&img, 5);
+        assert_eq!(c.len(), 2);
+        assert_eq!(c[0], [200, 30, 30, 255]);
+    }
 }

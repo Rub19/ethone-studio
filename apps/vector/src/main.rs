@@ -59,7 +59,12 @@ enum Tool {
     Twirl,
     Pucker,
     Bloat,
+    Scallop,
+    Crystallize,
+    Wrinkle,
     Builder,
+    BlendTool,
+    SymSpray,
     Bucket,
     Gradient,
     Mesh,
@@ -85,8 +90,8 @@ const GROUPS: [Slot; 16] = [
     &[(Tool::Brush, "Pinceau", "B"), (Tool::Blob, "Pinceau goutte", "Maj+B"), (Tool::Pencil, "Crayon", "N"), (Tool::Smooth, "Lissage", ""), (Tool::PathErase, "Gomme de tracé", "")],
     &[(Tool::Rotate, "Rotation", "R"), (Tool::Reflect, "Miroir", "O")],
     &[(Tool::Scale, "Échelle", "S"), (Tool::Distort, "Distorsion", ""), (Tool::Reshape, "Remodelage", "")],
-    &[(Tool::Width, "Largeur", "Maj+W"), (Tool::Warp, "Déformation", "Maj+R"), (Tool::Twirl, "Torsion", ""), (Tool::Pucker, "Contraction", ""), (Tool::Bloat, "Dilatation", "")],
-    &[(Tool::Builder, "Concepteur de forme", "Maj+M"), (Tool::Bucket, "Pot de peinture dynamique", "K")],
+    &[(Tool::Width, "Largeur", "Maj+W"), (Tool::Warp, "Déformation", "Maj+R"), (Tool::Twirl, "Torsion", ""), (Tool::Pucker, "Contraction", ""), (Tool::Bloat, "Dilatation", ""), (Tool::Scallop, "Festons", ""), (Tool::Crystallize, "Cristallisation", ""), (Tool::Wrinkle, "Fronces", "")],
+    &[(Tool::Builder, "Concepteur de forme", "Maj+M"), (Tool::Bucket, "Pot de peinture dynamique", "K"), (Tool::BlendTool, "Dégradé de formes", "W"), (Tool::SymSpray, "Pulvérisation de symboles", "Maj+S")],
     &[(Tool::Gradient, "Dégradé", "G"), (Tool::Mesh, "Filet", "U")],
     &[(Tool::Picker, "Pipette", "I"), (Tool::Measure, "Mesure", "")],
     &[(Tool::Scissors, "Ciseaux", "C"), (Tool::Knife, "Cutter", ""), (Tool::Eraser, "Gomme", "Maj+E")],
@@ -95,7 +100,9 @@ const GROUPS: [Slot; 16] = [
     &[(Tool::Board, "Plan de travail", "Maj+O")],
 ];
 
-const HOTKEYS: [(Key, bool, Tool); 33] = [
+const HOTKEYS: [(Key, bool, Tool); 35] = [
+    (Key::W, false, Tool::BlendTool),
+    (Key::S, true, Tool::SymSpray),
     (Key::V, false, Tool::Select),
     (Key::A, false, Tool::Direct),
     (Key::Y, false, Tool::Wand),
@@ -171,6 +178,7 @@ enum Drag {
     Distort { corner: usize, orig: Item, bbox: BBox },
     Reshape { last: P },
     Liquify { last: P, targets: Vec<usize> },
+    Spray { last: P, n: u32 },
     Width { t: f32 },
     Gradient { start: P },
     Band { start: P, end: P },
@@ -220,6 +228,11 @@ struct Opts {
     erase_r: f32,
     liquify_r: f32,
     liquify_k: f32,
+    blend_steps: u32,
+    blend_from: Option<usize>,
+    spray_sym: usize,
+    spray_gap: f32,
+    spray_jitter: f32,
     wand_tol: f32,
     wand: [bool; 4],
     pick: [bool; 4],
@@ -448,6 +461,11 @@ impl VectorApp {
                 erase_r: 12.0,
                 liquify_r: 60.0,
                 liquify_k: 0.5,
+                blend_steps: 6,
+                blend_from: None,
+                spray_sym: 0,
+                spray_gap: 40.0,
+                spray_jitter: 0.5,
                 wand_tol: 32.0,
                 wand: [true, false, false, false],
                 pick: [true, true, true, true],
@@ -1471,6 +1489,48 @@ impl VectorApp {
             self.doc.items[i].group = if all.len() > 1 { g } else { 0 };
         }
         self.symbol_name.clear();
+    }
+
+    fn blend_click(&mut self, p: P, tol: f32) {
+        let Some(h) = self.doc.hit(p, tol) else {
+            self.o.blend_from = None;
+            self.info = Some("Dégradé de formes : clique un premier objet, puis un second".into());
+            return;
+        };
+        match self.o.blend_from.filter(|a| *a != h && *a < self.doc.items.len()) {
+            Some(a) => {
+                self.o.blend_from = None;
+                self.checkpoint();
+                self.set_selection(vec![a.min(h), a.max(h)]);
+                self.apply_dlg(&Dlg::Blend { steps: self.o.blend_steps }, false);
+                self.info = Some(format!("{} étapes créées entre les deux objets", self.o.blend_steps));
+            }
+            None => {
+                self.o.blend_from = Some(h);
+                self.set_selection(vec![h]);
+                self.info = Some("Clique maintenant le second objet".into());
+            }
+        }
+    }
+
+    fn spray_at(&mut self, p: P, n: u32) {
+        let Some(s) = self.doc.symbols.get(self.o.spray_sym) else { return };
+        let items = s.items.clone();
+        let Some(sb) = items.iter().map(|i| i.bbox()).reduce(|a, b| a.union(&b)) else { return };
+        let h = |k: f32| ((p[0] * 12.9898 + p[1] * 78.233 + k * 37.719).sin() * 43758.547).fract().abs();
+        let j = self.o.spray_jitter * self.o.spray_gap;
+        let c = sb.center();
+        let d = [p[0] - c[0] + (h(1.0) - 0.5) * 2.0 * j, p[1] - c[1] + (h(2.0) - 0.5) * 2.0 * j];
+        let g = if items.len() > 1 { self.next_group() } else { 0 };
+        let k = self.o.spray_sym as u32 + 1;
+        for mut it in items {
+            it.translate(d);
+            it.sym = k;
+            it.group = g;
+            it.layer = self.active_layer;
+            self.push_item(it);
+        }
+        self.info = Some(format!("{n} occurrence(s) pulvérisée(s)"));
     }
 
     fn place_symbol(&mut self, k: usize) {

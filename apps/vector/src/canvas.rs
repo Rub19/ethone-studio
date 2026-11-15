@@ -228,7 +228,7 @@ impl VectorApp {
                     Tool::Wand | Tool::Picker | Tool::Bucket => egui::CursorIcon::PointingHand,
                     Tool::Zoom => if alt { egui::CursorIcon::ZoomOut } else { egui::CursorIcon::ZoomIn },
                     Tool::Scale | Tool::Distort => egui::CursorIcon::ResizeNwSe,
-                    Tool::Blob | Tool::Eraser | Tool::Warp | Tool::Pucker | Tool::Bloat | Tool::Smooth | Tool::PathErase => egui::CursorIcon::None,
+                    Tool::Blob | Tool::Eraser | Tool::Warp | Tool::Pucker | Tool::Bloat | Tool::Scallop | Tool::Crystallize | Tool::Wrinkle | Tool::Smooth | Tool::PathErase => egui::CursorIcon::None,
                     _ => egui::CursorIcon::Crosshair,
                 });
             }
@@ -444,7 +444,7 @@ impl VectorApp {
                 self.pencil = vec![raw];
                 self.drag = Drag::Stroke;
             }
-            Tool::Smooth | Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat => {
+            Tool::Smooth | Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat | Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => {
                 let r = if self.tool == Tool::Smooth { self.o.brush_r } else { self.o.liquify_r };
                 let mut targets = self.selection();
                 if targets.is_empty() {
@@ -651,6 +651,16 @@ impl VectorApp {
                 self.drag = Drag::Width { t };
             }
             Tool::Bucket => self.live_paint(p),
+            Tool::BlendTool => self.blend_click(p, tol),
+            Tool::SymSpray => {
+                if self.doc.symbols.is_empty() {
+                    self.info = Some("Crée d'abord un symbole (Bibliothèques › Symboles › Nouveau symbole)".into());
+                    return;
+                }
+                self.checkpoint();
+                self.spray_at(p, 1);
+                self.drag = Drag::Spray { last: p, n: 1 };
+            }
             Tool::Gradient => {
                 if let Some(i) = self.sel.filter(|i| self.doc.items[*i].fill.is_some()) {
                     self.checkpoint();
@@ -771,6 +781,15 @@ impl VectorApp {
 
     fn drag_to(&mut self, p: P, raw: P, tol: f32) {
         let (shift, alt, _) = self.mods;
+        if let Drag::Spray { last, n } = &mut self.drag {
+            if dist(*last, p) >= self.o.spray_gap {
+                *last = p;
+                *n += 1;
+                let n = *n;
+                self.spray_at(p, n);
+            }
+            return;
+        }
         match &mut self.drag {
             Drag::Stroke => {
                 if self.pencil.last().is_none_or(|l| dist(*l, raw) > 0.5 / self.zoom) {
@@ -1117,6 +1136,19 @@ impl VectorApp {
                     *q = [p[0] + v[0] * c - v[1] * s, p[1] + v[0] * s + v[1] * c];
                 }
                 Tool::Pucker => *q = model::lerp(*q, p, w * 0.05),
+                Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => {
+                    let n = ((q[0] * 0.37 + q[1] * 0.91).sin() * 43758.547).fract().abs();
+                    let v = [q[0] - p[0], q[1] - p[1]];
+                    match tool {
+                        Tool::Wrinkle => {
+                            let a = n * std::f32::consts::TAU;
+                            q[0] += a.cos() * w * 1.5;
+                            q[1] += a.sin() * w * 1.5;
+                        }
+                        Tool::Scallop => *q = [p[0] + v[0] * (1.0 - w * 0.06 * (0.3 + n)), p[1] + v[1] * (1.0 - w * 0.06 * (0.3 + n))],
+                        _ => *q = [p[0] + v[0] * (1.0 + w * 0.08 * (n * n)), p[1] + v[1] * (1.0 + w * 0.08 * (n * n))],
+                    }
+                }
                 _ => *q = model::lerp(*q, p, -w * 0.05),
             };
             for n in nodes.iter_mut() {
@@ -1570,7 +1602,7 @@ impl VectorApp {
             let r = match self.tool {
                 Tool::Blob => Some(self.o.blob_w / 2.0),
                 Tool::Eraser => Some(self.o.erase_r),
-                Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat => Some(self.o.liquify_r),
+                Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat | Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => Some(self.o.liquify_r),
                 Tool::Smooth | Tool::PathErase => Some(self.o.brush_r),
                 _ => None,
             };

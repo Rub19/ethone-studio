@@ -5,6 +5,8 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const MOTION: &[Tuto] = &[
+    t("Masques rectangulaire et elliptique", "", "Comme dans After Effects : ne garde visible qu'une zone d'un calque.", &["Sélectionne le calque, prends l'outil Masque et trace la zone dans la vue.", "Le masque est un calque blanc placé juste en dessous et utilisé comme cache alpha. Coche « Inversé » pour cacher la zone au lieu de la garder.", "Redessiner remplace le masque existant. Anime-le comme n'importe quel calque."]),
+    t("Marionnette", "", "Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur.", &["Sélectionne un calque Tracé (plume) ou Peinture, puis glisse depuis la zone à déplacer.", "La portée règle jusqu'où la déformation s'étend."]),
     t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Effets de composition", "", "Plus de 100 effets image appliqués à toute l'animation.", &["Panneau Effets de composition > + Ajouter un effet : looks, lueur, glitch, VHS, écran cathodique, neige, pluie…", "Chaque effet a son intensité, ses réglages et ses préréglages ; ils s'appliquent à l'aperçu et à tous les exports."]),
     t("Composition", "", "Le cadre de ton animation : format, images par seconde, durée, fond.", &[

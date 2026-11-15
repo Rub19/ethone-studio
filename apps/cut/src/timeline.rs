@@ -530,9 +530,13 @@ impl Cut {
                     2 => (d, 0.0),
                     _ => (d / 2.0, d / 2.0),
                 };
-                let tr = Rect::from_min_max(pos2(r.left() - a, r.top()), pos2(r.left() + b, r.top() + 14.0));
-                p.rect_filled(tr, CornerRadius::same(3), Color32::from_rgb(120, 110, 230));
-                p.with_clip_rect(tr).text(tr.center(), Align2::CENTER_CENTER, TRANSITIONS[c.trans as usize % TRANSITIONS.len()], FontId::proportional(9.5), Color32::WHITE);
+                let tr = Rect::from_min_max(pos2(r.left() - a, r.top()), pos2(r.left() + b, r.bottom()));
+                p.rect_filled(tr, CornerRadius::same(3), Color32::from_rgba_unmultiplied(120, 110, 230, 190));
+                p.line_segment([tr.left_bottom(), tr.right_top()], Stroke::new(1.0, Color32::from_white_alpha(120)));
+                let g = p.layout_no_wrap(TRANSITIONS[c.trans as usize % TRANSITIONS.len()].to_string(), FontId::proportional(9.5), Color32::WHITE);
+                if g.size().x + 6.0 < tr.width() {
+                    p.galley(tr.center() - g.size() / 2.0, g, Color32::WHITE);
+                }
             }
         }
         for (i, c) in self.proj.overlays.iter().enumerate() {

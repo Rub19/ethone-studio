@@ -491,7 +491,28 @@ impl VectorApp {
                     Tool::Distort => small(ui, "Tire un coin du cadre pour déformer en perspective libre"),
                     Tool::Reshape => small(ui, "Tire une partie du tracé sélectionné : les points voisins suivent en douceur"),
                     Tool::Width => small(ui, "Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur"),
-                    Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat => {
+                    Tool::BlendTool => {
+                        let mut s = self.o.blend_steps as f32;
+                        opt_dv(ui, "Étapes", &mut s, 1.0..=100.0, "");
+                        self.o.blend_steps = s.round().max(1.0) as u32;
+                        small(ui, if self.o.blend_from.is_some() { "Clique maintenant le second objet" } else { "Clique un objet puis un autre : les étapes intermédiaires (forme et couleur) sont créées" });
+                    }
+                    Tool::SymSpray => {
+                        let names: Vec<String> = self.doc.symbols.iter().map(|s| s.name.clone()).collect();
+                        if names.is_empty() {
+                            small(ui, "Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole");
+                        } else {
+                            egui::ComboBox::from_id_salt("spray-sym").width(140.0).selected_text(names.get(self.o.spray_sym).cloned().unwrap_or_default()).show_ui(ui, |ui| {
+                                for (k, n) in names.iter().enumerate() {
+                                    ui.selectable_value(&mut self.o.spray_sym, k, n);
+                                }
+                            });
+                            opt_dv(ui, "Espacement", &mut self.o.spray_gap, 4.0..=500.0, " px");
+                            pro::option_slider(ui, "Dispersion", &mut self.o.spray_jitter, 0.0..=2.0, "", false);
+                            hint(ui, "Glisse pour pulvériser des occurrences du symbole");
+                        }
+                    }
+                    Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat | Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => {
                         opt_dv(ui, "Rayon", &mut self.o.liquify_r, 5.0..=600.0, " px");
                         pro::option_slider(ui, "Intensité", &mut self.o.liquify_k, 0.05..=1.0, "", false);
                         hint(ui, if self.tool == Tool::Twirl { "Alt : sens inverse" } else { "Agit sur la sélection, ou sur tout ce qui est sous le pinceau" });
@@ -2184,6 +2205,38 @@ pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
                 let (from, to) = if tool == Tool::Pucker { (o, i) } else { (i, o) };
                 p.line_segment([from, to], s);
                 p.circle_filled(to, 2.0, c);
+            }
+        }
+        Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => {
+            p.circle_stroke(r.center(), r.width() * 0.45, thin);
+            let k = match tool {
+                Tool::Scallop => 0,
+                Tool::Crystallize => 1,
+                _ => 2,
+            };
+            let pts: Vec<Pos2> = (0..=24).map(|i| {
+                let a = i as f32 / 24.0 * std::f32::consts::TAU;
+                let rr = match k {
+                    0 => 0.3 - 0.08 * (a * 6.0).cos().abs(),
+                    1 => if i % 2 == 0 { 0.38 } else { 0.18 },
+                    _ => 0.28 + 0.05 * (a * 9.0).sin(),
+                };
+                r.center() + vec2(a.cos(), a.sin()) * r.width() * rr
+            }).collect();
+            p.add(Shape::closed_line(pts, s));
+        }
+        Tool::BlendTool => {
+            p.rect_stroke(Rect::from_min_max(at(0.0, 0.55), at(0.35, 0.95)), CornerRadius::ZERO, s, StrokeKind::Middle);
+            p.circle_stroke(at(0.78, 0.25), r.width() * 0.2, s);
+            for t in [0.33, 0.5, 0.66] {
+                p.circle_stroke(at(0.18 + 0.6 * t, 0.75 - 0.5 * t), r.width() * 0.1, thin);
+            }
+        }
+        Tool::SymSpray => {
+            p.rect_stroke(Rect::from_min_max(at(0.0, 0.5), at(0.3, 1.0)), CornerRadius::same(2), s, StrokeKind::Middle);
+            p.line_segment([at(0.15, 0.5), at(0.15, 0.35)], s);
+            for (x, y) in [(0.55, 0.2), (0.8, 0.1), (0.7, 0.45), (0.95, 0.35), (0.55, 0.65), (0.85, 0.7)] {
+                p.circle_filled(at(x, y), 1.8, c);
             }
         }
         Tool::Builder => {

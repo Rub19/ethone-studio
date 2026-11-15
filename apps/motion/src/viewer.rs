@@ -22,9 +22,12 @@ pub enum Tool {
     TextV,
     Brush,
     Eraser,
+    MaskRect,
+    MaskEllipse,
+    Puppet,
 }
 
-pub const TOOL_GROUPS: [&[(Tool, &str, &str)]; 9] = [
+pub const TOOL_GROUPS: [&[(Tool, &str, &str)]; 11] = [
     &[(Tool::Select, "Sélection", "V")],
     &[(Tool::Hand, "Main", "H")],
     &[(Tool::ZoomIn, "Zoom avant", "Z"), (Tool::ZoomOut, "Zoom arrière", "Z")],
@@ -34,6 +37,8 @@ pub const TOOL_GROUPS: [&[(Tool, &str, &str)]; 9] = [
     &[(Tool::Pen, "Plume", "G"), (Tool::PenAdd, "Ajout de sommet", "G"), (Tool::PenDel, "Suppression de sommet", "G"), (Tool::PenConv, "Conversion de sommet", "G")],
     &[(Tool::TextH, "Texte horizontal", "Ctrl+T"), (Tool::TextV, "Texte vertical", "Ctrl+T")],
     &[(Tool::Brush, "Pinceau", "Ctrl+B"), (Tool::Eraser, "Gomme", "Ctrl+B")],
+    &[(Tool::MaskRect, "Masque rectangulaire", ""), (Tool::MaskEllipse, "Masque elliptique", "")],
+    &[(Tool::Puppet, "Marionnette", "")],
 ];
 
 pub struct ToolOpts {
@@ -57,6 +62,8 @@ pub struct ToolOpts {
     pub brush_color: [u8; 4],
     pub smooth: u32,
     pub eraser: f32,
+    pub puppet: f32,
+    pub mask_invert: bool,
 }
 
 impl Default for ToolOpts {
@@ -82,6 +89,8 @@ impl Default for ToolOpts {
             brush_color: [255, 214, 10, 255],
             smooth: 2,
             eraser: 30.0,
+            puppet: 160.0,
+            mask_invert: false,
         }
     }
 }
@@ -97,6 +106,7 @@ pub enum VDrag {
     Vertex { li: usize, vi: usize, part: u8, inv: Mat },
     Brush { li: usize, inv: Mat },
     Erase { li: usize, inv: Mat, r: f32 },
+    Puppet { li: usize, inv: Mat, last: (f32, f32), r: f32 },
     Guide { gi: usize },
     NewGuide { vertical: bool },
     PathKey { li: usize, kt: f32 },
@@ -185,6 +195,27 @@ pub fn tool_glyph(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         Tool::Brush => {
             p.line_segment([cen + vec2(u * 0.9, -u * 0.9), cen + vec2(-u * 0.2, u * 0.2)], Stroke::new(2.6, c));
             p.circle_filled(cen + vec2(-u * 0.45, u * 0.45), u * 0.38, c);
+        }
+        Tool::MaskRect | Tool::MaskEllipse => {
+            let b = Rect::from_center_size(cen, vec2(u * 1.8, u * 1.5));
+            p.rect_filled(b, CornerRadius::same(2), c.gamma_multiply(0.25));
+            if tool == Tool::MaskRect {
+                p.rect_stroke(b.shrink(u * 0.3), CornerRadius::ZERO, Stroke::new(1.6, c), StrokeKind::Middle);
+            } else {
+                let pts: Vec<Pos2> = (0..24).map(|k| {
+                    let a = k as f32 / 24.0 * std::f32::consts::TAU;
+                    cen + vec2(a.cos() * u * 0.6, a.sin() * u * 0.45)
+                }).collect();
+                p.add(Shape::closed_line(pts, s));
+            }
+        }
+        Tool::Puppet => {
+            p.circle_stroke(cen + vec2(0.0, -u * 0.6), u * 0.25, s);
+            p.line_segment([cen + vec2(0.0, -u * 0.35), cen + vec2(0.0, u * 0.3)], s);
+            p.line_segment([cen + vec2(-u * 0.6, -u * 0.1), cen + vec2(u * 0.6, -u * 0.1)], s);
+            p.line_segment([cen + vec2(0.0, u * 0.3), cen + vec2(-u * 0.45, u * 0.9)], s);
+            p.line_segment([cen + vec2(0.0, u * 0.3), cen + vec2(u * 0.45, u * 0.9)], s);
+            p.circle_filled(cen + vec2(u * 0.6, -u * 0.1), u * 0.18, Color32::from_rgb(255, 214, 10));
         }
         Tool::Eraser => {
             let d = vec2(0.7, -0.7);
@@ -348,6 +379,14 @@ impl Motion {
                         color_button(ui, &mut o.brush_color);
                         ui.add(egui::DragValue::new(&mut o.smooth).range(0..=8).prefix("Lissage "));
                         lab(ui, "Peint sur le calque Peinture sélectionné");
+                    }
+                    Tool::MaskRect | Tool::MaskEllipse => {
+                        ui.checkbox(&mut o.mask_invert, "Inversé");
+                        lab(ui, "Sélectionne un calque puis trace : seule la zone dessinée reste visible");
+                    }
+                    Tool::Puppet => {
+                        ui.add(egui::DragValue::new(&mut o.puppet).range(10.0..=1000.0).speed(1.0).prefix("Portée ").suffix(" px"));
+                        lab(ui, "Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur");
                     }
                     Tool::Eraser => {
                         ui.add(egui::DragValue::new(&mut o.eraser).range(2.0..=400.0).speed(0.5).prefix("Taille ").suffix(" px"));
@@ -768,6 +807,21 @@ impl Motion {
                         }
                     }
                     Tool::Rect | Tool::RoundRect | Tool::Ellipse | Tool::Polygon | Tool::Star => self.vdrag = Some(VDrag::Shape { from: (cx, cy) }),
+                    Tool::MaskRect | Tool::MaskEllipse => {
+                        if self.sel.is_none() {
+                            self.sel = self.hit_layer(cx, cy, s);
+                        }
+                        self.vdrag = Some(VDrag::Shape { from: (cx, cy) });
+                    }
+                    Tool::Puppet => {
+                        let target = self.sel.filter(|i| matches!(self.comp.layers[*i].content, Content::Path { .. } | Content::Strokes { .. })).or_else(|| self.hit_layer(cx, cy, s));
+                        if let Some(i) = target.filter(|i| matches!(self.comp.layers[*i].content, Content::Path { .. } | Content::Strokes { .. }) && !self.comp.layers[*i].locked) {
+                            self.sel = Some(i);
+                            let inv = invert(self.comp.matrix(i, t));
+                            let ws = self.comp.world(i, t).2.abs().max(1e-3);
+                            self.vdrag = Some(VDrag::Puppet { li: i, inv, last: apply(inv, cx, cy), r: self.topts.puppet / ws });
+                        }
+                    }
                     Tool::Pen => {
                         if let Some((li, k)) = self.pen_click(cx, cy, p, &path_scr) {
                             if let Some(m) = Some(self.comp.matrix(li, t)) {
@@ -900,7 +954,7 @@ impl Motion {
                         Some(pts) => {
                             painter.add(Shape::closed_line(pts.iter().map(|q| to_scr(q[0], q[1])).collect(), st));
                         }
-                        None if self.tool == Tool::Ellipse => {
+                        None if matches!(self.tool, Tool::Ellipse | Tool::MaskEllipse) => {
                             let c = a + (b - a) / 2.0;
                             let pts: Vec<Pos2> = (0..48).map(|k| {
                                 let an = k as f32 / 48.0 * std::f32::consts::TAU;
@@ -946,6 +1000,24 @@ impl Motion {
                     {
                         st.push([lx, ly]);
                     }
+                }
+                VDrag::Puppet { li, inv, last, r } => {
+                    let (lx, ly) = apply(inv, cx, cy);
+                    let (dx, dy) = (lx - last.0, ly - last.1);
+                    let pull = |q: &mut [f32; 2]| {
+                        let d = (q[0] - last.0).hypot(q[1] - last.1) / r;
+                        if d < 1.0 {
+                            let w = (1.0 - d * d).powi(2);
+                            q[0] += dx * w;
+                            q[1] += dy * w;
+                        }
+                    };
+                    match self.comp.layers.get_mut(li).map(|l| &mut l.content) {
+                        Some(Content::Path { pts, .. }) => pts.iter_mut().for_each(|v| pull(&mut v.p)),
+                        Some(Content::Strokes { strokes, .. }) => strokes.iter_mut().flatten().for_each(pull),
+                        _ => {}
+                    }
+                    self.vdrag = Some(VDrag::Puppet { li, inv, last: (lx, ly), r });
                 }
                 VDrag::Erase { li, inv, r } => {
                     let (lx, ly) = apply(inv, cx, cy);
@@ -1224,9 +1296,40 @@ impl Motion {
         }
     }
 
+    fn make_mask(&mut self, (x0, y0, x1, y1): (f32, f32, f32, f32)) {
+        let n = self.comp.layers.len();
+        let Some(mut li) = self.sel.filter(|i| *i < n) else {
+            return;
+        };
+        if li > 0 && self.comp.layers[li - 1].fx.matte > 0 {
+            li -= 1;
+        }
+        let (w, h) = ((x1 - x0).max(2.0), (y1 - y0).max(2.0));
+        let content = if self.tool == Tool::MaskRect { Content::Rect { w, h, r: 0.0, color: [255; 4] } } else { Content::Ellipse { w, h, color: [255; 4] } };
+        let (start, end, name) = (self.comp.layers[li].start, self.comp.layers[li].end, format!("Masque · {}", self.comp.layers[li].name));
+        let i = if self.comp.layers[li].fx.matte > 0 && li + 1 < n {
+            self.comp.layers[li + 1].content = content;
+            li + 1
+        } else {
+            self.sel = Some(li);
+            let i = self.add_layer(&name, content);
+            self.comp.layers[i].name = name;
+            i
+        };
+        self.comp.layers[i].start = start;
+        self.comp.layers[i].end = end;
+        self.comp.layers[li].fx.matte = if self.topts.mask_invert { 3 } else { 1 };
+        self.place(i, (x0 + x1) / 2.0, (y0 + y1) / 2.0);
+        self.sel = Some(li);
+    }
+
     fn make_shape(&mut self, a: (f32, f32), b: (f32, f32), shift: bool, alt: bool) {
         let ((x0, y0, x1, y1), _) = self.shape_geom(a, b, shift, alt);
         let (w, h) = ((x1 - x0).max(2.0), (y1 - y0).max(2.0));
+        if matches!(self.tool, Tool::MaskRect | Tool::MaskEllipse) {
+            self.make_mask((x0, y0, x1, y1));
+            return;
+        }
         let o = &self.topts;
         let (name, content) = match self.tool {
             Tool::Rect => ("Rectangle", Content::Rect { w, h, r: 0.0, color: o.fill }),

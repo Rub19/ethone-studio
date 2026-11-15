@@ -177,6 +177,7 @@ enum Tool {
     Pen,
     Rect,
     Ellipse,
+    Poly,
     Hand,
     Zoom,
     Text,
@@ -190,7 +191,7 @@ const GROUPS: [Group; 7] = [
     (Key::B, &[(Tool::Ripple, "Modification par propagation", "B"), (Tool::Rolling, "Modification par déplacement", "N"), (Tool::Rate, "Allongement de la durée", "R")]),
     (Key::C, &[(Tool::Blade, "Cutter", "C"), (Tool::BladeAll, "Couper toutes les pistes", "Maj+C")]),
     (Key::Y, &[(Tool::Slip, "Glissement", "Y"), (Tool::Slide, "Déplacement", "U")]),
-    (Key::P, &[(Tool::Pen, "Plume (masque)", "P"), (Tool::Rect, "Rectangle (masque)", "P"), (Tool::Ellipse, "Ellipse (masque)", "P")]),
+    (Key::P, &[(Tool::Pen, "Plume (masque)", "P"), (Tool::Rect, "Rectangle (masque)", "P"), (Tool::Ellipse, "Ellipse (masque)", "P"), (Tool::Poly, "Polygone (masque)", "P")]),
     (Key::H, &[(Tool::Hand, "Main", "H"), (Tool::Zoom, "Zoom", "Z")]),
     (Key::T, &[(Tool::Text, "Texte", "T"), (Tool::TextV, "Texte vertical", "T")]),
 ];
@@ -2696,7 +2697,7 @@ impl Cut {
         let target = self.mask_target();
         let mask = target.and_then(|(s, _)| self.clip_ref(s).and_then(|c| c.mask.clone()));
         let painter = ui.painter().with_clip_rect(frame.expand(6.0));
-        let shows_mask = matches!(self.tool, Tool::Select | Tool::Pen | Tool::Rect | Tool::Ellipse) && (matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_))) || matches!(self.tool, Tool::Pen | Tool::Rect | Tool::Ellipse));
+        let shows_mask = matches!(self.tool, Tool::Select | Tool::Pen | Tool::Rect | Tool::Ellipse | Tool::Poly) && (matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_))) || matches!(self.tool, Tool::Pen | Tool::Rect | Tool::Ellipse | Tool::Poly));
         let mut handles: Vec<Pos2> = Vec::new();
         if let Some(m) = &mask
             && shows_mask
@@ -2747,7 +2748,7 @@ impl Cut {
         }
         match self.tool {
             Tool::Text | Tool::TextV => ui.ctx().set_cursor_icon(egui::CursorIcon::Text),
-            Tool::Pen | Tool::Rect | Tool::Ellipse => ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair),
+            Tool::Pen | Tool::Rect | Tool::Ellipse | Tool::Poly => ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair),
             Tool::Select if resp.hovered() => ui.ctx().set_cursor_icon(egui::CursorIcon::Move),
             _ => {}
         }
@@ -2772,6 +2773,28 @@ impl Cut {
                 }
                 if resp.double_clicked() {
                     self.close_pen();
+                }
+            }
+            Tool::Poly => {
+                if resp.drag_started()
+                    && let (Some(pp), Some((s, _))) = (resp.interact_pointer_pos(), target)
+                {
+                    self.view_drag = Some((1, pp, self.proj.clone(), s, 0));
+                }
+                if let Some((1, start, _, s, _)) = self.view_drag.clone()
+                    && let Some(pp) = resp.interact_pointer_pos()
+                {
+                    let n = ui.ctx().data(|d| d.get_temp::<u32>(egui::Id::NULL.with("cut-poly-sides"))).unwrap_or(6).clamp(3, 24);
+                    let (rad, a0) = (start.distance(pp).max(4.0), (pp - start).angle());
+                    let pts: Vec<[f32; 2]> = (0..n).map(|k| {
+                        let a = a0 + k as f32 / n as f32 * std::f32::consts::TAU;
+                        norm(start + vec2(a.cos(), a.sin()) * rad)
+                    }).collect();
+                    if let Some(c) = self.clip_mut(s) {
+                        let feather = c.mask.as_ref().map_or(5.0, |m| m.feather);
+                        c.mask = Some(model::Mask { kind: 2, pts, feather, invert: false });
+                    }
+                    self.sel = Some(s);
                 }
             }
             Tool::Rect | Tool::Ellipse => {
@@ -3369,6 +3392,13 @@ fn tool_glyph(p: &Painter, r: Rect, c: Color32, t: Tool) {
             p.add(Shape::convex_polygon(vec![at(0.5, 0.0), at(0.85, 0.55), at(0.5, 1.0), at(0.15, 0.55)], Color32::TRANSPARENT, s));
             p.circle_filled(at(0.5, 0.55), 1.8, c);
             p.line_segment([at(0.5, 0.0), at(0.5, 0.45)], Stroke::new(1.0, c));
+        }
+        Tool::Poly => {
+            let pts: Vec<Pos2> = (0..6).map(|k| {
+                let a = k as f32 / 6.0 * std::f32::consts::TAU - std::f32::consts::FRAC_PI_2;
+                at(0.5 + a.cos() * 0.45, 0.5 + a.sin() * 0.45)
+            }).collect();
+            p.add(Shape::closed_line(pts, s));
         }
         Tool::Rect => {
             p.rect_stroke(Rect::from_min_max(at(0.08, 0.2), at(0.92, 0.8)), CornerRadius::ZERO, s, StrokeKind::Middle);

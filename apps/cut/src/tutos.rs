@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const CUT: &[Tuto] = &[
+    t("Masque polygonal", "P", "Un masque à 3 à 24 côtés, en plus du rectangle, de l'ellipse et de la plume.", &["Prends le Polygone (masque) dans la case de la Plume, puis glisse dans le moniteur depuis le centre : la distance donne la taille, la direction l'orientation.", "Le nombre de côtés se règle dans l'inspecteur, panneau Masque."]),
     t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Bibliothèque d'effets", "", "Plus de 100 effets image empilables sur chaque clip.", &["Inspecteur > onglet Effets > Bibliothèque d'effets > + Ajouter un effet.", "Relight, brume, looks, lueur, glitch, VHS, écran cathodique, pluie, neige, aquarelle… chacun avec intensité, réglages et préréglages.", "Les effets suivent le clip et sont rendus à l'export."]),
     t("Importer des médias", "Ctrl+I", "Vidéos, photos (PNG, JPG…) et sons (MP3, WAV, M4A…).", &[

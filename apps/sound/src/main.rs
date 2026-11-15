@@ -2077,7 +2077,7 @@ impl Sound {
         ui.label(RichText::new(t.name()).font(semibold(12.5)).color(INK_STRONG));
         pro::toolbar_sep(ui);
         let small = |ui: &mut Ui, s: &str| {
-            ui.label(RichText::new(s).size(12.0).color(MUTED));
+            ui.add(egui::Label::new(RichText::new(s).size(12.0).color(MUTED)).truncate());
         };
         match t {
             Tool::Select | Tool::Hand | Tool::Zoom => {
@@ -2374,7 +2374,7 @@ impl Sound {
         let full = ui.max_rect();
         let head_h = 68.0;
         let head = Rect::from_min_size(full.min, vec2(full.width(), head_h));
-        ui.scope_builder(egui::UiBuilder::new().max_rect(head), |ui| {
+        ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(full.min, vec2(full.width(), 30.0))), |ui| {
             ui.horizontal_centered(|ui| {
                 pro::segmented(ui, &mut self.view_mode, &["Forme d'onde", "Spectrogramme"]);
                 pro::toolbar_sep(ui);
