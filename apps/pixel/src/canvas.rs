@@ -413,9 +413,9 @@ impl Pixel {
                             self.doc.combine_selection(prev, self.sel_mode);
                         }
                     }
-                    Tool::Marquee | Tool::EllipseMarquee => self.drag = Drag::Marquee(d),
+                    Tool::Marquee | Tool::EllipseMarquee | Tool::ObjectSelect => self.drag = Drag::Marquee(d),
                     Tool::Lasso | Tool::MagLasso => self.drag = Drag::Lasso(vec![if t == Tool::MagLasso { self.mag_snap(raw) } else { raw }]),
-                    Tool::Patch => {
+                    Tool::Patch | Tool::ContentMove => {
                         if self.doc.selection.is_some() && raw.0 >= 0.0 && raw.1 >= 0.0 && self.doc.selected(raw.0 as u32, raw.1 as u32) {
                             self.drag = Drag::Patch { from: raw };
                             self.gradient_end = Some(raw);
@@ -536,6 +536,9 @@ impl Pixel {
                             if let Some(p) = prev.filter(|_| self.sel_mode != 0) {
                                 self.doc.select_mask(p);
                             }
+                        } else if self.tool == Tool::ObjectSelect {
+                            self.sel_prev = prev;
+                            self.object_select();
                         } else {
                             if self.tool == Tool::EllipseMarquee
                                 && let Some(a) = self.doc.selection
@@ -555,7 +558,12 @@ impl Pixel {
                     }
                     Drag::Patch { from } => {
                         if let Some(end) = self.gradient_end.take() {
-                            self.apply_patch((end.0 - from.0, end.1 - from.1));
+                            if self.tool == Tool::ContentMove {
+                                let ctx = ui.ctx().clone();
+                                self.content_move((end.0 - from.0, end.1 - from.1), &ctx);
+                            } else {
+                                self.apply_patch((end.0 - from.0, end.1 - from.1));
+                            }
                         }
                     }
                     Drag::Crop(_) => {
@@ -630,14 +638,25 @@ impl Pixel {
                             None => Sheet::Note { idx: None, at: (x, y), text: String::new() },
                         });
                     }
-                    Tool::PolyLasso => {
+                    Tool::RedEye if inside => self.fix_red_eye(x, y),
+                    Tool::Count if inside => self.counts.push((x, y)),
+                    Tool::PerspCrop => {
+                        self.persp.push((x.clamp(0.0, w), y.clamp(0.0, h)));
+                        if self.persp.len() == 4 {
+                            self.perspective_crop();
+                        }
+                    }
+                    Tool::PolyLasso | Tool::CurvePen => {
                         let d = (x.clamp(0.0, w), y.clamp(0.0, h));
                         let close = self.poly.first().is_some_and(|f| (v.to_scr(*f) - at).length() < 8.0);
                         if self.poly.is_empty() {
                             self.sel_prev = (self.sel_mode != 0 && self.doc.selection.is_some()).then(|| self.doc.sel_mask());
                         }
                         if (close || resp.double_clicked()) && self.poly.len() >= 3 {
-                            let pts = std::mem::take(&mut self.poly);
+                            let mut pts = std::mem::take(&mut self.poly);
+                            if self.tool == Tool::CurvePen {
+                                pts = crate::newtools::catmull(&pts, 12);
+                            }
                             self.finish_lasso(&pts);
                         } else if !resp.double_clicked() {
                             self.poly.push(d);
@@ -745,6 +764,21 @@ impl Pixel {
                     for (vert, p) in &self.guides {
                         let (a, b) = if *vert { ((*p, -100000.0), (*p, 100000.0)) } else { ((-100000.0, *p), (100000.0, *p)) };
                         painter.line_segment([v.to_scr(a), v.to_scr(b)], gs);
+                    }
+                }
+                for (i, p) in self.counts.iter().enumerate() {
+                    let c = v.to_scr(*p);
+                    painter.circle(c, 9.0, Color32::from_rgb(10, 132, 255), Stroke::new(1.5, Color32::WHITE));
+                    painter.text(c, Align2::CENTER_CENTER, format!("{}", i + 1), FontId::proportional(10.0), Color32::WHITE);
+                }
+                if !self.persp.is_empty() {
+                    let mut q: Vec<Pos2> = self.persp.iter().map(|p| v.to_scr(*p)).collect();
+                    if let Some(at) = pointer {
+                        q.push(at);
+                    }
+                    painter.add(Shape::line(q.clone(), Stroke::new(1.5, Color32::from_rgb(10, 132, 255))));
+                    for p in &q[..self.persp.len()] {
+                        painter.circle(*p, 4.0, Color32::WHITE, Stroke::new(1.0, Color32::BLACK));
                     }
                 }
                 for (i, (p, text)) in self.notes.iter().enumerate() {

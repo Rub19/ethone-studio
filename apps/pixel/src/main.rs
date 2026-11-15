@@ -5,6 +5,7 @@ mod doc;
 use studio_fx::{filters, fx};
 mod extras;
 mod inpaint;
+mod newtools;
 mod panels;
 mod shapes;
 mod sheets;
@@ -239,6 +240,9 @@ pub struct Pixel {
     compare: Option<(TextureHandle, f32)>,
     last_removal: Option<Vec<bool>>,
     task_bar: bool,
+    red_eye_dark: f32,
+    persp: Vec<(f32, f32)>,
+    counts: Vec<(f32, f32)>,
 }
 
 fn data_file(name: &str) -> PathBuf {
@@ -407,6 +411,9 @@ impl Pixel {
             compare: None,
             last_removal: None,
             task_bar: true,
+            red_eye_dark: 0.6,
+            persp: Vec::new(),
+            counts: Vec::new(),
             sheet: None,
             view_doc: None,
             hist: None,

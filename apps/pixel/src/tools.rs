@@ -12,17 +12,23 @@ pub enum Tool {
     ColMarquee,
     Lasso,
     PolyLasso,
+    CurvePen,
     MagLasso,
     QuickSelect,
     Wand,
+    ObjectSelect,
     Crop,
+    PerspCrop,
     Picker,
     Sampler,
     Ruler,
     Note,
+    Count,
     Remove,
     Heal,
     Patch,
+    ContentMove,
+    RedEye,
     Clone,
     HistoryBrush,
     Brush,
@@ -61,16 +67,22 @@ pub const TOOLS: &[(Tool, &str, Key, &str)] = &[
     (Tool::Lasso, "Lasso", Key::L, "L"),
     (Tool::PolyLasso, "Lasso polygonal", Key::L, "L"),
     (Tool::MagLasso, "Lasso magnétique", Key::L, "L"),
+    (Tool::CurvePen, "Plume de courbure", Key::P, "P"),
     (Tool::QuickSelect, "Sélection rapide", Key::W, "W"),
     (Tool::Wand, "Baguette magique", Key::W, "W"),
+    (Tool::ObjectSelect, "Sélection d'objet", Key::W, "W"),
     (Tool::Crop, "Recadrage", Key::C, "C"),
+    (Tool::PerspCrop, "Recadrage de la perspective", Key::C, "C"),
     (Tool::Picker, "Pipette", Key::I, "I"),
     (Tool::Sampler, "Échantillonnage de couleur", Key::I, "I"),
     (Tool::Ruler, "Règle", Key::I, "I"),
     (Tool::Note, "Annotation", Key::I, "I"),
+    (Tool::Count, "Comptage", Key::I, "I"),
     (Tool::Remove, "Suppression intelligente", Key::J, "J"),
     (Tool::Heal, "Correcteur", Key::J, "J"),
     (Tool::Patch, "Pièce", Key::J, "J"),
+    (Tool::ContentMove, "Déplacement basé sur le contenu", Key::J, "J"),
+    (Tool::RedEye, "Yeux rouges", Key::J, "J"),
     (Tool::Clone, "Tampon de duplication", Key::S, "S"),
     (Tool::HistoryBrush, "Forme d'historique", Key::Y, "Y"),
     (Tool::Brush, "Pinceau", Key::B, "B"),
@@ -103,11 +115,11 @@ pub const TOOLS: &[(Tool, &str, Key, &str)] = &[
 pub const GROUPS: [&[Tool]; 17] = [
     &[Tool::Move],
     &[Tool::Marquee, Tool::EllipseMarquee, Tool::RowMarquee, Tool::ColMarquee],
-    &[Tool::Lasso, Tool::PolyLasso, Tool::MagLasso],
-    &[Tool::QuickSelect, Tool::Wand],
-    &[Tool::Crop],
-    &[Tool::Picker, Tool::Sampler, Tool::Ruler, Tool::Note],
-    &[Tool::Remove, Tool::Heal, Tool::Patch, Tool::Clone],
+    &[Tool::Lasso, Tool::PolyLasso, Tool::MagLasso, Tool::CurvePen],
+    &[Tool::ObjectSelect, Tool::QuickSelect, Tool::Wand],
+    &[Tool::Crop, Tool::PerspCrop],
+    &[Tool::Picker, Tool::Sampler, Tool::Ruler, Tool::Note, Tool::Count],
+    &[Tool::Remove, Tool::Heal, Tool::Patch, Tool::ContentMove, Tool::RedEye, Tool::Clone],
     &[Tool::HistoryBrush],
     &[Tool::Brush, Tool::Pencil, Tool::ColorReplace, Tool::Mixer],
     &[Tool::Eraser, Tool::BgEraser, Tool::MagicEraser],
@@ -580,6 +592,29 @@ impl Pixel {
                 pro::option_slider(ui, "Diffusion", &mut self.patch_diffusion, 1.0..=20.0, "", false);
                 hint(ui, if self.doc.selection.is_some() { "Fais glisser la sélection vers une zone saine" } else { "Entoure la zone à réparer" });
             }
+            Tool::ContentMove => hint(ui, if self.doc.selection.is_some() { "Fais glisser la sélection : l'objet est déplacé et le fond est reconstruit" } else { "Sélectionne d'abord un objet (lasso, sélection d'objet…)" }),
+            Tool::RedEye => {
+                pro::option_slider(ui, "Taille de la pupille", &mut self.brush.radius, 2.0..=80.0, " px", false);
+                pro::option_slider(ui, "Assombrir", &mut self.red_eye_dark, 0.0..=1.0, "", false);
+                hint(ui, "Clique sur chaque œil rouge");
+            }
+            Tool::ObjectSelect => {
+                pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
+                hint(ui, "Trace un rectangle autour de l'objet : il est détouré automatiquement");
+            }
+            Tool::CurvePen => hint(ui, &format!("Clique pour poser des points, double-clic ou clic sur le 1er point pour fermer la courbe en sélection · {} point(s)", self.poly.len())),
+            Tool::PerspCrop => {
+                hint(ui, &format!("Clique les 4 coins dans l'ordre : haut gauche, haut droit, bas droit, bas gauche · {}/4", self.persp.len()));
+                if !self.persp.is_empty() && pro::secondary(ui, "Annuler").clicked() {
+                    self.persp.clear();
+                }
+            }
+            Tool::Count => {
+                hint(ui, &format!("Clique pour compter · total : {}", self.counts.len()));
+                if !self.counts.is_empty() && pro::secondary(ui, "Remettre à zéro").clicked() {
+                    self.counts.clear();
+                }
+            }
             _ => {}
         }
     }
@@ -592,7 +627,8 @@ pub fn tutorial_for(t: Tool) -> &'static str {
         Tool::Remove | Tool::Heal | Tool::Patch => "Suppression",
         Tool::Clone => "Tampon de duplication",
         t if is_marquee(t) => "Sélections",
-        Tool::Lasso | Tool::PolyLasso | Tool::MagLasso => "Lassos",
+        Tool::Lasso | Tool::PolyLasso | Tool::MagLasso | Tool::CurvePen => "Lassos",
+        Tool::ObjectSelect | Tool::RedEye | Tool::ContentMove | Tool::PerspCrop | Tool::Count => "Outils de Photoshop 2027",
         Tool::QuickSelect | Tool::Wand => "Sélection rapide et baguette",
         Tool::Brush | Tool::Pencil | Tool::ColorReplace | Tool::Mixer => "Pinceaux et dynamique",
         Tool::Eraser | Tool::BgEraser | Tool::MagicEraser => "Gommes",
@@ -891,6 +927,34 @@ pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         Tool::Zoom => {
             p.circle_stroke(at(0.42, 0.42), wd * 0.32, s);
             p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.4, c));
+        }
+        Tool::CurvePen => {
+            p.add(Shape::convex_polygon(vec![at(0.5, 0.05), at(0.75, 0.55), at(0.5, 0.95), at(0.25, 0.55)], Color32::TRANSPARENT, s));
+            p.circle_filled(at(0.5, 0.5), 2.0, c);
+            p.add(Shape::line(vec![at(0.05, 0.9), at(0.2, 0.6), at(0.35, 0.95)], Stroke::new(1.2, c)));
+        }
+        Tool::ObjectSelect => {
+            p.rect_stroke(Rect::from_min_max(at(0.08, 0.08), at(0.92, 0.92)), CornerRadius::same(2), Stroke::new(1.0, c.gamma_multiply(0.6)), StrokeKind::Middle);
+            p.circle_stroke(at(0.5, 0.42), wd * 0.18, s);
+            p.add(Shape::line(vec![at(0.25, 0.85), at(0.35, 0.62), at(0.65, 0.62), at(0.75, 0.85)], s));
+        }
+        Tool::PerspCrop => {
+            p.add(Shape::closed_line(vec![at(0.25, 0.2), at(0.75, 0.2), at(0.95, 0.85), at(0.05, 0.85)], s));
+            p.line_segment([at(0.25, 0.0), at(0.25, 0.2)], s);
+            p.line_segment([at(0.95, 0.85), at(1.0, 1.0)], s);
+        }
+        Tool::Count => {
+            p.circle_stroke(r.center(), wd * 0.4, s);
+            p.text(r.center(), egui::Align2::CENTER_CENTER, "1", egui::FontId::proportional(wd * 0.5), c);
+        }
+        Tool::ContentMove => {
+            p.rect_stroke(Rect::from_min_max(at(0.05, 0.4), at(0.45, 0.8)), CornerRadius::same(1), Stroke::new(1.0, c.gamma_multiply(0.5)), StrokeKind::Middle);
+            p.rect_filled(Rect::from_min_max(at(0.5, 0.15), at(0.9, 0.55)), CornerRadius::same(1), c);
+            p.line_segment([at(0.3, 0.6), at(0.62, 0.38)], s);
+        }
+        Tool::RedEye => {
+            p.add(Shape::closed_line(vec![at(0.0, 0.5), at(0.25, 0.25), at(0.75, 0.25), at(1.0, 0.5), at(0.75, 0.75), at(0.25, 0.75)], s));
+            p.circle_filled(r.center(), wd * 0.18, Color32::from_rgb(230, 60, 60));
         }
     }
 }
