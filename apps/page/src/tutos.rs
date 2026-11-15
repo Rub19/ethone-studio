@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const PAGE: &[Tuto] = &[
+    t("Effets de l'image", "", "Plus de 100 effets non destructifs sur les blocs image.", &["Sélectionne un bloc image > panneau Effets de l'image > + Ajouter un effet.", "Looks, Relight, bichromie, tramage rétro, aquarelle… L'image d'origine n'est jamais modifiée : l'effet est recalculé à l'affichage et à l'export PDF."]),
     t("Nouveau document", "Ctrl+N", "10 formats et 6 modèles prêts : magazine, flyer, CV, carte de visite, menu, affiche.", &[
         "Choisis un format ou un modèle sur l'accueil.",
         "La pastille en haut à droite (Ctrl+K) rouvre le format : taille en mm, portrait ou paysage, marges, fond perdu.",

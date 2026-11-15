@@ -1974,6 +1974,11 @@ impl PageApp {
                 }
             });
         });
+        if matches!(f.kind, Kind::Image { .. }) {
+            pro::dock_panel(ui, "img-fx", "Effets de l'image", |ui| {
+                studio_ui::fxpanel::effects_panel(ui, "page", &mut f.effects);
+            });
+        }
         match &mut f.kind {
             Kind::Text { text, size, family, bold, color, align: al, leading, italic, tracking, columns, gutter, background, padding, underline, upper, list, para_space, indent, valign, link, opts } => {
                 pro::dock_panel(ui, "text", "Texte", |ui| {

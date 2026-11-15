@@ -529,6 +529,28 @@ pub fn corner_d(x: f32, y: f32, w: f32, h: f32, kind: u8, r: f32) -> String {
     d
 }
 
+fn fx_path(path: &str, effects: &[studio_fx::stack::Fx]) -> String {
+    use std::hash::{Hash, Hasher};
+    if !studio_fx::stack::active(effects) {
+        return path.to_string();
+    }
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    path.hash(&mut h);
+    format!("{effects:?}").hash(&mut h);
+    std::fs::metadata(path).and_then(|m| m.modified()).ok().hash(&mut h);
+    let out = std::env::temp_dir().join("ethone-page-fx").join(format!("{:016x}.png", h.finish()));
+    if !out.exists() {
+        let Ok(img) = image::open(path) else { return path.to_string() };
+        let mut img = img.into_rgba8();
+        studio_fx::stack::apply(&mut img, effects);
+        let _ = std::fs::create_dir_all(out.parent().unwrap_or(std::path::Path::new(".")));
+        if img.save(&out).is_err() {
+            return path.to_string();
+        }
+    }
+    out.to_string_lossy().into_owned()
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Frame {
     pub x: f32,
@@ -560,11 +582,13 @@ pub struct Frame {
     pub name: String,
     #[serde(default)]
     pub fx: Fx,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub effects: Vec<studio_fx::stack::Fx>,
 }
 
 impl Frame {
     pub fn new(x: f32, y: f32, w: f32, h: f32, kind: Kind) -> Self {
-        Frame { x, y, w, h, kind, opacity: 1.0, stroke: None, stroke_w: 1.0, locked: false, rotation: 0.0, shadow: false, dash: 0.0, fill2: None, grad_angle: 90.0, hidden: false, name: String::new(), fx: Fx::default() }
+        Frame { x, y, w, h, kind, opacity: 1.0, stroke: None, stroke_w: 1.0, locked: false, rotation: 0.0, shadow: false, dash: 0.0, fill2: None, grad_angle: 90.0, hidden: false, name: String::new(), fx: Fx::default(), effects: Vec::new() }
     }
     pub fn contains(&self, p: [f32; 2], tol: f32) -> bool {
         p[0] >= self.x - tol && p[0] <= self.x + self.w + tol && p[1] >= self.y - tol && p[1] <= self.y + self.h + tol
@@ -1650,7 +1674,7 @@ impl Doc {
                 if path.is_empty() {
                     write!(s, r##"<g clip-path="url(#{rclip})"><rect x="{}" y="{}" width="{}" height="{}" fill="#e8e8ee"/><line x1="{}" y1="{}" x2="{}" y2="{}" stroke="#b8b8c4" stroke-width="1"/><line x1="{}" y1="{}" x2="{}" y2="{}" stroke="#b8b8c4" stroke-width="1"/></g>"##, f.x, f.y, f.w, f.h, f.x, f.y, f.x + f.w, f.y + f.h, f.x + f.w, f.y, f.x, f.y + f.h).unwrap();
                 } else {
-                    write!(s, r#"<g clip-path="url(#{rclip})"><image{fattr}{flip_t} x="{ix}" y="{iy}" width="{cw}" height="{ch}" preserveAspectRatio="{par}" xlink:href="{}"/></g>"#, esc(path)).unwrap();
+                    write!(s, r#"<g clip-path="url(#{rclip})"><image{fattr}{flip_t} x="{ix}" y="{iy}" width="{cw}" height="{ch}" preserveAspectRatio="{par}" xlink:href="{}"/></g>"#, esc(&fx_path(path, &f.effects))).unwrap();
                 }
                 if !st.is_empty() {
                     let outline = match shape {
