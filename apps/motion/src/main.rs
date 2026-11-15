@@ -3,15 +3,22 @@
 #[allow(dead_code)]
 #[path = "../../cut/src/media.rs"]
 mod media;
+mod export;
+mod graph;
+mod menus;
 mod model;
+mod panels;
 mod tutos;
+mod viewer;
 
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key as EKey, Layout, Margin, Painter,
     Pos2, Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2,
     pos2, vec2,
 };
-use model::{BLENDS, Comp, Content, Ease, Ease2, Layer, MATTES, Marker, PROP_DEFAULT, PROPS, Prop};
+use export::ExportOpts;
+use model::{BLENDS, Comp, Content, Ease, Ease2, Layer, MATTES, Marker, PROPS, Prop};
+use viewer::{Tool, ToolOpts, VDrag};
 use resvg::{tiny_skia, usvg};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -29,17 +36,41 @@ const LABELS: [Color32; 6] = [
     Color32::from_rgb(191, 90, 242),
     Color32::from_rgb(100, 210, 255),
 ];
-const PRESETS: [(&str, &str, u32, u32); 6] = [
+const PRESETS: [(&str, &str, u32, u32); 12] = [
     ("1080p", "Vidéo 16:9", 1920, 1080),
+    ("720p", "Vidéo HD légère", 1280, 720),
     ("4K UHD", "Vidéo 16:9", 3840, 2160),
+    ("2K DCI", "Cinéma", 2048, 1080),
+    ("Cinémascope", "Large 2,39:1", 1920, 804),
     ("Vertical", "Shorts, Reels, TikTok", 1080, 1920),
     ("Carré", "Publication 1:1", 1080, 1080),
     ("Portrait", "Publication 4:5", 1080, 1350),
     ("Bannière GIF", "Web", 800, 400),
+    ("En-tête X", "Bannière 3:1", 1500, 500),
+    ("LinkedIn", "Bannière 4:1", 1584, 396),
+    ("Sticker", "Emoji animé", 512, 512),
 ];
 const FONTS: [&str; 14] = ["Segoe UI", "Segoe UI Black", "Arial", "Arial Black", "Impact", "Bahnschrift", "Calibri", "Cambria", "Georgia", "Times New Roman", "Consolas", "Verdana", "Trebuchet MS", "Comic Sans MS"];
-const GROUPS: [&str; 4] = ["Entrées", "Sorties", "Boucles", "Effets"];
-const ANIMS: [(&str, &str, usize, usize); 27] = [
+const GROUPS: [&str; 7] = ["Entrées", "Sorties", "Boucles", "Effets", "3D", "Tracés", "Texte"];
+const ANIMS: [(&str, &str, usize, usize); 45] = [
+    ("Retournement 3D", "Pivote sur l'axe vertical", 4, 27),
+    ("Bascule 3D", "Bascule vers l'avant", 4, 28),
+    ("Carte qui tourne", "Rotation Y continue", 4, 41),
+    ("Tracé dessiné", "Le contour se dessine", 5, 29),
+    ("Tracé effacé", "Le contour s'efface", 5, 30),
+    ("Tracé qui court", "Un segment fait le tour", 5, 31),
+    ("Lettres qui montent", "Une lettre après l'autre", 6, 35),
+    ("Lettres qui tombent", "Arrivent du haut en tournant", 6, 36),
+    ("Lettres en vrac", "Ordre aléatoire, zoom", 6, 37),
+    ("Lettres qui s'envolent", "Sortie lettre par lettre", 6, 44),
+    ("Étirement élastique", "S'étire en largeur", 0, 32),
+    ("Écrasement", "Squash and stretch", 2, 33),
+    ("Arc-en-ciel", "La teinte tourne sans fin", 3, 34),
+    ("Glitch", "Tranches décalées et RVB", 3, 38),
+    ("Zoom flou", "Arrive avec un flou radial", 0, 39),
+    ("Pendule", "Balance sans fin", 2, 43),
+    ("Tremblement de rotation", "Tourne nerveusement", 3, 42),
+    ("Apparition colorée", "Du blanc vers sa couleur", 0, 40),
     ("Fondu entrant", "Opacité 0 → 100 %", 0, 0),
     ("Glisser depuis la gauche", "Entre par le côté", 0, 2),
     ("Glisser depuis la droite", "Entre par l'autre côté", 0, 15),
@@ -68,28 +99,31 @@ const ANIMS: [(&str, &str, usize, usize); 27] = [
     ("Zoom lent", "Effet Ken Burns", 3, 11),
     ("Progression", "Révélation sur toute la durée", 3, 26),
 ];
-const TEMPLATES: [(&str, &str); 6] = [
+const TEMPLATES: [(&str, &str); 8] = [
     ("Bandeau titre", "Nom et fonction en bas d'écran"),
     ("Titre cinéma", "Grand titre espacé qui sort du flou"),
     ("Bouton S'abonner", "Bouton rouge qui rebondit"),
     ("Compte à rebours", "10 → 0 avec anneau"),
     ("Barre de progression", "Se remplit de 0 à 100 %"),
     ("Citation", "Texte en italique et auteur"),
+    ("Coche validée", "Cercle puis coche qui se dessine"),
+    ("Titre lettre par lettre", "Entrée et sortie animées"),
 ];
-const FORMATS: [&str; 5] = ["MP4", "GIF", "PNG (séquence)", "PNG (image)", "SVG"];
-const SCALES: [(&str, f32); 4] = [("25 %", 0.25), ("50 %", 0.5), ("100 %", 1.0), ("200 %", 2.0)];
-const GIF_FPS: [(&str, u32); 3] = [("Composition", 0), ("15 i/s", 15), ("10 i/s", 10)];
 const FPS_CHOICES: [u32; 6] = [12, 24, 25, 30, 50, 60];
 
-#[derive(Clone, Copy, PartialEq)]
-enum Tool {
-    Select,
-    Rotate,
-    Hand,
-}
+const QUALITY: [&str; 3] = ["Complète", "Demie", "Quart"];
+const ZOOMS: [f32; 9] = [0.1, 0.25, 0.33, 0.5, 0.75, 1.0, 2.0, 4.0, 8.0];
+const SAFE: [(&str, (f32, f32)); 3] = [("Classique 90/80 %", (0.9, 0.8)), ("Moderne 93/90 %", (0.93, 0.9)), ("Réseaux sociaux 85/75 %", (0.85, 0.75))];
+const GUIDE: Color32 = Color32::from_rgb(0, 220, 255);
+const SNAP: Color32 = Color32::from_rgb(255, 64, 160);
 
 #[derive(Clone, Copy, PartialEq)]
 enum G {
+    Path,
+    Onion,
+    Checker,
+    Ruler,
+    Ruler2,
     Select,
     Rotate,
     Hand,
@@ -103,23 +137,6 @@ enum G {
     Loop,
     Magnet,
     Marker,
-    Half,
-}
-
-struct ExportOpts {
-    format: usize,
-    scale: usize,
-    range: usize,
-    transparent: bool,
-    gif_fps: usize,
-}
-
-#[derive(Clone, Copy)]
-enum XDrag {
-    Move { wx: f32, wy: f32, from: Pos2 },
-    Scale { ws: f32, d0: f32 },
-    Rotate { r0: f32, a0: f32 },
-    Pan { p0: Vec2, from: Pos2 },
 }
 
 struct Job {
@@ -144,10 +161,34 @@ struct Motion {
     playing: bool,
     fontdb: Arc<usvg::fontdb::Database>,
     tex: Option<TextureHandle>,
-    rendered: Option<(Comp, f32, u32)>,
-    xdrag: Option<XDrag>,
+    rendered: Option<(Comp, f32, u32, bool)>,
+    vdrag: Option<VDrag>,
     bar_drag: Option<(usize, u8, f32, Layer)>,
-    key_drag: Option<(usize, usize, usize)>,
+    key_drag: Option<(f32, Vec<(usize, usize, usize, f32)>)>,
+    ksel: Vec<(usize, usize, f32)>,
+    clip_keys: Option<Vec<(usize, model::Key)>>,
+    tl_filter: Option<Vec<usize>>,
+    gkey: Option<(usize, usize, usize)>,
+    graph_speed: bool,
+    tool_mem: [usize; 9],
+    topts: ToolOpts,
+    pen: Option<usize>,
+    focus_text: bool,
+    quality: usize,
+    rulers: bool,
+    user_guides: bool,
+    checker: bool,
+    onion: bool,
+    onion_n: u32,
+    onion_step: u32,
+    onion_tex: Option<TextureHandle>,
+    onion_key: Option<(Comp, f32, u32, u32, u32)>,
+    paths: bool,
+    grid_div: u32,
+    safe_kind: usize,
+    cursor: Option<(f32, f32)>,
+    queue: Vec<export::QItem>,
+    queue_sheet: bool,
     pps: f32,
     job: Option<Job>,
     error: Option<String>,
@@ -160,7 +201,6 @@ struct Motion {
     grid: bool,
     safe: bool,
     guides: bool,
-    half: bool,
     loop_play: bool,
     snap: bool,
     export: Option<ExportOpts>,
@@ -200,10 +240,6 @@ fn unpremultiply(pix: &tiny_skia::Pixmap) -> image::RgbaImage {
     img
 }
 
-fn rot(x: f32, y: f32, deg: f32) -> (f32, f32) {
-    let (s, c) = deg.to_radians().sin_cos();
-    (x * c - y * s, x * s + y * c)
-}
 
 fn demo_comp(w: u32, h: u32) -> Comp {
     let mut comp = Comp { width: w, height: h, ..Comp::new() };
@@ -239,9 +275,33 @@ impl Motion {
             fontdb: Arc::new(db),
             tex: None,
             rendered: None,
-            xdrag: None,
+            vdrag: None,
             bar_drag: None,
             key_drag: None,
+            ksel: Vec::new(),
+            clip_keys: None,
+            tl_filter: None,
+            gkey: None,
+            graph_speed: false,
+            tool_mem: [0; 9],
+            topts: ToolOpts::default(),
+            pen: None,
+            focus_text: false,
+            quality: 0,
+            rulers: false,
+            user_guides: true,
+            checker: false,
+            onion: false,
+            onion_n: 2,
+            onion_step: 3,
+            onion_tex: None,
+            onion_key: None,
+            paths: true,
+            grid_div: 10,
+            safe_kind: 0,
+            cursor: None,
+            queue: Vec::new(),
+            queue_sheet: false,
             pps: 160.0,
             job: None,
             error: None,
@@ -254,7 +314,6 @@ impl Motion {
             grid: false,
             safe: false,
             guides: false,
-            half: false,
             loop_play: true,
             snap: true,
             export: None,
@@ -368,6 +427,50 @@ impl Motion {
             8 => self.add_layer("Triangle", Content::Star { points: 3, radius: u * 0.15, inner: 1.0, color: [191, 90, 242, 255] }),
             9 => self.add_layer("Flèche", Content::Arrow { w: u * 0.4, thickness: (u * 0.03).max(4.0), color: [255, 255, 255, 255] }),
             10 => self.add_layer("Anneau", Content::Ring { radius: u * 0.14, thickness: (u * 0.025).max(3.0), color: [100, 210, 255, 255] }),
+            12 => self.add_layer("Nul", Content::Null),
+            13 => {
+                let i = self.add_layer("Calque d'effets", Content::Adjust { w: cw, h: ch });
+                self.comp.layers[i].fx.saturation = 130.0;
+                i
+            }
+            14 => self.add_layer("Solide", Content::Rect { w: cw, h: ch, r: 0.0, color: [255, 92, 120, 255] }),
+            15 => self.add_layer("Rectangle arrondi", Content::Rect { w: u * 0.37, h: u * 0.22, r: u * 0.06, color: [48, 209, 88, 255] }),
+            16 => self.add_layer("Losange", Content::Star { points: 4, radius: u * 0.15, inner: 1.0, color: [255, 159, 10, 255] }),
+            17 => {
+                let mut c = Content::text("Vertical", (u * 0.07).max(20.0), [255; 4], true);
+                if let Content::Text { vertical, .. } = &mut c {
+                    *vertical = true;
+                }
+                self.add_layer("Texte vertical", c)
+            }
+            18..=21 => {
+                let k = u * 0.15;
+                let (name, pts, closed, fill) = match kind {
+                    18 => ("Cœur", vec![model::Vtx { p: [0.0, k * 0.95], i: [k * 0.1, -k * 0.1], o: [-k * 0.1, -k * 0.1] }, model::Vtx { p: [-k, -k * 0.2], i: [0.0, k * 0.5], o: [0.0, -k * 0.6] }, model::Vtx { p: [0.0, -k * 0.45], i: [-k * 0.5, -k * 0.6], o: [k * 0.5, -k * 0.6] }, model::Vtx { p: [k, -k * 0.2], i: [0.0, -k * 0.6], o: [0.0, k * 0.5] }], true, true),
+                    19 => ("Spirale", (0..14).map(|j| {
+                        let a = j as f32 * 0.9;
+                        let r = k * 0.08 * (1.0 + j as f32 * 0.55);
+                        let (s, c) = a.sin_cos();
+                        model::Vtx::smooth(c * r, s * r, -s * r * 0.3, c * r * 0.3)
+                    }).collect(), false, false),
+                    20 => ("Vague", (0..7).map(|j| model::Vtx::smooth(-k * 1.8 + j as f32 * k * 0.6, if j % 2 == 0 { -k * 0.25 } else { k * 0.25 }, k * 0.2, 0.0)).collect(), false, false),
+                    _ => ("Coche", vec![model::Vtx::at(-k * 0.6, 0.0), model::Vtx::at(-k * 0.15, k * 0.45), model::Vtx::at(k * 0.7, -k * 0.45)], false, false),
+                };
+                let i = self.add_layer(name, Content::Path { pts, closed, color: [255, 69, 120, 255], fill });
+                let l = &mut self.comp.layers[i];
+                if !fill {
+                    l.fx.stroke = Some([255, 255, 255, 255]);
+                    l.fx.stroke_w = (u * 0.012).max(3.0);
+                    l.props[17].base = l.fx.stroke_w;
+                    l.fx.cap = 1;
+                }
+                i
+            }
+            22 => {
+                let i = self.add_layer("Peinture", Content::Strokes { strokes: Vec::new(), width: self.topts.brush, color: self.topts.brush_color });
+                self.set_tool(Tool::Brush);
+                i
+            }
             _ => {
                 let i = self.add_layer("Fond", Content::Rect { w: cw, h: ch, r: 0.0, color: [36, 38, 52, 255] });
                 let l = self.comp.layers.remove(i);
@@ -489,6 +592,34 @@ impl Motion {
                 let mut pct = mk("Pourcentage", Content::Counter { from: 0.0, to: 100.0, decimals: 0, size: u * 0.06, color: [255; 4], prefix: String::new(), suffix: " %".into() }, cw / 2.0, ch / 2.0 - u * 0.07);
                 pct.start = t;
                 self.push_layer(pct);
+            }
+            6 => {
+                let mut ring = mk("Cercle", Content::Ring { radius: u * 0.16, thickness: u * 0.02, color: [48, 209, 88, 255] }, cw / 2.0, ch / 2.0);
+                ring.props[7].add_key(t, 0.0);
+                ring.props[7].add_key(t + 0.6, 100.0);
+                ring.props[7].keys[0].set_ease(Ease::Strong);
+                self.push_layer(ring);
+                let k = u * 0.15;
+                let mut check = mk("Coche", Content::Path { pts: vec![model::Vtx::at(-k * 0.55, 0.0), model::Vtx::at(-k * 0.12, k * 0.42), model::Vtx::at(k * 0.6, -k * 0.4)], closed: false, color: [255; 4], fill: false }, cw / 2.0, ch / 2.0);
+                check.fx.stroke = Some([48, 209, 88, 255]);
+                check.fx.stroke_w = u * 0.03;
+                check.fx.cap = 1;
+                check.normalize();
+                check.props[17].base = u * 0.03;
+                check.props[15].add_key(t + 0.5, 0.0);
+                check.props[15].add_key(t + 0.9, 100.0);
+                check.props[15].keys[0].set_ease(Ease::Out);
+                check.props[2].add_key(t + 0.9, 100.0);
+                check.props[2].add_key(t + 1.05, 112.0);
+                check.props[2].add_key(t + 1.25, 100.0);
+                self.push_layer(check);
+            }
+            7 => {
+                let mut title = mk("Titre animé", Content::text("MOTION", u * 0.14, [255; 4], true).styled("Segoe UI Black", false, u * 0.01, 0), cw / 2.0, ch / 2.0);
+                title.fx.ta = model::TextAnim { on: true, mode: 2, dy: u * 0.08, rot: 12.0, delay: 0.06, dur: 0.5, ease: Ease::Back, ..Default::default() };
+                title.fx.gradient = Some([255, 92, 120, 255]);
+                title.fx.gradient_angle = 90.0;
+                self.push_layer(title);
             }
             _ => {
                 let mut q = mk("Citation", Content::text("« L'imagination est plus\nimportante que le savoir. »", u * 0.06, [255; 4], false).styled("Georgia", true, 0.0, 0), cw / 2.0, ch / 2.0 - u * 0.03);
@@ -687,6 +818,116 @@ impl Motion {
                 l.props[7].add_key(l.end, 100.0);
                 ease_all(&mut l.props[7], Ease::Linear);
             }
+            27 | 28 => {
+                let pi = if kind == 27 { 13 } else { 12 };
+                l.props[pi].add_key(t, 90.0);
+                l.props[pi].add_key(t + d * 1.2, 0.0);
+                ease_all(&mut l.props[pi], Ease::Back);
+                l.props[4].add_key(t, 0.0);
+                l.props[4].add_key(t + d * 0.4, 100.0);
+            }
+            29 | 30 => {
+                let pi = if kind == 29 { 15 } else { 14 };
+                l.props[pi].add_key(t, 0.0);
+                l.props[pi].add_key(t + d * 2.0, 100.0);
+                ease_all(&mut l.props[pi], Ease::Strong);
+                if l.fx.stroke.is_none() && !matches!(l.content, Content::Line { .. } | Content::Ring { .. } | Content::Strokes { .. }) {
+                    l.fx.stroke = Some([255; 4]);
+                    l.props[17].set(t, 6.0);
+                }
+            }
+            31 => {
+                l.props[15].set(t, 25.0);
+                l.props[16].add_key(t, 0.0);
+                l.props[16].add_key(t + 1.0, 100.0);
+                ease_all(&mut l.props[16], Ease::Linear);
+                l.props[16].cycle = 3;
+                if l.fx.stroke.is_none() && !matches!(l.content, Content::Line { .. } | Content::Ring { .. } | Content::Strokes { .. }) {
+                    l.fx.stroke = Some([255; 4]);
+                    l.props[17].set(t, 6.0);
+                }
+            }
+            32 => {
+                l.props[10].add_key(t, 0.0);
+                l.props[10].add_key(t + d * 1.5, 100.0);
+                ease_all(&mut l.props[10], Ease::Elastic);
+            }
+            33 => {
+                for (dt, sx, sy) in [(0.0, 100.0, 100.0), (0.15, 120.0, 80.0), (0.3, 90.0, 112.0), (0.45, 100.0, 100.0), (0.9, 100.0, 100.0)] {
+                    l.props[10].add_key(t + dt, sx);
+                    l.props[11].add_key(t + dt, sy);
+                }
+                l.props[10].cycle = 1;
+                l.props[11].cycle = 1;
+            }
+            34 => {
+                l.props[18].add_key(t, 0.0);
+                l.props[18].add_key(t + 2.0, 360.0);
+                ease_all(&mut l.props[18], Ease::Linear);
+                l.props[18].cycle = 3;
+            }
+            35..=37 | 44 => {
+                let ta = &mut l.fx.ta;
+                *ta = model::TextAnim { on: true, ..Default::default() };
+                match kind {
+                    36 => {
+                        ta.dy = -120.0;
+                        ta.rot = -40.0;
+                        ta.ease = Ease::Bounce;
+                        ta.dur = 0.6;
+                    }
+                    37 => {
+                        ta.order = 3;
+                        ta.dy = 0.0;
+                        ta.scale = 0.0;
+                        ta.ease = Ease::Back;
+                    }
+                    44 => {
+                        ta.mode = 1;
+                        ta.dy = -80.0;
+                        ta.ease = Ease::In;
+                    }
+                    _ => {}
+                }
+                if kind != 44 {
+                    l.start = t.min(l.end - 0.1).max(0.0);
+                }
+            }
+            38 => {
+                l.fx.glitch = 40.0;
+                l.fx.glitch_freq = 10.0;
+                l.fx.rgb_split = 6.0;
+            }
+            39 => {
+                l.fx.zoom_blur = 30.0;
+                l.props[2].add_key(t, 140.0);
+                l.props[2].add_key(t + d, 100.0);
+                l.props[4].add_key(t, 0.0);
+                l.props[4].add_key(t + d * 0.6, 100.0);
+                ease_all(&mut l.props[2], Ease::Out);
+            }
+            40 => {
+                if let Some(c) = l.content.color() {
+                    model::set_color_key(&mut l.color_keys, t, [255, 255, 255, c[3]]);
+                    model::set_color_key(&mut l.color_keys, t + d * 1.5, c);
+                }
+            }
+            41 => {
+                l.props[13].add_key(t, 0.0);
+                l.props[13].add_key(t + 2.0, 360.0);
+                ease_all(&mut l.props[13], Ease::Linear);
+                l.props[13].cycle = 3;
+            }
+            42 => {
+                l.props[3].wiggle = 6.0;
+                l.props[3].wiggle_freq = 3.0;
+            }
+            43 => {
+                l.props[3].add_key(t, -20.0);
+                l.props[3].add_key(t + 1.0, 20.0);
+                ease_all(&mut l.props[3], Ease::Smooth);
+                l.props[3].cycle = 2;
+            }
             _ => {}
         }
     }
@@ -731,112 +972,6 @@ impl Motion {
 
     fn busy(&self) -> bool {
         self.job.as_ref().is_some_and(|j| j.done.load(Ordering::Relaxed) != usize::MAX)
-    }
-
-    fn run_export(&mut self, o: &ExportOpts) {
-        let comp = self.comp.clone();
-        let db = self.fontdb.clone();
-        let scale = SCALES[o.scale].1;
-        let transparent = o.transparent;
-        let (a, b) = if o.range == 1 { comp.range() } else { (0.0, comp.duration) };
-        let first = (a * comp.fps as f32).round() as u32;
-        let last = ((b * comp.fps as f32).round() as u32).max(first + 1);
-        match o.format {
-            3 | 4 => {
-                let svg = o.format == 4;
-                let ext = if svg { "svg" } else { "png" };
-                let Some(path) = rfd::FileDialog::new().add_filter(ext.to_uppercase(), &[ext]).set_file_name(format!("image.{ext}")).save_file() else { return };
-                let r = if svg {
-                    std::fs::write(&path, comp.to_svg_with(self.t, transparent)).map_err(|e| e.to_string())
-                } else {
-                    let (w, h) = out_size(&comp, scale, false);
-                    render(&comp, self.t, w, h, &db, transparent).and_then(|pix| pix.save_png(&path).map_err(|e| e.to_string()))
-                };
-                if let Err(e) = r {
-                    self.error = Some(format!("Export : {e}"));
-                }
-                return;
-            }
-            _ => {}
-        }
-        let done = Arc::new(AtomicUsize::new(0));
-        let error = Arc::new(Mutex::new(None));
-        let (d2, e2) = (done.clone(), error.clone());
-        let finish = move |r: Result<(), String>| {
-            if let Err(e) = r
-                && let Ok(mut slot) = e2.lock()
-            {
-                *slot = Some(e);
-            }
-            d2.store(usize::MAX, Ordering::Relaxed);
-        };
-        let d3 = done.clone();
-        let fps = comp.fps;
-        let (label, total): (&str, usize) = match o.format {
-            0 => {
-                let Some(path) = rfd::FileDialog::new().add_filter("Vidéo MP4", &["mp4"]).set_file_name("animation.mp4").save_file() else { return };
-                std::thread::spawn(move || {
-                    let r = (|| -> Result<(), String> {
-                        let (w, h) = out_size(&comp, scale, true);
-                        let bitrate = ((w * h) as f32 * fps as f32 * 0.14).max(2_000_000.0) as u32;
-                        let mut enc = media::Encoder::new(&path, w, h, fps, bitrate)?;
-                        let mut written = 0u64;
-                        for (n, f) in (first..last).enumerate() {
-                            let pix = render(&comp, f as f32 / fps as f32, w, h, &db, false)?;
-                            enc.video(pix.data())?;
-                            let need = ((n as u64 + 1) * media::OUT_RATE as u64 / fps as u64).saturating_sub(written);
-                            enc.audio(&vec![0.0; need as usize * 2])?;
-                            written += need;
-                            d3.fetch_add(1, Ordering::Relaxed);
-                        }
-                        enc.finish()
-                    })();
-                    finish(r);
-                });
-                ("MP4", (last - first) as usize)
-            }
-            1 => {
-                let Some(path) = rfd::FileDialog::new().add_filter("GIF", &["gif"]).set_file_name("animation.gif").save_file() else { return };
-                let target = GIF_FPS[o.gif_fps].1;
-                let step = if target == 0 || target >= fps { 1 } else { (fps as f32 / target as f32).round().max(1.0) as u32 };
-                std::thread::spawn(move || {
-                    let r = (|| -> Result<(), String> {
-                        let (w, h) = out_size(&comp, scale, false);
-                        let file = std::fs::File::create(&path).map_err(|e| e.to_string())?;
-                        let mut enc = image::codecs::gif::GifEncoder::new_with_speed(std::io::BufWriter::new(file), 10);
-                        enc.set_repeat(image::codecs::gif::Repeat::Infinite).map_err(|e| e.to_string())?;
-                        let mut f = first;
-                        while f < last {
-                            let pix = render(&comp, f as f32 / fps as f32, w, h, &db, transparent)?;
-                            let frame = image::Frame::from_parts(unpremultiply(&pix), 0, 0, image::Delay::from_numer_denom_ms(1000 * step, fps));
-                            enc.encode_frame(frame).map_err(|e| e.to_string())?;
-                            d3.fetch_add(step as usize, Ordering::Relaxed);
-                            f += step;
-                        }
-                        Ok(())
-                    })();
-                    finish(r);
-                });
-                ("GIF", (last - first) as usize)
-            }
-            _ => {
-                let Some(dir) = rfd::FileDialog::new().set_title("Dossier de la séquence PNG").pick_folder() else { return };
-                std::thread::spawn(move || {
-                    let r = (|| -> Result<(), String> {
-                        let (w, h) = out_size(&comp, scale, false);
-                        for (n, f) in (first..last).enumerate() {
-                            let pix = render(&comp, f as f32 / fps as f32, w, h, &db, transparent)?;
-                            pix.save_png(dir.join(format!("frame_{n:05}.png"))).map_err(|e| e.to_string())?;
-                            d3.fetch_add(1, Ordering::Relaxed);
-                        }
-                        Ok(())
-                    })();
-                    finish(r);
-                });
-                ("séquence PNG", (last - first) as usize)
-            }
-        };
-        self.job = Some(Job { done, total, error, label: label.into() });
     }
 
     fn split(&mut self) {
@@ -957,41 +1092,60 @@ impl Motion {
         self.comp.work = Some(if start { (self.t, b.max(self.t + 0.05)) } else { (a.min(self.t - 0.05).max(0.0), self.t) });
     }
 
-    fn parent_frame(&self, i: usize, t: f32) -> (f32, f32, f32, f32) {
-        match self.comp.layers[i].parent.filter(|p| *p < self.comp.layers.len() && *p != i) {
-            Some(p) => self.comp.world(p, t),
-            None => (0.0, 0.0, 1.0, 0.0),
-        }
-    }
-
     fn place(&mut self, i: usize, wx: f32, wy: f32) {
         let t = self.t;
-        let (px, py, ps, pr) = self.parent_frame(i, t);
-        let (lx, ly) = rot(wx - px, wy - py, -pr);
+        let (lx, ly) = model::apply(model::invert(self.comp.parent_matrix(i, t)), wx, wy);
         let (gx, gy) = self.comp.layers[i].wiggle(t, i);
-        let ps = ps.max(1e-4);
         let l = &mut self.comp.layers[i];
-        l.props[0].set(t, (lx / ps - gx).round());
-        l.props[1].set(t, (ly / ps - gy).round());
+        l.props[0].set(t, (lx - gx).round());
+        l.props[1].set(t, (ly - gy).round());
+    }
+
+    fn world_box(&self, i: usize) -> (f32, f32, f32, f32) {
+        let m = self.comp.matrix(i, self.t);
+        let (x0, y0, x1, y1) = self.comp.layers[i].bounds();
+        let mut b = (f32::MAX, f32::MAX, f32::MIN, f32::MIN);
+        for (x, y) in [(x0, y0), (x1, y0), (x1, y1), (x0, y1)] {
+            let (a, c) = model::apply(m, x, y);
+            b = (b.0.min(a), b.1.min(c), b.2.max(a), b.3.max(c));
+        }
+        b
     }
 
     fn align(&mut self, how: u8) {
         let Some(i) = self.sel else { return };
         let t = self.t;
-        let (wx, wy, ws, _) = self.comp.world(i, t);
-        let (w, h) = self.comp.layers[i].size();
-        let (hw, hh) = (w * ws / 2.0, h * ws / 2.0);
+        let (wx, wy, _, _) = self.comp.world(i, t);
+        let (x0, y0, x1, y1) = self.world_box(i);
         let (cw, ch) = (self.comp.width as f32, self.comp.height as f32);
-        let (nx, ny) = match how {
-            0 => (hw, wy),
-            1 => (cw / 2.0, wy),
-            2 => (cw - hw, wy),
-            3 => (wx, hh),
-            4 => (wx, ch / 2.0),
-            5 => (wx, ch - hh),
-            _ => (cw / 2.0, ch / 2.0),
+        let (cx, cy) = ((x0 + x1) / 2.0, (y0 + y1) / 2.0);
+        let (dx, dy) = match how {
+            0 => (-x0, 0.0),
+            1 => (cw / 2.0 - cx, 0.0),
+            2 => (cw - x1, 0.0),
+            3 => (0.0, -y0),
+            4 => (0.0, ch / 2.0 - cy),
+            5 => (0.0, ch - y1),
+            _ => (cw / 2.0 - cx, ch / 2.0 - cy),
         };
-        self.place(i, nx, ny);
+        self.place(i, wx + dx, wy + dy);
+    }
+
+    fn fit_to_comp(&mut self, mode: u8) {
+        let Some(i) = self.sel else { return };
+        let t = self.t;
+        let (x0, y0, x1, y1) = self.world_box(i);
+        let (cw, ch) = (self.comp.width as f32, self.comp.height as f32);
+        let (w, h) = ((x1 - x0).max(1e-3), (y1 - y0).max(1e-3));
+        let k = match mode {
+            0 => (cw / w).min(ch / h),
+            1 => cw / w,
+            _ => ch / h,
+        };
+        let s = self.comp.layers[i].props[2].at(t);
+        self.comp.layers[i].props[2].set(t, (s * k * 10.0).round() / 10.0);
+        self.sel = Some(i);
+        self.align(6);
     }
 
     fn undo_step(&mut self) {
@@ -1042,16 +1196,21 @@ impl Motion {
         if sc(M::COMMAND, EKey::OpenBracket) {
             self.reorder(-1);
         }
-        if sc(M::COMMAND, EKey::C)
-            && let Some(i) = self.sel
-        {
-            self.clip_layer = self.comp.layers.get(i).cloned();
+        if sc(M::COMMAND, EKey::C) {
+            if !self.ksel.is_empty() {
+                self.copy_keys();
+            } else if let Some(i) = self.sel {
+                self.clip_layer = self.comp.layers.get(i).cloned();
+                self.clip_keys = None;
+            }
         }
-        if sc(M::COMMAND, EKey::V)
-            && let Some(mut l) = self.clip_layer.clone()
-        {
-            l.parent = None;
-            self.push_layer(l);
+        if sc(M::COMMAND, EKey::V) {
+            if self.clip_keys.is_some() {
+                self.paste_keys();
+            } else if let Some(mut l) = self.clip_layer.clone() {
+                l.parent = None;
+                self.push_layer(l);
+            }
         }
         if sc(M::COMMAND, EKey::Num0) {
             self.zoom = None;
@@ -1084,7 +1243,7 @@ impl Motion {
                 i.key_pressed(EKey::Delete),
                 i.key_pressed(EKey::Home),
                 i.key_pressed(EKey::End),
-                [p(EKey::J), p(EKey::K), p(EKey::B), p(EKey::N), p(EKey::M), p(EKey::V), p(EKey::W), p(EKey::H), p(EKey::L), p(EKey::U), p(EKey::F9)],
+                [p(EKey::J), p(EKey::K), p(EKey::B), p(EKey::N), p(EKey::M), p(EKey::V), p(EKey::W), p(EKey::H), p(EKey::L), p(EKey::U), i.key_pressed(EKey::F9)],
             )
         });
         let jump = if shift { step * 10.0 } else { step };
@@ -1104,7 +1263,11 @@ impl Motion {
             self.t = self.comp.range().1;
         }
         if del {
-            self.delete();
+            if self.ksel.is_empty() {
+                self.delete();
+            } else {
+                self.delete_keys();
+            }
         }
         let [j, k, b, n, m, v, w, h, l, u, f9] = letters;
         if j && let Some(t) = self.comp.next_key(self.t, false, None) {
@@ -1123,13 +1286,101 @@ impl Motion {
             self.add_marker();
         }
         if v {
-            self.tool = Tool::Select;
+            self.set_tool(Tool::Select);
         }
         if w {
-            self.tool = Tool::Rotate;
+            self.set_tool(Tool::Rotate);
         }
         if h {
-            self.tool = Tool::Hand;
+            self.set_tool(Tool::Hand);
+        }
+        let more = ctx.input(|i| {
+            let p = |k| i.key_pressed(k) && !i.modifiers.command && !i.modifiers.alt;
+            [p(EKey::Z), p(EKey::Y), p(EKey::Q), p(EKey::G), p(EKey::P), p(EKey::S), p(EKey::R), p(EKey::T), p(EKey::A), p(EKey::Period), p(EKey::Comma), p(EKey::OpenBracket), p(EKey::CloseBracket), p(EKey::PageUp), p(EKey::PageDown), p(EKey::F2), i.key_pressed(EKey::Escape), i.key_pressed(EKey::Enter)]
+        });
+        let [z, y, q, g, kp, ks, kr, kt, ka, zin, zout, inp, outp, pgu, pgd, f2, esc, enter] = more;
+        for (on, grp) in [(z, 2), (y, 4), (q, 5), (g, 6)] {
+            if on {
+                self.cycle_group(grp);
+            }
+        }
+        if sc(M::COMMAND, EKey::T) {
+            self.cycle_group(7);
+        }
+        if sc(M::COMMAND, EKey::B) {
+            self.cycle_group(8);
+        }
+        if (esc || enter) && self.pen.is_some() {
+            self.pen = None;
+        }
+        for (on, props) in [(kp, vec![0, 1]), (ks, vec![2, 10, 11]), (kr, vec![3, 12, 13]), (kt, vec![4]), (ka, vec![8, 9])] {
+            if on && let Some(i) = self.sel {
+                self.tl_filter = if self.tl_filter.as_ref() == Some(&props) { None } else { Some(props) };
+                if let Some(e) = self.expanded.get_mut(i) {
+                    *e = true;
+                }
+            }
+        }
+        if zin || zout {
+            let z0 = self.zoom.unwrap_or(0.5);
+            self.zoom = Some(if zin { ZOOMS.iter().copied().find(|z| *z > z0 + 1e-3).unwrap_or(8.0) } else { ZOOMS.iter().rev().copied().find(|z| *z < z0 - 1e-3).unwrap_or(0.1) });
+        }
+        if let Some(i) = self.sel.filter(|i| *i < self.comp.layers.len()) {
+            let t = self.t;
+            let alt = ctx.input(|i| i.modifiers.alt);
+            let l = &mut self.comp.layers[i];
+            if inp {
+                let d = t - l.start;
+                l.shift(d);
+                l.end = l.end.min(self.comp.duration);
+            }
+            if outp {
+                let d = t - l.end;
+                l.shift(d);
+            }
+            if alt && ctx.input(|i| i.key_pressed(EKey::OpenBracket)) {
+                l.start = t.min(l.end - 0.05);
+            }
+            if alt && ctx.input(|i| i.key_pressed(EKey::CloseBracket)) {
+                l.end = t.max(l.start + 0.05);
+            }
+        }
+        if pgu {
+            self.t = self.snap_frame((self.t - step).max(0.0));
+        }
+        if pgd {
+            self.t = self.snap_frame((self.t + step).min(self.comp.duration));
+        }
+        if f2 {
+            self.sel = None;
+            self.ksel.clear();
+        }
+        if sc(M::COMMAND, EKey::A) && let Some(i) = self.sel {
+            self.ksel = self.comp.layers[i].props.iter().enumerate().flat_map(|(pi, p)| p.keys.iter().map(move |k| (i, pi, k.t))).collect();
+        }
+        if sc(M::COMMAND | M::ALT, EKey::H) {
+            self.with_keys(|k| k.set_ease(if k.ease == Ease::Hold && k.ease2 == Ease2::None && k.bez.is_none() { Ease::Linear } else { Ease::Hold }));
+        }
+        if sc(M::COMMAND | M::ALT, EKey::R) {
+            self.reverse_keys();
+        }
+        if sc(M::COMMAND | M::ALT, EKey::Home) {
+            self.anchor_to(4);
+        }
+        if sc(M::COMMAND | M::ALT, EKey::F) {
+            self.fit_to_comp(0);
+        }
+        if sc(M::COMMAND | M::ALT, EKey::M) {
+            self.queue_sheet = true;
+        }
+        if sc(M::COMMAND, EKey::R) {
+            self.rulers = !self.rulers;
+        }
+        if sc(M::COMMAND, EKey::Quote) {
+            self.grid = !self.grid;
+        }
+        if sc(M::COMMAND, EKey::Semicolon) {
+            self.user_guides = !self.user_guides;
         }
         if l {
             self.loop_play = !self.loop_play;
@@ -1139,10 +1390,16 @@ impl Motion {
                 *e = !*e;
             }
         }
-        if f9 && let Some(i) = self.sel {
-            for p in &mut self.comp.layers[i].props {
-                p.keys.iter_mut().for_each(|k| k.set_ease(Ease::Smooth));
-            }
+        if f9 {
+            let (sh, ctrl) = ctx.input(|i| (i.modifiers.shift, i.modifiers.ctrl));
+            self.easy_ease(match (sh, ctrl) {
+                (true, true) => 2,
+                (true, false) => 1,
+                _ => 0,
+            });
+        }
+        if u {
+            self.tl_filter = None;
         }
         self.comp.normalize();
         self.expanded.resize(self.comp.layers.len(), false);
@@ -1151,9 +1408,6 @@ impl Motion {
         }
     }
 
-    fn default_export(&self) -> ExportOpts {
-        ExportOpts { format: 0, scale: 2, range: if self.comp.work.is_some() { 1 } else { 0 }, transparent: false, gif_fps: 1 }
-    }
 }
 
 impl eframe::App for Motion {
@@ -1190,7 +1444,7 @@ impl eframe::App for Motion {
             self.timeline(root);
             self.library(root);
             self.props(root);
-            self.viewer(root, &name);
+            self.viewer(root);
         }
         self.sheets(ctx);
         self.help.show(ctx);
@@ -1245,220 +1499,12 @@ impl Motion {
         });
     }
 
-    fn menus(&mut self, ui: &mut Ui) {
-        let has = self.sel.is_some();
-        ui.menu_button("Fichier", |ui| {
-            if ui.button("Nouvelle composition").clicked() {
-                self.home = true;
-            }
-            if ui.button("Ouvrir…                        Ctrl+O").clicked() {
-                self.open();
-            }
-            ui.menu_button("Ouvrir un projet récent", |ui| {
-                let mut open = None;
-                for p in &self.recents {
-                    if ui.button(p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()).clicked() {
-                        open = Some(p.clone());
-                    }
-                }
-                if self.recents.is_empty() {
-                    ui.label(RichText::new("Aucun projet récent").color(FAINT));
-                }
-                if let Some(p) = open {
-                    self.open_path(&p);
-                }
-            });
-            ui.add_enabled_ui(!self.home, |ui| {
-                ui.separator();
-                if ui.button("Enregistrer                   Ctrl+S").clicked() {
-                    self.save(false);
-                }
-                if ui.button("Enregistrer sous…     Ctrl+Maj+S").clicked() {
-                    self.save(true);
-                }
-                ui.separator();
-                if ui.button("Exporter…                     Ctrl+M").clicked() {
-                    self.export = Some(self.default_export());
-                }
-                if ui.button("Exporter l'image courante en PNG…").clicked() {
-                    self.run_export(&ExportOpts { format: 3, scale: 2, range: 0, transparent: false, gif_fps: 0 });
-                }
-                if ui.button("Exporter l'image courante en SVG…").clicked() {
-                    self.run_export(&ExportOpts { format: 4, scale: 2, range: 0, transparent: false, gif_fps: 0 });
-                }
-            });
-        });
-        if self.home {
-            self.help.menu(ui);
-            return;
-        }
-        ui.menu_button("Édition", |ui| {
-            if ui.add_enabled(!self.undo.is_empty(), egui::Button::new("Annuler                    Ctrl+Z")).clicked() {
-                self.undo_step();
-            }
-            if ui.add_enabled(!self.redo.is_empty(), egui::Button::new("Rétablir                   Ctrl+Y")).clicked() {
-                self.redo_step();
-            }
-            ui.separator();
-            if ui.add_enabled(has, egui::Button::new("Copier le calque         Ctrl+C")).clicked()
-                && let Some(i) = self.sel
-            {
-                self.clip_layer = self.comp.layers.get(i).cloned();
-            }
-            if ui.add_enabled(self.clip_layer.is_some(), egui::Button::new("Coller le calque          Ctrl+V")).clicked()
-                && let Some(mut l) = self.clip_layer.clone()
-            {
-                l.parent = None;
-                self.push_layer(l);
-            }
-            if ui.add_enabled(has, egui::Button::new("Dupliquer                  Ctrl+D")).clicked() {
-                self.duplicate();
-            }
-            if ui.add_enabled(has, egui::Button::new("Supprimer                  Suppr")).clicked() {
-                self.delete();
-            }
-            ui.separator();
-            if ui.add_enabled(has, egui::Button::new("Copier l'animation")).clicked() {
-                self.copy_anim();
-            }
-            if ui.add_enabled(has && self.clip_anim.is_some(), egui::Button::new("Coller l'animation à la tête de lecture")).clicked() {
-                self.paste_anim();
-            }
-            ui.separator();
-            if ui.add_enabled(has, egui::Button::new("Tout désélectionner")).clicked() {
-                self.sel = None;
-            }
-        });
-        ui.menu_button("Calque", |ui| {
-            ui.menu_button("Nouveau", |ui| {
-                for (label, kind) in KINDS {
-                    if ui.button(label).clicked() {
-                        self.add_kind(kind);
-                        ui.close();
-                    }
-                }
-            });
-            ui.menu_button("Modèle", |ui| {
-                for (k, (name, _)) in TEMPLATES.iter().enumerate() {
-                    if ui.button(*name).clicked() {
-                        self.template(k);
-                        ui.close();
-                    }
-                }
-            });
-            ui.separator();
-            ui.add_enabled_ui(has, |ui| {
-                if ui.button("Fractionner à la tête       Ctrl+Maj+D").clicked() {
-                    self.split();
-                }
-                if ui.button("Monter                          Ctrl+]").clicked() {
-                    self.reorder(1);
-                }
-                if ui.button("Descendre                     Ctrl+[").clicked() {
-                    self.reorder(-1);
-                }
-                if ui.button("Premier plan").clicked()
-                    && let Some(i) = self.sel
-                {
-                    self.move_layer(i, self.comp.layers.len() - 1);
-                }
-                if ui.button("Arrière-plan").clicked()
-                    && let Some(i) = self.sel
-                {
-                    self.move_layer(i, 0);
-                }
-                ui.separator();
-                if let Some(i) = self.sel {
-                    let t = self.t;
-                    let dur = self.comp.duration;
-                    let l = &mut self.comp.layers[i];
-                    if ui.button("Commencer à la tête de lecture").clicked() {
-                        l.start = t.min(l.end - 0.05);
-                    }
-                    if ui.button("Finir à la tête de lecture").clicked() {
-                        l.end = t.max(l.start + 0.05);
-                    }
-                    if ui.button("Étendre à toute la composition").clicked() {
-                        l.start = 0.0;
-                        l.end = dur;
-                    }
-                    ui.separator();
-                    if ui.button("Courbe douce sur toutes les clés     F9").clicked() {
-                        for p in &mut l.props {
-                            p.keys.iter_mut().for_each(|k| k.set_ease(Ease::Smooth));
-                        }
-                    }
-                    if ui.button("Inverser les images clés").clicked() {
-                        let (a, b) = (l.key_times().first().copied().unwrap_or(0.0), l.key_times().last().copied().unwrap_or(0.0));
-                        for p in &mut l.props {
-                            p.reverse(a, b);
-                        }
-                    }
-                    if ui.button("Supprimer toutes les images clés").clicked() {
-                        for p in &mut l.props {
-                            p.clear(t);
-                        }
-                    }
-                    ui.separator();
-                    ui.checkbox(&mut l.visible, "Visible");
-                    ui.checkbox(&mut l.locked, "Verrouillé");
-                    ui.checkbox(&mut l.solo, "Solo");
-                }
-            });
-        });
-        ui.menu_button("Composition", |ui| {
-            if ui.button("Réglages de la composition…   Ctrl+K").clicked() {
-                self.comp_sheet = true;
-            }
-            if ui.button("Ajuster la durée à l'animation").clicked() {
-                self.fit_duration();
-            }
-            ui.separator();
-            if ui.button("Ajouter un repère                    M").clicked() {
-                self.add_marker();
-            }
-            if ui.add_enabled(!self.comp.markers.is_empty(), egui::Button::new("Supprimer tous les repères")).clicked() {
-                self.comp.markers.clear();
-            }
-            ui.separator();
-            if ui.button("Début de la zone de travail        B").clicked() {
-                self.set_work(true);
-            }
-            if ui.button("Fin de la zone de travail            N").clicked() {
-                self.set_work(false);
-            }
-            if ui.add_enabled(self.comp.work.is_some(), egui::Button::new("Effacer la zone de travail")).clicked() {
-                self.comp.work = None;
-            }
-        });
-        ui.menu_button("Affichage", |ui| {
-            ui.checkbox(&mut self.grid, "Grille et tiers");
-            ui.checkbox(&mut self.safe, "Zones sûres (titres et action)");
-            ui.checkbox(&mut self.guides, "Repères centraux");
-            ui.checkbox(&mut self.snap, "Magnétisme");
-            ui.checkbox(&mut self.half, "Aperçu en demi-résolution");
-            ui.checkbox(&mut self.loop_play, "Lecture en boucle               L");
-            ui.separator();
-            if ui.button("Ajuster à la fenêtre            Ctrl+0").clicked() {
-                self.zoom = None;
-                self.pan = Vec2::ZERO;
-            }
-            if ui.button("Taille réelle (100 %)          Ctrl+1").clicked() {
-                self.zoom = Some(1.0);
-            }
-            if ui.button("50 %").clicked() {
-                self.zoom = Some(0.5);
-            }
-        });
-        self.help.menu(ui);
-    }
-
     fn status(&mut self, root: &mut Ui) {
         egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 if !self.home {
-                    ui.label(small("Espace lire · ← → image · J K clé préc./suiv. · M repère · B N zone · V W H outils · F9 courbe douce · U déplier".into()));
+                    ui.label(small("Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce".into()));
                 }
                 if let Some(j) = &self.job
                     && j.done.load(Ordering::Relaxed) == usize::MAX
@@ -1641,404 +1687,9 @@ impl Motion {
         });
     }
 
-    fn comp_panels(&mut self, ui: &mut Ui) {
-        pro::dock_panel(ui, "comp", "Composition", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            pro::label_value(ui, "Format", &format!("{} × {}", self.comp.width, self.comp.height));
-            pro::label_value(ui, "Images/s", &self.comp.fps.to_string());
-            ui.horizontal(|ui| {
-                ui.label(RichText::new("Durée").size(12.5).color(MUTED));
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    ui.add(egui::DragValue::new(&mut self.comp.duration).range(0.1..=600.0).speed(0.1).suffix(" s"));
-                });
-            });
-            if pro::secondary(ui, "Réglages…").clicked() {
-                self.comp_sheet = true;
-            }
-            ui.add_space(4.0);
-            bg_editor(ui, &mut self.comp);
-        });
-        pro::dock_panel(ui, "markers", "Repères", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            if self.comp.markers.is_empty() {
-                ui.label(RichText::new("Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.").size(12.0).color(FAINT));
-            }
-            let mut remove = None;
-            let mut go = None;
-            for (k, m) in self.comp.markers.iter_mut().enumerate() {
-                ui.horizontal(|ui| {
-                    if ui.add(egui::Button::new(RichText::new(secs(m.t)).monospace().size(11.5)).frame(false)).on_hover_text("Aller au repère").clicked() {
-                        go = Some(m.t);
-                    }
-                    ui.add(egui::TextEdit::singleline(&mut m.name).desired_width(150.0));
-                    if ui.small_button("×").clicked() {
-                        remove = Some(k);
-                    }
-                });
-            }
-            if let Some(k) = remove {
-                self.comp.markers.remove(k);
-            }
-            if let Some(t) = go {
-                self.t = t;
-            }
-            if pro::ghost(ui, "+ Repère à la tête de lecture").clicked() {
-                self.add_marker();
-            }
-        });
-    }
-
-    fn layer_panels(&mut self, ui: &mut Ui, i: usize) {
-        let t = self.t;
-        let dur = self.comp.duration;
-        let names: Vec<(usize, String)> = self.comp.layers.iter().enumerate().filter(|(k, _)| *k != i && !self.comp.chain_has(*k, i)).map(|(k, l)| (k, l.name.clone())).collect();
-        let mut new_parent: Option<Option<usize>> = None;
-        let cur_parent = self.comp.layers[i].parent;
-        {
-            let l = &mut self.comp.layers[i];
-            pro::dock_panel(ui, "layer", "Calque", |ui| {
-                ui.spacing_mut().item_spacing.y = 6.0;
-                ui.add(egui::TextEdit::singleline(&mut l.name).desired_width(f32::INFINITY));
-                ui.horizontal(|ui| {
-                    ui.checkbox(&mut l.visible, "Visible");
-                    ui.checkbox(&mut l.locked, "Verrou");
-                    ui.checkbox(&mut l.solo, "Solo");
-                });
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new("De").size(12.5).color(MUTED));
-                    ui.add(egui::DragValue::new(&mut l.start).range(0.0..=l.end).speed(0.05).suffix(" s"));
-                    ui.label(RichText::new("à").size(12.5).color(MUTED));
-                    ui.add(egui::DragValue::new(&mut l.end).range(l.start..=dur).speed(0.05).suffix(" s"));
-                });
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new("Parent").size(12.5).color(MUTED));
-                    let label = cur_parent.and_then(|p| names.iter().find(|n| n.0 == p)).map_or("Aucun".to_string(), |n| n.1.clone());
-                    egui::ComboBox::from_id_salt("parent").selected_text(short(&label, 22)).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
-                        if ui.selectable_label(cur_parent.is_none(), "Aucun").clicked() {
-                            new_parent = Some(None);
-                        }
-                        for (k, n) in &names {
-                            if ui.selectable_label(cur_parent == Some(*k), n).clicked() {
-                                new_parent = Some(Some(*k));
-                            }
-                        }
-                    });
-                });
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new("Couleur").size(12.5).color(MUTED));
-                    let cur = l.label.unwrap_or((i % LABELS.len()) as u8);
-                    for (k, c) in LABELS.iter().enumerate() {
-                        let (r, resp) = ui.allocate_exact_size(Vec2::splat(18.0), Sense::click());
-                        ui.painter().circle_filled(r.center(), 7.0, *c);
-                        if cur as usize == k {
-                            ui.painter().circle_stroke(r.center(), 9.0, Stroke::new(1.5, Color32::WHITE));
-                        }
-                        if resp.clicked() {
-                            l.label = Some(k as u8);
-                        }
-                    }
-                });
-            });
-        }
-        if let Some(p) = new_parent
-            && !self.comp.set_parent(i, p, t)
-        {
-            self.error = Some("Ce parent créerait une boucle".into());
-        }
-        let mut go = None;
-        {
-            let l = &mut self.comp.layers[i];
-            pro::dock_panel(ui, "transform", "Transformation", |ui| {
-                ui.spacing_mut().item_spacing.y = 5.0;
-                for (pi, label) in PROPS.iter().enumerate() {
-                    let p = &mut l.props[pi];
-                    ui.horizontal(|ui| {
-                        let has = p.key_at(t).is_some();
-                        let (r, resp) = ui.allocate_exact_size(Vec2::splat(18.0), Sense::click());
-                        let c = r.center();
-                        let d = 5.5;
-                        ui.painter().add(Shape::convex_polygon(vec![c + vec2(0.0, -d), c + vec2(d, 0.0), c + vec2(0.0, d), c + vec2(-d, 0.0)], if has { KEY } else { Color32::TRANSPARENT }, Stroke::new(1.5, if p.animated() { KEY } else { FAINT })));
-                        if resp.on_hover_text("Ajouter ou retirer une image clé ici").clicked() {
-                            p.toggle_key(t);
-                        }
-                        let lab = ui.add(egui::Label::new(RichText::new(*label).size(12.5).color(if p.animated() { INK } else { MUTED })).sense(Sense::click()));
-                        lab.context_menu(|ui| {
-                            if ui.button("Réinitialiser la valeur").clicked() {
-                                p.set(t, PROP_DEFAULT[pi]);
-                                ui.close();
-                            }
-                            if ui.add_enabled(p.animated(), egui::Button::new("Supprimer l'animation")).clicked() {
-                                p.clear(t);
-                                ui.close();
-                            }
-                        });
-                        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            if p.animated() {
-                                if ui.small_button("›").on_hover_text("Clé suivante").clicked() {
-                                    go = p.keys.iter().map(|k| k.t).find(|k| *k > t + 1e-3);
-                                }
-                            }
-                            let mut v = p.at(t);
-                            let speed = match pi {
-                                2 | 4 | 7 => 0.5,
-                                3 | 5 => 0.5,
-                                6 => 0.2,
-                                _ => 1.0,
-                            };
-                            let mut dv = egui::DragValue::new(&mut v).speed(speed).max_decimals(1);
-                            if matches!(pi, 4 | 7) {
-                                dv = dv.range(0.0..=100.0);
-                            }
-                            if pi == 6 {
-                                dv = dv.range(0.0..=200.0);
-                            }
-                            if ui.add(dv).changed() {
-                                p.set(t, v);
-                            }
-                            if p.animated() {
-                                if ui.small_button("‹").on_hover_text("Clé précédente").clicked() {
-                                    go = p.keys.iter().rev().map(|k| k.t).find(|k| *k < t - 1e-3);
-                                }
-                            }
-                        });
-                    });
-                    if let Some(k) = p.key_at(t) {
-                        ui.horizontal(|ui| {
-                            ui.add_space(24.0);
-                            ui.label(RichText::new("Courbe").size(11.5).color(FAINT));
-                            ease_combo(ui, ("ease", pi), &mut p.keys[k]);
-                        });
-                    }
-                }
-            });
-        }
-        if let Some(g) = go {
-            self.t = g;
-        }
-        pro::dock_panel(ui, "align", "Aligner sur la composition", |ui| {
-            ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
-            let w = (ui.available_width() - 8.0) / 3.0;
-            let mut how = None;
-            for row in [[("Gauche", 0u8), ("Centre ↔", 1), ("Droite", 2)], [("Haut", 3), ("Centre ↕", 4), ("Bas", 5)]] {
-                ui.horizontal(|ui| {
-                    for (label, k) in row {
-                        if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(label).size(12.0))).clicked() {
-                            how = Some(k);
-                        }
-                    }
-                });
-            }
-            if ui.add_sized([ui.available_width(), 26.0], egui::Button::new(RichText::new("Centrer au milieu").size(12.0))).clicked() {
-                how = Some(6);
-            }
-            if let Some(h) = how {
-                self.align(h);
-            }
-        });
-        let l = &mut self.comp.layers[i];
-        pro::dock_panel(ui, "content", "Contenu", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-            content_editor(ui, &mut l.content);
-        });
-        let mut help_open = false;
-        let is_text = matches!(l.content, Content::Text { .. });
-        let fx = &mut l.fx;
-        pro::dock_panel(ui, "look", "Apparence", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-            let mut on = fx.stroke.is_some();
-            ui.horizontal(|ui| {
-                if ui.checkbox(&mut on, "Contour").changed() {
-                    fx.stroke = on.then_some([255, 255, 255, 255]);
-                    if fx.stroke_w <= 0.0 {
-                        fx.stroke_w = 4.0;
-                    }
-                }
-                if let Some(c) = &mut fx.stroke {
-                    color_button(ui, c);
-                }
-            });
-            if fx.stroke.is_some() {
-                slider(ui, "Épaisseur", &mut fx.stroke_w, 0.5..=60.0, " px");
-                slider(ui, "Pointillés (0 = plein)", &mut fx.dash, 0.0..=120.0, " px");
-            }
-            let mut grad = fx.gradient.is_some();
-            ui.horizontal(|ui| {
-                if ui.checkbox(&mut grad, "Dégradé vers").changed() {
-                    fx.gradient = grad.then_some([10, 132, 255, 255]);
-                }
-                if let Some(c) = &mut fx.gradient {
-                    color_button(ui, c);
-                }
-            });
-            if fx.gradient.is_some() {
-                slider(ui, "Angle du dégradé", &mut fx.gradient_angle, -180.0..=180.0, "°");
-            }
-            ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
-            egui::ComboBox::from_id_salt("blend").selected_text(BLENDS.get(fx.blend as usize).map_or("Normal", |b| b.1)).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
-                for (k, (_, name)) in BLENDS.iter().enumerate() {
-                    ui.selectable_value(&mut fx.blend, k as u8, *name);
-                }
-            });
-            ui.horizontal(|ui| {
-                ui.checkbox(&mut fx.flip_x, "Miroir horizontal");
-                ui.checkbox(&mut fx.flip_y, "Vertical");
-            });
-        });
-        pro::dock_panel(ui, "fx", "Effets", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-            slider(ui, "Flou", &mut fx.blur, 0.0..=80.0, " px");
-            ui.horizontal(|ui| {
-                ui.checkbox(&mut fx.shadow, "Ombre portée");
-                if fx.shadow {
-                    color_button(ui, &mut fx.shadow_color);
-                }
-            });
-            if fx.shadow {
-                slider(ui, "Décalage X", &mut fx.shadow_dx, -100.0..=100.0, " px");
-                slider(ui, "Décalage Y", &mut fx.shadow_dy, -100.0..=100.0, " px");
-                slider(ui, "Douceur", &mut fx.shadow_blur, 0.0..=80.0, " px");
-                slider(ui, "Opacité", &mut fx.shadow_alpha, 0.0..=100.0, " %");
-            }
-            ui.horizontal(|ui| {
-                ui.label(RichText::new("Lueur").size(12.5).color(MUTED));
-                color_button(ui, &mut fx.glow_color);
-            });
-            ui.add(egui::Slider::new(&mut fx.glow, 0.0..=80.0).suffix(" px"));
-            ui.label(RichText::new("Couleur").size(12.5).color(INK));
-            slider(ui, "Teinte", &mut fx.hue, -180.0..=180.0, "°");
-            slider(ui, "Saturation", &mut fx.saturation, 0.0..=300.0, " %");
-            slider(ui, "Luminosité", &mut fx.brightness, 0.0..=300.0, " %");
-        });
-        pro::dock_panel(ui, "motion", "Mouvement", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-            if is_text {
-                slider(ui, "Machine à écrire (0 = non)", &mut fx.typewriter, 0.0..=10.0, " s");
-            }
-            slider(ui, "Tremblement", &mut fx.wiggle, 0.0..=200.0, " px");
-            if fx.wiggle > 0.0 {
-                if fx.wiggle_freq <= 0.0 {
-                    fx.wiggle_freq = 2.0;
-                }
-                slider(ui, "Fréquence", &mut fx.wiggle_freq, 0.1..=12.0, " /s");
-            }
-            ui.label(RichText::new("Répéter les images clés").size(12.5).color(MUTED));
-            let mut mode = if fx.pingpong { 2 } else if fx.loop_keys { 1 } else { 0 };
-            if pro::segmented(ui, &mut mode, &["Non", "Boucle", "Aller-retour"]) {
-                fx.loop_keys = mode == 1;
-                fx.pingpong = mode == 2;
-            }
-            ui.add_space(4.0);
-            let mut echo = fx.echo as f32;
-            slider(ui, "Écho (traînée)", &mut echo, 0.0..=12.0, " copies");
-            fx.echo = echo.round() as u32;
-            if fx.echo > 0 {
-                slider(ui, "Délai entre échos", &mut fx.echo_delay, 0.01..=0.5, " s");
-            }
-            let mut rep = fx.repeat as f32;
-            slider(ui, "Répéteur", &mut rep, 0.0..=40.0, " copies");
-            fx.repeat = rep.round() as u32;
-            if fx.repeat > 0 {
-                slider(ui, "Décalage X", &mut fx.rep_dx, -1000.0..=1000.0, " px");
-                slider(ui, "Décalage Y", &mut fx.rep_dy, -1000.0..=1000.0, " px");
-                slider(ui, "Rotation par copie", &mut fx.rep_rot, -180.0..=180.0, "°");
-                slider(ui, "Échelle par copie", &mut fx.rep_scale, 20.0..=200.0, " %");
-                slider(ui, "Fondu par copie", &mut fx.rep_fade, 0.0..=100.0, " %");
-            }
-        });
-        pro::dock_panel(ui, "matte", "Masque", |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            egui::ComboBox::from_id_salt("matte").selected_text(MATTES[(fx.matte as usize).min(2)]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
-                for (k, n) in MATTES.iter().enumerate() {
-                    ui.selectable_value(&mut fx.matte, k as u8, *n);
-                }
-            });
-            ui.label(RichText::new("Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme.").size(11.5).color(FAINT));
-            ui.add_space(4.0);
-            if pro::secondary(ui, "?  Tutoriels").clicked() {
-                help_open = true;
-            }
-        });
-        if help_open {
-            self.help.learn("Effets");
-        }
-    }
-
     fn sheets(&mut self, ctx: &egui::Context) {
-        if let Some(mut o) = self.export.take() {
-            let mut go = false;
-            let mut cancel = false;
-            let keep = pro::sheet(ctx, "export", 460.0, |ui| {
-                ui.horizontal(|ui| {
-                    let (r, _) = ui.allocate_exact_size(Vec2::splat(36.0), Sense::hover());
-                    ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.25));
-                    glyph(ui.painter(), r.shrink(9.0), G::Export, BLUE);
-                    ui.vertical(|ui| {
-                        ui.label(RichText::new("Exporter l'animation").font(semibold(18.0)).color(INK_STRONG));
-                        ui.label(RichText::new(["Vidéo H.264, lisible partout", "Animation légère pour le web et les messages", "Une image par frame, idéal pour le montage", "L'image affichée à la tête de lecture", "Vectoriel, l'image affichée, modifiable"][o.format]).size(12.0).color(MUTED));
-                    });
-                });
-                ui.add_space(14.0);
-                let row = |ui: &mut Ui, s: &str| {
-                    ui.label(RichText::new(s).size(12.5).color(MUTED));
-                };
-                row(ui, "Format");
-                pro::segmented(ui, &mut o.format, &FORMATS);
-                ui.add_space(8.0);
-                if o.format != 4 {
-                    row(ui, "Taille");
-                    let labels: Vec<&str> = SCALES.iter().map(|s| s.0).collect();
-                    pro::segmented(ui, &mut o.scale, &labels);
-                    let (w, h) = out_size(&self.comp, SCALES[o.scale].1, o.format == 0);
-                    ui.label(RichText::new(format!("{w} × {h} px")).size(11.5).color(FAINT));
-                    ui.add_space(8.0);
-                }
-                if o.format <= 2 {
-                    row(ui, "Plage");
-                    ui.add_enabled_ui(self.comp.work.is_some(), |ui| {
-                        pro::segmented(ui, &mut o.range, &["Toute la composition", "Zone de travail"]);
-                    });
-                    if self.comp.work.is_none() {
-                        o.range = 0;
-                    }
-                    ui.add_space(8.0);
-                }
-                if o.format == 1 {
-                    row(ui, "Images par seconde");
-                    let labels: Vec<&str> = GIF_FPS.iter().map(|s| s.0).collect();
-                    pro::segmented(ui, &mut o.gif_fps, &labels);
-                    ui.add_space(8.0);
-                }
-                if o.format != 0 {
-                    ui.checkbox(&mut o.transparent, "Fond transparent");
-                } else {
-                    o.transparent = false;
-                }
-                ui.add_space(10.0);
-                let (a, b) = if o.range == 1 { self.comp.range() } else { (0.0, self.comp.duration) };
-                if o.format <= 2 {
-                    let n = if o.range == 1 { ((b - a) * self.comp.fps as f32).round() as u32 } else { self.comp.frames() };
-                    ui.label(RichText::new(format!("{} · {n} images", secs(b - a))).size(12.5).color(FAINT));
-                }
-                ui.add_space(14.0);
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Exporter…").clicked() {
-                        go = true;
-                    }
-                    if pro::secondary(ui, "Annuler").clicked() {
-                        cancel = true;
-                    }
-                });
-            });
-            if go {
-                self.run_export(&o);
-            } else if keep && !cancel {
-                self.export = Some(o);
-            }
-        }
+        self.export_sheet(ctx);
+        self.queue_sheet(ctx);
         if self.comp_sheet {
             let mut done = false;
             let keep = pro::sheet(ctx, "comp", 470.0, |ui| {
@@ -2095,316 +1746,6 @@ impl Motion {
         }
     }
 
-    fn viewer(&mut self, root: &mut Ui, name: &str) {
-        egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD)).show(root, |ui| {
-            let full = ui.max_rect();
-            let bar_h = 40.0;
-            let bar = Rect::from_min_size(full.min, vec2(full.width(), bar_h));
-            ui.painter().rect_filled(bar, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x20));
-            ui.painter().line_segment([bar.left_bottom(), bar.right_bottom()], Stroke::new(1.0, LINE));
-            ui.scope_builder(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(10.0, 0.0))), |ui| {
-                ui.horizontal_centered(|ui| {
-                    ui.spacing_mut().item_spacing.x = 2.0;
-                    for (tool, g, tip) in [(Tool::Select, G::Select, "Sélection (V) : déplace, coins = échelle, rond = rotation"), (Tool::Rotate, G::Rotate, "Rotation (W)"), (Tool::Hand, G::Hand, "Main (H) : déplace la vue")] {
-                        if pro::icon_button(ui, 30.0, self.tool == tool, tip, |p, r, c| glyph(p, r, g, c)).clicked() {
-                            self.tool = tool;
-                        }
-                    }
-                    pro::toolbar_sep(ui);
-                    let mut z = match self.zoom {
-                        None => 0,
-                        Some(v) if (v - 0.5).abs() < 1e-3 => 1,
-                        Some(v) if (v - 1.0).abs() < 1e-3 => 2,
-                        _ => 3,
-                    };
-                    let labels: &[&str] = if z == 3 { &["Ajuster", "50 %", "100 %", "Autre"] } else { &["Ajuster", "50 %", "100 %"] };
-                    if pro::segmented(ui, &mut z, labels) {
-                        self.zoom = [None, Some(0.5), Some(1.0), self.zoom][z];
-                        self.pan = Vec2::ZERO;
-                    }
-                    pro::toolbar_sep(ui);
-                    for (on, g, tip) in [(&mut self.grid, G::Grid, "Grille et tiers"), (&mut self.safe, G::Safe, "Zones sûres"), (&mut self.guides, G::Guides, "Repères centraux"), (&mut self.snap, G::Magnet, "Magnétisme"), (&mut self.half, G::Half, "Aperçu en demi-résolution (plus fluide)")] {
-                        if pro::icon_button(ui, 30.0, *on, tip, |p, r, c| glyph(p, r, g, c)).clicked() {
-                            *on = !*on;
-                        }
-                    }
-                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.label(RichText::new(short(name, 28)).size(12.5).color(MUTED));
-                    });
-                });
-            });
-
-            let controls_h = 54.0;
-            let canvas = Rect::from_min_max(pos2(full.left(), bar.bottom()), pos2(full.right(), full.bottom() - controls_h));
-            let area = canvas.shrink(22.0);
-            let (cw, ch) = (self.comp.width as f32, self.comp.height as f32);
-            let ppp = ui.ctx().pixels_per_point();
-            let fit = (area.width() / cw).min(area.height() / ch).max(0.01);
-            let s = self.zoom.map_or(fit, |z| z / ppp);
-            let view = Rect::from_center_size(area.center() + if self.zoom.is_some() { self.pan } else { Vec2::ZERO }, vec2(cw, ch) * s);
-            let rs = (s * ppp * if self.half { 0.5 } else { 1.0 }).min(2.0);
-            let (rw, rh) = (((cw * rs).round() as u32).max(1), ((ch * rs).round() as u32).max(1));
-            let t = self.t;
-            let stale = self.rendered.as_ref().is_none_or(|(c, rt, w)| *c != self.comp || (*rt - t).abs() > 1e-4 || *w != rw);
-            if stale {
-                match render(&self.comp, t, rw, rh, &self.fontdb, false) {
-                    Ok(pix) => {
-                        let img = egui::ColorImage::from_rgba_premultiplied([pix.width() as usize, pix.height() as usize], pix.data());
-                        match &mut self.tex {
-                            Some(tx) => tx.set(img, TextureOptions::LINEAR),
-                            None => self.tex = Some(ui.ctx().load_texture("frame", img, TextureOptions::LINEAR)),
-                        }
-                        self.rendered = Some((self.comp.clone(), t, rw));
-                    }
-                    Err(e) => self.error = Some(format!("Rendu : {e}")),
-                }
-            }
-            let painter = ui.painter_at(canvas);
-            painter.add(egui::epaint::Shadow { offset: [0, 6], blur: 24, spread: 0, color: Color32::from_black_alpha(140) }.as_shape(view, CornerRadius::same(4)));
-            if let Some(tx) = &self.tex {
-                painter.image(tx.id(), view, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
-            }
-            let to_scr = |x: f32, y: f32| pos2(view.min.x + x * s, view.min.y + y * s);
-            let thin = Stroke::new(1.0, Color32::from_white_alpha(46));
-            if self.grid {
-                for k in 1..10 {
-                    let f = k as f32 / 10.0;
-                    painter.line_segment([to_scr(cw * f, 0.0), to_scr(cw * f, ch)], Stroke::new(1.0, Color32::from_white_alpha(16)));
-                    painter.line_segment([to_scr(0.0, ch * f), to_scr(cw, ch * f)], Stroke::new(1.0, Color32::from_white_alpha(16)));
-                }
-                for f in [1.0 / 3.0, 2.0 / 3.0] {
-                    painter.line_segment([to_scr(cw * f, 0.0), to_scr(cw * f, ch)], thin);
-                    painter.line_segment([to_scr(0.0, ch * f), to_scr(cw, ch * f)], thin);
-                }
-            }
-            if self.safe {
-                for (k, a) in [(0.9, 70), (0.8, 110)] {
-                    painter.rect_stroke(Rect::from_center_size(view.center(), view.size() * k), CornerRadius::ZERO, Stroke::new(1.0, Color32::from_white_alpha(a)), StrokeKind::Middle);
-                }
-            }
-            if self.guides {
-                painter.line_segment([to_scr(cw / 2.0, 0.0), to_scr(cw / 2.0, ch)], Stroke::new(1.0, MARK.gamma_multiply(0.6)));
-                painter.line_segment([to_scr(0.0, ch / 2.0), to_scr(cw, ch / 2.0)], Stroke::new(1.0, MARK.gamma_multiply(0.6)));
-            }
-
-            let geo = |me: &Self, i: usize| -> Option<(Pos2, f32, f32, f32, f32)> {
-                let l = me.comp.layers.get(i)?;
-                if !l.active(t) {
-                    return None;
-                }
-                let (x, y, ws, wr) = me.comp.world(i, t);
-                let (w, h) = l.size();
-                Some((to_scr(x, y), w * ws * s / 2.0, h * ws * s / 2.0, wr, ws))
-            };
-            let corners = |c: Pos2, hw: f32, hh: f32, r: f32| -> [Pos2; 4] {
-                [(-1.0, -1.0), (1.0, -1.0), (1.0, 1.0), (-1.0, 1.0)].map(|(a, b)| {
-                    let (dx, dy) = rot(a * hw, b * hh, r);
-                    c + vec2(dx, dy)
-                })
-            };
-            let rot_handle = |c: Pos2, hh: f32, r: f32| {
-                let (dx, dy) = rot(0.0, -hh - 26.0, r);
-                c + vec2(dx, dy)
-            };
-            let sel_geo = self.sel.and_then(|i| geo(self, i));
-            if let Some((c, hw, hh, r, _)) = sel_geo {
-                let q = corners(c, hw, hh, r);
-                painter.add(Shape::closed_line(q.to_vec(), Stroke::new(1.0, BLUE)));
-                for p in q {
-                    painter.rect(Rect::from_center_size(p, Vec2::splat(8.0)), CornerRadius::same(2), Color32::WHITE, Stroke::new(1.0, BLUE), StrokeKind::Inside);
-                }
-                let rh = rot_handle(c, hh, r);
-                let top = {
-                    let (dx, dy) = rot(0.0, -hh, r);
-                    c + vec2(dx, dy)
-                };
-                painter.line_segment([top, rh], Stroke::new(1.0, BLUE));
-                painter.circle(rh, 5.0, Color32::WHITE, Stroke::new(1.0, BLUE));
-                painter.circle(c, 3.5, Color32::WHITE, Stroke::new(1.0, BLUE));
-                if let Some(p) = self.sel.and_then(|i| self.comp.layers[i].parent)
-                    && let Some((pc, ..)) = geo(self, p)
-                {
-                    painter.line_segment([c, pc], Stroke::new(1.0, Color32::from_white_alpha(60)));
-                }
-            }
-
-            let resp = ui.interact(canvas, ui.make_persistent_id("view"), Sense::click_and_drag());
-            if resp.hovered() {
-                let (scroll, cmd) = ui.input(|i| (i.smooth_scroll_delta.y, i.modifiers.command));
-                if cmd && scroll != 0.0 {
-                    let z = (self.zoom.unwrap_or(fit * ppp) * (1.0 + scroll * 0.002)).clamp(0.05, 8.0);
-                    self.zoom = Some(z);
-                }
-                ui.ctx().set_cursor_icon(match self.tool {
-                    Tool::Hand => egui::CursorIcon::Grab,
-                    Tool::Rotate => egui::CursorIcon::Alias,
-                    Tool::Select => egui::CursorIcon::Default,
-                });
-            }
-            let middle = ui.input(|i| i.pointer.middle_down());
-            if resp.drag_started()
-                && let Some(p) = resp.interact_pointer_pos()
-            {
-                self.xdrag = None;
-                if self.tool == Tool::Hand || middle {
-                    if self.zoom.is_none() {
-                        self.zoom = Some(fit * ppp);
-                    }
-                    self.xdrag = Some(XDrag::Pan { p0: self.pan, from: p });
-                } else if let (Some(i), Some((c, hw, hh, r, ws))) = (self.sel, sel_geo)
-                    && !self.comp.layers[i].locked
-                {
-                    let near_corner = corners(c, hw, hh, r).iter().any(|q| q.distance(p) < 9.0);
-                    if self.tool == Tool::Rotate || rot_handle(c, hh, r).distance(p) < 9.0 {
-                        let a0 = (p - c).angle().to_degrees();
-                        self.xdrag = Some(XDrag::Rotate { r0: self.comp.layers[i].value(3, t), a0 });
-                    } else if near_corner {
-                        self.xdrag = Some(XDrag::Scale { ws, d0: c.distance(p).max(1.0) });
-                    }
-                }
-                if self.xdrag.is_none() && self.tool == Tool::Select {
-                    let (px, py) = ((p.x - view.min.x) / s, (p.y - view.min.y) / s);
-                    let solo = self.comp.layers.iter().any(|l| l.solo);
-                    let hit = (0..self.comp.layers.len()).rev().find(|&i| {
-                        let l = &self.comp.layers[i];
-                        if !l.active(t) || l.locked || (solo && !l.solo) || (i > 0 && self.comp.layers[i - 1].fx.matte > 0) {
-                            return false;
-                        }
-                        let (x, y, ws, wr) = self.comp.world(i, t);
-                        let (w, h) = l.size();
-                        let (lx, ly) = rot(px - x, py - y, -wr);
-                        lx.abs() <= w * ws.abs() / 2.0 + 4.0 / s && ly.abs() <= h * ws.abs() / 2.0 + 4.0 / s
-                    });
-                    if let Some(i) = hit {
-                        self.sel = Some(i);
-                        let (wx, wy, _, _) = self.comp.world(i, t);
-                        self.xdrag = Some(XDrag::Move { wx, wy, from: p });
-                    }
-                }
-            }
-            let (shift, ptr) = ui.input(|i| (i.modifiers.shift, i.pointer.interact_pos()));
-            if resp.dragged()
-                && let (Some(d), Some(p)) = (self.xdrag, ptr)
-            {
-                match (d, self.sel) {
-                    (XDrag::Pan { p0, from }, _) => self.pan = p0 + (p - from),
-                    (XDrag::Move { wx, wy, from }, Some(i)) => {
-                        let mut dx = (p.x - from.x) / s;
-                        let mut dy = (p.y - from.y) / s;
-                        if shift {
-                            if dx.abs() > dy.abs() {
-                                dy = 0.0;
-                            } else {
-                                dx = 0.0;
-                            }
-                        }
-                        let (mut nx, mut ny) = (wx + dx, wy + dy);
-                        if self.snap {
-                            let (_, _, ws, _) = self.comp.world(i, t);
-                            let (w, h) = self.comp.layers[i].size();
-                            let tol = 8.0 / s;
-                            for c in [cw / 2.0, w * ws / 2.0, cw - w * ws / 2.0] {
-                                if (nx - c).abs() < tol {
-                                    nx = c;
-                                    painter.line_segment([to_scr(c, 0.0), to_scr(c, ch)], Stroke::new(1.0, Color32::from_rgb(255, 64, 160)));
-                                    break;
-                                }
-                            }
-                            for c in [ch / 2.0, h * ws / 2.0, ch - h * ws / 2.0] {
-                                if (ny - c).abs() < tol {
-                                    ny = c;
-                                    painter.line_segment([to_scr(0.0, c), to_scr(cw, c)], Stroke::new(1.0, Color32::from_rgb(255, 64, 160)));
-                                    break;
-                                }
-                            }
-                        }
-                        self.place(i, nx, ny);
-                    }
-                    (XDrag::Scale { ws, d0 }, Some(i)) => {
-                        if let Some((c, ..)) = sel_geo {
-                            let k = c.distance(p) / d0;
-                            let (_, _, ps, _) = self.parent_frame(i, t);
-                            let v = (ws * k / ps.max(1e-4) * 100.0 * 10.0).round() / 10.0;
-                            self.comp.layers[i].props[2].set(t, v.max(0.1));
-                        }
-                    }
-                    (XDrag::Rotate { r0, a0 }, Some(i)) => {
-                        if let Some((c, ..)) = sel_geo {
-                            let a = (p - c).angle().to_degrees();
-                            let mut d = a - a0;
-                            if d > 180.0 {
-                                d -= 360.0;
-                            }
-                            if d < -180.0 {
-                                d += 360.0;
-                            }
-                            let mut v = r0 + d;
-                            v = if shift { (v / 15.0).round() * 15.0 } else { (v * 10.0).round() / 10.0 };
-                            self.comp.layers[i].props[3].set(t, v);
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            if resp.drag_stopped() {
-                self.xdrag = None;
-            }
-            if resp.clicked() && self.tool == Tool::Select {
-                self.sel = None;
-            }
-            if resp.double_clicked() {
-                self.zoom = None;
-                self.pan = Vec2::ZERO;
-            }
-
-            let tb = Rect::from_min_max(pos2(full.left() + 18.0, full.bottom() - controls_h + 6.0), pos2(full.right() - 18.0, full.bottom() - 6.0));
-            ui.painter().line_segment([pos2(full.left(), tb.top() - 6.0), pos2(full.right(), tb.top() - 6.0)], Stroke::new(1.0, LINE));
-            let fps = self.comp.fps;
-            ui.painter().text(tb.left_center(), Align2::LEFT_CENTER, tc(self.t, fps), FontId::monospace(16.0), BLUE);
-            ui.painter().text(tb.left_center() + vec2(104.0, 0.0), Align2::LEFT_CENTER, format!("image {}", (self.t * fps as f32).round() as u32), FontId::proportional(11.5), FAINT);
-            let (a, b) = self.comp.range();
-            ui.painter().text(tb.right_center(), Align2::RIGHT_CENTER, if self.comp.work.is_some() { format!("zone {} → {}", tc(a, fps), tc(b, fps)) } else { tc(self.comp.duration, fps) }, FontId::monospace(13.0), MUTED);
-            let step = 1.0 / fps as f32;
-            for (dx, kind, tip) in [(-150.0, 0u8, "Début (Origine)"), (-108.0, 5, "Image clé précédente (J)"), (-66.0, 1, "Image précédente (←)"), (0.0, 2, "Lecture / pause (Espace)"), (66.0, 3, "Image suivante (→)"), (108.0, 6, "Image clé suivante (K)"), (150.0, 4, "Fin"), (200.0, 7, "Lecture en boucle (L)")] {
-                let size = if kind == 2 { 40.0 } else { 32.0 };
-                let r = Rect::from_center_size(tb.center() + vec2(dx, 0.0), Vec2::splat(size));
-                let bt = ui.interact(r, ui.make_persistent_id(("transport", kind)), Sense::click()).on_hover_text(tip);
-                let on = kind == 7 && self.loop_play;
-                let fill = if kind == 2 {
-                    if bt.hovered() { BLUE.lerp_to_gamma(Color32::WHITE, 0.12) } else { BLUE }
-                } else if on {
-                    BLUE.gamma_multiply(0.28)
-                } else if bt.hovered() {
-                    FIELD
-                } else {
-                    Color32::TRANSPARENT
-                };
-                ui.painter().circle_filled(r.center(), size / 2.0, fill);
-                match kind {
-                    5 | 6 => {
-                        let dir = if kind == 6 { 1.0 } else { -1.0 };
-                        diamond(ui.painter(), r.center() + vec2(3.0 * dir, 0.0), 5.0, KEY);
-                        ui.painter().add(Shape::convex_polygon(vec![r.center() + vec2(-6.0 * dir, -4.5), r.center() + vec2(-2.0 * dir, 0.0), r.center() + vec2(-6.0 * dir, 4.5)], INK, Stroke::NONE));
-                    }
-                    7 => glyph(ui.painter(), r.shrink(8.0), G::Loop, if on { INK_STRONG } else { INK }),
-                    _ => transport_glyph(ui.painter(), r.center(), kind, self.playing, if kind == 2 { Color32::WHITE } else { INK }),
-                }
-                if bt.clicked() {
-                    match kind {
-                        0 => self.t = a,
-                        1 => self.t = self.snap_frame((self.t - step).max(0.0)),
-                        2 => self.playing = !self.playing,
-                        3 => self.t = self.snap_frame((self.t + step).min(self.comp.duration)),
-                        4 => self.t = b,
-                        5 => self.t = self.comp.next_key(self.t, false, None).unwrap_or(self.t),
-                        6 => self.t = self.comp.next_key(self.t, true, None).unwrap_or(self.t),
-                        _ => self.loop_play = !self.loop_play,
-                    }
-                }
-            }
-        });
-    }
-
     fn timeline(&mut self, root: &mut Ui) {
         egui::Panel::bottom("timeline").resizable(true).default_size(300.0).min_size(200.0).frame(Frame::new().fill(PANEL).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = ui.max_rect();
@@ -2450,9 +1791,8 @@ impl Motion {
         let label_w = 236.0;
         let row_h = 30.0;
         let sub_h = 22.0;
-        let np = PROPS.len() as f32;
         let dur = self.comp.duration.max(0.1);
-        let n_rows: f32 = self.comp.layers.iter().enumerate().map(|(i, _)| row_h + if self.expanded.get(i).copied().unwrap_or(false) { sub_h * np } else { 0.0 }).sum();
+        let n_rows: f32 = (0..self.comp.layers.len()).map(|i| row_h + if self.expanded.get(i).copied().unwrap_or(false) { sub_h * self.shown_props(i).len() as f32 } else { 0.0 }).sum();
         let width = (dur * self.pps + 40.0).max(ui.available_width() - label_w);
         let (rect, _) = ui.allocate_exact_size(vec2(label_w + width, (26.0 + n_rows + 10.0).max(ui.available_height())), Sense::hover());
         let x0 = rect.min.x + label_w;
@@ -2564,7 +1904,12 @@ impl Motion {
             p.rect_filled(Rect::from_min_size(pos2(rect.min.x + 92.0, row.center().y - 6.0), vec2(4.0, 12.0)), CornerRadius::same(2), color);
             let name_col = if l.visible { if on { INK_STRONG } else { INK } } else { FAINT };
             let parent_tag = l.parent.map(|_| "↳ ").unwrap_or("");
-            p.text(pos2(rect.min.x + 102.0, row.center().y), Align2::LEFT_CENTER, format!("{parent_tag}{}", short(&l.name, 17)), if on { semibold(12.5) } else { FontId::proportional(12.5) }, name_col);
+            p.text(pos2(rect.min.x + 102.0, row.center().y), Align2::LEFT_CENTER, format!("{parent_tag}{}", short(&l.name, 15)), if on { semibold(12.5) } else { FontId::proportional(12.5) }, name_col);
+            if l.has_effects() {
+                let fr = Rect::from_center_size(pos2(x0 - 16.0, row.center().y), vec2(20.0, 14.0));
+                p.rect_filled(fr, CornerRadius::same(4), BLUE.gamma_multiply(0.35));
+                p.text(fr.center(), Align2::CENTER_CENTER, "fx", FontId::proportional(10.0), INK);
+            }
             let lab = ui.interact(Rect::from_min_max(pos2(rect.min.x + 90.0, row.min.y), pos2(x0, row.max.y)), ui.make_persistent_id(("label", li)), Sense::click());
             if lab.clicked() {
                 self.sel = Some(li);
@@ -2625,12 +1970,14 @@ impl Motion {
             });
             y += row_h;
             if expanded {
-                for (pi, name) in PROPS.iter().enumerate() {
+                for pi in self.shown_props(li) {
+                    let name = PROPS[pi];
                     let sub = Rect::from_min_max(pos2(rect.min.x, y), pos2(rect.max.x, y + sub_h));
                     p.rect_filled(sub, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x20));
                     let Some(prop) = self.comp.layers[li].props.get(pi) else { continue };
-                    p.text(pos2(rect.min.x + 44.0, sub.center().y), Align2::LEFT_CENTER, *name, FontId::proportional(11.5), if prop.animated() { INK } else { FAINT });
-                    p.text(pos2(x0 - 10.0, sub.center().y), Align2::RIGHT_CENTER, format!("{:.1}", prop.at(self.t)), FontId::monospace(11.0), if prop.animated() { KEY } else { FAINT });
+                    let live = prop.animated() || prop.expressive();
+                    p.text(pos2(rect.min.x + 44.0, sub.center().y), Align2::LEFT_CENTER, if prop.expressive() { format!("{name} ≈") } else { name.to_string() }, FontId::proportional(11.5), if live { INK } else { FAINT });
+                    p.text(pos2(x0 - 10.0, sub.center().y), Align2::RIGHT_CENTER, format!("{:.1}", prop.at(self.t)), FontId::monospace(11.0), if live { KEY } else { FAINT });
                     if prop.keys.len() > 1 {
                         p.line_segment([pos2(x_of(prop.keys[0].t), sub.center().y), pos2(x_of(prop.keys[prop.keys.len() - 1].t), sub.center().y)], Stroke::new(1.0, KEY.gamma_multiply(0.35)));
                     }
@@ -2638,43 +1985,88 @@ impl Motion {
                     for (ki, key) in keys.iter().enumerate() {
                         let c = pos2(x_of(key.t), sub.center().y);
                         let kr = Rect::from_center_size(c, Vec2::splat(14.0));
-                        let resp = ui.interact(kr, ui.make_persistent_id(("key", li, pi, ki)), Sense::click_and_drag()).on_hover_text(format!("{} · {:.1} · {}\nGlisser pour déplacer · clic droit : courbe", secs(key.t), key.v, key.ease_name()));
-                        let active = self.key_drag == Some((li, pi, ki));
-                        key_shape(&p, c, if resp.hovered() || active { 6.5 } else { 5.0 }, if active { Color32::WHITE } else { KEY }, key);
+                        let resp = ui.interact(kr, ui.make_persistent_id(("key", li, pi, ki)), Sense::click_and_drag()).on_hover_text(format!("{} · {:.1} · {}\nClic : choisir · Maj/Ctrl+clic : ajouter · glisser : déplacer", secs(key.t), key.v, key.ease_name()));
+                        let selected = self.ksel.iter().any(|s| s.0 == li && s.1 == pi && (s.2 - key.t).abs() < 1e-3);
+                        let dragging = self.key_drag.as_ref().is_some_and(|(_, v)| v.iter().any(|d| d.0 == li && d.1 == pi && d.2 == ki));
+                        key_shape(&p, c, if resp.hovered() || dragging { 6.5 } else { 5.0 }, if selected || dragging { Color32::WHITE } else { KEY }, key);
+                        if selected {
+                            p.circle_stroke(c, 8.0, Stroke::new(1.0, BLUE));
+                        }
+                        let multi = ui.input(|i| i.modifiers.shift || i.modifiers.command);
                         if resp.clicked() {
                             self.t = key.t;
                             self.sel = Some(li);
+                            self.gkey = Some((li, pi, ki));
+                            if multi {
+                                if selected {
+                                    self.ksel.retain(|s| !(s.0 == li && s.1 == pi && (s.2 - key.t).abs() < 1e-3));
+                                } else {
+                                    self.ksel.push((li, pi, key.t));
+                                }
+                            } else {
+                                self.ksel = vec![(li, pi, key.t)];
+                            }
                         }
                         if resp.drag_started() {
-                            self.key_drag = Some((li, pi, ki));
+                            if !selected {
+                                if !multi {
+                                    self.ksel.clear();
+                                }
+                                self.ksel.push((li, pi, key.t));
+                            }
+                            let group: Vec<(usize, usize, usize, f32)> = self
+                                .ksel
+                                .iter()
+                                .filter_map(|(sl, sp, st)| self.comp.layers.get(*sl)?.props.get(*sp)?.key_at(*st).map(|k| (*sl, *sp, k, *st)))
+                                .collect();
+                            self.key_drag = Some((key.t, group));
+                            self.sel = Some(li);
                         }
                         resp.context_menu(|ui| {
-                            if let Some(k) = self.comp.layers.get_mut(li).and_then(|l| l.props.get_mut(pi)).and_then(|p| p.keys.get_mut(ki)) {
-                                for (e, n) in Ease::ALL {
-                                    if ui.selectable_label(k.ease2 == Ease2::None && k.ease == e, n).clicked() {
-                                        k.set_ease(e);
-                                        ui.close();
-                                    }
-                                }
-                                ui.separator();
-                                for (e, n) in Ease2::ALL {
-                                    if ui.selectable_label(k.ease2 == e, n).clicked() {
-                                        k.ease2 = e;
-                                        ui.close();
-                                    }
-                                }
-                                ui.separator();
+                            if !selected {
+                                self.ksel = vec![(li, pi, key.t)];
                             }
-                            if ui.button("Supprimer cette clé").clicked() {
-                                if let Some(pr) = self.comp.layers.get_mut(li).and_then(|l| l.props.get_mut(pi))
-                                    && ki < pr.keys.len()
-                                {
-                                    let v = pr.keys[ki].v;
-                                    pr.keys.remove(ki);
-                                    if pr.keys.is_empty() {
-                                        pr.base = v;
+                            for (e, n) in Ease::ALL {
+                                if ui.selectable_label(key.ease2 == Ease2::None && key.bez.is_none() && key.ease == e, n).clicked() {
+                                    self.with_keys(|k| k.set_ease(e));
+                                    ui.close();
+                                }
+                            }
+                            ui.menu_button("Autres courbes", |ui| {
+                                for (e, n) in Ease2::ALL {
+                                    if ui.selectable_label(key.ease2 == e && key.bez.is_none(), n).clicked() {
+                                        self.with_keys(|k| k.set_ease2(e));
+                                        ui.close();
                                     }
                                 }
+                                ui.separator();
+                                for (n, b) in model::BEZ_PRESETS {
+                                    if ui.selectable_label(key.bez == Some(b), n).clicked() {
+                                        self.with_keys(|k| k.bez = Some(b));
+                                        ui.close();
+                                    }
+                                }
+                            });
+                            ui.separator();
+                            if ui.button("Courbe douce (F9)").clicked() {
+                                self.easy_ease(0);
+                                ui.close();
+                            }
+                            if ui.button("Éditer la courbe…").clicked() {
+                                self.gkey = Some((li, pi, ki));
+                                self.sel = Some(li);
+                                ui.close();
+                            }
+                            if ui.button("Copier (Ctrl+C)").clicked() {
+                                self.copy_keys();
+                                ui.close();
+                            }
+                            if ui.button("Sélectionner toute la propriété").clicked() {
+                                self.ksel = keys.iter().map(|k| (li, pi, k.t)).collect();
+                                ui.close();
+                            }
+                            if ui.button("Supprimer (Suppr)").clicked() {
+                                self.delete_keys();
                                 ui.close();
                             }
                         });
@@ -2693,19 +2085,27 @@ impl Motion {
             }
         }
 
-        if let Some((li, pi, ki)) = self.key_drag {
+        if let Some((anchor, group)) = self.key_drag.clone() {
             let (down, pos) = ui.input(|i| (i.pointer.primary_down(), i.pointer.hover_pos()));
             if let (true, Some(pp)) = (down, pos) {
-                let nt = self.snap_time(t_of(pp.x), None, Some((li, pi)));
-                if let Some(k) = self.comp.layers.get_mut(li).and_then(|l| l.props.get_mut(pi)).and_then(|p| p.keys.get_mut(ki)) {
-                    k.t = nt;
+                let skip = group.first().map(|g| (g.0, g.1));
+                let nt = self.snap_time(t_of(pp.x), None, skip);
+                let dt = nt - anchor;
+                for (li, pi, ki, t0) in &group {
+                    if let Some(k) = self.comp.layers.get_mut(*li).and_then(|l| l.props.get_mut(*pi)).and_then(|p| p.keys.get_mut(*ki)) {
+                        k.t = (t0 + dt).max(0.0);
+                    }
                 }
+                self.ksel = group.iter().map(|(li, pi, _, t0)| (*li, *pi, (t0 + dt).max(0.0))).collect();
                 self.t = nt;
             } else {
-                if let Some(prop) = self.comp.layers.get_mut(li).and_then(|l| l.props.get_mut(pi)) {
-                    prop.keys.sort_by(|a, b| a.t.total_cmp(&b.t));
-                    prop.keys.dedup_by(|a, b| (a.t - b.t).abs() < 1e-3);
+                for (li, pi, _, _) in &group {
+                    if let Some(prop) = self.comp.layers.get_mut(*li).and_then(|l| l.props.get_mut(*pi)) {
+                        prop.keys.sort_by(|a, b| a.t.total_cmp(&b.t));
+                        prop.keys.dedup_by(|a, b| (a.t - b.t).abs() < 1e-3);
+                    }
                 }
+                self.gkey = None;
                 self.key_drag = None;
             }
         }
@@ -2781,19 +2181,30 @@ impl Motion {
     }
 }
 
-const KINDS: [(&str, u8); 12] = [
+const KINDS: [(&str, u8); 23] = [
     ("Texte", 0),
+    ("Vertical", 17),
+    ("Compteur", 7),
     ("Rectangle", 1),
+    ("Arrondi", 15),
     ("Ellipse", 2),
     ("Étoile", 4),
     ("Polygone", 5),
     ("Triangle", 8),
+    ("Losange", 16),
     ("Ligne", 6),
     ("Flèche", 9),
     ("Anneau", 10),
-    ("Compteur", 7),
+    ("Cœur", 18),
+    ("Spirale", 19),
+    ("Vague", 20),
+    ("Coche", 21),
+    ("Peinture", 22),
     ("Image…", 3),
     ("Fond", 11),
+    ("Solide", 14),
+    ("Nul", 12),
+    ("Effets", 13),
 ];
 
 fn secs(t: f32) -> String {
@@ -2802,7 +2213,10 @@ fn secs(t: f32) -> String {
 
 fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
     ui.label(RichText::new(label).size(12.5).color(MUTED));
-    ui.add(egui::Slider::new(v, range).suffix(suffix).max_decimals(2));
+    ui.scope(|ui| {
+        ui.spacing_mut().slider_width = (ui.available_width() - 112.0).max(60.0);
+        ui.add(egui::Slider::new(v, range).suffix(suffix).max_decimals(2));
+    });
 }
 
 fn color_button(ui: &mut Ui, c: &mut [u8; 4]) {
@@ -2845,7 +2259,7 @@ fn bg_editor(ui: &mut Ui, comp: &mut Comp) {
     });
 }
 
-fn content_editor(ui: &mut Ui, content: &mut Content) {
+fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
     match content {
         Content::Rect { w, h, r, color } => {
             size_row(ui, w, h);
@@ -2857,8 +2271,12 @@ fn content_editor(ui: &mut Ui, content: &mut Content) {
             size_row(ui, w, h);
             color_row(ui, color);
         }
-        Content::Text { text, size, color, bold, family, italic, tracking, align } => {
-            ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY));
+        Content::Text { text, size, color, bold, family, italic, tracking, align, vertical } => {
+            let te = ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY).id_salt("text-content"));
+            if focus {
+                te.request_focus();
+            }
+            ui.checkbox(vertical, "Texte vertical");
             ui.label(RichText::new("Taille").size(12.5).color(MUTED));
             ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
             egui::ComboBox::from_id_salt("font").selected_text(family.as_str()).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
@@ -2925,7 +2343,75 @@ fn content_editor(ui: &mut Ui, content: &mut Content) {
             color_row(ui, color);
             ui.label(RichText::new("Compte pendant 80 % de la durée du calque").size(12.0).color(FAINT));
         }
+        Content::Path { pts, closed, color, fill } => {
+            ui.label(RichText::new(format!("{} sommets · outil Plume (G) pour éditer", pts.len())).size(12.0).color(FAINT));
+            ui.horizontal(|ui| {
+                ui.checkbox(closed, "Tracé fermé");
+                ui.checkbox(fill, "Remplir");
+            });
+            ui.horizontal(|ui| {
+                if ui.small_button("Tout lisser").clicked() {
+                    smooth_all(pts, *closed);
+                }
+                if ui.small_button("Tout en angles").clicked() {
+                    for v in pts.iter_mut() {
+                        v.i = [0.0; 2];
+                        v.o = [0.0; 2];
+                    }
+                }
+                if ui.small_button("Inverser").clicked() {
+                    pts.reverse();
+                    for v in pts.iter_mut() {
+                        std::mem::swap(&mut v.i, &mut v.o);
+                    }
+                }
+            });
+            if *fill {
+                color_row(ui, color);
+            } else {
+                ui.label(RichText::new("Sans remplissage : règle le contour dans Apparence.").size(11.5).color(FAINT));
+            }
+        }
+        Content::Strokes { strokes, width, color } => {
+            ui.label(RichText::new(format!("{} traits · Pinceau (Ctrl+B) pour peindre, Gomme pour effacer", strokes.len())).size(12.0).color(FAINT));
+            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+            ui.add(egui::Slider::new(width, 0.5..=200.0).logarithmic(true).suffix(" px"));
+            ui.horizontal(|ui| {
+                if ui.add_enabled(!strokes.is_empty(), egui::Button::new("Annuler le dernier trait").small()).clicked() {
+                    strokes.pop();
+                }
+                if ui.add_enabled(!strokes.is_empty(), egui::Button::new("Tout effacer").small()).clicked() {
+                    strokes.clear();
+                }
+            });
+            color_row(ui, color);
+        }
+        Content::Null => {
+            ui.label(RichText::new("Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.").size(12.0).color(FAINT));
+        }
+        Content::Adjust { w, h } => {
+            size_row(ui, w, h);
+            ui.label(RichText::new("Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.").size(12.0).color(FAINT));
+        }
     }
+}
+
+fn smooth_all(pts: &mut [model::Vtx], closed: bool) {
+    for k in 0..pts.len() {
+        smooth_vertex(pts, k, closed);
+    }
+}
+
+fn smooth_vertex(pts: &mut [model::Vtx], k: usize, closed: bool) {
+    let n = pts.len();
+    if n < 2 {
+        return;
+    }
+    let prev = if k == 0 { if closed { pts[n - 1].p } else { pts[0].p } } else { pts[k - 1].p };
+    let next = if k + 1 == n { if closed { pts[0].p } else { pts[n - 1].p } } else { pts[k + 1].p };
+    let (dx, dy) = ((next[0] - prev[0]) / 6.0, (next[1] - prev[1]) / 6.0);
+    pts[k].i = [-dx, -dy];
+    pts[k].o = [dx, dy];
 }
 
 fn diamond(p: &Painter, c: Pos2, d: f32, color: Color32) {
@@ -2962,6 +2448,47 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
     let cen = r.center();
     let u = r.width() / 2.0;
     match g {
+        G::Path => {
+            let pts: Vec<Pos2> = (0..=16).map(|k| {
+                let u2 = k as f32 / 16.0;
+                pos2(r.left() + u2 * r.width(), cen.y + (u2 * std::f32::consts::TAU).sin() * u * 0.55)
+            }).collect();
+            for q in pts.iter().step_by(2) {
+                p.circle_filled(*q, 1.3, c);
+            }
+            p.rect_filled(Rect::from_center_size(pts[4], Vec2::splat(u * 0.5)), CornerRadius::ZERO, c);
+            p.rect_filled(Rect::from_center_size(pts[12], Vec2::splat(u * 0.5)), CornerRadius::ZERO, c);
+        }
+        G::Onion => {
+            p.circle_stroke(cen - vec2(u * 0.4, 0.0), u * 0.55, Stroke::new(1.0, c.gamma_multiply(0.5)));
+            p.circle_stroke(cen + vec2(u * 0.4, 0.0), u * 0.55, Stroke::new(1.0, c.gamma_multiply(0.5)));
+            p.circle_filled(cen, u * 0.55, c);
+        }
+        G::Checker => {
+            p.rect_stroke(r, CornerRadius::same(2), Stroke::new(1.0, c), StrokeKind::Middle);
+            let h = r.width() / 4.0;
+            for y in 0..4 {
+                for x in 0..4 {
+                    if (x + y) % 2 == 0 {
+                        p.rect_filled(Rect::from_min_size(r.min + vec2(x as f32 * h, y as f32 * h), Vec2::splat(h)), CornerRadius::ZERO, c);
+                    }
+                }
+            }
+        }
+        G::Ruler => {
+            p.rect_stroke(Rect::from_min_max(r.min, pos2(r.right(), r.top() + u * 0.6)), CornerRadius::ZERO, s, StrokeKind::Middle);
+            p.rect_stroke(Rect::from_min_max(r.min, pos2(r.left() + u * 0.6, r.bottom())), CornerRadius::ZERO, s, StrokeKind::Middle);
+            for k in 1..4 {
+                let f = k as f32 / 4.0;
+                p.line_segment([pos2(r.left() + r.width() * f, r.top()), pos2(r.left() + r.width() * f, r.top() + u * 0.35)], Stroke::new(1.0, c));
+                p.line_segment([pos2(r.left(), r.top() + r.height() * f), pos2(r.left() + u * 0.35, r.top() + r.height() * f)], Stroke::new(1.0, c));
+            }
+        }
+        G::Ruler2 => {
+            p.line_segment([pos2(cen.x - u * 0.3, r.top()), pos2(cen.x - u * 0.3, r.bottom())], Stroke::new(1.4, c));
+            p.line_segment([pos2(r.left(), cen.y + u * 0.3), pos2(r.right(), cen.y + u * 0.3)], Stroke::new(1.4, c));
+            p.rect_stroke(r, CornerRadius::same(2), Stroke::new(1.0, c.gamma_multiply(0.5)), StrokeKind::Middle);
+        }
         G::Select => {
             p.add(Shape::convex_polygon(vec![r.left_top() + vec2(u * 0.3, 0.0), r.left_top() + vec2(u * 0.3, u * 1.7), cen + vec2(-u * 0.05, u * 0.35), cen + vec2(u * 0.75, u * 0.35)], c, Stroke::NONE));
         }
@@ -3035,10 +2562,6 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
         G::Marker => {
             p.add(Shape::convex_polygon(vec![r.left_top() + vec2(u * 0.3, 0.0), r.right_top() - vec2(u * 0.3, 0.0), pos2(r.right() - u * 0.3, cen.y + u * 0.2), pos2(cen.x, r.bottom()), pos2(r.left() + u * 0.3, cen.y + u * 0.2)], c, Stroke::NONE));
         }
-        G::Half => {
-            p.rect_stroke(r, CornerRadius::same(2), s, StrokeKind::Middle);
-            p.rect_filled(Rect::from_min_max(r.min, pos2(cen.x, r.bottom())), CornerRadius::same(2), c);
-        }
     }
 }
 
@@ -3091,9 +2614,53 @@ fn layer_glyph(p: &Painter, r: Rect, kind: u8, c: Color32) {
         2 => {
             p.circle_stroke(r.center(), r.width() * 0.45, s);
         }
-        11 => {
-            p.rect_filled(r.shrink2(vec2(0.0, 2.0)), CornerRadius::same(3), c.gamma_multiply(0.5));
+        11 | 14 => {
+            p.rect_filled(r.shrink2(vec2(0.0, 2.0)), CornerRadius::same(3), c.gamma_multiply(if kind == 14 { 0.9 } else { 0.5 }));
             p.rect_stroke(r.shrink2(vec2(0.0, 2.0)), CornerRadius::same(3), s, StrokeKind::Middle);
+        }
+        12 => {
+            p.rect_stroke(r.shrink(2.0), CornerRadius::ZERO, Stroke::new(1.4, Color32::from_rgb(255, 120, 120)), StrokeKind::Middle);
+            p.line_segment([r.center() - vec2(4.0, 0.0), r.center() + vec2(4.0, 0.0)], Stroke::new(1.2, c));
+            p.line_segment([r.center() - vec2(0.0, 4.0), r.center() + vec2(0.0, 4.0)], Stroke::new(1.2, c));
+        }
+        13 => {
+            p.rect_stroke(r.shrink(1.0), CornerRadius::same(3), s, StrokeKind::Middle);
+            p.rect_filled(Rect::from_min_max(r.shrink(1.0).min, pos2(r.center().x, r.shrink(1.0).bottom())), CornerRadius::same(3), c.gamma_multiply(0.6));
+        }
+        15 => {
+            p.rect_stroke(r.shrink2(vec2(0.0, 3.0)), CornerRadius::same(7), s, StrokeKind::Middle);
+        }
+        16 => {
+            p.add(Shape::closed_line(ring(4, 1.0), s));
+        }
+        17 => {
+            p.line_segment([r.center_top() + vec2(-5.0, 2.0), r.center_top() + vec2(5.0, 2.0)], Stroke::new(2.2, c));
+            p.line_segment([r.center_top() + vec2(0.0, 2.0), r.center_bottom()], Stroke::new(2.2, c));
+            p.line_segment([r.right_top() + vec2(-1.0, 3.0), r.right_bottom() - vec2(1.0, 2.0)], Stroke::new(1.0, c));
+        }
+        18 => {
+            let cc = r.center();
+            p.circle_filled(cc + vec2(-3.5, -2.5), 4.5, c);
+            p.circle_filled(cc + vec2(3.5, -2.5), 4.5, c);
+            p.add(Shape::convex_polygon(vec![cc + vec2(-8.0, -1.0), cc + vec2(8.0, -1.0), cc + vec2(0.0, 8.0)], c, Stroke::NONE));
+        }
+        19 => {
+            let pts: Vec<Pos2> = (0..40).map(|k| {
+                let a = k as f32 * 0.32;
+                r.center() + vec2(a.cos(), a.sin()) * (1.0 + k as f32 * 0.22)
+            }).collect();
+            p.add(Shape::line(pts, Stroke::new(1.6, c)));
+        }
+        20 => {
+            let pts: Vec<Pos2> = (0..=24).map(|k| pos2(r.left() + k as f32 / 24.0 * r.width(), r.center().y + (k as f32 / 24.0 * std::f32::consts::TAU * 1.5).sin() * 4.0)).collect();
+            p.add(Shape::line(pts, Stroke::new(2.0, c)));
+        }
+        21 => {
+            p.add(Shape::line(vec![r.center() + vec2(-7.0, 0.0), r.center() + vec2(-2.0, 5.0), r.center() + vec2(8.0, -6.0)], Stroke::new(2.4, c)));
+        }
+        22 => {
+            p.line_segment([r.right_top() + vec2(-2.0, 2.0), r.center()], Stroke::new(2.4, c));
+            p.circle_filled(r.center() + vec2(-3.0, 3.0), 4.0, c);
         }
         _ => {
             p.rect_stroke(r.shrink(1.0), CornerRadius::same(3), s, StrokeKind::Middle);

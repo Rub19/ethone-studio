@@ -29,11 +29,11 @@ pub const MOTION: &[Tuto] = &[
         "Flou px s'anime : parfait pour une mise au point ou un titre qui sort du flou.",
         "Révélation % dévoile le calque de gauche à droite ; sur un anneau, c'est la longueur de l'arc.",
     ]),
-    t("Animations prêtes", "", "27 animations classées : entrées, sorties, boucles, effets.", &[
+    t("Animations prêtes", "", "45 animations classées : entrées, sorties, boucles, effets, 3D, tracés, texte.", &[
         "Sélectionne un calque, place la tête, clique une animation. La recherche filtre la liste.",
         "Elles créent de vraies images clés que tu peux ajuster ensuite.",
     ]),
-    t("Modèles", "", "Bandeau titre, titre cinéma, bouton S'abonner, compte à rebours, barre de progression, citation.", &[
+    t("Modèles", "", "Bandeau titre, titre cinéma, bouton S'abonner, compte à rebours, barre de progression, citation, coche validée, titre lettre par lettre.", &[
         "Clique un modèle : ses calques arrivent déjà animés à la tête de lecture.",
         "Change ensuite les textes et les couleurs dans le panneau Contenu.",
     ]),
@@ -54,7 +54,7 @@ pub const MOTION: &[Tuto] = &[
     ]),
     t("Masque", "", "Voir un calque à travers la forme d'un autre.", &[
         "Place le calque pochoir juste au-dessus dans la timeline.",
-        "Sur le calque du dessous, choisis Masque > Alpha (la forme) ou Luminance (le clair laisse passer).",
+        "Sur le calque du dessous, choisis Masque > Alpha (la forme) ou Luminance (le clair laisse passer), ou leurs versions inversées pour voir autour.",
         "Idéal pour un dégradé ou une image visible seulement à travers un texte.",
     ]),
     t("Machine à écrire", "", "Le texte apparaît lettre par lettre.", &["Sélectionne un calque texte, règle Machine à écrire dans Mouvement (durée en secondes).", "Ou applique l'animation prête Machine à écrire."]),
@@ -88,9 +88,89 @@ pub const MOTION: &[Tuto] = &[
     t("Fractionner", "Ctrl+Maj+D", "Coupe un calque en deux à la tête de lecture.", &["Sélectionne le calque, place la tête, Calque > Fractionner."]),
     t("Ordre des calques", "Ctrl+] / Ctrl+[", "Le calque du haut de la liste passe devant.", &["Calque > Monter, Descendre, Premier plan ou Arrière-plan."]),
     t("Composition", "Ctrl+K", "Format, images par seconde, durée et fond.", &["Clique la pastille en haut à droite. Ajuster à l'animation coupe la durée juste après la dernière clé.", "Le fond peut être un dégradé vertical."]),
-    t("Exporter", "Ctrl+M", "MP4, GIF, séquence PNG, image PNG ou SVG.", &[
-        "MP4 : la vidéo à publier partout. GIF : léger, pour le web et les messages.",
-        "Choisis la taille (25 à 200 %), la plage (toute la composition ou la zone de travail) et le fond transparent pour PNG et GIF.",
-        "SVG exporte l'image affichée en vectoriel, modifiable dans Vector.",
+    t("Exporter", "Ctrl+M", "MP4, GIF, séquences PNG ou SVG, image, planche contact, Lottie.", &[
+        "MP4 : choisis la qualité (débit). GIF : images par seconde, nombre de boucles et qualité de palette.",
+        "Plage : toute la composition, la zone de travail ou des images précises. Séquences : préfixe, premier numéro, une image sur N.",
+        "Planche : une grille d'images pour présenter l'animation. Lottie JSON : formes, tracés et transformations pour le web et les apps.",
+    ]),
+    t("File de rendu", "Ctrl+Alt+M", "Plusieurs exports d'un coup.", &[
+        "Dans Exporter, règle un format puis « Ajouter à la file » et choisis le fichier.",
+        "Recommence pour d'autres formats, puis ouvre la file et lance le rendu : tout s'enchaîne en arrière-plan.",
+    ]),
+    t("Barre d'outils", "V H Z W Y Q G", "Les outils sont regroupés comme dans Adobe.", &[
+        "Le petit triangle d'une case indique d'autres outils : clic droit ou clic maintenu pour les voir.",
+        "Appuyer de nouveau sur le raccourci fait défiler les outils du groupe (Q : rectangle, arrondi, ellipse, polygone, étoile).",
+        "La barre au-dessus de la vue montre les options de l'outil actif : couleurs, contour, côtés, police, taille du pinceau…",
+    ]),
+    t("Formes dessinées", "Q", "Rectangle, rectangle arrondi, ellipse, polygone, étoile.", &[
+        "Glisse dans la vue pour tracer la forme : Maj garde les proportions, Alt part du centre.",
+        "Un simple clic pose une forme de taille standard.",
+    ]),
+    t("Plume et tracés", "G", "Dessine des courbes de Bézier.", &[
+        "Clic : un sommet en angle. Clic-glisser : un sommet courbe avec ses poignées. Clic sur le premier sommet : fermer. Entrée ou Échap : terminer.",
+        "Ajout de sommet : clic sur un segment. Suppression : clic sur un sommet. Conversion : passe d'angle à courbe ou tire de nouvelles poignées.",
+        "Avec la Sélection, glisse les sommets et les poignées (Alt casse la symétrie).",
+    ]),
+    t("Couper le tracé", "", "Fait apparaître un contour comme s'il se dessinait.", &[
+        "Dans Tracé et opérateurs, anime Début, Fin et Décalage (en %). Marche sur les tracés, formes, lignes, anneaux et peintures.",
+        "« Un par un » dessine plusieurs traits à la suite. Animations prêtes : Tracé dessiné, Tracé effacé, Tracé qui court.",
+    ]),
+    t("Opérateurs de forme", "", "Arrondir les angles, fronce et dilatation, zigzag, agitation, torsion.", &[
+        "Ils déforment la silhouette sans toucher au calque : une étoile aux pointes rondes, un cercle ondulé, une forme qui frémit.",
+        "Agitation avec une vitesse > 0 fait vibrer le contour en continu.",
+    ]),
+    t("Texte", "Ctrl+T", "Texte horizontal ou vertical, posé d'un clic.", &[
+        "Clique dans la vue avec l'outil Texte : le calque est créé et le champ de saisie s'active. Ctrl+T bascule entre horizontal et vertical.",
+    ]),
+    t("Animateur de texte", "", "Anime les lettres une par une.", &[
+        "Active « Animer lettre par lettre » : choisis entrée, sortie ou les deux, l'ordre (gauche → droite, aléatoire, centre…), le décalage et la courbe.",
+        "Règle les valeurs de départ : opacité, décalage, échelle et rotation de chaque lettre.",
+    ]),
+    t("Pinceau et gomme", "Ctrl+B", "Peins à main levée sur un calque Peinture.", &[
+        "Glisse dans la vue : chaque trait est lissé et reste vectoriel. La gomme coupe les traits qu'elle touche.",
+        "Anime Fin du tracé avec « Un par un » pour rejouer le dessin trait après trait.",
+    ]),
+    t("Point d'ancrage", "Y", "Le centre de rotation et d'échelle.", &[
+        "Avec l'outil Point d'ancrage, glisse la croix : le calque ne bouge pas mais tournera autour du nouveau point.",
+        "Les boutons Centre, Haut, Bas, Gauche, Droite le placent sur la boîte du calque. Ctrl+Alt+Origine le recentre.",
+    ]),
+    t("Zoom et vue", "Z / . / ,", "Zoom avant et arrière, règles et repères.", &[
+        "Outil Zoom : clic pour zoomer sur le point, Alt+clic pour reculer. Point et virgule zooment aussi.",
+        "Ctrl+R affiche les règles : glisse depuis une règle pour tirer un repère, l'accroche aimante les calques.",
+        "Damier de transparence, pelure d'oignon (images voisines en rouge et bleu) et qualité d'aperçu sont dans la barre de la vue.",
+    ]),
+    t("Nouvelles propriétés", "P S R T A", "Ancre, échelle X/Y, rotation 3D, teinte animée.", &[
+        "Rotation X et Y donnent une fausse perspective : parfait pour une carte qui se retourne.",
+        "P, S, R, T et A n'affichent dans la timeline que la position, l'échelle, la rotation, l'opacité ou l'ancre ; U revient aux propriétés animées.",
+    ]),
+    t("Éditeur de courbe", "", "Courbe de Bézier sur mesure entre deux clés.", &[
+        "Clique une clé : l'Éditeur de courbe montre le trajet. Glisse les deux poignées ou choisis un préréglage (Material, Expo, Fluide Apple…).",
+        "« Vitesse » affiche le graphique de vitesse. « Copier sur la sélection » applique la courbe à toutes les clés choisies.",
+    ]),
+    t("Sélection de clés", "Maj+clic", "Déplacer, copier et coller plusieurs clés.", &[
+        "Maj ou Ctrl+clic ajoute une clé à la sélection, Ctrl+A prend toutes celles du calque. Glisse-en une : tout le groupe suit.",
+        "Ctrl+C / Ctrl+V copie les clés et les colle à la tête de lecture ; Suppr les efface.",
+        "Maj+F9 ralentit à l'arrivée, Ctrl+Maj+F9 démarre en douceur, Ctrl+Alt+H bascule le maintien.",
+    ]),
+    t("Expressions", "", "Tremblement et boucles sur n'importe quelle propriété.", &[
+        "Clic droit sur le nom d'une propriété : règle un tremblement (amplitude, fréquence) et ce qui se passe après la dernière clé.",
+        "Cycle rejoue, Aller-retour fait la navette, Décalage cumule (une rotation infinie), Continuer prolonge la vitesse.",
+    ]),
+    t("Calques spéciaux", "", "Nul, calque d'effets, solide, peinture.", &[
+        "Un nul est invisible : sers-t'en comme parent. Calque > Créer un nul parent le fait pour toi.",
+        "Un calque d'effets applique ses réglages (couleur, flou, grain…) à tout ce qui est en dessous ; son opacité dose l'effet.",
+    ]),
+    t("Effets avancés", "", "Couleur, stylisation, flous, lumière.", &[
+        "Couleur : contraste, gamma, sépia, teinte bicolore, inversion, seuil, postérisation, remplissage.",
+        "Stylisation : séparation RVB, glitch, grain, distorsion, scintillement. Flous : directionnel et radial. Ombre interne.",
+        "Finition de l'image (sans calque sélectionné) : vignettage, grain film et bandes cinéma pour toute la composition.",
+    ]),
+    t("Temps du calque", "[ ] Alt+[ Alt+]", "Vitesse, inversion, image figée.", &[
+        "Panneau Temps : vitesse en %, décalage, lecture inversée ou image figée.",
+        "[ et ] déplacent le calque pour qu'il commence ou finisse à la tête ; Alt+[ et Alt+] le coupent.",
+    ]),
+    t("Trajectoires", "", "Le chemin d'un calque animé.", &[
+        "Les points montrent chaque image, les carrés jaunes les clés de position : glisse un carré pour modifier la trajectoire.",
+        "Orientation auto fait tourner le calque dans le sens de son déplacement.",
     ]),
 ];
