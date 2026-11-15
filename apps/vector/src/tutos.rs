@@ -5,6 +5,8 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const VECTOR: &[Tuto] = &[
+    t("Effets bitmap", "", "Plus de 100 effets appliqués aux exports PNG et JPEG.", &["Panneau Effets bitmap > + Ajouter un effet : grain, looks, lueur, tramage rétro, glitch…", "Le dessin reste vectoriel : les effets ne s'appliquent qu'à l'export en image."]),
+    t("Formes prêtes", "", "50 formes : cœurs, étoiles, flèches, bannières, écussons, bulles, vagues, spirales…", &["Panneau Formes prêtes : un clic insère la forme au centre du plan de travail, modifiable point par point."]),
     t("Outils groupés", "Clic droit", "Les outils proches partagent une case, comme dans Illustrator.", &[
         "Le petit triangle d'une case signale d'autres outils cachés dessous.",
         "Clic droit, clic maintenu ou clic sur le triangle : le menu de la case s'ouvre.",

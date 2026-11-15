@@ -1646,6 +1646,17 @@ impl VectorApp {
         let mut pix = tiny_skia::Pixmap::new((w * scale).round().max(1.0) as u32, (h * scale).round().max(1.0) as u32).ok_or("taille invalide")?;
         let sx = pix.width() as f32 / tree.size().width();
         resvg::render(&tree, tiny_skia::Transform::from_scale(sx, sx), &mut pix.as_mut());
+        if studio_fx::stack::active(&self.doc.raster_fx) {
+            let mut img = image::RgbaImage::new(pix.width(), pix.height());
+            for (d, s) in img.pixels_mut().zip(pix.pixels()) {
+                let c = s.demultiply();
+                d.0 = [c.red(), c.green(), c.blue(), c.alpha()];
+            }
+            studio_fx::stack::apply(&mut img, &self.doc.raster_fx);
+            for (d, s) in pix.pixels_mut().iter_mut().zip(img.pixels()) {
+                *d = tiny_skia::ColorU8::from_rgba(s.0[0], s.0[1], s.0[2], s.0[3]).premultiply();
+            }
+        }
         Ok(pix)
     }
 

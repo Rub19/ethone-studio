@@ -267,6 +267,8 @@ pub struct Doc {
     pub styles: Vec<Named>,
     #[serde(default)]
     pub swatches: Vec<[u8; 4]>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub raster_fx: Vec<studio_fx::stack::Fx>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -1067,7 +1069,7 @@ fn head_shape(kind: u8, c: &str) -> String {
 
 impl Doc {
     pub fn new(width: f32, height: f32) -> Self {
-        Self { width, height, background: Some([255, 255, 255, 255]), items: Vec::new(), boards: Vec::new(), layers: Vec::new(), guides: Vec::new(), symbols: Vec::new(), styles: Vec::new(), swatches: Vec::new() }
+        Self { width, height, background: Some([255, 255, 255, 255]), items: Vec::new(), boards: Vec::new(), layers: Vec::new(), guides: Vec::new(), symbols: Vec::new(), styles: Vec::new(), swatches: Vec::new(), raster_fx: Vec::new() }
     }
 
     pub fn all_boards(&self) -> Vec<Board> {
@@ -1667,7 +1669,7 @@ pub fn blend_items(a: &Item, b: &Item, steps: usize) -> Vec<Item> {
         .collect()
 }
 
-pub const SHAPES: [&str; 10] = ["Bulle", "Croix", "Éclair", "Repère", "Nuage", "Coche", "Engrenage", "Goutte", "Lune", "Badge"];
+pub const SHAPES: &[&str] = &["Bulle", "Croix", "Éclair", "Repère", "Nuage", "Coche", "Engrenage", "Goutte", "Lune", "Badge", "Cœur", "Étoile 5 branches", "Étoile 6 branches", "Étoile 8 branches", "Étincelle", "Explosion 12", "Explosion 24", "Soleil", "Fleur", "Triangle", "Losange", "Pentagone", "Hexagone", "Octogone", "Trapèze", "Parallélogramme", "Flèche droite", "Flèche gauche", "Flèche haut", "Flèche bas", "Double flèche", "Chevron", "Bannière", "Étiquette", "Écusson", "Maison", "Signet", "Drapeau", "Croix diagonale", "Bulle ronde", "Feuille", "Vague", "Zigzag", "Spirale", "Lecture", "Pile", "Infini", "Engrenage fin", "Sceau", "Cible"];
 
 pub fn preset_shape(kind: usize, x: f32, y: f32, w: f32, h: f32) -> (Vec<Node>, bool) {
     let at = |u: f32, v: f32| [x + u * w, y + v * h];
@@ -1686,6 +1688,7 @@ pub fn preset_shape(kind: usize, x: f32, y: f32, w: f32, h: f32) -> (Vec<Node>, 
             })
             .collect()
     };
+    let alt = |a: f32, k: usize, hi: f32, lo: f32| if ((a + std::f32::consts::FRAC_PI_2) / std::f32::consts::TAU * k as f32).round() as usize % 2 == 0 { hi } else { lo };
     match kind {
         0 => (poly(&[(0.0, 0.0), (1.0, 0.0), (1.0, 0.75), (0.45, 0.75), (0.2, 1.0), (0.25, 0.75), (0.0, 0.75)]), true),
         1 => (poly(&[(0.35, 0.0), (0.65, 0.0), (0.65, 0.35), (1.0, 0.35), (1.0, 0.65), (0.65, 0.65), (0.65, 1.0), (0.35, 1.0), (0.35, 0.65), (0.0, 0.65), (0.0, 0.35), (0.35, 0.35)]), true),
@@ -1719,7 +1722,71 @@ pub fn preset_shape(kind: usize, x: f32, y: f32, w: f32, h: f32) -> (Vec<Node>, 
             smooth(&mut n, true);
             (n, true)
         }
-        _ => (ring(32, &|a| if ((a * 16.0 / std::f32::consts::TAU).rem_euclid(1.0)) < 0.5 { 1.0 } else { 0.84 }), true),
+        10 => {
+            let pts: Vec<(f32, f32)> = (0..48).map(|i| {
+                let t = i as f32 / 48.0 * std::f32::consts::TAU;
+                let x = 16.0 * t.sin().powi(3);
+                let y = 13.0 * t.cos() - 5.0 * (2.0 * t).cos() - 2.0 * (3.0 * t).cos() - (4.0 * t).cos();
+                (0.5 + x / 34.0, 0.45 - y / 34.0)
+            }).collect();
+            (poly(&pts), true)
+        }
+        11 => (ring(10, &|a| alt(a, 10, 1.0, 0.42)), true),
+        12 => (ring(12, &|a| alt(a, 12, 1.0, 0.55)), true),
+        13 => (ring(16, &|a| alt(a, 16, 1.0, 0.62)), true),
+        14 => (ring(8, &|a| alt(a, 8, 1.0, 0.25)), true),
+        15 => (ring(24, &|a| alt(a, 24, 1.0, 0.72)), true),
+        16 => (ring(48, &|a| alt(a, 48, 1.0, 0.84)), true),
+        17 => (ring(32, &|a| alt(a, 32, 1.0, 0.64)), true),
+        18 => (ring(72, &|a| 0.55 + 0.45 * (2.5 * (a + std::f32::consts::FRAC_PI_2)).cos().abs()), true),
+        19 => (poly(&[(0.5, 0.0), (1.0, 1.0), (0.0, 1.0)]), true),
+        20 => (poly(&[(0.5, 0.0), (1.0, 0.5), (0.5, 1.0), (0.0, 0.5)]), true),
+        21 => (ring(5, &|_| 1.0), true),
+        22 => (ring(6, &|_| 1.0), true),
+        23 => (ring(8, &|_| 1.0), true),
+        24 => (poly(&[(0.2, 0.0), (0.8, 0.0), (1.0, 1.0), (0.0, 1.0)]), true),
+        25 => (poly(&[(0.25, 0.0), (1.0, 0.0), (0.75, 1.0), (0.0, 1.0)]), true),
+        26 => (poly(&[(0.0, 0.3), (0.6, 0.3), (0.6, 0.05), (1.0, 0.5), (0.6, 0.95), (0.6, 0.7), (0.0, 0.7)]), true),
+        27 => (poly(&[(1.0, 0.3), (0.4, 0.3), (0.4, 0.05), (0.0, 0.5), (0.4, 0.95), (0.4, 0.7), (1.0, 0.7)]), true),
+        28 => (poly(&[(0.3, 1.0), (0.3, 0.4), (0.05, 0.4), (0.5, 0.0), (0.95, 0.4), (0.7, 0.4), (0.7, 1.0)]), true),
+        29 => (poly(&[(0.3, 0.0), (0.3, 0.6), (0.05, 0.6), (0.5, 1.0), (0.95, 0.6), (0.7, 0.6), (0.7, 0.0)]), true),
+        30 => (poly(&[(0.0, 0.5), (0.25, 0.1), (0.25, 0.32), (0.75, 0.32), (0.75, 0.1), (1.0, 0.5), (0.75, 0.9), (0.75, 0.68), (0.25, 0.68), (0.25, 0.9)]), true),
+        31 => (poly(&[(0.0, 0.0), (0.55, 0.0), (1.0, 0.5), (0.55, 1.0), (0.0, 1.0), (0.45, 0.5)]), true),
+        32 => (poly(&[(0.0, 0.2), (1.0, 0.2), (0.88, 0.5), (1.0, 0.8), (0.0, 0.8), (0.12, 0.5)]), true),
+        33 => (poly(&[(0.0, 0.2), (0.7, 0.2), (1.0, 0.5), (0.7, 0.8), (0.0, 0.8)]), true),
+        34 => (round(&[(0.5, 0.0), (1.0, 0.12), (0.95, 0.55), (0.5, 1.0), (0.05, 0.55), (0.0, 0.12)]), true),
+        35 => (poly(&[(0.5, 0.0), (1.0, 0.45), (0.85, 0.45), (0.85, 1.0), (0.15, 1.0), (0.15, 0.45), (0.0, 0.45)]), true),
+        36 => (poly(&[(0.15, 0.0), (0.85, 0.0), (0.85, 1.0), (0.5, 0.75), (0.15, 1.0)]), true),
+        37 => (poly(&[(0.0, 0.0), (1.0, 0.0), (0.75, 0.3), (1.0, 0.6), (0.12, 0.6), (0.12, 1.0), (0.0, 1.0)]), true),
+        38 => (poly(&[(0.15, 0.0), (0.5, 0.35), (0.85, 0.0), (1.0, 0.15), (0.65, 0.5), (1.0, 0.85), (0.85, 1.0), (0.5, 0.65), (0.15, 1.0), (0.0, 0.85), (0.35, 0.5), (0.0, 0.15)]), true),
+        39 => {
+            let mut pts: Vec<(f32, f32)> = (0..=28).map(|i| {
+                let a = 0.75 * std::f32::consts::PI + i as f32 / 28.0 * 1.85 * std::f32::consts::PI;
+                (0.5 + a.cos() * 0.5, 0.42 + a.sin() * 0.42)
+            }).collect();
+            pts.push((0.1, 1.0));
+            (round(&pts), true)
+        }
+        40 => (round(&[(0.0, 1.0), (0.1, 0.45), (0.45, 0.1), (1.0, 0.0), (0.9, 0.55), (0.55, 0.9)]), true),
+        41 => (poly(&(0..=40).map(|i| (i as f32 / 40.0, 0.5 + (i as f32 / 40.0 * std::f32::consts::TAU * 2.0).sin() * 0.35)).collect::<Vec<_>>()), false),
+        42 => (poly(&(0..=8).map(|i| (i as f32 / 8.0, if i % 2 == 0 { 0.8 } else { 0.2 })).collect::<Vec<_>>()), false),
+        43 => (poly(&(0..=120).map(|i| {
+            let t = i as f32 / 120.0;
+            let a = t * std::f32::consts::TAU * 3.0;
+            (0.5 + a.cos() * 0.5 * t, 0.5 + a.sin() * 0.5 * t)
+        }).collect::<Vec<_>>()), false),
+        44 => (poly(&[(0.1, 0.0), (1.0, 0.5), (0.1, 1.0)]), true),
+        45 => (poly(&[(0.0, 0.2), (0.9, 0.2), (0.9, 0.38), (1.0, 0.38), (1.0, 0.62), (0.9, 0.62), (0.9, 0.8), (0.0, 0.8)]), true),
+        46 => (poly(&(0..64).map(|i| {
+            let t = i as f32 / 64.0 * std::f32::consts::TAU;
+            let d = 1.0 + t.sin().powi(2);
+            (0.5 + 0.48 * t.cos() / d, 0.5 + 0.48 * t.sin() * t.cos() / d * 1.6)
+        }).collect::<Vec<_>>()), true),
+        47 => (ring(96, &|a| if ((a * 12.0 / std::f32::consts::TAU).rem_euclid(1.0)) < 0.5 { 1.0 } else { 0.86 }), true),
+        48 => (ring(60, &|a| alt(a, 60, 1.0, 0.92)), true),
+        49 => (ring(4, &|_| 1.0), true),
+        9 => (ring(32, &|a| if ((a * 16.0 / std::f32::consts::TAU).rem_euclid(1.0)) < 0.5 { 1.0 } else { 0.84 }), true),
+        _ => (ring(4, &|_| 1.0), true),
     }
 }
 
@@ -1818,6 +1885,7 @@ mod tests {
         for k in 0..SHAPES.len() {
             let (n, _) = preset_shape(k, 0.0, 0.0, 100.0, 100.0);
             assert!(n.len() >= 3, "{k}");
+            assert!(n.iter().all(|p| p.p[0].is_finite() && p.p[1].is_finite()), "{k}");
         }
         let mut e = Doc::new(500.0, 500.0);
         e.items.push(Item { geom: Geom::Rect { x: 100.0, y: 200.0, w: 50.0, h: 20.0, r: 0.0 }, fill: Some([0; 4]), radial: true, fill2: Some([255; 4]), blend: 1, ..Item::blank() });
