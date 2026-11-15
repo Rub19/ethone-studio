@@ -666,6 +666,25 @@ impl Pixel {
             if let Some(t) = &self.tex {
                 image_quad(&painter, t.id(), doc_q, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)));
             }
+            if let Some((t, split)) = &self.compare {
+                let s = split.clamp(0.0, 1.0);
+                image_quad(&painter, t.id(), v.quad(0.0, 0.0, w * s, h), Rect::from_min_max(pos2(0.0, 0.0), pos2(s, 1.0)));
+                let (a, b) = (v.to_scr((w * s, 0.0)), v.to_scr((w * s, h)));
+                painter.line_segment([a, b], Stroke::new(2.0, Color32::WHITE));
+                let mid = a + (b - a) * 0.5;
+                painter.circle_filled(mid, 11.0, Color32::WHITE);
+                painter.text(mid, Align2::CENTER_CENTER, "⇔", FontId::proportional(13.0), Color32::BLACK);
+                painter.text(a + vec2(-8.0, 10.0), Align2::RIGHT_TOP, "Avant", semibold(12.0), Color32::WHITE);
+                painter.text(a + vec2(8.0, 10.0), Align2::LEFT_TOP, "Après", semibold(12.0), Color32::WHITE);
+                let grip = Rect::from_two_pos(a, b).expand2(vec2(8.0, 0.0));
+                let r = ui.interact(grip, ui.make_persistent_id("compare-split"), Sense::drag()).on_hover_cursor(egui::CursorIcon::ResizeHorizontal);
+                if r.dragged()
+                    && let Some(p) = r.interact_pointer_pos()
+                    && let Some((_, sp)) = &mut self.compare
+                {
+                    *sp = (v.to_doc(p).0 / w).clamp(0.0, 1.0);
+                }
+            }
             let corners = [area.left_top(), area.right_top(), area.right_bottom(), area.left_bottom()].map(|p| v.to_doc(p));
             let (vx0, vx1) = (corners.iter().map(|c| c.0).fold(f32::MAX, f32::min), corners.iter().map(|c| c.0).fold(f32::MIN, f32::max));
             let (vy0, vy1) = (corners.iter().map(|c| c.1).fold(f32::MAX, f32::min), corners.iter().map(|c| c.1).fold(f32::MIN, f32::max));
@@ -967,6 +986,7 @@ impl Pixel {
                     }
                 }
             }
+            self.task_bar(ui, area);
         });
     }
 }

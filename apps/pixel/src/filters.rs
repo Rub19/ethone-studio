@@ -12,15 +12,15 @@ pub struct Param {
     pub choices: &'static [&'static str],
 }
 
-const fn p(label: &'static str, min: f32, max: f32, default: f32, suffix: &'static str) -> Param {
+pub(crate) const fn p(label: &'static str, min: f32, max: f32, default: f32, suffix: &'static str) -> Param {
     Param { label, min, max, default, suffix, choices: &[] }
 }
 
-const fn c(label: &'static str, choices: &'static [&'static str], default: f32) -> Param {
+pub(crate) const fn c(label: &'static str, choices: &'static [&'static str], default: f32) -> Param {
     Param { label, min: 0.0, max: choices.len() as f32 - 1.0, default, suffix: "", choices }
 }
 
-const fn on(label: &'static str, default: f32) -> Param {
+pub(crate) const fn on(label: &'static str, default: f32) -> Param {
     Param { label, min: 0.0, max: 1.0, default, suffix: "", choices: &[] }
 }
 
@@ -105,6 +105,52 @@ pub enum Kind {
     Maximum,
     Minimum,
     Offset,
+    Relight,
+    Dehaze,
+    JpegClean,
+    Looks,
+    GlowPro,
+    Blemish,
+    SplitTone,
+    ColorGrade,
+    Duotone,
+    HslMixer,
+    Kelvin,
+    CrossProcess,
+    BleachBypass,
+    Infrared,
+    Thermal,
+    NightVision,
+    Lomo,
+    Faded,
+    Clarity,
+    Orton,
+    Hdr,
+    LensBlur,
+    LensCorrect,
+    SmartSharpen,
+    SunRays,
+    LightLeak,
+    Bokeh,
+    Glitch,
+    Vhs,
+    Scanlines,
+    PixelSort,
+    Dither,
+    Rain,
+    Snow,
+    Fog,
+    Stars,
+    Watercolor,
+    ColorPencil,
+    Pointillism,
+    StainedGlass,
+    NeonEdges,
+    Kaleidoscope,
+    Mirror,
+    Fisheye,
+    FrostedGlass,
+    Turbulence,
 }
 
 pub const ADJUSTMENTS: &[Kind] = &[
@@ -247,6 +293,7 @@ impl Kind {
             Kind::Maximum => "Maximum",
             Kind::Minimum => "Minimum",
             Kind::Offset => "Décalage",
+            k => crate::fx::title(k),
         }
     }
 
@@ -358,7 +405,7 @@ impl Kind {
             Kind::HighPass => const { &[p("Rayon", 0.5, 100.0, 10.0, " px")] },
             Kind::Maximum | Kind::Minimum => const { &[p("Rayon", 1.0, 20.0, 2.0, " px")] },
             Kind::Offset => const { &[p("Horizontal", -100.0, 100.0, 50.0, " %"), p("Vertical", -100.0, 100.0, 0.0, " %")] },
-            _ => &[],
+            k => crate::fx::params(k),
         }
     }
 
@@ -398,7 +445,7 @@ impl Kind {
             ],
             Kind::Vignette => &[("Assombrir les bords", &[-60.0, 45.0]), ("Éclaircir les bords", &[60.0, 45.0]), ("Discret", &[-25.0, 60.0])],
             Kind::Unsharp => &[("Portrait", &[60.0, 1.0, 4.0]), ("Paysage", &[120.0, 1.2, 0.0]), ("Web", &[180.0, 0.5, 0.0])],
-            _ => &[],
+            k => crate::fx::presets(k),
         }
     }
 
@@ -1165,6 +1212,7 @@ impl Kind {
                 let (ox, oy) = (g(0) / 100.0 * wf, g(1) / 100.0 * hf);
                 sample(img, move |x, y, at| at((x as f32 - ox).rem_euclid(wf), (y as f32 - oy).rem_euclid(hf)))
             }
+            k => crate::fx::apply(k, img, &g),
         }
     }
 }
@@ -1241,7 +1289,7 @@ fn sobel(at: &dyn Fn(f32, f32) -> [f32; 4], x: f32, y: f32, s: f32) -> f32 {
     (gx * gx + gy * gy).sqrt()
 }
 
-fn median(img: &RgbaImage, r: i32, threshold: f32) -> RgbaImage {
+pub(crate) fn median(img: &RgbaImage, r: i32, threshold: f32) -> RgbaImage {
     let (w, h) = (img.width() as i32, img.height() as i32);
     let src = img.as_raw();
     let mut out = img.clone();
@@ -1267,7 +1315,7 @@ fn median(img: &RgbaImage, r: i32, threshold: f32) -> RgbaImage {
     out
 }
 
-fn box_blur(img: &RgbaImage, rx: usize, ry: usize) -> RgbaImage {
+pub(crate) fn box_blur(img: &RgbaImage, rx: usize, ry: usize) -> RgbaImage {
     let (w, h) = (img.width() as usize, img.height() as usize);
     let mut buf: Vec<[f32; 4]> = img.pixels().map(|p| p.0.map(|v| v as f32)).collect();
     let pass = |src: &[[f32; 4]], horizontal: bool, r: usize| -> Vec<[f32; 4]> {
@@ -1310,7 +1358,7 @@ fn box_blur(img: &RgbaImage, rx: usize, ry: usize) -> RgbaImage {
     out
 }
 
-fn morph(img: &RgbaImage, r: usize, max: bool) -> RgbaImage {
+pub(crate) fn morph(img: &RgbaImage, r: usize, max: bool) -> RgbaImage {
     let (w, h) = (img.width() as usize, img.height() as usize);
     let pick = |a: u8, b: u8| if max { a.max(b) } else { a.min(b) };
     let pass = |src: &RgbaImage, horizontal: bool| -> RgbaImage {
@@ -1337,7 +1385,7 @@ fn morph(img: &RgbaImage, r: usize, max: bool) -> RgbaImage {
     pass(&pass(img, true), false)
 }
 
-fn kuwahara(img: &RgbaImage, r: i32) -> RgbaImage {
+pub(crate) fn kuwahara(img: &RgbaImage, r: i32) -> RgbaImage {
     let (w, h) = (img.width() as usize, img.height() as usize);
     let mut integ = vec![[0f64; 5]; (w + 1) * (h + 1)];
     for y in 0..h {
@@ -1381,7 +1429,7 @@ fn kuwahara(img: &RgbaImage, r: i32) -> RgbaImage {
     out
 }
 
-fn fbm(x: f32, y: f32, oct: u32) -> f32 {
+pub(crate) fn fbm(x: f32, y: f32, oct: u32) -> f32 {
     let noise = |x: f32, y: f32, k: u32| {
         let (xi, yi) = (x.floor(), y.floor());
         let (fx, fy) = (smooth(x - xi), smooth(y - yi));
@@ -1400,16 +1448,16 @@ fn fbm(x: f32, y: f32, oct: u32) -> f32 {
     sum / norm
 }
 
-fn smooth(t: f32) -> f32 {
+pub(crate) fn smooth(t: f32) -> f32 {
     let t = t.clamp(0.0, 1.0);
     t * t * (3.0 - 2.0 * t)
 }
 
-fn rgb(p: [u8; 4]) -> [f32; 3] {
+pub(crate) fn rgb(p: [u8; 4]) -> [f32; 3] {
     [p[0] as f32 / 255.0, p[1] as f32 / 255.0, p[2] as f32 / 255.0]
 }
 
-fn rgb4(p: [f32; 4]) -> [f32; 3] {
+pub(crate) fn rgb4(p: [f32; 4]) -> [f32; 3] {
     [p[0], p[1], p[2]]
 }
 
@@ -1417,11 +1465,11 @@ pub fn luma(c: [f32; 3]) -> f32 {
     0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 }
 
-fn srgb_to_lin(x: f32) -> f32 {
+pub(crate) fn srgb_to_lin(x: f32) -> f32 {
     if x <= 0.04045 { x / 12.92 } else { ((x + 0.055) / 1.055).powf(2.4) }
 }
 
-fn lin_to_srgb(x: f32) -> f32 {
+pub(crate) fn lin_to_srgb(x: f32) -> f32 {
     if x <= 0.0031308 { x * 12.92 } else { 1.055 * x.powf(1.0 / 2.4) - 0.055 }
 }
 
@@ -1454,7 +1502,7 @@ fn add(acc: &mut [f32; 4], p: [f32; 4]) {
     }
 }
 
-fn map(img: &RgbaImage, f: impl Fn([f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
+pub(crate) fn map(img: &RgbaImage, f: impl Fn([f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     let mut out = img.clone();
     out.par_chunks_mut(4).for_each(|px| {
         let c = f([px[0] as f32 / 255.0, px[1] as f32 / 255.0, px[2] as f32 / 255.0]);
@@ -1465,7 +1513,7 @@ fn map(img: &RgbaImage, f: impl Fn([f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     out
 }
 
-fn map_xy(img: &RgbaImage, f: impl Fn(f32, f32, [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
+pub(crate) fn map_xy(img: &RgbaImage, f: impl Fn(f32, f32, [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     let w = img.width();
     let mut out = img.clone();
     out.par_chunks_mut(4).enumerate().for_each(|(i, px)| {
@@ -1477,7 +1525,7 @@ fn map_xy(img: &RgbaImage, f: impl Fn(f32, f32, [f32; 3]) -> [f32; 3] + Sync) ->
     out
 }
 
-fn zip(a: &RgbaImage, b: &RgbaImage, f: impl Fn([f32; 3], [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
+pub(crate) fn zip(a: &RgbaImage, b: &RgbaImage, f: impl Fn([f32; 3], [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     let mut out = a.clone();
     out.par_chunks_mut(4).zip(b.par_chunks(4)).for_each(|(px, q)| {
         let c = f([px[0] as f32 / 255.0, px[1] as f32 / 255.0, px[2] as f32 / 255.0], [q[0] as f32 / 255.0, q[1] as f32 / 255.0, q[2] as f32 / 255.0]);
@@ -1488,7 +1536,7 @@ fn zip(a: &RgbaImage, b: &RgbaImage, f: impl Fn([f32; 3], [f32; 3]) -> [f32; 3] 
     out
 }
 
-fn mix_by(a: &RgbaImage, b: &RgbaImage, f: impl Fn(u32, u32) -> f32 + Sync) -> RgbaImage {
+pub(crate) fn mix_by(a: &RgbaImage, b: &RgbaImage, f: impl Fn(u32, u32) -> f32 + Sync) -> RgbaImage {
     let w = a.width();
     let mut out = a.clone();
     out.par_chunks_mut(4).zip(b.par_chunks(4)).enumerate().for_each(|(i, (px, q))| {
@@ -1500,7 +1548,7 @@ fn mix_by(a: &RgbaImage, b: &RgbaImage, f: impl Fn(u32, u32) -> f32 + Sync) -> R
     out
 }
 
-fn sample(img: &RgbaImage, f: impl Fn(u32, u32, &dyn Fn(f32, f32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
+pub(crate) fn sample(img: &RgbaImage, f: impl Fn(u32, u32, &dyn Fn(f32, f32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
     let (w, h) = img.dimensions();
     let src = img.as_raw();
     let at = |x: f32, y: f32| {
@@ -1519,7 +1567,7 @@ fn sample(img: &RgbaImage, f: impl Fn(u32, u32, &dyn Fn(f32, f32) -> [f32; 4]) -
     out
 }
 
-fn sample_i(img: &RgbaImage, f: impl Fn(i32, i32, &dyn Fn(i32, i32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
+pub(crate) fn sample_i(img: &RgbaImage, f: impl Fn(i32, i32, &dyn Fn(i32, i32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
     let (w, h) = img.dimensions();
     let src = img.as_raw();
     let at = |x: i32, y: i32| {
@@ -1543,7 +1591,7 @@ mod tests {
     #[test]
     fn every_filter_runs_and_keeps_alpha() {
         let img = RgbaImage::from_fn(40, 30, |x, y| image::Rgba([(x * 6) as u8, (y * 8) as u8, 120, if x < 3 { 0 } else { 255 }]));
-        let all: Vec<Kind> = ADJUSTMENTS.iter().chain(QUICK).chain(FILTERS.iter().flat_map(|f| f.1.iter())).copied().collect();
+        let all: Vec<Kind> = ADJUSTMENTS.iter().chain(QUICK).chain(FILTERS.iter().chain(crate::fx::GROUPS).flat_map(|f| f.1.iter())).copied().collect();
         assert!(all.len() >= 70);
         for k in all {
             let out = k.apply(&img, &k.defaults());

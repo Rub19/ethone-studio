@@ -5,6 +5,17 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const PIXEL: &[Tuto] = &[
+    t("Rééclairer (Relight)", "", "Ajoute une ou deux lumières virtuelles à une photo.", &["Filtre > Nouveautés 2027 > Rééclairer, ou le bouton Rééclairer de la barre de tâches.", "Règle la température (K), la position gauche/droite et bas/haut, la distance, l'intensité et la diffusion.", "Active la deuxième lumière pour un éclairage croisé (néon rose et bleu par exemple). Les préréglages Rembrandt, Papillon, Contre-jour… donnent un point de départ."]),
+    t("Comparaison rapide", "", "Avant / après en glissant un séparateur.", &["Affichage > Comparaison rapide, ou Comparer dans la barre de tâches.", "Glisse la poignée blanche sur l'image ou le curseur de la barre : à gauche l'image à l'ouverture, à droite l'état actuel."]),
+    t("Supprimer la brume", "", "Retire brume, brouillard et voile atmosphérique.", &["Filtre > Nouveautés 2027 > Supprimer la brume et les effets d'ambiance.", "Quantité positive : retire le voile. Négative : en ajoute. Protéger le ciel évite de noircir un ciel blanc."]),
+    t("Débruitage JPEG", "", "Efface les blocs et le bruit de couleur des JPEG compressés.", &["Idéal pour les images reçues par messagerie ou les captures d'écran.", "Monte Artefacts de blocs pour lisser la grille 8×8, Détails préservés protège les contours."]),
+    t("Looks et LUT", "", "Trois looks créatifs empilables, ou tes propres LUT .cube.", &["Filtre > Nouveautés 2027 > Looks : choisis jusqu'à 3 looks parmi 59, chacun avec son intensité.", "Image > Appliquer des LUT .cube : sélectionne jusqu'à 3 fichiers, appliqués dans l'ordre (sur la sélection s'il y en a une)."]),
+    t("Lueur améliorée", "", "Bloom, néon, halo anamorphique.", &["Seuil : seules les zones plus claires brillent. Teinte colore la lueur, Étirement anamorphique l'allonge horizontalement comme au cinéma."]),
+    t("Suppression des imperfections", "", "Retouche automatique des boutons, taches et rougeurs.", &["Taille max : la taille des imperfections à effacer. Sensibilité : plus haut = plus de taches détectées.", "Lissage de la peau adoucit le grain de peau ; Seulement la peau protège les yeux, les cheveux et le fond."]),
+    t("Timelapse", "", "Transforme l'historique de retouche en GIF animé.", &["Fichier > Créer un timelapse (GIF) : chaque étape de l'historique devient une image.", "Fichier > Exporter chaque étape en PNG garde la pleine résolution."]),
+    t("Agrandir (super-résolution)", "", "Multiplie la taille par 2, 3 ou 4 en gardant du piqué.", &["Image > Agrandir. Le rééchantillonnage Lanczos est suivi d'une netteté optimisée qui évite le halo."]),
+    t("Répéter la dernière suppression", "", "Réapplique la même zone de suppression à un autre calque.", &["Après une suppression intelligente, change de calque puis Édition > Répéter la dernière suppression."]),
+    t("Barre de tâches contextuelle", "", "Les actions utiles selon ce que tu fais.", &["Sans sélection : ton auto, Relight, brume, looks, imperfections, agrandir. Avec une sélection : supprimer l'objet, remplir, inverser.", "Masque-la avec ×, réaffiche-la dans Affichage."]),
     t("Suppression", "J", "Efface un objet (oiseau, passant, câble) et reconstruit le fond autour comme s'il n'avait jamais existé.", &[
         "Choisis l'outil Suppression (J) dans la barre d'outils.",
         "Règle la taille du pinceau un peu plus large que l'objet avec [ et ].",

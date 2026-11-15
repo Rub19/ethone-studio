@@ -2,7 +2,9 @@
 
 mod canvas;
 mod doc;
+mod extras;
 mod filters;
+mod fx;
 mod inpaint;
 mod panels;
 mod shapes;
@@ -233,6 +235,9 @@ pub struct Pixel {
     saved_sel: Vec<(String, Vec<u8>)>,
     last_filter: Option<(Kind, Vec<f32>)>,
     user_presets: Vec<(Kind, String, Vec<f32>)>,
+    compare: Option<(TextureHandle, f32)>,
+    last_removal: Option<Vec<bool>>,
+    task_bar: bool,
 }
 
 fn data_file(name: &str) -> PathBuf {
@@ -270,7 +275,7 @@ impl Pixel {
                     .filter_map(|l| {
                         let mut it = l.splitn(3, '|');
                         let (k, n, v) = (it.next()?, it.next()?, it.next()?);
-                        let kind = filters::ADJUSTMENTS.iter().chain(filters::QUICK).chain(filters::FILTERS.iter().flat_map(|g| g.1.iter())).find(|x| format!("{x:?}") == k)?;
+                        let kind = filters::ADJUSTMENTS.iter().chain(filters::QUICK).chain(filters::FILTERS.iter().chain(fx::GROUPS).flat_map(|g| g.1.iter())).find(|x| format!("{x:?}") == k)?;
                         Some((*kind, n.to_string(), v.split(',').filter_map(|x| x.parse().ok()).collect()))
                     })
                     .collect()
@@ -396,6 +401,9 @@ impl Pixel {
             pasteboard: 0,
             cursor_mode: 0,
             hide_panels: false,
+            compare: None,
+            last_removal: None,
+            task_bar: true,
             sheet: None,
             view_doc: None,
             hist: None,
@@ -606,6 +614,7 @@ impl Pixel {
         }
         let layer = self.doc.active;
         let img = self.doc.layers[layer].img.clone();
+        self.last_removal = Some(mask.clone());
         let (tx, rx) = std::sync::mpsc::channel();
         let ctx = ctx.clone();
         std::thread::spawn(move || {
@@ -1258,6 +1267,12 @@ impl Pixel {
             if self.mie(ui, !home, "Exporter les calques en PNG…", "") {
                 self.export_layers();
             }
+            if self.mie(ui, !home, "Créer un timelapse (GIF)…", "") {
+                self.export_timelapse(true);
+            }
+            if self.mie(ui, !home, "Exporter chaque étape en PNG…", "") {
+                self.export_timelapse(false);
+            }
             ui.separator();
             if self.mie(ui, !home, "Fermer", "Ctrl+W") {
                 self.home = true;
@@ -1272,6 +1287,10 @@ impl Pixel {
             }
             if self.mie(ui, self.doc.can_redo(), "Rétablir", "Ctrl+Y") {
                 self.doc.redo();
+            }
+            if self.mie(ui, self.last_removal.is_some(), "Répéter la dernière suppression", "") {
+                let ctx = ui.ctx().clone();
+                self.repeat_removal(&ctx);
             }
             if self.mie(ui, self.last_filter.is_some(), "Répéter le dernier filtre", "Ctrl+Alt+F") {
                 self.repeat_filter();
@@ -1349,6 +1368,17 @@ impl Pixel {
 
     fn menu_image(&mut self, ui: &mut Ui) {
         ui.menu_button("Image", |ui| {
+            ui.menu_button("Agrandir (super-résolution)", |ui| {
+                for f in [2u32, 3, 4] {
+                    if ui.button(format!("×{f}")).clicked() {
+                        self.upscale(f);
+                        ui.close();
+                    }
+                }
+            });
+            if self.mi(ui, "Appliquer des LUT .cube (jusqu'à 3)…", "") {
+                self.apply_cube_luts();
+            }
             ui.menu_button("Réglages", |ui| {
                 let keys = [(Kind::Levels, "Ctrl+L"), (Kind::Curves, "Ctrl+M"), (Kind::HueSat, "Ctrl+U"), (Kind::ColorBalance, "Ctrl+B"), (Kind::BlackWhiteMix, "Ctrl+Alt+Maj+B")];
                 for k in filters::ADJUSTMENTS {
@@ -1645,7 +1675,7 @@ impl Pixel {
                 self.repeat_filter();
             }
             ui.separator();
-            for (group, kinds) in filters::FILTERS {
+            for (group, kinds) in filters::FILTERS.iter().chain(fx::GROUPS) {
                 ui.menu_button(*group, |ui| {
                     for k in *kinds {
                         let label = if k.params().is_empty() { k.title().to_string() } else { format!("{}…", k.title()) };
@@ -1731,6 +1761,11 @@ impl Pixel {
             ui.separator();
             if ui.button(if self.hide_panels { "Afficher les panneaux (Tab)" } else { "Masquer les panneaux (Tab)" }).clicked() {
                 self.hide_panels = !self.hide_panels;
+            }
+            ui.checkbox(&mut self.task_bar, "Barre de tâches contextuelle");
+            if ui.button(if self.compare.is_some() { "Quitter la comparaison" } else { "Comparaison rapide (avant / après)" }).clicked() {
+                let ctx = ui.ctx().clone();
+                self.toggle_compare(&ctx);
             }
         });
     }

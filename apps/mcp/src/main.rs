@@ -4,6 +4,9 @@
 #[path = "../../pixel/src/doc.rs"]
 mod doc;
 #[allow(dead_code)]
+#[path = "../../pixel/src/fx.rs"]
+mod fx;
+#[allow(dead_code)]
 #[path = "../../pixel/src/filters.rs"]
 mod filters;
 #[allow(dead_code)]
