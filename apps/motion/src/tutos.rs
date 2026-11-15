@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const MOTION: &[Tuto] = &[
+    t("Effets de composition", "", "Plus de 100 effets image appliqués à toute l'animation.", &["Panneau Effets de composition > + Ajouter un effet : looks, lueur, glitch, VHS, écran cathodique, neige, pluie…", "Chaque effet a son intensité, ses réglages et ses préréglages ; ils s'appliquent à l'aperçu et à tous les exports."]),
     t("Composition", "", "Le cadre de ton animation : format, images par seconde, durée, fond.", &[
         "Choisis un format sur l'accueil (16:9, vertical, carré, bannière GIF).",
         "Menu Composition ou panneau de droite (sans calque sélectionné) pour la durée et le fond.",

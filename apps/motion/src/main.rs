@@ -228,6 +228,13 @@ fn render(comp: &Comp, t: f32, w: u32, h: u32, db: &Arc<usvg::fontdb::Database>,
     let tree = usvg::Tree::from_str(&svg, &opt).map_err(|e| e.to_string())?;
     let mut pix = tiny_skia::Pixmap::new(w.max(1), h.max(1)).ok_or("taille invalide")?;
     resvg::render(&tree, tiny_skia::Transform::from_scale(w as f32 / comp.width as f32, h as f32 / comp.height as f32), &mut pix.as_mut());
+    if studio_fx::stack::active(&comp.effects) {
+        let mut img = unpremultiply(&pix);
+        studio_fx::stack::apply(&mut img, &comp.effects);
+        for (d, s) in pix.pixels_mut().iter_mut().zip(img.pixels()) {
+            *d = tiny_skia::ColorU8::from_rgba(s.0[0], s.0[1], s.0[2], s.0[3]).premultiply();
+        }
+    }
     Ok(pix)
 }
 

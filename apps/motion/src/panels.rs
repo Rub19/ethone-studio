@@ -147,6 +147,9 @@ impl Motion {
                 self.comp.letterbox = LETTERBOX[k].1;
             }
         });
+        pro::dock_panel(ui, "comp-stack", "Effets de composition", |ui| {
+            studio_ui::fxpanel::effects_panel(ui, "motion", &mut self.comp.effects);
+        });
         pro::dock_panel(ui, "markers", "Repères", |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             if self.comp.markers.is_empty() {

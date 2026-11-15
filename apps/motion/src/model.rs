@@ -1451,6 +1451,8 @@ pub struct Comp {
     pub letterbox: f32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub guides: Vec<Guide>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub effects: Vec<studio_fx::stack::Fx>,
 }
 
 fn color(c: [u8; 4]) -> String {
@@ -1491,7 +1493,7 @@ fn ranks(n: usize, order: u8) -> Vec<f32> {
 
 impl Comp {
     pub fn new() -> Self {
-        Self { width: 1920, height: 1080, fps: 30, duration: 5.0, background: [16, 18, 26, 255], layers: Vec::new(), background2: None, markers: Vec::new(), work: None, vignette: 0.0, grain: 0.0, letterbox: 0.0, guides: Vec::new() }
+        Self { width: 1920, height: 1080, fps: 30, duration: 5.0, background: [16, 18, 26, 255], layers: Vec::new(), background2: None, markers: Vec::new(), work: None, vignette: 0.0, grain: 0.0, letterbox: 0.0, guides: Vec::new(), effects: Vec::new() }
     }
 
     pub fn normalize(&mut self) {
