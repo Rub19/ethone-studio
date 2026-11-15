@@ -2,9 +2,8 @@
 
 mod canvas;
 mod doc;
+use studio_fx::{filters, fx};
 mod extras;
-mod filters;
-mod fx;
 mod inpaint;
 mod panels;
 mod shapes;

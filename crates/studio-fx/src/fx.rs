@@ -1,4 +1,4 @@
-use crate::doc::{hsl_to_rgb, rgb_to_hsl};
+use crate::{hsl_to_rgb, rgb_to_hsl};
 use crate::filters::{Kind, Param, box_blur, c, fbm, gradient_at, hash, kuwahara, luma, map, map_xy, morph, on, p, rgb, sample, zip};
 use image::{Rgba, RgbaImage, imageops};
 use rayon::prelude::*;

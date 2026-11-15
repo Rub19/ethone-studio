@@ -1,4 +1,4 @@
-use crate::doc::{hsl_to_rgb, rgb_to_hsl};
+use crate::{hsl_to_rgb, rgb_to_hsl};
 use image::{Rgba, RgbaImage, imageops};
 use rayon::prelude::*;
 use std::f32::consts::{PI, TAU};
@@ -12,15 +12,15 @@ pub struct Param {
     pub choices: &'static [&'static str],
 }
 
-pub(crate) const fn p(label: &'static str, min: f32, max: f32, default: f32, suffix: &'static str) -> Param {
+pub const fn p(label: &'static str, min: f32, max: f32, default: f32, suffix: &'static str) -> Param {
     Param { label, min, max, default, suffix, choices: &[] }
 }
 
-pub(crate) const fn c(label: &'static str, choices: &'static [&'static str], default: f32) -> Param {
+pub const fn c(label: &'static str, choices: &'static [&'static str], default: f32) -> Param {
     Param { label, min: 0.0, max: choices.len() as f32 - 1.0, default, suffix: "", choices }
 }
 
-pub(crate) const fn on(label: &'static str, default: f32) -> Param {
+pub const fn on(label: &'static str, default: f32) -> Param {
     Param { label, min: 0.0, max: 1.0, default, suffix: "", choices: &[] }
 }
 
@@ -1289,7 +1289,7 @@ fn sobel(at: &dyn Fn(f32, f32) -> [f32; 4], x: f32, y: f32, s: f32) -> f32 {
     (gx * gx + gy * gy).sqrt()
 }
 
-pub(crate) fn median(img: &RgbaImage, r: i32, threshold: f32) -> RgbaImage {
+pub fn median(img: &RgbaImage, r: i32, threshold: f32) -> RgbaImage {
     let (w, h) = (img.width() as i32, img.height() as i32);
     let src = img.as_raw();
     let mut out = img.clone();
@@ -1315,7 +1315,7 @@ pub(crate) fn median(img: &RgbaImage, r: i32, threshold: f32) -> RgbaImage {
     out
 }
 
-pub(crate) fn box_blur(img: &RgbaImage, rx: usize, ry: usize) -> RgbaImage {
+pub fn box_blur(img: &RgbaImage, rx: usize, ry: usize) -> RgbaImage {
     let (w, h) = (img.width() as usize, img.height() as usize);
     let mut buf: Vec<[f32; 4]> = img.pixels().map(|p| p.0.map(|v| v as f32)).collect();
     let pass = |src: &[[f32; 4]], horizontal: bool, r: usize| -> Vec<[f32; 4]> {
@@ -1358,7 +1358,7 @@ pub(crate) fn box_blur(img: &RgbaImage, rx: usize, ry: usize) -> RgbaImage {
     out
 }
 
-pub(crate) fn morph(img: &RgbaImage, r: usize, max: bool) -> RgbaImage {
+pub fn morph(img: &RgbaImage, r: usize, max: bool) -> RgbaImage {
     let (w, h) = (img.width() as usize, img.height() as usize);
     let pick = |a: u8, b: u8| if max { a.max(b) } else { a.min(b) };
     let pass = |src: &RgbaImage, horizontal: bool| -> RgbaImage {
@@ -1385,7 +1385,7 @@ pub(crate) fn morph(img: &RgbaImage, r: usize, max: bool) -> RgbaImage {
     pass(&pass(img, true), false)
 }
 
-pub(crate) fn kuwahara(img: &RgbaImage, r: i32) -> RgbaImage {
+pub fn kuwahara(img: &RgbaImage, r: i32) -> RgbaImage {
     let (w, h) = (img.width() as usize, img.height() as usize);
     let mut integ = vec![[0f64; 5]; (w + 1) * (h + 1)];
     for y in 0..h {
@@ -1429,7 +1429,7 @@ pub(crate) fn kuwahara(img: &RgbaImage, r: i32) -> RgbaImage {
     out
 }
 
-pub(crate) fn fbm(x: f32, y: f32, oct: u32) -> f32 {
+pub fn fbm(x: f32, y: f32, oct: u32) -> f32 {
     let noise = |x: f32, y: f32, k: u32| {
         let (xi, yi) = (x.floor(), y.floor());
         let (fx, fy) = (smooth(x - xi), smooth(y - yi));
@@ -1448,16 +1448,16 @@ pub(crate) fn fbm(x: f32, y: f32, oct: u32) -> f32 {
     sum / norm
 }
 
-pub(crate) fn smooth(t: f32) -> f32 {
+pub fn smooth(t: f32) -> f32 {
     let t = t.clamp(0.0, 1.0);
     t * t * (3.0 - 2.0 * t)
 }
 
-pub(crate) fn rgb(p: [u8; 4]) -> [f32; 3] {
+pub fn rgb(p: [u8; 4]) -> [f32; 3] {
     [p[0] as f32 / 255.0, p[1] as f32 / 255.0, p[2] as f32 / 255.0]
 }
 
-pub(crate) fn rgb4(p: [f32; 4]) -> [f32; 3] {
+pub fn rgb4(p: [f32; 4]) -> [f32; 3] {
     [p[0], p[1], p[2]]
 }
 
@@ -1465,11 +1465,11 @@ pub fn luma(c: [f32; 3]) -> f32 {
     0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 }
 
-pub(crate) fn srgb_to_lin(x: f32) -> f32 {
+pub fn srgb_to_lin(x: f32) -> f32 {
     if x <= 0.04045 { x / 12.92 } else { ((x + 0.055) / 1.055).powf(2.4) }
 }
 
-pub(crate) fn lin_to_srgb(x: f32) -> f32 {
+pub fn lin_to_srgb(x: f32) -> f32 {
     if x <= 0.0031308 { x * 12.92 } else { 1.055 * x.powf(1.0 / 2.4) - 0.055 }
 }
 
@@ -1502,7 +1502,7 @@ fn add(acc: &mut [f32; 4], p: [f32; 4]) {
     }
 }
 
-pub(crate) fn map(img: &RgbaImage, f: impl Fn([f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
+pub fn map(img: &RgbaImage, f: impl Fn([f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     let mut out = img.clone();
     out.par_chunks_mut(4).for_each(|px| {
         let c = f([px[0] as f32 / 255.0, px[1] as f32 / 255.0, px[2] as f32 / 255.0]);
@@ -1513,7 +1513,7 @@ pub(crate) fn map(img: &RgbaImage, f: impl Fn([f32; 3]) -> [f32; 3] + Sync) -> R
     out
 }
 
-pub(crate) fn map_xy(img: &RgbaImage, f: impl Fn(f32, f32, [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
+pub fn map_xy(img: &RgbaImage, f: impl Fn(f32, f32, [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     let w = img.width();
     let mut out = img.clone();
     out.par_chunks_mut(4).enumerate().for_each(|(i, px)| {
@@ -1525,7 +1525,7 @@ pub(crate) fn map_xy(img: &RgbaImage, f: impl Fn(f32, f32, [f32; 3]) -> [f32; 3]
     out
 }
 
-pub(crate) fn zip(a: &RgbaImage, b: &RgbaImage, f: impl Fn([f32; 3], [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
+pub fn zip(a: &RgbaImage, b: &RgbaImage, f: impl Fn([f32; 3], [f32; 3]) -> [f32; 3] + Sync) -> RgbaImage {
     let mut out = a.clone();
     out.par_chunks_mut(4).zip(b.par_chunks(4)).for_each(|(px, q)| {
         let c = f([px[0] as f32 / 255.0, px[1] as f32 / 255.0, px[2] as f32 / 255.0], [q[0] as f32 / 255.0, q[1] as f32 / 255.0, q[2] as f32 / 255.0]);
@@ -1536,7 +1536,7 @@ pub(crate) fn zip(a: &RgbaImage, b: &RgbaImage, f: impl Fn([f32; 3], [f32; 3]) -
     out
 }
 
-pub(crate) fn mix_by(a: &RgbaImage, b: &RgbaImage, f: impl Fn(u32, u32) -> f32 + Sync) -> RgbaImage {
+pub fn mix_by(a: &RgbaImage, b: &RgbaImage, f: impl Fn(u32, u32) -> f32 + Sync) -> RgbaImage {
     let w = a.width();
     let mut out = a.clone();
     out.par_chunks_mut(4).zip(b.par_chunks(4)).enumerate().for_each(|(i, (px, q))| {
@@ -1548,7 +1548,7 @@ pub(crate) fn mix_by(a: &RgbaImage, b: &RgbaImage, f: impl Fn(u32, u32) -> f32 +
     out
 }
 
-pub(crate) fn sample(img: &RgbaImage, f: impl Fn(u32, u32, &dyn Fn(f32, f32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
+pub fn sample(img: &RgbaImage, f: impl Fn(u32, u32, &dyn Fn(f32, f32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
     let (w, h) = img.dimensions();
     let src = img.as_raw();
     let at = |x: f32, y: f32| {
@@ -1567,7 +1567,7 @@ pub(crate) fn sample(img: &RgbaImage, f: impl Fn(u32, u32, &dyn Fn(f32, f32) -> 
     out
 }
 
-pub(crate) fn sample_i(img: &RgbaImage, f: impl Fn(i32, i32, &dyn Fn(i32, i32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
+pub fn sample_i(img: &RgbaImage, f: impl Fn(i32, i32, &dyn Fn(i32, i32) -> [f32; 4]) -> [f32; 4] + Sync) -> RgbaImage {
     let (w, h) = img.dimensions();
     let src = img.as_raw();
     let at = |x: i32, y: i32| {

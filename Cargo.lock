@@ -993,6 +993,7 @@ dependencies = [
  "serde",
  "serde_json",
  "studio-core",
+ "studio-fx",
  "symphonia",
  "ttf-parser",
 ]
@@ -2644,6 +2645,7 @@ dependencies = [
  "rayon",
  "rfd",
  "studio-core",
+ "studio-fx",
  "studio-ui",
  "winresource",
 ]
@@ -3492,6 +3494,14 @@ dependencies = [
  "serde_json",
  "sha2",
  "ureq",
+]
+
+[[package]]
+name = "studio-fx"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "rayon",
 ]
 
 [[package]]
