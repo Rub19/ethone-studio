@@ -5,6 +5,19 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const SOUND: &[Tuto] = &[
+    t("Sélection temporelle", "V", "Sélectionne une durée sur la forme d'onde.", &["Glisse pour sélectionner, tire les bords pour ajuster, Maj+clic pour étendre.", "Double-clic : sélectionne l'espace entre deux marqueurs."]),
+    t("Main (défilement)", "H", "Fait défiler la vue sans toucher à la sélection.", &["Glisse à gauche ou à droite. H une seconde fois passe au zoom."]),
+    t("Zoom", "H", "Zoome au clic ou sur une zone.", &["Clic : zoom avant au point cliqué. Alt+clic ou clic droit : zoom arrière.", "Glisse une zone pour la faire remplir l'écran."]),
+    t("Rectangle de fréquences", "E", "Sélectionne une zone temps × fréquences dans le spectrogramme.", &["L'outil passe la vue en spectrogramme. Glisse un rectangle autour du bruit (sifflement, sonnerie).", "Dans la barre d'options : Appliquer le gain (Entrée), Supprimer, Réparer ou Isoler la zone.", "Échelle Log ou Linéaire et taille de FFT règlent la précision de l'affichage."]),
+    t("Lasso spectral", "E", "Détoure librement un bruit dans le spectrogramme.", &["Dessine le contour d'une toux ou d'un grincement, puis Supprimer ou Réparer."]),
+    t("Pinceau spectral", "E", "Peins les zones à traiter dans le spectrogramme.", &["La taille du pinceau se règle dans la barre d'options. Peins, puis applique un gain ou répare."]),
+    t("Correction des taches", "B", "Efface un clic ou un bruit bref en le reconstruisant.", &["Sur la forme d'onde : glisse sur le clic, il est reconstruit au relâchement.", "Sur le spectrogramme : peins sur le bruit, seule la zone peinte est réparée."]),
+    t("Crayon", "B", "Redessine la forme d'onde à la main.", &["Zoome jusqu'aux échantillons (bouton dans la barre d'options), puis dessine sur le canal voulu."]),
+    t("Rasoir", "C", "Coupe le fichier en morceaux.", &["Clic : pose une coupe (un marqueur). Alt+clic : supprime le segment entre deux coupes.", "Exporter en morceaux crée un fichier par segment."]),
+    t("Fondus par poignées", "G", "Fondus d'entrée et de sortie à la souris.", &["Tire les carrés orange : horizontalement la durée, verticalement la courbe.", "Appliquer (Entrée) grave les fondus, double-clic les retire."]),
+    t("Enveloppe de volume", "G", "Dessine l'évolution du volume dans le temps.", &["Clic : ajoute un point, glisse pour le déplacer, clic droit pour le retirer.", "Montée, Descente et Creux sont des enveloppes prêtes. Appliquer (Entrée) grave l'enveloppe."]),
+    t("Effets", "", "Plus de 60 effets classés, avec préréglages.", &["Choisis une catégorie (dynamique, filtres, restauration, distorsion, échos, réverbération, modulation, voix, stéréo, temps) ou cherche par nom.", "Chaque effet a ses réglages et ses préréglages. ▶ Écouter essaie sans modifier, Appliquer agit sur la sélection ou tout le fichier."]),
+    t("Détection", "", "Tempo, mesures et prises.", &["Détecter le tempo estime les BPM ; Marqueur sur chaque mesure pose un repère toutes les 4 temps.", "Repérer les sons pose un marqueur au début de chaque prise séparée par un silence."]),
     t("Ouvrir", "Ctrl+O", "WAV, MP3, FLAC, OGG, M4A, et le son des vidéos MP4/MKV.", &["Fichier > Ouvrir, ou glisse un fichier sur la fenêtre."]),
     t("Exporter", "Ctrl+E", "WAV 16, 24 ou 32 bits, sélection seule ou un fichier par marqueur.", &[
         "Le bouton Exporter ouvre les options : qualité, fréquence (44,1 ou 48 kHz), mono ou stéréo.",

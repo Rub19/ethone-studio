@@ -1,9 +1,13 @@
 #![windows_subsystem = "windows"]
 
 mod audio;
+mod dsp;
+mod effects;
+mod tools;
 mod tutos;
 
 use audio::Clip;
+use tools::{SpecSel, SpecShape, Tool};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Pos2, Rect, RichText, Sense, Shape, Stroke, TextureOptions, Ui, Vec2, pos2, vec2,
@@ -205,7 +209,13 @@ struct ExportOpts {
     channels: usize,
     range: usize,
     normalize: bool,
+    dither: usize,
+    cues: bool,
+    hq: bool,
 }
+
+const INFO_IDS: [(&[u8; 4], &str); 6] = [(b"INAM", "Titre"), (b"IART", "Artiste"), (b"IPRD", "Album"), (b"ICRD", "Année"), (b"IGNR", "Genre"), (b"ICMT", "Commentaire")];
+const FFT_SIZES: [usize; 4] = [512, 1024, 2048, 4096];
 
 #[derive(Clone, Copy)]
 enum Drag {
@@ -213,6 +223,12 @@ enum Drag {
     Select(usize),
     EdgeA,
     EdgeB,
+    Zoom(usize),
+    Heal(usize),
+    Spec(usize, f32),
+    Pencil(usize, Option<(usize, f32)>),
+    Fade(bool),
+    Env(usize),
 }
 
 type Op = Box<dyn FnOnce(&mut Clip, usize, usize)>;
@@ -223,6 +239,7 @@ struct Stats {
     rms: f32,
     lufs: f32,
     clipped: usize,
+    true_peak: f32,
 }
 
 struct Sound {
@@ -260,6 +277,21 @@ struct Sound {
     title: String,
     icon: egui::TextureHandle,
     help: studio_ui::help::Help,
+    tool: Tool,
+    spec_sel: Option<SpecSel>,
+    spec_log: bool,
+    fft: usize,
+    spec_db: f32,
+    brush: f32,
+    fades: [(usize, f32); 2],
+    env: Vec<(usize, f32)>,
+    rack_cat: usize,
+    rack_pick: usize,
+    rack_vals: Vec<Vec<f32>>,
+    rack_search: String,
+    meta: [String; 6],
+    bpm: Option<(f32, usize)>,
+    regions: [f32; 3],
 }
 
 impl Sound {
@@ -336,6 +368,21 @@ impl Sound {
             title: String::new(),
             icon: studio_ui::icon_texture(&cc.egui_ctx, "sound"),
             help: studio_ui::help::Help::new("Sound", tutos::SOUND),
+            tool: Tool::Select,
+            spec_sel: None,
+            spec_log: true,
+            fft: 2,
+            spec_db: -24.0,
+            brush: 14.0,
+            fades: [(0, 0.0); 2],
+            env: Vec::new(),
+            rack_cat: 1,
+            rack_pick: 0,
+            rack_vals: (0..effects::DEFS.len()).map(effects::defaults).collect(),
+            rack_search: String::new(),
+            meta: Default::default(),
+            bpm: None,
+            regions: [-40.0, 300.0, 120.0],
         };
         if let Some(p) = std::env::args().nth(1) {
             me.open_path(Path::new(&p));
@@ -528,11 +575,11 @@ impl Sound {
     }
 
     fn prepare_export(&self, part: Clip, o: &ExportOpts) -> Clip {
-        let mut c = match o.rate {
-            1 => part.resampled(44_100),
-            2 => part.resampled(48_000),
-            3 => part.resampled(22_050),
-            _ => part,
+        let target = [0u32, 44_100, 48_000, 22_050, 96_000][o.rate];
+        let mut c = match target {
+            0 => part,
+            r if o.hq => part.resample_hq(r),
+            r => part.resampled(r),
         };
         match o.channels {
             1 => {
@@ -550,7 +597,10 @@ impl Sound {
     }
 
     fn run_export(&mut self, o: &ExportOpts) {
-        let bits = [16u16, 24, 32][o.bits];
+        let bits = [16u16, 24, 32, 8][o.bits];
+        let info: Vec<(&[u8; 4], String)> = INFO_IDS.iter().zip(&self.meta).map(|((id, _), v)| (*id, v.clone())).collect();
+        let dither = o.dither as u8;
+        let save = |c: &Clip, path: &Path, cues: &[(usize, String)]| dsp::export_wav(c, path, bits, dither, &info, cues);
         let stem = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("audio".into());
         if o.range == 2 {
             let Some(dir) = rfd::FileDialog::new().set_title("Dossier des morceaux").pick_folder() else { return };
@@ -567,7 +617,7 @@ impl Sound {
                 }
                 let name = self.markers.iter().find(|m| m.0 == w[0]).map(|m| clean(&m.1)).filter(|s| !s.is_empty()).unwrap_or_else(|| format!("partie {}", k + 1));
                 let part = self.prepare_export(self.clip.slice(w[0], w[1]), o);
-                if let Err(e) = part.save_wav(&dir.join(format!("{stem} - {:02} - {name}.wav", k + 1)), bits) {
+                if let Err(e) = save(&part, &dir.join(format!("{stem} - {:02} - {name}.wav", k + 1)), &[]) {
                     self.notice = Some((format!("Export : {e}"), false));
                     return;
                 }
@@ -579,7 +629,9 @@ impl Sound {
         let Some(path) = rfd::FileDialog::new().add_filter("WAV", &["wav"]).set_file_name(format!("{stem}.wav")).save_file() else { return };
         let (a, b) = if o.range == 1 { self.range() } else { (0, self.clip.len()) };
         let part = self.prepare_export(self.clip.slice(a, b), o);
-        match part.save_wav(&path, bits) {
+        let k = part.rate as f64 / self.clip.rate as f64;
+        let cues: Vec<(usize, String)> = if o.cues { self.markers.iter().filter(|m| m.0 >= a && m.0 < b).map(|m| (((m.0 - a) as f64 * k) as usize, m.1.clone())).collect() } else { Vec::new() };
+        match save(&part, &path, &cues) {
             Ok(()) => {
                 if o.range == 0 {
                     self.modified = false;
@@ -684,7 +736,7 @@ impl Sound {
             self.open_dialog();
         }
         if sc(M::COMMAND, Key::E) || sc(M::COMMAND, Key::S) {
-            self.export = Some(ExportOpts { bits: 0, rate: 0, channels: 0, range: if self.sel.is_some() { 1 } else { 0 }, normalize: false });
+            self.export = Some(self.export_opts());
         }
         if sc(M::COMMAND, Key::Num0) {
             self.fit_pending = true;
@@ -711,6 +763,30 @@ impl Sound {
             )
         });
         let [m, l, r, z, s, f] = letters;
+        if ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, Key::F1)) {
+            self.help.learn(self.tool.name());
+        }
+        for (_, key) in tools::GROUPS {
+            if ctx.input(|i| i.key_pressed(key) && !i.modifiers.command) {
+                self.cycle_tool(key);
+            }
+        }
+        if ctx.input(|i| i.key_pressed(Key::Escape)) {
+            self.spec_sel = None;
+            self.sel = None;
+        }
+        if ctx.input(|i| i.key_pressed(Key::Enter)) {
+            if !self.env.is_empty() {
+                self.apply_env();
+            }
+            if self.fades[0].0 + self.fades[1].0 > 0 {
+                self.apply_fades();
+            }
+            if self.spec_sel.is_some() {
+                let g = self.spec_db;
+                self.spectral_apply(dsp::SpecMode::Gain(g), "Atténuation spectrale");
+            }
+        }
         if space {
             self.toggle_play();
         }
@@ -773,6 +849,106 @@ impl Sound {
     fn open_dialog(&mut self) {
         if let Some(p) = rfd::FileDialog::new().add_filter("Audio", &["wav", "mp3", "flac", "ogg", "m4a", "aac", "mp4", "mkv", "webm"]).pick_file() {
             self.open_path(&p);
+        }
+    }
+
+    fn export_opts(&self) -> ExportOpts {
+        ExportOpts { bits: 0, rate: 0, channels: 0, range: if self.sel.is_some() { 1 } else { 0 }, normalize: false, dither: 1, cues: true, hq: true }
+    }
+
+    fn set_tool(&mut self, t: Tool) {
+        self.tool = t;
+        if t.spectral() {
+            self.view_mode = 1;
+        }
+        self.notice = Some((format!("{} : {}", t.name(), t.help()), true));
+    }
+
+    fn cycle_tool(&mut self, key: Key) {
+        let Some(g) = tools::GROUPS.iter().find(|g| g.1 == key).map(|g| g.0) else { return };
+        let next = match g.iter().position(|t| t.0 == self.tool) {
+            Some(k) => g[(k + 1) % g.len()].0,
+            None => g[0].0,
+        };
+        self.set_tool(next);
+    }
+
+    fn spectral_apply(&mut self, mode: dsp::SpecMode, label: &str) {
+        let Some(sel) = self.spec_sel.clone() else { return };
+        let nyq = self.clip.rate as f32 / 2.0;
+        let log = self.spec_log;
+        let (a, b) = (sel.a.min(self.clip.len()), sel.b.min(self.clip.len()));
+        if b <= a {
+            return;
+        }
+        self.snapshot(label);
+        let yf = move |f: f32| dsp::y_frac(f, nyq, log);
+        self.clip.spectral_edit(a, b, &|s, f| sel.contains(s, f, &yf), mode);
+        self.modified = true;
+        self.changed();
+        self.notice = Some((format!("{label} appliqué à la zone spectrale"), true));
+    }
+
+    fn env_gain(&self, s: usize) -> f32 {
+        let e = &self.env;
+        match e.iter().position(|p| p.0 > s) {
+            None => e.last().map_or(0.0, |p| p.1),
+            Some(0) => e[0].1,
+            Some(k) => {
+                let (p, q) = (e[k - 1], e[k]);
+                p.1 + (q.1 - p.1) * (s - p.0) as f32 / (q.0 - p.0).max(1) as f32
+            }
+        }
+    }
+
+    fn apply_env(&mut self) {
+        if self.env.is_empty() {
+            return;
+        }
+        let gains: Vec<f32> = (0..self.clip.len()).map(|s| dsp::db_to(self.env_gain(s))).collect();
+        self.snapshot("Enveloppe de volume");
+        let n = self.clip.len();
+        self.clip.each(0, n, |i, v| v * gains[i]);
+        self.env.clear();
+        self.modified = true;
+        self.changed();
+        self.notice = Some(("Enveloppe de volume appliquée".into(), true));
+    }
+
+    fn apply_fades(&mut self) {
+        let [(fi, ci), (fo, co)] = self.fades;
+        let n = self.clip.len();
+        if fi + fo == 0 || n == 0 {
+            return;
+        }
+        self.snapshot("Fondus");
+        let (fi, fo) = (fi.min(n), fo.min(n));
+        self.clip.each(0, fi, |i, v| v * dsp::fade_gain(i as f32 / fi.max(1) as f32, ci));
+        self.clip.each(n - fo, n, |i, v| v * dsp::fade_gain(1.0 - i as f32 / fo.max(1) as f32, co));
+        self.fades = [(0, 0.0); 2];
+        self.modified = true;
+        self.changed();
+        self.notice = Some(("Fondus appliqués".into(), true));
+    }
+
+    fn run_rack(&mut self, k: usize, preview: bool) {
+        let d = &effects::DEFS[k];
+        let vals = self.rack_vals[k].clone();
+        let id = d.id;
+        if preview {
+            self.preview_fx(move |c, a, b| {
+                effects::run(id, c, a, b, &vals);
+            });
+            return;
+        }
+        let mut msg = None;
+        let whole = self.sel.is_none();
+        self.edit(d.name, |c, a, b| msg = effects::run(id, c, a, b, &vals));
+        if let Some(m) = msg {
+            self.notice = Some((format!("{} : {m}", d.name), true));
+        }
+        if whole {
+            self.fit_pending = true;
         }
     }
 
@@ -864,6 +1040,7 @@ impl eframe::App for Sound {
         self.transport(root, playing, pos);
         self.status(root);
         self.dock(root, pos, playing);
+        self.tool_rail(root);
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD).inner_margin(Margin::same(12))).show(root, |ui| {
             self.waveform(ui, playing, pos);
         });
@@ -889,7 +1066,7 @@ impl Sound {
             ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::primary_icon(ui, "Exporter", export_glyph).on_hover_text("WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E").clicked() {
-                        self.export = Some(ExportOpts { bits: 0, rate: 0, channels: 0, range: if self.sel.is_some() { 1 } else { 0 }, normalize: false });
+                        self.export = Some(self.export_opts());
                     }
                     ui.add_space(4.0);
                     let chip = format!("{} Hz · {} · {}", self.clip.rate, if self.clip.ch.len() > 1 { "stéréo" } else { "mono" }, fmt_time(self.clip.secs(self.clip.len())));
@@ -917,7 +1094,7 @@ impl Sound {
             }
             ui.separator();
             if ui.button("Exporter…                       Ctrl+E").clicked() {
-                self.export = Some(ExportOpts { bits: 0, rate: 0, channels: 0, range: if self.sel.is_some() { 1 } else { 0 }, normalize: false });
+                self.export = Some(self.export_opts());
             }
             if ui.button("Propriétés du son…").clicked() {
                 self.props_sheet = true;
@@ -1162,14 +1339,14 @@ impl Sound {
                 }
                 let (ra, rb) = self.range();
                 if self.stats.as_ref().is_none_or(|s| s.key != (self.version, ra, rb)) && rb > ra {
-                    self.stats = Some(Stats { key: (self.version, ra, rb), peak: db(self.clip.peak(ra, rb)), rms: self.clip.rms_db(ra, rb), lufs: self.clip.loudness(ra, rb), clipped: self.clip.clipped(ra, rb) });
+                    self.stats = Some(Stats { key: (self.version, ra, rb), peak: db(self.clip.peak(ra, rb)), rms: self.clip.rms_db(ra, rb), lufs: self.clip.loudness(ra, rb), clipped: self.clip.clipped(ra, rb), true_peak: db(self.clip.true_peak(ra, rb)) });
                 }
                 if let Some((_, _, spec)) = &self.spectrum {
                     let spec = spec.clone();
-                    let stats = self.stats.as_ref().map(|s| (s.peak, s.rms, s.lufs, s.clipped));
+                    let stats = self.stats.as_ref().map(|s| (s.peak, s.rms, s.lufs, s.clipped, s.true_peak));
                     pro::dock_panel(ui, "analysis", "Analyse", |ui| {
                         draw_spectrum(ui, &spec);
-                        if let Some((p, r, l, c)) = stats {
+                        if let Some((p, r, l, c, tp)) = stats {
                             egui::Grid::new("stats").num_columns(4).spacing(vec2(6.0, 4.0)).show(ui, |ui| {
                                 for (k, v, col) in [("Crête", format!("{p:.1} dB"), if p > -0.1 { RED } else { INK }), ("RMS", format!("{r:.1} dB"), INK)] {
                                     ui.label(RichText::new(k).size(11.5).color(MUTED));
@@ -1181,10 +1358,15 @@ impl Sound {
                                 ui.label(RichText::new("Écrêtés").size(11.5).color(MUTED));
                                 ui.label(RichText::new(c.to_string()).size(12.0).color(if c > 0 { RED } else { GREEN }).monospace());
                                 ui.end_row();
+                                ui.label(RichText::new("Crête réelle").size(11.5).color(MUTED));
+                                ui.label(RichText::new(format!("{tp:.1} dBTP")).size(12.0).color(if tp > -1.0 { RED } else { INK }).monospace());
+                                ui.end_row();
                             });
                         }
                     });
                 }
+                self.rack(ui);
+                self.analysis_tools(ui);
                 let mut action: Option<(bool, String, Op)> = None;
                 let mut preset = None;
                 let mut capture = false;
@@ -1468,6 +1650,167 @@ impl Sound {
         });
     }
 
+    fn analysis_tools(&mut self, ui: &mut Ui) {
+        let mut bpm = false;
+        let mut regions = false;
+        let mut beats = false;
+        pro::dock_panel(ui, "detect", "Détection", |ui| {
+            ui.spacing_mut().item_spacing.y = 5.0;
+            ui.horizontal(|ui| {
+                if pro::secondary(ui, "Détecter le tempo").on_hover_text("Analyse la sélection ou tout le fichier").clicked() {
+                    bpm = true;
+                }
+                if let Some((b, _)) = self.bpm {
+                    ui.label(RichText::new(format!("{b:.1} BPM")).font(semibold(13.0)).color(WAVE));
+                }
+            });
+            if self.bpm.is_some() && pro::ghost(ui, "Marqueur sur chaque mesure").clicked() {
+                beats = true;
+            }
+            ui.add_space(4.0);
+            ui.label(RichText::new("Repérer les sons (un marqueur par prise)").size(12.5).color(INK));
+            slider(ui, "Seuil du silence", &mut self.regions[0], -70.0..=-10.0, " dB");
+            slider(ui, "Silence minimum", &mut self.regions[1], 50.0..=3000.0, " ms");
+            slider(ui, "Son minimum", &mut self.regions[2], 10.0..=2000.0, " ms");
+            if pro::secondary(ui, "Poser les marqueurs").clicked() {
+                regions = true;
+            }
+        });
+        let (a, b) = self.range();
+        if bpm {
+            self.bpm = self.clip.detect_bpm(a, b);
+            self.notice = Some(match self.bpm {
+                Some((v, _)) => {
+                    self.fx.bpm = v.round();
+                    (format!("Tempo estimé : {v:.1} BPM"), true)
+                }
+                None => ("Passage trop court ou sans rythme net (il faut au moins 4 s)".into(), false),
+            });
+        }
+        if beats && let Some((v, off)) = self.bpm {
+            let bar = self.clip.rate as f64 * 60.0 / v as f64 * 4.0;
+            let mut t = off as f64;
+            let mut k = 1;
+            while (t as usize) < b {
+                if t as usize >= a {
+                    self.markers.push((t as usize, format!("Mesure {k}")));
+                    k += 1;
+                }
+                t += bar;
+            }
+            self.markers.sort_by_key(|m| m.0);
+            self.markers.dedup_by_key(|m| m.0);
+        }
+        if regions {
+            let r = self.clip.sound_regions(a, b, self.regions[0], self.regions[1], self.regions[2]);
+            let n = r.len();
+            for (k, g) in r.into_iter().enumerate() {
+                self.markers.push((g.a, format!("Prise {}", k + 1)));
+            }
+            self.markers.sort_by_key(|m| m.0);
+            self.notice = Some((format!("{n} sons repérés"), n > 0));
+        }
+    }
+
+    fn tool_rail(&mut self, root: &mut Ui) {
+        egui::Panel::left("tools").resizable(false).exact_size(52.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(7, 10))).show(root, |ui| {
+            ui.spacing_mut().item_spacing = vec2(2.0, 2.0);
+            let mut cur = self.tool;
+            for (k, (g, _)) in tools::GROUPS.iter().enumerate() {
+                if k == 2 || k == 4 {
+                    let (s, _) = ui.allocate_exact_size(vec2(36.0, 7.0), Sense::hover());
+                    ui.painter().line_segment([s.left_center() + vec2(6.0, 0.0), s.right_center() - vec2(6.0, 0.0)], Stroke::new(1.0, LINE));
+                }
+                pro::tool_group(ui, 36.0, &mut cur, g, |p, r, c, t| tools::draw_icon(p, r, c, t));
+            }
+            if cur != self.tool {
+                self.set_tool(cur);
+            }
+        });
+    }
+
+    fn rack(&mut self, ui: &mut Ui) {
+        let scope = if self.sel.is_some() { "à la sélection" } else { "à tout le fichier" };
+        let mut run = None;
+        pro::dock_panel(ui, "rack", &format!("Effets · {}", effects::DEFS.len()), |ui| {
+            ui.spacing_mut().item_spacing.y = 5.0;
+            ui.add(egui::TextEdit::singleline(&mut self.rack_search).hint_text("Rechercher un effet…").desired_width(f32::INFINITY));
+            let q = self.rack_search.to_lowercase();
+            if q.is_empty() {
+                egui::ComboBox::from_id_salt("rack-cat").width(ui.available_width()).selected_text(effects::CATS[self.rack_cat]).show_ui(ui, |ui| {
+                    for (k, c) in effects::CATS.iter().enumerate() {
+                        let n = effects::DEFS.iter().filter(|d| d.cat == k).count();
+                        if ui.selectable_label(self.rack_cat == k, format!("{c}  ({n})")).clicked() {
+                            self.rack_cat = k;
+                            if let Some(i) = effects::DEFS.iter().position(|d| d.cat == k) {
+                                self.rack_pick = i;
+                            }
+                        }
+                    }
+                });
+            }
+            ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
+                for (k, d) in effects::DEFS.iter().enumerate() {
+                    let show = if q.is_empty() { d.cat == self.rack_cat } else { d.name.to_lowercase().contains(&q) || d.hint.to_lowercase().contains(&q) };
+                    if show && ui.selectable_label(self.rack_pick == k, RichText::new(d.name).size(12.0)).on_hover_text(d.hint).clicked() {
+                        self.rack_pick = k;
+                        self.rack_cat = d.cat;
+                    }
+                }
+            });
+            let k = self.rack_pick;
+            let d = &effects::DEFS[k];
+            ui.add_space(4.0);
+            ui.label(RichText::new(d.name).font(semibold(13.0)).color(INK_STRONG));
+            ui.label(RichText::new(d.hint).size(11.5).color(FAINT));
+            if !d.presets.is_empty() {
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
+                    for (name, vals) in d.presets {
+                        if pro::chip(ui, name).clicked() {
+                            self.rack_vals[k] = vals.to_vec();
+                        }
+                    }
+                });
+            }
+            let vals = &mut self.rack_vals[k];
+            for (i, prm) in d.params.iter().enumerate() {
+                ui.label(RichText::new(prm.name).size(12.5).color(MUTED));
+                if !prm.choices.is_empty() {
+                    let mut c = (vals[i].round() as usize).min(prm.choices.len() - 1);
+                    if prm.choices.len() <= 3 {
+                        if pro::segmented(ui, &mut c, prm.choices) {
+                            vals[i] = c as f32;
+                        }
+                    } else {
+                        egui::ComboBox::from_id_salt(("rack", k, i)).width(ui.available_width()).selected_text(prm.choices[c]).show_ui(ui, |ui| {
+                            for (j, ch) in prm.choices.iter().enumerate() {
+                                if ui.selectable_label(c == j, *ch).clicked() {
+                                    vals[i] = j as f32;
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    ui.spacing_mut().slider_width = (ui.available_width() - 118.0).max(80.0);
+                    let sl = egui::Slider::new(&mut vals[i], prm.min..=prm.max).suffix(prm.unit).logarithmic(prm.log);
+                    ui.add(if prm.int { sl.integer() } else { sl.max_decimals(2) });
+                }
+            }
+            ui.horizontal(|ui| {
+                if ui.small_button("Valeurs par défaut").clicked() {
+                    *vals = effects::defaults(k);
+                }
+                ui.label(RichText::new(format!("appliqué {scope}")).size(11.0).color(FAINT));
+            });
+            run = fx_buttons(ui);
+        });
+        if let Some(p) = run {
+            self.run_rack(self.rack_pick, p);
+        }
+    }
+
     fn markers_panel(&mut self, ui: &mut Ui) {
         let rate = self.clip.rate as f64;
         pro::dock_panel(ui, "markers", "Marqueurs", |ui| {
@@ -1523,10 +1866,17 @@ impl Sound {
                     ui.label(RichText::new(s).size(12.5).color(MUTED));
                 };
                 row(ui, "Qualité");
-                pro::segmented(ui, &mut o.bits, &["16 bits (CD)", "24 bits (studio)", "32 bits flottant"]);
+                pro::segmented(ui, &mut o.bits, &["16 bits (CD)", "24 bits", "32 flottant", "8 bits"]);
+                if o.bits != 2 {
+                    row(ui, "Dither (adoucit la réduction de bits)");
+                    pro::segmented(ui, &mut o.dither, &["Aucun", "Triangulaire", "Mise en forme"]);
+                }
                 ui.add_space(8.0);
                 row(ui, "Fréquence");
-                pro::segmented(ui, &mut o.rate, &["Originale", "44 100 Hz", "48 000 Hz", "22 050 Hz"]);
+                pro::segmented(ui, &mut o.rate, &["Originale", "44,1 k", "48 k", "22 k", "96 k"]);
+                if o.rate > 0 {
+                    ui.checkbox(&mut o.hq, "Conversion haute qualité (filtre sinc)");
+                }
                 ui.add_space(8.0);
                 row(ui, "Canaux");
                 pro::segmented(ui, &mut o.channels, &["Originaux", "Mono", "Stéréo"]);
@@ -1542,6 +1892,16 @@ impl Sound {
                 }
                 ui.add_space(8.0);
                 ui.checkbox(&mut o.normalize, "Normaliser à −1 dB avant l'export");
+                ui.checkbox(&mut o.cues, "Inclure les marqueurs (repères lus par les éditeurs audio)");
+                egui::CollapsingHeader::new(RichText::new("Métadonnées").size(12.5).color(MUTED)).id_salt("meta").show(ui, |ui| {
+                    egui::Grid::new("meta-grid").num_columns(2).spacing(vec2(8.0, 4.0)).show(ui, |ui| {
+                        for (k, (_, label)) in INFO_IDS.iter().enumerate() {
+                            ui.label(RichText::new(*label).size(12.0).color(MUTED));
+                            ui.add(egui::TextEdit::singleline(&mut self.meta[k]).desired_width(280.0));
+                            ui.end_row();
+                        }
+                    });
+                });
                 if self.stats.as_ref().is_some_and(|s| s.clipped > 0) {
                     ui.label(RichText::new("Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.").size(12.0).color(RED));
                 }
@@ -1626,9 +1986,308 @@ impl Sound {
         }
     }
 
+    fn options_bar(&mut self, ui: &mut Ui) {
+        ui.spacing_mut().slider_width = 90.0;
+        let t = self.tool;
+        ui.label(RichText::new(t.name()).font(semibold(12.5)).color(INK_STRONG));
+        pro::toolbar_sep(ui);
+        let small = |ui: &mut Ui, s: &str| {
+            ui.label(RichText::new(s).size(12.0).color(MUTED));
+        };
+        match t {
+            Tool::Select | Tool::Hand | Tool::Zoom => {
+                if ui.small_button("Tout sélectionner").clicked() {
+                    self.sel = Some((0, self.clip.len()));
+                }
+                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Désélectionner").small()).clicked() {
+                    self.sel = None;
+                }
+                if ui.small_button("Zoom 1:1 (échantillons)").clicked() {
+                    let c = self.view_start + 500.0 * self.spp;
+                    self.spp = 0.1;
+                    self.view_start = c - 50.0;
+                }
+                small(ui, t.help());
+            }
+            Tool::SpecRect | Tool::Lasso | Tool::Brush | Tool::Heal => {
+                small(ui, "Échelle");
+                let mut l = !self.spec_log as usize;
+                if pro::segmented(ui, &mut l, &["Log", "Linéaire"]) {
+                    self.spec_log = l == 0;
+                }
+                small(ui, "FFT");
+                egui::ComboBox::from_id_salt("fft").width(64.0).selected_text(FFT_SIZES[self.fft].to_string()).show_ui(ui, |ui| {
+                    for (k, n) in FFT_SIZES.iter().enumerate() {
+                        ui.selectable_value(&mut self.fft, k, n.to_string());
+                    }
+                });
+                if matches!(t, Tool::Brush | Tool::Heal) {
+                    small(ui, "Taille");
+                    ui.add(egui::Slider::new(&mut self.brush, 3.0..=80.0).suffix(" px").integer());
+                }
+                if t != Tool::Heal {
+                    pro::toolbar_sep(ui);
+                    let has = self.spec_sel.is_some();
+                    ui.add(egui::DragValue::new(&mut self.spec_db).range(-60.0..=24.0).suffix(" dB").speed(0.2));
+                    let g = self.spec_db;
+                    if ui.add_enabled(has, egui::Button::new("Appliquer le gain").small()).on_hover_text("Entrée").clicked() {
+                        self.spectral_apply(dsp::SpecMode::Gain(g), "Gain spectral");
+                    }
+                    if ui.add_enabled(has, egui::Button::new("Supprimer").small()).clicked() {
+                        self.spectral_apply(dsp::SpecMode::Gain(-90.0), "Suppression spectrale");
+                    }
+                    if ui.add_enabled(has, egui::Button::new("Réparer").small()).on_hover_text("Reconstruit la zone à partir de ce qui l'entoure").clicked() {
+                        self.spectral_apply(dsp::SpecMode::Heal, "Réparation spectrale");
+                    }
+                    if ui.add_enabled(has, egui::Button::new("Isoler").small()).on_hover_text("Garde seulement la zone (le reste devient silencieux)").clicked()
+                        && let Some(sel) = self.spec_sel.clone()
+                    {
+                        let nyq = self.clip.rate as f32 / 2.0;
+                        let log = self.spec_log;
+                        let (a, b) = (sel.a, sel.b.min(self.clip.len()));
+                        self.snapshot("Isoler la zone spectrale");
+                        let yf = move |f: f32| dsp::y_frac(f, nyq, log);
+                        self.clip.spectral_edit(a, b, &|s, f| !sel.contains(s, f, &yf), dsp::SpecMode::Gain(-90.0));
+                        self.modified = true;
+                        self.changed();
+                    }
+                    if ui.add_enabled(has, egui::Button::new("×").small()).on_hover_text("Effacer la zone (Échap)").clicked() {
+                        self.spec_sel = None;
+                    }
+                }
+            }
+            Tool::Pencil => {
+                let ok = self.spp <= 8.0;
+                small(ui, if ok { "Dessine la forme d'onde, un canal à la fois." } else { "Zoome davantage pour dessiner les échantillons." });
+                if ui.small_button("Zoom aux échantillons").clicked() {
+                    let c = self.view_start + 500.0 * self.spp;
+                    self.spp = 0.25;
+                    self.view_start = c - 125.0;
+                }
+            }
+            Tool::Razor => {
+                let cuts = self.markers.len();
+                small(ui, &format!("{cuts} coupe(s) · Alt+clic supprime un segment"));
+                if ui.add_enabled(cuts > 0, egui::Button::new("Exporter en morceaux…").small()).clicked() {
+                    let mut o = self.export_opts();
+                    o.range = 2;
+                    self.export = Some(o);
+                }
+            }
+            Tool::Fade => {
+                let r = self.clip.rate as f64;
+                small(ui, &format!("Entrée {:.2} s · Sortie {:.2} s", self.fades[0].0 as f64 / r, self.fades[1].0 as f64 / r));
+                for (k, label) in [(0, "Courbe entrée"), (1, "Courbe sortie")] {
+                    small(ui, label);
+                    ui.add(egui::Slider::new(&mut self.fades[k].1, -1.0..=1.0).show_value(false));
+                }
+                if ui.add_enabled(self.fades[0].0 + self.fades[1].0 > 0, egui::Button::new("Appliquer").small()).on_hover_text("Entrée").clicked() {
+                    self.apply_fades();
+                }
+                if ui.small_button("Réinitialiser").clicked() {
+                    self.fades = [(0, 0.0); 2];
+                }
+            }
+            Tool::Envelope => {
+                small(ui, &format!("{} point(s)", self.env.len()));
+                let n = self.clip.len();
+                for (label, pts) in [("Montée", vec![(0usize, -30.0f32), (n, 0.0)]), ("Descente", vec![(0, 0.0), (n, -30.0)]), ("Creux au centre", vec![(0, 0.0), (n / 3, -12.0), (n * 2 / 3, -12.0), (n, 0.0)])] {
+                    if ui.small_button(label).clicked() {
+                        self.env = pts;
+                    }
+                }
+                if ui.add_enabled(!self.env.is_empty(), egui::Button::new("Appliquer").small()).on_hover_text("Entrée").clicked() {
+                    self.apply_env();
+                }
+                if ui.add_enabled(!self.env.is_empty(), egui::Button::new("Effacer").small()).clicked() {
+                    self.env.clear();
+                }
+            }
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn tool_pointer(
+        &mut self,
+        resp: &egui::Response,
+        wave: Rect,
+        spp: f64,
+        sample_at: &dyn Fn(f32) -> usize,
+        x_of: &dyn Fn(f64) -> f32,
+        y_to_f: &dyn Fn(f32) -> f32,
+        env_y: &dyn Fn(f32) -> f32,
+        env_g: &dyn Fn(f32) -> f32,
+        fade_x: [f32; 2],
+        lane_h: f32,
+        amp: f32,
+        spec_view: bool,
+    ) {
+        let tool = self.tool;
+        let n = self.clip.len();
+        let alt = resp.ctx.input(|i| i.modifiers.alt);
+        let Some(p) = resp.interact_pointer_pos() else { return };
+        let s = sample_at(p.x);
+        let brush = |me: &Self, f: f32| SpecShape::Brush { pts: vec![(s as f64, f)], rs: me.brush as f64 * spp, ry: me.brush / wave.height() };
+        if resp.drag_started() {
+            self.drag = match tool {
+                Tool::Zoom => Drag::Zoom(s),
+                Tool::SpecRect | Tool::Lasso | Tool::Brush | Tool::Heal if spec_view => {
+                    let f = y_to_f(p.y);
+                    let shape = match tool {
+                        Tool::SpecRect => SpecShape::Rect { f0: f, f1: f },
+                        Tool::Lasso => SpecShape::Lasso(vec![(s as f64, f)]),
+                        _ => brush(self, f),
+                    };
+                    let r = (self.brush as f64 * spp) as usize;
+                    self.spec_sel = Some(SpecSel { a: s.saturating_sub(r), b: s + r, shape });
+                    Drag::Spec(s, f)
+                }
+                Tool::SpecRect | Tool::Lasso | Tool::Brush => {
+                    self.view_mode = 1;
+                    Drag::None
+                }
+                Tool::Heal => Drag::Heal(s),
+                Tool::Pencil if self.spp <= 8.0 => {
+                    self.snapshot("Crayon");
+                    Drag::Pencil((((p.y - wave.top()) / lane_h) as usize).min(self.clip.ch.len().saturating_sub(1)), None)
+                }
+                Tool::Pencil => {
+                    self.notice = Some(("Crayon : zoome jusqu'aux échantillons d'abord".into(), false));
+                    Drag::None
+                }
+                Tool::Fade => Drag::Fade((p.x - fade_x[0]).abs() <= (p.x - fade_x[1]).abs()),
+                Tool::Envelope => {
+                    let k = self.env.iter().position(|(es, g)| (x_of(*es as f64) - p.x).abs() < 8.0 && (env_y(*g) - p.y).abs() < 8.0);
+                    Drag::Env(k.unwrap_or_else(|| {
+                        let g = env_g(p.y);
+                        let at = self.env.iter().position(|e| e.0 > s).unwrap_or(self.env.len());
+                        self.env.insert(at, (s, g));
+                        at
+                    }))
+                }
+                _ => Drag::None,
+            };
+        }
+        if resp.dragged() {
+            match self.drag {
+                Drag::None if tool == Tool::Hand => self.view_start -= resp.drag_delta().x as f64 * spp,
+                Drag::Zoom(f) | Drag::Heal(f) => self.sel = Some((f.min(s), f.max(s))).filter(|(a, b)| b > a),
+                Drag::Spec(s0, f0) => {
+                    let f = y_to_f(p.y);
+                    if let Some(sel) = &mut self.spec_sel {
+                        if let SpecShape::Rect { f0: lo, f1: hi } = &mut sel.shape {
+                            (*lo, *hi) = (f0.min(f), f0.max(f));
+                            (sel.a, sel.b) = (s0.min(s), s0.max(s));
+                        } else {
+                            sel.extend(s as f64, f);
+                        }
+                    }
+                }
+                Drag::Pencil(ci, last) => {
+                    let mid = wave.top() + ci as f32 * lane_h + lane_h / 2.0;
+                    let v = ((mid - p.y) / amp.max(1.0)).clamp(-1.0, 1.0);
+                    let s = s.min(n.saturating_sub(1));
+                    let (ls, lv) = last.unwrap_or((s, v));
+                    let (a, b) = (ls.min(s), ls.max(s));
+                    if let Some(c) = self.clip.ch.get_mut(ci) {
+                        for i in a..=b {
+                            let t = if b > a { (i - ls.min(s)) as f32 / (b - a) as f32 } else { 1.0 };
+                            let (va, vb) = if ls <= s { (lv, v) } else { (v, lv) };
+                            c[i] = va + (vb - va) * t;
+                        }
+                    }
+                    self.drag = Drag::Pencil(ci, Some((s, v)));
+                    self.version += 1;
+                }
+                Drag::Fade(left) => {
+                    let c = (-(p.y - wave.center().y) / (wave.height() / 2.0)).clamp(-1.0, 1.0);
+                    if left {
+                        self.fades[0] = (s.min(n - self.fades[1].0.min(n)), c);
+                    } else {
+                        self.fades[1] = (n - s.max(self.fades[0].0).min(n), c);
+                    }
+                }
+                Drag::Env(k) if k < self.env.len() => {
+                    let lo = if k > 0 { self.env[k - 1].0 + 1 } else { 0 };
+                    let hi = self.env.get(k + 1).map_or(n, |e| e.0.saturating_sub(1));
+                    self.env[k] = (s.clamp(lo, hi.max(lo)), env_g(p.y));
+                }
+                _ => {}
+            }
+        }
+        if resp.drag_stopped() {
+            match self.drag {
+                Drag::Zoom(_) => {
+                    self.zoom_sel();
+                    self.sel = None;
+                }
+                Drag::Heal(_) => {
+                    if self.sel.is_some() {
+                        self.edit("Correction des taches", |c, a, b| c.heal(a, b));
+                        self.sel = None;
+                    }
+                }
+                Drag::Spec(..) if tool == Tool::Heal => {
+                    self.spectral_apply(dsp::SpecMode::Heal, "Correction spectrale");
+                    self.spec_sel = None;
+                }
+                Drag::Pencil(..) => {
+                    self.modified = true;
+                    self.changed();
+                }
+                _ => {}
+            }
+            self.drag = Drag::None;
+        }
+        if resp.clicked() || resp.secondary_clicked() {
+            let secondary = resp.secondary_clicked();
+            match tool {
+                Tool::Zoom => {
+                    let k = if alt || secondary { 2.0 } else { 0.5 };
+                    let at = s as f64;
+                    let off = at - self.view_start;
+                    self.spp = (self.spp * k).max(0.05);
+                    self.view_start = at - off * k;
+                }
+                Tool::Razor if alt => {
+                    let lo = self.markers.iter().map(|m| m.0).filter(|m| *m <= s).max().unwrap_or(0);
+                    let hi = self.markers.iter().map(|m| m.0).filter(|m| *m > s).min().unwrap_or(n);
+                    self.markers.retain(|m| m.0 != lo || lo == 0);
+                    self.sel = Some((lo, hi)).filter(|(a, b)| b > a);
+                    self.cut(false);
+                }
+                Tool::Razor => {
+                    let k = self.markers.len() + 1;
+                    self.markers.push((s, format!("Coupe {k}")));
+                    self.markers.sort_by_key(|m| m.0);
+                }
+                Tool::Envelope => {
+                    let near = self.env.iter().position(|(es, g)| (x_of(*es as f64) - p.x).abs() < 8.0 && (env_y(*g) - p.y).abs() < 8.0);
+                    match (near, secondary) {
+                        (Some(k), true) => {
+                            self.env.remove(k);
+                        }
+                        (None, false) => {
+                            let at = self.env.iter().position(|e| e.0 > s).unwrap_or(self.env.len());
+                            self.env.insert(at, (s, env_g(p.y)));
+                        }
+                        _ => {}
+                    }
+                }
+                Tool::Fade if resp.double_clicked() => self.fades = [(0, 0.0); 2],
+                Tool::SpecRect | Tool::Lasso | Tool::Brush => self.spec_sel = None,
+                _ if !secondary => {
+                    self.cursor = s;
+                    self.sel = None;
+                }
+                _ => {}
+            }
+        }
+    }
+
     fn waveform(&mut self, ui: &mut Ui, playing: bool, pos: usize) {
         let full = ui.max_rect();
-        let head_h = 34.0;
+        let head_h = 68.0;
         let head = Rect::from_min_size(full.min, vec2(full.width(), head_h));
         ui.scope_builder(egui::UiBuilder::new().max_rect(head), |ui| {
             ui.horizontal_centered(|ui| {
@@ -1654,6 +2313,11 @@ impl Sound {
                     ui.label(RichText::new("Zoom").size(12.0).color(MUTED));
                 });
             });
+        });
+        let bar = Rect::from_min_size(full.min + vec2(0.0, 34.0), vec2(full.width(), 30.0));
+        ui.painter().rect_filled(bar, CornerRadius::same(7), PANEL);
+        ui.scope_builder(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(10.0, 0.0))), |ui| {
+            ui.horizontal_centered(|ui| self.options_bar(ui));
         });
         let over_h = 26.0;
         let area = Rect::from_min_max(pos2(full.left(), head.bottom() + 4.0), pos2(full.right(), full.bottom() - over_h - 6.0));
@@ -1694,7 +2358,21 @@ impl Sound {
         let (start, spp) = (self.view_start, self.spp);
         let x_of = |s: f64| wave.min.x + ((s - start) / spp) as f32;
         let sample_at = |x: f32| ((start + (x - wave.min.x) as f64 * spp).round().max(0.0) as usize).min(n);
-        if let Some(p) = resp.interact_pointer_pos() {
+        let tool = self.tool;
+        let nyq = self.clip.rate as f32 / 2.0;
+        let log = self.spec_log;
+        let spec_view = self.view_mode == 1;
+        let y_to_f = |y: f32| dsp::freq_at((wave.bottom() - y) / wave.height(), nyq, log);
+        let f_to_y = |f: f32| wave.bottom() - dsp::y_frac(f, nyq, log) * wave.height();
+        let lanes = self.clip.ch.len().max(1);
+        let lane_h0 = wave.height() / lanes as f32;
+        let amp0 = lane_h0 * 0.45 * self.amp_zoom;
+        let env_y = |g: f32| wave.top() + (12.0 - g) / 42.0 * wave.height();
+        let env_g = |y: f32| (12.0 - (y - wave.top()) / wave.height() * 42.0).clamp(-30.0, 12.0);
+        let fade_x = [x_of(self.fades[0].0 as f64), x_of(n.saturating_sub(self.fades[1].0) as f64)];
+        if tool != Tool::Select {
+            self.tool_pointer(&resp, wave, spp, &sample_at, &x_of, &y_to_f, &env_y, &env_g, fade_x, lane_h0, amp0, spec_view);
+        } else if let Some(p) = resp.interact_pointer_pos() {
             let s = sample_at(p.x);
             if resp.drag_started() {
                 self.drag = match self.sel {
@@ -1716,7 +2394,7 @@ impl Sound {
                             self.sel = Some((a.min(s), a.max(s))).filter(|(x, y)| y > x);
                         }
                     }
-                    Drag::None => {}
+                    _ => {}
                 }
             }
             if resp.double_clicked() {
@@ -1738,11 +2416,19 @@ impl Sound {
                 }
             }
         }
-        if resp.drag_stopped() {
+        if tool == Tool::Select && resp.drag_stopped() {
             if let Some((a, _)) = self.sel {
                 self.cursor = a;
             }
             self.drag = Drag::None;
+        }
+        if resp.hovered() {
+            ui.ctx().set_cursor_icon(match tool {
+                Tool::Hand => egui::CursorIcon::Grab,
+                Tool::Zoom => egui::CursorIcon::ZoomIn,
+                Tool::Select => egui::CursorIcon::Text,
+                _ => egui::CursorIcon::Crosshair,
+            });
         }
         if resp.hovered()
             && let (Some(p), Some((a, b))) = (resp.hover_pos(), self.sel)
@@ -1796,9 +2482,9 @@ impl Sound {
         let lane_h = wave.height() / nch as f32;
         if self.view_mode == 1 {
             let rows = (wave.height() / 3.0).clamp(32.0, 160.0) as usize;
-            let skey = (start as usize, spp.to_bits(), cols, self.version, rows);
+            let skey = (start as usize, spp.to_bits(), cols, self.version, rows * 16 + self.fft * 2 + log as usize);
             if self.specgram.as_ref().is_none_or(|s| s.0 != skey) {
-                let data = self.clip.spectrogram(start, spp, cols.max(1), rows);
+                let data = self.clip.spectrogram_ex(start, spp, cols.max(1), rows, FFT_SIZES[self.fft], log);
                 let mut img = egui::ColorImage::filled([cols.max(1), rows], Color32::BLACK);
                 for (x, col) in data.iter().enumerate() {
                     for (y, v) in col.iter().enumerate() {
@@ -1811,10 +2497,9 @@ impl Sound {
             if let Some((_, tex)) = &self.specgram {
                 painter.image(tex.id(), wave, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             }
-            let nyq = rate as f32 / 2.0;
-            for (f, l) in [(100.0, "100 Hz"), (1000.0, "1 kHz"), (10_000.0, "10 kHz")] {
-                if f < nyq {
-                    let y = wave.bottom() - wave.height() * (f / 30.0f32).ln() / (nyq / 30.0).ln();
+            for (f, l) in [(100.0, "100 Hz"), (500.0, "500 Hz"), (1000.0, "1 kHz"), (2000.0, "2 kHz"), (5000.0, "5 kHz"), (10_000.0, "10 kHz"), (15_000.0, "15 kHz")] {
+                if f < nyq && (log || f >= 1000.0) {
+                    let y = f_to_y(f);
                     painter.line_segment([pos2(wave.left(), y), pos2(wave.left() + 8.0, y)], Stroke::new(1.0, Color32::WHITE));
                     painter.text(pos2(wave.left() + 11.0, y), Align2::LEFT_CENTER, l, FontId::proportional(10.0), Color32::from_white_alpha(200));
                 }
@@ -1867,6 +2552,58 @@ impl Sound {
                 let tag = Rect::from_min_size(pos2(x + 3.0, wave.min.y + 2.0), g.size() + vec2(8.0, 4.0));
                 painter.rect_filled(tag, CornerRadius::same(4), MARK);
                 painter.galley(tag.min + vec2(4.0, 2.0), g, Color32::BLACK);
+            }
+        }
+        if spec_view && let Some(sel) = &self.spec_sel {
+            let col = Color32::from_rgb(120, 230, 255);
+            match &sel.shape {
+                SpecShape::Rect { f0, f1 } => {
+                    let r = Rect::from_x_y_ranges(x_of(sel.a as f64)..=x_of(sel.b as f64), f_to_y(*f1)..=f_to_y(*f0));
+                    painter.rect_filled(r, CornerRadius::ZERO, col.gamma_multiply(0.15));
+                    painter.rect_stroke(r, CornerRadius::ZERO, Stroke::new(1.5, col), egui::StrokeKind::Middle);
+                }
+                SpecShape::Lasso(pts) => {
+                    let v: Vec<Pos2> = pts.iter().map(|(s, f)| pos2(x_of(*s), f_to_y(*f))).collect();
+                    painter.add(Shape::closed_line(v, Stroke::new(1.5, col)));
+                }
+                SpecShape::Brush { pts, rs, .. } => {
+                    let r = (*rs / spp) as f32;
+                    for (s, f) in pts.iter().step_by((pts.len() / 400).max(1)) {
+                        painter.circle_filled(pos2(x_of(*s), f_to_y(*f)), r, col.gamma_multiply(0.18));
+                    }
+                }
+            }
+        }
+        if tool == Tool::Fade || self.fades[0].0 + self.fades[1].0 > 0 {
+            let fcol = Color32::from_rgb(255, 170, 60);
+            for (k, (len, curve)) in self.fades.iter().enumerate() {
+                let (a, b) = if k == 0 { (0, *len) } else { (n.saturating_sub(*len), n) };
+                if b > a {
+                    let pts: Vec<Pos2> = (0..=40).map(|i| {
+                        let t = i as f32 / 40.0;
+                        let g = dsp::fade_gain(if k == 0 { t } else { 1.0 - t }, *curve);
+                        pos2(x_of(a as f64 + (b - a) as f64 * t as f64), wave.bottom() - g * wave.height())
+                    }).collect();
+                    painter.add(Shape::line(pts, Stroke::new(2.0, fcol)));
+                }
+                let x = fade_x[k];
+                if x >= wave.min.x - 6.0 && x <= wave.max.x + 6.0 {
+                    painter.rect_filled(Rect::from_center_size(pos2(x, wave.top() + 7.0), Vec2::splat(10.0)), CornerRadius::same(2), fcol);
+                }
+            }
+        }
+        if tool == Tool::Envelope || !self.env.is_empty() {
+            let ecol = Color32::from_rgb(120, 255, 160);
+            let y0 = env_y(0.0);
+            painter.line_segment([pos2(wave.left(), y0), pos2(wave.right(), y0)], Stroke::new(1.0, ecol.gamma_multiply(0.25)));
+            if !self.env.is_empty() {
+                let mut v = vec![pos2(wave.left(), env_y(self.env_gain(start as usize)))];
+                v.extend(self.env.iter().map(|(s, g)| pos2(x_of(*s as f64), env_y(*g))));
+                v.push(pos2(wave.right(), env_y(self.env_gain((start + visible) as usize))));
+                painter.add(Shape::line(v, Stroke::new(1.8, ecol)));
+                for (s, g) in &self.env {
+                    painter.circle_filled(pos2(x_of(*s as f64), env_y(*g)), 4.0, ecol);
+                }
             }
         }
         let line = |p: &Painter, s: usize, c: Color32| {

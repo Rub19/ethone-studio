@@ -78,6 +78,7 @@ impl Clip {
         Ok(Self { rate, ch })
     }
 
+    #[allow(dead_code)]
     pub fn save_wav(&self, path: &Path, bits: u16) -> Result<(), String> {
         let float = bits == 32;
         let spec = hound::WavSpec {
@@ -723,35 +724,6 @@ impl Clip {
         }
     }
 
-    /// `cols` columns of `bins` magnitudes in dB (mono mix), FFT 512 centred on each column.
-    pub fn spectrogram(&self, start: f64, spp: f64, cols: usize, bins: usize) -> Vec<Vec<f32>> {
-        const N: usize = 512;
-        let win = hann(N);
-        let len = self.len();
-        let nch = self.ch.len().max(1) as f32;
-        (0..cols)
-            .map(|x| {
-                let centre = (start + (x as f64 + 0.5) * spp) as isize;
-                let mut re: Vec<f32> = (0..N)
-                    .map(|i| {
-                        let p = centre - (N as isize / 2) + i as isize;
-                        if p < 0 || p as usize >= len { 0.0 } else { self.ch.iter().map(|c| c[p as usize]).sum::<f32>() / nch * win[i] }
-                    })
-                    .collect();
-                let mut im = vec![0f32; N];
-                fft(&mut re, &mut im, false);
-                (0..bins)
-                    .map(|k| {
-                        let f = 30.0 * ((self.rate as f32 / 2.0) / 30.0).powf(k as f32 / bins as f32);
-                        let bin = ((f / self.rate as f32 * N as f32) as usize).min(N / 2);
-                        20.0 * ((re[bin] * re[bin] + im[bin] * im[bin]).sqrt() / N as f32 * 4.0).max(1e-6).log10()
-                    })
-                    .collect()
-            })
-            .collect()
-    }
-
-    /// Magnitude spectrum (dB) of up to 2048 samples from `a`, on `bins` log-spaced bands from 20 Hz.
     pub fn spectrum(&self, a: usize, bins: usize) -> Vec<f32> {
         let n = 2048.min(self.len().saturating_sub(a));
         if n < 64 {
@@ -963,7 +935,6 @@ mod tests {
         fx.ring(0, 8000, 50.0);
         fx.fade_shape(0, 4000, true, 2);
         assert!(fx.ch.iter().flatten().all(|v| v.is_finite()) && fx.peak(0, 8000) <= 1.5);
-        assert_eq!(tone(8000, 1.0).spectrogram(0.0, 100.0, 80, 32).len(), 80);
         assert!(tone(8000, 1.0).rms_db(0, 8000) < -8.0 && tone(8000, 1.0).clipped(0, 8000) == 0);
 
         let dir = std::env::temp_dir().join("ethone-sound-test.wav");
