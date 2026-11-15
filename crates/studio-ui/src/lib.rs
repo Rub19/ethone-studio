@@ -90,6 +90,7 @@ pub fn app_window_icon(id: &str) -> egui::IconData {
         "lumen" => include_bytes!("../assets/icons/lumen.png"),
         "page" => include_bytes!("../assets/icons/page.png"),
         "sound" => include_bytes!("../assets/icons/sound.png"),
+        "folio" => include_bytes!("../assets/icons/folio.png"),
         "studio" => include_bytes!("../assets/icons/studio.png"),
         _ => ETHONE_LOGO_PNG,
     };

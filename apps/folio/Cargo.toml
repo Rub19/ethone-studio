@@ -1,0 +1,21 @@
+[package]
+name = "folio"
+version = "0.4.0"
+edition = "2024"
+
+[dependencies]
+eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts"] }
+hayro = "0.9"
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg"] }
+lopdf = "0.47"
+rfd = "0.18.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+studio-core = { version = "0.1.0", path = "../../crates/studio-core" }
+studio-ui = { version = "0.1.0", path = "../../crates/studio-ui" }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Media_Ocr", "Graphics_Imaging", "Storage_Streams", "Globalization", "Foundation", "Foundation_Collections"] }
+
+[build-dependencies]
+winresource = "0.1.34"

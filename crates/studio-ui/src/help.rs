@@ -380,3 +380,12 @@ fn key_chip(ui: &mut Ui, key: &str) {
         ui.label(RichText::new(key).size(11.5).color(Color32::from_gray(200)));
     });
 }
+
+/// One-shot question to the local assistant (Ollama), starting the server if needed.
+pub fn ask_once(system: &str, prompt: &str) -> String {
+    if matches!(probe(), Ai::Offline) {
+        start_server();
+        std::thread::sleep(std::time::Duration::from_secs(3));
+    }
+    ask(system.into(), vec![(true, prompt.into())])
+}

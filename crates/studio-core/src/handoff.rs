@@ -2,7 +2,7 @@ use crate::{app_dir, data_dir, exe_path};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime};
 
-pub const APPS: [(&str, &str); 7] = [("pixel", "Pixel"), ("lumen", "Lumen"), ("vector", "Vector"), ("cut", "Cut"), ("motion", "Motion"), ("page", "Page"), ("sound", "Sound")];
+pub const APPS: [(&str, &str); 8] = [("pixel", "Pixel"), ("lumen", "Lumen"), ("vector", "Vector"), ("cut", "Cut"), ("motion", "Motion"), ("page", "Page"), ("sound", "Sound"), ("folio", "Folio")];
 
 pub fn name(id: &str) -> &'static str {
     APPS.iter().find(|a| a.0 == id).map_or("Ethone", |a| a.1)

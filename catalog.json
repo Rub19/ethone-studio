@@ -6,6 +6,7 @@
     { "id": "motion", "name": "Motion", "tagline": "Animation, titres et effets visuels", "category": "Vidéo", "accent": [30, 170, 240] },
     { "id": "lumen", "name": "Lumen", "tagline": "Développement RAW et catalogue photo", "category": "Photo", "accent": [30, 200, 140] },
     { "id": "page", "name": "Page", "tagline": "Mise en page, magazines et PDF", "category": "Publication", "accent": [250, 100, 50] },
-    { "id": "sound", "name": "Sound", "tagline": "Édition et nettoyage audio", "category": "Audio", "accent": [100, 95, 240] }
+    { "id": "sound", "name": "Sound", "tagline": "Édition et nettoyage audio", "category": "Audio", "accent": [100, 95, 240] },
+    { "id": "folio", "name": "Folio", "tagline": "PDF : lecture, annotation, OCR, signature et organisation", "category": "Document", "accent": [235, 50, 60] }
   ]
 }

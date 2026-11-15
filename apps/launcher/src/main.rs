@@ -46,12 +46,13 @@ const TILE_H: f32 = 168.0;
 const TILE_MIN_W: f32 = 330.0;
 const GAP: f32 = 18.0;
 
-const CATEGORIES: [(&str, &str); 5] = [
+const CATEGORIES: [(&str, &str); 6] = [
     ("Image", "Image et illustration"),
     ("Photo", "Photo"),
     ("Vidéo", "Vidéo et animation"),
     ("Publication", "Publication"),
     ("Audio", "Audio"),
+    ("Document", "Documents et PDF"),
 ];
 
 #[derive(Clone, Copy, PartialEq)]

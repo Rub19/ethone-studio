@@ -1,6 +1,6 @@
 use resvg::{tiny_skia, usvg};
 
-pub const APPS: [(&str, &str, &str); 8] = [
+pub const APPS: [(&str, &str, &str); 9] = [
     ("pixel", "#FF5A7E", "#E0184B"),
     ("cut", "#C77DFF", "#8A2BE2"),
     ("vector", "#FFB23F", "#F07800"),
@@ -8,6 +8,7 @@ pub const APPS: [(&str, &str, &str); 8] = [
     ("lumen", "#3EE0A4", "#0FA36B"),
     ("page", "#FF8A5B", "#E2461B"),
     ("sound", "#7C83FF", "#4B3BDB"),
+    ("folio", "#FF5F57", "#C8102E"),
     ("studio", "#8B7CFF", "#2E8BFF"),
 ];
 
@@ -62,6 +63,13 @@ fn glyph(id: &str) -> (String, String) {
         "sound" => (
             r#"<path d="M17 28 V36 M24.5 22 V42 M32 15 V49 M39.5 22 V42 M47 28 V36" stroke="white" stroke-width="5" stroke-linecap="round"/>"#.into(),
             String::new(),
+        ),
+        "folio" => (
+            r#"<path d="M18 14 Q18 11 21 11 H38 L47 20 V50 Q47 53 44 53 H21 Q18 53 18 50 Z" fill="white"/>"#.into(),
+            r#"<path d="M38 11 V18 Q38 20 40 20 H47" fill="none" stroke="black" stroke-width="2.4"/>
+<path d="M24 25 H39 M24 31 H41 M24 37 H34" stroke="black" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M23 47 C26 41 29 41 29 45 C29 48 32 42 35 43 C37 44 37 47 41 45" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round"/>"#
+                .into(),
         ),
         _ => (
             r#"<rect x="17" y="17" width="13" height="13" rx="4" fill="white"/>
