@@ -46,9 +46,9 @@
 
 - [x] Slice A : nouvelles commandes Pixel, Vector, Motion, Page et Folio.
 - [x] Slice A : compilation et tests ciblés réussis.
-- [ ] Slice A : commit local créé.
-- [ ] Slice B : nouvelles commandes Cut, Lumen et Sound.
-- [ ] Slice B : demande « −16 LUFS » comprise et couverte par un test.
-- [ ] Slice B : suggestions du Launcher enrichies.
-- [ ] Checkpoint final : workspace compilé et testé.
-- [ ] Checkpoint final : diff revu et commit local créé.
+- [x] Slice A : commit local créé.
+- [x] Slice B : nouvelles commandes Cut, Lumen et Sound.
+- [x] Slice B : demande « −16 LUFS » comprise et couverte par un test.
+- [x] Slice B : suggestions du Launcher enrichies.
+- [x] Checkpoint final : workspace compilé et testé.
+- [x] Checkpoint final : diff revu et commit local créé.

@@ -71,9 +71,10 @@ Aucune.
 
 ### Slice B — médias, lots et assistant
 
-- [ ] Cut : normaliser l'audio sélectionné et appliquer des fondus rapides à tous les clips.
-- [ ] Lumen : noter, retenir, rejeter ou réinitialiser les photos choisies.
-- [ ] Sound : normalisation crête, normalisation −16 LUFS et micro-fondus de bord.
-- [ ] Assistant : distinguer une demande LUFS d'une simple normalisation de crête.
-- [ ] Mettre à jour les suggestions audio du Launcher.
-- [ ] Tests complets, revue qualité et commit local.
+- [x] Cut : normaliser l'audio sélectionné et appliquer des fondus rapides à tous les clips.
+- [x] Lumen : noter, retenir, rejeter ou réinitialiser les photos choisies.
+- [x] Sound : normalisation crête, normalisation −16 LUFS et micro-fondus de bord.
+- [x] Assistant : distinguer une demande LUFS d'une simple normalisation de crête.
+- [x] Mettre à jour les suggestions audio du Launcher.
+- [x] Créer une feuille de route récapitulative dans `ROADMAP.md`.
+- [x] Tests complets, revue qualité et commit local.
