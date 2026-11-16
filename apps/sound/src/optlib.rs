@@ -188,6 +188,13 @@ pub fn sfx_clip(k: usize) -> Result<Clip, String> {
 
 impl Sound {
     pub fn run_lib(&mut self, id: &str, _ctx: &egui::Context) -> bool {
+        if let Some((_, label, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            if self.clip.len() > 0 {
+                self.edit(label, |c, a, b| f(c, a, b));
+                self.notice = Some((format!("{label} appliqué"), true));
+            }
+            return true;
+        }
         if let Some(k) = id.strip_prefix("sx:").and_then(|k| k.parse::<usize>().ok()) {
             match sfx_clip(k) {
                 Ok(c) => self.insert_sfx(c, crate::sfx::SFX[k].1),

@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod sfx;
 mod audio;
 mod dsp;
@@ -1086,6 +1087,7 @@ impl Sound {
                 _ => command.enabled_if(has_audio, "Ouvre ou enregistre d'abord un son"),
             })
             .collect();
+        v.extend(outils::TOOLS.iter().map(|(id, label, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Sound · nouvel outil · sélection ou fichier", format!("tool:{id}")).enabled_if(has_audio, "Ouvre ou enregistre d'abord un son")));
         v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage (sélection ou tout)")]).into_iter().map(|command| command.enabled_if(has_audio, "Ouvre ou enregistre d'abord un son")));
         for (k, d) in effects::DEFS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Effet audio : {}", d.name), effects::CATS[d.cat], format!("rack:{k}")));
