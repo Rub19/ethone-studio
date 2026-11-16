@@ -995,12 +995,27 @@ impl PageApp {
         v.push(studio_ui::palette::Cmd::new("QR code du texte sélectionné", "Lien, Wi-Fi, contact… · image nette", "qr"));
         v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille (remplir la page)", "Étiquettes, cartes, badges · écart 10 pt", "grid:10"));
         v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille sans écart (traits de coupe communs)", "Objet", "grid:0"));
+        v.push(studio_ui::palette::Cmd::new("Centrer les blocs sur la page", "Disposition · sélection", "center-page"));
+        v.push(studio_ui::palette::Cmd::new("Distribuer les blocs horizontalement", "Disposition · 3 blocs minimum", "distribute-x"));
+        v.push(studio_ui::palette::Cmd::new("Distribuer les blocs verticalement", "Disposition · 3 blocs minimum", "distribute-y"));
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
         v.extend(studio_ui::palette::effect_cmds());
         v
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        match id {
+            "center-page" => {
+                self.align_to(0, 0.5, 2);
+                self.align_to(1, 0.5, 2);
+            }
+            "distribute-x" => self.distribute(0, None),
+            "distribute-y" => self.distribute(1, None),
+            _ => {}
+        }
+        if matches!(id, "center-page" | "distribute-x" | "distribute-y") {
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);

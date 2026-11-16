@@ -29,3 +29,15 @@
 - [x] `cargo test --workspace` réussit.
 - [x] `cargo check --workspace` réussit.
 - [x] Diff revu, sans secret ni changement hors périmètre.
+
+## Vague 2 — nouveaux outils
+
+- [x] Pixel : recadrer aux pixels visibles depuis `Ctrl+K`.
+- [x] Vector : sélectionner les objets de même apparence depuis `Ctrl+K`.
+- [x] Motion : outils temporels et ajustement rapide depuis `Ctrl+K`.
+- [x] Cut : fermer tous les blancs depuis `Ctrl+K`.
+- [x] Lumen : synchroniser les réglages vers les photos choisies.
+- [x] Page : centrer et distribuer les blocs.
+- [x] Folio : exporter la page courante en PNG.
+- [x] Sound : rogner les silences de bord avec test de régression.
+- [x] Tests et compilation complets réussis.

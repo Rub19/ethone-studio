@@ -357,7 +357,10 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
                 ops.push(json!({"op":"reverse"}));
                 s.push("Lire à l'envers".into());
             }
-            if has(&t, &["silence", "blanc", "pause", "temps mort"]) && has(&t, &["supprime", "retire", "enleve", "coupe", "vire", "raccourci"]) {
+            if has(&t, &["silence", "blanc"]) && has(&t, &["debut", "fin", "bords", "extremites"]) && has(&t, &["rogne", "retire", "enleve", "supprime", "coupe"]) {
+                ops.push(json!({"op":"trim_silence_edges","threshold":-42,"window_ms":10}));
+                s.push("Rogner uniquement les silences du début et de la fin".into());
+            } else if has(&t, &["silence", "blanc", "pause", "temps mort"]) && has(&t, &["supprime", "retire", "enleve", "coupe", "vire", "raccourci"]) {
                 ops.push(json!({"op":"cut_silences","threshold":-40,"min_ms":700,"keep_ms":120}));
                 s.push("Supprimer les silences de plus de 0,7 s".into());
             }
@@ -470,6 +473,7 @@ mod tests {
         assert_eq!(p("monte cette vidéo", "v.mp4").app, "cut");
         assert!(matches!(&p("nettoie ce podcast", "a.wav").steps[0], Step::Sound(o) if o.len() > 3));
         assert!(matches!(&p("supprime les silences", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "cut_silences"));
+        assert!(matches!(&p("rogne le silence au début et à la fin", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "trim_silence_edges"));
         assert_eq!(p("retire le filigrane", "x.jpg").steps, vec![Step::Watermark]);
         assert_eq!(p("enlève le watermark shutterstock", "x.jpg").steps, vec![Step::Watermark]);
         assert_eq!(p("efface le texte", "x.png").steps, vec![Step::EraseText]);

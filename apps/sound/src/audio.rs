@@ -198,6 +198,32 @@ impl Clip {
         out
     }
 
+    /// First and last audible samples, preserving internal pauses.
+    pub fn audible_bounds(&self, threshold_db: f32, window_ms: f32) -> Option<(usize, usize)> {
+        let win = (self.rate as f32 * window_ms / 1000.0).round().max(1.0) as usize;
+        let threshold = 10f32.powf(threshold_db / 20.0);
+        let audible = |a: usize, b: usize| {
+            let mut power = 0.0;
+            let mut count = 0usize;
+            for channel in &self.ch {
+                for sample in &channel[a..b] {
+                    power += sample * sample;
+                    count += 1;
+                }
+            }
+            (power / count.max(1) as f32).sqrt() >= threshold
+        };
+        let chunk_count = self.len().div_ceil(win);
+        let first = (0..chunk_count)
+            .find(|index| audible(index * win, ((index + 1) * win).min(self.len())))?
+            * win;
+        let last_index = (0..chunk_count)
+            .rev()
+            .find(|index| audible(index * win, ((index + 1) * win).min(self.len())))?;
+        let last = ((last_index + 1) * win).min(self.len());
+        Some((first, last))
+    }
+
     /// Makes the sound loop seamlessly: its last `xfade` samples are crossfaded (equal power) into the
     /// start, then cut, so the end flows straight into the beginning.
     pub fn make_loop(&mut self, xfade: usize) -> usize {
@@ -912,6 +938,14 @@ mod segment_tests {
         let s = c.segments(-40.0, 300.0, 100.0);
         assert_eq!(s.len(), 3);
         assert_eq!(s[1], (900, 1400));
+    }
+
+    #[test]
+    fn audible_bounds_trim_only_outer_silence() {
+        let c = Clip { rate: 1000, ch: vec![[vec![0.0; 200], vec![0.5; 300], vec![0.0; 100], vec![0.5; 200], vec![0.0; 250]].concat()] };
+        assert_eq!(c.audible_bounds(-40.0, 10.0), Some((200, 800)));
+        let silent = Clip { rate: 1000, ch: vec![vec![0.0; 500]] };
+        assert_eq!(silent.audible_bounds(-40.0, 10.0), None);
     }
 }
 

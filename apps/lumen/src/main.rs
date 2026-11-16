@@ -1224,6 +1224,7 @@ impl Lumen {
             studio_ui::palette::Cmd::new("Ton auto sur les photos choisies", "Lot", "batch-auto"),
             studio_ui::palette::Cmd::new("Redresser l'horizon sur les photos choisies", "Lot", "batch-straighten"),
             studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset"),
+            studio_ui::palette::Cmd::new("Synchroniser les réglages vers les photos choisies", "Lot · copie la photo courante", "batch-sync"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]));
@@ -1232,6 +1233,19 @@ impl Lumen {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if id == "batch-sync" {
+            let Some(source) = self.current.filter(|i| *i < self.files.len()) else {
+                studio_ui::handoff::toast(ctx, "Choisis d'abord la photo source".into(), false);
+                return;
+            };
+            let settings = self.settings(source);
+            let targets: Vec<usize> = self.picked.iter().copied().filter(|i| *i < self.files.len() && *i != source).collect();
+            for target in &targets {
+                self.set_settings(*target, settings.clone());
+            }
+            studio_ui::handoff::toast(ctx, format!("Réglages synchronisés vers {} photo(s)", targets.len()), !targets.is_empty());
+            return;
+        }
         if let Some(mode) = id.strip_prefix("blurry:") {
             let pool: Vec<usize> = if self.picked.len() > 1 { self.picked.clone() } else { (0..self.files.len()).collect() };
             let scores: Vec<(usize, f32)> = pool.iter().filter_map(|i| develop::load(&self.files[*i], 800).ok().map(|img| (*i, develop::sharpness(&img)))).collect();

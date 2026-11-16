@@ -1201,7 +1201,7 @@ impl Folio {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         use studio_ui::palette::Cmd;
-        let mut v = vec![Cmd::new("Ouvrir…", "Ctrl+O", "open"), Cmd::new("Enregistrer", "Ctrl+S", "save"), Cmd::new("Enregistrer sous…", "Ctrl+Maj+S", "saveas")];
+        let mut v = vec![Cmd::new("Ouvrir…", "Ctrl+O", "open"), Cmd::new("Enregistrer", "Ctrl+S", "save"), Cmd::new("Enregistrer sous…", "Ctrl+Maj+S", "saveas"), Cmd::new("Exporter la page courante en PNG…", "Page · rendu 200 ppp", "export-page")];
         for (p, name) in panels::LIST {
             v.push(Cmd::new(format!("Outil : {name}"), "Outils", format!("panel:{}", p as u8)));
         }
@@ -1234,6 +1234,17 @@ impl Folio {
             "open" => self.open_dialog(ctx),
             "save" => self.save(ctx, false),
             "saveas" => self.save(ctx, true),
+            "export-page" => {
+                let name = self.od.as_ref().map(|opened| format!("{} - page {}.png", opened.name, self.page + 1)).unwrap_or("page.png".into());
+                if let Some(path) = rfd::FileDialog::new().add_filter("PNG", &["png"]).set_file_name(name).save_file()
+                    && let Some(image) = self.render_page(self.page, 200.0 / 72.0)
+                {
+                    match image.save(&path) {
+                        Ok(()) => toast(ctx, format!("Page exportée : {}", path.display()), true),
+                        Err(error) => toast(ctx, error.to_string(), false),
+                    }
+                }
+            }
             _ => {}
         }
     }

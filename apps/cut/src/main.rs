@@ -1735,6 +1735,7 @@ impl Cut {
             studio_ui::palette::Cmd::new("Passer en carré 1:1", "Séquence · clips recadrés au centre", "format:1080x1080"),
             studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350"),
             studio_ui::palette::Cmd::new("Passer en paysage 16:9", "Séquence · clips recadrés au centre", "format:1920x1080"),
+            studio_ui::palette::Cmd::new("Fermer tous les blancs de la piste", "Montage · rapproche tous les clips", "close-gaps"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));
@@ -1743,6 +1744,12 @@ impl Cut {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if id == "close-gaps" {
+            let count = self.proj.clips.iter().filter(|clip| clip.gap > 1e-6).count();
+            self.proj.close_gaps();
+            studio_ui::handoff::toast(ctx, format!("{count} blanc(s) fermé(s)"), count > 0);
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);

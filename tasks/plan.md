@@ -40,3 +40,20 @@
 ## Open Questions
 
 Aucune.
+
+## Wave 2: nouveaux outils par application
+
+- [x] Pixel : recadrage instantané aux pixels visibles.
+- [x] Vector : sélection rapide par fond, contour, type et aspect.
+- [x] Motion : inversion/étalement des images clés, ajustement du calque et durée automatique.
+- [x] Cut : fermeture instantanée de tous les blancs.
+- [x] Lumen : synchronisation des réglages de la photo courante vers la sélection.
+- [x] Page : centrage et distribution rapides des blocs.
+- [x] Folio : export PNG immédiat de la page courante.
+- [x] Sound : suppression non destructive des silences de début et de fin.
+
+### Checkpoint Wave 2
+
+- [x] Tests ciblés des nouveaux algorithmes.
+- [x] Compilation et tests du workspace.
+- [x] Revue qualité et commit local.

@@ -2239,6 +2239,9 @@ impl VectorApp {
         ];
         v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr"));
         v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
+        for (label, kind) in [("Même couleur de fond", 0), ("Même couleur de contour", 1), ("Même type d'objet", 5), ("Même aspect complet", 6)] {
+            v.push(studio_ui::palette::Cmd::new(format!("Sélectionner : {label}"), "Objet actif · document", format!("select-same:{kind}")));
+        }
         for (k, name) in model::RECOLOR.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Recolorer : {name}"), "Sélection, sinon tout", format!("recolor:{k}")));
         }
@@ -2248,6 +2251,15 @@ impl VectorApp {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(kind) = id.strip_prefix("select-same:").and_then(|value| value.parse::<u8>().ok()) {
+            if self.sel.is_some() {
+                self.select_same(kind);
+                studio_ui::handoff::toast(ctx, format!("{} objet(s) sélectionné(s)", self.selection().len()), true);
+            } else {
+                studio_ui::handoff::toast(ctx, "Sélectionne d'abord un objet de référence".into(), false);
+            }
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);

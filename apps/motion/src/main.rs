@@ -1441,6 +1441,10 @@ impl Motion {
             v.push(studio_ui::palette::Cmd::new(format!("Calques en cascade : {name} d'écart"), "Composition", format!("cascade:{step}")));
         }
         v.push(studio_ui::palette::Cmd::new("Aligner tous les calques au même départ", "Composition", "cascade:0"));
+        v.push(studio_ui::palette::Cmd::new("Inverser les images clés du calque", "Animation · plage des clés", "keys-reverse"));
+        v.push(studio_ui::palette::Cmd::new("Répartir régulièrement les images clés", "Animation · calque sélectionné", "keys-spread"));
+        v.push(studio_ui::palette::Cmd::new("Ajuster le calque à la composition", "Calque sélectionné · contenir", "fit-layer"));
+        v.push(studio_ui::palette::Cmd::new("Adapter la durée aux calques", "Composition · fin du dernier calque", "duration-layers"));
         for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")));
         }
@@ -1450,6 +1454,23 @@ impl Motion {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        match id {
+            "keys-reverse" if self.sel.is_some() => self.reverse_keys(),
+            "keys-spread" if self.sel.is_some() => self.spread_keys(),
+            "fit-layer" if self.sel.is_some() => self.fit_to_comp(0),
+            "duration-layers" => {
+                let end = self.comp.layers.iter().map(|layer| layer.end).fold(0.0, f32::max);
+                if end > 0.0 {
+                    self.comp.duration = end;
+                    studio_ui::handoff::toast(ctx, format!("Durée adaptée à {end:.2} s"), true);
+                }
+            }
+            "keys-reverse" | "keys-spread" | "fit-layer" => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un calque".into(), false),
+            _ => {}
+        }
+        if matches!(id, "keys-reverse" | "keys-spread" | "fit-layer" | "duration-layers") {
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);
