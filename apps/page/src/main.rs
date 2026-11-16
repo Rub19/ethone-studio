@@ -988,24 +988,28 @@ impl PageApp {
 impl PageApp {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let selection_count = self.selection().len();
+        let has_selection = selection_count > 0;
+        let text_selected = self.sel.is_some_and(|index| matches!(self.frames_ref().get(index).map(|frame| &frame.kind), Some(Kind::Text { .. } | Kind::TextPath { .. })));
+        let image_selected = self.sel.is_some_and(|index| matches!(self.frames_ref().get(index).map(|frame| &frame.kind), Some(Kind::Image { .. })));
         let mut v = vec![
 
         ];
         v.push(studio_ui::palette::Cmd::new("Fusion de données (CSV)…", "Publipostage : «Nom» dans les textes", "data-merge"));
-        v.push(studio_ui::palette::Cmd::new("QR code du texte sélectionné", "Lien, Wi-Fi, contact… · image nette", "qr"));
-        v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille (remplir la page)", "Étiquettes, cartes, badges · écart 10 pt", "grid:10"));
-        v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille sans écart (traits de coupe communs)", "Objet", "grid:0"));
-        v.push(studio_ui::palette::Cmd::new("Centrer les blocs sur la page", "Disposition · sélection", "center-page"));
-        v.push(studio_ui::palette::Cmd::new("Distribuer les blocs horizontalement", "Disposition · 3 blocs minimum", "distribute-x"));
-        v.push(studio_ui::palette::Cmd::new("Distribuer les blocs verticalement", "Disposition · 3 blocs minimum", "distribute-y"));
-        v.push(studio_ui::palette::Cmd::new("Dupliquer les blocs", "Disposition · Ctrl+D", "duplicate"));
-        v.push(studio_ui::palette::Cmd::new("Grouper les blocs", "Disposition · Ctrl+G", "group"));
-        v.push(studio_ui::palette::Cmd::new("Dégrouper les blocs", "Disposition · Ctrl+Maj+G", "ungroup"));
-        v.push(studio_ui::palette::Cmd::new("Pivoter les blocs de 90°", "Disposition · sélection", "rotate-90"));
-        v.push(studio_ui::palette::Cmd::new("Retourner les blocs horizontalement", "Disposition · sélection", "flip-x"));
-        v.push(studio_ui::palette::Cmd::new("Retourner les blocs verticalement", "Disposition · sélection", "flip-y"));
+        v.push(studio_ui::palette::Cmd::new("QR code du texte sélectionné", "Lien, Wi-Fi, contact… · image nette", "qr").enabled_if(text_selected, "Sélectionne d'abord un bloc texte"));
+        v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille (remplir la page)", "Étiquettes, cartes, badges · écart 10 pt", "grid:10").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille sans écart (traits de coupe communs)", "Objet", "grid:0").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        v.push(studio_ui::palette::Cmd::new("Centrer les blocs sur la page", "Disposition · sélection", "center-page").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        v.push(studio_ui::palette::Cmd::new("Distribuer les blocs horizontalement", "Disposition · 3 blocs minimum", "distribute-x").enabled_if(selection_count >= 3, "Sélectionne au moins trois blocs"));
+        v.push(studio_ui::palette::Cmd::new("Distribuer les blocs verticalement", "Disposition · 3 blocs minimum", "distribute-y").enabled_if(selection_count >= 3, "Sélectionne au moins trois blocs"));
+        v.push(studio_ui::palette::Cmd::new("Dupliquer les blocs", "Disposition · Ctrl+D", "duplicate").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        v.push(studio_ui::palette::Cmd::new("Grouper les blocs", "Disposition · Ctrl+G", "group").enabled_if(selection_count >= 2, "Sélectionne au moins deux blocs"));
+        v.push(studio_ui::palette::Cmd::new("Dégrouper les blocs", "Disposition · Ctrl+Maj+G", "ungroup").enabled_if(has_selection, "Sélectionne d'abord un groupe"));
+        v.push(studio_ui::palette::Cmd::new("Pivoter les blocs de 90°", "Disposition · sélection", "rotate-90").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        v.push(studio_ui::palette::Cmd::new("Retourner les blocs horizontalement", "Disposition · sélection", "flip-x").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        v.push(studio_ui::palette::Cmd::new("Retourner les blocs verticalement", "Disposition · sélection", "flip-y").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
-        v.extend(studio_ui::palette::effect_cmds());
+        v.extend(studio_ui::palette::effect_cmds().into_iter().map(|command| command.enabled_if(image_selected, "Sélectionne d'abord un bloc image")));
         v
     }
 

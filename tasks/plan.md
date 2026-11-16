@@ -127,9 +127,9 @@ Aucune.
 
 ### Slice B — éditeurs image et design
 
-- [ ] Pixel : désactiver les actions nécessitant une image ouverte.
-- [ ] Vector, Motion et Page : désactiver les actions nécessitant une sélection.
-- [ ] Compiler et tester ces quatre applications, puis créer un commit local.
+- [x] Pixel : désactiver les actions nécessitant une image ouverte.
+- [x] Vector, Motion et Page : désactiver les actions nécessitant une sélection.
+- [x] Compiler et tester ces quatre applications, puis créer un commit local.
 
 ### Slice C — médias et documents
 

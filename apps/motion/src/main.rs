@@ -1431,6 +1431,7 @@ impl Motion {
 impl Motion {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let has_layer = self.sel.is_some();
         let mut v = vec![
 
         ];
@@ -1441,14 +1442,14 @@ impl Motion {
             v.push(studio_ui::palette::Cmd::new(format!("Calques en cascade : {name} d'écart"), "Composition", format!("cascade:{step}")));
         }
         v.push(studio_ui::palette::Cmd::new("Aligner tous les calques au même départ", "Composition", "cascade:0"));
-        v.push(studio_ui::palette::Cmd::new("Inverser les images clés du calque", "Animation · plage des clés", "keys-reverse"));
-        v.push(studio_ui::palette::Cmd::new("Répartir régulièrement les images clés", "Animation · calque sélectionné", "keys-spread"));
-        v.push(studio_ui::palette::Cmd::new("Ajuster le calque à la composition", "Calque sélectionné · contenir", "fit-layer"));
+        v.push(studio_ui::palette::Cmd::new("Inverser les images clés du calque", "Animation · plage des clés", "keys-reverse").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new("Répartir régulièrement les images clés", "Animation · calque sélectionné", "keys-spread").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new("Ajuster le calque à la composition", "Calque sélectionné · contenir", "fit-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
         v.push(studio_ui::palette::Cmd::new("Adapter la durée aux calques", "Composition · fin du dernier calque", "duration-layers"));
-        v.push(studio_ui::palette::Cmd::new("Fractionner le calque à la tête", "Calque sélectionné · Ctrl+Maj+D", "split-layer"));
-        v.push(studio_ui::palette::Cmd::new("Dupliquer le calque", "Calque sélectionné · Ctrl+D", "duplicate-layer"));
+        v.push(studio_ui::palette::Cmd::new("Fractionner le calque à la tête", "Calque sélectionné · Ctrl+Maj+D", "split-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new("Dupliquer le calque", "Calque sélectionné · Ctrl+D", "duplicate-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
         for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
-            v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")));
+            v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")).enabled_if(has_layer, "Sélectionne d'abord un calque"));
         }
         v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage"), ("pixel", "retoucher l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("lumen", "développer")]));
         v.extend(studio_ui::palette::effect_cmds());

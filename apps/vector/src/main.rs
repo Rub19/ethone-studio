@@ -2234,18 +2234,21 @@ fn apply_affine(it: &mut Item, m: [f32; 4], c: P, strokes: bool) -> bool {
 impl VectorApp {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let selection_count = self.selection().len();
+        let has_selection = selection_count > 0;
+        let text_selected = self.selection().into_iter().any(|index| matches!(self.doc.items[index].geom, Geom::Text { .. }));
         let mut v = vec![
 
         ];
-        v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr"));
+        v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr").enabled_if(text_selected, "Sélectionne d'abord un texte"));
         v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
         v.push(studio_ui::palette::Cmd::new("Tout sélectionner", "Document · Ctrl+A", "select-all"));
         v.push(studio_ui::palette::Cmd::new("Inverser la sélection", "Document", "select-inverse"));
-        v.push(studio_ui::palette::Cmd::new("Dupliquer la sélection", "Objets · Ctrl+Alt+D", "duplicate"));
-        v.push(studio_ui::palette::Cmd::new("Grouper la sélection", "Objets · Ctrl+G", "group"));
-        v.push(studio_ui::palette::Cmd::new("Dégrouper la sélection", "Objets · Ctrl+Maj+G", "ungroup"));
+        v.push(studio_ui::palette::Cmd::new("Dupliquer la sélection", "Objets · Ctrl+Alt+D", "duplicate").enabled_if(has_selection, "Sélectionne d'abord un objet"));
+        v.push(studio_ui::palette::Cmd::new("Grouper la sélection", "Objets · Ctrl+G", "group").enabled_if(selection_count > 1, "Sélectionne au moins deux objets"));
+        v.push(studio_ui::palette::Cmd::new("Dégrouper la sélection", "Objets · Ctrl+Maj+G", "ungroup").enabled_if(has_selection, "Sélectionne d'abord un groupe"));
         for (label, kind) in [("Même couleur de fond", 0), ("Même couleur de contour", 1), ("Même type d'objet", 5), ("Même aspect complet", 6)] {
-            v.push(studio_ui::palette::Cmd::new(format!("Sélectionner : {label}"), "Objet actif · document", format!("select-same:{kind}")));
+            v.push(studio_ui::palette::Cmd::new(format!("Sélectionner : {label}"), "Objet actif · document", format!("select-same:{kind}")).enabled_if(has_selection, "Sélectionne d'abord un objet de référence"));
         }
         for (k, name) in model::RECOLOR.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Recolorer : {name}"), "Sélection, sinon tout", format!("recolor:{k}")));

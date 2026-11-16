@@ -1173,6 +1173,7 @@ impl Pixel {
 impl Pixel {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
+        let has_document = !self.home;
         let mut v = vec![
             studio_ui::palette::Cmd::new("Ouvrir une image…", "Ctrl+O", "open"),
             studio_ui::palette::Cmd::new("Exporter…", "Ctrl+E", "export"),
@@ -1204,8 +1205,15 @@ impl Pixel {
             studio_ui::palette::Cmd::new("Fusionner les calques visibles", "Calques · conserve les calques masqués", "merge-visible"),
             studio_ui::palette::Cmd::new("Aplatir toute l'image", "Calques · résultat unique", "flatten-image").confirm(),
         ];
-        v.extend(studio_ui::palette::send_cmds(&[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]));
-        v.extend(studio_ui::palette::effect_cmds());
+        v = v.into_iter().map(|command| {
+            if matches!(command.id.as_str(), "open" | "taskbar") {
+                command
+            } else {
+                command.enabled_if(has_document, "Ouvre d'abord une image")
+            }
+        }).collect();
+        v.extend(studio_ui::palette::send_cmds(&[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]).into_iter().map(|command| command.enabled_if(has_document, "Ouvre d'abord une image")));
+        v.extend(studio_ui::palette::effect_cmds().into_iter().map(|command| command.enabled_if(has_document, "Ouvre d'abord une image")));
         v
     }
 
