@@ -308,7 +308,7 @@ impl Pixel {
     pub fn options_bar(&mut self, root: &mut Ui) {
         egui::Panel::top("options").exact_size(44.0).frame(egui::Frame::new().fill(pro::CHROME).inner_margin(egui::Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                ui.spacing_mut().slider_width = 90.0;
+                ui.spacing_mut().slider_width = 72.0;
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
                 ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
                 tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
@@ -318,7 +318,10 @@ impl Pixel {
                 let avail = ui.available_width() - right;
                 ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(ui.cursor().min, vec2(avail.max(100.0), 44.0))), |ui| {
                     ui.set_clip_rect(ui.max_rect().intersect(ui.clip_rect()));
-                    ui.horizontal_centered(|ui| self.tool_options(ui));
+                    egui::ScrollArea::horizontal().id_salt("pixel-options").scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
+                        ui.set_min_height(44.0);
+                        ui.horizontal_centered(|ui| self.tool_options(ui));
+                    });
                 });
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::secondary(ui, "?  Tutoriel").on_hover_text("F1").clicked() {

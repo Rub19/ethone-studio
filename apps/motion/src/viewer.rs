@@ -290,7 +290,7 @@ impl Motion {
     }
 
     fn options_bar(&mut self, ui: &mut Ui, bar: Rect) {
-        let right_w = 470.0;
+        let right_w = (bar.width() - 130.0).clamp(240.0, 560.0);
         let left = Rect::from_min_max(bar.min + vec2(12.0, 0.0), pos2(bar.right() - right_w, bar.bottom()));
         let right = Rect::from_min_max(pos2(bar.right() - right_w, bar.top()), bar.max - vec2(8.0, 0.0));
         ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| {
@@ -301,7 +301,7 @@ impl Motion {
                 ui.label(RichText::new(name).font(semibold(12.5)).color(INK));
                 pro::toolbar_sep(ui);
                 let lab = |ui: &mut Ui, s: &str| {
-                    ui.label(RichText::new(s).size(12.0).color(MUTED));
+                    ui.add(egui::Label::new(RichText::new(s).size(12.0).color(MUTED)).truncate());
                 };
                 let o = &mut self.topts;
                 match self.tool {
@@ -398,7 +398,9 @@ impl Motion {
                 }
             });
         });
+        let fits = (((right.width() - 236.0) / 32.0).floor().max(0.0)) as usize;
         ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
+            ui.set_clip_rect(right.intersect(ui.clip_rect()));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 ui.spacing_mut().item_spacing.x = 2.0;
                 let toggles: [(&mut bool, G, &str); 9] = [
@@ -412,7 +414,7 @@ impl Motion {
                     (&mut self.safe, G::Safe, "Zones sûres"),
                     (&mut self.grid, G::Grid, "Grille et tiers"),
                 ];
-                for (on, g, tip) in toggles {
+                for (on, g, tip) in toggles.into_iter().take(fits) {
                     if pro::icon_button(ui, 30.0, *on, tip, |p, r, c| glyph(p, r, g, c)).clicked() {
                         *on = !*on;
                     }
