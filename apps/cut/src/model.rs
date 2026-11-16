@@ -816,6 +816,31 @@ impl Project {
         true
     }
 
+    /// Cuts the main track every `every` seconds (only inside clip `only` when given). Returns the cut count.
+    pub fn split_every(&mut self, every: f64, only: Option<usize>) -> usize {
+        if every < 0.1 {
+            return 0;
+        }
+        let mut t = 0.0;
+        let mut spans = Vec::new();
+        for (i, c) in self.clips.iter().enumerate() {
+            t += c.gap;
+            if only.is_none_or(|o| o == i) {
+                spans.push((t, t + c.len()));
+            }
+            t += c.len();
+        }
+        let mut n = 0;
+        for (a, b) in spans {
+            let mut at = a + every;
+            while at < b - 0.05 {
+                n += usize::from(self.split(at));
+                at += every;
+            }
+        }
+        n
+    }
+
     pub fn split_all(&mut self, t: f64) -> bool {
         let mut any = self.split(t);
         let mut music = Vec::new();
@@ -1271,6 +1296,22 @@ pub fn reframe(p: &mut Project, w: u32, h: u32) -> usize {
         }
     }
     n
+}
+
+#[cfg(test)]
+mod split_every_tests {
+    use super::*;
+
+    #[test]
+    fn regular_cuts() {
+        let mut p = Project::new();
+        p.sources.push(Source { path: "a.mp4".into(), duration: 10.0, width: 1920, height: 1080, fps: 30.0, has_video: true, has_audio: false, label: 0 });
+        p.clips.push(Clip { src: 0, inp: 0.0, out: 10.0, ..Clip::default() });
+        assert_eq!(p.split_every(3.0, None), 3);
+        assert_eq!(p.clips.len(), 4);
+        assert!((p.clips[1].len() - 3.0).abs() < 1e-6 && (p.clips[3].len() - 1.0).abs() < 1e-6);
+        assert_eq!(p.split_every(0.0, None), 0);
+    }
 }
 
 #[cfg(test)]

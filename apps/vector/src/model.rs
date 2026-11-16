@@ -1977,3 +1977,46 @@ mod recolor_tests {
         assert!(s[1] > 100 && s[2] < 5, "{s:?}");
     }
 }
+
+/// QR code modules (true = dark) with a 4-module quiet zone; side length first.
+pub fn qr_matrix(text: &str) -> Option<(usize, Vec<bool>)> {
+    let code = qrcode::QrCode::new(text.as_bytes()).ok()?;
+    let w = code.width();
+    let n = w + 8;
+    let colors = code.to_colors();
+    Some((n, (0..n * n).map(|i| {
+        let (x, y) = (i % n, i / n);
+        x >= 4 && y >= 4 && x < w + 4 && y < w + 4 && colors[(y - 4) * w + (x - 4)] == qrcode::Color::Dark
+    }).collect()))
+}
+
+/// Merges each row's dark modules into horizontal runs: (x, y, length) in modules.
+pub fn qr_runs(n: usize, m: &[bool]) -> Vec<(usize, usize, usize)> {
+    let mut out = Vec::new();
+    for y in 0..n {
+        let mut x = 0;
+        while x < n {
+            if m[y * n + x] {
+                let s = x;
+                while x < n && m[y * n + x] {
+                    x += 1;
+                }
+                out.push((s, y, x - s));
+            } else {
+                x += 1;
+            }
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod qr_tests {
+    #[test]
+    fn runs_cover_dark_modules() {
+        let (n, m) = super::qr_matrix("Ethone").unwrap();
+        let runs = super::qr_runs(n, &m);
+        assert_eq!(runs.iter().map(|r| r.2).sum::<usize>(), m.iter().filter(|b| **b).count());
+        assert!(runs.len() < m.iter().filter(|b| **b).count());
+    }
+}

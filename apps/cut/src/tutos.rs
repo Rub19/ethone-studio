@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const CUT: &[Tuto] = &[
+    t("Couper toutes les N secondes", "Ctrl+K", "Découpe un clip en morceaux réguliers (2, 5 ou 10 s), pratique pour les montages rythmés.", &["Sélectionne un clip (ou rien pour toute la piste), Ctrl+K puis « Couper le clip toutes les 5 s »."]),
     t("Changer de format (vertical, carré)", "Ctrl+K", "Transforme le montage en 9:16, 1:1, 4:5 ou 16:9 en recadrant les clips pour remplir l'image.", &["Ctrl+K puis « Passer en vertical 9:16 » : chaque clip est agrandi et centré pour couvrir le nouveau cadre.", "Ajuste ensuite le cadrage de chaque clip dans l'inspecteur (position, échelle)."]),
     t("Transitions sur tous les clips", "Ctrl+K", "Ajoute ou retire d'un coup les transitions entre tous les clips collés.", &["Ctrl+K puis « Fondu enchaîné entre tous les clips » ou « Fondu au noir ».", "« Retirer toutes les transitions » remet des coupes franches. Ctrl+Z annule."]),
     t("Masque polygonal", "P", "Un masque à 3 à 24 côtés, en plus du rectangle, de l'ellipse et de la plume.", &["Prends le Polygone (masque) dans la case de la Plume, puis glisse dans le moniteur depuis le centre : la distance donne la taille, la direction l'orientation.", "Le nombre de côtés se règle dans l'inspecteur, panneau Masque."]),

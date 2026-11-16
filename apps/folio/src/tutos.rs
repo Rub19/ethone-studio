@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const FOLIO: &[Tuto] = &[
+    t("Supprimer les pages blanches", "", "Retire les pages vides d'un scan recto-verso.", &["Outils › Organiser les pages › Supprimer les pages blanches. Ctrl+Z remet tout."]),
     t("2 ou 4 pages par feuille", "", "Réduit le nombre de feuilles à imprimer.", &["Outils › Organiser les pages › Impression économique : 2 pages (A4 paysage) ou 4 pages (A4 portrait) par feuille.", "Ctrl+Z revient au document d'origine."]),
     t("Extraire les images", "", "Récupère en PNG toutes les photos et illustrations d'un PDF.", &["Outils › Exporter › Extraire les images du PDF, choisis les pages et un dossier."]),
     t("Ouvrir un PDF", "Ctrl+O", "Ouvre un PDF, ou une image qui devient un PDF.", &["Fichier > Ouvrir, ou glisse le fichier dans la fenêtre.", "Une photo ou un scan (PNG, JPEG) devient un PDF d'une page : lance ensuite l'OCR pour le rendre consultable.", "Un PDF protégé demande son mot de passe."]),

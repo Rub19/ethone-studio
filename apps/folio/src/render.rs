@@ -23,6 +23,25 @@ pub fn page(pdf: &Pdf, i: usize, scale: f32) -> Option<RgbaImage> {
     RgbaImage::from_raw(pix.width() as u32, pix.height() as u32, pix.data_as_u8_slice().to_vec())
 }
 
+/// Share of pixels that carry ink (clearly darker than paper), 0..1.
+pub fn ink_ratio(img: &RgbaImage) -> f32 {
+    let n = (img.width() * img.height()).max(1) as f32;
+    img.pixels().filter(|p| (p.0[0] as u32 + p.0[1] as u32 + p.0[2] as u32) < 3 * 215).count() as f32 / n
+}
+
+#[cfg(test)]
+mod ink_tests {
+    #[test]
+    fn blank_vs_text() {
+        let mut img = image::RgbaImage::from_pixel(100, 100, image::Rgba([250, 250, 248, 255]));
+        assert_eq!(super::ink_ratio(&img), 0.0);
+        for x in 10..90 {
+            img.put_pixel(x, 50, image::Rgba([0, 0, 0, 255]));
+        }
+        assert!(super::ink_ratio(&img) > 0.005);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

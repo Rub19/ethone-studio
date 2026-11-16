@@ -2237,6 +2237,7 @@ impl VectorApp {
         let mut v = vec![
 
         ];
+        v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr"));
         v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
         for (k, name) in model::RECOLOR.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Recolorer : {name}"), "Sélection, sinon tout", format!("recolor:{k}")));
@@ -2256,6 +2257,47 @@ impl VectorApp {
             self.checkpoint();
             self.doc.raster_fx.push(studio_fx::stack::Fx::new(k));
             studio_ui::handoff::toast(ctx, format!("{} ajouté aux effets bitmap de l'export", k.title()), true);
+            return;
+        }
+        if id == "qr" {
+            let src = self.selection().into_iter().find_map(|i| match &self.doc.items[i].geom {
+                Geom::Text { text, .. } => Some((i, text.trim().to_string())),
+                _ => None,
+            });
+            let Some((ti, text)) = src.filter(|s| !s.1.is_empty()) else {
+                studio_ui::handoff::toast(ctx, "Sélectionne un texte (le lien à encoder), puis relance « QR code »".into(), false);
+                return;
+            };
+            let Some((n, m)) = model::qr_matrix(&text) else {
+                studio_ui::handoff::toast(ctx, "Texte trop long pour un QR code".into(), false);
+                return;
+            };
+            let b = self.doc.items[ti].bbox();
+            let module = 6.0f32;
+            let (x0, y0) = (b.max[0] + 20.0, b.min[1]);
+            self.checkpoint();
+            let g = self.next_group();
+            let layer = self.doc.items[ti].layer;
+            let mut bg = Item::blank();
+            bg.geom = Geom::Rect { x: x0, y: y0, w: n as f32 * module, h: n as f32 * module, r: 0.0 };
+            bg.fill = Some([255, 255, 255, 255]);
+            bg.stroke = None;
+            bg.group = g;
+            bg.layer = layer;
+            bg.name = "QR fond".into();
+            self.push_item(bg);
+            for (x, y, len) in model::qr_runs(n, &m) {
+                let mut it = Item::blank();
+                it.geom = Geom::Rect { x: x0 + x as f32 * module, y: y0 + y as f32 * module, w: len as f32 * module + 0.3, h: module + 0.3, r: 0.0 };
+                it.fill = Some([0, 0, 0, 255]);
+                it.stroke = None;
+                it.group = g;
+                it.layer = layer;
+                self.push_item(it);
+            }
+            let idx: Vec<usize> = (0..self.doc.items.len()).filter(|i| self.doc.items[*i].group == g).collect();
+            self.set_selection(idx);
+            studio_ui::handoff::toast(ctx, format!("QR code groupé ajouté à droite du texte ({n}×{n})"), true);
             return;
         }
         if id == "icon-pack" {

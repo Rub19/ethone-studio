@@ -1728,6 +1728,9 @@ impl Cut {
             studio_ui::palette::Cmd::new("Fondu enchaîné entre tous les clips", "Séquence", "trans-all:1"),
             studio_ui::palette::Cmd::new("Fondu au noir entre tous les clips", "Séquence", "trans-all:2"),
             studio_ui::palette::Cmd::new("Retirer toutes les transitions", "Séquence", "trans-all:0"),
+            studio_ui::palette::Cmd::new("Couper le clip toutes les 2 s", "Clip sélectionné, sinon toute la piste", "every:2"),
+            studio_ui::palette::Cmd::new("Couper le clip toutes les 5 s", "Clip sélectionné, sinon toute la piste", "every:5"),
+            studio_ui::palette::Cmd::new("Couper le clip toutes les 10 s", "Clip sélectionné, sinon toute la piste", "every:10"),
             studio_ui::palette::Cmd::new("Passer en vertical 9:16 (Shorts, Reels, TikTok)", "Séquence · clips recadrés au centre", "format:1080x1920"),
             studio_ui::palette::Cmd::new("Passer en carré 1:1", "Séquence · clips recadrés au centre", "format:1080x1080"),
             studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350"),
@@ -1750,6 +1753,15 @@ impl Cut {
                 Some(c) => c.effects.push(studio_fx::stack::Fx::new(k)),
                 None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un clip".into(), false),
             }
+            return;
+        }
+        if let Some(every) = id.strip_prefix("every:").and_then(|e| e.parse::<f64>().ok()) {
+            let only = match self.sel {
+                Some(Sel::Clip(i)) => Some(i),
+                _ => None,
+            };
+            let n = self.proj.split_every(every, only);
+            studio_ui::handoff::toast(ctx, format!("{n} coupe(s) ajoutée(s)"), n > 0);
             return;
         }
         if let Some((w, h)) = id.strip_prefix("format:").and_then(|f| f.split_once('x')).and_then(|(w, h)| Some((w.parse::<u32>().ok()?, h.parse::<u32>().ok()?))) {

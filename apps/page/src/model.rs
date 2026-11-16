@@ -2247,3 +2247,25 @@ mod grid_tests {
         assert_eq!(super::grid_cells(100.0, 100.0, 0.0, 500.0, 500.0, 0.0).len(), 1);
     }
 }
+
+/// QR code modules (true = dark) with a 4-module quiet zone; side length first.
+pub fn qr_matrix(text: &str) -> Option<(usize, Vec<bool>)> {
+    let code = qrcode::QrCode::new(text.as_bytes()).ok()?;
+    let w = code.width();
+    let n = w + 8;
+    let colors = code.to_colors();
+    Some((n, (0..n * n).map(|i| {
+        let (x, y) = (i % n, i / n);
+        x >= 4 && y >= 4 && x < w + 4 && y < w + 4 && colors[(y - 4) * w + (x - 4)] == qrcode::Color::Dark
+    }).collect()))
+}
+
+#[cfg(test)]
+mod qr_tests {
+    #[test]
+    fn qr_has_finder_patterns() {
+        let (n, m) = super::qr_matrix("https://ethone.dev").unwrap();
+        assert!(n >= 29);
+        assert!(m[4 * n + 4] && m[4 * n + 10] && !m[5 * n + 5] && !m[0]);
+    }
+}

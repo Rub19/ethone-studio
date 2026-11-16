@@ -1434,6 +1434,9 @@ impl Motion {
         let mut v = vec![
 
         ];
+        for (size, fps) in [(128u32, 12u32), (256, 12), (256, 24), (512, 12)] {
+            v.push(studio_ui::palette::Cmd::new(format!("Planche de sprites {size} px, {fps} i/s"), "Export pour jeux · PNG transparent", format!("sprites:{size}:{fps}")));
+        }
         for (step, name) in [(0.1, "0,1 s"), (0.25, "0,25 s"), (0.5, "0,5 s"), (1.0, "1 s")] {
             v.push(studio_ui::palette::Cmd::new(format!("Calques en cascade : {name} d'écart"), "Composition", format!("cascade:{step}")));
         }
@@ -1454,6 +1457,31 @@ impl Motion {
         }
         if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
             self.comp.effects.push(studio_fx::stack::Fx::new(k));
+            return;
+        }
+        if let Some((size, fps)) = id.strip_prefix("sprites:").and_then(|s| s.split_once(':')).and_then(|(a, b)| Some((a.parse::<u32>().ok()?, b.parse::<u32>().ok()?))) {
+            let Some(p) = rfd::FileDialog::new().add_filter("PNG", &["png"]).set_file_name("sprites.png").save_file() else { return };
+            let (cw, ch) = (self.comp.width.max(1) as f32, self.comp.height.max(1) as f32);
+            let k = size as f32 / cw.max(ch);
+            let (fw, fh) = (((cw * k).round() as u32).max(1), ((ch * k).round() as u32).max(1));
+            let (a, b) = self.comp.range();
+            let frames = (((b - a) * fps as f32).round() as u32).clamp(1, 400);
+            let cols = (frames as f32).sqrt().ceil() as u32;
+            let rows = frames.div_ceil(cols);
+            let mut sheet = image::RgbaImage::new(cols * fw, rows * fh);
+            for f in 0..frames {
+                let t = a + f as f32 / fps as f32;
+                let Ok(pix) = render(&self.comp, t, fw, fh, &self.fontdb, true) else { continue };
+                let img = image::RgbaImage::from_fn(fw, fh, |x, y| {
+                    let c = pix.pixel(x, y).map(|c| c.demultiply()).unwrap_or(tiny_skia::ColorU8::from_rgba(0, 0, 0, 0));
+                    image::Rgba([c.red(), c.green(), c.blue(), c.alpha()])
+                });
+                image::imageops::overlay(&mut sheet, &img, ((f % cols) * fw) as i64, ((f / cols) * fh) as i64);
+            }
+            match sheet.save(&p) {
+                Ok(()) => studio_ui::handoff::toast(ctx, format!("{frames} images de {fw}×{fh} en {cols}×{rows} : {}", p.display()), true),
+                Err(e) => studio_ui::handoff::toast(ctx, e.to_string(), false),
+            }
             return;
         }
         if let Some(step) = id.strip_prefix("cascade:").and_then(|s| s.parse::<f32>().ok()) {

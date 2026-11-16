@@ -4,6 +4,7 @@ version = "0.6.0"
 edition = "2024"
 
 [dependencies]
+qrcode = { version = "0.14.1", default-features = false }
 eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts"] }
 krilla = "0.8.2"
 krilla-svg = "0.8.1"

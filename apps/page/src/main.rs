@@ -992,6 +992,7 @@ impl PageApp {
 
         ];
         v.push(studio_ui::palette::Cmd::new("Fusion de données (CSV)…", "Publipostage : «Nom» dans les textes", "data-merge"));
+        v.push(studio_ui::palette::Cmd::new("QR code du texte sélectionné", "Lien, Wi-Fi, contact… · image nette", "qr"));
         v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille (remplir la page)", "Étiquettes, cartes, badges · écart 10 pt", "grid:10"));
         v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille sans écart (traits de coupe communs)", "Objet", "grid:0"));
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
@@ -1015,6 +1016,36 @@ impl PageApp {
         }
         if id == "data-merge" {
             self.data_merge(ctx);
+        }
+        if id == "qr" {
+            let text = self.sel.and_then(|i| self.frames_ref().get(i)).and_then(|f| match &f.kind {
+                Kind::Text { text, .. } | Kind::TextPath { text, .. } => Some(text.trim().to_string()),
+                _ => None,
+            });
+            let Some(text) = text.filter(|t| !t.is_empty()) else {
+                return studio_ui::handoff::toast(ctx, "Écris le lien dans un bloc de texte, sélectionne-le, puis relance « QR code »".into(), false);
+            };
+            let Some((n, m)) = model::qr_matrix(&text) else {
+                return studio_ui::handoff::toast(ctx, "Texte trop long pour un QR code".into(), false);
+            };
+            let px = 12u32;
+            let img = image::RgbaImage::from_fn(n as u32 * px, n as u32 * px, |x, y| {
+                if m[(y / px) as usize * n + (x / px) as usize] { image::Rgba([0, 0, 0, 255]) } else { image::Rgba([255, 255, 255, 255]) }
+            });
+            let dir = studio_core::data_dir().join("qr");
+            let _ = std::fs::create_dir_all(&dir);
+            let file = dir.join(format!("qr-{}.png", text.bytes().fold(5381u64, |h, b| h.wrapping_mul(33) ^ b as u64)));
+            if let Err(e) = img.save(&file) {
+                return studio_ui::handoff::toast(ctx, e.to_string(), false);
+            }
+            let f = self.frames_ref()[self.sel.unwrap_or(0)].clone();
+            let side = f.h.max(60.0).min(160.0);
+            let mut q = Frame::new(f.x + f.w + 12.0, f.y, side, side, Kind::image(&file.to_string_lossy(), 0.0));
+            q.name = "QR code".into();
+            q.fx.layer = f.fx.layer;
+            self.frames().push(q);
+            studio_ui::handoff::toast(ctx, format!("QR code ajouté à droite du texte ({n}×{n} modules)"), true);
+            return;
         }
         if let Some(gap) = id.strip_prefix("grid:").and_then(|g| g.parse::<f32>().ok()) {
             let Some(i) = self.sel.filter(|i| *i < self.frames_ref().len()) else {

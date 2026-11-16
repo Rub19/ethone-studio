@@ -500,6 +500,19 @@ fn organize(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     });
     ui.add_space(10.0);
+    if ui.button("Supprimer les pages blanches").on_hover_text("Détecte les pages presque vides (dos de scans, séparateurs) et les retire").clicked() {
+        let n = app.od.as_ref().map_or(0, |o| o.n());
+        let blank: Vec<usize> = (0..n).filter(|i| app.render_page(*i, 0.35).is_some_and(|img| render::ink_ratio(&img) < 0.002)).collect();
+        if blank.is_empty() {
+            toast(ctx, "Aucune page blanche", true);
+        } else if blank.len() == n {
+            toast(ctx, "Toutes les pages semblent vides : rien n'a été supprimé", false);
+        } else {
+            let k = blank.len();
+            app.edit(ctx, &format!("{k} page(s) blanche(s) supprimée(s)"), |d| engine::delete(d, &blank));
+        }
+    }
+    ui.add_space(6.0);
     label(ui, "Impression économique");
     ui.horizontal(|ui| {
         for (k, name) in [(2usize, "2 pages par feuille"), (4, "4 pages par feuille")] {

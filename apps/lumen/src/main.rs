@@ -1219,6 +1219,8 @@ impl Lumen {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
+            studio_ui::palette::Cmd::new("Trouver les photos floues (les sélectionner)", "Tri", "blurry:pick"),
+            studio_ui::palette::Cmd::new("Rejeter les photos floues", "Tri · drapeau X", "blurry:reject"),
             studio_ui::palette::Cmd::new("Ton auto sur les photos choisies", "Lot", "batch-auto"),
             studio_ui::palette::Cmd::new("Redresser l'horizon sur les photos choisies", "Lot", "batch-straighten"),
             studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset"),
@@ -1230,6 +1232,28 @@ impl Lumen {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(mode) = id.strip_prefix("blurry:") {
+            let pool: Vec<usize> = if self.picked.len() > 1 { self.picked.clone() } else { (0..self.files.len()).collect() };
+            let scores: Vec<(usize, f32)> = pool.iter().filter_map(|i| develop::load(&self.files[*i], 800).ok().map(|img| (*i, develop::sharpness(&img)))).collect();
+            if scores.len() < 2 {
+                studio_ui::handoff::toast(ctx, "Il faut au moins deux photos à comparer".into(), false);
+                return;
+            }
+            let mut sorted: Vec<f32> = scores.iter().map(|s| s.1).collect();
+            sorted.sort_by(|a, b| a.total_cmp(b));
+            let median = sorted[sorted.len() / 2];
+            let blurry: Vec<usize> = scores.iter().filter(|s| s.1 < median * 0.3).map(|s| s.0).collect();
+            if mode == "reject" {
+                for i in &blurry {
+                    self.entry(*i).flag = -1;
+                }
+                self.dirty_catalog = true;
+            } else if !blurry.is_empty() {
+                self.picked = blurry.clone();
+            }
+            studio_ui::handoff::toast(ctx, if blurry.is_empty() { "Aucune photo nettement floue".into() } else if mode == "reject" { format!("{} photo(s) floue(s) rejetée(s) (X)", blurry.len()) } else { format!("{} photo(s) floue(s) sélectionnée(s)", blurry.len()) }, !blurry.is_empty());
+            return;
+        }
         if matches!(id, "batch-auto" | "batch-straighten" | "batch-reset") {
             let targets = self.targets();
             if targets.is_empty() {

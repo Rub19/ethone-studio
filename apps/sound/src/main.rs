@@ -1046,6 +1046,7 @@ impl Sound {
             studio_ui::palette::Cmd::new("Ajouter un marqueur", "M", "marker"),
             studio_ui::palette::Cmd::new("Supprimer les silences (plus de 0,8 s)", "Édition", "silences"),
             studio_ui::palette::Cmd::new("Supprimer les silences courts (plus de 0,4 s)", "Édition", "silences-short"),
+            studio_ui::palette::Cmd::new("Découper aux silences en fichiers WAV…", "Prises, samples, chapitres", "split-files"),
             studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 0,5 s)", "Musique de jeu, ambiance", "loop:500"),
             studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 2 s)", "Musique de jeu, ambiance", "loop:2000"),
             studio_ui::palette::Cmd::new("Annuler", "Ctrl+Z", "undo"),
@@ -1080,6 +1081,21 @@ impl Sound {
             "play" => self.toggle_play(),
             "marker" => self.add_marker(),
             "silences" | "silences-short" => self.cut_silences(if id == "silences" { 800.0 } else { 400.0 }),
+            "split-files" => {
+                let segs = self.clip.segments(-42.0, 350.0, 120.0);
+                if segs.len() < 2 {
+                    self.notice = Some(("Pas assez de silences pour découper (il faut au moins deux passages)".into(), false));
+                } else if let Some(dir) = rfd::FileDialog::new().pick_folder() {
+                    let stem = self.file.as_ref().and_then(|p| p.file_stem()).map(|s| s.to_string_lossy().into_owned()).unwrap_or("son".into());
+                    let pad = (self.clip.rate as f32 * 0.05) as usize;
+                    let mut ok = 0;
+                    for (k, (a, b)) in segs.iter().enumerate() {
+                        let part = self.clip.slice(a.saturating_sub(pad), (b + pad).min(self.clip.len()));
+                        ok += usize::from(part.save_wav(&dir.join(format!("{stem} - {:02}.wav", k + 1)), 16).is_ok());
+                    }
+                    self.notice = Some((format!("{ok} fichier(s) créés dans {}", dir.display()), ok > 0));
+                }
+            }
             x if x.starts_with("loop:") => {
                 let ms: f32 = x[5..].parse().unwrap_or(500.0);
                 let mut c = self.clip.clone();

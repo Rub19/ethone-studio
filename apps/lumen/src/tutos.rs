@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const LUMEN: &[Tuto] = &[
+    t("Trouver les photos floues", "Ctrl+K", "Repère les photos ratées (bougé, mise au point manquée) pendant le tri.", &["Ctrl+K puis « Trouver les photos floues » : elles sont sélectionnées pour vérification.", "« Rejeter les photos floues » leur met directement le drapeau X. Choisis d'abord un groupe de photos pour ne traiter que lui."]),
     t("Réglages par lot", "Ctrl+K", "Ton auto, redressement de l'horizon ou remise à zéro sur plusieurs photos d'un coup.", &["Choisis des photos dans la bibliothèque (Ctrl+clic), puis Ctrl+K « Ton auto sur les photos choisies » ou « Redresser l'horizon ».", "Les autres réglages de chaque photo sont conservés."]),
     t("Préréglages pellicule", "", "Huit rendus argentiques : Portra doux, Ektar vif, Fuji vert, Cinéma 500T, Diapositive, Instantané pastel, Argentique N&B 400, Jetable 90s.", &["Dans Développement, panneau Préréglages, catégorie Pellicule. Le grain et le virage font partie du rendu ; le curseur Quantité dose l'effet."]),
     t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),

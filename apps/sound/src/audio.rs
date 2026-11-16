@@ -161,6 +161,43 @@ impl Clip {
         cuts.len()
     }
 
+    /// Sound passages separated by silences longer than `gap_ms` (10 ms RMS windows), as sample ranges.
+    pub fn segments(&self, threshold_db: f32, gap_ms: f32, min_ms: f32) -> Vec<(usize, usize)> {
+        let win = (self.rate as f32 * 0.01).max(1.0) as usize;
+        let thr = 10f32.powf(threshold_db / 20.0);
+        let n = self.len();
+        let gap = (self.rate as f32 * gap_ms / 1000.0) as usize;
+        let min = (self.rate as f32 * min_ms / 1000.0) as usize;
+        let mut out: Vec<(usize, usize)> = Vec::new();
+        let mut cur: Option<(usize, usize)> = None;
+        let mut i = 0;
+        while i < n {
+            let e = (i + win).min(n);
+            let mut acc = 0.0f32;
+            let mut k = 0usize;
+            for c in &self.ch {
+                for s in &c[i..e] {
+                    acc += s * s;
+                    k += 1;
+                }
+            }
+            if (acc / k.max(1) as f32).sqrt() >= thr {
+                cur = Some(match cur {
+                    Some((a, b)) if i - b <= gap => (a, e),
+                    Some(done) => {
+                        out.push(done);
+                        (i, e)
+                    }
+                    None => (i, e),
+                });
+            }
+            i = e;
+        }
+        out.extend(cur);
+        out.retain(|(a, b)| b - a >= min);
+        out
+    }
+
     /// Makes the sound loop seamlessly: its last `xfade` samples are crossfaded (equal power) into the
     /// start, then cut, so the end flows straight into the beginning.
     pub fn make_loop(&mut self, xfade: usize) -> usize {
@@ -861,6 +898,20 @@ pub fn fft(re: &mut [f32], im: &mut [f32], inverse: bool) {
         let k = 1.0 / n as f32;
         re.iter_mut().for_each(|v| *v *= k);
         im.iter_mut().for_each(|v| *v *= k);
+    }
+}
+
+#[cfg(test)]
+mod segment_tests {
+    use super::*;
+
+    #[test]
+    fn three_takes() {
+        let on = |n: usize| vec![0.4f32; n];
+        let c = Clip { rate: 1000, ch: vec![[on(300), vec![0.0; 600], on(200), vec![0.0; 100], on(200), vec![0.0; 900], on(20), vec![0.0; 500], on(400)].concat()] };
+        let s = c.segments(-40.0, 300.0, 100.0);
+        assert_eq!(s.len(), 3);
+        assert_eq!(s[1], (900, 1400));
     }
 }
 

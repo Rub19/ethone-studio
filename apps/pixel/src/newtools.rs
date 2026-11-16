@@ -175,6 +175,29 @@ pub fn expand_size(w: u32, h: u32, margin: f32, aspect: Option<f32>) -> (u32, u3
 }
 
 impl Pixel {
+    /// Quick action "Supprimer l'arrière-plan": the background touching the image edges is hidden
+    /// with a layer mask (nothing is erased, paint the mask to fix it).
+    pub fn remove_background(&mut self) {
+        let (w, h) = (self.doc.width(), self.doc.height());
+        let Some(all) = Area::from_points((0.0, 0.0), (w as f32, h as f32), w, h) else { return };
+        let mask = object_mask(&self.composite, all, 20.0 + self.tolerance as f32 * 1.2);
+        let kept = mask.iter().filter(|m| **m > 0).count();
+        if kept == 0 || kept == mask.len() {
+            self.error = Some("Arrière-plan introuvable : il doit toucher les bords et être assez uni".into());
+            return;
+        }
+        let m = RgbaImage::from_fn(w, h, |x, y| {
+            let v = mask[(y * w + x) as usize];
+            Rgba([v, v, v, 255])
+        });
+        self.doc.next_label = Some("Supprimer l'arrière-plan".into());
+        self.doc.checkpoint();
+        let l = &mut self.doc.layers[self.doc.active];
+        l.mask = Some(m);
+        l.mask_on = true;
+        self.doc.touch_all();
+    }
+
     /// Photoshop's Generative Expand, done with content-aware fill: grows the canvas and rebuilds the new border.
     pub fn expand_image(&mut self, margin: f32, aspect: Option<f32>, ctx: &egui::Context) {
         let (w, h) = (self.doc.width(), self.doc.height());

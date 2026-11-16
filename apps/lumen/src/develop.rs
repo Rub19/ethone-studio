@@ -1951,3 +1951,36 @@ mod tests {
         }
     }
 }
+
+
+/// Sharpness score: variance of the Laplacian on a grey version (higher = sharper).
+pub fn sharpness(img: &RgbImage) -> f32 {
+    let (w, h) = img.dimensions();
+    if w < 3 || h < 3 {
+        return 0.0;
+    }
+    let g = |x: u32, y: u32| {
+        let p = img.get_pixel(x, y).0;
+        0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32
+    };
+    let (mut s, mut s2, mut n) = (0f64, 0f64, 0f64);
+    for y in 1..h - 1 {
+        for x in 1..w - 1 {
+            let l = (4.0 * g(x, y) - g(x - 1, y) - g(x + 1, y) - g(x, y - 1) - g(x, y + 1)) as f64;
+            s += l;
+            s2 += l * l;
+            n += 1.0;
+        }
+    }
+    (s2 / n - (s / n).powi(2)) as f32
+}
+
+#[cfg(test)]
+mod sharp_tests {
+    #[test]
+    fn detail_beats_blur() {
+        let sharp = super::RgbImage::from_fn(64, 64, |x, y| if (x / 4 + y / 4) % 2 == 0 { image::Rgb([255, 255, 255]) } else { image::Rgb([0, 0, 0]) });
+        let soft = image::imageops::blur(&sharp, 4.0);
+        assert!(super::sharpness(&sharp) > super::sharpness(&soft) * 5.0);
+    }
+}

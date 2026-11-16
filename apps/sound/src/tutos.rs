@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const SOUND: &[Tuto] = &[
+    t("Découper aux silences", "Ctrl+K", "Enregistre chaque passage séparé par un silence dans son propre fichier WAV.", &["Ctrl+K puis « Découper aux silences en fichiers WAV » et choisis un dossier : idéal pour séparer des prises, des samples ou des chapitres."]),
     t("Boucle parfaite", "Ctrl+K", "Rend un son ou une musique bouclable sans clic ni coupure.", &["Ctrl+K puis « Boucle parfaite » : la fin est fondue dans le début (0,5 s ou 2 s), et la lecture en boucle s'active pour vérifier.", "Idéal pour les musiques de jeu et les ambiances."]),
     t("Supprimer les silences", "Ctrl+K", "Retire les blancs d'une interview ou d'un podcast.", &["Ctrl+K puis « Supprimer les silences » : les passages calmes de plus de 0,8 s sont coupés, en gardant un petit souffle de chaque côté.", "La version « courts » coupe dès 0,4 s. Fais une sélection pour ne traiter qu'une partie."]),
     t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
