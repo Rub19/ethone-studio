@@ -1,4 +1,4 @@
-use crate::{audio, develop, filters, inpaint, motion_model, page_model, vector_model};
+use crate::{algos, audio, develop, filters, inpaint, motion_model, page_model, vector_model};
 use image::{DynamicImage, RgbaImage, imageops};
 use serde_json::{Value, json};
 use std::path::{Path, PathBuf};
@@ -104,7 +104,7 @@ pub fn list() -> Vec<Value> {
             "name": "pixel_edit",
             "title": "Pixel : retoucher une image",
             "description": format!("Retouche une image (PNG, JPEG, WebP, BMP) avec le moteur de Pixel et enregistre le résultat. Opérations appliquées dans l'ordre : \
-                {{op:'filter', name, params?, region?:{{x,y,width,height}}}} ; {{op:'remove', x,y,width,height}} = suppression d'objet avec reconstruction du fond (oiseaux dans le ciel, passants…) ; \
+                {{op:'filter', name, params?, region?:{{x,y,width,height}}}} ; {{op:'remove', x,y,width,height}} = suppression d'objet avec reconstruction du fond (oiseaux dans le ciel, passants…) ; {{op:'remove_background', tolerance?}} = fond uni qui touche les bords rendu transparent (sortie .png) ; {{op:'expand', margin?:0.15 | aspect?:1.0}} = agrandit la toile et reconstruit le décor ; \
                 {{op:'resize', width?, height?}} ; {{op:'crop', x,y,width,height}} ; {{op:'rotate', degrees:90|180|270}} ; {{op:'flip', axis:'horizontal'|'vertical'}}. \
                 Filtres disponibles (nom [paramètres dans l'ordre]) : {}", filter_doc()),
             "inputSchema": {
@@ -199,7 +199,7 @@ pub fn list() -> Vec<Value> {
             "title": "Sound : traiter un son",
             "description": "Traite un fichier audio (WAV, MP3, FLAC, OGG, M4A, son d'une vidéo) avec le moteur de Sound et enregistre un WAV. Sans input, part d'un fichier vide (utile avec generate). \
                 Opérations dans l'ordre, chacune avec start/end optionnels en secondes (sinon tout le fichier) : gain{db}, normalize{db}, loudness{db} (volume perçu RMS), fade_in{seconds}, fade_out{seconds}, \
-                trim{start,end} (garde la plage), cut{start,end} (supprime la plage), eq{low,mid,high} (dB), low_cut{hz}, high_cut{hz}, compress{threshold,ratio,makeup}, gate{threshold}, cut_silences{threshold:-40 dB, min_ms:800, keep_ms:120} (supprime les silences longs), saturate{drive 0..1}, \
+                trim{start,end} (garde la plage), cut{start,end} (supprime la plage), eq{low,mid,high} (dB), low_cut{hz}, high_cut{hz}, compress{threshold,ratio,makeup}, gate{threshold}, cut_silences{threshold:-40 dB, min_ms:800, keep_ms:120} (supprime les silences longs), loop{crossfade_ms:500} (boucle sans couture), saturate{drive 0..1}, \
                 echo{delay_ms,feedback,mix}, reverb{size,mix}, speed{factor}, reverse, mono, stereo{pan,width}, generate{kind:'silence'|'tone'|'noise', seconds, at?}.",
             "inputSchema": {
                 "type": "object",
@@ -279,6 +279,34 @@ fn pixel_edit(a: &Value) -> Out {
                     None => out,
                 };
                 log.push(format!("{} {:?}", k.title(), params));
+            }
+            "remove_background" => {
+                let all = crate::doc::Area::from_points((0.0, 0.0), (w as f32, h as f32), w, h).ok_or("image vide")?;
+                let tol = f(op, "tolerance", 44.0);
+                let mut mask = algos::object_mask(&img, all, tol);
+                algos::clear_holes(&img, &mut mask, tol);
+                let kept = mask.iter().filter(|m| **m > 0).count();
+                if kept == 0 || kept == mask.len() {
+                    return Err("arrière-plan introuvable : il doit toucher les bords et être assez uni".into());
+                }
+                for (p, m) in img.pixels_mut().zip(&mask) {
+                    p.0[3] = ((p.0[3] as u32 * *m as u32) / 255) as u8;
+                }
+                log.push(format!("arrière-plan supprimé ({:.0} % gardé)", kept as f32 * 100.0 / mask.len() as f32));
+            }
+            "expand" => {
+                let aspect = op["aspect"].as_f64().map(|a| a as f32);
+                let (nw, nh, ox, oy) = algos::expand_size(w, h, f(op, "margin", 0.15), aspect);
+                if (nw, nh) != (w, h) {
+                    let mut big = RgbaImage::new(nw, nh);
+                    imageops::replace(&mut big, &img, ox as i64, oy as i64);
+                    let mask: Vec<bool> = (0..nw * nh).map(|i| {
+                        let (x, y) = (i % nw, i / nw);
+                        x < ox || y < oy || x >= ox + w || y >= oy + h
+                    }).collect();
+                    img = algos::smooth_expand(&inpaint::content_aware_fill(&big, &mask, 7), &img, ox, oy);
+                    log.push(format!("étendue en {nw}×{nh}"));
+                }
             }
             "remove" => {
                 let (x, y, rw, rh) = rect_of(op, w, h)?;
@@ -559,6 +587,10 @@ fn sound_process(a: &Value) -> Out {
             }
             "trim" => clip = clip.slice(s0, s1),
             "cut" => clip.remove(s0, s1),
+            "loop" => {
+                let x = (v("crossfade_ms", 500.0) / 1000.0 * clip.rate as f32) as usize;
+                clip.make_loop(x);
+            }
             "cut_silences" => {
                 let n = clip.cut_silences(s0, s1, v("threshold", -40.0), v("min_ms", 800.0), v("keep_ms", 120.0));
                 let _ = n;

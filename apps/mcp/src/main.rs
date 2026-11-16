@@ -8,6 +8,9 @@ use studio_fx::filters;
 #[path = "../../pixel/src/inpaint.rs"]
 mod inpaint;
 #[allow(dead_code)]
+#[path = "../../pixel/src/algos.rs"]
+mod algos;
+#[allow(dead_code)]
 #[path = "../../vector/src/model.rs"]
 mod vector_model;
 #[allow(dead_code)]

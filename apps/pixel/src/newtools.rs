@@ -1,178 +1,8 @@
 use crate::Pixel;
 use crate::doc::Area;
+pub use crate::algos::*;
 use eframe::egui;
 use image::{Rgba, RgbaImage};
-
-pub fn catmull(pts: &[(f32, f32)], steps: usize) -> Vec<(f32, f32)> {
-    let n = pts.len();
-    if n < 3 {
-        return pts.to_vec();
-    }
-    let mut out = Vec::with_capacity(n * steps);
-    for i in 0..n {
-        let (p0, p1, p2, p3) = (pts[(i + n - 1) % n], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]);
-        for s in 0..steps {
-            let t = s as f32 / steps as f32;
-            let (t2, t3) = (t * t, t * t * t);
-            let f = |a: f32, b: f32, c: f32, d: f32| 0.5 * (2.0 * b + (c - a) * t + (2.0 * a - 5.0 * b + 4.0 * c - d) * t2 + (3.0 * b - a - 3.0 * c + d) * t3);
-            out.push((f(p0.0, p1.0, p2.0, p3.0), f(p0.1, p1.1, p2.1, p3.1)));
-        }
-    }
-    out
-}
-
-fn dist(a: [u8; 4], b: [u8; 4]) -> f32 {
-    (0..3).map(|k| (a[k] as f32 - b[k] as f32).powi(2)).sum::<f32>().sqrt()
-}
-
-pub fn object_mask(img: &RgbaImage, a: Area, tol: f32) -> Vec<u8> {
-    let (w, h) = img.dimensions();
-    let (x0, y0, x1, y1) = (a.x0.min(w), a.y0.min(h), a.x1.min(w), a.y1.min(h));
-    let mut mask = vec![0u8; (w * h) as usize];
-    if x1 <= x0 + 2 || y1 <= y0 + 2 {
-        return mask;
-    }
-    let mut border = Vec::new();
-    let step = (((x1 - x0) + (y1 - y0)) / 60).max(1);
-    for x in (x0..x1).step_by(step as usize) {
-        border.push(img.get_pixel(x, y0).0);
-        border.push(img.get_pixel(x, y1 - 1).0);
-    }
-    for y in (y0..y1).step_by(step as usize) {
-        border.push(img.get_pixel(x0, y).0);
-        border.push(img.get_pixel(x1 - 1, y).0);
-    }
-    let bg = |x: u32, y: u32| {
-        let p = img.get_pixel(x, y).0;
-        border.iter().any(|b| dist(*b, p) < tol)
-    };
-    let (bw, bh) = ((x1 - x0) as usize, (y1 - y0) as usize);
-    let mut seen = vec![false; bw * bh];
-    let mut stack: Vec<(u32, u32)> = Vec::new();
-    for x in x0..x1 {
-        stack.push((x, y0));
-        stack.push((x, y1 - 1));
-    }
-    for y in y0..y1 {
-        stack.push((x0, y));
-        stack.push((x1 - 1, y));
-    }
-    while let Some((x, y)) = stack.pop() {
-        let i = (y - y0) as usize * bw + (x - x0) as usize;
-        if seen[i] || !bg(x, y) {
-            continue;
-        }
-        seen[i] = true;
-        if x > x0 {
-            stack.push((x - 1, y));
-        }
-        if x + 1 < x1 {
-            stack.push((x + 1, y));
-        }
-        if y > y0 {
-            stack.push((x, y - 1));
-        }
-        if y + 1 < y1 {
-            stack.push((x, y + 1));
-        }
-    }
-    for y in y0..y1 {
-        for x in x0..x1 {
-            if !seen[(y - y0) as usize * bw + (x - x0) as usize] {
-                mask[(y * w + x) as usize] = 255;
-            }
-        }
-    }
-    mask
-}
-
-pub fn red_eye(img: &RgbaImage, cx: f32, cy: f32, r: f32, darken: f32) -> RgbaImage {
-    let mut out = img.clone();
-    let (w, h) = img.dimensions();
-    let (x0, x1) = ((cx - r).max(0.0) as u32, ((cx + r) as u32).min(w.saturating_sub(1)));
-    let (y0, y1) = ((cy - r).max(0.0) as u32, ((cy + r) as u32).min(h.saturating_sub(1)));
-    for y in y0..=y1 {
-        for x in x0..=x1 {
-            let d = ((x as f32 - cx).powi(2) + (y as f32 - cy).powi(2)).sqrt() / r;
-            if d > 1.0 {
-                continue;
-            }
-            let p = img.get_pixel(x, y).0;
-            let (rr, g, b) = (p[0] as f32, p[1] as f32, p[2] as f32);
-            let red = rr - g.max(b);
-            if red > 25.0 && rr > 70.0 {
-                let k = ((red - 25.0) / 60.0).clamp(0.0, 1.0) * (1.0 - d.powi(4));
-                let nr = (g + b) / 2.0 * (1.0 - darken);
-                let mix = |a: f32, z: f32| (a + (z - a) * k).round().clamp(0.0, 255.0) as u8;
-                out.put_pixel(x, y, Rgba([mix(rr, nr), mix(g, g * (1.0 - darken * 0.5)), mix(b, b * (1.0 - darken * 0.5)), p[3]]));
-            }
-        }
-    }
-    out
-}
-
-pub fn warp_quad(img: &RgbaImage, q: [(f32, f32); 4], ow: u32, oh: u32) -> RgbaImage {
-    let (w, h) = img.dimensions();
-    RgbaImage::from_fn(ow.max(1), oh.max(1), |x, y| {
-        let (u, v) = ((x as f32 + 0.5) / ow as f32, (y as f32 + 0.5) / oh as f32);
-        let top = (q[0].0 + (q[1].0 - q[0].0) * u, q[0].1 + (q[1].1 - q[0].1) * u);
-        let bot = (q[3].0 + (q[2].0 - q[3].0) * u, q[3].1 + (q[2].1 - q[3].1) * u);
-        let (sx, sy) = (top.0 + (bot.0 - top.0) * v, top.1 + (bot.1 - top.1) * v);
-        let (fx, fy) = ((sx - 0.5).clamp(0.0, w as f32 - 1.0), (sy - 0.5).clamp(0.0, h as f32 - 1.0));
-        let (ix, iy) = (fx as u32, fy as u32);
-        let (jx, jy) = ((ix + 1).min(w - 1), (iy + 1).min(h - 1));
-        let (tx, ty) = (fx - ix as f32, fy - iy as f32);
-        let p = |a: u32, b: u32| img.get_pixel(a, b).0.map(|c| c as f32);
-        let (a, b, c, d) = (p(ix, iy), p(jx, iy), p(ix, jy), p(jx, jy));
-        Rgba(std::array::from_fn(|k| ((a[k] * (1.0 - tx) + b[k] * tx) * (1.0 - ty) + (c[k] * (1.0 - tx) + d[k] * tx) * ty).round() as u8))
-    })
-}
-
-/// Mean and standard deviation of R, G, B over pixels where `keep` is true.
-pub fn color_stats(img: &RgbaImage, keep: impl Fn(u32, u32) -> bool) -> ([f32; 3], [f32; 3]) {
-    let (mut s, mut s2, mut n) = ([0f64; 3], [0f64; 3], 0f64);
-    for (x, y, p) in img.enumerate_pixels() {
-        if keep(x, y) {
-            for k in 0..3 {
-                let v = p.0[k] as f64;
-                s[k] += v;
-                s2[k] += v * v;
-            }
-            n += 1.0;
-        }
-    }
-    let n = n.max(1.0);
-    let mean = s.map(|v| (v / n) as f32);
-    let sd = [0, 1, 2].map(|k| ((s2[k] / n - (s[k] / n).powi(2)).max(0.0).sqrt() as f32).max(1.0));
-    (mean, sd)
-}
-
-/// Moves `src`'s colours toward the target mean/contrast ("Harmoniser"), weighted by `amount` 0..1.
-pub fn harmonize(src: &RgbaImage, from: ([f32; 3], [f32; 3]), to: ([f32; 3], [f32; 3]), amount: f32) -> RgbaImage {
-    let mut out = src.clone();
-    for p in out.pixels_mut() {
-        if p.0[3] == 0 {
-            continue;
-        }
-        for k in 0..3 {
-            let v = p.0[k] as f32;
-            let t = (v - from.0[k]) * (to.1[k] / from.1[k]).clamp(0.4, 2.5) + to.0[k];
-            p.0[k] = (v + (t - v) * amount).round().clamp(0.0, 255.0) as u8;
-        }
-    }
-    out
-}
-
-/// New canvas size for "Étendre" : a margin in % on every side, or a target aspect ratio (w/h)
-/// reached by growing only the short side. Returns (w, h, x offset, y offset).
-pub fn expand_size(w: u32, h: u32, margin: f32, aspect: Option<f32>) -> (u32, u32, u32, u32) {
-    let (nw, nh) = match aspect {
-        Some(a) if (w as f32 / h as f32) < a => (((h as f32) * a).round() as u32, h),
-        Some(a) => (w, ((w as f32) / a).round() as u32),
-        None => (((w as f32) * (1.0 + 2.0 * margin)).round() as u32, ((h as f32) * (1.0 + 2.0 * margin)).round() as u32),
-    };
-    (nw.max(w), nh.max(h), (nw.max(w) - w) / 2, (nh.max(h) - h) / 2)
-}
 
 impl Pixel {
     /// Quick action "Supprimer l'arrière-plan": the background touching the image edges is hidden
@@ -180,7 +10,9 @@ impl Pixel {
     pub fn remove_background(&mut self) {
         let (w, h) = (self.doc.width(), self.doc.height());
         let Some(all) = Area::from_points((0.0, 0.0), (w as f32, h as f32), w, h) else { return };
-        let mask = object_mask(&self.composite, all, 20.0 + self.tolerance as f32 * 1.2);
+        let tol = 20.0 + self.tolerance as f32 * 1.2;
+        let mut mask = object_mask(&self.composite, all, tol);
+        clear_holes(&self.composite, &mut mask, tol);
         let kept = mask.iter().filter(|m| **m > 0).count();
         if kept == 0 || kept == mask.len() {
             self.error = Some("Arrière-plan introuvable : il doit toucher les bords et être assez uni".into());
@@ -206,6 +38,7 @@ impl Pixel {
             self.error = Some("L'image a déjà ce format".into());
             return;
         }
+        let original = self.doc.layers[self.doc.active].img.clone();
         self.doc.next_label = Some("Étendre l'image".into());
         self.doc.checkpoint();
         self.doc.canvas_size(nw, nh, (0.5, 0.5), None);
@@ -214,6 +47,7 @@ impl Pixel {
             x < ox || y < oy || x >= ox + w || y >= oy + h
         }).collect();
         self.fit_pending = true;
+        self.expand_box = Some((original, ox, oy));
         self.start_fill(mask, ctx);
     }
 

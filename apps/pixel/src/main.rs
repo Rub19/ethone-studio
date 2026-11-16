@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod algos;
 mod canvas;
 mod doc;
 use studio_fx::{filters, fx};
@@ -244,6 +245,7 @@ pub struct Pixel {
     red_eye_dark: f32,
     pt: phototext::State,
     pt_auto: bool,
+    expand_box: Option<(RgbaImage, u32, u32)>,
     persp: Vec<(f32, f32)>,
     counts: Vec<(f32, f32)>,
 }
@@ -417,6 +419,7 @@ impl Pixel {
             red_eye_dark: 0.6,
             pt: phototext::State::default(),
             pt_auto: false,
+            expand_box: None,
             persp: Vec::new(),
             counts: Vec::new(),
             sheet: None,
@@ -650,6 +653,10 @@ impl Pixel {
         if let Ok(img) = rx.try_recv() {
             let layer = *layer;
             self.filling = None;
+            let img = match self.expand_box.take() {
+                Some((orig, ox, oy)) if img.width() >= orig.width() + ox && img.height() >= orig.height() + oy => algos::smooth_expand(&img, &orig, ox, oy),
+                _ => img,
+            };
             self.remove_stroke.clear();
             if layer < self.doc.layers.len() && self.doc.layers[layer].img.dimensions() == img.dimensions() {
                 self.doc.next_label = Some("Suppression intelligente".into());

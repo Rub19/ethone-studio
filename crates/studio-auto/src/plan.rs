@@ -260,19 +260,37 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
                 if text_words.iter().any(|w| obj.contains(w)) {
                     steps.push(Step::EraseText);
                     s.push("Lire le texte (OCR) et l'effacer en reconstruisant le fond".into());
-                } else if has(&t, &["fond", "arriere plan", "background", "decor"]) && !has(&t, &["sur le fond", "du fond", "dans le fond"]) {
-                    return done("pixel", &[], vec!["Ouvrir dans Pixel : utilise Sélection d'objet (W) puis Calque › Masque pour détourer".into()], steps);
+                } else if has(&t, &["fond", "arriere plan", "background", "decor"]) && !has(&t, &["sur le fond", "dans le fond"]) {
+                    steps.push(Step::Pixel(vec![json!({ "op": "remove_background" })]));
+                    s.push("Rendre l'arrière-plan transparent (fond uni qui touche les bords)".into());
                 } else {
                     s.push(format!("Repérer « {obj} » avec l'IA de vision locale"));
                     s.push("Supprimer chaque élément et reconstruire le fond".into());
                     steps.push(Step::Remove(obj));
                 }
             }
+            if has(&t, &["detoure", "fond transparent", "png transparent"]) && !steps.iter().any(|x| matches!(x, Step::Pixel(_))) {
+                steps.push(Step::Pixel(vec![json!({ "op": "remove_background" })]));
+                s.push("Rendre l'arrière-plan transparent (fond uni qui touche les bords)".into());
+            }
+            if has(&t, &["etends", "etend", "elargis", "agrandis la toile", "agrandis le cadre", "ajoute du decor", "outpaint", "expand"]) {
+                let aspect = if has(&t, &["story", "9 16", "vertical"]) { Some(0.5625) } else if has(&t, &["16 9", "paysage", "panoram"]) { Some(16.0 / 9.0) } else if has(&t, &["carre", "1 1"]) { Some(1.0) } else if has(&t, &["4 5", "instagram"]) { Some(0.8) } else { None };
+                steps.push(Step::Pixel(vec![match aspect {
+                    Some(a) => json!({ "op": "expand", "aspect": a }),
+                    None => json!({ "op": "expand", "margin": 0.15 }),
+                }]));
+                s.push(match aspect {
+                    Some(_) => "Étendre l'image au nouveau format en inventant le décor".into(),
+                    None => "Étendre l'image de 15 % de chaque côté en inventant le décor".into(),
+                });
+            }
             if has(&t, &["anime", "gif", "fais bouger", "animation", "ken burns"]) {
                 steps.push(Step::Animate);
                 s.push("Créer une animation (zoom lent) en GIF et l'ouvrir dans Motion".into());
                 return done("motion", &[], s, steps);
             }
+            let expanding = steps.iter().any(|x| matches!(x, Step::Pixel(o) if o.iter().any(|o| o["op"] == "expand")));
+            let t = if expanding { t.replace(" carre", " ").replace(" vertical", " ") } else { t.clone() };
             let (ops, dev) = image_filters(&t, &mut s);
             if !dev.is_empty() {
                 steps.push(Step::Develop(Value::Object(dev)));
@@ -335,6 +353,10 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
             if has(&t, &["silence", "blanc", "pause", "temps mort"]) && has(&t, &["supprime", "retire", "enleve", "coupe", "vire", "raccourci"]) {
                 ops.push(json!({"op":"cut_silences","threshold":-40,"min_ms":700,"keep_ms":120}));
                 s.push("Supprimer les silences de plus de 0,7 s".into());
+            }
+            if has(&t, &["boucle", "loop", "bouclable"]) {
+                ops.push(json!({"op":"loop","crossfade_ms":if has(&t, &["long", "doux", "lent"]) { 2000 } else { 500 }}));
+                s.push("Rendre le son bouclable sans couture".into());
             }
             if has(&t, &["mono"]) {
                 ops.push(json!({"op":"mono"}));
@@ -441,6 +463,11 @@ mod tests {
         assert_eq!(p("monte cette vidéo", "v.mp4").app, "cut");
         assert!(matches!(&p("nettoie ce podcast", "a.wav").steps[0], Step::Sound(o) if o.len() > 3));
         assert!(matches!(&p("supprime les silences", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "cut_silences"));
+        assert_eq!(p("supprime le fond", "x.png").steps, vec![Step::Pixel(vec![json!({"op":"remove_background"})])]);
+        assert_eq!(p("détoure le produit", "x.png").steps, vec![Step::Pixel(vec![json!({"op":"remove_background"})])]);
+        assert_eq!(p("étends l'image en format story", "x.jpg").steps, vec![Step::Pixel(vec![json!({"op":"expand","aspect":0.5625})])]);
+        assert_eq!(p("élargis la photo", "x.jpg").steps, vec![Step::Pixel(vec![json!({"op":"expand","margin":0.15})])]);
+        assert!(matches!(&p("rends cette musique bouclable", "m.wav").steps[0], Step::Sound(o) if o[0]["op"] == "loop"));
         assert_eq!(p("résume ce document", "d.pdf").args, vec!["--outil", "ai"]);
         assert_eq!(p("fais l'ocr", "d.pdf").args, vec!["--ocr"]);
         assert_eq!(p("fais un logo pour Nova Café", "").steps, vec![Step::Logo("Nova Café".into())]);
