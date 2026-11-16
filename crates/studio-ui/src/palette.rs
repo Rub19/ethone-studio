@@ -285,7 +285,6 @@ impl Palette {
         }
         let mut chosen = if enter { hits.get(self.sel).map(|c| c.id.clone()) } else { None };
         let close = esc;
-        let confirmation_label = self.confirming.as_ref().and_then(|id| hits.iter().find(|command| &command.id == id)).map(|command| command.label.clone());
         egui::Area::new(egui::Id::NULL.with("palette")).order(egui::Order::Foreground).anchor(Align2::CENTER_TOP, [0.0, 80.0]).show(ctx, |ui| {
             Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(14)).inner_margin(Margin::same(10)).shadow(egui::epaint::Shadow { offset: [0, 16], blur: 40, spread: 0, color: Color32::from_black_alpha(170) }).show(ui, |ui| {
                 ui.set_width(560.0);
@@ -298,6 +297,7 @@ impl Palette {
                 ui.add_space(6.0);
                 let recent = if self.query.trim().is_empty() && !self.recent.is_empty() { " · récentes en premier" } else { "" };
                 ui.label(RichText::new(format!("{} résultat(s){recent} · ↑ ↓ pour choisir · Entrée pour lancer · Échap pour fermer", hits.len())).size(11.0).color(FAINT));
+                let confirmation_label = self.confirming.as_ref().and_then(|id| hits.iter().find(|command| &command.id == id)).map(|command| command.label.as_str());
                 if let Some(label) = &confirmation_label {
                     ui.label(RichText::new(format!("⚠ Confirmer « {label} » avec Entrée ou un second clic")).size(12.0).color(Color32::from_rgb(255, 180, 60)));
                 }
@@ -310,6 +310,7 @@ impl Palette {
                             resp.scroll_to_me(None);
                         }
                         if resp.clicked() {
+                            self.sel = k;
                             chosen = Some(c.id.clone());
                         }
                     }
@@ -319,6 +320,7 @@ impl Palette {
         if close {
             self.open = false;
             self.confirming = None;
+            return None;
         }
         let id = chosen?;
         let Some(command) = app.iter().chain(&builtin).chain(variants).find(|command| command.id == id) else { return None };

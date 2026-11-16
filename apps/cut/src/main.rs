@@ -1725,20 +1725,20 @@ impl Cut {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
-            studio_ui::palette::Cmd::new("Fondu enchaîné entre tous les clips", "Séquence", "trans-all:1"),
-            studio_ui::palette::Cmd::new("Fondu au noir entre tous les clips", "Séquence", "trans-all:2"),
-            studio_ui::palette::Cmd::new("Retirer toutes les transitions", "Séquence", "trans-all:0"),
-            studio_ui::palette::Cmd::new("Couper le clip toutes les 2 s", "Clip sélectionné, sinon toute la piste", "every:2"),
-            studio_ui::palette::Cmd::new("Couper le clip toutes les 5 s", "Clip sélectionné, sinon toute la piste", "every:5"),
-            studio_ui::palette::Cmd::new("Couper le clip toutes les 10 s", "Clip sélectionné, sinon toute la piste", "every:10"),
-            studio_ui::palette::Cmd::new("Passer en vertical 9:16 (Shorts, Reels, TikTok)", "Séquence · clips recadrés au centre", "format:1080x1920"),
-            studio_ui::palette::Cmd::new("Passer en carré 1:1", "Séquence · clips recadrés au centre", "format:1080x1080"),
-            studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350"),
-            studio_ui::palette::Cmd::new("Passer en paysage 16:9", "Séquence · clips recadrés au centre", "format:1920x1080"),
-            studio_ui::palette::Cmd::new("Fermer tous les blancs de la piste", "Montage · rapproche tous les clips", "close-gaps"),
+            studio_ui::palette::Cmd::new("Fondu enchaîné entre tous les clips", "Séquence", "trans-all:1").confirm(),
+            studio_ui::palette::Cmd::new("Fondu au noir entre tous les clips", "Séquence", "trans-all:2").confirm(),
+            studio_ui::palette::Cmd::new("Retirer toutes les transitions", "Séquence", "trans-all:0").confirm(),
+            studio_ui::palette::Cmd::new("Couper le clip toutes les 2 s", "Clip sélectionné, sinon toute la piste", "every:2").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
+            studio_ui::palette::Cmd::new("Couper le clip toutes les 5 s", "Clip sélectionné, sinon toute la piste", "every:5").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
+            studio_ui::palette::Cmd::new("Couper le clip toutes les 10 s", "Clip sélectionné, sinon toute la piste", "every:10").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
+            studio_ui::palette::Cmd::new("Passer en vertical 9:16 (Shorts, Reels, TikTok)", "Séquence · clips recadrés au centre", "format:1080x1920").confirm(),
+            studio_ui::palette::Cmd::new("Passer en carré 1:1", "Séquence · clips recadrés au centre", "format:1080x1080").confirm(),
+            studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350").confirm(),
+            studio_ui::palette::Cmd::new("Passer en paysage 16:9", "Séquence · clips recadrés au centre", "format:1920x1080").confirm(),
+            studio_ui::palette::Cmd::new("Fermer tous les blancs de la piste", "Montage · rapproche tous les clips", "close-gaps").confirm(),
             studio_ui::palette::Cmd::new("Normaliser l'audio sélectionné à −1 dB", "Clip ou musique sélectionné", "normalize-audio"),
-            studio_ui::palette::Cmd::new("Fondus de 0,5 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:0.5"),
-            studio_ui::palette::Cmd::new("Fondus de 1 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:1"),
+            studio_ui::palette::Cmd::new("Fondus de 0,5 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:0.5").confirm(),
+            studio_ui::palette::Cmd::new("Fondus de 1 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:1").confirm(),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));

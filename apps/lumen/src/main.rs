@@ -1220,14 +1220,14 @@ impl Lumen {
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
             studio_ui::palette::Cmd::new("Trouver les photos floues (les sélectionner)", "Tri", "blurry:pick"),
-            studio_ui::palette::Cmd::new("Rejeter les photos floues", "Tri · drapeau X", "blurry:reject"),
+            studio_ui::palette::Cmd::new("Rejeter les photos floues", "Tri · drapeau X", "blurry:reject").confirm(),
             studio_ui::palette::Cmd::new("Ton auto sur les photos choisies", "Lot", "batch-auto"),
             studio_ui::palette::Cmd::new("Redresser l'horizon sur les photos choisies", "Lot", "batch-straighten"),
-            studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset"),
+            studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset").confirm(),
             studio_ui::palette::Cmd::new("Synchroniser les réglages vers les photos choisies", "Lot · copie la photo courante", "batch-sync"),
             studio_ui::palette::Cmd::new("Attribuer 5 étoiles aux photos choisies", "Lot · classement", "batch-rate:5"),
             studio_ui::palette::Cmd::new("Marquer les photos choisies comme retenues", "Lot · drapeau P", "batch-flag:1"),
-            studio_ui::palette::Cmd::new("Rejeter les photos choisies", "Lot · drapeau X", "batch-flag:-1"),
+            studio_ui::palette::Cmd::new("Rejeter les photos choisies", "Lot · drapeau X", "batch-flag:-1").confirm(),
             studio_ui::palette::Cmd::new("Effacer les drapeaux des photos choisies", "Lot · neutre", "batch-flag:0"),
 
         ];

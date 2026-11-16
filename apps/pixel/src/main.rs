@@ -1202,7 +1202,7 @@ impl Pixel {
             studio_ui::palette::Cmd::new("Recadrer aux pixels visibles", "Image · retire les marges transparentes", "trim-visible"),
             studio_ui::palette::Cmd::new("Dupliquer le calque actif", "Calque · Ctrl+J", "duplicate-layer"),
             studio_ui::palette::Cmd::new("Fusionner les calques visibles", "Calques · conserve les calques masqués", "merge-visible"),
-            studio_ui::palette::Cmd::new("Aplatir toute l'image", "Calques · résultat unique", "flatten-image"),
+            studio_ui::palette::Cmd::new("Aplatir toute l'image", "Calques · résultat unique", "flatten-image").confirm(),
         ];
         v.extend(studio_ui::palette::send_cmds(&[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]));
         v.extend(studio_ui::palette::effect_cmds());
