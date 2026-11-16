@@ -2237,6 +2237,9 @@ impl VectorApp {
         let mut v = vec![
 
         ];
+        for (k, name) in model::RECOLOR.iter().enumerate() {
+            v.push(studio_ui::palette::Cmd::new(format!("Recolorer : {name}"), "Sélection, sinon tout", format!("recolor:{k}")));
+        }
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher en image"), ("page", "placer le dessin"), ("motion", "animer le dessin"), ("cut", "ajouter au montage"), ("lumen", "développer")]));
         v.extend(studio_ui::palette::effect_cmds());
         v
@@ -2252,6 +2255,21 @@ impl VectorApp {
             self.checkpoint();
             self.doc.raster_fx.push(studio_fx::stack::Fx::new(k));
             studio_ui::handoff::toast(ctx, format!("{} ajouté aux effets bitmap de l'export", k.title()), true);
+            return;
+        }
+        if let Some(k) = id.strip_prefix("recolor:").and_then(|k| k.parse::<usize>().ok()) {
+            let mut targets = self.selection();
+            if targets.is_empty() {
+                targets = (0..self.doc.items.len()).filter(|i| self.doc.editable(*i)).collect();
+            }
+            self.checkpoint();
+            for i in &targets {
+                let it = &mut self.doc.items[*i];
+                for c in [&mut it.fill, &mut it.stroke, &mut it.fill2].into_iter().flatten() {
+                    *c = model::recolor(*c, k);
+                }
+            }
+            studio_ui::handoff::toast(ctx, format!("{} objet(s) recoloré(s) : {}", targets.len(), model::RECOLOR[k]), true);
             return;
         }
         match id {

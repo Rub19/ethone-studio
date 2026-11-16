@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const VECTOR: &[Tuto] = &[
+    t("Recolorer l'illustration", "Ctrl+K", "Change d'un coup toutes les couleurs du dessin, comme Recolor Artwork d'Illustrator.", &["Sélectionne des objets (ou rien pour tout le dessin), Ctrl+K puis « Recolorer » : décaler la teinte, complémentaire, niveaux de gris, négatif, plus ou moins saturé, plus clair ou plus sombre.", "Les fonds, contours et dégradés suivent. Ctrl+Z annule."]),
     t("Dégradé de formes (outil)", "W", "Crée les étapes intermédiaires entre deux objets, forme et couleur.", &["Prends l'outil (W), clique un premier objet puis un second.", "Le nombre d'étapes se règle dans la barre d'options. Objet > Fusion fait la même chose sur une sélection."]),
     t("Pulvérisation de symboles", "Maj+S", "Sème des copies d'un symbole en glissant, comme une bombe de peinture.", &["Crée d'abord un symbole : sélectionne un dessin, Bibliothèques › Symboles › Nouveau symbole.", "Choisis le symbole, l'espacement et la dispersion dans la barre d'options, puis glisse sur le plan de travail.", "Chaque copie est une occurrence : redéfinir le symbole les met toutes à jour."]),
     t("Festons, cristallisation, fronces", "", "Trois pinceaux de déformation de plus, dans la case de la Déformation.", &["Festons creuse le contour en vagues, Cristallisation le hérisse de pointes, Fronces le froisse.", "Agit sur la sélection, ou sur tout ce qui passe sous le pinceau. Rayon et intensité dans la barre d'options."]),

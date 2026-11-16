@@ -1944,3 +1944,36 @@ mod tests {
         assert!(fit(&resample(&flatten(&polygon(0.0, 0.0, 50.0, 40, None), true, 4), true, 40), true, 40.0).iter().all(|n| !n.is_corner()));
     }
 }
+
+
+/// Recolour modes for "Recolorer l'illustration".
+pub const RECOLOR: [&str; 9] = ["Décaler la teinte de +30°", "Décaler la teinte de −30°", "Teinte opposée (complémentaire)", "Niveaux de gris", "Négatif", "Plus saturé", "Moins saturé", "Plus clair", "Plus sombre"];
+
+pub fn recolor(c: [u8; 4], mode: usize) -> [u8; 4] {
+    let (h, s, l) = studio_fx::rgb_to_hsl(c[0] as f32 / 255.0, c[1] as f32 / 255.0, c[2] as f32 / 255.0);
+    let (h, s, l) = match mode {
+        0 => (h + 30.0 / 360.0, s, l),
+        1 => (h - 30.0 / 360.0, s, l),
+        2 => (h + 0.5, s, l),
+        3 => (h, 0.0, l),
+        4 => return [255 - c[0], 255 - c[1], 255 - c[2], c[3]],
+        5 => (h, (s * 1.3 + 0.05).min(1.0), l),
+        6 => (h, s * 0.6, l),
+        7 => (h, s, l + (1.0 - l) * 0.25),
+        _ => (h, s, l * 0.75),
+    };
+    let (r, g, b) = studio_fx::hsl_to_rgb(h.rem_euclid(1.0), s, l.clamp(0.0, 1.0));
+    [(r * 255.0).round() as u8, (g * 255.0).round() as u8, (b * 255.0).round() as u8, c[3]]
+}
+
+#[cfg(test)]
+mod recolor_tests {
+    #[test]
+    fn modes() {
+        assert_eq!(super::recolor([255, 0, 0, 200], 2), [0, 255, 255, 200]);
+        assert_eq!(super::recolor([255, 0, 0, 255], 3), [128, 128, 128, 255]);
+        assert_eq!(super::recolor([10, 20, 30, 255], 4), [245, 235, 225, 255]);
+        let s = super::recolor([255, 0, 0, 255], 0);
+        assert!(s[1] > 100 && s[2] < 5, "{s:?}");
+    }
+}

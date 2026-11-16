@@ -1434,6 +1434,9 @@ impl Motion {
         let mut v = vec![
 
         ];
+        for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
+            v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")));
+        }
         v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage"), ("pixel", "retoucher l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("lumen", "développer")]));
         v.extend(studio_ui::palette::effect_cmds());
         v
@@ -1447,6 +1450,17 @@ impl Motion {
         }
         if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
             self.comp.effects.push(studio_fx::stack::Fx::new(k));
+            return;
+        }
+        if let Some(k) = id.strip_prefix("anim:").and_then(|k| k.parse::<usize>().ok()).filter(|k| *k < model::ANIM_PRESETS.len()) {
+            let (w, h) = (self.comp.width as f32, self.comp.height as f32);
+            match self.sel.and_then(|i| self.comp.layers.get_mut(i)) {
+                Some(l) => {
+                    model::apply_anim_preset(l, k, w, h);
+                    studio_ui::handoff::toast(ctx, format!("{} appliqué à « {} »", model::ANIM_PRESETS[k], l.name), true);
+                }
+                None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un calque".into(), false),
+            }
             return;
         }
         match id {

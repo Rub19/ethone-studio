@@ -991,6 +991,7 @@ impl PageApp {
         let mut v = vec![
 
         ];
+        v.push(studio_ui::palette::Cmd::new("Fusion de données (CSV)…", "Publipostage : «Nom» dans les textes", "data-merge"));
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
         v.extend(studio_ui::palette::effect_cmds());
         v
@@ -1010,11 +1011,35 @@ impl PageApp {
             }
             return;
         }
-        match id {
-
-            _ => {}
+        if id == "data-merge" {
+            self.data_merge(ctx);
         }
     }
+
+    fn data_merge(&mut self, ctx: &egui::Context) {
+        let fields = model::merge_fields(&self.doc);
+        if fields.is_empty() {
+            studio_ui::handoff::toast(ctx, "Écris d'abord des champs dans tes textes, par ex. «Nom» ou <<Ville>>, puis relance la fusion".into(), false);
+            return;
+        }
+        let Some(p) = rfd::FileDialog::new().add_filter("Tableau CSV", &["csv", "tsv", "txt"]).pick_file() else { return };
+        let text = match std::fs::read(&p) {
+            Ok(b) => String::from_utf8(b.clone()).unwrap_or_else(|_| b.iter().map(|c| *c as char).collect()),
+            Err(e) => return studio_ui::handoff::toast(ctx, e.to_string(), false),
+        };
+        let (head, rows) = model::parse_csv(&text);
+        let missing: Vec<&String> = fields.iter().filter(|f| !head.contains(f)).collect();
+        if rows.is_empty() || head.is_empty() {
+            return studio_ui::handoff::toast(ctx, "Le fichier ne contient pas de lignes".into(), false);
+        }
+        let merged = model::data_merge(&self.doc, &head, &rows);
+        let n = rows.len();
+        self.doc = merged;
+        self.page = 0;
+        let warn = if missing.is_empty() { String::new() } else { format!(" · colonne(s) absente(s) : {}", missing.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", ")) };
+        studio_ui::handoff::toast(ctx, format!("{n} fiche(s) générée(s), {} page(s){warn}", self.doc.pages.len()), missing.is_empty());
+    }
+
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let cur = if self.page == MASTER { 0 } else { self.page.min(self.doc.pages.len().saturating_sub(1)) };
         let svg = self.export_svg(&self.doc, &[cur], &RenderOpts::screen(false));

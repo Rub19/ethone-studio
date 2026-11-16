@@ -2118,3 +2118,109 @@ mod tests {
         assert_eq!(d.draw_order(&d.pages[0].frames)[d.pages[0].frames.len() - 1], 0);
     }
 }
+
+
+/// Parses a CSV/TSV file (separator guessed from the header: ";", "," or tab; quotes allowed).
+pub fn parse_csv(s: &str) -> (Vec<String>, Vec<Vec<String>>) {
+    let s = s.trim_start_matches('\u{feff}');
+    let head = s.lines().next().unwrap_or_default();
+    let sep = [';', '\t', ','].into_iter().max_by_key(|c| head.matches(*c).count()).unwrap_or(',');
+    let mut rows: Vec<Vec<String>> = Vec::new();
+    let (mut row, mut cell, mut quoted) = (Vec::new(), String::new(), false);
+    let mut it = s.chars().peekable();
+    while let Some(c) = it.next() {
+        match c {
+            '"' if quoted && it.peek() == Some(&'"') => {
+                cell.push('"');
+                it.next();
+            }
+            '"' => quoted = !quoted,
+            c if c == sep && !quoted => row.push(std::mem::take(&mut cell)),
+            '\r' if !quoted => {}
+            '\n' if !quoted => {
+                row.push(std::mem::take(&mut cell));
+                if row.iter().any(|x| !x.trim().is_empty()) {
+                    rows.push(std::mem::take(&mut row));
+                }
+                row.clear();
+            }
+            c => cell.push(c),
+        }
+    }
+    row.push(cell);
+    if row.iter().any(|x| !x.trim().is_empty()) {
+        rows.push(row);
+    }
+    if rows.is_empty() {
+        return (Vec::new(), Vec::new());
+    }
+    let head: Vec<String> = rows.remove(0).into_iter().map(|h| h.trim().to_string()).collect();
+    (head, rows)
+}
+
+/// InDesign-style data merge: the document's pages are repeated once per row, with every
+/// «Champ» or <<Champ>> in the texts replaced by that row's value.
+pub fn data_merge(doc: &Doc, head: &[String], rows: &[Vec<String>]) -> Doc {
+    let mut out = doc.clone();
+    out.pages.clear();
+    for row in rows {
+        for page in &doc.pages {
+            let mut p = page.clone();
+            for f in &mut p.frames {
+                if let Kind::Text { text, .. } | Kind::TextPath { text, .. } = &mut f.kind {
+                    for (h, v) in head.iter().zip(row.iter().map(|x| x.trim()).chain(std::iter::repeat(""))) {
+                        *text = text.replace(&format!("«{h}»"), v).replace(&format!("« {h} »"), v).replace(&format!("<<{h}>>"), v);
+                    }
+                }
+            }
+            out.pages.push(p);
+        }
+    }
+    out
+}
+
+/// Field names used in the document («Nom», <<Ville>>…).
+pub fn merge_fields(doc: &Doc) -> Vec<String> {
+    let mut v: Vec<String> = Vec::new();
+    for p in &doc.pages {
+        for f in &p.frames {
+            if let Kind::Text { text, .. } | Kind::TextPath { text, .. } = &f.kind {
+                for (open, close) in [("«", "»"), ("<<", ">>")] {
+                    let mut rest = text.as_str();
+                    while let Some(a) = rest.find(open) {
+                        let after = &rest[a + open.len()..];
+                        let Some(b) = after.find(close) else { break };
+                        let name = after[..b].trim().to_string();
+                        if !name.is_empty() && name.len() < 40 && !v.contains(&name) {
+                            v.push(name);
+                        }
+                        rest = &after[b + close.len()..];
+                    }
+                }
+            }
+        }
+    }
+    v
+}
+
+
+#[cfg(test)]
+mod merge_tests {
+    use super::*;
+
+    #[test]
+    fn csv_and_merge() {
+        let (h, rows) = parse_csv("Nom;Ville\nAlice;Paris\n\"Dupont; Jean\";\"Lyon \"\"centre\"\"\"\n");
+        assert_eq!(h, vec!["Nom", "Ville"]);
+        assert_eq!(rows[1], vec!["Dupont; Jean", "Lyon \"centre\""]);
+        let (h2, r2) = parse_csv("a,b\r\n1,2\r\n");
+        assert_eq!((h2.len(), r2.len()), (2, 1));
+        let mut doc = Doc::a4();
+        doc.pages = vec![Page { frames: vec![Frame::new(0.0, 0.0, 100.0, 20.0, Kind::text("Bonjour «Nom» de <<Ville>>", 12.0, false))], ..Default::default() }];
+        assert_eq!(merge_fields(&doc), vec!["Nom", "Ville"]);
+        let m = data_merge(&doc, &h, &rows);
+        assert_eq!(m.pages.len(), 2);
+        let Kind::Text { text, .. } = &m.pages[1].frames[0].kind else { panic!() };
+        assert_eq!(text, "Bonjour Dupont; Jean de Lyon \"centre\"");
+    }
+}

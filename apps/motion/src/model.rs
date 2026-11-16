@@ -2376,3 +2376,70 @@ mod tests {
         assert!(p.eval(0.3, 1).abs() > 0.01 && p.at(0.3) == 0.0);
     }
 }
+
+
+pub const ANIM_PRESETS: [&str; 9] = ["Apparition en fondu", "Zoom d'entrée avec rebond", "Glisser depuis la gauche", "Glisser depuis la droite", "Monter depuis le bas", "Chute avec rebond", "Entrée en tournant", "Sortie en fondu", "Secousse continue"];
+
+fn put_keys(p: &mut Prop, keys: &[(f32, f32, Ease)]) {
+    let (lo, hi) = keys.iter().fold((f32::MAX, f32::MIN), |a, k| (a.0.min(k.0), a.1.max(k.0)));
+    p.keys.retain(|k| k.t < lo - 1e-3 || k.t > hi + 1e-3);
+    p.keys.extend(keys.iter().map(|(t, v, e)| Key { t: *t, v: *v, ease: *e, ease2: Ease2::default(), bez: None }));
+    p.keys.sort_by(|a, b| a.t.total_cmp(&b.t));
+}
+
+/// Adds a ready-made animation to a layer, relative to its current values at its start (or end).
+pub fn apply_anim_preset(l: &mut Layer, k: usize, comp_w: f32, comp_h: f32) {
+    let (s, e) = (l.start, l.end.max(l.start + 0.2));
+    let at = |l: &Layer, i: usize, t: f32| l.props.get(i).map_or(0.0, |p| p.at(t));
+    let (x, y, sc, rot, op) = (at(l, 0, s), at(l, 1, s), at(l, 2, s), at(l, 3, s), at(l, 4, s));
+    let d = 0.6f32.min((e - s) / 2.0);
+    match k {
+        0 => put_keys(&mut l.props[4], &[(s, 0.0, Ease::Smooth), (s + d, op, Ease::Smooth)]),
+        1 => {
+            put_keys(&mut l.props[2], &[(s, 0.0, Ease::Back), (s + d, sc, Ease::Smooth)]);
+            put_keys(&mut l.props[4], &[(s, 0.0, Ease::Smooth), (s + d * 0.5, op, Ease::Smooth)]);
+        }
+        2 | 3 => {
+            let from = if k == 2 { x - comp_w * 0.6 } else { x + comp_w * 0.6 };
+            put_keys(&mut l.props[0], &[(s, from, Ease::Out), (s + d, x, Ease::Smooth)]);
+        }
+        4 => {
+            put_keys(&mut l.props[1], &[(s, y + comp_h * 0.4, Ease::Out), (s + d, y, Ease::Smooth)]);
+            put_keys(&mut l.props[4], &[(s, 0.0, Ease::Smooth), (s + d, op, Ease::Smooth)]);
+        }
+        5 => put_keys(&mut l.props[1], &[(s, y - comp_h * 0.6, Ease::Bounce), (s + d * 1.5, y, Ease::Smooth)]),
+        6 => {
+            put_keys(&mut l.props[3], &[(s, rot - 180.0, Ease::Out), (s + d, rot, Ease::Smooth)]);
+            put_keys(&mut l.props[2], &[(s, 0.0, Ease::Back), (s + d, sc, Ease::Smooth)]);
+        }
+        7 => {
+            let o = at(l, 4, e - d);
+            put_keys(&mut l.props[4], &[(e - d, o, Ease::Smooth), (e, 0.0, Ease::Smooth)]);
+        }
+        _ => {
+            for i in [0, 1] {
+                l.props[i].wiggle = 8.0;
+                l.props[i].wiggle_freq = 6.0;
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod preset_tests {
+    use super::*;
+
+    #[test]
+    fn presets_animate_from_current_values() {
+        let mut l = Layer::new("t".into(), Content::text("Hi", 40.0, [255; 4], true), 300.0, 200.0, 4.0);
+        apply_anim_preset(&mut l, 1, 1000.0, 500.0);
+        assert_eq!(l.props[2].keys.len(), 2);
+        assert!(l.props[2].at(l.start) < 1.0 && (l.props[2].at(l.start + 0.6) - 100.0).abs() < 0.5);
+        apply_anim_preset(&mut l, 2, 1000.0, 500.0);
+        assert!((l.props[0].at(l.start) - (300.0 - 600.0)).abs() < 0.5);
+        apply_anim_preset(&mut l, 7, 1000.0, 500.0);
+        assert!(l.props[4].at(l.end) < 1.0);
+        apply_anim_preset(&mut l, 8, 1000.0, 500.0);
+        assert_eq!(l.props[0].wiggle, 8.0);
+    }
+}
