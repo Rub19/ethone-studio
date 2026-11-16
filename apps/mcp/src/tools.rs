@@ -104,7 +104,7 @@ pub fn list() -> Vec<Value> {
             "name": "pixel_edit",
             "title": "Pixel : retoucher une image",
             "description": format!("Retouche une image (PNG, JPEG, WebP, BMP) avec le moteur de Pixel et enregistre le résultat. Opérations appliquées dans l'ordre : \
-                {{op:'filter', name, params?, region?:{{x,y,width,height}}}} ; {{op:'remove', x,y,width,height}} = suppression d'objet avec reconstruction du fond (oiseaux dans le ciel, passants…) ; {{op:'remove_background', tolerance?}} = fond uni qui touche les bords rendu transparent (sortie .png) ; {{op:'expand', margin?:0.15 | aspect?:1.0}} = agrandit la toile et reconstruit le décor ; \
+                {{op:'filter', name, params?, region?:{{x,y,width,height}}}} ; {{op:'remove', x,y,width,height}} = suppression d'objet avec reconstruction du fond (oiseaux dans le ciel, passants…) ; {{op:'remove_watermark', x,y,width,height, sensitivity?:55}} = retire un filigrane (seuls ses traits sont reconstruits) ; {{op:'remove_background', tolerance?}} = fond uni qui touche les bords rendu transparent (sortie .png) ; {{op:'expand', margin?:0.15 | aspect?:1.0}} = agrandit la toile et reconstruit le décor ; \
                 {{op:'resize', width?, height?}} ; {{op:'crop', x,y,width,height}} ; {{op:'rotate', degrees:90|180|270}} ; {{op:'flip', axis:'horizontal'|'vertical'}}. \
                 Filtres disponibles (nom [paramètres dans l'ordre]) : {}", filter_doc()),
             "inputSchema": {
@@ -279,6 +279,12 @@ fn pixel_edit(a: &Value) -> Out {
                     None => out,
                 };
                 log.push(format!("{} {:?}", k.title(), params));
+            }
+            "remove_watermark" => {
+                let (x, y, rw, rh) = rect_of(op, w, h)?;
+                let mask = algos::watermark_mask(&img, [x, y, x + rw, y + rh], f(op, "sensitivity", 55.0), 2);
+                img = inpaint::content_aware_fill(&img, &mask, 7);
+                log.push(format!("filigrane retiré dans {rw}×{rh} à ({x},{y})"));
             }
             "remove_background" => {
                 let all = crate::doc::Area::from_points((0.0, 0.0), (w as f32, h as f32), w, h).ok_or("image vide")?;

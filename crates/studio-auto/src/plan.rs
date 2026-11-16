@@ -45,6 +45,8 @@ pub enum Step {
     Remove(String),
     /// OCR then remove every line of text.
     EraseText,
+    /// Find watermarks (vision model, then OCR near the edges) and clean their strokes.
+    Watermark,
     Sound(Vec<Value>),
     ExtractAudio,
     Animate,
@@ -256,7 +258,12 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
             if has(&t, &["pdf"]) {
                 return done("folio", &[], vec!["Ouvrir l'image en PDF dans Folio".into()], steps);
             }
-            if let Some(obj) = object_of(&t) {
+            let wm = has(&t, &["filigrane", "watermark", "tatouage", "copyright", "©", "logo shutterstock", "logo getty"]);
+            if wm && has(&t, &["retire", "enleve", "supprime", "efface", "vire", "remove", "nettoie", "ote"]) {
+                steps.push(Step::Watermark);
+                s.push("Trouver les filigranes (IA de vision locale, sinon OCR)".into());
+                s.push("Ne reconstruire que leurs traits, le reste de la photo reste intact".into());
+            } else if let Some(obj) = object_of(&t) {
                 if text_words.iter().any(|w| obj.contains(w)) {
                     steps.push(Step::EraseText);
                     s.push("Lire le texte (OCR) et l'effacer en reconstruisant le fond".into());
@@ -463,6 +470,9 @@ mod tests {
         assert_eq!(p("monte cette vidéo", "v.mp4").app, "cut");
         assert!(matches!(&p("nettoie ce podcast", "a.wav").steps[0], Step::Sound(o) if o.len() > 3));
         assert!(matches!(&p("supprime les silences", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "cut_silences"));
+        assert_eq!(p("retire le filigrane", "x.jpg").steps, vec![Step::Watermark]);
+        assert_eq!(p("enlève le watermark shutterstock", "x.jpg").steps, vec![Step::Watermark]);
+        assert_eq!(p("efface le texte", "x.png").steps, vec![Step::EraseText]);
         assert_eq!(p("supprime le fond", "x.png").steps, vec![Step::Pixel(vec![json!({"op":"remove_background"})])]);
         assert_eq!(p("détoure le produit", "x.png").steps, vec![Step::Pixel(vec![json!({"op":"remove_background"})])]);
         assert_eq!(p("étends l'image en format story", "x.jpg").steps, vec![Step::Pixel(vec![json!({"op":"expand","aspect":0.5625})])]);

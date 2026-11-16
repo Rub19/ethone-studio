@@ -3,8 +3,84 @@ use crate::doc::Area;
 pub use crate::algos::*;
 use eframe::egui;
 use image::{Rgba, RgbaImage};
+use std::hash::{Hash, Hasher};
+
+fn image_signature(img: &RgbaImage) -> u64 {
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    img.dimensions().hash(&mut hasher);
+    img.as_raw().hash(&mut hasher);
+    hasher.finish()
+}
 
 impl Pixel {
+    /// Watermark remover without AI: only the mark's strokes inside the selection are rebuilt.
+    pub fn remove_watermark_selection(&mut self, ctx: &egui::Context) {
+        let Some(a) = self.doc.selection else {
+            self.error = Some("Filigrane : entoure-le d'abord avec le Rectangle de sélection (M) ou le Lasso".into());
+            return;
+        };
+        let w = self.doc.width();
+        let m = watermark_mask(&self.composite, [a.x0, a.y0, a.x1, a.y1], self.wm_sens, 2);
+        let mask: Vec<bool> = m.iter().enumerate().map(|(i, b)| *b && self.doc.selected(i as u32 % w, i as u32 / w)).collect();
+        self.doc.set_selection(None, None);
+        self.start_fill(mask, ctx);
+    }
+
+    /// Watermark remover with AI: the local vision model finds the marks, OCR helps for text
+    /// watermarks near the edges, then the same precise clean-up runs on each box.
+    pub fn remove_watermark_ai(&mut self, ctx: &egui::Context) {
+        if self.wm_job.is_some() {
+            return;
+        }
+        let img = image::DynamicImage::ImageRgba8(self.composite.clone());
+        let signature = image_signature(&self.composite);
+        let (tx, rx) = std::sync::mpsc::channel();
+        self.wm_job = Some((signature, rx));
+        studio_ui::handoff::toast(ctx, "Recherche des filigranes (IA locale, 1 à 2 min)…".into(), true);
+        let ctx = ctx.clone();
+        std::thread::spawn(move || {
+            let r = find_watermarks(&img);
+            let _ = tx.send(r);
+            ctx.request_repaint();
+        });
+    }
+
+    pub fn poll_watermark(&mut self, ctx: &egui::Context) {
+        let Some((signature, rx)) = &self.wm_job else { return };
+        ctx.request_repaint_after(std::time::Duration::from_millis(250));
+        let received = match rx.try_recv() {
+            Ok(r) => Some(Ok((*signature, r))),
+            Err(std::sync::mpsc::TryRecvError::Empty) => None,
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => Some(Err(())),
+        };
+        let Some(received) = received else { return };
+        self.wm_job = None;
+        let Ok((signature, r)) = received else {
+            studio_ui::handoff::toast(ctx, "La recherche des filigranes s'est interrompue".into(), false);
+            return;
+        };
+        if image_signature(&self.composite) != signature {
+            studio_ui::handoff::toast(ctx, "L'image a changé pendant la recherche : relance la suppression du filigrane".into(), false);
+            return;
+        }
+        match r {
+            Ok((boxes, how)) if !boxes.is_empty() => {
+                let (w, h) = (self.doc.width(), self.doc.height());
+                let mut mask = vec![false; (w * h) as usize];
+                for b in &boxes {
+                    let m = watermark_mask(&self.composite, [b[0] as u32, b[1] as u32, b[2].ceil() as u32, b[3].ceil() as u32], self.wm_sens, 2);
+                    for (d, s) in mask.iter_mut().zip(m) {
+                        *d |= s;
+                    }
+                }
+                studio_ui::handoff::toast(ctx, format!("{} filigrane(s) trouvé(s) ({how}), nettoyage…", boxes.len()), true);
+                self.start_fill(mask, ctx);
+            }
+            Ok(_) => studio_ui::handoff::toast(ctx, "Aucun filigrane trouvé : sélectionne la zone et utilise « Retirer le filigrane de la sélection »".into(), false),
+            Err(e) => studio_ui::handoff::toast(ctx, e, false),
+        }
+    }
+
     /// Quick action "Supprimer l'arrière-plan": the background touching the image edges is hidden
     /// with a layer mask (nothing is erased, paint the mask to fix it).
     pub fn remove_background(&mut self) {
@@ -165,6 +241,16 @@ mod tests {
     }
 
     #[test]
+    fn watermark_job_signature_changes_with_image_content() {
+        let original = RgbaImage::from_pixel(4, 4, Rgba([10, 20, 30, 255]));
+        let mut edited = original.clone();
+        edited.put_pixel(2, 1, Rgba([11, 20, 30, 255]));
+
+        assert_eq!(image_signature(&original), image_signature(&original));
+        assert_ne!(image_signature(&original), image_signature(&edited));
+    }
+
+    #[test]
     fn object_red_eye_warp_curve() {
         let mut img = RgbaImage::from_pixel(40, 40, Rgba([240, 240, 240, 255]));
         for y in 15..25 {
@@ -185,5 +271,35 @@ mod tests {
         let c = catmull(&[(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)], 8);
         assert_eq!(c.len(), 32);
         assert_eq!(c[0], (0.0, 0.0));
+    }
+}
+
+
+/// Boxes (x0, y0, x1, y1) of the watermarks of an image: vision model first, then OCR text lying
+/// in the outer band of the picture. Returns the boxes and how they were found.
+pub fn find_watermarks(img: &image::DynamicImage) -> Result<(Vec<[f32; 4]>, &'static str), String> {
+    let (w, h) = (img.width() as f32, img.height() as f32);
+    let pad = |b: [f32; 4]| {
+        let (pw, ph) = ((b[2] - b[0]) * 0.08 + 3.0, (b[3] - b[1]) * 0.15 + 3.0);
+        [(b[0] - pw).max(0.0), (b[1] - ph).max(0.0), (b[2] + pw).min(w), (b[3] + ph).min(h)]
+    };
+    let ai = studio_auto::run::detect(img, "watermark, stock-photo logo, copyright text or semi-transparent text overlay");
+    if let Ok(found) = &ai
+        && !found.is_empty()
+    {
+        return Ok((found.iter().map(|b| pad(*b)).collect(), "IA de vision"));
+    }
+    let page = studio_ocr::recognize_with(&img.to_rgba8(), "", true)?;
+    let edge = |r: [f32; 4]| r[1] + r[3] > h * 0.8 || r[1] < h * 0.2 || r[0] < w * 0.15 || r[0] + r[2] > w * 0.85;
+    let marks: Vec<[f32; 4]> = page
+        .lines
+        .iter()
+        .filter(|l| edge(l.rect) || l.text.contains('©') || ["shutterstock", "getty", "adobe stock", "istock", "dreamstime", "alamy", "depositphotos", "123rf", "watermark", "sample", "preview"].iter().any(|k| l.text.to_lowercase().contains(k)))
+        .map(|l| pad([l.rect[0], l.rect[1], l.rect[0] + l.rect[2], l.rect[1] + l.rect[3]]))
+        .collect();
+    match (marks.is_empty(), ai) {
+        (false, _) => Ok((marks, "texte repéré par l'OCR")),
+        (true, Err(e)) => Err(format!("Aucun filigrane trouvé par l'OCR, et l'IA n'est pas disponible ({e})")),
+        (true, Ok(_)) => Ok((Vec::new(), "")),
     }
 }

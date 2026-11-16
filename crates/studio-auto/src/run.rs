@@ -310,6 +310,33 @@ pub fn run(plan: &Plan, file: Option<&Path>, open: bool, tx: &Sender<Msg>) -> Re
                 notes.push(format!("{} élément(s) « {what} » supprimé(s)", found.len()));
                 cur = Some(out_png);
             }
+            Step::Watermark => {
+                let src = cur.clone().ok_or("Aucune image")?;
+                let img = image::open(&src).map_err(|e| e.to_string())?;
+                say("Recherche des filigranes avec l'IA de vision locale (1 à 2 min)…".into());
+                let (w, h) = (img.width() as f32, img.height() as f32);
+                let mut found: Vec<[f32; 4]> = detect(&img, "watermark, stock-photo logo, copyright text or semi-transparent text overlay").unwrap_or_default();
+                let mut how = "IA de vision";
+                if found.is_empty() {
+                    say("L'IA n'a rien trouvé, recherche du texte au bord de l'image (OCR)…".into());
+                    how = "OCR";
+                    let page = studio_ocr::recognize_with(&img.to_rgba8(), "", true)?;
+                    found = page.lines.iter().filter(|l| l.rect[1] + l.rect[3] > h * 0.8 || l.rect[1] < h * 0.2 || l.rect[0] < w * 0.15 || l.rect[0] + l.rect[2] > w * 0.85 || l.text.contains('©')).map(|l| [l.rect[0], l.rect[1], l.rect[0] + l.rect[2], l.rect[1] + l.rect[3]]).collect();
+                }
+                if found.is_empty() {
+                    return Err("Aucun filigrane trouvé : ouvre l'image dans Pixel, entoure-le et lance « Retirer le filigrane de la sélection »".into());
+                }
+                say(format!("{} filigrane(s) trouvé(s) ({how}), nettoyage…", found.len()));
+                let ops: Vec<Value> = found.iter().map(|b| {
+                    let (pw, ph) = ((b[2] - b[0]) * 0.08 + 3.0, (b[3] - b[1]) * 0.15 + 3.0);
+                    let (x0, y0) = ((b[0] - pw).max(0.0), (b[1] - ph).max(0.0));
+                    let (x1, y1) = ((b[2] + pw).min(w), (b[3] + ph).min(h));
+                    json!({ "op": "remove_watermark", "x": x0.round(), "y": y0.round(), "width": (x1 - x0).round().max(1.0), "height": (y1 - y0).round().max(1.0) })
+                }).collect();
+                mcp("pixel_edit", &json!({ "input": src, "output": out_png, "operations": ops }), &work)?;
+                notes.push(format!("{} filigrane(s) retiré(s) ({how})", found.len()));
+                cur = Some(out_png);
+            }
             Step::EraseText => {
                 let src = cur.clone().ok_or("Aucune image")?;
                 say("Lecture du texte (OCR Windows)…".into());

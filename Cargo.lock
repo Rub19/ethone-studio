@@ -3050,6 +3050,7 @@ dependencies = [
  "image",
  "rayon",
  "rfd",
+ "studio-auto",
  "studio-core",
  "studio-fx",
  "studio-ocr",

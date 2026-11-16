@@ -251,6 +251,80 @@ pub fn smooth_expand(filled: &RgbaImage, original: &RgbaImage, ox: u32, oy: u32)
     out
 }
 
+/// Watermark pixels inside the box `r` = (x0, y0, x1, y1): the strokes that stand out from a
+/// smoothed copy of the area (text, logo, semi-transparent overlay), grown by `grow` pixels.
+/// `sensitivity` 1..100 (higher catches fainter marks). Falls back to the whole box when the
+/// mark cannot be told apart. Returns a full-size mask.
+pub fn watermark_mask(img: &RgbaImage, r: [u32; 4], sensitivity: f32, grow: u32) -> Vec<bool> {
+    let (w, h) = img.dimensions();
+    let (x0, y0, x1, y1) = (r[0].min(w), r[1].min(h), r[2].min(w), r[3].min(h));
+    let mut mask = vec![false; (w * h) as usize];
+    if x1 <= x0 + 1 || y1 <= y0 + 1 {
+        return mask;
+    }
+    let pad = 8;
+    let (cx0, cy0) = (x0.saturating_sub(pad), y0.saturating_sub(pad));
+    let (cx1, cy1) = ((x1 + pad).min(w), (y1 + pad).min(h));
+    let crop = image::imageops::crop_imm(img, cx0, cy0, cx1 - cx0, cy1 - cy0).to_image();
+    let sigma = (((y1 - y0).min(x1 - x0)) as f32 / 4.0).clamp(4.0, 30.0);
+    let smooth = image::imageops::fast_blur(&crop, sigma);
+    let thr = (40.0 - sensitivity.clamp(1.0, 100.0) * 0.34).max(4.0);
+    let lum = |p: [u8; 4]| 0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32;
+    let mut hit = Vec::new();
+    for y in y0..y1 {
+        for x in x0..x1 {
+            let (a, b) = (crop.get_pixel(x - cx0, y - cy0).0, smooth.get_pixel(x - cx0, y - cy0).0);
+            let d = (lum(a) - lum(b)).abs() + (0..3).map(|k| (a[k] as f32 - b[k] as f32).abs()).sum::<f32>() * 0.15;
+            if d > thr {
+                hit.push((x, y));
+            }
+        }
+    }
+    let area = ((x1 - x0) * (y1 - y0)) as usize;
+    if hit.len() * 200 < area || hit.len() * 10 > area * 7 {
+        for y in y0..y1 {
+            for x in x0..x1 {
+                mask[(y * w + x) as usize] = true;
+            }
+        }
+        return mask;
+    }
+    let g = grow as i64;
+    for (x, y) in hit {
+        for dy in -g..=g {
+            for dx in -g..=g {
+                let (nx, ny) = (x as i64 + dx, y as i64 + dy);
+                if nx >= 0 && ny >= 0 && (nx as u32) < w && (ny as u32) < h && dx * dx + dy * dy <= g * g + 1 {
+                    mask[(ny as u32 * w + nx as u32) as usize] = true;
+                }
+            }
+        }
+    }
+    mask
+}
+
+#[cfg(test)]
+mod watermark_tests {
+    use super::*;
+
+    #[test]
+    fn strokes_not_the_whole_box() {
+        let mut img = RgbaImage::from_fn(200, 100, |x, y| Rgba([(60 + x / 4) as u8, (90 + y / 3) as u8, 150, 255]));
+        for y in 40..60 {
+            for x in [50u32, 51, 52, 53, 80, 81, 82, 83, 110, 111, 112, 113] {
+                let p = img.get_pixel(x, y).0;
+                img.put_pixel(x, y, Rgba([((p[0] as u32 + 255) / 2) as u8, ((p[1] as u32 + 255) / 2) as u8, ((p[2] as u32 + 255) / 2) as u8, 255]));
+            }
+        }
+        let m = watermark_mask(&img, [40, 30, 130, 70], 50.0, 1);
+        assert!(m[50 * 200 + 51] && m[50 * 200 + 81]);
+        assert!(!m[50 * 200 + 66] && !m[35 * 200 + 95]);
+        assert!(!m[50 * 200 + 5]);
+        let flat = RgbaImage::from_pixel(50, 50, Rgba([100, 100, 100, 255]));
+        assert_eq!(watermark_mask(&flat, [10, 10, 20, 20], 50.0, 1).iter().filter(|b| **b).count(), 100);
+    }
+}
+
 #[cfg(test)]
 mod expand_tests {
     use super::*;

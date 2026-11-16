@@ -246,6 +246,8 @@ pub struct Pixel {
     pt: phototext::State,
     pt_auto: bool,
     expand_box: Option<(RgbaImage, u32, u32)>,
+    wm_job: Option<(u64, std::sync::mpsc::Receiver<Result<(Vec<[f32; 4]>, &'static str), String>>)>,
+    wm_sens: f32,
     persp: Vec<(f32, f32)>,
     counts: Vec<(f32, f32)>,
 }
@@ -420,6 +422,8 @@ impl Pixel {
             pt: phototext::State::default(),
             pt_auto: false,
             expand_box: None,
+            wm_job: None,
+            wm_sens: 55.0,
             persp: Vec::new(),
             counts: Vec::new(),
             sheet: None,
@@ -1175,6 +1179,10 @@ impl Pixel {
             studio_ui::palette::Cmd::new("Répéter la dernière suppression", "Édition", "repeat-remove"),
             studio_ui::palette::Cmd::new("Harmoniser le calque avec le fond", "Calque", "harmonize"),
             studio_ui::palette::Cmd::new("Harmoniser à moitié (doux)", "Calque", "harmonize-soft"),
+            studio_ui::palette::Cmd::new("Retirer le filigrane de la sélection (sans IA)", "Entoure le filigrane puis lance", "wm-sel"),
+            studio_ui::palette::Cmd::new("Retirer le filigrane automatiquement (IA)", "Vision locale, sinon OCR", "wm-ai"),
+            studio_ui::palette::Cmd::new("Filigrane : sensibilité normale", "Filigranes nets", "wm-sens:55"),
+            studio_ui::palette::Cmd::new("Filigrane : sensibilité haute", "Filigranes très transparents", "wm-sens:85"),
             studio_ui::palette::Cmd::new("Supprimer l'arrière-plan (masque de calque)", "Action rapide", "remove-bg"),
             studio_ui::palette::Cmd::new("Étendre l'image de 10 % (fond reconstruit)", "Image", "expand:0.1"),
             studio_ui::palette::Cmd::new("Étendre l'image de 25 % (fond reconstruit)", "Image", "expand:0.25"),
@@ -1216,6 +1224,12 @@ impl Pixel {
             "harmonize" => self.harmonize_layer(1.0),
             "harmonize-soft" => self.harmonize_layer(0.5),
             "remove-bg" => self.remove_background(),
+            "wm-sel" => self.remove_watermark_selection(ctx),
+            "wm-ai" => self.remove_watermark_ai(ctx),
+            x if x.starts_with("wm-sens:") => {
+                self.wm_sens = x[8..].parse().unwrap_or(55.0);
+                studio_ui::handoff::toast(ctx, format!("Sensibilité du filigrane : {:.0}", self.wm_sens), true);
+            }
             x if x.starts_with("expand:") => self.expand_image(x[7..].parse().unwrap_or(0.1), None, ctx),
             x if x.starts_with("expand-to:") => self.expand_image(0.0, x[10..].parse().ok(), ctx),
             "invert" => self.doc.invert_selection(),
@@ -1302,6 +1316,7 @@ impl eframe::App for Pixel {
             }
             self.finish_fill();
             self.pt_poll(ctx);
+            self.poll_watermark(ctx);
             self.sync_texture(ctx);
             if self.pt_auto && !self.home && self.composite.dimensions() == (self.doc.width(), self.doc.height()) {
                 self.pt_auto = false;

@@ -11,6 +11,7 @@ image = { version = "0.25.10", default-features = false, features = ["png", "jpe
 rayon = "1.12.0"
 rfd = "0.18.0"
 studio-fx = { version = "0.1.0", path = "../../crates/studio-fx" }
+studio-auto = { version = "0.1.0", path = "../../crates/studio-auto" }
 studio-ocr = { version = "0.1.0", path = "../../crates/studio-ocr" }
 studio-core = { version = "0.1.0", path = "../../crates/studio-core" }
 studio-ui = { version = "0.1.0", path = "../../crates/studio-ui" }
