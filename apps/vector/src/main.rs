@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod canvas;
 mod dialogs;
 mod geom;
@@ -2245,6 +2246,10 @@ impl VectorApp {
         let mut v = vec![
 
         ];
+        for (id, label, min, _) in outils::TOOLS {
+            let reason = if min > 1 { format!("Sélectionne au moins {min} objets") } else { "Sélectionne d'abord un objet".to_string() };
+            v.push(studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Vector · nouvel outil · sélection", format!("tool:{id}")).enabled_if(selection_count >= min, &reason));
+        }
         v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr").enabled_if(text_selected, "Sélectionne d'abord un texte"));
         v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
         v.push(studio_ui::palette::Cmd::new("Tout sélectionner", "Document · Ctrl+A", "select-all"));

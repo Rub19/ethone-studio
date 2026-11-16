@@ -131,6 +131,19 @@ pub fn gradient_fill(it: &mut crate::model::Item, k: usize) {
 
 impl VectorApp {
     fn run_bank(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((_, label, min, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            let sel = self.selection();
+            if sel.len() < *min {
+                studio_ui::handoff::toast(ctx, format!("Sélectionne au moins {min} objet(s)"), false);
+                return true;
+            }
+            self.checkpoint();
+            let page = [self.doc.width, self.doc.height];
+            let next = f(&mut self.doc.items, &sel, page);
+            self.set_selection(next);
+            studio_ui::handoff::toast(ctx, format!("{label} appliqué"), true);
+            return true;
+        }
         if id == "vc-ase" {
             if let Some(p) = rfd::FileDialog::new().add_filter("Nuancier Adobe", &["ase", "aco"]).pick_file() {
                 match studio_fx::swatches::load(&p) {
