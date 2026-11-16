@@ -1627,7 +1627,7 @@ impl eframe::App for Motion {
 
         if !self.home && self.comp != before && !self.editing {
             self.undo.push(before);
-            if self.undo.len() > 100 {
+            if self.undo.len() > studio_ui::palette::undo_levels(100) {
                 self.undo.remove(0);
             }
             self.redo.clear();

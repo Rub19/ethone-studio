@@ -447,7 +447,7 @@ impl Sound {
 
     fn snapshot(&mut self, label: &str) {
         self.undo.push((self.clip.clone(), label.to_string()));
-        if self.undo.len() > UNDO_LIMIT {
+        if self.undo.len() > studio_ui::palette::undo_levels(UNDO_LIMIT) {
             self.undo.remove(0);
         }
         self.redo.clear();

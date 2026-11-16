@@ -573,7 +573,7 @@ impl VectorApp {
 
     fn checkpoint(&mut self) {
         self.undo.push(self.doc.clone());
-        if self.undo.len() > 200 {
+        if self.undo.len() > studio_ui::palette::undo_levels(200) {
             self.undo.remove(0);
         }
         self.redo.clear();

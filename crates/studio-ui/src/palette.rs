@@ -42,11 +42,30 @@ pub const SIZES: [f32; 6] = [0.85, 0.9, 1.0, 1.1, 1.25, 1.5];
 pub struct Prefs {
     pub zoom: f32,
     pub accent: usize,
+    /// Interface animations (menus, panels, switches).
+    pub animations: bool,
+    /// 0 instantanées, 1 normales, 2 lentes, 3 jamais.
+    pub tooltips: u8,
+    /// Undo steps kept by every app; 0 = each app's own default.
+    pub undo_levels: usize,
+    /// Corners of panels and buttons: 0 square, 1 rounded, 2 very rounded.
+    pub rounding: u8,
 }
 
 impl Default for Prefs {
     fn default() -> Self {
-        Prefs { zoom: 1.0, accent: 0 }
+        Prefs { zoom: 1.0, accent: 0, animations: true, tooltips: 1, undo_levels: 0, rounding: 1 }
+    }
+}
+
+pub const TOOLTIPS: [(&str, f32); 4] = [("Instantanées", 0.0), ("Normales", 0.5), ("Lentes", 1.2), ("Jamais", f32::INFINITY)];
+pub const ROUNDING: [&str; 3] = ["Carrés", "Arrondis", "Très arrondis"];
+
+/// Undo steps an app should keep: the user's choice, or the app's own default.
+pub fn undo_levels(app_default: usize) -> usize {
+    match load_prefs().undo_levels {
+        0 => app_default,
+        n => n.clamp(5, 500),
     }
 }
 
@@ -68,7 +87,26 @@ pub fn apply_prefs(ctx: &Context, p: Prefs) {
         s.visuals.hyperlink_color = a;
         s.visuals.widgets.active.bg_fill = a;
         s.visuals.text_cursor.stroke.color = a;
+        s.animation_time = if p.animations { 1.0 / 12.0 } else { 0.0 };
+        s.interaction.tooltip_delay = TOOLTIPS[(p.tooltips as usize).min(3)].1;
+        let r = [2u8, 6, 12][(p.rounding as usize).min(2)];
+        for w in [&mut s.visuals.widgets.noninteractive, &mut s.visuals.widgets.inactive, &mut s.visuals.widgets.hovered, &mut s.visuals.widgets.active, &mut s.visuals.widgets.open] {
+            w.corner_radius = egui::CornerRadius::same(r);
+        }
+        s.visuals.window_corner_radius = egui::CornerRadius::same(r + 4);
+        s.visuals.menu_corner_radius = egui::CornerRadius::same(r + 2);
     });
+}
+
+const PREF_TABS: [&str; 4] = ["Interface", "Outils", "Performances", "Général"];
+
+fn pref_title(ui: &mut egui::Ui, t: &str) {
+    ui.label(RichText::new(t).size(17.0).strong().color(INK_STRONG));
+    ui.add_space(10.0);
+}
+
+fn prefs_equal(a: &Prefs, b: &Prefs) -> bool {
+    serde_json::to_string(a).ok() == serde_json::to_string(b).ok()
 }
 
 fn save_prefs(p: Prefs) {
@@ -290,13 +328,15 @@ pub struct Palette {
     recent: Vec<String>,
     confirming: Option<String>,
     library: Option<fn() -> &'static Library>,
+    pub prefs_open: bool,
+    prefs_tab: usize,
 }
 
 impl Palette {
     pub fn new(ctx: &Context) -> Self {
         let prefs = load_prefs();
         apply_prefs(ctx, prefs);
-        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None, library: None }
+        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None, library: None, prefs_open: false, prefs_tab: 0 }
     }
 
     /// Gives this app's option library to the palette; it is built on the first search only.
@@ -312,11 +352,121 @@ impl Palette {
             self.sel = 0;
             self.confirming = None;
         }
+        if ctx.input_mut(|i| i.consume_shortcut(&KeyboardShortcut::new(Modifiers::COMMAND, Key::Comma))) {
+            self.prefs_open = !self.prefs_open;
+        }
+        self.preferences(ctx);
+    }
+
+    /// Édition > Préférences (Ctrl+,): settings shared by every Ethone Studio app, saved as soon as they change.
+    fn preferences(&mut self, ctx: &Context) {
+        if !self.prefs_open {
+            return;
+        }
+        let before = self.prefs;
+        let mut open = true;
+        egui::Window::new(RichText::new("Préférences").size(16.0).strong()).open(&mut open).collapsible(false).resizable(false).default_width(620.0).anchor(Align2::CENTER_CENTER, [0.0, 0.0]).show(ctx, |ui| {
+            ui.horizontal_top(|ui| {
+                ui.vertical(|ui| {
+                    ui.set_width(150.0);
+                    for (k, name) in PREF_TABS.iter().enumerate() {
+                        if ui.selectable_label(self.prefs_tab == k, RichText::new(*name).size(13.5)).clicked() {
+                            self.prefs_tab = k;
+                        }
+                    }
+                });
+                ui.separator();
+                ui.vertical(|ui| {
+                    ui.set_width(430.0);
+                    ui.set_min_height(300.0);
+                    let p = &mut self.prefs;
+                    match self.prefs_tab {
+                        0 => {
+                            pref_title(ui, "Interface");
+                            ui.label("Taille de l'interface");
+                            ui.horizontal_wrapped(|ui| {
+                                for z in SIZES {
+                                    ui.selectable_value(&mut p.zoom, z, format!("{:.0} %", z * 100.0));
+                                }
+                            });
+                            ui.add_space(10.0);
+                            ui.label("Couleur d'accentuation");
+                            ui.horizontal_wrapped(|ui| {
+                                for (k, (name, c)) in ACCENTS.iter().enumerate() {
+                                    let (rect, resp) = ui.allocate_exact_size(egui::vec2(28.0, 28.0), egui::Sense::click());
+                                    ui.painter().circle_filled(rect.center(), 11.0, Color32::from_rgb(c[0], c[1], c[2]));
+                                    if p.accent == k {
+                                        ui.painter().circle_stroke(rect.center(), 13.5, Stroke::new(2.0, INK_STRONG));
+                                    }
+                                    if resp.on_hover_text(*name).clicked() {
+                                        p.accent = k;
+                                    }
+                                }
+                            });
+                            ui.add_space(10.0);
+                            ui.horizontal(|ui| {
+                                ui.label("Coins");
+                                for (k, name) in ROUNDING.iter().enumerate() {
+                                    ui.selectable_value(&mut p.rounding, k as u8, *name);
+                                }
+                            });
+                            ui.add_space(6.0);
+                            ui.checkbox(&mut p.animations, "Animations de l'interface");
+                        }
+                        1 => {
+                            pref_title(ui, "Outils");
+                            ui.horizontal(|ui| {
+                                ui.label("Info-bulles");
+                                for (k, (name, _)) in TOOLTIPS.iter().enumerate() {
+                                    ui.selectable_value(&mut p.tooltips, k as u8, *name);
+                                }
+                            });
+                            ui.add_space(8.0);
+                            ui.label(RichText::new("Ctrl+K ouvre la palette de commandes, Ctrl+, ces préférences.").color(MUTED));
+                        }
+                        2 => {
+                            pref_title(ui, "Performances");
+                            let mut own = p.undo_levels == 0;
+                            ui.checkbox(&mut own, "Historique : valeur conseillée par chaque app");
+                            if own {
+                                p.undo_levels = 0;
+                            } else {
+                                if p.undo_levels == 0 {
+                                    p.undo_levels = 50;
+                                }
+                                ui.add(egui::Slider::new(&mut p.undo_levels, 5..=500).text("états d'historique"));
+                            }
+                            ui.label(RichText::new("Plus d'états permet d'annuler plus loin, mais utilise plus de mémoire. Pris en compte au prochain document ou au redémarrage de l'app.").size(12.0).color(MUTED));
+                        }
+                        _ => {
+                            pref_title(ui, "Général");
+                            ui.label(RichText::new("Ces préférences sont communes à toutes les apps d'Ethone Studio.").color(MUTED));
+                            ui.add_space(8.0);
+                            if ui.button("Ouvrir le dossier des préférences").clicked() {
+                                let _ = std::process::Command::new("explorer").arg(studio_core::data_dir()).spawn();
+                            }
+                            ui.add_space(4.0);
+                            if ui.button("Rétablir les préférences par défaut").clicked() {
+                                *p = Prefs::default();
+                            }
+                        }
+                    }
+                });
+            });
+        });
+        if !open {
+            self.prefs_open = false;
+        }
+        if !prefs_equal(&before, &self.prefs) {
+            apply_prefs(ctx, self.prefs);
+            save_prefs(self.prefs);
+        }
     }
 
     fn builtin(&self, help: &Help) -> Vec<Cmd> {
         let mut v: Vec<Cmd> = help.titles().into_iter().map(|t| Cmd::new(format!("Aide : {t}"), "Tutoriel", format!("help:{t}"))).collect();
         v.push(Cmd::new("Ouvrir l'aide et l'assistant IA", "F1", "help:"));
+        v.push(Cmd::new("Préférences…", "Interface, outils, performances · Ctrl+,", "ui-prefs"));
         for z in SIZES {
             v.push(Cmd::new(format!("Interface : taille {:.0} %", z * 100.0), "Agrandit ou réduit toute l'interface", format!("ui-zoom:{z}")));
         }
@@ -397,7 +547,7 @@ impl Palette {
             return None;
         }
         let id = chosen?;
-        let Some(command) = app.iter().chain(&builtin).chain(variants).find(|command| command.id == id) else { return None };
+        let Some(command) = app.iter().chain(&builtin).chain(variants).chain(library.into_iter().flat_map(|l| l.cmds.iter())).find(|command| command.id == id) else { return None };
         if !confirmation_step(&mut self.confirming, command) {
             return None;
         }
@@ -405,6 +555,10 @@ impl Palette {
         remember_recent(&mut self.recent, &id);
         if let Some(t) = id.strip_prefix("help:") {
             if t.is_empty() { help.toggle() } else { help.learn(t) }
+            return None;
+        }
+        if id == "ui-prefs" {
+            self.prefs_open = true;
             return None;
         }
         if let Some(z) = id.strip_prefix("ui-zoom:").and_then(|z| z.parse().ok()) {
@@ -627,5 +781,40 @@ mod icon_tests {
         assert_eq!(super::icon_bank().len(), 2359);
         assert_eq!(super::icon_cmds("X", "x:").count(), 2359);
         assert!(super::icon_svg("<path d=\"M0 0\"/>", 24.0, [255, 0, 16]).contains("#ff0010"));
+    }
+}
+
+#[cfg(test)]
+mod library_run_tests {
+    use super::*;
+
+    fn lib() -> &'static Library {
+        static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
+        L.get_or_init(|| Library::new(vec![Cmd::new("Zébulon magique", "essai", "zz:1")]))
+    }
+
+    /// Typing a library option and pressing Enter must hand its id to the app (it used to be dropped).
+    #[test]
+    fn enter_on_a_library_option_returns_its_id() {
+        let ctx = Context::default();
+        let mut pal = Palette::new(&ctx);
+        pal.set_library(lib);
+        pal.open = true;
+        pal.query = "zebulon".into();
+        let mut help = Help::new("essai", &[]);
+        let mut got = None;
+        for enter in [false, true] {
+            let mut input = egui::RawInput::default();
+            if enter {
+                input.events.push(egui::Event::Key { key: Key::Enter, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE });
+            }
+            let mut out = ctx.run_ui(input, |ui| {
+                if let Some(id) = pal.show(ui.ctx(), &mut help, Vec::new()) {
+                    got = Some(id);
+                }
+            });
+            out.textures_delta.clear();
+        }
+        assert_eq!(got.as_deref(), Some("zz:1"));
     }
 }

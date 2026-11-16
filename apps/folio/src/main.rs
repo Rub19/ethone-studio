@@ -322,7 +322,7 @@ impl Folio {
         }) {
             Ok(old) => {
                 od.undo.push(old);
-                if od.undo.len() > 40 {
+                if od.undo.len() > studio_ui::palette::undo_levels(40) {
                     od.undo.remove(0);
                 }
                 od.redo.clear();

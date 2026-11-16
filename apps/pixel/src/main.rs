@@ -450,6 +450,7 @@ impl Pixel {
     fn set_doc(&mut self, doc: Document) {
         self.history_src = Some(doc.layers[0].img.clone());
         self.doc = doc;
+        self.doc.undo_limit = studio_ui::palette::undo_levels(self.doc.undo_limit);
         self.tex = None;
         self.fit_pending = true;
         self.renaming = None;
