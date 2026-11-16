@@ -2239,6 +2239,11 @@ impl VectorApp {
         ];
         v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr"));
         v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
+        v.push(studio_ui::palette::Cmd::new("Tout sélectionner", "Document · Ctrl+A", "select-all"));
+        v.push(studio_ui::palette::Cmd::new("Inverser la sélection", "Document", "select-inverse"));
+        v.push(studio_ui::palette::Cmd::new("Dupliquer la sélection", "Objets · Ctrl+Alt+D", "duplicate"));
+        v.push(studio_ui::palette::Cmd::new("Grouper la sélection", "Objets · Ctrl+G", "group"));
+        v.push(studio_ui::palette::Cmd::new("Dégrouper la sélection", "Objets · Ctrl+Maj+G", "ungroup"));
         for (label, kind) in [("Même couleur de fond", 0), ("Même couleur de contour", 1), ("Même type d'objet", 5), ("Même aspect complet", 6)] {
             v.push(studio_ui::palette::Cmd::new(format!("Sélectionner : {label}"), "Objet actif · document", format!("select-same:{kind}")));
         }
@@ -2251,6 +2256,17 @@ impl VectorApp {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        match id {
+            "select-all" => self.select_all(),
+            "select-inverse" => self.select_inverse(),
+            "duplicate" => self.duplicate_selected(),
+            "group" => self.group(),
+            "ungroup" => self.ungroup(),
+            _ => {}
+        }
+        if matches!(id, "select-all" | "select-inverse" | "duplicate" | "group" | "ungroup") {
+            return;
+        }
         if let Some(kind) = id.strip_prefix("select-same:").and_then(|value| value.parse::<u8>().ok()) {
             if self.sel.is_some() {
                 self.select_same(kind);

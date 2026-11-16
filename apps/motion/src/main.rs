@@ -1445,6 +1445,8 @@ impl Motion {
         v.push(studio_ui::palette::Cmd::new("Répartir régulièrement les images clés", "Animation · calque sélectionné", "keys-spread"));
         v.push(studio_ui::palette::Cmd::new("Ajuster le calque à la composition", "Calque sélectionné · contenir", "fit-layer"));
         v.push(studio_ui::palette::Cmd::new("Adapter la durée aux calques", "Composition · fin du dernier calque", "duration-layers"));
+        v.push(studio_ui::palette::Cmd::new("Fractionner le calque à la tête", "Calque sélectionné · Ctrl+Maj+D", "split-layer"));
+        v.push(studio_ui::palette::Cmd::new("Dupliquer le calque", "Calque sélectionné · Ctrl+D", "duplicate-layer"));
         for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")));
         }
@@ -1458,6 +1460,8 @@ impl Motion {
             "keys-reverse" if self.sel.is_some() => self.reverse_keys(),
             "keys-spread" if self.sel.is_some() => self.spread_keys(),
             "fit-layer" if self.sel.is_some() => self.fit_to_comp(0),
+            "split-layer" if self.sel.is_some() => self.split(),
+            "duplicate-layer" if self.sel.is_some() => self.duplicate(),
             "duration-layers" => {
                 let end = self.comp.layers.iter().map(|layer| layer.end).fold(0.0, f32::max);
                 if end > 0.0 {
@@ -1465,10 +1469,10 @@ impl Motion {
                     studio_ui::handoff::toast(ctx, format!("Durée adaptée à {end:.2} s"), true);
                 }
             }
-            "keys-reverse" | "keys-spread" | "fit-layer" => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un calque".into(), false),
+            "keys-reverse" | "keys-spread" | "fit-layer" | "split-layer" | "duplicate-layer" => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un calque".into(), false),
             _ => {}
         }
-        if matches!(id, "keys-reverse" | "keys-spread" | "fit-layer" | "duration-layers") {
+        if matches!(id, "keys-reverse" | "keys-spread" | "fit-layer" | "duration-layers" | "split-layer" | "duplicate-layer") {
             return;
         }
         if let Some(t) = id.strip_prefix("send:") {

@@ -1200,6 +1200,9 @@ impl Pixel {
             studio_ui::palette::Cmd::new("Désélectionner", "Ctrl+D", "deselect"),
             studio_ui::palette::Cmd::new("Barre de tâches contextuelle (afficher / masquer)", "Affichage", "taskbar"),
             studio_ui::palette::Cmd::new("Recadrer aux pixels visibles", "Image · retire les marges transparentes", "trim-visible"),
+            studio_ui::palette::Cmd::new("Dupliquer le calque actif", "Calque · Ctrl+J", "duplicate-layer"),
+            studio_ui::palette::Cmd::new("Fusionner les calques visibles", "Calques · conserve les calques masqués", "merge-visible"),
+            studio_ui::palette::Cmd::new("Aplatir toute l'image", "Calques · résultat unique", "flatten-image"),
         ];
         v.extend(studio_ui::palette::send_cmds(&[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]));
         v.extend(studio_ui::palette::effect_cmds());
@@ -1248,6 +1251,9 @@ impl Pixel {
             "invert" => self.doc.invert_selection(),
             "deselect" => self.deselect(),
             "taskbar" => self.task_bar = !self.task_bar,
+            "duplicate-layer" => self.doc.duplicate_layer(),
+            "merge-visible" => self.doc.merge_visible(),
+            "flatten-image" => self.doc.flatten_all(),
             "trim-visible" => {
                 self.doc.next_label = Some("Recadrer aux pixels visibles".into());
                 if self.doc.trim() {

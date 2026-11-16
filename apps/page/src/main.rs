@@ -998,6 +998,12 @@ impl PageApp {
         v.push(studio_ui::palette::Cmd::new("Centrer les blocs sur la page", "Disposition · sélection", "center-page"));
         v.push(studio_ui::palette::Cmd::new("Distribuer les blocs horizontalement", "Disposition · 3 blocs minimum", "distribute-x"));
         v.push(studio_ui::palette::Cmd::new("Distribuer les blocs verticalement", "Disposition · 3 blocs minimum", "distribute-y"));
+        v.push(studio_ui::palette::Cmd::new("Dupliquer les blocs", "Disposition · Ctrl+D", "duplicate"));
+        v.push(studio_ui::palette::Cmd::new("Grouper les blocs", "Disposition · Ctrl+G", "group"));
+        v.push(studio_ui::palette::Cmd::new("Dégrouper les blocs", "Disposition · Ctrl+Maj+G", "ungroup"));
+        v.push(studio_ui::palette::Cmd::new("Pivoter les blocs de 90°", "Disposition · sélection", "rotate-90"));
+        v.push(studio_ui::palette::Cmd::new("Retourner les blocs horizontalement", "Disposition · sélection", "flip-x"));
+        v.push(studio_ui::palette::Cmd::new("Retourner les blocs verticalement", "Disposition · sélection", "flip-y"));
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
         v.extend(studio_ui::palette::effect_cmds());
         v
@@ -1011,9 +1017,15 @@ impl PageApp {
             }
             "distribute-x" => self.distribute(0, None),
             "distribute-y" => self.distribute(1, None),
+            "duplicate" => self.duplicate(),
+            "group" => self.group(true),
+            "ungroup" => self.group(false),
+            "rotate-90" => self.rotate_by(90.0),
+            "flip-x" => self.flip(true),
+            "flip-y" => self.flip(false),
             _ => {}
         }
-        if matches!(id, "center-page" | "distribute-x" | "distribute-y") {
+        if matches!(id, "center-page" | "distribute-x" | "distribute-y" | "duplicate" | "group" | "ungroup" | "rotate-90" | "flip-x" | "flip-y") {
             return;
         }
         if let Some(t) = id.strip_prefix("send:") {

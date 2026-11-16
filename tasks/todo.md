@@ -41,3 +41,14 @@
 - [x] Folio : exporter la page courante en PNG.
 - [x] Sound : rogner les silences de bord avec test de régression.
 - [x] Tests et compilation complets réussis.
+
+## Vague 3 — productivité dans toute la suite
+
+- [x] Slice A : nouvelles commandes Pixel, Vector, Motion, Page et Folio.
+- [x] Slice A : compilation et tests ciblés réussis.
+- [ ] Slice A : commit local créé.
+- [ ] Slice B : nouvelles commandes Cut, Lumen et Sound.
+- [ ] Slice B : demande « −16 LUFS » comprise et couverte par un test.
+- [ ] Slice B : suggestions du Launcher enrichies.
+- [ ] Checkpoint final : workspace compilé et testé.
+- [ ] Checkpoint final : diff revu et commit local créé.

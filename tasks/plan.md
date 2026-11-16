@@ -57,3 +57,23 @@ Aucune.
 - [x] Tests ciblés des nouveaux algorithmes.
 - [x] Compilation et tests du workspace.
 - [x] Revue qualité et commit local.
+
+## Wave 3: productivité dans toute la suite
+
+### Slice A — édition et mise en page
+
+- [x] Pixel : dupliquer, fusionner les calques visibles et aplatir depuis `Ctrl+K`.
+- [x] Vector : sélectionner, inverser, dupliquer, grouper et dégrouper depuis `Ctrl+K`.
+- [x] Motion : fractionner et dupliquer le calque actif depuis `Ctrl+K`.
+- [x] Page : dupliquer, grouper, dégrouper, pivoter et retourner les blocs depuis `Ctrl+K`.
+- [x] Folio : pivoter rapidement la page courante ou les pages sélectionnées.
+- [x] Compiler et tester les applications concernées, puis créer un commit local.
+
+### Slice B — médias, lots et assistant
+
+- [ ] Cut : normaliser l'audio sélectionné et appliquer des fondus rapides à tous les clips.
+- [ ] Lumen : noter, retenir, rejeter ou réinitialiser les photos choisies.
+- [ ] Sound : normalisation crête, normalisation −16 LUFS et micro-fondus de bord.
+- [ ] Assistant : distinguer une demande LUFS d'une simple normalisation de crête.
+- [ ] Mettre à jour les suggestions audio du Launcher.
+- [ ] Tests complets, revue qualité et commit local.

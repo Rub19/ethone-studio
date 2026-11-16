@@ -371,15 +371,7 @@ impl Folio {
 
     pub fn scope(&self, k: usize) -> Vec<usize> {
         let n = self.od.as_ref().map_or(0, |o| o.n());
-        match k {
-            0 => vec![self.page.min(n.saturating_sub(1))],
-            2 if !self.sel.is_empty() => {
-                let mut s = self.sel.clone();
-                s.sort();
-                s
-            }
-            _ => (0..n).collect(),
-        }
+        scope_indices(n, self.page, &self.sel, k)
     }
 
     pub fn render_page(&self, i: usize, scale: f32) -> Option<image::RgbaImage> {
@@ -1201,7 +1193,7 @@ impl Folio {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         use studio_ui::palette::Cmd;
-        let mut v = vec![Cmd::new("Ouvrir…", "Ctrl+O", "open"), Cmd::new("Enregistrer", "Ctrl+S", "save"), Cmd::new("Enregistrer sous…", "Ctrl+Maj+S", "saveas"), Cmd::new("Exporter la page courante en PNG…", "Page · rendu 200 ppp", "export-page")];
+        let mut v = vec![Cmd::new("Ouvrir…", "Ctrl+O", "open"), Cmd::new("Enregistrer", "Ctrl+S", "save"), Cmd::new("Enregistrer sous…", "Ctrl+Maj+S", "saveas"), Cmd::new("Exporter la page courante en PNG…", "Page · rendu 200 ppp", "export-page"), Cmd::new("Pivoter les pages à gauche", "Page courante ou sélection", "rotate-left"), Cmd::new("Pivoter les pages à droite", "Page courante ou sélection", "rotate-right")];
         for (p, name) in panels::LIST {
             v.push(Cmd::new(format!("Outil : {name}"), "Outils", format!("panel:{}", p as u8)));
         }
@@ -1234,6 +1226,11 @@ impl Folio {
             "open" => self.open_dialog(ctx),
             "save" => self.save(ctx, false),
             "saveas" => self.save(ctx, true),
+            "rotate-left" | "rotate-right" => {
+                let pages = self.scope(2);
+                let deg = if id == "rotate-left" { -90 } else { 90 };
+                self.edit(ctx, "Pages pivotées", |doc| engine::rotate(doc, &pages, deg));
+            }
             "export-page" => {
                 let name = self.od.as_ref().map(|opened| format!("{} - page {}.png", opened.name, self.page + 1)).unwrap_or("page.png".into());
                 if let Some(path) = rfd::FileDialog::new().add_filter("PNG", &["png"]).set_file_name(name).save_file()
@@ -1413,6 +1410,31 @@ fn home_glyph(p: &Painter, r: Rect, k: u8, c: Color32) {
             p.line_segment([at(0.52, 0.4), at(0.52, 0.8)], s);
             p.line_segment([at(0.32, 0.6), at(0.72, 0.6)], s);
         }
+    }
+}
+
+fn scope_indices(n: usize, page: usize, selected: &[usize], kind: usize) -> Vec<usize> {
+    match kind {
+        0 => (n > 0).then(|| page.min(n - 1)).into_iter().collect(),
+        2 if !selected.is_empty() => {
+            let mut pages: Vec<usize> = selected.iter().copied().filter(|index| *index < n).collect();
+            pages.sort_unstable();
+            pages.dedup();
+            pages
+        }
+        2 => (n > 0).then(|| page.min(n - 1)).into_iter().collect(),
+        _ => (0..n).collect(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::scope_indices;
+
+    #[test]
+    fn selected_scope_defaults_to_current_page() {
+        assert_eq!(scope_indices(5, 3, &[], 2), vec![3]);
+        assert_eq!(scope_indices(5, 3, &[1, 4], 2), vec![1, 4]);
     }
 }
 
