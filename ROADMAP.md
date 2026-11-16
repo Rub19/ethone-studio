@@ -54,6 +54,16 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - Les commandes affichent des icônes distinctes pour les fichiers, calques, sélections, lots, actions audio et dispositions.
 - La requête normalisée est calculée une seule fois, y compris lors d'une recherche dans les 3 000 variantes.
 
+### Vague 5 — sécurité des actions globales
+
+- Les commandes sensibles de `Ctrl+K` affichent un avertissement et exigent une seconde validation identique.
+- Échap, une nouvelle recherche ou l'exécution d'une commande normale annule la confirmation en attente.
+- Un clic déplace la sélection afin qu'Entrée confirme toujours la même commande.
+- Pixel protège l'aplatissement complet de l'image.
+- Cut protège les transitions globales, coupes de piste, changements de format, fermeture des blancs et fondus appliqués à tous les clips.
+- Lumen protège les rejets et remises à zéro par lot.
+- Sound protège la suppression globale des silences, le rognage des bords et la création de boucles.
+
 ### Corrections incluses
 
 - Folio : une action visant les pages sélectionnées agit désormais sur la page courante quand aucune vignette n'est sélectionnée, au lieu de modifier toutes les pages.
@@ -62,21 +72,20 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 
 ## Prochaines vagues
 
-### Vague 5 — cohérence et sécurité des actions
+### Vague 6 — cohérence et sécurité des actions
 
-- Ajouter des confirmations pour les opérations destructrices sans sélection.
 - Uniformiser les messages de réussite, d'erreur et les états vides dans les huit éditeurs.
 - Ajouter des tests de registre garantissant que chaque commande `Ctrl+K` possède un identifiant unique et une action associée.
 - Vérifier les historiques annuler/rétablir pour les nouvelles commandes de lot.
 
-### Vague 6 — workflows inter-applications
+### Vague 7 — workflows inter-applications
 
 - Conserver davantage de métadonnées lors des envois entre applications.
 - Ajouter des recettes multi-applications : développer puis retoucher, monter puis mixer, mettre en page puis exporter.
 - Afficher la destination et le format avant chaque envoi.
 - Ajouter un historique des transferts récents dans le Launcher.
 
-### Vague 7 — outils avancés
+### Vague 8 — outils avancés
 
 - Pixel : traitement par lot et comparaison multi-versions.
 - Vector : symboles réutilisables, variantes et export SVG optimisé.
@@ -89,7 +98,7 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 
 ## Qualité et validation
 
-- État actuel : `118` tests réussis, `8` tests ignorés intentionnellement et compilation complète validée.
+- État actuel : `120` tests réussis, `8` tests ignorés intentionnellement et compilation complète validée.
 - Chaque vague doit compiler avec `cargo check --workspace`.
 - Tous les tests doivent réussir avec `cargo test --workspace`.
 - Les nouveaux algorithmes et les corrections doivent commencer par un test de régression.
@@ -106,4 +115,6 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - `1ca5b29` — actions média, lots Lumen et compréhension −16 LUFS de la vague 3.
 - `c148638` — commandes récentes, recherche sans accents et validation des registres.
 - `a2ba87f` — icônes distinctes par famille de commande.
+- `82529d8` — moteur de confirmation partagé pour les commandes sensibles.
+- `6a7c985` — protection des actions globales dans les éditeurs.
 

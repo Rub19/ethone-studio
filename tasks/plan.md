@@ -108,9 +108,9 @@ Aucune.
 
 ### Slice B — intégration dans les éditeurs
 
-- [ ] Pixel : protéger l'aplatissement complet.
-- [ ] Cut : protéger les opérations globales qui remplacent le montage ou ses fondus.
-- [ ] Lumen : protéger les rejets et remises à zéro par lot.
-- [ ] Sound : protéger les suppressions de silence appliquées au fichier entier.
-- [ ] Compiler et tester tout le workspace.
-- [ ] Mettre à jour la feuille de route, revoir le diff et créer les commits locaux.
+- [x] Pixel : protéger l'aplatissement complet.
+- [x] Cut : protéger les opérations globales qui remplacent le montage ou ses fondus.
+- [x] Lumen : protéger les rejets et remises à zéro par lot.
+- [x] Sound : protéger les suppressions de silence appliquées au fichier entier.
+- [x] Compiler et tester tout le workspace.
+- [x] Mettre à jour la feuille de route, revoir le diff et créer les commits locaux.

@@ -64,7 +64,7 @@
 ## Vague 5 — sécurité des actions globales
 
 - [x] Slice A : moteur de confirmation partagé et tests.
-- [ ] Slice A : commit local créé.
-- [ ] Slice B : commandes sensibles annotées dans Pixel, Cut, Lumen et Sound.
-- [ ] Slice B : workspace compilé et testé.
-- [ ] Checkpoint final : feuille de route, revue et commits locaux.
+- [x] Slice A : commit local créé.
+- [x] Slice B : commandes sensibles annotées dans Pixel, Cut, Lumen et Sound.
+- [x] Slice B : workspace compilé et testé.
+- [x] Checkpoint final : feuille de route, revue et commits locaux.
