@@ -2780,7 +2780,7 @@ impl PageApp {
             });
             ui.horizontal(|ui| {
                 ui.label(RichText::new("Titre").size(12.5).color(MUTED));
-                ui.add(egui::TextEdit::singleline(&mut self.doc.title).hint_text("{title}").desired_width(ui.available_width() - 16.0));
+                ui.add(egui::TextEdit::singleline(&mut self.doc.title).hint_text("Titre du document (variable {title})").desired_width(ui.available_width() - 16.0));
             });
             ui.horizontal(|ui| {
                 ui.label(RichText::new("Marges").size(12.5).color(MUTED));

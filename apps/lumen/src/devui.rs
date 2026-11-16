@@ -357,7 +357,9 @@ impl Lumen {
                 self.pan = vec2(r.width() * sc * (0.5 - fu), r.height() * sc * (0.5 - fv));
             }
         }
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing.x = 2.0;
+            ui.spacing_mut().button_padding = egui::vec2(6.0, 2.0);
             for (n, z) in [ZOOMS[0], ZOOMS[2], ZOOMS[3], ZOOMS[4]] {
                 if ui.selectable_label(self.zoom == z, RichText::new(n).size(11.0)).clicked() {
                     self.zoom = z;
@@ -920,7 +922,6 @@ impl Lumen {
             let bar = Rect::from_min_size(full.min, vec2(full.width(), 38.0));
             ui.scope_builder(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(14.0, 4.0))), |ui| {
                 ui.horizontal_centered(|ui| {
-                    ui.label(RichText::new(short(&display_name(&self.files[i]), 48)).size(13.0).color(MUTED));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let held = ui.add(egui::Button::new(RichText::new("Original").size(12.5)).corner_radius(CornerRadius::same(7)).sense(Sense::click_and_drag()));
                         if held.is_pointer_button_down_on() {
@@ -949,6 +950,9 @@ impl Lumen {
                         if ui.selectable_label(self.hide_panels, "Plein écran").on_hover_text("Tab : masquer les panneaux").clicked() {
                             self.hide_panels = !self.hide_panels;
                         }
+                        ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                            ui.add(egui::Label::new(RichText::new(display_name(&self.files[i])).size(13.0).color(MUTED)).truncate());
+                        });
                     });
                 });
             });

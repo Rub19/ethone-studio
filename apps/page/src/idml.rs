@@ -55,10 +55,22 @@ fn bbox(tag: &str, body: &str) -> Option<[f32; 4]> {
     Some([x0, y0, x1, y1])
 }
 
-/// Story text with paragraph breaks, and the first point size found.
-fn story(xml: &str) -> (String, Option<f32>) {
+/// What Page keeps of an InDesign story: its text and the look of its first paragraph.
+#[derive(Clone, Default, Debug, PartialEq)]
+struct Story {
+    text: String,
+    size: Option<f32>,
+    /// 0 left, 1 centre, 2 right, 3 justified (Page's text alignment).
+    align: u8,
+    family: Option<String>,
+    bold: bool,
+}
+
+/// Story text with paragraph breaks (`<Br/>`, `<Br />` and paragraph ends) and its first paragraph's style.
+fn story(xml: &str) -> Story {
+    let xml = xml.replace("<Br />", "<Br/>").replace("</ParagraphStyleRange>", "<Br/></ParagraphStyleRange>");
     let mut text = String::new();
-    let mut rest = xml;
+    let mut rest = xml.as_str();
     loop {
         let (c, b) = (rest.find("<Content>"), rest.find("<Br/>"));
         match (c, b) {
@@ -75,8 +87,21 @@ fn story(xml: &str) -> (String, Option<f32>) {
             _ => break,
         }
     }
-    let size = elements(xml, "CharacterStyleRange").iter().find_map(|(t, _)| attr(t, "PointSize")).and_then(|s| s.parse().ok());
-    (text.trim_end().to_string(), size)
+    let ranges = elements(&xml, "CharacterStyleRange");
+    let size = ranges.iter().find_map(|(t, _)| attr(t, "PointSize")).and_then(|s| s.parse().ok());
+    let family = ranges.iter().find_map(|(_, body)| {
+        let i = body.find("<AppliedFont")?;
+        let start = i + body[i..].find('>')? + 1;
+        Some(unescape(body[start..start + body[start..].find('<')?].trim())).filter(|f| !f.is_empty())
+    });
+    let bold = ranges.first().and_then(|(t, _)| attr(t, "FontStyle")).is_some_and(|f| f.contains("Bold"));
+    let align = match elements(&xml, "ParagraphStyleRange").first().and_then(|(t, _)| attr(t, "Justification")).as_deref() {
+        Some("CenterAlign" | "CenterJustified") => 1,
+        Some("RightAlign" | "RightJustified" | "AwayFromBindingSide") => 2,
+        Some("LeftJustified" | "FullyJustified") => 3,
+        _ => 0,
+    };
+    Story { text: text.trim_end().to_string(), size, align, family, bold }
 }
 
 fn file_uri(uri: &str) -> String {
@@ -103,7 +128,7 @@ pub fn import(bytes: &[u8]) -> Result<(Doc, usize), String> {
     let files = unzip(bytes)?;
     let get = |name: &str| files.iter().find(|(n, _)| n == name).map(|(_, d)| String::from_utf8_lossy(d).into_owned());
     let design = get("designmap.xml").ok_or("ce n'est pas un fichier IDML (designmap.xml manquant)")?;
-    let stories: std::collections::HashMap<String, (String, Option<f32>)> = files
+    let stories: std::collections::HashMap<String, Story> = files
         .iter()
         .filter(|(n, _)| n.starts_with("Stories/"))
         .filter_map(|(_, d)| {
@@ -146,8 +171,15 @@ pub fn import(bytes: &[u8]) -> Result<(Doc, usize), String> {
         };
         for (tag, body) in elements(&xml, "TextFrame") {
             let (Some(b), Some(id)) = (bbox(tag, body), attr(tag, "ParentStory")) else { continue };
-            let (text, size) = stories.get(&id).cloned().unwrap_or_default();
-            place(b, Kind::text(&text, size.unwrap_or(12.0), false));
+            let st = stories.get(&id).cloned().unwrap_or_default();
+            let mut kind = Kind::text(&st.text, st.size.unwrap_or(12.0), st.bold);
+            if let Kind::Text { align, family, .. } = &mut kind {
+                *align = st.align;
+                if let Some(f) = st.family {
+                    *family = f;
+                }
+            }
+            place(b, kind);
         }
         for (tag, body) in elements(&xml, "Rectangle") {
             let Some(uri) = elements(body, "Link").first().and_then(|(t, _)| attr(t, "LinkResourceURI")) else { continue };
@@ -168,8 +200,9 @@ mod tests {
 
     #[test]
     fn story_and_uri() {
-        let (t, s) = story(r#"<Story Self="u1"><ParagraphStyleRange><CharacterStyleRange PointSize="18"><Content>Bonjour &amp; bienvenue</Content><Br/><Content>Ligne 2</Content></CharacterStyleRange></ParagraphStyleRange></Story>"#);
-        assert_eq!((t.as_str(), s), ("Bonjour & bienvenue\nLigne 2", Some(18.0)));
+        let st = story(r#"<Story Self="u1"><ParagraphStyleRange Justification="CenterAlign"><CharacterStyleRange PointSize="18" FontStyle="Bold"><Properties><AppliedFont type="string">Georgia</AppliedFont></Properties><Content>Bonjour &amp; bienvenue</Content><Br /><Content>Ligne 2</Content></CharacterStyleRange></ParagraphStyleRange><ParagraphStyleRange><CharacterStyleRange><Content>Paragraphe 2</Content></CharacterStyleRange></ParagraphStyleRange></Story>"#);
+        assert_eq!(st.text, "Bonjour & bienvenue\nLigne 2\nParagraphe 2");
+        assert_eq!((st.size, st.align, st.family.as_deref(), st.bold), (Some(18.0), 1, Some("Georgia"), true));
         assert_eq!(file_uri("file:///C:/Photos/mon%20chat.jpg"), "C:/Photos/mon chat.jpg");
         assert_eq!(file_uri("file:/Users/a/b.png"), "/Users/a/b.png");
         let tf = r#"<TextFrame Self="t" ParentStory="u1" ItemTransform="1 0 0 1 10 20"><Properties><PathGeometry><GeometryPathType><PathPointArray><PathPointType Anchor="0 0"/><PathPointType Anchor="100 50"/></PathPointArray></GeometryPathType></PathGeometry></Properties></TextFrame>"#;
@@ -190,6 +223,6 @@ mod real_file {
             _ => None,
         }).collect();
         println!("{} pages, {placed} blocs, textes : {texts:?}", doc.pages.len());
-        assert!(placed > 0 && texts.iter().any(|t| !t.is_empty()));
+        assert!(placed > 0 && texts.iter().any(|t| t.starts_with("Hello world\nSecond line of the test")), "{texts:?}");
     }
 }

@@ -2704,9 +2704,11 @@ impl Cut {
             let bar = Rect::from_min_max(pos2(full.left() + 16.0, full.bottom() - controls_h + 10.0), pos2(full.right() - 16.0, full.bottom() - 10.0));
             let p = ui.painter();
             p.text(bar.left_center(), Align2::LEFT_CENTER, tc(self.t, self.proj.fps), FontId::monospace(18.0), BLUE);
-            p.text(bar.left_center() + vec2(98.0, 1.0), Align2::LEFT_CENTER, format!("/ {}", tc(self.proj.duration(), self.proj.fps)), FontId::monospace(12.5), FAINT);
             let step = 1.0 / self.proj.fps as f64;
             let center = bar.center();
+            if center.x - 136.0 > bar.left() + 214.0 {
+                p.text(bar.left_center() + vec2(98.0, 1.0), Align2::LEFT_CENTER, format!("/ {}", tc(self.proj.duration(), self.proj.fps)), FontId::monospace(12.5), FAINT);
+            }
             let buttons: [(f32, u8, &str); 5] = [(-100.0, 0, "Point de montage précédent (↑)"), (-54.0, 1, "Image précédente (←)"), (0.0, 2, "Lecture / pause (Espace)"), (54.0, 3, "Image suivante (→)"), (100.0, 4, "Point de montage suivant (↓)")];
             for (dx, kind, tip) in buttons {
                 let size = if kind == 2 { 40.0 } else { 32.0 };
@@ -2729,16 +2731,18 @@ impl Cut {
                 }
             }
             let right = Rect::from_min_max(pos2(center.x + 140.0, bar.top()), bar.max);
+            let room = right.width();
+            let (with_guides, with_slider) = (room >= 238.0, room >= 302.0);
             ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.spacing_mut().item_spacing.x = 4.0;
                     if pro::icon_button(ui, 30.0, self.focus, "Mode visionneuse (F)", |p, r, c| glyph(p, r, G::Focus, c)).clicked() {
                         self.focus = !self.focus;
                     }
-                    if pro::icon_button(ui, 30.0, self.safe, "Zones de sécurité", |p, r, c| glyph(p, r, G::Safe, c)).clicked() {
+                    if with_guides && pro::icon_button(ui, 30.0, self.safe, "Zones de sécurité", |p, r, c| glyph(p, r, G::Safe, c)).clicked() {
                         self.safe = !self.safe;
                     }
-                    if pro::icon_button(ui, 30.0, self.grid, "Grille des tiers", |p, r, c| glyph(p, r, G::Grid, c)).clicked() {
+                    if with_guides && pro::icon_button(ui, 30.0, self.grid, "Grille des tiers", |p, r, c| glyph(p, r, G::Grid, c)).clicked() {
                         self.grid = !self.grid;
                     }
                     if pro::icon_button(ui, 30.0, self.looping, "Lecture en boucle (entre entrée et sortie)", |p, r, c| glyph(p, r, G::Loop, c)).clicked() {
@@ -2751,8 +2755,10 @@ impl Cut {
                         self.mark_in = Some(self.t);
                     }
                     pro::toolbar_sep(ui);
-                    ui.spacing_mut().slider_width = 60.0;
-                    ui.add(egui::Slider::new(&mut self.volume, 0.0..=1.5).show_value(false)).on_hover_text("Volume d'écoute");
+                    if with_slider {
+                        ui.spacing_mut().slider_width = 60.0;
+                        ui.add(egui::Slider::new(&mut self.volume, 0.0..=1.5).show_value(false)).on_hover_text("Volume d'écoute");
+                    }
                     let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
                     speaker(ui.painter(), r.center(), self.volume == 0.0, if resp.hovered() { INK_STRONG } else { MUTED });
                     if resp.clicked() {

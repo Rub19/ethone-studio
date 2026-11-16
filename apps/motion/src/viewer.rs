@@ -263,6 +263,8 @@ impl Motion {
             ui.painter().rect_filled(bar, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x20));
             ui.painter().line_segment([bar.left_bottom(), bar.right_bottom()], Stroke::new(1.0, LINE));
             ui.scope_builder(egui::UiBuilder::new().max_rect(strip.shrink2(vec2(6.0, 8.0))), |ui| {
+                ui.set_clip_rect(strip);
+                egui::ScrollArea::vertical().id_salt("motion-tools").scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
                 ui.vertical_centered(|ui| {
                     ui.spacing_mut().item_spacing.y = 3.0;
                     for (g, group) in TOOL_GROUPS.iter().enumerate() {
@@ -277,6 +279,7 @@ impl Motion {
                             self.set_tool(cur);
                         }
                     }
+                });
                 });
             });
             self.options_bar(ui, bar);
@@ -1358,11 +1361,22 @@ impl Motion {
             Some((x, y)) => format!("image {} · x {x:.0} y {y:.0}", (self.t * fps as f32).round() as u32),
             None => format!("image {}", (self.t * fps as f32).round() as u32),
         };
-        ui.painter().text(tb.left_center() + vec2(104.0, 0.0), Align2::LEFT_CENTER, info, FontId::proportional(11.5), FAINT);
+        let compact = tb.width() / 2.0 < 300.0;
+        let span = if compact { 156.0 } else { 216.0 };
+        let center_x = tb.center().x;
+        if tb.left() + 104.0 + info.chars().count() as f32 * 6.5 < center_x - span - 8.0 {
+            ui.painter().text(tb.left_center() + vec2(104.0, 0.0), Align2::LEFT_CENTER, info, FontId::proportional(11.5), FAINT);
+        }
         let (a, b) = self.comp.range();
-        ui.painter().text(tb.right_center(), Align2::RIGHT_CENTER, if self.comp.work.is_some() { format!("zone {} → {}", tc(a, fps), tc(b, fps)) } else { tc(self.comp.duration, fps) }, FontId::monospace(13.0), MUTED);
+        let end = if self.comp.work.is_some() { format!("zone {} → {}", tc(a, fps), tc(b, fps)) } else { tc(self.comp.duration, fps) };
+        if tb.right() - end.chars().count() as f32 * 8.0 > center_x + span + 8.0 {
+            ui.painter().text(tb.right_center(), Align2::RIGHT_CENTER, end, FontId::monospace(13.0), MUTED);
+        }
         let step = 1.0 / fps as f32;
-        for (dx, kind, tip) in [(-150.0, 0u8, "Début (Origine)"), (-108.0, 5, "Image clé précédente (J)"), (-66.0, 1, "Image précédente (←)"), (0.0, 2, "Lecture / pause (Espace)"), (66.0, 3, "Image suivante (→)"), (108.0, 6, "Image clé suivante (K)"), (150.0, 4, "Fin"), (200.0, 7, "Lecture en boucle (L)")] {
+        let full: [(f32, u8, &str); 8] = [(-150.0, 0u8, "Début (Origine)"), (-108.0, 5, "Image clé précédente (J)"), (-66.0, 1, "Image précédente (←)"), (0.0, 2, "Lecture / pause (Espace)"), (66.0, 3, "Image suivante (→)"), (108.0, 6, "Image clé suivante (K)"), (150.0, 4, "Fin"), (200.0, 7, "Lecture en boucle (L)")];
+        let small: [(f32, u8, &str); 6] = [(-96.0, 0u8, "Début (Origine)"), (-52.0, 1, "Image précédente (←)"), (0.0, 2, "Lecture / pause (Espace)"), (52.0, 3, "Image suivante (→)"), (96.0, 4, "Fin"), (140.0, 7, "Lecture en boucle (L)")];
+        let buttons: &[(f32, u8, &str)] = if compact { &small } else { &full };
+        for &(dx, kind, tip) in buttons {
             let size = if kind == 2 { 40.0 } else { 32.0 };
             let r = Rect::from_center_size(tb.center() + vec2(dx, 0.0), Vec2::splat(size));
             let bt = ui.interact(r, ui.make_persistent_id(("transport", kind)), Sense::click()).on_hover_text(tip);
