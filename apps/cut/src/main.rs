@@ -1741,8 +1741,26 @@ impl Cut {
             studio_ui::palette::Cmd::new("Fondus de 1 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:1").confirm(),
 
         ];
-        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));
-        v.extend(studio_ui::palette::effect_cmds());
+        let clips = self.proj.clips.len();
+        let has_gap = self.proj.clips.iter().any(|clip| clip.gap > 1e-6);
+        let audio_selected = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_) | Sel::Music(_)));
+        v = v
+            .into_iter()
+            .map(|command| {
+                let (ok, reason) = match command.id.as_str() {
+                    _ if self.home => (false, "Ouvre ou crée d'abord un projet"),
+                    id if id.starts_with("trans-all:") => (clips > 1, "Il faut au moins deux clips dans la piste"),
+                    "close-gaps" => (has_gap, "La piste n'a aucun blanc à fermer"),
+                    "normalize-audio" => (audio_selected, "Sélectionne d'abord un clip ou une musique"),
+                    _ => (clips > 0, "Ajoute d'abord un clip à la piste"),
+                };
+                command.enabled_if(ok, reason)
+            })
+            .collect();
+        let has_project = !self.home;
+        let clip_selected = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_)));
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]).into_iter().map(|command| command.enabled_if(has_project && clips > 0, "Ajoute d'abord un clip à la piste")));
+        v.extend(studio_ui::palette::effect_cmds().into_iter().map(|command| command.enabled_if(clip_selected, "Sélectionne d'abord un clip")));
         v
     }
 

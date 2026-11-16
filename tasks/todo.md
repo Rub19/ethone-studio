@@ -75,5 +75,5 @@
 - [x] Slice A : commit local créé.
 - [x] Slice B : intégration Pixel, Vector, Motion et Page.
 - [x] Slice B : tests ciblés et commit local.
-- [ ] Slice C : intégration Cut, Lumen, Folio et Sound.
-- [ ] Checkpoint final : workspace, feuille de route, revue et commits.
+- [x] Slice C : intégration Cut, Lumen, Folio et Sound.
+- [x] Checkpoint final : workspace, feuille de route, revue et commits.

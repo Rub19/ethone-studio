@@ -64,6 +64,15 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - Lumen protège les rejets et remises à zéro par lot.
 - Sound protège la suppression globale des silences, le rognage des bords et la création de boucles.
 
+### Vague 6 — commandes indisponibles expliquées
+
+- Une commande impossible dans le contexte actuel reste visible mais grisée, avec sa raison (« Ouvre d'abord une image », « Sélectionne d'abord un clip »…), et ne peut pas être exécutée.
+- Pixel, Vector, Motion et Page : document ouvert, sélection, objet de référence, texte sélectionné.
+- Cut : projet ouvert, au moins deux clips pour les transitions globales, blancs présents, clip ou musique sélectionné pour l'audio et les effets.
+- Lumen : dossier ouvert, photo courante, photos choisies, photo modèle plus cibles pour la synchronisation.
+- Folio : PDF ouvert ; Combiner et Créer restent accessibles sans document.
+- Sound : son chargé ; Annuler n'est proposé que s'il y a un historique.
+
 ### Corrections incluses
 
 - Folio : une action visant les pages sélectionnées agit désormais sur la page courante quand aucune vignette n'est sélectionnée, au lieu de modifier toutes les pages.
@@ -74,6 +83,7 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 
 ### Vague 6 — cohérence et sécurité des actions
 
+- États indisponibles explicites dans `Ctrl+K`, avec raison visible : **livré dans les huit éditeurs.**
 - Uniformiser les messages de réussite, d'erreur et les états vides dans les huit éditeurs.
 - Ajouter des tests de registre garantissant que chaque commande `Ctrl+K` possède un identifiant unique et une action associée.
 - Vérifier les historiques annuler/rétablir pour les nouvelles commandes de lot.
@@ -98,7 +108,7 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 
 ## Qualité et validation
 
-- État actuel : `120` tests réussis, `8` tests ignorés intentionnellement et compilation complète validée.
+- État actuel : `122` tests réussis, `8` tests ignorés intentionnellement et compilation complète validée.
 - Chaque vague doit compiler avec `cargo check --workspace`.
 - Tous les tests doivent réussir avec `cargo test --workspace`.
 - Les nouveaux algorithmes et les corrections doivent commencer par un test de régression.
@@ -117,4 +127,6 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - `a2ba87f` — icônes distinctes par famille de commande.
 - `82529d8` — moteur de confirmation partagé pour les commandes sensibles.
 - `6a7c985` — protection des actions globales dans les éditeurs.
+- `189a6d6` — état désactivé partagé et raison visible dans la palette.
+- `485d03b` — actions indisponibles dans Pixel, Vector, Motion et Page.
 

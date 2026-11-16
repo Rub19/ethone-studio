@@ -1055,10 +1055,20 @@ impl Sound {
             studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 2 s)", "Musique de jeu, ambiance", "loop:2000").confirm(),
             studio_ui::palette::Cmd::new("Annuler", "Ctrl+Z", "undo"),
         ];
-        v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage (sélection ou tout)")]));
+        let has_audio = self.clip.len() > 0;
+        let can_undo = !self.undo.is_empty();
+        v = v
+            .into_iter()
+            .map(|command| match command.id.as_str() {
+                "open" => command,
+                "undo" => command.enabled_if(can_undo, "Rien à annuler"),
+                _ => command.enabled_if(has_audio, "Ouvre ou enregistre d'abord un son"),
+            })
+            .collect();
+        v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage (sélection ou tout)")]).into_iter().map(|command| command.enabled_if(has_audio, "Ouvre ou enregistre d'abord un son")));
         for (k, d) in effects::DEFS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Effet audio : {}", d.name), effects::CATS[d.cat], format!("rack:{k}")));
-            v.push(studio_ui::palette::Cmd::new(format!("Appliquer : {}", d.name), "Réglages actuels", format!("apply:{k}")));
+            v.push(studio_ui::palette::Cmd::new(format!("Appliquer : {}", d.name), "Réglages actuels", format!("apply:{k}")).enabled_if(has_audio, "Ouvre ou enregistre d'abord un son"));
         }
         v
     }

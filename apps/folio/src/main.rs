@@ -1194,13 +1194,22 @@ impl Folio {
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         use studio_ui::palette::Cmd;
         let mut v = vec![Cmd::new("Ouvrir…", "Ctrl+O", "open"), Cmd::new("Enregistrer", "Ctrl+S", "save"), Cmd::new("Enregistrer sous…", "Ctrl+Maj+S", "saveas"), Cmd::new("Exporter la page courante en PNG…", "Page · rendu 200 ppp", "export-page"), Cmd::new("Pivoter les pages à gauche", "Page courante ou sélection", "rotate-left"), Cmd::new("Pivoter les pages à droite", "Page courante ou sélection", "rotate-right")];
+        let has_doc = self.od.is_some();
+        v = v
+            .into_iter()
+            .map(|command| match command.id.as_str() {
+                "open" => command,
+                _ => command.enabled_if(has_doc, "Ouvre d'abord un PDF"),
+            })
+            .collect();
         for (p, name) in panels::LIST {
-            v.push(Cmd::new(format!("Outil : {name}"), "Outils", format!("panel:{}", p as u8)));
+            let standalone = matches!(p, panels::Panel::Combine | panels::Panel::Create);
+            v.push(Cmd::new(format!("Outil : {name}"), "Outils", format!("panel:{}", p as u8)).enabled_if(standalone || has_doc, "Ouvre d'abord un PDF"));
         }
         for (t, name) in TOOLS {
-            v.push(Cmd::new(format!("Annoter : {name}"), "Barre d'outils", format!("tool:{}", t as u8)));
+            v.push(Cmd::new(format!("Annoter : {name}"), "Barre d'outils", format!("tool:{}", t as u8)).enabled_if(has_doc, "Ouvre d'abord un PDF"));
         }
-        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer la page")]));
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer la page")]).into_iter().map(|command| command.enabled_if(has_doc, "Ouvre d'abord un PDF")));
         v
     }
 

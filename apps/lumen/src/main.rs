@@ -1231,8 +1231,24 @@ impl Lumen {
             studio_ui::palette::Cmd::new("Effacer les drapeaux des photos choisies", "Lot · neutre", "batch-flag:0"),
 
         ];
-        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]));
-        v.extend(studio_ui::palette::effect_cmds());
+        let photos = self.files.len();
+        let current = self.current.is_some_and(|i| i < photos);
+        let targets = self.targets().into_iter().filter(|i| *i < photos).count();
+        let sync_targets = self.current.map_or(0, |source| self.picked.iter().filter(|i| **i < photos && **i != source).count());
+        v = v
+            .into_iter()
+            .map(|command| {
+                let (ok, reason) = match command.id.as_str() {
+                    _ if photos == 0 => (false, "Ouvre d'abord un dossier de photos"),
+                    id if id.starts_with("blurry:") => (photos > 1, "Il faut au moins deux photos à comparer"),
+                    "batch-sync" => (current && sync_targets > 0, "Ouvre la photo modèle puis choisis d'autres photos (Ctrl+clic)"),
+                    _ => (targets > 0, "Choisis d'abord des photos (clic ou Ctrl+clic)"),
+                };
+                command.enabled_if(ok, reason)
+            })
+            .collect();
+        v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]).into_iter().map(|command| command.enabled_if(current, "Choisis d'abord une photo")));
+        v.extend(studio_ui::palette::effect_cmds().into_iter().map(|command| command.enabled_if(current, "Choisis d'abord une photo")));
         v
     }
 
