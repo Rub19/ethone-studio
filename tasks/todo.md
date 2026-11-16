@@ -60,3 +60,11 @@
 - [x] Slice B : icônes de familles de commandes.
 - [x] Slice B : feuille de route actualisée.
 - [x] Checkpoint final : workspace compilé, testé et revu.
+
+## Vague 5 — sécurité des actions globales
+
+- [x] Slice A : moteur de confirmation partagé et tests.
+- [ ] Slice A : commit local créé.
+- [ ] Slice B : commandes sensibles annotées dans Pixel, Cut, Lumen et Sound.
+- [ ] Slice B : workspace compilé et testé.
+- [ ] Checkpoint final : feuille de route, revue et commits locaux.

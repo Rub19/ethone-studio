@@ -95,3 +95,22 @@ Aucune.
 - [x] Mettre à jour la feuille de route avec la vague 4.
 - [x] Compiler et tester tout le workspace.
 - [x] Effectuer la revue qualité et créer les commits locaux.
+
+## Wave 5: sécuriser les actions globales
+
+### Slice A — moteur de confirmation
+
+- [x] Ajouter un état de confirmation aux commandes `Ctrl+K`.
+- [x] Exiger une seconde validation avant d'exécuter une commande sensible.
+- [x] Annuler la confirmation avec Échap, une nouvelle recherche ou une autre commande.
+- [x] Signaler visuellement les commandes sensibles.
+- [x] Couvrir le comportement par des tests unitaires et créer un commit local.
+
+### Slice B — intégration dans les éditeurs
+
+- [ ] Pixel : protéger l'aplatissement complet.
+- [ ] Cut : protéger les opérations globales qui remplacent le montage ou ses fondus.
+- [ ] Lumen : protéger les rejets et remises à zéro par lot.
+- [ ] Sound : protéger les suppressions de silence appliquées au fichier entier.
+- [ ] Compiler et tester tout le workspace.
+- [ ] Mettre à jour la feuille de route, revoir le diff et créer les commits locaux.

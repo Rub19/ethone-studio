@@ -7,11 +7,22 @@ pub struct Cmd {
     pub label: String,
     pub hint: String,
     pub id: String,
+    pub confirm: bool,
 }
 
 impl Cmd {
     pub fn new(label: impl Into<String>, hint: impl Into<String>, id: impl Into<String>) -> Self {
-        Cmd { label: label.into(), hint: hint.into(), id: id.into() }
+        Cmd { label: label.into(), hint: hint.into(), id: id.into(), confirm: false }
+    }
+
+    pub fn confirm(mut self) -> Self {
+        self.confirm = true;
+        self
+    }
+
+    pub fn confirm_if(mut self, condition: bool) -> Self {
+        self.confirm = condition;
+        self
     }
 }
 
@@ -180,6 +191,20 @@ fn rank_recent(commands: &mut Vec<&Cmd>, recent: &[String]) {
     commands.sort_by_key(|command| recent.iter().position(|id| id == &command.id).unwrap_or(usize::MAX));
 }
 
+fn confirmation_step(pending: &mut Option<String>, command: &Cmd) -> bool {
+    if !command.confirm {
+        *pending = None;
+        return true;
+    }
+    if pending.as_deref() == Some(&command.id) {
+        *pending = None;
+        true
+    } else {
+        *pending = Some(command.id.clone());
+        false
+    }
+}
+
 pub fn validate_commands(commands: &[Cmd]) -> Result<(), String> {
     let mut ids = std::collections::HashSet::new();
     for command in commands {
@@ -202,13 +227,14 @@ pub struct Palette {
     sel: usize,
     prefs: Prefs,
     recent: Vec<String>,
+    confirming: Option<String>,
 }
 
 impl Palette {
     pub fn new(ctx: &Context) -> Self {
         let prefs = load_prefs();
         apply_prefs(ctx, prefs);
-        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new() }
+        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None }
     }
 
     pub fn keys(&mut self, ctx: &Context) {
@@ -217,6 +243,7 @@ impl Palette {
             self.open = !self.open;
             self.query.clear();
             self.sel = 0;
+            self.confirming = None;
         }
     }
 
@@ -258,6 +285,7 @@ impl Palette {
         }
         let mut chosen = if enter { hits.get(self.sel).map(|c| c.id.clone()) } else { None };
         let close = esc;
+        let confirmation_label = self.confirming.as_ref().and_then(|id| hits.iter().find(|command| &command.id == id)).map(|command| command.label.clone());
         egui::Area::new(egui::Id::NULL.with("palette")).order(egui::Order::Foreground).anchor(Align2::CENTER_TOP, [0.0, 80.0]).show(ctx, |ui| {
             Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(14)).inner_margin(Margin::same(10)).shadow(egui::epaint::Shadow { offset: [0, 16], blur: 40, spread: 0, color: Color32::from_black_alpha(170) }).show(ui, |ui| {
                 ui.set_width(560.0);
@@ -265,14 +293,18 @@ impl Palette {
                 r.request_focus();
                 if r.changed() {
                     self.sel = 0;
+                    self.confirming = None;
                 }
                 ui.add_space(6.0);
                 let recent = if self.query.trim().is_empty() && !self.recent.is_empty() { " · récentes en premier" } else { "" };
                 ui.label(RichText::new(format!("{} résultat(s){recent} · ↑ ↓ pour choisir · Entrée pour lancer · Échap pour fermer", hits.len())).size(11.0).color(FAINT));
+                if let Some(label) = &confirmation_label {
+                    ui.label(RichText::new(format!("⚠ Confirmer « {label} » avec Entrée ou un second clic")).size(12.0).color(Color32::from_rgb(255, 180, 60)));
+                }
                 egui::ScrollArea::vertical().max_height(380.0).show(ui, |ui| {
                     for (k, c) in hits.iter().enumerate().take(200) {
                         let on = k == self.sel;
-                        let label = format!("{}  {}", command_icon(&c.id), c.label);
+                        let label = format!("{}  {}", if c.confirm { "⚠" } else { command_icon(&c.id) }, c.label);
                         let resp = ui.add(egui::Button::new(RichText::new(label).size(13.5).color(if on { INK_STRONG } else { INK })).fill(if on { Color32::from_white_alpha(18) } else { Color32::TRANSPARENT }).min_size(egui::vec2(ui.available_width(), 26.0)).right_text(RichText::new(&c.hint).size(11.0).color(MUTED)));
                         if on && (up || down) {
                             resp.scroll_to_me(None);
@@ -286,8 +318,13 @@ impl Palette {
         });
         if close {
             self.open = false;
+            self.confirming = None;
         }
         let id = chosen?;
+        let Some(command) = app.iter().chain(&builtin).chain(variants).find(|command| command.id == id) else { return None };
+        if !confirmation_step(&mut self.confirming, command) {
+            return None;
+        }
         self.open = false;
         remember_recent(&mut self.recent, &id);
         if let Some(t) = id.strip_prefix("help:") {
@@ -386,5 +423,27 @@ mod tests {
         assert!(validate_commands(&[Cmd::new("", "", "open")]).is_err());
         assert!(validate_commands(&[Cmd::new("Ouvrir", "", "")]).is_err());
         assert!(validate_commands(&[Cmd::new("A", "", "same"), Cmd::new("B", "", "same")]).is_err());
+    }
+
+    #[test]
+    fn sensitive_command_requires_two_matching_confirmations() {
+        let danger = Cmd::new("Aplatir", "", "flatten").confirm();
+        let other = Cmd::new("Réinitialiser", "", "reset").confirm();
+        let mut pending = None;
+
+        assert!(!confirmation_step(&mut pending, &danger));
+        assert_eq!(pending.as_deref(), Some("flatten"));
+        assert!(!confirmation_step(&mut pending, &other));
+        assert_eq!(pending.as_deref(), Some("reset"));
+        assert!(confirmation_step(&mut pending, &other));
+        assert!(pending.is_none());
+    }
+
+    #[test]
+    fn regular_command_executes_immediately_and_cancels_pending_confirmation() {
+        let command = Cmd::new("Ouvrir", "", "open");
+        let mut pending = Some("flatten".to_string());
+        assert!(confirmation_step(&mut pending, &command));
+        assert!(pending.is_none());
     }
 }
