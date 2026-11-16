@@ -78,6 +78,15 @@ pub fn apply_id(d: &mut lopdf::Document, pages: &[usize], id: &str, file: &str) 
 
 impl Folio {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((_, label, f)) = id.strip_prefix("oc:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            let Some(name) = self.od.as_ref().map(|d| d.name.clone()) else {
+                crate::toast(ctx, "Ouvre d'abord un PDF", false);
+                return true;
+            };
+            let page = self.page;
+            self.edit(ctx, label, |d| f(d, page, &name).map(|_| ()));
+            return true;
+        }
         if !["fo:", "fh:", "fb:"].iter().any(|p| id.starts_with(p)) {
             return false;
         }

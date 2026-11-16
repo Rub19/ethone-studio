@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod engine;
 mod panels;
 mod render;
@@ -1211,6 +1212,9 @@ impl Folio {
         for (p, name) in panels::LIST {
             let standalone = matches!(p, panels::Panel::Combine | panels::Panel::Create);
             v.push(Cmd::new(format!("Outil : {name}"), "Outils", format!("panel:{}", p as u8)).enabled_if(standalone || has_doc, "Ouvre d'abord un PDF"));
+        }
+        for (id, name, _) in outils::TOOLS {
+            v.push(Cmd::new(format!("Outil PDF : {name}"), "Folio · nouvel outil · document ou page courante", format!("oc:{id}")).enabled_if(has_doc, "Ouvre d'abord un PDF"));
         }
         for (t, name) in TOOLS {
             v.push(Cmd::new(format!("Annoter : {name}"), "Barre d'outils", format!("tool:{}", t as u8)).enabled_if(has_doc, "Ouvre d'abord un PDF"));
