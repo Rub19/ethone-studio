@@ -224,6 +224,16 @@ pub fn apply(img: &RgbaImage, op: Op) -> RgbaImage {
 
 impl Pixel {
     pub fn run_lib(&mut self, id: &str, _ctx: &egui::Context) -> bool {
+        if let Some((_, label, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            if !self.home {
+                let base = self.doc.active_target();
+                let out = f(&base);
+                self.doc.next_label = Some(label.to_string());
+                self.doc.checkpoint();
+                self.doc.put_filtered(&base, &out);
+            }
+            return true;
+        }
         if id == "pc-ase" {
             if let Some(p) = rfd::FileDialog::new().add_filter("Nuancier Adobe", &["ase", "aco"]).pick_file() {
                 match studio_fx::swatches::load(&p) {

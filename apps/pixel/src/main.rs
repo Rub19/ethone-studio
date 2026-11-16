@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod algos;
 mod canvas;
 mod doc;
@@ -1227,6 +1228,7 @@ impl Pixel {
             studio_ui::palette::Cmd::new("Fusionner les calques visibles", "Calques · conserve les calques masqués", "merge-visible"),
             studio_ui::palette::Cmd::new("Aplatir toute l'image", "Calques · résultat unique", "flatten-image").confirm(),
         ];
+        v.extend(outils::TOOLS.iter().map(|(id, label, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Pixel · nouvel outil · calque actif ou sélection", format!("tool:{id}"))));
         v = v.into_iter().map(|command| {
             if matches!(command.id.as_str(), "open" | "taskbar") {
                 command
