@@ -197,6 +197,9 @@ impl Default for Mask {
 #[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Settings {
+    /// "bank:KEY" or a .cube path; empty = none.
+    pub lut: String,
+    pub lut_amount: f32,
     pub exposure: f32,
     pub contrast: f32,
     pub highlights: f32,
@@ -1329,6 +1332,8 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
     let lvm = 1.0 + s.lens_vignette_mid / 100.0 * 1.5;
     let vround = s.vignette_round / 100.0;
     let fade = s.fade / 100.0;
+    let look = (!s.lut.is_empty() && s.lut_amount > 0.0).then(|| studio_fx::lut::load(&s.lut)).flatten();
+    let look_amt = s.lut_amount / 100.0;
     let mut out = RgbImage::new(w, h);
     out.par_chunks_mut(w as usize * 3).enumerate().for_each(|(y, row)| {
         for x in 0..w as usize {
@@ -1409,6 +1414,9 @@ pub fn process(src: &RgbImage, s: &Settings) -> RgbImage {
                 for k in 0..3 {
                     c[k] += (tint_sh[k] - 0.5) * wsh * 0.35 + (tint_hi[k] - 0.5) * whi * 0.35 + (tint_mid[k] - 0.5) * wmid * 0.35 + (tint_gl[k] - 0.5) * wgl * 0.3 + dl;
                 }
+            }
+            if let Some(l) = &look {
+                c = l.apply_mix(c, look_amt);
             }
             let (u, v) = ((x as f32 + 0.5) / w as f32, (y as f32 + 0.5) / h as f32);
             if s.grad_on {

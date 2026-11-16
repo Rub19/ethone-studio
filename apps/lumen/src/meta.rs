@@ -81,6 +81,8 @@ pub const FIELDS: &[(&str, &str, usize)] = &[
     ("grain_rough", "Rugosité du grain", 10),
     ("glow", "Halo lumineux", 10),
     ("fade", "Délavé", 10),
+    ("lut", "LUT pellicule", 10),
+    ("lut_amount", "Intensité du LUT", 10),
     ("cal_shadow_tint", "Teinte des ombres (étalonnage)", 11),
     ("cal_red_hue", "Primaire rouge", 11),
     ("cal_red_sat", "Primaire rouge", 11),

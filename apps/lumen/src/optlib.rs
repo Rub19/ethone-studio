@@ -9,7 +9,7 @@ use studio_ui::palette::{Cmd, Library};
 const AMOUNTS: [u8; 10] = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const WB: [(f32, &str); 8] = [(0.0, "balance neutre"), (-30.0, "froid −30"), (-20.0, "froid −20"), (-10.0, "froid −10"), (10.0, "chaud +10"), (20.0, "chaud +20"), (30.0, "chaud +30"), (45.0, "très chaud +45")];
 /// Geometry stays the photo's own when a look is applied.
-const KEEP: [&str; 6] = ["crop", "straighten", "rotate", "flip", "flip_v", "aspect"];
+const KEEP: [&str; 8] = ["crop", "straighten", "rotate", "flip", "flip_v", "aspect", "lut", "lut_amount"];
 
 pub fn lib() -> &'static Library {
     static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
@@ -22,6 +22,13 @@ pub fn lib() -> &'static Library {
                 }
             }
         }
+        for (k, (_, name, stock)) in studio_fx::lut::BANK.iter().enumerate() {
+            for a in AMOUNTS {
+                v.push(Cmd::new(format!("Film {name} ({stock}) · {a} %"), "Lumen · LUT pellicule · photo courante ou choisies", format!("lt:{k}:{a}")));
+            }
+        }
+        v.push(Cmd::new("Importer un LUT .cube…", "Lumen · ton propre LUT 3D · photo courante ou choisies", "lt-file"));
+        v.push(Cmd::new("Retirer le LUT", "Lumen · photo courante ou choisies", "lt-off"));
         Library::new(v)
     })
 }
@@ -64,6 +71,36 @@ pub fn look(current: &Settings, preset: &Settings, amount: f32, wb: f32) -> Sett
 
 impl Lumen {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if id == "lt-file" || id == "lt-off" || id.starts_with("lt:") {
+            let source = match id {
+                "lt-off" => Some((String::new(), 0.0)),
+                "lt-file" => rfd::FileDialog::new().add_filter("LUT 3D", &["cube"]).pick_file().map(|p| (p.to_string_lossy().into_owned(), 100.0)),
+                _ => {
+                    let n: Vec<usize> = id[3..].split(':').filter_map(|x| x.parse().ok()).collect();
+                    match (n.first().and_then(|k| studio_fx::lut::BANK.get(*k)), n.get(1)) {
+                        (Some((key, _, _)), Some(a)) => Some((format!("bank:{key}"), *a as f32)),
+                        _ => None,
+                    }
+                }
+            };
+            let Some((lut, amount)) = source else { return true };
+            if !lut.is_empty() && studio_fx::lut::load(&lut).is_none() {
+                studio_ui::handoff::toast(ctx, "LUT illisible (format .cube 3D attendu)".into(), false);
+                return true;
+            }
+            let targets: Vec<usize> = self.targets().into_iter().filter(|i| *i < self.files.len()).collect();
+            if targets.is_empty() {
+                studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
+                return true;
+            }
+            for i in &targets {
+                let mut s = self.settings(*i);
+                (s.lut, s.lut_amount) = (lut.clone(), amount);
+                self.set_settings(*i, s);
+            }
+            studio_ui::handoff::toast(ctx, format!("{} sur {} photo(s)", if lut.is_empty() { "LUT retiré" } else { "LUT appliqué" }, targets.len()), true);
+            return true;
+        }
         let Some(rest) = id.strip_prefix("lm:") else { return false };
         let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
         let cat = develop::preset_catalog();
@@ -89,7 +126,7 @@ mod tests {
 
     #[test]
     fn library_size_and_blend() {
-        assert!(lib().len() >= 6000, "{}", lib().len());
+        assert!(lib().len() >= 6000 + 72, "{}", lib().len());
         let preset = Settings { exposure: 1.0, contrast: 40.0, mono: true, ..Settings::default() };
         let cur = Settings { straighten: 3.0, ..Settings::default() };
         let half = look(&cur, &preset, 0.5, 10.0);
@@ -98,5 +135,8 @@ mod tests {
         assert_eq!(half.straighten, 3.0);
         assert_eq!(half.temperature, 10.0);
         assert!(!look(&cur, &preset, 0.3, 0.0).mono);
+        let with_lut = Settings { lut: "bank:toasty".into(), lut_amount: 60.0, ..Settings::default() };
+        let kept = look(&with_lut, &preset, 1.0, 0.0);
+        assert_eq!((kept.lut.as_str(), kept.lut_amount), ("bank:toasty", 60.0));
     }
 }
