@@ -9,6 +9,8 @@ use studio_ui::palette::{Cmd, Library};
 const AMOUNTS: [u8; 10] = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const WB: [(f32, &str); 8] = [(0.0, "balance neutre"), (-30.0, "froid −30"), (-20.0, "froid −20"), (-10.0, "froid −10"), (10.0, "chaud +10"), (20.0, "chaud +20"), (30.0, "chaud +30"), (45.0, "très chaud +45")];
 /// Geometry stays the photo's own when a look is applied.
+const LOOK_AMTS: [u8; 4] = [25, 50, 75, 100];
+const FILM_AMTS: [u8; 5] = [20, 40, 60, 80, 100];
 const KEEP: [&str; 8] = ["crop", "straighten", "rotate", "flip", "flip_v", "aspect", "lut", "lut_amount"];
 
 pub fn lib() -> &'static Library {
@@ -25,6 +27,15 @@ pub fn lib() -> &'static Library {
         for (k, (_, name, stock)) in studio_fx::lut::BANK.iter().enumerate() {
             for a in AMOUNTS {
                 v.push(Cmd::new(format!("Film {name} ({stock}) · {a} %"), "Lumen · LUT pellicule · photo courante ou choisies", format!("lt:{k}:{a}")));
+            }
+        }
+        for (p, (group, name, _)) in develop::preset_catalog().iter().enumerate() {
+            for (f, (_, film, stock)) in studio_fx::lut::BANK.iter().enumerate() {
+                for la in LOOK_AMTS {
+                    for fa in FILM_AMTS {
+                        v.push(Cmd::new(format!("Look {name} {la} % + film {film} {fa} %"), format!("Lumen · {group} + pellicule {stock} · photo courante ou choisies"), format!("lc:{p}:{la}:{f}:{fa}")));
+                    }
+                }
             }
         }
         v.push(Cmd::new("Importer un LUT .cube…", "Lumen · ton propre LUT 3D · photo courante ou choisies", "lt-file"));
@@ -68,6 +79,23 @@ pub fn look(current: &Settings, preset: &Settings, amount: f32, wb: f32) -> Sett
     let mut s: Settings = serde_json::from_value(out).unwrap_or_else(|_| preset.clone());
     s.temperature = (s.temperature + wb).clamp(-100.0, 100.0);
     s
+}
+
+/// New settings for a library id ("lm:", "lt:" bank film or "lc:" look + film) applied to `cur`.
+pub fn settings_for(id: &str, cur: &Settings) -> Option<Settings> {
+    let (kind, rest) = id.split_once(':')?;
+    let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
+    let cat = develop::preset_catalog();
+    match (kind, n.as_slice()) {
+        ("lm", [p, a, w]) => Some(look(cur, &cat.get(*p)?.2, *a as f32 / 100.0, WB.get(*w)?.0)),
+        ("lt", [k, a]) => Some(Settings { lut: format!("bank:{}", studio_fx::lut::BANK.get(*k)?.0), lut_amount: *a as f32, ..cur.clone() }),
+        ("lc", [p, la, f, fa]) => {
+            let mut s = look(cur, &cat.get(*p)?.2, *la as f32 / 100.0, 0.0);
+            (s.lut, s.lut_amount) = (format!("bank:{}", studio_fx::lut::BANK.get(*f)?.0), *fa as f32);
+            Some(s)
+        }
+        _ => None,
+    }
 }
 
 impl Lumen {
@@ -126,21 +154,21 @@ impl Lumen {
             studio_ui::handoff::toast(ctx, format!("{} sur {} photo(s)", if lut.is_empty() { "LUT retiré" } else { "LUT appliqué" }, targets.len()), true);
             return true;
         }
-        let Some(rest) = id.strip_prefix("lm:") else { return false };
-        let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
-        let cat = develop::preset_catalog();
-        let (Some(&p), Some(&a), Some(&w)) = (n.first(), n.get(1), n.get(2)) else { return true };
-        let (Some((_, name, preset)), Some((wb, _))) = (cat.get(p), WB.get(w)) else { return true };
+        if !(id.starts_with("lm:") || id.starts_with("lc:")) {
+            return false;
+        }
+        let label = lib().cmds.iter().find(|c| c.id == id).map(|c| c.label.clone()).unwrap_or_default();
         let targets: Vec<usize> = self.targets().into_iter().filter(|i| *i < self.files.len()).collect();
         if targets.is_empty() {
             studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
             return true;
         }
         for i in &targets {
-            let s = look(&self.settings(*i), preset, a as f32 / 100.0, *wb);
-            self.set_settings(*i, s);
+            if let Some(s) = settings_for(id, &self.settings(*i)) {
+                self.set_settings(*i, s);
+            }
         }
-        studio_ui::handoff::toast(ctx, format!("Look {name} à {a} % appliqué à {} photo(s)", targets.len()), true);
+        studio_ui::handoff::toast(ctx, format!("{label} appliqué à {} photo(s)", targets.len()), true);
         true
     }
 }
@@ -151,7 +179,7 @@ mod tests {
 
     #[test]
     fn library_size_and_blend() {
-        assert!(lib().len() >= 6000 + 73, "{}", lib().len());
+        assert!(lib().len() >= 6000 + 73 + 10_920, "{}", lib().len());
         let preset = Settings { exposure: 1.0, contrast: 40.0, mono: true, ..Settings::default() };
         let cur = Settings { straighten: 3.0, ..Settings::default() };
         let half = look(&cur, &preset, 0.5, 10.0);
@@ -163,5 +191,22 @@ mod tests {
         let with_lut = Settings { lut: "bank:toasty".into(), lut_amount: 60.0, ..Settings::default() };
         let kept = look(&with_lut, &preset, 1.0, 0.0);
         assert_eq!((kept.lut.as_str(), kept.lut_amount), ("bank:toasty", 60.0));
+    }
+
+    #[test]
+    fn every_library_option_renders() {
+        let src = image::RgbImage::from_fn(5, 4, |x, y| image::Rgb([(x * 50) as u8, (y * 60) as u8, 90]));
+        let base = Settings::default();
+        let mut ran = 0;
+        for c in &lib().cmds {
+            if let Some(s) = settings_for(&c.id, &base) {
+                let out = develop::process(&src, &s);
+                assert!(out.width() > 0 && out.height() > 0, "{}", c.label);
+                ran += 1;
+            }
+        }
+        assert_eq!(ran, 6240 + 70 + 10_920);
+        let film = settings_for("lc:0:100:5:100", &base).unwrap();
+        assert_ne!(develop::process(&src, &film), develop::process(&src, &settings_for("lm:0:100:0", &base).unwrap()), "le film ne change rien");
     }
 }

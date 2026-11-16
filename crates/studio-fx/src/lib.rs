@@ -1,4 +1,5 @@
 pub mod filters;
+pub mod archive;
 pub mod fx;
 pub mod fx2;
 pub mod lut;

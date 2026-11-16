@@ -26,6 +26,7 @@ pub enum Op {
     Peak(f32),
     Lufs(f32),
     Fade(bool, f32, u8),
+    Chain(u16, u16),
 }
 
 fn steps(a: f32, b: f32, step: f32) -> Vec<f32> {
@@ -112,6 +113,16 @@ pub fn ops() -> &'static Vec<(Op, String, &'static str)> {
                 v.push((Op::Fade(false, secs, k as u8), format!("Fondu de sortie {secs} s · {sn}"), "Fondus"));
             }
         }
+        let idx = |f: &dyn Fn(&Op) -> bool| -> Vec<usize> { v.iter().enumerate().filter(|(_, o)| f(&o.0)).map(|(i, _)| i).collect() };
+        let pitch = idx(&|o| matches!(o, Op::Pitch(s) if s.fract() == 0.0 && s.abs() <= 12.0));
+        let reverb = idx(&|o| matches!(o, Op::Reverb(..)));
+        let echo = idx(&|o| matches!(o, Op::Echo(..)));
+        let lowcut = idx(&|o| matches!(o, Op::LowCut(..)));
+        let mut chains = Vec::new();
+        for (a, b) in pitch.iter().flat_map(|a| reverb.iter().map(move |b| (*a, *b))).chain(echo.iter().flat_map(|a| lowcut.iter().map(move |b| (*a, *b)))) {
+            chains.push((Op::Chain(a as u16, b as u16), format!("{} + {}", v[a].1, v[b].1.to_lowercase()), "Chaîne d'effets"));
+        }
+        v.extend(chains);
         v
     })
 }
@@ -149,6 +160,15 @@ pub fn apply(c: &mut Clip, a: usize, b: usize, op: Op) {
         Op::HighCut(f) => c.filter(a, b, 3, f, 0.0, 0.707),
         Op::Peak(p) => c.normalize(a, b, p),
         Op::Lufs(l) => c.loudness_normalize(a, b, l),
+        Op::Chain(x, y) => {
+            for k in [x, y] {
+                if let Some((op, _, _)) = ops().get(k as usize)
+                    && !matches!(op, Op::Chain(..))
+                {
+                    apply(c, a, b.min(c.len()), *op);
+                }
+            }
+        }
         Op::Fade(fade_in, secs, shape) => {
             let n = ((secs * rate) as usize).min(b.saturating_sub(a));
             if fade_in { c.fade_shape(a, a + n, true, shape) } else { c.fade_shape(b - n, b, false, shape) }
@@ -193,7 +213,14 @@ mod tests {
 
     #[test]
     fn library_and_ops() {
-        assert!(lib().len() >= 6000 + 313, "{}", lib().len());
+        assert!(lib().len() >= 6973 + 313 + 12_000, "{}", lib().len());
+        let probe = Clip { rate: 8000, ch: vec![(0..800).map(|i| (i as f32 * 0.07).sin() * 0.5).collect(), (0..800).map(|i| (i as f32 * 0.05).cos() * 0.4).collect()] };
+        for (op, label, _) in ops() {
+            let mut c = probe.clone();
+            let n = c.len();
+            apply(&mut c, 0, n, *op);
+            assert!(c.len() > 0 && c.ch.iter().flatten().all(|v| v.is_finite()), "{label}");
+        }
         for k in 0..crate::sfx::SFX.len() {
             let c = sfx_clip(k).unwrap_or_else(|e| panic!("{e}"));
             assert!(c.len() > 100 && !c.ch.is_empty(), "{}", crate::sfx::SFX[k].1);

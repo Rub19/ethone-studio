@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod idml;
 mod model;
 mod panels;
 mod templates;
@@ -463,6 +464,17 @@ impl PageApp {
     }
 
     fn open_path(&mut self, p: &Path) {
+        if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("idml")) {
+            match std::fs::read(p).map_err(|e| e.to_string()).and_then(|b| idml::import(&b)) {
+                Ok((d, n)) => {
+                    let pages = d.pages.len();
+                    self.set_doc(d, None);
+                    self.notice = Some((format!("InDesign : {pages} page(s), {n} bloc(s) repris (styles et chaînages non repris)"), true));
+                }
+                Err(e) => self.notice = Some((format!("InDesign : {e}"), false)),
+            }
+            return;
+        }
         match std::fs::read(p).map_err(|e| e.to_string()).and_then(|b| serde_json::from_slice::<Doc>(b.strip_prefix(b"\xEF\xBB\xBF").unwrap_or(&b)).map_err(|e| e.to_string())) {
             Ok(d) => {
                 self.set_doc(d, Some(p.to_path_buf()));
@@ -473,7 +485,7 @@ impl PageApp {
     }
 
     fn open(&mut self) {
-        if let Some(p) = rfd::FileDialog::new().add_filter("Projet Page", &["epage"]).pick_file() {
+        if let Some(p) = rfd::FileDialog::new().add_filter("Projet Page ou InDesign", &["epage", "idml"]).pick_file() {
             self.open_path(&p);
         }
     }

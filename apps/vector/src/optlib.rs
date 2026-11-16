@@ -71,10 +71,33 @@ fn icon_svg(inner: &str) -> String {
     studio_ui::palette::icon_svg(inner, ICON_SIZE, [30, 30, 36])
 }
 
+pub const GRADIENTS: usize = 10_000;
+
+/// The two bank colours of gradient `k` (always different).
+pub fn gradient_pair(k: usize) -> (usize, usize) {
+    let n = color_bank().len();
+    let a = k % n;
+    let step = if k < n { 7919 } else { 104_729 };
+    let b = (a * step + n / 3 + k / n) % n;
+    (a, if b == a { (a + 1) % n } else { b })
+}
+
 pub fn lib() -> &'static Library {
     static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
     L.get_or_init(|| {
         let mut v = Vec::new();
+        use crate::model::{Doc, Geom, Item};
+        let opt = resvg::usvg::Options::default();
+        for k in 0..GRADIENTS {
+            let mut d = Doc::new(40.0, 20.0);
+            d.items.push(Item { geom: Geom::Rect { x: 2.0, y: 2.0, w: 30.0, h: 10.0, r: 0.0 }, visible: true, opacity: 1.0, ..Item::blank() });
+            gradient_fill(&mut d.items[0], k);
+            let svg = d.to_svg();
+            assert!(svg.contains("url(#g0)"), "dégradé {k} absent du SVG");
+            if k % 250 == 0 {
+                assert!(resvg::usvg::Tree::from_str(&svg, &opt).is_ok(), "dégradé {k} illisible");
+            }
+        }
         for h in (0..360).step_by(6) {
             let (r, g, b) = studio_fx::hsl_to_rgb(h as f32 / 360.0, 0.85, 0.5);
             let name = color_name([(r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8]);
@@ -83,6 +106,10 @@ pub fn lib() -> &'static Library {
                     v.push(Cmd::new(format!("Palette {name} {h}° · {sn} · {tn}"), "Vector · recolorer la sélection, sinon tout", format!("vc:{h}:{s}:{t}")));
                 }
             }
+        }
+        for k in 0..GRADIENTS {
+            let (a, b) = gradient_pair(k);
+            v.push(Cmd::new(format!("Dégradé « {} » → « {} »", color_bank()[a].0, color_bank()[b].0), "Vector · banque de couleurs · remplissage de la sélection", format!("vg:{k}")));
         }
         v.extend(icon_cmds("Vector", "vi:"));
         v.push(Cmd::new("Importer un nuancier Adobe (.ase / .aco)…", "Vector · Illustrator, Photoshop, InDesign · nuancier du document", "vc-ase"));
@@ -93,6 +120,13 @@ pub fn lib() -> &'static Library {
         }
         Library::new(v)
     })
+}
+
+pub fn gradient_fill(it: &mut crate::model::Item, k: usize) {
+    let (a, b) = gradient_pair(k);
+    let (ca, cb) = (color_bank()[a].1, color_bank()[b].1);
+    it.fill = Some([ca[0], ca[1], ca[2], 255]);
+    it.fill2 = Some([cb[0], cb[1], cb[2], 255]);
 }
 
 impl VectorApp {
@@ -113,6 +147,19 @@ impl VectorApp {
         if let Some((name, _, inner)) = id.strip_prefix("vi:").and_then(|k| k.parse::<usize>().ok()).and_then(|k| icons().get(k)) {
             let at = [(self.doc.width - ICON_SIZE) / 2.0, (self.doc.height - ICON_SIZE) / 2.0];
             self.import_svg_str(&icon_svg(inner), name, at);
+            return true;
+        }
+        if let Some(k) = id.strip_prefix("vg:").and_then(|k| k.parse::<usize>().ok()).filter(|k| *k < GRADIENTS) {
+            let targets = self.selection();
+            if targets.is_empty() {
+                studio_ui::handoff::toast(ctx, "Sélectionne d'abord un objet".into(), false);
+                return true;
+            }
+            self.checkpoint();
+            for i in targets {
+                gradient_fill(&mut self.doc.items[i], k);
+            }
+            studio_ui::handoff::toast(ctx, "Dégradé appliqué".into(), true);
             return true;
         }
         let (stroke, rest) = match (id.strip_prefix("vf:"), id.strip_prefix("vs:")) {
@@ -179,7 +226,20 @@ mod tests {
     #[test]
     fn palettes_and_remap() {
         assert_eq!(icons().len(), 2359);
-        assert_eq!(lib().len(), 6000 + 2359 + 10000 + 1);
+        assert_eq!(lib().len(), 6000 + GRADIENTS + 2359 + 10000 + 1);
+        let mut pairs = std::collections::HashSet::new();
+        for k in 0..GRADIENTS {
+            let (a, b) = gradient_pair(k);
+            assert!(a != b && pairs.insert((a, b)), "dégradé {k} en double ou uni");
+        }
+        for h in (0..360).step_by(6) {
+            for s in 0..SCHEMES.len() {
+                for t in 0..TONES.len() {
+                    let pal = palette(h as f32, s, t);
+                    assert_eq!(remap(&[[10, 10, 10, 255], [240, 240, 240, 255]], &pal).len(), 2);
+                }
+            }
+        }
         let opt = resvg::usvg::Options::default();
         for (name, _, inner) in icons() {
             let items = crate::geom::import_svg(&icon_svg(inner), &opt).unwrap_or_default();

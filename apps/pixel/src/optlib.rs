@@ -14,6 +14,19 @@ pub enum Op {
     Gradient(usize, u8, u8),
     Vignette(usize, u8, bool),
     PixelArt(u32, usize),
+    DuoBank(usize, usize),
+    TintBank(usize),
+}
+
+/// A second, far-away colour of the bank for colour `i` (never `i` itself).
+pub fn partner(i: usize, n: usize) -> usize {
+    let j = (i * 7919 + n / 2) % n;
+    if j == i { (i + 1) % n } else { j }
+}
+
+fn bank(i: usize) -> [u8; 3] {
+    let b = color_bank();
+    b[i % b.len()].1
 }
 
 const ZONES: [&str; 3] = ["ombres", "tons moyens", "hautes lumières"];
@@ -78,6 +91,13 @@ pub fn ops() -> &'static Vec<(Op, String, &'static str)> {
                 v.push((Op::PixelArt(b, p), format!("Pixel art {b} px · {pn}"), "Rétro"));
             }
         }
+        let n = color_bank().len();
+        for i in 0..n {
+            let (a, b) = (i, partner(i, n));
+            let (a, b) = if luma([bank(a)[0], bank(a)[1], bank(a)[2], 255]) <= luma([bank(b)[0], bank(b)[1], bank(b)[2], 255]) { (a, b) } else { (b, a) };
+            v.push((Op::DuoBank(a, b), format!("Duotone « {} » et « {} »", color_bank()[a].0, color_bank()[b].0), "Duotone · banque de couleurs"));
+            v.push((Op::TintBank(i), format!("Voile de couleur « {} »", color_bank()[i].0), "Teinte · banque de couleurs"));
+        }
         v
     })
 }
@@ -101,18 +121,20 @@ fn mix(p: [u8; 4], c: [u8; 3], t: f32) -> [u8; 4] {
     [0, 1, 2].map(|k| (p[k] as f32 + (c[k] as f32 - p[k] as f32) * t).round() as u8).into_iter().chain([p[3]]).collect::<Vec<_>>().try_into().unwrap_or(p)
 }
 
+fn duo(img: &RgbaImage, d: [u8; 3], l: [u8; 3]) -> RgbaImage {
+    RgbaImage::from_fn(img.width(), img.height(), |x, y| {
+        let p = img.get_pixel(x, y).0;
+        let t = luma(p);
+        let c = [0, 1, 2].map(|k| (d[k] as f32 + (l[k] as f32 - d[k] as f32) * t).round() as u8);
+        Rgba([c[0], c[1], c[2], p[3]])
+    })
+}
+
 pub fn apply(img: &RgbaImage, op: Op) -> RgbaImage {
     let (w, h) = img.dimensions();
     let (fw, fh) = (w.max(1) as f32, h.max(1) as f32);
     match op {
-        Op::Duotone(a, b) => {
-            let (d, l) = (col(a), col(b));
-            RgbaImage::from_fn(w, h, |x, y| {
-                let p = img.get_pixel(x, y).0;
-                let t = luma(p);
-                Rgba([0, 1, 2].map(|k| (d[k] as f32 + (l[k] as f32 - d[k] as f32) * t).round() as u8).into_iter().chain([p[3]]).collect::<Vec<_>>().try_into().unwrap_or(p))
-            })
-        }
+        Op::Duotone(a, b) => duo(img, col(a), col(b)),
         Op::Tint(hue, s, zone) => {
             let (r, g, b) = studio_fx::hsl_to_rgb(hue as f32 / 360.0, 1.0, 0.5);
             let c = [r * 255.0, g * 255.0, b * 255.0];
@@ -157,6 +179,15 @@ pub fn apply(img: &RgbaImage, op: Op) -> RgbaImage {
                 let d = if round { (u * u + v * v).sqrt() / 1.414 } else { u.abs().max(v.abs()) };
                 let t = ((d - 0.35) / 0.65).clamp(0.0, 1.0).powf(1.6);
                 Rgba(mix(img.get_pixel(x, y).0, c, t * st as f32 / 100.0))
+            })
+        }
+        Op::DuoBank(a, b) => duo(img, bank(a), bank(b)),
+        Op::TintBank(i) => {
+            let c = bank(i);
+            RgbaImage::from_fn(w, h, |x, y| {
+                let p = img.get_pixel(x, y).0;
+                let l = luma(p);
+                Rgba(mix(p, [0, 1, 2].map(|k| (c[k] as f32 * (0.35 + 0.65 * l)).min(255.0) as u8), 0.35))
             })
         }
         Op::PixelArt(b, pal) => {
@@ -231,7 +262,15 @@ mod tests {
 
     #[test]
     fn library_and_ops() {
-        assert!(lib().len() >= 11000, "{}", lib().len());
+        assert!(lib().len() >= 21_744, "{}", lib().len());
+        let probe = RgbaImage::from_fn(6, 5, |x, y| Rgba([(x * 40) as u8, (y * 50) as u8, 128, 200]));
+        for (op, label, _) in ops() {
+            let out = apply(&probe, *op);
+            assert_eq!(out.dimensions(), probe.dimensions(), "{label}");
+            assert!(out.pixels().zip(probe.pixels()).all(|(a, b)| a.0[3] == b.0[3]) || matches!(op, Op::Frame(..) | Op::PixelArt(..)), "{label} change l'alpha");
+        }
+        let mut seen = std::collections::HashSet::new();
+        assert!(lib().cmds.iter().all(|c| seen.insert(c.id.clone())), "identifiant en double");
         let img = RgbaImage::from_fn(20, 20, |x, _| if x < 10 { Rgba([0, 0, 0, 255]) } else { Rgba([255, 255, 255, 255]) });
         let d = apply(&img, Op::Duotone(39, 4));
         assert_eq!(d.get_pixel(0, 0).0[..3], NAMED_COLORS[39].1);

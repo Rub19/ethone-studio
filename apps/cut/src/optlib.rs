@@ -19,6 +19,7 @@ pub enum Op {
     KenBurns(f32, f32, f32),
     Fades(f64, f64),
     Opacity(f32),
+    Recipe(u8, f32, f32, f32, f32),
 }
 
 const ANCHORS: [(f32, f32, &str); 9] = [(0.0, 0.0, "centre"), (-1.0, -1.0, "haut gauche"), (0.0, -1.0, "haut"), (1.0, -1.0, "haut droite"), (-1.0, 0.0, "gauche"), (1.0, 0.0, "droite"), (-1.0, 1.0, "bas gauche"), (0.0, 1.0, "bas"), (1.0, 1.0, "bas droite")];
@@ -92,6 +93,22 @@ pub fn ops() -> &'static Vec<(Op, String, &'static str)> {
                 }
             }
         }
+        for (l, look) in LOOKS.iter().enumerate().skip(1) {
+            for c in [-20.0, -10.0, 0.0, 10.0, 20.0, 30.0] {
+                for s in [-30.0, -15.0, 0.0, 15.0, 30.0] {
+                    for g in [0.0, 15.0, 30.0, 50.0, 70.0, 90.0] {
+                        for vig in [0.0, 30.0, 60.0] {
+                            let mut parts = vec![format!("Recette {look}")];
+                            if c != 0.0 { parts.push(format!("contraste {}", sign(c))) }
+                            if s != 0.0 { parts.push(format!("saturation {}", sign(s))) }
+                            if g > 0.0 { parts.push(format!("grain {g}")) }
+                            if vig > 0.0 { parts.push(format!("vignettage {vig}")) }
+                            v.push((Op::Recipe(l as u8, c, s, g, vig), parts.join(" · "), "Recette d'étalonnage"));
+                        }
+                    }
+                }
+            }
+        }
         for o in (2..=20).map(|k| k as f32 * 0.05) {
             v.push((Op::Opacity(o), format!("Opacité {:.0} %", o * 100.0), "Calque"));
         }
@@ -101,7 +118,11 @@ pub fn ops() -> &'static Vec<(Op, String, &'static str)> {
 
 pub fn lib() -> &'static Library {
     static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
-    L.get_or_init(|| Library::new(ops().iter().enumerate().map(|(k, (_, label, hint))| Cmd::new(label.clone(), format!("Cut · {hint} · clip sélectionné"), format!("ct:{k}"))).collect()))
+    L.get_or_init(|| {
+        let mut v: Vec<Cmd> = ops().iter().enumerate().map(|(k, (_, label, hint))| Cmd::new(label.clone(), format!("Cut · {hint} · clip sélectionné"), format!("ct:{k}"))).collect();
+        v.push(Cmd::new("Importer les médias d'un projet Premiere Pro (.prproj)…", "Cut · Adobe Premiere · ajoute les vidéos, sons et images trouvés", "ct-prproj"));
+        Library::new(v)
+    })
 }
 
 pub fn apply(c: &mut Clip, op: Op) {
@@ -126,11 +147,28 @@ pub fn apply(c: &mut Clip, op: Op) {
             (c.fade_in, c.fade_out) = (a.min(half), b.min(half));
         }
         Op::Opacity(o) => c.opacity = o,
+        Op::Recipe(l, ct, s, g, vig) => (c.look, c.look_amt, c.contrast, c.saturation, c.grain, c.vignette) = (l, 1.0, ct, s, g, vig),
     }
 }
 
 impl Cut {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if id == "ct-prproj" {
+            let Some(p) = rfd::FileDialog::new().add_filter("Projet Premiere Pro", &["prproj"]).pick_file() else { return true };
+            match std::fs::read(&p).map_err(|e| e.to_string()).and_then(|b| studio_fx::archive::premiere_media(&b)) {
+                Ok(all) => {
+                    let found: Vec<std::path::PathBuf> = all.iter().map(std::path::PathBuf::from).filter(|f| f.is_file() && f.extension().is_some_and(|e| crate::EXT.contains(&e.to_string_lossy().to_lowercase().as_str()))).collect();
+                    let missing = all.len() - found.len();
+                    studio_ui::handoff::toast(ctx, format!("Premiere : {} média(s) importé(s){}", found.len(), if missing > 0 { format!(", {missing} introuvable(s) ou non pris en charge") } else { String::new() }), !found.is_empty());
+                    if !found.is_empty() {
+                        self.home = false;
+                        self.import(found, ctx);
+                    }
+                }
+                Err(e) => studio_ui::handoff::toast(ctx, format!("Premiere : {e}"), false),
+            }
+            return true;
+        }
         let Some(k) = id.strip_prefix("ct:").and_then(|k| k.parse::<usize>().ok()) else { return false };
         let Some((op, label, _)) = ops().get(k).cloned() else { return true };
         let sel = match self.sel {
@@ -158,7 +196,14 @@ mod tests {
 
     #[test]
     fn library_and_ops() {
-        assert!(lib().len() >= 6000, "{}", lib().len());
+        assert!(lib().len() >= 7047 + 10_260, "{}", lib().len());
+        let mut labels = std::collections::HashSet::new();
+        for (op, label, _) in ops() {
+            assert!(labels.insert(label.clone()), "libellé en double : {label}");
+            let mut c = Clip { out: 6.0, ..Clip::default() };
+            apply(&mut c, *op);
+            assert!(c.speed > 0.0 && c.fade_in + c.fade_out <= c.len() + 1e-9 && (0.0..=1.0).contains(&c.opacity), "{label}");
+        }
         let mut c = Clip::default();
         apply(&mut c, Op::Look(3, 0.6, 10.0, -20.0));
         assert_eq!((c.look, c.look_amt, c.temperature, c.saturation), (3, 0.6, 10.0, -20.0));

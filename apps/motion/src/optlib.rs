@@ -27,9 +27,47 @@ pub fn lib() -> &'static Library {
                 }
             }
         }
+        let entries = (0..ANIM_PRESETS.len()).filter(|p| *p != SKIP && !EXITS.contains(p) && *p < 8);
+        for p in entries {
+            for q in EXITS {
+                for (di, din) in DURATIONS.iter().enumerate() {
+                    for (dq, dout) in DURATIONS.iter().enumerate() {
+                        for (e, (_, en)) in EASES.iter().enumerate().take(COMBO_EASES) {
+                            v.push(Cmd::new(format!("Entrée {} {din} s puis {} {dout} s · {en}", ANIM_PRESETS[p].to_lowercase(), ANIM_PRESETS[q].to_lowercase()), "Motion · entrée et sortie · calque sélectionné", format!("mc:{p}:{q}:{di}:{dq}:{e}")));
+                        }
+                    }
+                }
+            }
+        }
         v.extend(icon_cmds("Motion", "mi:"));
         Library::new(v)
     })
+}
+
+const COMBO_EASES: usize = 5;
+
+/// Applies an "mo:" or "mc:" library entry to a layer; false when the id is not one of them.
+pub fn apply_id(l: &mut model::Layer, id: &str, w: f32, h: f32) -> bool {
+    let Some((kind, rest)) = id.split_once(':') else { return false };
+    let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
+    match (kind, n.as_slice()) {
+        ("mo", [p, d, e, dl]) if *p < ANIM_PRESETS.len() => match (DURATIONS.get(*d), EASES.get(*e), DELAYS.get(*dl)) {
+            (Some(dur), Some((ease, _)), Some(delay)) => {
+                apply_timed(l, *p, w, h, *dur, *ease, *delay);
+                true
+            }
+            _ => false,
+        },
+        ("mc", [p, q, di, dq, e]) if *p < ANIM_PRESETS.len() && *q < ANIM_PRESETS.len() => match (DURATIONS.get(*di), DURATIONS.get(*dq), EASES.get(*e)) {
+            (Some(din), Some(dout), Some((ease, _))) => {
+                apply_timed(l, *p, w, h, *din, *ease, 0.0);
+                apply_timed(l, *q, w, h, *dout, *ease, 0.0);
+                true
+            }
+            _ => false,
+        },
+        _ => false,
+    }
 }
 
 /// Applies a preset, then re-times the keyframes it added: new duration, easing and delay.
@@ -67,17 +105,18 @@ impl Motion {
             }
             return true;
         }
-        let Some(rest) = id.strip_prefix("mo:") else { return false };
-        let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
-        let (Some(&p), Some(&d), Some(&e), Some(&w)) = (n.first(), n.get(1), n.get(2), n.get(3)) else { return true };
-        let (Some(dur), Some((ease, _)), Some(delay)) = (DURATIONS.get(d), EASES.get(e), DELAYS.get(w)) else { return true };
+        if !(id.starts_with("mo:") || id.starts_with("mc:")) {
+            return false;
+        }
         let (cw, ch) = (self.comp.width as f32, self.comp.height as f32);
+        let label = lib().cmds.iter().find(|c| c.id == id).map(|c| c.label.clone()).unwrap_or_default();
         match self.sel.and_then(|i| self.comp.layers.get_mut(i)) {
-            Some(l) if p < ANIM_PRESETS.len() => {
-                apply_timed(l, p, cw, ch, *dur, *ease, *delay);
-                studio_ui::handoff::toast(ctx, format!("{} ({dur} s) appliqué à « {} »", ANIM_PRESETS[p], l.name), true);
+            Some(l) => {
+                if apply_id(l, id, cw, ch) {
+                    studio_ui::handoff::toast(ctx, format!("{label} appliqué à « {} »", l.name), true);
+                }
             }
-            _ => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un calque".into(), false),
+            None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un calque".into(), false),
         }
         true
     }
@@ -90,7 +129,19 @@ mod tests {
 
     #[test]
     fn timed_presets() {
-        assert!(lib().len() >= 6000, "{}", lib().len());
+        assert!(lib().len() >= 6750 + 10_500, "{}", lib().len());
+        let mut ran = 0;
+        for c in &lib().cmds {
+            let mut l = Layer::new("t".into(), Content::Null, 100.0, 100.0, 6.0);
+            if apply_id(&mut l, &c.id, 1920.0, 1080.0) {
+                ran += 1;
+                assert!(l.props.iter().any(|p| !p.keys.is_empty()), "{} n'ajoute aucune image clé", c.label);
+                for p in &l.props {
+                    assert!(p.keys.windows(2).all(|w| w[0].t <= w[1].t) && p.keys.iter().all(|k| k.t.is_finite() && k.v.is_finite()), "{}", c.label);
+                }
+            }
+        }
+        assert_eq!(ran, 6750 + 10_500);
         let mut l = Layer::new("t".into(), Content::Null, 100.0, 100.0, 4.0);
         apply_timed(&mut l, 0, 1000.0, 500.0, 1.2, Ease::Linear, 0.5);
         let k = &l.props[4].keys;
