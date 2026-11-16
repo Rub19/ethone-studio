@@ -73,6 +73,13 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - Folio : PDF ouvert ; Combiner et Créer restent accessibles sans document.
 - Sound : son chargé ; Annuler n'est proposé que s'il y a un historique.
 
+### Vague 7 (début) — transferts et nouveautés légères
+
+- Historique des transferts : chaque « Envoyer vers » entre apps et chaque ouverture lancée par l'Assistant est noté (50 derniers, sans doublon), avec l'app d'origine, la destination et l'heure.
+- Launcher : section « Transferts récents » sous l'Assistant, avec Rouvrir, Dossier et Effacer.
+- Motion : 7 préréglages d'animation de plus (pulsation, balancement, clignotement, flottement, rotation continue, zoom de sortie, sortie vers la droite) ; les effets continus utilisent les cycles d'images clés existants.
+- Lumen : catégorie « Ambiances » de 8 rendus (heure dorée, heure bleue, brume chaude, hiver lumineux, désert, cyberpunk, rétro 70s, sombre et intense).
+
 ### Corrections incluses
 
 - Folio : une action visant les pages sélectionnées agit désormais sur la page courante quand aucune vignette n'est sélectionnée, au lieu de modifier toutes les pages.
@@ -93,7 +100,7 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - Conserver davantage de métadonnées lors des envois entre applications.
 - Ajouter des recettes multi-applications : développer puis retoucher, monter puis mixer, mettre en page puis exporter.
 - Afficher la destination et le format avant chaque envoi.
-- Ajouter un historique des transferts récents dans le Launcher.
+- Ajouter un historique des transferts récents dans le Launcher. **Livré.**
 
 ### Vague 8 — outils avancés
 

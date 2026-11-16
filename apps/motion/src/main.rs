@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 #[allow(dead_code)]
 #[path = "../../cut/src/media.rs"]
 mod media;
@@ -1457,6 +1458,9 @@ impl Motion {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         match id {
             "keys-reverse" if self.sel.is_some() => self.reverse_keys(),
             "keys-spread" if self.sel.is_some() => self.spread_keys(),
@@ -1561,6 +1565,7 @@ impl eframe::App for Motion {
             self.receive(&p);
         }
         let before = self.comp.clone();
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

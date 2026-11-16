@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 mod develop;
 mod devui;
 mod library;
@@ -1253,6 +1254,9 @@ impl Lumen {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         if let Some(rating) = id.strip_prefix("batch-rate:").and_then(|value| value.parse::<u8>().ok()).filter(|value| *value <= 5) {
             let file_count = self.files.len();
             let targets: Vec<usize> = self.targets().into_iter().filter(|index| *index < file_count).collect();
@@ -1397,6 +1401,7 @@ impl eframe::App for Lumen {
         for p in self.inbox.poll(ctx) {
             self.receive(&p, ctx);
         }
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 mod canvas;
 mod dialogs;
 mod geom;
@@ -2259,6 +2260,9 @@ impl VectorApp {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         match id {
             "select-all" => self.select_all(),
             "select-inverse" => self.select_inverse(),
@@ -2397,6 +2401,7 @@ impl eframe::App for VectorApp {
             self.receive(&p);
         }
         let before = self.doc.clone();
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

@@ -303,3 +303,33 @@ pub fn find_watermarks(img: &image::DynamicImage) -> Result<(Vec<[f32; 4]>, &'st
         (true, Ok(_)) => Ok((Vec::new(), "")),
     }
 }
+
+#[cfg(all(test, windows))]
+mod watermark_e2e {
+    use super::*;
+    use crate::shapes::{TextStyle, render_text};
+
+    #[test]
+    #[ignore]
+    fn semi_transparent_stock_mark() {
+        let dir = std::env::var("WM_DIR").unwrap();
+        let mut img = image::open(format!("{dir}/birds-auto4.png")).unwrap().to_rgba8();
+        let st = TextStyle { font: 1, size: 70.0, bold: true, italic: false, underline: false, align: 0, tracking: 0.0, leading: 1.2, vertical: false, color: [255, 255, 255, 115] };
+        let t = render_text("© Ethone Stock", &st).unwrap();
+        image::imageops::overlay(&mut img, &t, 330, 360);
+        img.save(format!("{dir}/wm-before.png")).unwrap();
+        let (found, how) = find_watermarks(&image::DynamicImage::ImageRgba8(img.clone())).unwrap();
+        println!("found {found:?} via {how}");
+        assert!(!found.is_empty());
+        let (w, h) = img.dimensions();
+        let mut mask = vec![false; (w * h) as usize];
+        for b in &found {
+            for (d, s) in mask.iter_mut().zip(watermark_mask(&img, [b[0] as u32, b[1] as u32, b[2].ceil() as u32, b[3].ceil() as u32], 55.0, 2)) {
+                *d |= s;
+            }
+        }
+        println!("mask pixels {}", mask.iter().filter(|m| **m).count());
+        let out = crate::inpaint::content_aware_fill(&img, &mask, 7);
+        out.save(format!("{dir}/wm-after.png")).unwrap();
+    }
+}

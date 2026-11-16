@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 mod model;
 mod panels;
 mod templates;
@@ -1014,6 +1015,9 @@ impl PageApp {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         match id {
             "center-page" => {
                 self.align_to(0, 0.5, 2);
@@ -1153,6 +1157,7 @@ impl eframe::App for PageApp {
             self.receive(&p);
         }
         let before = self.doc.clone();
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

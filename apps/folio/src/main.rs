@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 mod engine;
 mod panels;
 mod render;
@@ -1214,6 +1215,9 @@ impl Folio {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             panels::send_page(self, ctx, t);
@@ -1263,6 +1267,7 @@ impl eframe::App for Folio {
         for p in self.inbox.poll(ctx) {
             self.open_path(&p, ctx);
         }
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

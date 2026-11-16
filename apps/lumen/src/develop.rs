@@ -1676,6 +1676,14 @@ pub fn preset_catalog() -> Vec<(&'static str, &'static str, Settings)> {
     let teal_orange = hsl_of(&[(1, [-10.0, 20.0, 8.0]), (4, [10.0, 15.0, 0.0]), (5, [-15.0, 10.0, -10.0])]);
     vec![
         ("Couleur", "Naturel", d()),
+        ("Ambiances", "Heure dorée", Settings { temperature: 28.0, tint: 6.0, exposure: 0.1, highlights: -25.0, shadows: 15.0, vibrance: 20.0, split_high_hue: 40.0, split_high_sat: 25.0, glow: 12.0, ..d() }),
+        ("Ambiances", "Heure bleue", Settings { temperature: -25.0, tint: 6.0, contrast: 8.0, shadows: 10.0, split_shadow_hue: 220.0, split_shadow_sat: 25.0, vibrance: 15.0, ..d() }),
+        ("Ambiances", "Brume chaude", Settings { dehaze: -20.0, temperature: 18.0, contrast: -12.0, fade: 15.0, glow: 18.0, ..d() }),
+        ("Ambiances", "Hiver lumineux", Settings { exposure: 0.35, temperature: -15.0, highlights: -20.0, saturation: -15.0, clarity: 10.0, ..d() }),
+        ("Ambiances", "Désert", Settings { temperature: 30.0, tint: 4.0, dehaze: 15.0, contrast: 12.0, hsl: hsl_of(&[(1, [5.0, 20.0, 0.0]), (2, [-10.0, 15.0, 5.0]), (5, [0.0, -20.0, 5.0])]), ..d() }),
+        ("Ambiances", "Cyberpunk", Settings { temperature: -20.0, tint: 25.0, contrast: 20.0, saturation: 15.0, split_shadow_hue: 280.0, split_shadow_sat: 35.0, split_high_hue: 190.0, split_high_sat: 30.0, glow: 20.0, ..d() }),
+        ("Ambiances", "Rétro 70s", Settings { temperature: 22.0, tint: 8.0, fade: 30.0, contrast: -8.0, saturation: -10.0, split_shadow_hue: 30.0, split_shadow_sat: 20.0, grain: 20.0, ..d() }),
+        ("Ambiances", "Sombre et intense", Settings { exposure: -0.35, contrast: 30.0, clarity: 25.0, saturation: -20.0, vignette: -35.0, blacks: -15.0, ..d() }),
         ("Pellicule", "Portra doux", Settings { temperature: 8.0, tint: 4.0, contrast: -10.0, fade: 18.0, grain: 18.0, split_high_hue: 40.0, split_high_sat: 12.0, hsl: hsl_of(&[(1, [0.0, -5.0, 6.0])]), ..d() }),
         ("Pellicule", "Ektar vif", Settings { contrast: 20.0, vibrance: 35.0, saturation: 10.0, grain: 12.0, hsl: hsl_of(&[(0, [0.0, 15.0, 0.0]), (5, [0.0, 15.0, -5.0])]), ..d() }),
         ("Pellicule", "Fuji vert", Settings { temperature: -6.0, tint: -8.0, fade: 12.0, grain: 20.0, split_shadow_hue: 160.0, split_shadow_sat: 18.0, hsl: hsl_of(&[(3, [-10.0, 10.0, 0.0])]), ..d() }),

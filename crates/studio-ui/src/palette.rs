@@ -82,6 +82,48 @@ pub fn effect_cmds() -> Vec<Cmd> {
     studio_fx::stack::groups().into_iter().flat_map(|(g, ks)| ks.iter().map(move |k| Cmd::new(format!("Effet : {}", k.title()), g, format!("fx:{k:?}")))).collect()
 }
 
+/// A large, app-specific set of searchable options. Search keys are computed once, so looking
+/// through thousands of entries stays instant; nothing is shown until a query is typed.
+pub struct Library {
+    pub cmds: Vec<Cmd>,
+    keys: Vec<String>,
+}
+
+impl Library {
+    pub fn new(cmds: Vec<Cmd>) -> Self {
+        let keys = cmds.iter().map(|c| search_key(&format!("{} {}", c.label, c.hint))).collect();
+        Library { cmds, keys }
+    }
+
+    pub fn len(&self) -> usize {
+        self.cmds.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cmds.is_empty()
+    }
+
+    fn matching<'a>(&'a self, words: &'a [String]) -> impl Iterator<Item = &'a Cmd> + 'a {
+        self.cmds.iter().zip(&self.keys).filter(move |(_, k)| words.iter().all(|w| k.contains(w.as_str()))).map(|(c, _)| c)
+    }
+}
+
+/// Named colours shared by the option libraries (French names, sRGB).
+pub const NAMED_COLORS: [(&str, [u8; 3]); 48] = [
+    ("Noir", [18, 18, 20]), ("Anthracite", [50, 52, 58]), ("Gris", [128, 128, 132]), ("Argent", [192, 194, 198]), ("Blanc", [250, 250, 248]), ("Ivoire", [248, 242, 222]),
+    ("Crème", [244, 232, 205]), ("Beige", [222, 202, 168]), ("Sable", [214, 186, 140]), ("Caramel", [190, 128, 70]), ("Chocolat", [92, 58, 38]), ("Bordeaux", [110, 22, 40]),
+    ("Rouge", [220, 38, 38]), ("Cerise", [200, 20, 70]), ("Corail", [255, 112, 92]), ("Saumon", [250, 150, 125]), ("Pêche", [255, 190, 150]), ("Orange", [255, 140, 20]),
+    ("Ambre", [255, 176, 0]), ("Or", [212, 175, 55]), ("Jaune", [255, 214, 10]), ("Citron", [240, 240, 80]), ("Olive", [128, 128, 40]), ("Kaki", [150, 140, 90]),
+    ("Sauge", [156, 175, 136]), ("Menthe", [150, 225, 185]), ("Vert", [48, 190, 90]), ("Émeraude", [16, 150, 110]), ("Forêt", [30, 90, 50]), ("Sarcelle", [0, 128, 128]),
+    ("Turquoise", [20, 190, 200]), ("Cyan", [0, 200, 240]), ("Ciel", [120, 190, 250]), ("Azur", [10, 132, 255]), ("Bleu roi", [40, 70, 200]), ("Marine", [20, 34, 80]),
+    ("Indigo", [75, 40, 160]), ("Lavande", [180, 160, 230]), ("Violet", [140, 90, 255]), ("Prune", [100, 40, 90]), ("Magenta", [220, 40, 180]), ("Fuchsia", [255, 60, 160]),
+    ("Rose", [255, 140, 180]), ("Rose poudré", [230, 190, 195]), ("Lilas", [200, 170, 210]), ("Terracotta", [200, 100, 70]), ("Brique", [170, 70, 50]), ("Bronze", [160, 110, 60]),
+];
+
+pub fn color_name(c: [u8; 3]) -> &'static str {
+    NAMED_COLORS.iter().min_by_key(|(_, k)| (0..3).map(|i| (k[i] as i32 - c[i] as i32).pow(2)).sum::<i32>()).map_or("", |n| n.0)
+}
+
 const EFFECT_LEVELS: [u8; 20] = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 /// Three thousand searchable, executable variants of the existing effects.
@@ -247,13 +289,19 @@ pub struct Palette {
     prefs: Prefs,
     recent: Vec<String>,
     confirming: Option<String>,
+    library: Option<fn() -> &'static Library>,
 }
 
 impl Palette {
     pub fn new(ctx: &Context) -> Self {
         let prefs = load_prefs();
         apply_prefs(ctx, prefs);
-        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None }
+        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None, library: None }
+    }
+
+    /// Gives this app's option library to the palette; it is built on the first search only.
+    pub fn set_library(&mut self, library: fn() -> &'static Library) {
+        self.library = Some(library);
     }
 
     pub fn keys(&mut self, ctx: &Context) {
@@ -289,7 +337,8 @@ impl Palette {
         let builtin = self.builtin(help);
         let words = query_words(&self.query);
         let variants = if include_effect_variants(&self.query) { effect_variant_cmds() } else { &[] };
-        let mut hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(variants).filter(|command| matches_words(command, &words)).collect();
+        let library = self.library.filter(|_| !self.query.trim().is_empty()).map(|f| f());
+        let mut hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(variants).filter(|command| matches_words(command, &words)).chain(library.into_iter().flat_map(|l| l.matching(&words))).collect();
         if self.query.trim().is_empty() {
             rank_recent(&mut hits, &self.recent);
         }
@@ -307,7 +356,8 @@ impl Palette {
         egui::Area::new(egui::Id::NULL.with("palette")).order(egui::Order::Foreground).anchor(Align2::CENTER_TOP, [0.0, 80.0]).show(ctx, |ui| {
             Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(14)).inner_margin(Margin::same(10)).shadow(egui::epaint::Shadow { offset: [0, 16], blur: 40, spread: 0, color: Color32::from_black_alpha(170) }).show(ui, |ui| {
                 ui.set_width(560.0);
-                let r = ui.add(egui::TextEdit::singleline(&mut self.query).hint_text("Rechercher une commande, un effet, un tutoriel…").desired_width(f32::INFINITY).font(egui::FontId::proportional(16.0)));
+                let hint = if self.library.is_some() { "Rechercher une commande, un effet, une option de la bibliothèque…" } else { "Rechercher une commande, un effet, un tutoriel…" };
+                let r = ui.add(egui::TextEdit::singleline(&mut self.query).hint_text(hint).desired_width(f32::INFINITY).font(egui::FontId::proportional(16.0)));
                 r.request_focus();
                 if r.changed() {
                     self.sel = 0;
@@ -471,6 +521,15 @@ mod tests {
         let mut pending = Some("flatten".to_string());
         assert!(confirmation_step(&mut pending, &command));
         assert!(pending.is_none());
+    }
+
+    #[test]
+    fn library_search_uses_precomputed_keys() {
+        let lib = Library::new(vec![Cmd::new("Look Portra · 40 %", "Pellicule", "lm:a"), Cmd::new("Palette Corail", "Triade", "vc:b")]);
+        let words = query_words("portra");
+        assert_eq!(lib.matching(&words).map(|c| c.id.as_str()).collect::<Vec<_>>(), ["lm:a"]);
+        assert_eq!(lib.matching(&query_words("CORAIL triade")).count(), 1);
+        assert_eq!(color_name([250, 110, 90]), "Corail");
     }
 
     #[test]

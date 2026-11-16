@@ -10,6 +10,8 @@ const VIOLET: Color32 = Color32::from_rgb(0x8b, 0x6c, 0xff);
 
 #[derive(Default)]
 pub struct Auto {
+    transfers: Vec<studio_core::handoff::Transfer>,
+    transfers_read: Option<std::time::Instant>,
     pub prompt: String,
     pub file: Option<PathBuf>,
     thumb: Option<(PathBuf, Option<TextureHandle>)>,
@@ -52,6 +54,56 @@ fn preview_image(f: &Path) -> Option<image::DynamicImage> {
 }
 
 impl Auto {
+    fn transfers_ui(&mut self, ui: &mut Ui, w: f32) {
+        if self.transfers_read.is_none_or(|t| t.elapsed().as_secs() >= 2) {
+            self.transfers = studio_core::handoff::history();
+            self.transfers_read = Some(std::time::Instant::now());
+        }
+        ui.add_space(22.0);
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Transferts récents").font(semibold(14.0)).color(P.ink_strong));
+            ui.label(RichText::new("entre les apps et depuis l'Assistant").size(12.0).color(P.faint));
+            if !self.transfers.is_empty() && ui.add(egui::Button::new(RichText::new("Effacer").size(12.0).color(P.muted)).frame(false)).clicked() {
+                studio_core::handoff::clear_history();
+                self.transfers.clear();
+            }
+        });
+        ui.add_space(6.0);
+        if self.transfers.is_empty() {
+            ui.label(RichText::new("Rien pour l'instant : utilise « Envoyer vers » dans une app, ou lance une demande ici.").size(12.5).color(P.faint));
+            return;
+        }
+        let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
+        let mut reopen = None;
+        egui::Frame::new().fill(P.tile).corner_radius(CornerRadius::same(12)).stroke(Stroke::new(1.0, P.line)).inner_margin(egui::Margin::same(10)).show(ui, |ui| {
+            ui.set_width(w - 20.0);
+            for t in self.transfers.iter().take(12) {
+                ui.horizontal(|ui| {
+                    let exists = t.file.is_file();
+                    let name = t.file.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+                    let from = if t.from == "launcher" { "Assistant" } else { studio_core::handoff::name(&t.from) };
+                    ui.label(RichText::new(format!("{from} → {}", studio_core::handoff::name(&t.to))).font(semibold(12.5)).color(VIOLET));
+                    ui.add(egui::Label::new(RichText::new(&name).size(12.5).color(if exists { P.ink } else { P.faint })).truncate()).on_hover_text(t.file.display().to_string());
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        ui.label(RichText::new(studio_core::handoff::ago(t.at, now)).size(11.5).color(P.faint));
+                        if exists && ui.small_button("Dossier").clicked()
+                            && let Some(d) = t.file.parent()
+                        {
+                            let _ = std::process::Command::new("explorer").arg(d).spawn();
+                        }
+                        if exists && ui.small_button("Rouvrir").on_hover_text(format!("Rouvre ce fichier dans {}", studio_core::handoff::name(&t.to))).clicked() {
+                            reopen = Some((t.to.clone(), t.file.clone()));
+                        }
+                    });
+                });
+            }
+        });
+        if let Some((to, f)) = reopen {
+            let _ = studio_core::handoff::send(&to, &f);
+            self.transfers_read = None;
+        }
+    }
+
     pub fn new() -> Self {
         Self { open: true, ..Default::default() }
     }
@@ -232,6 +284,7 @@ impl Auto {
                     ui.label(RichText::new(format!("• {l}")).size(12.5).color(P.muted));
                 }
             }
+            self.transfers_ui(ui, w);
             match &self.result {
                 Some(Ok(o)) => {
                     ui.add_space(10.0);

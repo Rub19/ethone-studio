@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 mod algos;
 mod canvas;
 mod doc;
@@ -1218,6 +1219,9 @@ impl Pixel {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);
@@ -1307,6 +1311,7 @@ impl eframe::App for Pixel {
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
         }
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

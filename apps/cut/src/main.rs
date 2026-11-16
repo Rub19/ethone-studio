@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod optlib;
 mod inspect;
 mod look;
 mod media;
@@ -1765,6 +1766,9 @@ impl Cut {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if self.run_lib(id, ctx) {
+            return;
+        }
         if id == "normalize-audio" {
             match self.sel {
                 Some(selection @ (Sel::Clip(_) | Sel::Over(_) | Sel::Music(_))) => {
@@ -1863,6 +1867,7 @@ impl eframe::App for Cut {
             self.receive(&p, ctx);
         }
         let before = self.proj.clone();
+        self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
         if self.palette.open {
             let cmds = self.commands();

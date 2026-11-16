@@ -2378,7 +2378,7 @@ mod tests {
 }
 
 
-pub const ANIM_PRESETS: [&str; 9] = ["Apparition en fondu", "Zoom d'entrée avec rebond", "Glisser depuis la gauche", "Glisser depuis la droite", "Monter depuis le bas", "Chute avec rebond", "Entrée en tournant", "Sortie en fondu", "Secousse continue"];
+pub const ANIM_PRESETS: [&str; 16] = ["Apparition en fondu", "Zoom d'entrée avec rebond", "Glisser depuis la gauche", "Glisser depuis la droite", "Monter depuis le bas", "Chute avec rebond", "Entrée en tournant", "Sortie en fondu", "Secousse continue", "Pulsation continue", "Balancement", "Clignotement", "Flottement", "Rotation continue", "Zoom de sortie", "Sortie vers la droite"];
 
 fn put_keys(p: &mut Prop, keys: &[(f32, f32, Ease)]) {
     let (lo, hi) = keys.iter().fold((f32::MAX, f32::MIN), |a, k| (a.0.min(k.0), a.1.max(k.0)));
@@ -2416,11 +2416,39 @@ pub fn apply_anim_preset(l: &mut Layer, k: usize, comp_w: f32, comp_h: f32) {
             let o = at(l, 4, e - d);
             put_keys(&mut l.props[4], &[(e - d, o, Ease::Smooth), (e, 0.0, Ease::Smooth)]);
         }
-        _ => {
+        8 => {
             for i in [0, 1] {
                 l.props[i].wiggle = 8.0;
                 l.props[i].wiggle_freq = 6.0;
             }
+        }
+        9 => {
+            put_keys(&mut l.props[2], &[(s, sc, Ease::Smooth), (s + 0.4, sc * 1.08, Ease::Smooth), (s + 0.8, sc, Ease::Smooth)]);
+            l.props[2].cycle = 1;
+        }
+        10 => {
+            put_keys(&mut l.props[3], &[(s, rot - 6.0, Ease::Smooth), (s + 0.6, rot + 6.0, Ease::Smooth)]);
+            l.props[3].cycle = 2;
+        }
+        11 => {
+            put_keys(&mut l.props[4], &[(s, op, Ease::Hold), (s + 0.25, op * 0.15, Ease::Hold), (s + 0.5, op, Ease::Hold)]);
+            l.props[4].cycle = 1;
+        }
+        12 => {
+            put_keys(&mut l.props[1], &[(s, y - 8.0, Ease::Smooth), (s + 1.2, y + 8.0, Ease::Smooth)]);
+            l.props[1].cycle = 2;
+        }
+        13 => {
+            put_keys(&mut l.props[3], &[(s, rot, Ease::Linear), (s + 2.0, rot + 360.0, Ease::Linear)]);
+            l.props[3].cycle = 3;
+        }
+        14 => {
+            let z = at(l, 2, e - d);
+            put_keys(&mut l.props[2], &[(e - d, z, Ease::In), (e, 0.0, Ease::Smooth)]);
+        }
+        _ => {
+            let xe = at(l, 0, e - d);
+            put_keys(&mut l.props[0], &[(e - d, xe, Ease::In), (e, xe + comp_w * 0.6, Ease::Smooth)]);
         }
     }
 }
@@ -2441,6 +2469,11 @@ mod preset_tests {
         assert!(l.props[4].at(l.end) < 1.0);
         apply_anim_preset(&mut l, 8, 1000.0, 500.0);
         assert_eq!(l.props[0].wiggle, 8.0);
+        apply_anim_preset(&mut l, 13, 1000.0, 500.0);
+        assert_eq!(l.props[3].cycle, 3);
+        assert!((l.props[3].eval(l.start + 4.0, 0) - 720.0).abs() < 1.0);
+        apply_anim_preset(&mut l, 10, 1000.0, 500.0);
+        assert_eq!(l.props[3].cycle, 2);
     }
 }
 
