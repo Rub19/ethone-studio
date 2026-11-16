@@ -556,3 +556,28 @@ mod tests {
         assert_eq!(hits.iter().map(|command| command.id.as_str()).collect::<Vec<_>>(), ["recent-available", "available", "recent-disabled"]);
     }
 }
+
+/// 5 000 named colours from the color-name-list "best of" set (MIT, see assets/COLORNAMES-LICENSE.txt).
+pub fn color_bank() -> &'static [(&'static str, [u8; 3])] {
+    static B: std::sync::OnceLock<Vec<(&'static str, [u8; 3])>> = std::sync::OnceLock::new();
+    B.get_or_init(|| {
+        include_str!("../assets/colornames.csv")
+            .lines()
+            .filter_map(|l| {
+                let (name, hex) = l.rsplit_once(",#")?;
+                let v = u32::from_str_radix(hex.trim(), 16).ok()?;
+                Some((name, [(v >> 16) as u8, (v >> 8) as u8, v as u8]))
+            })
+            .collect()
+    })
+}
+
+#[cfg(test)]
+mod bank_tests {
+    #[test]
+    fn color_bank_parses_every_line() {
+        let b = super::color_bank();
+        assert_eq!(b.len(), 5000);
+        assert!(b.iter().any(|(n, c)| *n == "24 Carrot" && *c == [0xe5, 0x6e, 0x24]));
+    }
+}

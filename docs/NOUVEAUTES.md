@@ -2,6 +2,19 @@
 
 Toutes les nouvelles options se trouvent dans la palette **Ctrl+K** de chaque app : tape un mot (« look », « palette », « duotone », « écho », « filigrane »…) et choisis. Rien n'encombre l'interface tant que tu ne cherches pas.
 
+## Banques en ligne intégrées
+
+Deux banques libres récupérées sur internet et embarquées dans les apps (aucune connexion nécessaire) :
+
+| Banque | Licence | Où | Ce que ça donne |
+|---|---|---|---|
+| Lucide | ISC | Vector | 2 359 icônes vectorielles, recherche aussi par mots-clés anglais (« house », « arrow », « heart »…), insérées au centre en tracés modifiables |
+| color-name-list (meodai) | MIT | Pixel, Vector | 5 000 couleurs nommées : couleur du pinceau dans Pixel, remplissage ou contour de la sélection dans Vector |
+
+Vector gagne 12 359 options (18 359 au total), Pixel 5 000 (11 744 au total).
+
+Nouvel export **SVG optimisé** dans Vector : nombres arrondis, attributs par défaut retirés, fichier sur une ligne (case dans Exporter… et entrée dans Exporter rapidement).
+
 ## Bibliothèques d'options (≈ 52 800 nouvelles options)
 
 Chaque option est une vraie combinaison des réglages de l'app, nommée en français et exécutable en un clic.

@@ -1869,11 +1869,15 @@ impl VectorApp {
             Ok(d) => d,
             Err(e) => return self.error = Some(format!("SVG : {e}")),
         };
-        match geom::import_svg(&data, &self.opts()) {
+        let stem = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or("SVG".into());
+        self.import_svg_str(&data, &stem, [0.0, 0.0]);
+    }
+
+    pub fn import_svg_str(&mut self, data: &str, stem: &str, offset: P) {
+        match geom::import_svg(data, &self.opts()) {
             Ok(items) if !items.is_empty() => {
                 self.checkpoint();
                 let g = if items.len() > 1 { self.next_group() } else { 0 };
-                let stem = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or("SVG".into());
                 let mut v = Vec::new();
                 for (k, mut it) in items.into_iter().enumerate() {
                     if it.name.is_empty() {
@@ -1883,7 +1887,7 @@ impl VectorApp {
                     it.layer = self.active_layer;
                     v.push(it);
                 }
-                self.insert_copies(v, [0.0, 0.0]);
+                self.insert_copies(v, offset);
                 self.tool = Tool::Select;
             }
             Ok(_) => self.error = Some("SVG vide ou sans tracé".into()),
@@ -2547,9 +2551,9 @@ impl VectorApp {
         }
         ui.add_enabled_ui(on, |ui| {
             ui.menu_button("Exporter rapidement", |ui| {
-                for (label, f, s, t) in [("PNG ×1", 0, 1.0, false), ("PNG ×2", 0, 2.0, false), ("PNG ×3", 0, 3.0, false), ("PNG ×4", 0, 4.0, false), ("PNG ×2 fond transparent", 0, 2.0, true), ("JPEG ×2", 1, 2.0, false), ("SVG", 2, 1.0, false), ("PDF (tous les plans de travail)", 3, 1.0, false)] {
+                for (label, f, s, t) in [("PNG ×1", 0, 1.0, false), ("PNG ×2", 0, 2.0, false), ("PNG ×3", 0, 3.0, false), ("PNG ×4", 0, 4.0, false), ("PNG ×2 fond transparent", 0, 2.0, true), ("JPEG ×2", 1, 2.0, false), ("SVG", 2, 1.0, false), ("SVG optimisé", 4, 1.0, false), ("PDF (tous les plans de travail)", 3, 1.0, false)] {
                     if ui.button(label).clicked() {
-                        self.run_export(&ExportOpts { format: f, scale: s, transparent: t, quality: 90, scope: if f == 3 { 1 } else { 0 }, minify: false });
+                        self.run_export(&ExportOpts { format: f.min(3), scale: s, transparent: t, quality: 90, scope: if f == 3 { 1 } else { 0 }, minify: f == 4 });
                         ui.close();
                     }
                 }

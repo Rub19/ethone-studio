@@ -1,8 +1,9 @@
-//! Vector option library: 6 000 generated colour palettes to recolour the artwork (Ctrl+K).
+//! Vector option library: 6 000 generated palettes, 2 359 Lucide icons (ISC, assets/LUCIDE-LICENSE.txt)
+//! and 5 000 named colours for fill or stroke (Ctrl+K).
 
 use crate::VectorApp;
 use eframe::egui;
-use studio_ui::palette::{Cmd, Library, color_name};
+use studio_ui::palette::{Cmd, Library, color_bank, color_name};
 
 pub const SCHEMES: [(&str, &[f32]); 10] = [
     ("monochrome", &[0.0]),
@@ -60,6 +61,26 @@ pub fn remap(colors: &[[u8; 4]], pal: &[[u8; 3]]) -> Vec<[u8; 4]> {
         .collect()
 }
 
+/// (name, keywords, inner SVG) of every bundled icon.
+pub fn icons() -> &'static [(&'static str, &'static str, &'static str)] {
+    static I: std::sync::OnceLock<Vec<(&'static str, &'static str, &'static str)>> = std::sync::OnceLock::new();
+    I.get_or_init(|| {
+        include_str!("../assets/lucide.tsv")
+            .lines()
+            .filter_map(|l| {
+                let mut p = l.splitn(3, '\t');
+                Some((p.next()?, p.next()?, p.next()?))
+            })
+            .collect()
+    })
+}
+
+pub const ICON_SIZE: f32 = 192.0;
+
+pub fn icon_svg(inner: &str) -> String {
+    format!(r##"<svg xmlns="http://www.w3.org/2000/svg" width="{ICON_SIZE}" height="{ICON_SIZE}" viewBox="0 0 24 24" fill="none" stroke="#1e1e24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{inner}</svg>"##)
+}
+
 pub fn lib() -> &'static Library {
     static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
     L.get_or_init(|| {
@@ -73,12 +94,50 @@ pub fn lib() -> &'static Library {
                 }
             }
         }
+        for (k, (name, tags, _)) in icons().iter().enumerate() {
+            v.push(Cmd::new(format!("Icône {}", name.replace('-', " ")), format!("Vector · banque d'icônes · {tags}"), format!("vi:{k}")));
+        }
+        for (k, (n, c)) in color_bank().iter().enumerate() {
+            let hex = format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2]);
+            v.push(Cmd::new(format!("Remplissage « {n} » {hex}"), "Vector · banque de couleurs · sélection", format!("vf:{k}")));
+            v.push(Cmd::new(format!("Contour « {n} » {hex}"), "Vector · banque de couleurs · sélection", format!("vs:{k}")));
+        }
         Library::new(v)
     })
 }
 
 impl VectorApp {
+    fn run_bank(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((name, _, inner)) = id.strip_prefix("vi:").and_then(|k| k.parse::<usize>().ok()).and_then(|k| icons().get(k)) {
+            let at = [(self.doc.width - ICON_SIZE) / 2.0, (self.doc.height - ICON_SIZE) / 2.0];
+            self.import_svg_str(&icon_svg(inner), name, at);
+            return true;
+        }
+        let (stroke, rest) = match (id.strip_prefix("vf:"), id.strip_prefix("vs:")) {
+            (Some(r), _) => (false, r),
+            (_, Some(r)) => (true, r),
+            _ => return false,
+        };
+        let Some((n, c)) = rest.parse::<usize>().ok().and_then(|k| color_bank().get(k)) else { return true };
+        let targets = self.selection();
+        if targets.is_empty() {
+            studio_ui::handoff::toast(ctx, "Sélectionne d'abord un objet".into(), false);
+            return true;
+        }
+        self.checkpoint();
+        for i in targets {
+            let it = &mut self.doc.items[i];
+            let rgba = [c[0], c[1], c[2], 255];
+            if stroke { it.stroke = Some(rgba) } else { it.fill = Some(rgba) }
+        }
+        studio_ui::handoff::toast(ctx, format!("{} « {n} » appliqué", if stroke { "Contour" } else { "Remplissage" }), true);
+        true
+    }
+
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if self.run_bank(id, ctx) {
+            return true;
+        }
         let Some(rest) = id.strip_prefix("vc:") else { return false };
         let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
         let (Some(&h), Some(&s), Some(&t)) = (n.first(), n.get(1), n.get(2)) else { return true };
@@ -117,7 +176,13 @@ mod tests {
 
     #[test]
     fn palettes_and_remap() {
-        assert_eq!(lib().len(), 6000);
+        assert_eq!(icons().len(), 2359);
+        assert_eq!(lib().len(), 6000 + 2359 + 10000);
+        let opt = resvg::usvg::Options::default();
+        for (name, _, inner) in icons() {
+            let items = crate::geom::import_svg(&icon_svg(inner), &opt).unwrap_or_default();
+            assert!(!items.is_empty(), "{name}");
+        }
         let p = palette(0.0, 2, 0);
         assert_eq!(p.len(), 5);
         assert!(p[0][0] > 180 && p[1][2] > 150, "{p:?}");

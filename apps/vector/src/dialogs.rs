@@ -426,7 +426,7 @@ impl VectorApp {
                     ui.add(egui::Slider::new(&mut o.quality, 10..=100).suffix(" %"));
                 }
                 2 => {
-                    ui.checkbox(&mut o.minify, "SVG compact (sans retours à la ligne)");
+                    ui.checkbox(&mut o.minify, "SVG optimisé (nombres arrondis, attributs inutiles retirés)");
                     ui.label(RichText::new("Texte, dégradés, effets et images intégrés restent modifiables.").size(12.0).color(FAINT));
                 }
                 _ => {

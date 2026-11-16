@@ -1017,6 +1017,42 @@ pub fn unbase64(s: &str) -> Vec<u8> {
     out
 }
 
+/// Smaller SVG: numbers rounded to 2 decimals, default opacities dropped, no line breaks.
+pub fn optimize_svg(svg: &str) -> String {
+    let mut out = String::with_capacity(svg.len());
+    let b = svg.as_bytes();
+    let mut i = 0;
+    while i < b.len() {
+        let c = b[i];
+        if c == b'#' {
+            let j = i + 1 + b[i + 1..].iter().take_while(|x| x.is_ascii_alphanumeric()).count();
+            out.push_str(&svg[i..j]);
+            i = j;
+        } else if c.is_ascii_digit() && !(i > 0 && (b[i - 1].is_ascii_alphabetic() || b[i - 1] == b'_')) {
+            let j = i + b[i..].iter().take_while(|x| x.is_ascii_digit() || **x == b'.').count();
+            let num = &svg[i..j];
+            match num.parse::<f64>() {
+                Ok(v) if num.contains('.') && !(j < b.len() && (b[j] == b'e' || b[j] == b'E')) => {
+                    let r = format!("{:.2}", v);
+                    let r = r.trim_end_matches('0').trim_end_matches('.');
+                    out.push_str(if r.is_empty() { "0" } else { r });
+                }
+                _ => out.push_str(num),
+            }
+            i = j;
+        } else {
+            let ch = svg[i..].chars().next().unwrap_or(' ');
+            out.push(ch);
+            i += ch.len_utf8();
+        }
+    }
+    let mut out = out.replace('\n', "");
+    for d in [r#" fill-opacity="1""#, r#" stroke-opacity="1""#, r#" opacity="1""#] {
+        out = out.replace(d, "");
+    }
+    out
+}
+
 fn color(c: [u8; 4]) -> String {
     format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2])
 }
@@ -1810,6 +1846,16 @@ mod tests {
     use super::*;
 
     #[test]
+    fn optimized_svg_is_smaller_and_valid() {
+        let src = "<svg viewBox=\"0 0 100 100\">
+<path d=\"M10.123456 20.5000 L 30.999 0.004\" fill=\"#a1b2c3\" fill-opacity=\"1\" id=\"p1.25\"/>
+</svg>
+";
+        let o = optimize_svg(src);
+        assert_eq!(o, "<svg viewBox=\"0 0 100 100\"><path d=\"M10.12 20.5 L 31 0\" fill=\"#a1b2c3\" id=\"p1.25\"/></svg>");
+    }
+
+    #[test]
     fn svg_and_transforms() {
         let mut d = Doc::new(200.0, 100.0);
         d.items.push(Item {
@@ -1874,6 +1920,7 @@ mod tests {
         assert!(svg.contains(r#"fill="url(#g0)""#) && svg.contains("feDropShadow") && svg.contains("stroke-dasharray"));
         let opt = resvg::usvg::Options::default();
         assert!(resvg::usvg::Tree::from_str(&svg, &opt).is_ok());
+        assert!(optimize_svg(&svg).len() < svg.len() && resvg::usvg::Tree::from_str(&optimize_svg(&svg), &opt).is_ok());
         let mut nodes = vec![Node::corner([0.0, 0.0]), Node::corner([10.0, 0.0]), Node::corner([10.0, 10.0])];
         add_midpoints(&mut nodes, true);
         assert_eq!(nodes.len(), 6);
