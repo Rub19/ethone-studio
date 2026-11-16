@@ -5,6 +5,16 @@ members = ["crates/*", "apps/*"]
 [profile.release]
 lto = true
 strip = true
+codegen-units = 1
+
+[profile.release.package.naga]
+opt-level = "s"
+
+[profile.release.package.wgpu-core]
+opt-level = "s"
+
+[profile.release.package.wgpu-hal]
+opt-level = "s"
 
 
 [profile.dev]

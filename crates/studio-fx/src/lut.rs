@@ -79,17 +79,25 @@ pub const BANK: [(&str, &str, &str); 7] = [
     ("zesty", "Acidulé", "Fujicolor Superia X-TRA 400"),
 ];
 
-fn bank_text(key: &str) -> Option<&'static str> {
+fn bank_bytes(key: &str) -> Option<&'static [u8]> {
     Some(match key {
-        "blush" => include_str!("../assets/luts/blush.cube"),
-        "chilly" => include_str!("../assets/luts/chilly.cube"),
-        "dreamy" => include_str!("../assets/luts/dreamy.cube"),
-        "moonlit" => include_str!("../assets/luts/moonlit.cube"),
-        "sunshine" => include_str!("../assets/luts/sunshine.cube"),
-        "toasty" => include_str!("../assets/luts/toasty.cube"),
-        "zesty" => include_str!("../assets/luts/zesty.cube"),
+        "blush" => include_bytes!("../assets/luts/blush.lut3"),
+        "chilly" => include_bytes!("../assets/luts/chilly.lut3"),
+        "dreamy" => include_bytes!("../assets/luts/dreamy.lut3"),
+        "moonlit" => include_bytes!("../assets/luts/moonlit.lut3"),
+        "sunshine" => include_bytes!("../assets/luts/sunshine.lut3"),
+        "toasty" => include_bytes!("../assets/luts/toasty.lut3"),
+        "zesty" => include_bytes!("../assets/luts/zesty.lut3"),
         _ => return None,
     })
+}
+
+/// Compact bank format: one byte for the size n, then n³ RGB triplets in 8 bits, red fastest.
+fn parse_bin(b: &[u8]) -> Option<Lut3> {
+    let n = *b.first()? as usize;
+    let body = b.get(1..1 + n * n * n * 3)?;
+    let data = body.chunks(3).map(|c| [c[0] as f32 / 255.0, c[1] as f32 / 255.0, c[2] as f32 / 255.0]).collect();
+    (n >= 2).then_some(Lut3 { n, data, min: [0.0; 3], max: [1.0; 3] })
 }
 
 /// Loads "bank:KEY" or a .cube file path once; later calls reuse the parsed table.
@@ -99,11 +107,11 @@ pub fn load(source: &str) -> Option<Arc<Lut3>> {
     if let Some(hit) = cache.lock().ok()?.get(source) {
         return hit.clone();
     }
-    let text = match source.strip_prefix("bank:") {
-        Some(key) => bank_text(key).map(str::to_string),
-        None => std::fs::read_to_string(source).ok(),
-    };
-    let lut = text.and_then(|t| parse_cube(&t).ok()).map(Arc::new);
+    let lut = match source.strip_prefix("bank:") {
+        Some(key) => bank_bytes(key).and_then(parse_bin),
+        None => std::fs::read_to_string(source).ok().and_then(|t| parse_cube(&t).ok()),
+    }
+    .map(Arc::new);
     cache.lock().ok()?.insert(source.to_string(), lut.clone());
     lut
 }

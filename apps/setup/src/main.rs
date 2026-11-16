@@ -1,0 +1,239 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+//! Ethone Studio installer: one stub, one app appended per installer (Pixel-Setup.exe, Lumen-Setup.exe…).
+//! `ethone-setup --pack <app.exe> <id> <version> <out.exe>` builds an installer; `/S` installs silently;
+//! `--uninstall` (used by « Applications installées ») removes the app.
+
+mod payload;
+mod system;
+
+use eframe::egui::{self, Color32, RichText};
+use std::sync::{Arc, Mutex};
+
+#[derive(Clone, PartialEq)]
+enum Step {
+    Ready,
+    Working(f32, String),
+    Done,
+    Failed(String),
+}
+
+struct Job {
+    file: Arc<Vec<u8>>,
+    footer: payload::Footer,
+}
+
+fn install(job: &Job, desktop: bool, report: &dyn Fn(f32, &str)) -> Result<(), String> {
+    let id = job.footer.id.as_str();
+    report(0.02, "Fermeture de l'application si elle est ouverte");
+    system::close_app(id);
+    std::fs::create_dir_all(system::dir(id)).map_err(|e| format!("dossier impossible à créer : {e}"))?;
+    report(0.05, "Copie des fichiers");
+    payload::extract(&job.file, &job.footer, &system::exe(id), &|p| report(0.05 + p * 0.85, "Copie des fichiers"))?;
+    report(0.92, "Création du désinstalleur");
+    std::fs::write(system::dir(id).join(system::UNINSTALLER), &job.file[..job.footer.stub_len as usize]).map_err(|e| e.to_string())?;
+    report(0.95, "Raccourcis et inscription dans Windows");
+    system::shortcuts(id, desktop)?;
+    system::register(id, &job.footer.version)?;
+    report(1.0, "Terminé");
+    Ok(())
+}
+
+fn uninstall(id: &str, report: &dyn Fn(f32, &str)) -> Result<(), String> {
+    report(0.1, "Fermeture de l'application");
+    system::close_app(id);
+    report(0.4, "Suppression des raccourcis");
+    system::remove_shortcuts(id);
+    report(0.7, "Suppression des fichiers");
+    let exe = system::exe(id);
+    if exe.exists() {
+        std::fs::remove_file(&exe).map_err(|e| format!("suppression impossible : {e}"))?;
+    }
+    system::unregister(id);
+    report(1.0, "Terminé");
+    Ok(())
+}
+
+/// The uninstaller is the bare stub: it finds its app from the folder it lives in.
+fn uninstall_target() -> Option<String> {
+    let me = std::env::current_exe().ok()?;
+    let id = me.parent()?.file_name()?.to_str()?.to_string();
+    system::APPS.iter().any(|a| a.0 == id).then_some(id)
+}
+
+struct Setup {
+    job: Option<Arc<Job>>,
+    uninstall_id: Option<String>,
+    step: Arc<Mutex<Step>>,
+    desktop: bool,
+    open_after: bool,
+    previous: Option<String>,
+}
+
+impl Setup {
+    fn id(&self) -> String {
+        self.job.as_ref().map(|j| j.footer.id.clone()).or_else(|| self.uninstall_id.clone()).unwrap_or_default()
+    }
+
+    fn start(&self) {
+        let step = self.step.clone();
+        let report = move |p: f32, label: &str| *step.lock().unwrap_or_else(|e| e.into_inner()) = Step::Working(p, label.to_string());
+        let done = self.step.clone();
+        let (job, id, desktop) = (self.job.clone(), self.uninstall_id.clone(), self.desktop);
+        report(0.0, "Préparation");
+        std::thread::spawn(move || {
+            let r = match (&job, &id) {
+                (Some(j), _) => install(j, desktop, &report),
+                (None, Some(id)) => uninstall(id, &report),
+                _ => Err("rien à installer".into()),
+            };
+            *done.lock().unwrap_or_else(|e| e.into_inner()) = match r {
+                Ok(()) => Step::Done,
+                Err(e) => Step::Failed(e),
+            };
+        });
+    }
+}
+
+impl eframe::App for Setup {
+    fn ui(&mut self, root: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        let ctx = &root.ctx().clone();
+        let step = self.step.lock().unwrap_or_else(|e| e.into_inner()).clone();
+        if matches!(step, Step::Working(..)) {
+            ctx.request_repaint_after(std::time::Duration::from_millis(60));
+        }
+        let id = self.id();
+        let removing = self.job.is_none();
+        let version = self.job.as_ref().map(|j| j.footer.version.clone()).unwrap_or_default();
+        egui::CentralPanel::default().show(root, |ui| {
+            let outer = studio_ui::chrome::bar(ui, 0.0);
+            studio_ui::chrome::buttons(ui, outer);
+            ui.add_space(18.0);
+            ui.horizontal(|ui| {
+                ui.add_space(28.0);
+                studio_ui::app_icon(ui, 96.0, if id == "ethone-studio" { "studio" } else { &id }, Color32::WHITE);
+                ui.add_space(18.0);
+                ui.vertical(|ui| {
+                    ui.add_space(10.0);
+                    ui.label(RichText::new(system::name(&id)).size(30.0).strong());
+                    let desc = system::APPS.iter().find(|a| a.0 == id).map_or("", |a| a.2);
+                    ui.label(RichText::new(desc).size(15.0).weak());
+                    if !removing {
+                        let line = match &self.previous {
+                            Some(v) if *v == version => format!("Version {version} · déjà installée, elle sera réparée"),
+                            Some(v) => format!("Version {version} · remplace la {v}"),
+                            None => format!("Version {version}"),
+                        };
+                        ui.label(RichText::new(line).size(13.0).weak());
+                    }
+                });
+            });
+            ui.add_space(26.0);
+            ui.horizontal(|ui| {
+                ui.add_space(28.0);
+                ui.vertical(|ui| {
+                    ui.set_width(ui.available_width() - 28.0);
+                    match &step {
+                        Step::Ready if removing => {
+                            ui.label(format!("{} va être supprimée de cet ordinateur. Tes documents et réglages sont conservés.", system::name(&id)));
+                            ui.add_space(20.0);
+                            if ui.add(egui::Button::new(RichText::new("Désinstaller").size(16.0)).min_size([180.0, 40.0].into())).clicked() {
+                                self.start();
+                            }
+                        }
+                        Step::Ready => {
+                            ui.label(format!("Installation pour ton compte Windows, sans droits administrateur, dans :\n{}", system::dir(&id).display()));
+                            ui.add_space(10.0);
+                            ui.checkbox(&mut self.desktop, "Créer un raccourci sur le Bureau");
+                            ui.checkbox(&mut self.open_after, "Ouvrir l'application à la fin");
+                            ui.add_space(14.0);
+                            if ui.add(egui::Button::new(RichText::new("Installer").size(16.0)).fill(Color32::from_rgb(10, 132, 255)).min_size([180.0, 40.0].into())).clicked() {
+                                self.start();
+                            }
+                        }
+                        Step::Working(p, label) => {
+                            ui.label(RichText::new(label).size(15.0));
+                            ui.add_space(8.0);
+                            ui.add(egui::ProgressBar::new(*p).show_percentage().desired_height(14.0));
+                        }
+                        Step::Done => {
+                            ui.label(RichText::new(if removing { "Désinstallation terminée." } else { "Installation terminée." }).size(18.0).strong());
+                            ui.add_space(16.0);
+                            if ui.add(egui::Button::new(RichText::new("Fermer").size(16.0)).min_size([180.0, 40.0].into())).clicked() {
+                                if removing {
+                                    system::remove_self_later();
+                                } else if self.open_after {
+                                    system::launch(&id);
+                                }
+                                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                            }
+                        }
+                        Step::Failed(e) => {
+                            ui.colored_label(Color32::from_rgb(255, 110, 100), format!("Échec : {e}"));
+                            ui.add_space(12.0);
+                            if ui.button("Réessayer").clicked() {
+                                *self.step.lock().unwrap_or_else(|e| e.into_inner()) = Step::Ready;
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    }
+}
+
+fn pack_cli(args: &[String]) -> Result<(), String> {
+    let [app, id, version, out] = args else { return Err("usage : --pack <app.exe> <id> <version> <sortie.exe>".into()) };
+    let me = std::fs::read(std::env::current_exe().map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+    let stub = payload::footer(&me).map_or(&me[..], |f| &me[..f.stub_len as usize]);
+    let exe = std::fs::read(app).map_err(|e| format!("{app} : {e}"))?;
+    std::fs::write(out, payload::pack(stub, &exe, id, version)).map_err(|e| format!("{out} : {e}"))
+}
+
+fn main() -> eframe::Result {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("--pack") {
+        if let Err(e) = pack_cli(&args[1..]) {
+            eprintln!("{e}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+    let silent = args.iter().any(|a| a == "/S");
+    let file = std::env::current_exe().and_then(std::fs::read).unwrap_or_default();
+    let job = payload::footer(&file).map(|footer| Arc::new(Job { file: Arc::new(file), footer }));
+    let uninstall_id = if job.is_none() || args.iter().any(|a| a == "--uninstall") { uninstall_target() } else { None };
+    let job = if uninstall_id.is_some() && args.iter().any(|a| a == "--uninstall") { None } else { job };
+    if job.is_none() && uninstall_id.is_none() {
+        eprintln!("Cet installateur ne contient aucune application.");
+        std::process::exit(1);
+    }
+    if silent {
+        let quiet = |_: f32, _: &str| {};
+        let r = match (&job, &uninstall_id) {
+            (Some(j), _) => install(j, false, &quiet),
+            (None, Some(id)) => uninstall(id, &quiet).map(|_| system::remove_self_later()),
+            _ => Ok(()),
+        };
+        std::process::exit(if r.is_ok() { 0 } else { 1 });
+    }
+    let id = job.as_ref().map(|j| j.footer.id.clone()).or_else(|| uninstall_id.clone()).unwrap_or_default();
+    let title = format!("{} de {}", if job.is_some() { "Installation" } else { "Désinstallation" }, system::name(&id));
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_decorations(false)
+            .with_title(&title)
+            .with_icon(Arc::new(studio_ui::app_window_icon(if id == "ethone-studio" { "studio" } else { &id })))
+            .with_inner_size([720.0, 430.0])
+            .with_resizable(false),
+        ..Default::default()
+    };
+    let previous = system::installed_version(&id);
+    eframe::run_native(
+        &title,
+        options,
+        Box::new(move |cc| {
+            studio_ui::pro::apply(&cc.egui_ctx);
+            Ok(Box::new(Setup { job, uninstall_id, step: Arc::new(Mutex::new(Step::Ready)), desktop: true, open_after: true, previous }))
+        }),
+    )
+}

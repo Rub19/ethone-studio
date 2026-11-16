@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn library_and_ops() {
-        assert!(lib().len() >= 6973 + 313 + 12_000, "{}", lib().len());
+        assert!(lib().len() >= 6973 + 311 + 12_000, "{}", lib().len());
         let probe = Clip { rate: 8000, ch: vec![(0..800).map(|i| (i as f32 * 0.07).sin() * 0.5).collect(), (0..800).map(|i| (i as f32 * 0.05).cos() * 0.4).collect()] };
         for (op, label, _) in ops() {
             let mut c = probe.clone();

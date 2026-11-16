@@ -1113,6 +1113,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ethone-setup"
+version = "1.0.0"
+dependencies = [
+ "eframe",
+ "flate2",
+ "studio-core",
+ "studio-ui",
+ "winresource",
+]
+
+[[package]]
 name = "ethone-studio"
 version = "0.7.0"
 dependencies = [

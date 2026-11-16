@@ -24,9 +24,9 @@ Deux banques libres récupérées sur internet et embarquées dans les apps (auc
 | Lucide | ISC | Vector, Page, Motion | 2 359 icônes, recherche aussi par mots-clés anglais (« house », « arrow », « heart »…) ; tracés modifiables dans Vector, image vectorielle dans Page et calque dans Motion |
 | color-name-list (meodai) | MIT | Pixel, Vector | 5 000 couleurs nommées : couleur du pinceau dans Pixel, remplissage ou contour de la sélection dans Vector |
 | derby-film | MIT | Lumen | 7 looks pellicule (Kodachrome 64, Portra 400 et 800, Gold 200, Ektachrome E100VS, Agfa Ultra 100, Superia X-TRA 400) × 10 intensités |
-| Kenney (Interface, RPG, Digital) + « 100 CC0 SFX » | CC0 | Sound | 313 bruitages (clics, portes, livres, lasers, bonus, cloches, vaisselle…) insérés au curseur ou à la place de la sélection ; cherche « bruitage porte », « laser », « clic » |
+| Kenney (Interface, RPG, Digital) + « 100 CC0 SFX » | CC0 | Sound | 311 bruitages (clics, portes, livres, lasers, bonus, cloches, vaisselle…) insérés au curseur ou à la place de la sélection ; cherche « bruitage porte », « laser », « clic » |
 
-Vector gagne 12 359 options (18 359 au total), Pixel 5 000 (11 744), Page et Motion 2 359 chacun, Sound 313.
+Vector gagne 12 359 options (18 359 au total), Pixel 5 000 (11 744), Page et Motion 2 359 chacun, Sound 311.
 
 Nouvel export **SVG optimisé** dans Vector : nombres arrondis, attributs par défaut retirés, fichier sur une ligne (case dans Exporter… et entrée dans Exporter rapidement).
 

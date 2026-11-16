@@ -1,6 +1,6 @@
 //! Bundled CC0 sound effects (assets/sfx, see CREDITS.txt). Generated list: pack, name, French keywords, bytes, extension.
 
-pub const SFX: [(&str, &str, &str, &[u8], &str); 313] = [
+pub const SFX: [(&str, &str, &str, &[u8], &str); 311] = [
     ("Interface", "back 1", "retour", include_bytes!("../assets/sfx/interface/back_001.ogg"), "ogg"),
     ("Interface", "back 2", "retour", include_bytes!("../assets/sfx/interface/back_002.ogg"), "ogg"),
     ("Interface", "back 3", "retour", include_bytes!("../assets/sfx/interface/back_003.ogg"), "ogg"),
@@ -298,8 +298,6 @@ pub const SFX: [(&str, &str, &str, &[u8], &str); 313] = [
     ("Quotidien", "spring 9", "", include_bytes!("../assets/sfx/divers/spring_09.ogg"), "ogg"),
     ("Quotidien", "switch 1", "interrupteur", include_bytes!("../assets/sfx/divers/switch_01.ogg"), "ogg"),
     ("Quotidien", "switch 2", "interrupteur", include_bytes!("../assets/sfx/divers/switch_02.ogg"), "ogg"),
-    ("Quotidien", "toilet 1", "", include_bytes!("../assets/sfx/divers/toilet_01.ogg"), "ogg"),
-    ("Quotidien", "toilet 2", "", include_bytes!("../assets/sfx/divers/toilet_02.ogg"), "ogg"),
     ("Quotidien", "tools 1", "", include_bytes!("../assets/sfx/divers/tools_01.ogg"), "ogg"),
     ("Quotidien", "tools 2", "", include_bytes!("../assets/sfx/divers/tools_02.ogg"), "ogg"),
     ("Quotidien", "tools 3", "", include_bytes!("../assets/sfx/divers/tools_03.ogg"), "ogg"),
