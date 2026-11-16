@@ -778,7 +778,7 @@ checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
 name = "cut"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "ab_glyph",
  "cpal",
@@ -1114,7 +1114,7 @@ dependencies = [
 
 [[package]]
 name = "ethone-studio"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eframe",
  "image",
@@ -1229,7 +1229,7 @@ checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
 name = "folio"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eframe",
  "hayro",
@@ -2146,7 +2146,7 @@ dependencies = [
 
 [[package]]
 name = "lumen"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eframe",
  "image",
@@ -2224,7 +2224,7 @@ dependencies = [
 
 [[package]]
 name = "motion"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eframe",
  "image",
@@ -2872,7 +2872,7 @@ dependencies = [
 
 [[package]]
 name = "page"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eframe",
  "image",
@@ -3042,7 +3042,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "pixel"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "ab_glyph",
  "arboard",
@@ -3909,7 +3909,7 @@ dependencies = [
 
 [[package]]
 name = "sound"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "cpal",
  "eframe",
@@ -4654,7 +4654,7 @@ dependencies = [
 
 [[package]]
 name = "vector"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eframe",
  "image",
