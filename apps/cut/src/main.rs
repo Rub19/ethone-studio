@@ -1725,6 +1725,9 @@ impl Cut {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
+            studio_ui::palette::Cmd::new("Fondu enchaîné entre tous les clips", "Séquence", "trans-all:1"),
+            studio_ui::palette::Cmd::new("Fondu au noir entre tous les clips", "Séquence", "trans-all:2"),
+            studio_ui::palette::Cmd::new("Retirer toutes les transitions", "Séquence", "trans-all:0"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));
@@ -1745,11 +1748,26 @@ impl Cut {
             }
             return;
         }
-        match id {
-
-            _ => {}
+        if let Some(k) = id.strip_prefix("trans-all:").and_then(|k| k.parse::<u8>().ok()) {
+            let n = self.set_all_transitions(k, 1.0);
+            studio_ui::handoff::toast(ctx, if k == 0 { format!("{n} transition(s) retirée(s)") } else { format!("{n} transition(s) ajoutée(s)") }, true);
         }
     }
+
+    /// Applies one transition to every cut between touching clips of the main track; returns how many changed.
+    fn set_all_transitions(&mut self, kind: u8, dur: f64) -> usize {
+        let mut n = 0;
+        for i in 1..self.proj.clips.len() {
+            let c = &mut self.proj.clips[i];
+            if c.gap <= 1e-6 && c.trans != kind {
+                c.trans = kind;
+                c.trans_dur = dur;
+                n += 1;
+            }
+        }
+        n
+    }
+
     fn send_to(&mut self, target: &str, ctx: &egui::Context) {
         let (w, h) = (self.proj.width.max(2), self.proj.height.max(2));
         let p = studio_core::handoff::outgoing("cut", "image de la vidéo", "png");

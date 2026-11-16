@@ -199,7 +199,7 @@ pub fn list() -> Vec<Value> {
             "title": "Sound : traiter un son",
             "description": "Traite un fichier audio (WAV, MP3, FLAC, OGG, M4A, son d'une vidéo) avec le moteur de Sound et enregistre un WAV. Sans input, part d'un fichier vide (utile avec generate). \
                 Opérations dans l'ordre, chacune avec start/end optionnels en secondes (sinon tout le fichier) : gain{db}, normalize{db}, loudness{db} (volume perçu RMS), fade_in{seconds}, fade_out{seconds}, \
-                trim{start,end} (garde la plage), cut{start,end} (supprime la plage), eq{low,mid,high} (dB), low_cut{hz}, high_cut{hz}, compress{threshold,ratio,makeup}, gate{threshold}, saturate{drive 0..1}, \
+                trim{start,end} (garde la plage), cut{start,end} (supprime la plage), eq{low,mid,high} (dB), low_cut{hz}, high_cut{hz}, compress{threshold,ratio,makeup}, gate{threshold}, cut_silences{threshold:-40 dB, min_ms:800, keep_ms:120} (supprime les silences longs), saturate{drive 0..1}, \
                 echo{delay_ms,feedback,mix}, reverb{size,mix}, speed{factor}, reverse, mono, stereo{pan,width}, generate{kind:'silence'|'tone'|'noise', seconds, at?}.",
             "inputSchema": {
                 "type": "object",
@@ -559,6 +559,10 @@ fn sound_process(a: &Value) -> Out {
             }
             "trim" => clip = clip.slice(s0, s1),
             "cut" => clip.remove(s0, s1),
+            "cut_silences" => {
+                let n = clip.cut_silences(s0, s1, v("threshold", -40.0), v("min_ms", 800.0), v("keep_ms", 120.0));
+                let _ = n;
+            }
             "eq" => {
                 clip.filter(s0, s1, 1, 120.0, v("low", 0.0), 0.707);
                 clip.filter(s0, s1, 0, 1000.0, v("mid", 0.0), 0.9);

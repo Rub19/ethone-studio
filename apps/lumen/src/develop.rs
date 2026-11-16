@@ -1676,6 +1676,14 @@ pub fn preset_catalog() -> Vec<(&'static str, &'static str, Settings)> {
     let teal_orange = hsl_of(&[(1, [-10.0, 20.0, 8.0]), (4, [10.0, 15.0, 0.0]), (5, [-15.0, 10.0, -10.0])]);
     vec![
         ("Couleur", "Naturel", d()),
+        ("Pellicule", "Portra doux", Settings { temperature: 8.0, tint: 4.0, contrast: -10.0, fade: 18.0, grain: 18.0, split_high_hue: 40.0, split_high_sat: 12.0, hsl: hsl_of(&[(1, [0.0, -5.0, 6.0])]), ..d() }),
+        ("Pellicule", "Ektar vif", Settings { contrast: 20.0, vibrance: 35.0, saturation: 10.0, grain: 12.0, hsl: hsl_of(&[(0, [0.0, 15.0, 0.0]), (5, [0.0, 15.0, -5.0])]), ..d() }),
+        ("Pellicule", "Fuji vert", Settings { temperature: -6.0, tint: -8.0, fade: 12.0, grain: 20.0, split_shadow_hue: 160.0, split_shadow_sat: 18.0, hsl: hsl_of(&[(3, [-10.0, 10.0, 0.0])]), ..d() }),
+        ("Pellicule", "Cinéma 500T", Settings { temperature: -18.0, contrast: 12.0, fade: 15.0, grain: 28.0, split_shadow_hue: 200.0, split_shadow_sat: 25.0, split_high_hue: 30.0, split_high_sat: 20.0, glow: 15.0, ..d() }),
+        ("Pellicule", "Diapositive", Settings { contrast: 30.0, saturation: 18.0, blacks: -20.0, vignette: -20.0, grain: 10.0, ..d() }),
+        ("Pellicule", "Instantané pastel", Settings { exposure: 0.15, contrast: -18.0, fade: 35.0, temperature: 10.0, tint: 8.0, split_shadow_hue: 220.0, split_shadow_sat: 15.0, vignette: -18.0, grain: 15.0, ..d() }),
+        ("Pellicule", "Argentique N&B 400", Settings { mono: true, contrast: 25.0, grain: 35.0, clarity: 10.0, vignette: -15.0, ..d() }),
+        ("Pellicule", "Jetable 90s", Settings { exposure: 0.2, contrast: 15.0, saturation: 12.0, temperature: 15.0, tint: 10.0, fade: 10.0, grain: 30.0, vignette: -30.0, ..d() }),
         ("Couleur", "Vif", Settings { contrast: 18.0, vibrance: 35.0, saturation: 8.0, clarity: 10.0, ..d() }),
         ("Couleur", "Doux", Settings { contrast: -18.0, highlights: -20.0, shadows: 20.0, saturation: -10.0, clarity: -15.0, ..d() }),
         ("Couleur", "Chaud", Settings { temperature: 30.0, tint: 6.0, vibrance: 10.0, ..d() }),

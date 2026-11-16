@@ -426,6 +426,22 @@ impl Sound {
         self.markers.retain(|m| m.0 <= n);
     }
 
+    fn cut_silences(&mut self, min_ms: f32) {
+        let (a, b) = self.sel.unwrap_or((0, self.clip.len()));
+        let mut c = self.clip.clone();
+        let n = c.cut_silences(a, b, -40.0, min_ms, 120.0);
+        if n == 0 {
+            self.notice = Some(("Aucun silence assez long à supprimer".into(), false));
+            return;
+        }
+        self.snapshot("Suppression des silences");
+        let before = self.clip.secs(self.clip.len());
+        self.clip = c;
+        self.sel = None;
+        self.changed();
+        self.notice = Some((format!("{n} silence(s) supprimé(s) · {:.1} s gagnées", before - self.clip.secs(self.clip.len())), true));
+    }
+
     fn snapshot(&mut self, label: &str) {
         self.undo.push((self.clip.clone(), label.to_string()));
         if self.undo.len() > UNDO_LIMIT {
@@ -1028,6 +1044,8 @@ impl Sound {
             studio_ui::palette::Cmd::new("Tout sélectionner", "Ctrl+A", "select-all"),
             studio_ui::palette::Cmd::new("Lecture / pause", "Espace", "play"),
             studio_ui::palette::Cmd::new("Ajouter un marqueur", "M", "marker"),
+            studio_ui::palette::Cmd::new("Supprimer les silences (plus de 0,8 s)", "Édition", "silences"),
+            studio_ui::palette::Cmd::new("Supprimer les silences courts (plus de 0,4 s)", "Édition", "silences-short"),
             studio_ui::palette::Cmd::new("Annuler", "Ctrl+Z", "undo"),
         ];
         v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage (sélection ou tout)")]));
@@ -1059,6 +1077,7 @@ impl Sound {
             "select-all" => self.sel = Some((0, self.clip.len())),
             "play" => self.toggle_play(),
             "marker" => self.add_marker(),
+            "silences" | "silences-short" => self.cut_silences(if id == "silences" { 800.0 } else { 400.0 }),
             "undo" => self.undo(),
             _ => {}
         }

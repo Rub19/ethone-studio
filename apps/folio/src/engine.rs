@@ -1027,6 +1027,76 @@ pub fn set_field(doc: &mut Document, field: &Field, value: &str) -> R<()> {
     Ok(())
 }
 
+/// Every picture embedded in the listed pages: (page, image). JPEG streams are decoded as is,
+/// uncompressed or Flate 8-bit RGB / grey / CMYK images are rebuilt from their samples.
+pub fn extract_images(doc: &Document, idx: &[usize]) -> Vec<(usize, image::DynamicImage)> {
+    let mut out = Vec::new();
+    let mut seen = HashSet::new();
+    let all = pages(doc);
+    for &i in idx {
+        let Some(&pid) = all.get(i) else { continue };
+        let Ok(res) = doc.get_page_resources(pid) else { continue };
+        let mut dicts: Vec<Dictionary> = res.0.into_iter().cloned().collect();
+        for r in res.1 {
+            if let Ok(d) = doc.get_dictionary(r) {
+                dicts.push(d.clone());
+            }
+        }
+        for d in dicts {
+            let xo = match d.get(b"XObject") {
+                Ok(Object::Reference(r)) => doc.get_dictionary(*r).ok().cloned(),
+                Ok(Object::Dictionary(x)) => Some(x.clone()),
+                _ => None,
+            };
+            let Some(xo) = xo else { continue };
+            for (_, v) in xo.iter() {
+                let Ok(id) = v.as_reference() else { continue };
+                if !seen.insert(id) {
+                    continue;
+                }
+                let Ok(Object::Stream(s)) = doc.get_object(id) else { continue };
+                if s.dict.get(b"Subtype").map(decode).ok().as_deref() != Some("Image") {
+                    continue;
+                }
+                if let Some(img) = stream_image(s) {
+                    out.push((i, img));
+                }
+            }
+        }
+    }
+    out
+}
+
+fn stream_image(s: &Stream) -> Option<image::DynamicImage> {
+    let filters: Vec<String> = match s.dict.get(b"Filter") {
+        Ok(Object::Name(n)) => vec![String::from_utf8_lossy(n).into_owned()],
+        Ok(Object::Array(a)) => a.iter().map(decode).collect(),
+        _ => Vec::new(),
+    };
+    if filters.iter().any(|f| f == "DCTDecode") {
+        return image::load_from_memory_with_format(&s.content, image::ImageFormat::Jpeg).ok();
+    }
+    let (w, h) = (s.dict.get(b"Width").ok()?.as_i64().ok()? as u32, s.dict.get(b"Height").ok()?.as_i64().ok()? as u32);
+    if s.dict.get(b"BitsPerComponent").and_then(|b| b.as_i64()).unwrap_or(8) != 8 {
+        return None;
+    }
+    let data = if filters.is_empty() { s.content.clone() } else { s.decompressed_content().ok()? };
+    let cs = s.dict.get(b"ColorSpace").map(decode).unwrap_or_default();
+    let n = (w * h) as usize;
+    match cs.as_str() {
+        "DeviceGray" if data.len() >= n => image::GrayImage::from_raw(w, h, data[..n].to_vec()).map(image::DynamicImage::ImageLuma8),
+        "DeviceCMYK" if data.len() >= n * 4 => {
+            let rgb: Vec<u8> = data[..n * 4].chunks(4).flat_map(|c| {
+                let k = 255 - c[3] as u32;
+                [0, 1, 2].map(|i| ((255 - c[i] as u32) * k / 255) as u8)
+            }).collect();
+            image::RgbImage::from_raw(w, h, rgb).map(image::DynamicImage::ImageRgb8)
+        }
+        _ if data.len() >= n * 3 => image::RgbImage::from_raw(w, h, data[..n * 3].to_vec()).map(image::DynamicImage::ImageRgb8),
+        _ => None,
+    }
+}
+
 pub fn to_rtf(pages: &[String]) -> String {
     let mut s = String::from("{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Calibri;}}\\f0\\fs22\n");
     for (k, p) in pages.iter().enumerate() {
@@ -1111,6 +1181,17 @@ mod tests {
         assert_eq!(expand("{page}/{pages}", 0, 3, ""), "1/3");
         assert_eq!(civil(0), (1970, 1, 1));
         assert!(to_rtf(&["é{".into()]).contains("\\u233?\\{"));
+    }
+
+    #[test]
+    fn images_come_back_out() {
+        let d = sample(3);
+        let got = extract_images(&d, &[0, 2]);
+        assert_eq!(got.len(), 2);
+        assert_eq!(got[0].0, 0);
+        assert_eq!((got[1].1.width(), got[1].1.height()), (100, 60));
+        let p = got[0].1.to_rgb8().get_pixel(5, 5).0;
+        assert!(p[0] > 170 && p[1] < 80, "{p:?}");
     }
 
     #[test]

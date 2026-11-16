@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const LUMEN: &[Tuto] = &[
+    t("Préréglages pellicule", "", "Huit rendus argentiques : Portra doux, Ektar vif, Fuji vert, Cinéma 500T, Diapositive, Instantané pastel, Argentique N&B 400, Jetable 90s.", &["Dans Développement, panneau Préréglages, catégorie Pellicule. Le grain et le virage font partie du rendu ; le curseur Quantité dose l'effet."]),
     t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),
     t("Effets créatifs", "", "Plus de 100 effets de Pixel empilés sur le développement.", &["Panneau Effets créatifs > + Ajouter un effet : Relight, brume, looks, lueur, glitch, aquarelle, pluie, neige…", "Chaque effet a son intensité, ses réglages et ses préréglages ; ▲ change l'ordre, la case l'active ou le désactive.", "Les effets sont enregistrés avec la photo, copiables vers d'autres photos et appliqués à l'export."]),
     t("Importer des photos", "", "Lumen travaille sur un dossier : tes originaux ne sont jamais modifiés.", &[

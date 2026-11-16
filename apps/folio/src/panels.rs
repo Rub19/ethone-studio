@@ -948,6 +948,23 @@ fn export(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
             }
         }
     }
+    ui.add_space(6.0);
+    if ui.button("Extraire les images du PDF…").on_hover_text("Enregistre en PNG chaque image contenue dans les pages choisies").clicked()
+        && let Some(o) = &app.od
+    {
+        let idx = app.scope(app.st.exp_scope);
+        let found = engine::extract_images(&o.doc, &idx);
+        if found.is_empty() {
+            toast(ctx, "Aucune image dans ces pages", false);
+        } else if let Some(dir) = rfd::FileDialog::new().pick_folder() {
+            let name = stem(&o.name);
+            let mut ok = 0;
+            for (k, (page, img)) in found.iter().enumerate() {
+                ok += usize::from(img.save(dir.join(format!("{name} - p{} - image {}.png", page + 1, k + 1))).is_ok());
+            }
+            toast(ctx, format!("{ok} image(s) extraite(s) dans {}", dir.display()), ok > 0);
+        }
+    }
     ui.add_space(10.0);
     label(ui, "Envoyer la page courante");
     ui.horizontal(|ui| {

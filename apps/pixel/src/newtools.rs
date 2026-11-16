@@ -128,7 +128,64 @@ pub fn warp_quad(img: &RgbaImage, q: [(f32, f32); 4], ow: u32, oh: u32) -> RgbaI
     })
 }
 
+/// Mean and standard deviation of R, G, B over pixels where `keep` is true.
+pub fn color_stats(img: &RgbaImage, keep: impl Fn(u32, u32) -> bool) -> ([f32; 3], [f32; 3]) {
+    let (mut s, mut s2, mut n) = ([0f64; 3], [0f64; 3], 0f64);
+    for (x, y, p) in img.enumerate_pixels() {
+        if keep(x, y) {
+            for k in 0..3 {
+                let v = p.0[k] as f64;
+                s[k] += v;
+                s2[k] += v * v;
+            }
+            n += 1.0;
+        }
+    }
+    let n = n.max(1.0);
+    let mean = s.map(|v| (v / n) as f32);
+    let sd = [0, 1, 2].map(|k| ((s2[k] / n - (s[k] / n).powi(2)).max(0.0).sqrt() as f32).max(1.0));
+    (mean, sd)
+}
+
+/// Moves `src`'s colours toward the target mean/contrast ("Harmoniser"), weighted by `amount` 0..1.
+pub fn harmonize(src: &RgbaImage, from: ([f32; 3], [f32; 3]), to: ([f32; 3], [f32; 3]), amount: f32) -> RgbaImage {
+    let mut out = src.clone();
+    for p in out.pixels_mut() {
+        if p.0[3] == 0 {
+            continue;
+        }
+        for k in 0..3 {
+            let v = p.0[k] as f32;
+            let t = (v - from.0[k]) * (to.1[k] / from.1[k]).clamp(0.4, 2.5) + to.0[k];
+            p.0[k] = (v + (t - v) * amount).round().clamp(0.0, 255.0) as u8;
+        }
+    }
+    out
+}
+
 impl Pixel {
+    /// Matches the active layer's colours and contrast to what lies beneath it (Photoshop's Harmonize).
+    pub fn harmonize_layer(&mut self, amount: f32) {
+        let layer = self.doc.active;
+        if self.doc.layers.len() < 2 || layer == 0 {
+            self.error = Some("Harmoniser : place un calque au-dessus d'une image".into());
+            return;
+        }
+        let src = self.doc.layers[layer].img.clone();
+        let below = self.doc.layers[..layer].iter().filter(|l| l.visible).fold(None::<RgbaImage>, |acc, l| {
+            let mut base = acc.unwrap_or_else(|| RgbaImage::new(l.img.width(), l.img.height()));
+            image::imageops::overlay(&mut base, &l.img, 0, 0);
+            Some(base)
+        });
+        let Some(below) = below else { return };
+        let from = color_stats(&src, |x, y| src.get_pixel(x, y).0[3] > 128);
+        let to = color_stats(&below, |x, y| below.get_pixel(x, y).0[3] > 128);
+        self.doc.next_label = Some("Harmoniser".into());
+        self.doc.checkpoint();
+        self.doc.layers[layer].img = harmonize(&src, from, to, amount);
+        self.doc.touch_all();
+    }
+
     pub fn object_select(&mut self) {
         let Some(a) = self.doc.selection else { return };
         let prev = self.sel_prev.take();
@@ -200,6 +257,17 @@ impl Pixel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn harmonize_pulls_toward_target() {
+        let src = RgbaImage::from_pixel(4, 4, Rgba([200, 60, 60, 255]));
+        let from = color_stats(&src, |_, _| true);
+        let to = ([60.0, 90.0, 200.0], [10.0, 10.0, 10.0]);
+        let out = harmonize(&src, from, to, 1.0);
+        assert_eq!(out.get_pixel(0, 0).0, [60, 90, 200, 255]);
+        let half = harmonize(&src, from, to, 0.5);
+        assert_eq!(half.get_pixel(0, 0).0, [130, 75, 130, 255]);
+    }
 
     #[test]
     fn object_red_eye_warp_curve() {

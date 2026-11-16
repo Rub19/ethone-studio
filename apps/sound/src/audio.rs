@@ -113,6 +113,54 @@ impl Clip {
         }
     }
 
+    /// Removes silent passages longer than `min_ms` inside [a, b), keeping `keep_ms` of sound on each side.
+    /// Returns the number of passages removed. Silence is measured on 10 ms RMS windows.
+    pub fn cut_silences(&mut self, a: usize, b: usize, threshold_db: f32, min_ms: f32, keep_ms: f32) -> usize {
+        let win = (self.rate as f32 * 0.01).max(1.0) as usize;
+        let thr = 10f32.powf(threshold_db / 20.0);
+        let (a, b) = (a.min(self.len()), b.min(self.len()));
+        let mut quiet = Vec::new();
+        let mut i = a;
+        while i < b {
+            let e = (i + win).min(b);
+            let mut acc = 0.0f32;
+            let mut n = 0usize;
+            for c in &self.ch {
+                for s in &c[i..e] {
+                    acc += s * s;
+                    n += 1;
+                }
+            }
+            quiet.push((i, e, (acc / n.max(1) as f32).sqrt() < thr));
+            i = e;
+        }
+        let min = (self.rate as f32 * min_ms / 1000.0) as usize;
+        let keep = (self.rate as f32 * keep_ms / 1000.0) as usize;
+        let mut cuts: Vec<(usize, usize)> = Vec::new();
+        let mut k = 0;
+        while k < quiet.len() {
+            if quiet[k].2 {
+                let s = k;
+                while k < quiet.len() && quiet[k].2 {
+                    k += 1;
+                }
+                let (from, to) = (quiet[s].0, quiet[k - 1].1);
+                if to - from >= min {
+                    let (cs, ce) = (from + keep, to.saturating_sub(keep));
+                    if ce > cs {
+                        cuts.push((cs, ce));
+                    }
+                }
+            } else {
+                k += 1;
+            }
+        }
+        for (cs, ce) in cuts.iter().rev() {
+            self.remove(*cs, *ce);
+        }
+        cuts.len()
+    }
+
     pub fn insert(&mut self, at: usize, other: &Clip) {
         let other = other.resampled(self.rate);
         for (i, c) in self.ch.iter_mut().enumerate() {
@@ -794,6 +842,24 @@ pub fn fft(re: &mut [f32], im: &mut [f32], inverse: bool) {
         let k = 1.0 / n as f32;
         re.iter_mut().for_each(|v| *v *= k);
         im.iter_mut().for_each(|v| *v *= k);
+    }
+}
+
+#[cfg(test)]
+mod silence_tests {
+    use super::*;
+
+    #[test]
+    fn long_gaps_go_short_gaps_stay() {
+        let r = 10_000u32;
+        let mut tone = |n: usize| vec![0.5f32; n];
+        let mut c = vec![tone(5_000), vec![0.0; 20_000], tone(5_000), vec![0.0; 500], tone(5_000)].concat();
+        let mut clip = Clip { rate: r, ch: vec![c.clone()] };
+        let n = clip.cut_silences(0, clip.len(), -40.0, 800.0, 100.0);
+        assert_eq!(n, 1);
+        assert!(clip.len() < c.len() - 15_000);
+        assert!(clip.len() > 10_000 + 500 + 2_000);
+        c.clear();
     }
 }
 

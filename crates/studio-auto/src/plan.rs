@@ -332,6 +332,10 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
                 ops.push(json!({"op":"reverse"}));
                 s.push("Lire à l'envers".into());
             }
+            if has(&t, &["silence", "blanc", "pause", "temps mort"]) && has(&t, &["supprime", "retire", "enleve", "coupe", "vire", "raccourci"]) {
+                ops.push(json!({"op":"cut_silences","threshold":-40,"min_ms":700,"keep_ms":120}));
+                s.push("Supprimer les silences de plus de 0,7 s".into());
+            }
             if has(&t, &["mono"]) {
                 ops.push(json!({"op":"mono"}));
                 s.push("Passer en mono".into());
@@ -436,6 +440,7 @@ mod tests {
         assert_eq!(p("extrais le son", "v.mp4").steps, vec![Step::ExtractAudio]);
         assert_eq!(p("monte cette vidéo", "v.mp4").app, "cut");
         assert!(matches!(&p("nettoie ce podcast", "a.wav").steps[0], Step::Sound(o) if o.len() > 3));
+        assert!(matches!(&p("supprime les silences", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "cut_silences"));
         assert_eq!(p("résume ce document", "d.pdf").args, vec!["--outil", "ai"]);
         assert_eq!(p("fais l'ocr", "d.pdf").args, vec!["--ocr"]);
         assert_eq!(p("fais un logo pour Nova Café", "").steps, vec![Step::Logo("Nova Café".into())]);

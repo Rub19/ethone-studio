@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const FOLIO: &[Tuto] = &[
+    t("Extraire les images", "", "Récupère en PNG toutes les photos et illustrations d'un PDF.", &["Outils › Exporter › Extraire les images du PDF, choisis les pages et un dossier."]),
     t("Ouvrir un PDF", "Ctrl+O", "Ouvre un PDF, ou une image qui devient un PDF.", &["Fichier > Ouvrir, ou glisse le fichier dans la fenêtre.", "Une photo ou un scan (PNG, JPEG) devient un PDF d'une page : lance ensuite l'OCR pour le rendre consultable.", "Un PDF protégé demande son mot de passe."]),
     t("Naviguer", "", "Défile, zoome et saute de page en page.", &["Molette : défiler. Ctrl+molette ou Ctrl +/− : zoom. Ctrl+0 : page entière, Ctrl+1 : 100 %, Ctrl+2 : largeur.", "Le panneau de gauche montre les vignettes, les signets et les commentaires. Clique une vignette pour y aller.", "Page précédente / suivante : Page préc. / Page suiv. ou les flèches de la barre du bas."]),
     t("Commenter", "", "Surligne, souligne, barre, ajoute notes, textes, formes et dessins.", &["Choisis un outil dans la barre de gauche de la page : Surligner, Souligner, Barrer, Note, Zone de texte, Rectangle, Ellipse, Ligne, Flèche, Dessin.", "Glisse sur la page (un clic suffit pour la note). La couleur et l'épaisseur se règlent dans le panneau Commenter.", "Les commentaires sont de vraies annotations PDF : Acrobat, Edge et les autres lecteurs les affichent."]),
