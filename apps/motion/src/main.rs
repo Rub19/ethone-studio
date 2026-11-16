@@ -505,12 +505,24 @@ impl Motion {
     }
 
     fn add_image(&mut self) {
-        if let Some(p) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "gif", "webp", "svg"]).pick_file() {
+        if let Some(p) = rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "gif", "webp", "svg", "psd"]).pick_file() {
             self.add_image_path(&p);
         }
     }
 
     fn add_image_path(&mut self, p: &Path) {
+        let png;
+        let p = if studio_fx::psd::is_psd(p) {
+            let dir = studio_core::data_dir().join("psd");
+            png = studio_fx::psd::png_copy_path(p, &dir);
+            if let Err(e) = std::fs::create_dir_all(&dir).map_err(|e| e.to_string()).and_then(|_| studio_fx::psd::open_any(p)).and_then(|img| img.save(&png).map_err(|e| e.to_string())) {
+                self.error = Some(format!("PSD : {e}"));
+                return;
+            }
+            png.as_path()
+        } else {
+            p
+        };
         let dims = if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("svg")) {
             std::fs::read(&p).ok().and_then(|b| usvg::Tree::from_data(&b, &usvg::Options::default()).ok()).map(|t| (t.size().width() as u32, t.size().height() as u32)).ok_or("SVG illisible".to_string())
         } else {

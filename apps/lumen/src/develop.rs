@@ -6,7 +6,7 @@ use std::borrow::Cow;
 use std::path::Path;
 
 pub const RAW_EXT: [&str; 14] = ["cr2", "cr3", "nef", "nrw", "arw", "srf", "sr2", "dng", "raf", "orf", "rw2", "pef", "srw", "3fr"];
-pub const IMG_EXT: [&str; 6] = ["jpg", "jpeg", "png", "webp", "tif", "tiff"];
+pub const IMG_EXT: [&str; 7] = ["jpg", "jpeg", "png", "webp", "tif", "tiff", "psd"];
 pub const BANDS: [(&str, f32, [u8; 3]); 8] = [
     ("Rouges", 0.0, [235, 64, 52]),
     ("Oranges", 30.0, [245, 140, 40]),
@@ -392,7 +392,7 @@ pub fn load(path: &Path, max: u32) -> Result<RgbImage, String> {
         let s = imagepipe::simple_decode_8bit(path, m, m)?;
         RgbImage::from_raw(s.width as u32, s.height as u32, s.data).ok_or("RAW illisible")?
     } else {
-        image::open(path).map_err(|e| e.to_string())?.into_rgb8()
+        image::DynamicImage::ImageRgba8(studio_fx::psd::open_any(path)?).into_rgb8()
     };
     Ok(if max > 0 && (img.width() > max || img.height() > max) {
         let r = max as f32 / img.width().max(img.height()) as f32;

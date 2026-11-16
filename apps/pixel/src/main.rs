@@ -482,6 +482,27 @@ impl Pixel {
     }
 
     fn open_path(&mut self, path: &Path) {
+        if studio_fx::psd::is_psd(path) {
+            match std::fs::read(path).map_err(|e| e.to_string()).and_then(|b| studio_fx::psd::layers(&b)) {
+                Ok((_, _, layers)) => {
+                    let name = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+                    let mut it = layers.into_iter();
+                    let Some(first) = it.next() else { return };
+                    let mut doc = Document::from_image(name, first.img);
+                    (doc.layers[0].name, doc.layers[0].visible, doc.layers[0].opacity) = (first.name, first.visible, first.opacity);
+                    for l in it {
+                        doc.add_layer(Some(l.name), Some(l.img));
+                        let top = doc.layers.len() - 1;
+                        (doc.layers[top].visible, doc.layers[top].opacity) = (l.visible, l.opacity);
+                    }
+                    doc.clear_history();
+                    self.set_doc(doc);
+                    self.remember(path);
+                }
+                Err(e) => self.error = Some(format!("Impossible d'ouvrir le PSD : {e}")),
+            }
+            return;
+        }
         match image::open(path) {
             Ok(img) => {
                 let name = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
@@ -500,11 +521,11 @@ impl Pixel {
 
     fn import_layer(&mut self) {
         if let Some(p) = image_dialog().pick_file() {
-            match image::open(&p) {
+            match studio_fx::psd::open_any(&p) {
                 Ok(img) => {
                     let name = p.file_stem().map(|s| s.to_string_lossy().into_owned());
                     self.doc.next_label = Some("Importer".into());
-                    self.doc.add_layer(name, Some(img.into_rgba8()));
+                    self.doc.add_layer(name, Some(img));
                 }
                 Err(e) => self.error = Some(format!("Impossible d'importer : {e}")),
             }
@@ -2109,7 +2130,7 @@ pub fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
 }
 
 fn image_dialog() -> rfd::FileDialog {
-    rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "ico"])
+    rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "ico", "psd"])
 }
 
 fn main() -> eframe::Result {
