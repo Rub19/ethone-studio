@@ -114,3 +114,27 @@ Aucune.
 - [x] Sound : protéger les suppressions de silence appliquées au fichier entier.
 - [x] Compiler et tester tout le workspace.
 - [x] Mettre à jour la feuille de route, revoir le diff et créer les commits locaux.
+
+## Wave 6: états indisponibles cohérents
+
+### Slice A — moteur commun
+
+- [x] Ajouter un état activé/désactivé et une raison aux commandes `Ctrl+K`.
+- [x] Empêcher le clavier et la souris d'exécuter une commande désactivée.
+- [x] Rendre la raison visible et recherchable.
+- [x] Classer les commandes désactivées après les commandes disponibles.
+- [x] Couvrir le comportement par des tests et créer un commit local.
+
+### Slice B — éditeurs image et design
+
+- [ ] Pixel : désactiver les actions nécessitant une image ouverte.
+- [ ] Vector, Motion et Page : désactiver les actions nécessitant une sélection.
+- [ ] Compiler et tester ces quatre applications, puis créer un commit local.
+
+### Slice C — médias et documents
+
+- [ ] Cut : distinguer les commandes nécessitant un clip ou une sélection audio.
+- [ ] Lumen : distinguer les commandes nécessitant une photo ou un lot.
+- [ ] Folio : désactiver les actions nécessitant un PDF ouvert.
+- [ ] Sound : désactiver annuler lorsqu'aucun historique n'existe.
+- [ ] Compiler et tester tout le workspace, mettre à jour la feuille de route et créer les commits locaux.

@@ -68,3 +68,12 @@
 - [x] Slice B : commandes sensibles annotées dans Pixel, Cut, Lumen et Sound.
 - [x] Slice B : workspace compilé et testé.
 - [x] Checkpoint final : feuille de route, revue et commits locaux.
+
+## Vague 6 — états indisponibles
+
+- [x] Slice A : état désactivé partagé, raison visible et tests.
+- [ ] Slice A : commit local créé.
+- [ ] Slice B : intégration Pixel, Vector, Motion et Page.
+- [ ] Slice B : tests ciblés et commit local.
+- [ ] Slice C : intégration Cut, Lumen, Folio et Sound.
+- [ ] Checkpoint final : workspace, feuille de route, revue et commits.

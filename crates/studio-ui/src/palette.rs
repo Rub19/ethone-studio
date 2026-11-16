@@ -8,11 +8,13 @@ pub struct Cmd {
     pub hint: String,
     pub id: String,
     pub confirm: bool,
+    pub enabled: bool,
+    pub disabled_reason: Option<String>,
 }
 
 impl Cmd {
     pub fn new(label: impl Into<String>, hint: impl Into<String>, id: impl Into<String>) -> Self {
-        Cmd { label: label.into(), hint: hint.into(), id: id.into(), confirm: false }
+        Cmd { label: label.into(), hint: hint.into(), id: id.into(), confirm: false, enabled: true, disabled_reason: None }
     }
 
     pub fn confirm(mut self) -> Self {
@@ -22,6 +24,12 @@ impl Cmd {
 
     pub fn confirm_if(mut self, condition: bool) -> Self {
         self.confirm = condition;
+        self
+    }
+
+    pub fn enabled_if(mut self, condition: bool, reason: impl Into<String>) -> Self {
+        self.enabled = condition;
+        self.disabled_reason = (!condition).then(|| reason.into());
         self
     }
 }
@@ -174,7 +182,7 @@ fn query_words(query: &str) -> Vec<String> {
 }
 
 fn matches_words(command: &Cmd, words: &[String]) -> bool {
-    let haystack = search_key(&format!("{} {}", command.label, command.hint));
+    let haystack = search_key(&format!("{} {} {}", command.label, command.hint, command.disabled_reason.as_deref().unwrap_or("")));
     words.iter().all(|word| haystack.contains(word))
 }
 
@@ -188,10 +196,18 @@ fn remember_recent(recent: &mut Vec<String>, id: &str) {
 }
 
 fn rank_recent(commands: &mut Vec<&Cmd>, recent: &[String]) {
-    commands.sort_by_key(|command| recent.iter().position(|id| id == &command.id).unwrap_or(usize::MAX));
+    commands.sort_by_key(|command| (!command.enabled, recent.iter().position(|id| id == &command.id).unwrap_or(usize::MAX)));
+}
+
+fn executable_id(command: &Cmd) -> Option<String> {
+    command.enabled.then(|| command.id.clone())
 }
 
 fn confirmation_step(pending: &mut Option<String>, command: &Cmd) -> bool {
+    if !command.enabled {
+        *pending = None;
+        return false;
+    }
     if !command.confirm {
         *pending = None;
         return true;
@@ -216,6 +232,9 @@ pub fn validate_commands(commands: &[Cmd]) -> Result<(), String> {
         }
         if !ids.insert(command.id.as_str()) {
             return Err(format!("Identifiant de commande dupliqué : {}", command.id));
+        }
+        if !command.enabled && command.disabled_reason.as_deref().is_none_or(|reason| reason.trim().is_empty()) {
+            return Err(format!("La commande désactivée « {} » n'indique pas pourquoi", command.label));
         }
     }
     Ok(())
@@ -283,7 +302,7 @@ impl Palette {
         if up {
             self.sel = self.sel.saturating_sub(1);
         }
-        let mut chosen = if enter { hits.get(self.sel).map(|c| c.id.clone()) } else { None };
+        let mut chosen = if enter { hits.get(self.sel).and_then(|command| executable_id(command)) } else { None };
         let close = esc;
         egui::Area::new(egui::Id::NULL.with("palette")).order(egui::Order::Foreground).anchor(Align2::CENTER_TOP, [0.0, 80.0]).show(ctx, |ui| {
             Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(14)).inner_margin(Margin::same(10)).shadow(egui::epaint::Shadow { offset: [0, 16], blur: 40, spread: 0, color: Color32::from_black_alpha(170) }).show(ui, |ui| {
@@ -301,17 +320,22 @@ impl Palette {
                 if let Some(label) = &confirmation_label {
                     ui.label(RichText::new(format!("⚠ Confirmer « {label} » avec Entrée ou un second clic")).size(12.0).color(Color32::from_rgb(255, 180, 60)));
                 }
+                if let Some(reason) = hits.get(self.sel).and_then(|command| (!command.enabled).then_some(command.disabled_reason.as_deref()).flatten()) {
+                    ui.label(RichText::new(format!("Indisponible : {reason}")).size(12.0).color(MUTED));
+                }
                 egui::ScrollArea::vertical().max_height(380.0).show(ui, |ui| {
                     for (k, c) in hits.iter().enumerate().take(200) {
                         let on = k == self.sel;
-                        let label = format!("{}  {}", if c.confirm { "⚠" } else { command_icon(&c.id) }, c.label);
-                        let resp = ui.add(egui::Button::new(RichText::new(label).size(13.5).color(if on { INK_STRONG } else { INK })).fill(if on { Color32::from_white_alpha(18) } else { Color32::TRANSPARENT }).min_size(egui::vec2(ui.available_width(), 26.0)).right_text(RichText::new(&c.hint).size(11.0).color(MUTED)));
+                        let label = format!("{}  {}", if !c.enabled { "○" } else if c.confirm { "⚠" } else { command_icon(&c.id) }, c.label);
+                        let detail = c.disabled_reason.as_deref().map_or(c.hint.as_str(), |reason| reason);
+                        let button = egui::Button::new(RichText::new(label).size(13.5).color(if !c.enabled { MUTED } else if on { INK_STRONG } else { INK })).fill(if on && c.enabled { Color32::from_white_alpha(18) } else { Color32::TRANSPARENT }).min_size(egui::vec2(ui.available_width(), 26.0)).right_text(RichText::new(detail).size(11.0).color(MUTED));
+                        let resp = ui.add_enabled(c.enabled, button);
                         if on && (up || down) {
                             resp.scroll_to_me(None);
                         }
                         if resp.clicked() {
                             self.sel = k;
-                            chosen = Some(c.id.clone());
+                            chosen = executable_id(c);
                         }
                     }
                 });
@@ -447,5 +471,29 @@ mod tests {
         let mut pending = Some("flatten".to_string());
         assert!(confirmation_step(&mut pending, &command));
         assert!(pending.is_none());
+    }
+
+    #[test]
+    fn disabled_command_exposes_reason_and_cannot_execute() {
+        let disabled = Cmd::new("Dupliquer", "", "duplicate").enabled_if(false, "Sélectionne d'abord un objet");
+        let enabled = Cmd::new("Ouvrir", "", "open").enabled_if(true, "sans document");
+        assert!(!disabled.enabled);
+        assert_eq!(disabled.disabled_reason.as_deref(), Some("Sélectionne d'abord un objet"));
+        assert!(executable_id(&disabled).is_none());
+        assert!(enabled.enabled);
+        assert!(enabled.disabled_reason.is_none());
+        assert_eq!(executable_id(&enabled).as_deref(), Some("open"));
+    }
+
+    #[test]
+    fn disabled_commands_are_ranked_after_available_commands() {
+        let commands = [
+            Cmd::new("Indisponible récente", "", "recent-disabled").enabled_if(false, "Aucune sélection"),
+            Cmd::new("Disponible", "", "available"),
+            Cmd::new("Disponible récente", "", "recent-available"),
+        ];
+        let mut hits: Vec<&Cmd> = commands.iter().collect();
+        rank_recent(&mut hits, &["recent-disabled".into(), "recent-available".into()]);
+        assert_eq!(hits.iter().map(|command| command.id.as_str()).collect::<Vec<_>>(), ["recent-available", "available", "recent-disabled"]);
     }
 }
