@@ -2,6 +2,33 @@
 
 Toutes les nouvelles options se trouvent dans la palette **Ctrl+K** de chaque app : tape un mot (« look », « palette », « duotone », « écho », « filigrane »…) et choisis. Rien n'encombre l'interface tant que tu ne cherches pas.
 
+## 300 nouveaux outils
+
+Dans Ctrl+K, tape « Outil » (ou « Outil PDF » dans Folio). Chaque outil fait une vraie action en un clic et est testé automatiquement.
+
+| App | Outils | Exemples |
+|---|---:|---|
+| Pixel | 38 | Kaléidoscope, glitch, VHS, tri de pixels, tramages, réduction à 8 ou 16 couleurs, noir et blanc sauf une couleur, vision thermique, infrarouge, anaglyphe 3D, coins arrondis, découpe en cercle, autocollant, ombre portée, motif sans couture, reflet, cadre photo instantanée, pluie, neige |
+| Sound | 38 | Téléphone, radio AM, mégaphone, sous l'eau, cathédrale, effet Haas, largeur stéréo, ping-pong, doubleur, vinyle, cassette, lo-fi, hachage rythmique, pompage, dé-esseur, anti-ronflement 50 / 60 Hz, karaoké, voix seule, déclic, bip de censure, gel, granulaire, arrêt de bande |
+| Vector | 38 | Disposer en cercle ou en grille, progressions de couleur, taille, opacité et rotation, rosace, répétitions, copie miroir, ombre longue, halo, néon, centrer, remplir la page, coins, pastel, échanger fond et contour |
+| Lumen | 38 | Exposition, points noir et blanc, contraste et vibrance automatiques, ciel, verdure, peau, coucher de soleil, nuit américaine, HDR, mat, vintage, netteté web ou impression, recadrages carré, 16:9 et 4:5 |
+| Cut | 38 | Mélanger, trier, montage express, rythme alterné, Ken Burns, transitions variées, accélération, étalonnage partagé, boomerang, arrêt sur image, titre d'ouverture, carton de fin, noms des plans, marqueurs |
+| Motion | 38 | Vitesse et retard des clés, paliers, rebond, boucle, aller-retour, placements, écho, répétition, ombre, lueur, machine à écrire, formats 9:16 et 1:1, grain, bandes cinéma |
+| Page | 37 | Pages, numérotation, en-têtes, marges, formats A5, Lettre, carré, paysage, grilles, bandeaux, cadre, titre, citation, encadré, alignements, empiler, rangée, coins arrondis |
+| Folio | 35 | Dupliquer, pages blanches, remise en ordre d'un scan recto verso, rotations, rognage, 2 ou 4 pages par feuille, signets automatiques, date, page de garde et de fin, ligne de signature, cadre |
+
+## Installateurs autonomes
+
+Chaque app peut s'installer seule, sans le lanceur, comme Photoshop : Pixel-Setup.exe, Lumen-Setup.exe… Installation pour ton compte Windows (sans droits administrateur), raccourcis Démarrer et Bureau, entrée dans « Applications installées » avec désinstallation. Les apps installées ainsi restent reconnues par le lanceur et par « Envoyer vers ».
+
+Fabrication : `scripts\package-setups.ps1` (compile toute la suite en version finale, à lancer quand le PC est libre).
+
+## Suite allégée
+
+- Looks pellicule stockés en binaire (730 Ko → 100 Ko).
+- Bruitages inutiles retirés.
+- Compilation finale réglée pour des exécutables plus petits (taille mesurée à la prochaine compilation finale).
+
 ## Fichiers Adobe
 
 | Fichier | App | Ce qui se passe |
