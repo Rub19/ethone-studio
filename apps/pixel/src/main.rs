@@ -845,6 +845,12 @@ impl Pixel {
         }
     }
 
+    pub fn start_adjust_effect(&mut self, effect: studio_fx::stack::Fx) {
+        let Some(kind) = studio_fx::stack::kind(&effect.kind) else { return };
+        let base = self.doc.active_target();
+        self.adjust = Some(Adjust { kind, vals: effect.vals, base, layer: None, old: Vec::new(), opacity: (effect.amount / 100.0).clamp(0.0, 1.0), blend: 0, preview: true, preset_name: String::new(), fresh: true });
+    }
+
     pub fn repeat_filter(&mut self) {
         if let Some((k, v)) = self.last_filter.clone() {
             let base = self.doc.active_target();
@@ -1203,6 +1209,12 @@ impl Pixel {
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);
+            return;
+        }
+        if let Some(effect) = id.strip_prefix("fxv:").and_then(|_| studio_ui::palette::effect_from_command(id)) {
+            if !self.home {
+                self.start_adjust_effect(effect);
+            }
             return;
         }
         if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {

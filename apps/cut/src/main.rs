@@ -1748,9 +1748,9 @@ impl Cut {
             self.send_to(t, ctx);
             return;
         }
-        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+        if let Some(effect) = studio_ui::palette::effect_from_command(id) {
             match self.sel.and_then(|s| self.clip_mut(s)) {
-                Some(c) => c.effects.push(studio_fx::stack::Fx::new(k)),
+                Some(c) => c.effects.push(effect),
                 None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un clip".into(), false),
             }
             return;

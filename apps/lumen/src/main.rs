@@ -1291,10 +1291,10 @@ impl Lumen {
             self.send_to(t, ctx);
             return;
         }
-        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+        if let Some(effect) = studio_ui::palette::effect_from_command(id) {
             if let Some(i) = self.current.filter(|i| *i < self.files.len()) {
                 let mut s = self.settings(i);
-                s.creative.push(studio_fx::stack::Fx::new(k));
+                s.creative.push(effect);
                 self.set_settings(i, s);
                 self.view = View::Develop;
             } else {

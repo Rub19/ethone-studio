@@ -1006,10 +1006,10 @@ impl PageApp {
             self.send_to(t, ctx);
             return;
         }
-        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+        if let Some(effect) = studio_ui::palette::effect_from_command(id) {
             let i = self.sel.filter(|i| matches!(self.frames_ref().get(*i).map(|f| &f.kind), Some(Kind::Image { .. })));
             match i {
-                Some(i) => self.frames()[i].effects.push(studio_fx::stack::Fx::new(k)),
+                Some(i) => self.frames()[i].effects.push(effect),
                 None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un bloc image".into(), false),
             }
             return;

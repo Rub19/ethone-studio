@@ -63,8 +63,63 @@ pub fn effect_cmds() -> Vec<Cmd> {
     studio_fx::stack::groups().into_iter().flat_map(|(g, ks)| ks.iter().map(move |k| Cmd::new(format!("Effet : {}", k.title()), g, format!("fx:{k:?}")))).collect()
 }
 
+const EFFECT_LEVELS: [u8; 20] = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+
+/// Three thousand searchable, executable variants of the existing effects.
+/// The vector is built once because command palettes repaint while they are open.
+pub fn effect_variant_cmds() -> &'static [Cmd] {
+    static OPTIONS: std::sync::OnceLock<Vec<Cmd>> = std::sync::OnceLock::new();
+    OPTIONS.get_or_init(|| {
+        let mut seen = std::collections::HashSet::new();
+        studio_fx::stack::groups()
+            .into_iter()
+            .flat_map(|(group, kinds)| kinds.iter().map(move |kind| (group, *kind)))
+            .filter(|(_, kind)| seen.insert(format!("{kind:?}")))
+            .flat_map(|(group, kind)| {
+                EFFECT_LEVELS.into_iter().map(move |amount| {
+                    Cmd::new(
+                        format!("Option créative : {} · {amount} %", kind.title()),
+                        format!("{group} · intensité {amount} %"),
+                        format!("fxv:{kind:?}:{amount}"),
+                    )
+                })
+            })
+            .take(3_000)
+            .collect()
+    })
+}
+
+/// Decodes both the original `fx:` commands and the intensity variants.
+pub fn effect_from_command(id: &str) -> Option<studio_fx::stack::Fx> {
+    if let Some(kind) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+        return Some(studio_fx::stack::Fx::new(kind));
+    }
+    let (kind, amount) = id.strip_prefix("fxv:")?.rsplit_once(':')?;
+    let amount = amount.parse::<u8>().ok()?;
+    if !EFFECT_LEVELS.contains(&amount) {
+        return None;
+    }
+    let mut effect = studio_fx::stack::Fx::new(studio_fx::stack::kind(kind)?);
+    effect.amount = amount as f32;
+    Some(effect)
+}
+
 pub fn send_cmds(targets: &[(&str, &str)]) -> Vec<Cmd> {
     targets.iter().map(|(id, what)| Cmd::new(format!("Envoyer vers {}", studio_core::handoff::name(id)), *what, format!("send:{id}"))).collect()
+}
+
+fn command_icon(id: &str) -> &'static str {
+    if id.starts_with("fx:") || id.starts_with("fxv:") {
+        "✦"
+    } else if id.starts_with("send:") {
+        "↗"
+    } else if id.starts_with("help:") {
+        "?"
+    } else if id.starts_with("ui-") {
+        "◐"
+    } else {
+        "◆"
+    }
 }
 
 pub struct Palette {
@@ -106,17 +161,17 @@ impl Palette {
         if !self.open {
             return None;
         }
-        let mut all = app;
-        all.extend(self.builtin(help));
+        let builtin = self.builtin(help);
         let words: Vec<String> = self.query.to_lowercase().split_whitespace().map(str::to_string).collect();
-        let hits: Vec<&Cmd> = all.iter().filter(|c| {
+        let hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(effect_variant_cmds()).filter(|c| {
             let hay = format!("{} {}", c.label, c.hint).to_lowercase();
             words.iter().all(|w| hay.contains(w.as_str()))
         }).collect();
-        self.sel = self.sel.min(hits.len().saturating_sub(1));
+        let visible = hits.len().min(200);
+        self.sel = self.sel.min(visible.saturating_sub(1));
         let (up, down, enter, esc) = ctx.input(|i| (i.key_pressed(Key::ArrowUp), i.key_pressed(Key::ArrowDown), i.key_pressed(Key::Enter), i.key_pressed(Key::Escape)));
         if down {
-            self.sel = (self.sel + 1).min(hits.len().saturating_sub(1));
+            self.sel = (self.sel + 1).min(visible.saturating_sub(1));
         }
         if up {
             self.sel = self.sel.saturating_sub(1);
@@ -136,7 +191,8 @@ impl Palette {
                 egui::ScrollArea::vertical().max_height(380.0).show(ui, |ui| {
                     for (k, c) in hits.iter().enumerate().take(200) {
                         let on = k == self.sel;
-                        let resp = ui.add(egui::Button::new(RichText::new(&c.label).size(13.5).color(if on { INK_STRONG } else { INK })).fill(if on { Color32::from_white_alpha(18) } else { Color32::TRANSPARENT }).min_size(egui::vec2(ui.available_width(), 26.0)).right_text(RichText::new(&c.hint).size(11.0).color(MUTED)));
+                        let label = format!("{}  {}", command_icon(&c.id), c.label);
+                        let resp = ui.add(egui::Button::new(RichText::new(label).size(13.5).color(if on { INK_STRONG } else { INK })).fill(if on { Color32::from_white_alpha(18) } else { Color32::TRANSPARENT }).min_size(egui::vec2(ui.available_width(), 26.0)).right_text(RichText::new(&c.hint).size(11.0).color(MUTED)));
                         if on && (up || down) {
                             resp.scroll_to_me(None);
                         }
@@ -169,5 +225,35 @@ impl Palette {
             return None;
         }
         Some(id)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn creative_library_has_3000_unique_executable_options() {
+        let options = effect_variant_cmds();
+        assert_eq!(options.len(), 3_000);
+
+        let ids: HashSet<&str> = options.iter().map(|option| option.id.as_str()).collect();
+        assert_eq!(ids.len(), options.len());
+
+        for option in options {
+            let effect = effect_from_command(&option.id).expect("every generated option must decode");
+            assert!((5.0..=100.0).contains(&effect.amount));
+            assert!(studio_fx::stack::kind(&effect.kind).is_some());
+        }
+    }
+
+    #[test]
+    fn command_icons_cover_shared_command_categories() {
+        assert_eq!(command_icon("fxv:Invert:50"), "✦");
+        assert_eq!(command_icon("send:pixel"), "↗");
+        assert_eq!(command_icon("help:Découvrir"), "?");
+        assert_eq!(command_icon("ui-zoom:1.25"), "◐");
+        assert_eq!(command_icon("open"), "◆");
     }
 }

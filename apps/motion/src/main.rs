@@ -1455,8 +1455,8 @@ impl Motion {
             self.send_to(t, ctx);
             return;
         }
-        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
-            self.comp.effects.push(studio_fx::stack::Fx::new(k));
+        if let Some(effect) = studio_ui::palette::effect_from_command(id) {
+            self.comp.effects.push(effect);
             return;
         }
         if let Some((size, fps)) = id.strip_prefix("sprites:").and_then(|s| s.split_once(':')).and_then(|(a, b)| Some((a.parse::<u32>().ok()?, b.parse::<u32>().ok()?))) {

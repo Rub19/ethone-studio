@@ -2253,10 +2253,11 @@ impl VectorApp {
             self.send_to(t, ctx);
             return;
         }
-        if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
+        if let Some(effect) = studio_ui::palette::effect_from_command(id) {
             self.checkpoint();
-            self.doc.raster_fx.push(studio_fx::stack::Fx::new(k));
-            studio_ui::handoff::toast(ctx, format!("{} ajouté aux effets bitmap de l'export", k.title()), true);
+            let title = studio_fx::stack::kind(&effect.kind).map_or("Effet", |kind| kind.title());
+            self.doc.raster_fx.push(effect);
+            studio_ui::handoff::toast(ctx, format!("{title} ajouté aux effets bitmap de l'export"), true);
             return;
         }
         if id == "qr" {

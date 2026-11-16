@@ -1,0 +1,31 @@
+# Bibliothèque d'options et icônes
+
+## Task 1: Générateur et décodeur
+
+- [x] Exactement 3 000 variantes sont générées avec des identifiants uniques.
+- [x] Chaque identifiant se décode vers un `Fx` valide et une intensité bornée.
+- [x] Vérifier avec `cargo test -p studio-ui`.
+
+## Task 2: Icônes de palette
+
+- [x] Chaque résultat affiche une icône selon sa catégorie.
+- [x] Les libellés et raccourcis existants restent lisibles.
+- [x] Vérifier avec `cargo check -p studio-ui`.
+
+## Task 3: Pixel, Vector et Motion
+
+- [x] Les trois applications exécutent une variante décodée.
+- [x] Pixel conserve un aperçu réglable ; Vector et Motion ajoutent un effet non destructif.
+- [x] Vérifier avec les tests des trois paquets.
+
+## Task 4: Cut, Lumen et Page
+
+- [x] Les trois applications exécutent une variante décodée.
+- [x] Les erreurs de sélection restent explicites.
+- [x] Vérifier avec les tests des trois paquets.
+
+## Checkpoint final
+
+- [ ] `cargo test --workspace` réussit.
+- [ ] `cargo check --workspace` réussit.
+- [ ] Diff revu, sans secret ni changement hors périmètre.
