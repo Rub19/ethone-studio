@@ -1219,6 +1219,9 @@ impl Lumen {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
+            studio_ui::palette::Cmd::new("Ton auto sur les photos choisies", "Lot", "batch-auto"),
+            studio_ui::palette::Cmd::new("Redresser l'horizon sur les photos choisies", "Lot", "batch-straighten"),
+            studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]));
@@ -1227,6 +1230,38 @@ impl Lumen {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if matches!(id, "batch-auto" | "batch-straighten" | "batch-reset") {
+            let targets = self.targets();
+            if targets.is_empty() {
+                studio_ui::handoff::toast(ctx, "Choisis d'abord des photos (Ctrl+clic dans la bibliothèque)".into(), false);
+                return;
+            }
+            let mut done = 0;
+            let n_files = self.files.len();
+            for i in targets.iter().copied().filter(|i| *i < n_files) {
+                let mut s = self.settings(i);
+                if id == "batch-reset" {
+                    s = develop::Settings::default();
+                } else {
+                    let Ok(img) = develop::load(&self.files[i], 640) else { continue };
+                    if id == "batch-auto" {
+                        let a = develop::auto(&img);
+                        (s.exposure, s.contrast, s.shadows, s.highlights, s.vibrance) = (a.exposure, a.contrast, a.shadows, a.highlights, a.vibrance);
+                    } else {
+                        s.straighten = develop::auto_straighten(&img);
+                    }
+                }
+                self.set_settings(i, s);
+                done += 1;
+            }
+            let what = match id {
+                "batch-auto" => "Ton auto appliqué",
+                "batch-straighten" => "Horizon redressé",
+                _ => "Réglages remis à zéro",
+            };
+            studio_ui::handoff::toast(ctx, format!("{what} sur {done} photo(s)"), done > 0);
+            return;
+        }
         if let Some(t) = id.strip_prefix("send:") {
             let t: &'static str = studio_core::handoff::APPS.iter().find(|a| a.0 == t).map_or("pixel", |a| a.0);
             self.send_to(t, ctx);

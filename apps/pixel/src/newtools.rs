@@ -163,7 +163,37 @@ pub fn harmonize(src: &RgbaImage, from: ([f32; 3], [f32; 3]), to: ([f32; 3], [f3
     out
 }
 
+/// New canvas size for "Étendre" : a margin in % on every side, or a target aspect ratio (w/h)
+/// reached by growing only the short side. Returns (w, h, x offset, y offset).
+pub fn expand_size(w: u32, h: u32, margin: f32, aspect: Option<f32>) -> (u32, u32, u32, u32) {
+    let (nw, nh) = match aspect {
+        Some(a) if (w as f32 / h as f32) < a => (((h as f32) * a).round() as u32, h),
+        Some(a) => (w, ((w as f32) / a).round() as u32),
+        None => (((w as f32) * (1.0 + 2.0 * margin)).round() as u32, ((h as f32) * (1.0 + 2.0 * margin)).round() as u32),
+    };
+    (nw.max(w), nh.max(h), (nw.max(w) - w) / 2, (nh.max(h) - h) / 2)
+}
+
 impl Pixel {
+    /// Photoshop's Generative Expand, done with content-aware fill: grows the canvas and rebuilds the new border.
+    pub fn expand_image(&mut self, margin: f32, aspect: Option<f32>, ctx: &egui::Context) {
+        let (w, h) = (self.doc.width(), self.doc.height());
+        let (nw, nh, ox, oy) = expand_size(w, h, margin, aspect);
+        if (nw, nh) == (w, h) {
+            self.error = Some("L'image a déjà ce format".into());
+            return;
+        }
+        self.doc.next_label = Some("Étendre l'image".into());
+        self.doc.checkpoint();
+        self.doc.canvas_size(nw, nh, (0.5, 0.5), None);
+        let mask: Vec<bool> = (0..nw * nh).map(|i| {
+            let (x, y) = (i % nw, i / nw);
+            x < ox || y < oy || x >= ox + w || y >= oy + h
+        }).collect();
+        self.fit_pending = true;
+        self.start_fill(mask, ctx);
+    }
+
     /// Matches the active layer's colours and contrast to what lies beneath it (Photoshop's Harmonize).
     pub fn harmonize_layer(&mut self, amount: f32) {
         let layer = self.doc.active;
@@ -257,6 +287,14 @@ impl Pixel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn expand_sizes() {
+        assert_eq!(expand_size(100, 50, 0.1, None), (120, 60, 10, 5));
+        assert_eq!(expand_size(160, 90, 0.0, Some(1.0)), (160, 160, 0, 35));
+        assert_eq!(expand_size(90, 160, 0.0, Some(16.0 / 9.0)), (284, 160, 97, 0));
+        assert_eq!(expand_size(100, 100, 0.0, Some(1.0)), (100, 100, 0, 0));
+    }
 
     #[test]
     fn harmonize_pulls_toward_target() {

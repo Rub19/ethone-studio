@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const CUT: &[Tuto] = &[
+    t("Changer de format (vertical, carré)", "Ctrl+K", "Transforme le montage en 9:16, 1:1, 4:5 ou 16:9 en recadrant les clips pour remplir l'image.", &["Ctrl+K puis « Passer en vertical 9:16 » : chaque clip est agrandi et centré pour couvrir le nouveau cadre.", "Ajuste ensuite le cadrage de chaque clip dans l'inspecteur (position, échelle)."]),
     t("Transitions sur tous les clips", "Ctrl+K", "Ajoute ou retire d'un coup les transitions entre tous les clips collés.", &["Ctrl+K puis « Fondu enchaîné entre tous les clips » ou « Fondu au noir ».", "« Retirer toutes les transitions » remet des coupes franches. Ctrl+Z annule."]),
     t("Masque polygonal", "P", "Un masque à 3 à 24 côtés, en plus du rectangle, de l'ellipse et de la plume.", &["Prends le Polygone (masque) dans la case de la Plume, puis glisse dans le moniteur depuis le centre : la distance donne la taille, la direction l'orientation.", "Le nombre de côtés se règle dans l'inspecteur, panneau Masque."]),
     t("Envoyer vers une autre app", "", "Comme AirDrop entre les apps de la suite : ton travail s'ouvre dans l'autre app en un clic.", &["Fichier > Envoyer vers, puis choisis l'app.", "Si l'app est déjà ouverte, elle reçoit le fichier tout de suite (une notification « Reçu » apparaît en bas à droite). Sinon elle s'ouvre avec ton envoi.", "Les fichiers reçus sont gardés dans le dossier EthoneStudio › handoff › received."]),

@@ -992,6 +992,8 @@ impl PageApp {
 
         ];
         v.push(studio_ui::palette::Cmd::new("Fusion de données (CSV)…", "Publipostage : «Nom» dans les textes", "data-merge"));
+        v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille (remplir la page)", "Étiquettes, cartes, badges · écart 10 pt", "grid:10"));
+        v.push(studio_ui::palette::Cmd::new("Répéter le bloc en grille sans écart (traits de coupe communs)", "Objet", "grid:0"));
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
         v.extend(studio_ui::palette::effect_cmds());
         v
@@ -1013,6 +1015,27 @@ impl PageApp {
         }
         if id == "data-merge" {
             self.data_merge(ctx);
+        }
+        if let Some(gap) = id.strip_prefix("grid:").and_then(|g| g.parse::<f32>().ok()) {
+            let Some(i) = self.sel.filter(|i| *i < self.frames_ref().len()) else {
+                return studio_ui::handoff::toast(ctx, "Sélectionne d'abord le bloc à répéter".into(), false);
+            };
+            let (pw, ph) = match self.doc.pages.get(self.page).and_then(|p| p.size) {
+                Some([w, h]) => (w, h),
+                None => (self.doc.width, self.doc.height),
+            };
+            let f = self.frames_ref()[i].clone();
+            let cells = model::grid_cells(pw, ph, self.doc.margin, f.w, f.h, gap);
+            let n = cells.len();
+            let frames = self.frames();
+            frames[i].x = cells[0][0];
+            frames[i].y = cells[0][1];
+            for c in cells.into_iter().skip(1) {
+                let mut g = f.clone();
+                (g.x, g.y) = (c[0], c[1]);
+                frames.push(g);
+            }
+            studio_ui::handoff::toast(ctx, format!("{n} exemplaire(s) sur la page"), true);
         }
     }
 

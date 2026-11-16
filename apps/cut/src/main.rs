@@ -1728,6 +1728,10 @@ impl Cut {
             studio_ui::palette::Cmd::new("Fondu enchaîné entre tous les clips", "Séquence", "trans-all:1"),
             studio_ui::palette::Cmd::new("Fondu au noir entre tous les clips", "Séquence", "trans-all:2"),
             studio_ui::palette::Cmd::new("Retirer toutes les transitions", "Séquence", "trans-all:0"),
+            studio_ui::palette::Cmd::new("Passer en vertical 9:16 (Shorts, Reels, TikTok)", "Séquence · clips recadrés au centre", "format:1080x1920"),
+            studio_ui::palette::Cmd::new("Passer en carré 1:1", "Séquence · clips recadrés au centre", "format:1080x1080"),
+            studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350"),
+            studio_ui::palette::Cmd::new("Passer en paysage 16:9", "Séquence · clips recadrés au centre", "format:1920x1080"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));
@@ -1746,6 +1750,11 @@ impl Cut {
                 Some(c) => c.effects.push(studio_fx::stack::Fx::new(k)),
                 None => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un clip".into(), false),
             }
+            return;
+        }
+        if let Some((w, h)) = id.strip_prefix("format:").and_then(|f| f.split_once('x')).and_then(|(w, h)| Some((w.parse::<u32>().ok()?, h.parse::<u32>().ok()?))) {
+            let n = model::reframe(&mut self.proj, w, h);
+            studio_ui::handoff::toast(ctx, format!("Séquence en {w} × {h} · {n} clip(s) recadré(s) pour remplir l'image"), true);
             return;
         }
         if let Some(k) = id.strip_prefix("trans-all:").and_then(|k| k.parse::<u8>().ok()) {

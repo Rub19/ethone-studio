@@ -1046,6 +1046,8 @@ impl Sound {
             studio_ui::palette::Cmd::new("Ajouter un marqueur", "M", "marker"),
             studio_ui::palette::Cmd::new("Supprimer les silences (plus de 0,8 s)", "Édition", "silences"),
             studio_ui::palette::Cmd::new("Supprimer les silences courts (plus de 0,4 s)", "Édition", "silences-short"),
+            studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 0,5 s)", "Musique de jeu, ambiance", "loop:500"),
+            studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 2 s)", "Musique de jeu, ambiance", "loop:2000"),
             studio_ui::palette::Cmd::new("Annuler", "Ctrl+Z", "undo"),
         ];
         v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage (sélection ou tout)")]));
@@ -1078,6 +1080,21 @@ impl Sound {
             "play" => self.toggle_play(),
             "marker" => self.add_marker(),
             "silences" | "silences-short" => self.cut_silences(if id == "silences" { 800.0 } else { 400.0 }),
+            x if x.starts_with("loop:") => {
+                let ms: f32 = x[5..].parse().unwrap_or(500.0);
+                let mut c = self.clip.clone();
+                let n = c.make_loop((self.clip.rate as f32 * ms / 1000.0) as usize);
+                if n == 0 {
+                    self.notice = Some(("Son trop court pour une boucle".into(), false));
+                } else {
+                    self.snapshot("Boucle parfaite");
+                    self.clip = c;
+                    self.sel = None;
+                    self.changed();
+                    self.looping = true;
+                    self.notice = Some(("Boucle prête : la fin s'enchaîne sur le début (lecture en boucle activée)".into(), true));
+                }
+            }
             "undo" => self.undo(),
             _ => {}
         }

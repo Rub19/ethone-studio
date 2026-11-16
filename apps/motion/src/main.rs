@@ -1434,6 +1434,10 @@ impl Motion {
         let mut v = vec![
 
         ];
+        for (step, name) in [(0.1, "0,1 s"), (0.25, "0,25 s"), (0.5, "0,5 s"), (1.0, "1 s")] {
+            v.push(studio_ui::palette::Cmd::new(format!("Calques en cascade : {name} d'écart"), "Composition", format!("cascade:{step}")));
+        }
+        v.push(studio_ui::palette::Cmd::new("Aligner tous les calques au même départ", "Composition", "cascade:0"));
         for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")));
         }
@@ -1450,6 +1454,15 @@ impl Motion {
         }
         if let Some(k) = id.strip_prefix("fx:").and_then(studio_fx::stack::kind) {
             self.comp.effects.push(studio_fx::stack::Fx::new(k));
+            return;
+        }
+        if let Some(step) = id.strip_prefix("cascade:").and_then(|s| s.parse::<f32>().ok()) {
+            model::cascade(&mut self.comp.layers, step);
+            let end = self.comp.layers.iter().map(|l| l.end).fold(0.0, f32::max);
+            if end > self.comp.duration {
+                self.comp.duration = end;
+            }
+            studio_ui::handoff::toast(ctx, if step > 0.0 { format!("{} calques en cascade", self.comp.layers.len()) } else { "Calques alignés".into() }, true);
             return;
         }
         if let Some(k) = id.strip_prefix("anim:").and_then(|k| k.parse::<usize>().ok()).filter(|k| *k < model::ANIM_PRESETS.len()) {

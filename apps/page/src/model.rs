@@ -2224,3 +2224,26 @@ mod merge_tests {
         assert_eq!(text, "Bonjour Dupont; Jean de Lyon \"centre\"");
     }
 }
+
+
+/// InDesign's Step and Repeat filling the page: positions of copies of a w×h block in a grid
+/// inside the margins with `gap` between them (the original keeps the first cell).
+pub fn grid_cells(page_w: f32, page_h: f32, margin: f32, w: f32, h: f32, gap: f32) -> Vec<[f32; 2]> {
+    let cols = (((page_w - 2.0 * margin + gap) / (w + gap)).floor() as usize).max(1);
+    let rows = (((page_h - 2.0 * margin + gap) / (h + gap)).floor() as usize).max(1);
+    let used_w = cols as f32 * w + (cols - 1) as f32 * gap;
+    let used_h = rows as f32 * h + (rows - 1) as f32 * gap;
+    let (x0, y0) = ((page_w - used_w) / 2.0, (page_h - used_h) / 2.0);
+    (0..rows).flat_map(|r| (0..cols).map(move |c| [x0 + c as f32 * (w + gap), y0 + r as f32 * (h + gap)])).collect()
+}
+
+#[cfg(test)]
+mod grid_tests {
+    #[test]
+    fn business_cards_on_a4() {
+        let cells = super::grid_cells(595.0, 842.0, 20.0, 241.0, 156.0, 10.0);
+        assert_eq!(cells.len(), 2 * 4);
+        assert!((cells[0][0] - (595.0 - (2.0 * 241.0 + 10.0)) / 2.0).abs() < 0.01);
+        assert_eq!(super::grid_cells(100.0, 100.0, 0.0, 500.0, 500.0, 0.0).len(), 1);
+    }
+}

@@ -5,6 +5,7 @@ const fn t(title: &'static str, key: &'static str, summary: &'static str, steps:
 }
 
 pub const MOTION: &[Tuto] = &[
+    t("Calques en cascade", "Ctrl+K", "Chaque calque démarre un peu après le précédent, comme Séquence de calques d'After Effects.", &["Ctrl+K puis « Calques en cascade » avec 0,1 s, 0,25 s, 0,5 s ou 1 s d'écart. Les animations suivent leur calque.", "« Aligner tous les calques au même départ » annule l'effet."]),
     t("Préréglages d'animation", "Ctrl+K", "Neuf animations prêtes : fondu, zoom avec rebond, glissés, chute, rotation, sortie, secousse.", &["Sélectionne un calque, Ctrl+K puis « Animer : … ». Les images clés partent des valeurs actuelles du calque, au début (ou à la fin pour la sortie).", "Tu peux ensuite ajuster les clés dans la timeline comme d'habitude."]),
     t("Masques rectangulaire et elliptique", "", "Comme dans After Effects : ne garde visible qu'une zone d'un calque.", &["Sélectionne le calque, prends l'outil Masque et trace la zone dans la vue.", "Le masque est un calque blanc placé juste en dessous et utilisé comme cache alpha. Coche « Inversé » pour cacher la zone au lieu de la garder.", "Redessiner remplace le masque existant. Anime-le comme n'importe quel calque."]),
     t("Marionnette", "", "Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur.", &["Sélectionne un calque Tracé (plume) ou Peinture, puis glisse depuis la zone à déplacer.", "La portée règle jusqu'où la déformation s'étend."]),

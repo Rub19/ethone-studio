@@ -1097,6 +1097,43 @@ fn stream_image(s: &Stream) -> Option<image::DynamicImage> {
     }
 }
 
+/// Prints 2 (A4 landscape) or 4 (A4 portrait) pages per sheet, each scaled to fit its cell.
+pub fn n_up(doc: &mut Document, per_sheet: usize) -> R<()> {
+    let all = pages(doc);
+    for p in &all {
+        materialize(doc, *p);
+    }
+    let (sw, sh, cols, rows) = if per_sheet >= 4 { (595.0, 842.0, 2, 2) } else { (842.0, 595.0, 2, 1) };
+    let per = cols * rows;
+    let mut forms = Vec::new();
+    for &p in &all {
+        let (b, _) = geometry(doc, p);
+        let content = doc.get_page_content(p);
+        let res = doc.get_dictionary(p).map_err(e)?.get(b"Resources").ok().cloned().unwrap_or_else(|| Object::Dictionary(Dictionary::new()));
+        let form = Stream::new(dictionary! { "Type" => "XObject", "Subtype" => "Form", "BBox" => b.iter().map(|v| f(*v)).collect::<Vec<_>>(), "Resources" => res }, content);
+        forms.push((doc.add_object(form), b));
+    }
+    let mut kids = Vec::new();
+    for chunk in forms.chunks(per) {
+        let mut ops = Vec::new();
+        let mut xo = Dictionary::new();
+        for (k, (id, b)) in chunk.iter().enumerate() {
+            let (cw, ch) = (sw / cols as f32, sh / rows as f32);
+            let (col, row) = (k % cols, k / cols);
+            let (w, h) = (b[2] - b[0], b[3] - b[1]);
+            let s = ((cw - 16.0) / w).min((ch - 16.0) / h);
+            let x = col as f32 * cw + (cw - w * s) / 2.0 - b[0] * s;
+            let y = sh - (row + 1) as f32 * ch + (ch - h * s) / 2.0 - b[1] * s;
+            let name = format!("P{k}");
+            xo.set(name.as_str(), Object::Reference(*id));
+            ops.extend([op("q", vec![]), op("cm", vec![f(s), 0.into(), 0.into(), f(s), f(x), f(y)]), op("Do", vec![Object::Name(name.into_bytes())]), op("Q", vec![])]);
+        }
+        let c = doc.add_object(Stream::new(dictionary! {}, encode(ops)?));
+        kids.push(doc.add_object(dictionary! { "Type" => "Page", "MediaBox" => vec![0.into(), 0.into(), f(sw), f(sh)], "Resources" => dictionary! { "XObject" => xo }, "Contents" => c }));
+    }
+    rebuild(doc, kids)
+}
+
 pub fn to_rtf(pages: &[String]) -> String {
     let mut s = String::from("{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Calibri;}}\\f0\\fs22\n");
     for (k, p) in pages.iter().enumerate() {
@@ -1181,6 +1218,22 @@ mod tests {
         assert_eq!(expand("{page}/{pages}", 0, 3, ""), "1/3");
         assert_eq!(civil(0), (1970, 1, 1));
         assert!(to_rtf(&["é{".into()]).contains("\\u233?\\{"));
+    }
+
+    #[test]
+    fn two_and_four_up() {
+        let mut d = sample(5);
+        n_up(&mut d, 2).unwrap();
+        assert_eq!(pages(&d).len(), 3);
+        assert_eq!(geometry(&d, pages(&d)[0]).0, [0.0, 0.0, 842.0, 595.0]);
+        let bytes = save(&mut d).unwrap();
+        let pdf = crate::render::open(std::sync::Arc::new(bytes.clone())).unwrap();
+        let img = crate::render::page(&pdf, 0, 0.5).unwrap();
+        let red = |x: u32, y: u32| img.get_pixel(x, y).0[0] > 150 && img.get_pixel(x, y).0[1] < 100;
+        assert!(red(img.width() / 4, img.height() / 2) && red(img.width() * 3 / 4, img.height() / 2));
+        let mut d4 = load(&bytes, "").unwrap();
+        n_up(&mut d4, 4).unwrap();
+        assert_eq!(pages(&d4).len(), 1);
     }
 
     #[test]

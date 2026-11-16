@@ -161,6 +161,25 @@ impl Clip {
         cuts.len()
     }
 
+    /// Makes the sound loop seamlessly: its last `xfade` samples are crossfaded (equal power) into the
+    /// start, then cut, so the end flows straight into the beginning.
+    pub fn make_loop(&mut self, xfade: usize) -> usize {
+        let n = self.len();
+        let x = xfade.min(n / 3);
+        if x < 2 {
+            return 0;
+        }
+        for c in &mut self.ch {
+            for i in 0..x {
+                let t = i as f32 / x as f32;
+                let (a, b) = ((t * std::f32::consts::FRAC_PI_2).sin(), (t * std::f32::consts::FRAC_PI_2).cos());
+                c[i] = c[i] * a + c[n - x + i] * b;
+            }
+            c.truncate(n - x);
+        }
+        x
+    }
+
     pub fn insert(&mut self, at: usize, other: &Clip) {
         let other = other.resampled(self.rate);
         for (i, c) in self.ch.iter_mut().enumerate() {
@@ -846,13 +865,29 @@ pub fn fft(re: &mut [f32], im: &mut [f32], inverse: bool) {
 }
 
 #[cfg(test)]
+mod loop_tests {
+    use super::*;
+
+    #[test]
+    fn seam_is_continuous() {
+        let r = 1000usize;
+        let ramp: Vec<f32> = (0..r).map(|i| i as f32 / r as f32).collect();
+        let mut c = Clip { rate: r as u32, ch: vec![ramp.clone()] };
+        assert_eq!(c.make_loop(100), 100);
+        assert_eq!(c.len(), 900);
+        assert!((c.ch[0][0] - ramp[900]).abs() < 1e-6);
+        assert!((c.ch[0][899] - ramp[899]).abs() < 1e-6);
+    }
+}
+
+#[cfg(test)]
 mod silence_tests {
     use super::*;
 
     #[test]
     fn long_gaps_go_short_gaps_stay() {
         let r = 10_000u32;
-        let mut tone = |n: usize| vec![0.5f32; n];
+        let tone = |n: usize| vec![0.5f32; n];
         let mut c = vec![tone(5_000), vec![0.0; 20_000], tone(5_000), vec![0.0; 500], tone(5_000)].concat();
         let mut clip = Clip { rate: r, ch: vec![c.clone()] };
         let n = clip.cut_silences(0, clip.len(), -40.0, 800.0, 100.0);

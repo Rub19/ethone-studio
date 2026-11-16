@@ -500,6 +500,15 @@ fn organize(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     });
     ui.add_space(10.0);
+    label(ui, "Impression économique");
+    ui.horizontal(|ui| {
+        for (k, name) in [(2usize, "2 pages par feuille"), (4, "4 pages par feuille")] {
+            if ui.button(name).on_hover_text("Nouvelle mise en page A4 : chaque feuille regroupe plusieurs pages réduites").clicked() {
+                app.edit(ctx, &format!("{name} : document réorganisé"), |d| engine::n_up(d, k));
+            }
+        }
+    });
+    ui.add_space(10.0);
     label(ui, "Recadrer (marges en mm : gauche, haut, droite, bas)");
     ui.horizontal(|ui| {
         for v in app.st.crop.iter_mut() {

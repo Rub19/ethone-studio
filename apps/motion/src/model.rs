@@ -2443,3 +2443,45 @@ mod preset_tests {
         assert_eq!(l.props[0].wiggle, 8.0);
     }
 }
+
+
+/// Moves a layer (and all its keyframes) in time.
+pub fn shift_layer(l: &mut Layer, dt: f32) {
+    l.start += dt;
+    l.end += dt;
+    for p in &mut l.props {
+        for k in &mut p.keys {
+            k.t += dt;
+        }
+    }
+    for k in l.color_keys.iter_mut().chain(l.stroke_keys.iter_mut()) {
+        k.t += dt;
+    }
+}
+
+/// After Effects' Sequence Layers: each layer starts `step` seconds after the previous one
+/// (from the top of the list), keeping its length and animation. `step` 0 lines them all up.
+pub fn cascade(layers: &mut [Layer], step: f32) {
+    let Some(t0) = layers.iter().map(|l| l.start).reduce(f32::min) else { return };
+    for (i, l) in layers.iter_mut().enumerate() {
+        let dt = t0 + i as f32 * step - l.start;
+        shift_layer(l, dt);
+    }
+}
+
+#[cfg(test)]
+mod cascade_tests {
+    use super::*;
+
+    #[test]
+    fn layers_follow_each_other() {
+        let mut v: Vec<Layer> = (0..3).map(|i| Layer::new(format!("l{i}"), Content::Null, 0.0, 0.0, 4.0)).collect();
+        v[2].props[4].keys.push(Key { t: 1.0, v: 50.0, ease: Ease::Linear, ease2: Ease2::default(), bez: None });
+        cascade(&mut v, 0.25);
+        assert_eq!([v[0].start, v[1].start, v[2].start], [0.0, 0.25, 0.5]);
+        assert_eq!(v[2].props[4].keys[0].t, 1.5);
+        assert_eq!(v[2].end - v[2].start, 4.0);
+        cascade(&mut v, 0.0);
+        assert!(v.iter().all(|l| l.start == 0.0));
+    }
+}

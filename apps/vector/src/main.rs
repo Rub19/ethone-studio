@@ -2237,6 +2237,7 @@ impl VectorApp {
         let mut v = vec![
 
         ];
+        v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
         for (k, name) in model::RECOLOR.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Recolorer : {name}"), "Sélection, sinon tout", format!("recolor:{k}")));
         }
@@ -2255,6 +2256,22 @@ impl VectorApp {
             self.checkpoint();
             self.doc.raster_fx.push(studio_fx::stack::Fx::new(k));
             studio_ui::handoff::toast(ctx, format!("{} ajouté aux effets bitmap de l'export", k.title()), true);
+            return;
+        }
+        if id == "icon-pack" {
+            let Some((name, r, d)) = self.export_area(0).into_iter().next() else { return };
+            let Some(dir) = rfd::FileDialog::new().pick_folder() else { return };
+            let svg = d.export_svg(r[0], r[1], r[2], r[3], 1.0);
+            let mut ok = 0;
+            for size in [16u32, 32, 48, 64, 128, 180, 192, 256, 512, 1024] {
+                let s = size as f32 / r[2].max(r[3]).max(1.0);
+                if let Ok(pix) = self.rasterize(&svg, r[2], r[3], s)
+                    && pix.save_png(dir.join(format!("{name}-{size}.png"))).is_ok()
+                {
+                    ok += 1;
+                }
+            }
+            studio_ui::handoff::toast(ctx, format!("{ok} icônes enregistrées dans {}", dir.display()), ok > 0);
             return;
         }
         if let Some(k) = id.strip_prefix("recolor:").and_then(|k| k.parse::<usize>().ok()) {

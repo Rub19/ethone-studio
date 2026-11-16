@@ -1245,3 +1245,49 @@ mod tests {
         assert_eq!((m[0].t, m[1].name.as_str()), (1.5, "A"));
     }
 }
+
+
+/// Changes the sequence format and zooms every video clip so it fills the new frame (centre crop),
+/// the way Auto Reframe starts. Returns how many clips were adjusted.
+pub fn reframe(p: &mut Project, w: u32, h: u32) -> usize {
+    let (ow, oh) = (p.width.max(1) as f32, p.height.max(1) as f32);
+    p.width = w;
+    p.height = h;
+    let mut n = 0;
+    let sources = p.sources.clone();
+    for c in p.clips.iter_mut().chain(p.overlays.iter_mut()) {
+        let Some(s) = sources.get(c.src).filter(|s| s.width > 0 && s.height > 0) else { continue };
+        let (sw, sh) = (s.width as f32, s.height as f32);
+        let cover = |fw: f32, fh: f32| (fw / sw).max(fh / sh) / (fw / sw).min(fh / sh);
+        let was_cover = (c.zoom - cover(ow, oh)).abs() < 0.02;
+        if c.zoom <= 1.0001 || was_cover {
+            c.zoom = cover(w as f32, h as f32);
+            if c.zoom_end > 0.0 {
+                c.zoom_end = c.zoom * 1.15;
+            }
+            c.pos_x = 0.0;
+            c.pos_y = 0.0;
+            n += 1;
+        }
+    }
+    n
+}
+
+#[cfg(test)]
+mod reframe_tests {
+    use super::*;
+
+    #[test]
+    fn landscape_to_vertical_covers() {
+        let mut p = Project::new();
+        p.width = 1920;
+        p.height = 1080;
+        p.sources.push(Source { path: "a.mp4".into(), duration: 5.0, width: 1920, height: 1080, fps: 30.0, has_video: true, has_audio: false, label: 0 });
+        p.clips.push(Clip { src: 0, ..Clip::default() });
+        assert_eq!(reframe(&mut p, 1080, 1920), 1);
+        assert_eq!((p.width, p.height), (1080, 1920));
+        assert!((p.clips[0].zoom - (1920.0f32 / 1080.0).powi(2)).abs() < 0.01, "{}", p.clips[0].zoom);
+        assert_eq!(reframe(&mut p, 1920, 1080), 1);
+        assert!((p.clips[0].zoom - 1.0).abs() < 0.01);
+    }
+}
