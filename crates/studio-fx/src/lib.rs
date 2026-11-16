@@ -3,6 +3,7 @@ pub mod fx;
 pub mod fx2;
 pub mod lut;
 pub mod psd;
+pub mod swatches;
 pub mod stack;
 
 pub fn rgb_to_hsl(r: f32, g: f32, b: f32) -> (f32, f32, f32) {

@@ -85,6 +85,7 @@ pub fn lib() -> &'static Library {
             }
         }
         v.extend(icon_cmds("Vector", "vi:"));
+        v.push(Cmd::new("Importer un nuancier Adobe (.ase / .aco)…", "Vector · Illustrator, Photoshop, InDesign · nuancier du document", "vc-ase"));
         for (k, (n, c)) in color_bank().iter().enumerate() {
             let hex = format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2]);
             v.push(Cmd::new(format!("Remplissage « {n} » {hex}"), "Vector · banque de couleurs · sélection", format!("vf:{k}")));
@@ -96,6 +97,19 @@ pub fn lib() -> &'static Library {
 
 impl VectorApp {
     fn run_bank(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if id == "vc-ase" {
+            if let Some(p) = rfd::FileDialog::new().add_filter("Nuancier Adobe", &["ase", "aco"]).pick_file() {
+                match studio_fx::swatches::load(&p) {
+                    Ok(c) => {
+                        self.checkpoint();
+                        self.doc.swatches.extend(c.iter().map(|(_, c)| [c[0], c[1], c[2], 255]));
+                        studio_ui::handoff::toast(ctx, format!("{} couleurs ajoutées au nuancier", c.len()), true);
+                    }
+                    Err(e) => studio_ui::handoff::toast(ctx, format!("Nuancier : {e}"), false),
+                }
+            }
+            return true;
+        }
         if let Some((name, _, inner)) = id.strip_prefix("vi:").and_then(|k| k.parse::<usize>().ok()).and_then(|k| icons().get(k)) {
             let at = [(self.doc.width - ICON_SIZE) / 2.0, (self.doc.height - ICON_SIZE) / 2.0];
             self.import_svg_str(&icon_svg(inner), name, at);
@@ -165,7 +179,7 @@ mod tests {
     #[test]
     fn palettes_and_remap() {
         assert_eq!(icons().len(), 2359);
-        assert_eq!(lib().len(), 6000 + 2359 + 10000);
+        assert_eq!(lib().len(), 6000 + 2359 + 10000 + 1);
         let opt = resvg::usvg::Options::default();
         for (name, _, inner) in icons() {
             let items = crate::geom::import_svg(&icon_svg(inner), &opt).unwrap_or_default();

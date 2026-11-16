@@ -29,6 +29,7 @@ pub fn lib() -> &'static Library {
         }
         v.push(Cmd::new("Importer un LUT .cube…", "Lumen · ton propre LUT 3D · photo courante ou choisies", "lt-file"));
         v.push(Cmd::new("Retirer le LUT", "Lumen · photo courante ou choisies", "lt-off"));
+        v.push(Cmd::new("Importer un préréglage Lightroom (.xmp)…", "Lumen · Adobe Lightroom / Camera Raw · photo courante ou choisies", "lr-xmp"));
         Library::new(v)
     })
 }
@@ -71,6 +72,30 @@ pub fn look(current: &Settings, preset: &Settings, amount: f32, wb: f32) -> Sett
 
 impl Lumen {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if id == "lr-xmp" {
+            let Some(p) = rfd::FileDialog::new().add_filter("Préréglage Lightroom", &["xmp"]).pick_file() else { return true };
+            let targets: Vec<usize> = self.targets().into_iter().filter(|i| *i < self.files.len()).collect();
+            if targets.is_empty() {
+                studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
+                return true;
+            }
+            let xmp = match std::fs::read_to_string(&p) {
+                Ok(x) => x,
+                Err(e) => return { studio_ui::handoff::toast(ctx, format!("Lecture impossible : {e}"), false); true },
+            };
+            let mut count = 0;
+            for i in &targets {
+                match crate::lightroom::import(&xmp, &self.settings(*i)) {
+                    Ok((s, n)) => {
+                        self.set_settings(*i, s);
+                        count = n;
+                    }
+                    Err(e) => return { studio_ui::handoff::toast(ctx, e, false); true },
+                }
+            }
+            studio_ui::handoff::toast(ctx, format!("Préréglage Lightroom : {count} réglages sur {} photo(s)", targets.len()), true);
+            return true;
+        }
         if id == "lt-file" || id == "lt-off" || id.starts_with("lt:") {
             let source = match id {
                 "lt-off" => Some((String::new(), 0.0)),
@@ -126,7 +151,7 @@ mod tests {
 
     #[test]
     fn library_size_and_blend() {
-        assert!(lib().len() >= 6000 + 72, "{}", lib().len());
+        assert!(lib().len() >= 6000 + 73, "{}", lib().len());
         let preset = Settings { exposure: 1.0, contrast: 40.0, mono: true, ..Settings::default() };
         let cur = Settings { straighten: 3.0, ..Settings::default() };
         let half = look(&cur, &preset, 0.5, 10.0);

@@ -2,6 +2,19 @@
 
 Toutes les nouvelles options se trouvent dans la palette **Ctrl+K** de chaque app : tape un mot (« look », « palette », « duotone », « écho », « filigrane »…) et choisis. Rien n'encombre l'interface tant que tu ne cherches pas.
 
+## Fichiers Adobe
+
+| Fichier | App | Ce qui se passe |
+|---|---|---|
+| Photoshop .psd | Pixel | Ouvert calque par calque (nom, visibilité, opacité) ; aussi importable comme calque |
+| Photoshop .psd | Lumen, Page, Motion | Lu comme une image (aplatie) |
+| Illustrator .ai | Folio | Ouvert comme un PDF s'il a été enregistré « compatible PDF » (réglage par défaut d'Illustrator) ; enregistré en .pdf, l'original n'est jamais écrasé |
+| Lightroom / Camera Raw .xmp | Lumen | Ctrl+K « Importer un préréglage Lightroom » : exposition, contraste, tons, balance des blancs, présence, TSL par couleur, virage partiel, vignette, grain, netteté, bruit, noir et blanc |
+| Nuanciers .ase / .aco | Pixel, Vector | Ctrl+K « Importer un nuancier Adobe » : RVB, CMJN, gris et Lab convertis |
+| LUT .cube | Lumen | Ctrl+K « Importer un LUT .cube » (Premiere, Resolve, Photoshop…) |
+
+Premiere (.prproj), After Effects (.aep) et InDesign (.indd) sont des formats fermés : pas encore lus.
+
 ## Banques en ligne intégrées
 
 Deux banques libres récupérées sur internet et embarquées dans les apps (aucune connexion nécessaire) :
@@ -10,6 +23,7 @@ Deux banques libres récupérées sur internet et embarquées dans les apps (auc
 |---|---|---|---|
 | Lucide | ISC | Vector, Page, Motion | 2 359 icônes, recherche aussi par mots-clés anglais (« house », « arrow », « heart »…) ; tracés modifiables dans Vector, image vectorielle dans Page et calque dans Motion |
 | color-name-list (meodai) | MIT | Pixel, Vector | 5 000 couleurs nommées : couleur du pinceau dans Pixel, remplissage ou contour de la sélection dans Vector |
+| derby-film | MIT | Lumen | 7 looks pellicule (Kodachrome 64, Portra 400 et 800, Gold 200, Ektachrome E100VS, Agfa Ultra 100, Superia X-TRA 400) × 10 intensités |
 | Kenney (Interface, RPG, Digital) + « 100 CC0 SFX » | CC0 | Sound | 313 bruitages (clics, portes, livres, lasers, bonus, cloches, vaisselle…) insérés au curseur ou à la place de la sélection ; cherche « bruitage porte », « laser », « clic » |
 
 Vector gagne 12 359 options (18 359 au total), Pixel 5 000 (11 744), Page et Motion 2 359 chacun, Sound 313.

@@ -246,7 +246,7 @@ impl Folio {
     }
 
     pub fn open_dialog(&mut self, ctx: &egui::Context) {
-        if let Some(p) = rfd::FileDialog::new().add_filter("PDF et images", &["pdf", "png", "jpg", "jpeg"]).pick_file() {
+        if let Some(p) = rfd::FileDialog::new().add_filter("PDF, Illustrator et images", &["pdf", "ai", "png", "jpg", "jpeg"]).pick_file() {
             self.open_path(&p, ctx);
         }
     }
@@ -269,7 +269,12 @@ impl Folio {
             Ok(b) => b,
             Err(e) => return toast(ctx, format!("Lecture impossible : {e}"), false),
         };
-        match Opened::new(bytes.clone(), Some(p.to_path_buf()), name, "") {
+        let illustrator = ext == "ai";
+        if illustrator && !bytes.starts_with(b"%PDF") {
+            return toast(ctx, "Ce fichier Illustrator n'a pas de copie PDF : dans Illustrator, enregistre-le avec « Créer un fichier compatible PDF »", false);
+        }
+        let (src, name) = if illustrator { (None, format!("{}.pdf", p.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default())) } else { (Some(p.to_path_buf()), name) };
+        match Opened::new(bytes.clone(), src, name, "") {
             Err(e) if e.contains("mot de passe") || e.contains("assword") || e.contains("ecrypt") => self.ask_pw = Some((p.to_path_buf(), bytes, String::new())),
             r => {
                 self.set_doc(r, ctx);

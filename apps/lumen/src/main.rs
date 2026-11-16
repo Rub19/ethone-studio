@@ -4,6 +4,7 @@ mod optlib;
 mod develop;
 mod devui;
 mod library;
+mod lightroom;
 mod meta;
 mod tools;
 mod tutos;

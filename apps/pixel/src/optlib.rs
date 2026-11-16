@@ -87,7 +87,8 @@ pub fn lib() -> &'static Library {
     L.get_or_init(|| {
         let ops = ops().iter().enumerate().map(|(k, (_, label, hint))| Cmd::new(label.clone(), format!("Pixel · {hint} · calque actif"), format!("pl:{k}")));
         let colors = color_bank().iter().enumerate().map(|(k, (n, c))| Cmd::new(format!("Couleur « {n} » #{:02x}{:02x}{:02x}", c[0], c[1], c[2]), "Pixel · banque de couleurs · couleur du pinceau", format!("pc:{k}")));
-        Library::new(ops.chain(colors).collect())
+        let swatch = std::iter::once(Cmd::new("Importer un nuancier Adobe (.ase / .aco)…", "Pixel · Photoshop, Illustrator, InDesign · ajoute les couleurs au nuancier", "pc-ase"));
+        Library::new(ops.chain(colors).chain(swatch).collect())
     })
 }
 
@@ -192,6 +193,18 @@ pub fn apply(img: &RgbaImage, op: Op) -> RgbaImage {
 
 impl Pixel {
     pub fn run_lib(&mut self, id: &str, _ctx: &egui::Context) -> bool {
+        if id == "pc-ase" {
+            if let Some(p) = rfd::FileDialog::new().add_filter("Nuancier Adobe", &["ase", "aco"]).pick_file() {
+                match studio_fx::swatches::load(&p) {
+                    Ok(c) => {
+                        self.swatches.extend(c.iter().map(|(_, c)| egui::Color32::from_rgb(c[0], c[1], c[2])));
+                        self.save_swatches();
+                    }
+                    Err(e) => self.error = Some(format!("Nuancier : {e}")),
+                }
+            }
+            return true;
+        }
         if let Some(k) = id.strip_prefix("pc:").and_then(|k| k.parse::<usize>().ok()) {
             if let Some((_, c)) = color_bank().get(k) {
                 self.primary = egui::Color32::from_rgb(c[0], c[1], c[2]);
