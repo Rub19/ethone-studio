@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod idml;
 mod model;
 mod panels;
@@ -1021,6 +1022,10 @@ impl PageApp {
         v.push(studio_ui::palette::Cmd::new("Pivoter les blocs de 90°", "Disposition · sélection", "rotate-90").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
         v.push(studio_ui::palette::Cmd::new("Retourner les blocs horizontalement", "Disposition · sélection", "flip-x").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
         v.push(studio_ui::palette::Cmd::new("Retourner les blocs verticalement", "Disposition · sélection", "flip-y").enabled_if(has_selection, "Sélectionne d'abord un bloc"));
+        for (id, label, min, _) in outils::TOOLS {
+            let cmd = studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Page · nouvel outil · page ou blocs", format!("tool:{id}"));
+            v.push(if min > 0 { cmd.enabled_if(selection_count >= min, format!("Sélectionne au moins {min} bloc(s)")) } else { cmd.enabled_if(self.page != MASTER, "Choisis une page (pas le gabarit)") });
+        }
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher la page"), ("lumen", "développer"), ("vector", "placer la page"), ("cut", "ajouter au montage"), ("motion", "animer la page")]));
         v.extend(studio_ui::palette::effect_cmds().into_iter().map(|command| command.enabled_if(image_selected, "Sélectionne d'abord un bloc image")));
         v

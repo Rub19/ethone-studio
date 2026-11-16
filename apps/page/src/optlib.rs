@@ -64,6 +64,18 @@ pub fn apply_style(kind: &mut Kind, id: &str) -> bool {
 
 impl PageApp {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((_, label, min, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            let sel = self.selection();
+            if self.page == crate::model::MASTER || sel.len() < *min {
+                studio_ui::handoff::toast(ctx, "Choisis une page et les blocs nécessaires".into(), false);
+                return true;
+            }
+            let done = f(&mut crate::outils::Ctx { doc: &mut self.doc, page: self.page, sel: &sel });
+            self.page = self.page.min(self.doc.pages.len() - 1);
+            self.sel = None;
+            studio_ui::handoff::toast(ctx, if done { format!("{label} appliqué") } else { format!("{label} : rien à changer") }, done);
+            return true;
+        }
         if id == "pg-idml" {
             if let Some(p) = rfd::FileDialog::new().add_filter("InDesign Markup", &["idml"]).pick_file() {
                 self.open_path(&p);
