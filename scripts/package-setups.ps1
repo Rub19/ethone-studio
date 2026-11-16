@@ -1,4 +1,5 @@
-# Builds one standalone installer per app in dist\setup (Pixel-Setup.exe, Lumen-Setup.exe…).
+# Builds two installers per app in dist\setup: offline (Pixel-Setup.exe) and web (Pixel-Web-Setup.exe,
+# downloads the published version like Adobe's Set-up.exe).
 # Heavy: compiles every app in release. Run it yourself when the PC is free:
 #   powershell -ExecutionPolicy Bypass -File scripts\package-setups.ps1
 # Add -Apps pixel,sound to package only some apps.
@@ -19,7 +20,13 @@ foreach ($id in $Apps) {
     $version = (Select-String -Path $manifest -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
     $name = if ($id -eq "ethone-studio") { "Ethone-Studio" } else { (Get-Culture).TextInfo.ToTitleCase($id) }
     $target = Join-Path $out "$name-Setup.exe"
-    & $stub --pack (Join-Path $root "target\release\$id.exe") $id $version $target
-    if ($LASTEXITCODE -ne 0) { throw "emballage de $id échoué" }
+    $app = Join-Path $root "target\release\$id.exe"
+    $p = Start-Process -FilePath $stub -ArgumentList @("--pack", "`"$app`"", $id, $version, "`"$target`"") -Wait -PassThru -NoNewWindow
+    if ($p.ExitCode -ne 0) { throw "emballage de $id échoué" }
     "{0,-28} {1,8:N1} Mo" -f (Split-Path $target -Leaf), ((Get-Item $target).Length / 1MB)
+    if ($id -eq "ethone-studio") { continue }
+    $web = Join-Path $out "$name-Web-Setup.exe"
+    $p = Start-Process -FilePath $stub -ArgumentList @("--web", $id, "`"$web`"") -Wait -PassThru -NoNewWindow
+    if ($p.ExitCode -ne 0) { throw "installateur web de $id échoué" }
+    "{0,-28} {1,8:N1} Mo" -f (Split-Path $web -Leaf), ((Get-Item $web).Length / 1MB)
 }

@@ -1,7 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 //! Ethone Studio installer: one stub, one app appended per installer (Pixel-Setup.exe, Lumen-Setup.exe…).
-//! `ethone-setup --pack <app.exe> <id> <version> <out.exe>` builds an installer; `/S` installs silently;
-//! `--uninstall` (used by « Applications installées ») removes the app.
+//! `ethone-setup --pack <app.exe> <id> <version> <out.exe>` builds an offline installer, `--web <id> <out.exe>`
+//! a small one that downloads the app (checked by SHA-256) like Adobe's Set-up.exe; `/S` or `--silent` installs
+//! without a window; `--uninstall` (used by « Applications installées ») removes the app.
 
 mod payload;
 mod system;
@@ -27,18 +28,29 @@ fn install(job: &Job, desktop: bool, report: &dyn Fn(f32, &str)) -> Result<(), S
     report(0.02, "Fermeture de l'application si elle est ouverte");
     system::close_app(id);
     std::fs::create_dir_all(system::dir(id)).map_err(|e| format!("dossier impossible à créer : {e}"))?;
-    report(0.05, "Copie des fichiers");
-    payload::extract(&job.file, &job.footer, &system::exe(id), &|p| report(0.05 + p * 0.85, "Copie des fichiers"))?;
+    let version = if job.footer.payload_len == 0 {
+        report(0.05, "Recherche de la dernière version");
+        let catalog = studio_core::Catalog::fetch().map_err(|e| format!("catalogue inaccessible : {e}"))?;
+        let app = catalog.apps.into_iter().find(|a| a.id == id && a.published()).ok_or("cette application n'est pas encore publiée")?;
+        studio_core::install(&app, |done, total| report(0.05 + 0.85 * done as f32 / total.max(1) as f32, "Téléchargement"))?;
+        app.version.unwrap_or_default()
+    } else {
+        report(0.05, "Copie des fichiers");
+        payload::extract(&job.file, &job.footer, &system::exe(id), &|p| report(0.05 + p * 0.85, "Copie des fichiers"))?;
+        system::track(id, &job.footer.version);
+        job.footer.version.clone()
+    };
     report(0.92, "Création du désinstalleur");
     std::fs::write(system::dir(id).join(system::UNINSTALLER), &job.file[..job.footer.stub_len as usize]).map_err(|e| e.to_string())?;
-    report(0.95, "Raccourcis et inscription dans Windows");
+    report(0.95, "Raccourcis, types de fichiers et inscription dans Windows");
     system::shortcuts(id, desktop)?;
-    system::register(id, &job.footer.version)?;
+    system::associate(id)?;
+    system::register(id, &version)?;
     report(1.0, "Terminé");
     Ok(())
 }
 
-fn uninstall(id: &str, report: &dyn Fn(f32, &str)) -> Result<(), String> {
+fn uninstall(id: &str, purge: bool, report: &dyn Fn(f32, &str)) -> Result<(), String> {
     report(0.1, "Fermeture de l'application");
     system::close_app(id);
     report(0.4, "Suppression des raccourcis");
@@ -49,6 +61,12 @@ fn uninstall(id: &str, report: &dyn Fn(f32, &str)) -> Result<(), String> {
         std::fs::remove_file(&exe).map_err(|e| format!("suppression impossible : {e}"))?;
     }
     system::unregister(id);
+    system::dissociate(id);
+    system::untrack(id);
+    if purge {
+        report(0.85, "Suppression des préférences");
+        let _ = std::fs::remove_dir_all(studio_core::data_dir().join(id));
+    }
     report(1.0, "Terminé");
     Ok(())
 }
@@ -66,6 +84,7 @@ struct Setup {
     step: Arc<Mutex<Step>>,
     desktop: bool,
     open_after: bool,
+    purge: bool,
     previous: Option<String>,
 }
 
@@ -78,12 +97,12 @@ impl Setup {
         let step = self.step.clone();
         let report = move |p: f32, label: &str| *step.lock().unwrap_or_else(|e| e.into_inner()) = Step::Working(p, label.to_string());
         let done = self.step.clone();
-        let (job, id, desktop) = (self.job.clone(), self.uninstall_id.clone(), self.desktop);
+        let (job, id, desktop, purge) = (self.job.clone(), self.uninstall_id.clone(), self.desktop, self.purge);
         report(0.0, "Préparation");
         std::thread::spawn(move || {
             let r = match (&job, &id) {
                 (Some(j), _) => install(j, desktop, &report),
-                (None, Some(id)) => uninstall(id, &report),
+                (None, Some(id)) => uninstall(id, purge, &report),
                 _ => Err("rien à installer".into()),
             };
             *done.lock().unwrap_or_else(|e| e.into_inner()) = match r {
@@ -134,8 +153,10 @@ impl eframe::App for Setup {
                     ui.set_width(ui.available_width() - 28.0);
                     match &step {
                         Step::Ready if removing => {
-                            ui.label(format!("{} va être supprimée de cet ordinateur. Tes documents et réglages sont conservés.", system::name(&id)));
-                            ui.add_space(20.0);
+                            ui.label(format!("{} va être supprimée de cet ordinateur. Tes documents ne sont jamais touchés.", system::name(&id)));
+                            ui.add_space(10.0);
+                            ui.checkbox(&mut self.purge, "Supprimer aussi les préférences de l'application");
+                            ui.add_space(14.0);
                             if ui.add(egui::Button::new(RichText::new("Désinstaller").size(16.0)).min_size([180.0, 40.0].into())).clicked() {
                                 self.start();
                             }
@@ -181,6 +202,16 @@ impl eframe::App for Setup {
     }
 }
 
+fn stub() -> Result<Vec<u8>, String> {
+    let me = std::fs::read(std::env::current_exe().map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+    let len = payload::footer(&me).map_or(me.len(), |f| f.stub_len as usize);
+    Ok(me[..len].to_vec())
+}
+
+fn web_cli(id: &str, out: &str) -> Result<(), String> {
+    std::fs::write(out, payload::pack(&stub()?, &[], id, "web")).map_err(|e| format!("{out} : {e}"))
+}
+
 fn pack_cli(args: &[String]) -> Result<(), String> {
     let [app, id, version, out] = args else { return Err("usage : --pack <app.exe> <id> <version> <sortie.exe>".into()) };
     let me = std::fs::read(std::env::current_exe().map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
@@ -191,6 +222,17 @@ fn pack_cli(args: &[String]) -> Result<(), String> {
 
 fn main() -> eframe::Result {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("--web") {
+        let r = match &args[1..] {
+            [id, out] => web_cli(id, out),
+            _ => Err("usage : --web <id> <sortie.exe>".into()),
+        };
+        if let Err(e) = r {
+            eprintln!("{e}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("--pack") {
         if let Err(e) = pack_cli(&args[1..]) {
             eprintln!("{e}");
@@ -198,7 +240,7 @@ fn main() -> eframe::Result {
         }
         return Ok(());
     }
-    let silent = args.iter().any(|a| a == "/S");
+    let silent = args.iter().any(|a| a == "/S" || a == "--silent");
     let file = std::env::current_exe().and_then(std::fs::read).unwrap_or_default();
     let job = payload::footer(&file).map(|footer| Arc::new(Job { file: Arc::new(file), footer }));
     let uninstall_id = if job.is_none() || args.iter().any(|a| a == "--uninstall") { uninstall_target() } else { None };
@@ -211,7 +253,7 @@ fn main() -> eframe::Result {
         let quiet = |_: f32, _: &str| {};
         let r = match (&job, &uninstall_id) {
             (Some(j), _) => install(j, false, &quiet),
-            (None, Some(id)) => uninstall(id, &quiet).map(|_| system::remove_self_later()),
+            (None, Some(id)) => uninstall(id, args.iter().any(|a| a == "--purge"), &quiet).map(|_| system::remove_self_later()),
             _ => Ok(()),
         };
         std::process::exit(if r.is_ok() { 0 } else { 1 });
@@ -233,7 +275,7 @@ fn main() -> eframe::Result {
         options,
         Box::new(move |cc| {
             studio_ui::pro::apply(&cc.egui_ctx);
-            Ok(Box::new(Setup { job, uninstall_id, step: Arc::new(Mutex::new(Step::Ready)), desktop: true, open_after: true, previous }))
+            Ok(Box::new(Setup { job, uninstall_id, step: Arc::new(Mutex::new(Step::Ready)), desktop: true, open_after: true, purge: false, previous }))
         }),
     )
 }

@@ -120,3 +120,79 @@ pub fn remove_self_later() {
     let line = format!("ping -n 3 127.0.0.1 >nul & del /f /q \"{}\" & rmdir \"{folder}\"", me.display());
     let _ = hidden("cmd").arg("/C").raw_arg(&line).spawn();
 }
+
+/// (app, its own project types opened by default, other types offered in « Ouvrir avec » only).
+const TYPES: [(&str, &[&str], &[&str]); 8] = [
+    ("pixel", &[], &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "psd"]),
+    ("lumen", &[], &["jpg", "jpeg", "png", "tif", "tiff", "psd", "dng", "cr2", "cr3", "nef", "arw", "raf", "orf", "rw2"]),
+    ("vector", &["evec"], &["svg"]),
+    ("cut", &["ecut"], &["mp4", "mov", "mkv", "webm", "avi", "prproj"]),
+    ("motion", &["emot"], &[]),
+    ("page", &["epage"], &["idml"]),
+    ("folio", &[], &["pdf", "ai"]),
+    ("sound", &[], &["wav", "mp3", "flac", "ogg", "m4a", "aac"]),
+];
+
+fn classes(path: &str) -> String {
+    format!(r"HKCU\Software\Classes\{path}")
+}
+
+fn prog_id(id: &str) -> String {
+    format!("EthoneStudio.{id}")
+}
+
+pub fn associate(id: &str) -> Result<(), String> {
+    let Some((_, own, other)) = TYPES.iter().find(|t| t.0 == id) else { return Ok(()) };
+    let pid = prog_id(id);
+    let exe = exe(id).display().to_string();
+    let base = classes(&pid);
+    run(hidden("reg").args(["add", &base, "/ve", "/d", &name(id), "/f"]))?;
+    run(hidden("reg").args(["add", &format!(r"{base}\DefaultIcon"), "/ve", "/d", &format!("{exe},0"), "/f"]))?;
+    run(hidden("reg").args(["add", &format!(r"{base}\shell\open\command"), "/ve", "/d", &format!("\"{exe}\" \"%1\""), "/f"]))?;
+    for ext in own.iter().chain(other.iter()) {
+        run(hidden("reg").args(["add", &classes(&format!(r".{ext}\OpenWithProgids")), "/v", &pid, "/t", "REG_NONE", "/f"]))?;
+    }
+    for ext in own.iter() {
+        run(hidden("reg").args(["add", &classes(&format!(".{ext}")), "/ve", "/d", &pid, "/f"]))?;
+    }
+    Ok(())
+}
+
+pub fn dissociate(id: &str) {
+    let Some((_, own, other)) = TYPES.iter().find(|t| t.0 == id) else { return };
+    let pid = prog_id(id);
+    for ext in own.iter().chain(other.iter()) {
+        let _ = hidden("reg").args(["delete", &classes(&format!(r".{ext}\OpenWithProgids")), "/v", &pid, "/f"]).output();
+    }
+    for ext in own.iter() {
+        let _ = hidden("reg").args(["delete", &classes(&format!(".{ext}")), "/ve", "/f"]).output();
+    }
+    let _ = hidden("reg").args(["delete", &classes(&pid), "/f"]).output();
+}
+
+/// Keeps the launcher's list of installed apps in step with the installer.
+pub fn track(id: &str, version: &str) {
+    let mut i = studio_core::Installed::load();
+    i.apps.insert(id.to_string(), version.to_string());
+    let _ = i.save();
+}
+
+pub fn untrack(id: &str) {
+    let mut i = studio_core::Installed::load();
+    i.apps.remove(id);
+    let _ = i.save();
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn every_app_with_types_is_known_and_no_type_is_owned_twice() {
+        let mut owned = std::collections::HashSet::new();
+        for (id, own, _) in super::TYPES {
+            assert!(super::APPS.iter().any(|a| a.0 == id), "{id}");
+            for ext in own {
+                assert!(owned.insert(ext), ".{ext} associé deux fois");
+            }
+        }
+    }
+}

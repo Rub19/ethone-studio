@@ -39,9 +39,13 @@ fn field(s: &str) -> [u8; 16] {
 
 /// Builds an installer from the stub (this program) and an app executable.
 pub fn pack(stub: &[u8], app_exe: &[u8], id: &str, version: &str) -> Vec<u8> {
-    let mut gz = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::best());
-    let _ = gz.write_all(app_exe);
-    let payload = gz.finish().unwrap_or_default();
+    let payload = if app_exe.is_empty() {
+        Vec::new()
+    } else {
+        let mut gz = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::best());
+        let _ = gz.write_all(app_exe);
+        gz.finish().unwrap_or_default()
+    };
     let mut out = Vec::with_capacity(stub.len() + payload.len() + FOOTER);
     out.extend_from_slice(stub);
     out.extend_from_slice(&payload);
@@ -103,6 +107,8 @@ mod tests {
         assert_eq!(std::fs::read(&target).unwrap(), app);
         let _ = std::fs::remove_dir_all(&dir);
         assert!(footer(b"just some exe without footer").is_none());
+        let web = pack(&stub, &[], "sound", "web");
+        assert_eq!(footer(&web).map(|f| (f.payload_len, f.id)), Some((0, "sound".to_string())));
         assert!(footer(&file[..file.len() - 1]).is_none());
     }
 }
