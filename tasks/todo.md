@@ -57,6 +57,6 @@
 
 - [x] Slice A : commandes récentes, recherche sans accents et validation des registres.
 - [x] Slice A : tests ciblés et commit local.
-- [ ] Slice B : icônes de familles de commandes.
-- [ ] Slice B : feuille de route actualisée.
-- [ ] Checkpoint final : workspace compilé, testé et revu.
+- [x] Slice B : icônes de familles de commandes.
+- [x] Slice B : feuille de route actualisée.
+- [x] Checkpoint final : workspace compilé, testé et revu.

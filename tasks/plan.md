@@ -91,7 +91,7 @@ Aucune.
 
 ### Slice B — repères visuels et finalisation
 
-- [ ] Ajouter des icônes distinctes pour fichiers, sélection, disposition, lots et audio.
-- [ ] Mettre à jour la feuille de route avec la vague 4.
-- [ ] Compiler et tester tout le workspace.
-- [ ] Effectuer la revue qualité et créer les commits locaux.
+- [x] Ajouter des icônes distinctes pour fichiers, sélection, disposition, lots et audio.
+- [x] Mettre à jour la feuille de route avec la vague 4.
+- [x] Compiler et tester tout le workspace.
+- [x] Effectuer la revue qualité et créer les commits locaux.
