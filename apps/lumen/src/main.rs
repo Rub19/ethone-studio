@@ -1731,7 +1731,7 @@ impl Lumen {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 match &self.catalog.folder {
-                    Some(f) => ui.label(small(format!("{} · {} photo(s) · {} affichée(s){}", f.display(), self.files.len(), self.visible().len(), if self.picked.len() > 1 { format!(" · {} sélectionnée(s)", self.picked.len()) } else { String::new() }))),
+                    Some(f) => ui.label(small(format!("{} · {} photo(s) · {} affichée(s){}", f.file_name().map_or_else(|| f.display().to_string(), |n| n.to_string_lossy().into_owned()), self.files.len(), self.visible().len(), if self.picked.len() > 1 { format!(" · {} sélectionnée(s)", self.picked.len()) } else { String::new() }))).on_hover_text(f.display().to_string()),
                     None => ui.label(small("Aucun dossier ouvert".into())),
                 };
                 if let Some((t, at)) = self.notice.clone() {
@@ -1766,7 +1766,7 @@ impl Lumen {
                         View::Develop => "R recadrer · Q retouche · E yeux rouges · M masques · K pinceau · W pipette · T ciblage · Y avant/après · Tab panneaux",
                         _ => "0-5 noter · P/X drapeau · 6-9 couleur · D développer · C comparer · N ensemble · Ctrl+G empiler",
                     };
-                    ui.label(small(hint.into()));
+                    ui.add(egui::Label::new(small(hint.into())).truncate());
                 });
             });
         });

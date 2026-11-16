@@ -2460,7 +2460,7 @@ impl Cut {
                         }
                         let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                         ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(14.0), INK);
-                        ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| d.display().to_string()).unwrap_or_default(), FontId::proportional(12.0), FAINT);
+                        ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| short_path(&d.display().to_string(), 90)).unwrap_or_default(), FontId::proportional(12.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             open = Some(p.clone());
                         }
@@ -3715,4 +3715,10 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native("Cut", options, Box::new(|cc| Ok(Box::new(Cut::new(cc)))))
+}
+
+/// Keeps the end of a long path ("…\dossier\sous-dossier") so it fits on one line.
+fn short_path(p: &str, max: usize) -> String {
+    let n = p.chars().count();
+    if n <= max { p.to_string() } else { format!("…{}", p.chars().skip(n - max + 1).collect::<String>()) }
 }

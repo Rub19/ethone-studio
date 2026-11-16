@@ -145,7 +145,15 @@ impl Lumen {
 
     fn library_bar(&mut self, root: &mut Ui) {
         egui::Panel::top("lib-bar").exact_size(46.0).frame(Frame::new().fill(PASTEBOARD).inner_margin(Margin::symmetric(18, 0))).show(root, |ui| {
+            egui::ScrollArea::horizontal().id_salt("lib-bar-scroll").scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
+            ui.set_min_height(46.0);
             ui.horizontal_centered(|ui| {
+                for (v, l, tip) in [(View::Library, "Grille", "G"), (View::Compare, "Comparer", "C"), (View::Survey, "Ensemble", "N")] {
+                    if ui.selectable_label(self.view == v, l).on_hover_text(tip).clicked() {
+                        self.view = v;
+                    }
+                }
+                pro::toolbar_sep(ui);
                 egui::ComboBox::from_id_salt("rating-mode").width(36.0).selected_text(["≥", "=", "≤"][self.rating_mode]).show_ui(ui, |ui| {
                     for (k, l) in ["≥  au moins", "=  exactement", "≤  au plus"].iter().enumerate() {
                         ui.selectable_value(&mut self.rating_mode, k, *l);
@@ -162,12 +170,12 @@ impl Lumen {
                     }
                 }
                 pro::toolbar_sep(ui);
-                ui.add(egui::TextEdit::singleline(&mut self.query).hint_text("Rechercher").desired_width(120.0));
+                ui.add(egui::TextEdit::singleline(&mut self.query).hint_text("Rechercher").desired_width(100.0));
                 if !self.query.is_empty() && ui.small_button("×").clicked() {
                     self.query.clear();
                 }
                 pro::toolbar_sep(ui);
-                egui::ComboBox::from_id_salt("sort").selected_text(SORTS[self.sort]).width(130.0).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("sort").selected_text(SORTS[self.sort]).width(110.0).show_ui(ui, |ui| {
                     for (k, s) in SORTS.iter().enumerate() {
                         ui.selectable_value(&mut self.sort, k, *s);
                     }
@@ -175,16 +183,10 @@ impl Lumen {
                 if ui.selectable_label(self.sort_desc, if self.sort_desc { "↓" } else { "↑" }).on_hover_text("Tri · inverser l'ordre").clicked() {
                     self.sort_desc = !self.sort_desc;
                 }
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    ui.spacing_mut().slider_width = 80.0;
-                    ui.add(egui::Slider::new(&mut self.thumb_size, 120.0..=340.0).show_value(false)).on_hover_text("Taille des vignettes");
-                    pro::toolbar_sep(ui);
-                    for (v, l, tip) in [(View::Survey, "Ensemble", "N"), (View::Compare, "Comparer", "C"), (View::Library, "Grille", "G")] {
-                        if ui.selectable_label(self.view == v, l).on_hover_text(tip).clicked() {
-                            self.view = v;
-                        }
-                    }
-                });
+                pro::toolbar_sep(ui);
+                ui.spacing_mut().slider_width = 80.0;
+                ui.add(egui::Slider::new(&mut self.thumb_size, 120.0..=340.0).show_value(false)).on_hover_text("Taille des vignettes");
+            });
             });
         });
     }

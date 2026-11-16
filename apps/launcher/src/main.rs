@@ -281,6 +281,8 @@ impl Launcher {
 
         let installed = apps.iter().filter(|a| self.installed.apps.contains_key(&a.id)).count();
         let updates = apps.iter().filter(|a| self.has_update(a)).count();
+        let list_h = (ui.available_height() - 64.0).max(80.0);
+        egui::ScrollArea::vertical().id_salt("sidebar-list").max_height(list_h).auto_shrink([false, true]).show(ui, |ui| {
         nav_row(ui, &mut self.view, View::Auto, "Assistant", Some(Color32::from_rgb(0x8b, 0x6c, 0xff)), None);
         ui.add_space(14.0);
         heading(ui, "BIBLIOTHÈQUE");
@@ -298,6 +300,7 @@ impl Launcher {
             let color = apps.iter().find(|a| a.category == key).map(|a| Color32::from_rgb(a.accent[0], a.accent[1], a.accent[2]));
             nav_row(ui, &mut self.view, View::Category(key), label, color, Some(n));
         }
+        });
 
         ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
             ui.horizontal(|ui| {

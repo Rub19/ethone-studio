@@ -2493,24 +2493,23 @@ impl Sound {
                 pro::segmented(ui, &mut self.view_mode, &["Forme d'onde", "Spectrogramme"]);
                 pro::toolbar_sep(ui);
                 ui.label(RichText::new("Hauteur").size(12.0).color(MUTED));
-                ui.spacing_mut().slider_width = 90.0;
+                ui.spacing_mut().slider_width = 64.0;
                 ui.add(egui::Slider::new(&mut self.amp_zoom, 1.0..=10.0).logarithmic(true).show_value(false));
                 ui.toggle_value(&mut self.follow, RichText::new("Suivre").size(12.0)).on_hover_text("La vue suit la lecture (F)");
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if ui.small_button("Tout").on_hover_text("Ctrl+0").clicked() {
-                        self.fit_pending = true;
-                    }
-                    if ui.add_enabled(self.sel.is_some(), egui::Button::new("Sélection").small()).on_hover_text("Z").clicked() {
-                        self.zoom_sel();
-                    }
-                    if ui.small_button("+").clicked() {
-                        self.zoom_by(0.5);
-                    }
-                    if ui.small_button("−").clicked() {
-                        self.zoom_by(2.0);
-                    }
-                    ui.label(RichText::new("Zoom").size(12.0).color(MUTED));
-                });
+                pro::toolbar_sep(ui);
+                ui.label(RichText::new("Zoom").size(12.0).color(MUTED));
+                if ui.small_button("−").clicked() {
+                    self.zoom_by(2.0);
+                }
+                if ui.small_button("+").clicked() {
+                    self.zoom_by(0.5);
+                }
+                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Sélection").small()).on_hover_text("Z").clicked() {
+                    self.zoom_sel();
+                }
+                if ui.small_button("Tout").on_hover_text("Ctrl+0").clicked() {
+                    self.fit_pending = true;
+                }
             });
         });
         let bar = Rect::from_min_size(full.min + vec2(0.0, 34.0), vec2(full.width(), 30.0));
