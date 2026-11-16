@@ -215,8 +215,31 @@ impl Folio {
             progress: None,
             title: String::new(),
         };
-        if let Some(p) = std::env::args_os().nth(1).map(PathBuf::from) {
+        let args: Vec<String> = std::env::args().skip(1).collect();
+        let mut i = 0;
+        let (mut ocr, mut tool) = (false, None);
+        let mut file = None;
+        while i < args.len() {
+            match args[i].as_str() {
+                "--ocr" => ocr = true,
+                "--outil" => {
+                    tool = args.get(i + 1).cloned();
+                    i += 1;
+                }
+                a => file = Some(PathBuf::from(a)),
+            }
+            i += 1;
+        }
+        if let Some(p) = file {
             me.open_path(&p, &cc.egui_ctx);
+        }
+        if let Some(t) = tool {
+            me.panel = panels::by_name(&t).unwrap_or(panels::Panel::All);
+        }
+        if ocr && me.od.is_some() {
+            let all = me.scope(1);
+            panels::start_ocr(&mut me, all, true);
+            me.panel = panels::Panel::Ocr;
         }
         me
     }

@@ -1116,6 +1116,9 @@ name = "ethone-studio"
 version = "0.4.0"
 dependencies = [
  "eframe",
+ "image",
+ "rfd",
+ "studio-auto",
  "studio-core",
  "studio-ui",
  "winresource",
@@ -3949,6 +3952,17 @@ dependencies = [
  "unicode-bidi",
  "unicode-normalization",
  "unicode-properties",
+]
+
+[[package]]
+name = "studio-auto"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "serde_json",
+ "studio-core",
+ "studio-ocr",
+ "ureq",
 ]
 
 [[package]]

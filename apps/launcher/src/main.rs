@@ -1,4 +1,5 @@
 #![windows_subsystem = "windows"]
+mod auto;
 
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Pos2, Rect, RichText,
@@ -57,6 +58,7 @@ const CATEGORIES: [(&str, &str); 6] = [
 
 #[derive(Clone, Copy, PartialEq)]
 enum View {
+    Auto,
     All,
     Installed,
     Updates,
@@ -93,6 +95,7 @@ struct Launcher {
     toasts: Vec<Toast>,
     icons: HashMap<String, TextureHandle>,
     logo: TextureHandle,
+    auto: auto::Auto,
 }
 
 impl Launcher {
@@ -111,7 +114,7 @@ impl Launcher {
             s.visuals.override_text_color = Some(P.ink);
             s.spacing.button_padding = vec2(14.0, 7.0);
         });
-        let me = Self {
+        let mut me = Self {
             catalog: Arc::new(Mutex::new((Catalog::bundled(), Source::Loading))),
             jobs: Arc::default(),
             installed: Installed::load(),
@@ -123,8 +126,26 @@ impl Launcher {
             toasts: Vec::new(),
             icons: HashMap::new(),
             logo: studio_ui::icon_texture(&cc.egui_ctx, "studio"),
+            auto: auto::Auto::new(),
         };
         me.refresh(&cc.egui_ctx);
+        let args: Vec<String> = std::env::args().skip(1).collect();
+        let mut i = 0;
+        while i < args.len() {
+            match args[i].as_str() {
+                "--assistant" => me.view = View::Auto,
+                "--demande" => {
+                    me.auto.prompt = args.get(i + 1).cloned().unwrap_or_default();
+                    me.view = View::Auto;
+                    i += 1;
+                }
+                f => {
+                    me.auto.set_file(std::path::PathBuf::from(f));
+                    me.view = View::Auto;
+                }
+            }
+            i += 1;
+        }
         me
     }
 
@@ -196,7 +217,7 @@ impl Launcher {
         let q = self.search.trim().to_lowercase();
         let found = q.is_empty() || app.name.to_lowercase().contains(&q) || app.tagline.to_lowercase().contains(&q);
         let in_view = match self.view {
-            View::All => true,
+            View::All | View::Auto => true,
             View::Installed => self.installed.apps.contains_key(&app.id),
             View::Updates => self.has_update(app),
             View::Category(c) => app.category == c,
@@ -219,6 +240,10 @@ impl eframe::App for Launcher {
             (c.0.apps.clone(), s)
         };
         self.collect_finished(ctx, &apps);
+        if let Some(f) = ctx.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).find(|p| !p.as_os_str().is_empty())) {
+            self.auto.set_file(f);
+            self.view = View::Auto;
+        }
         if self.jobs.lock().unwrap().values().any(|j| matches!(j, Job::Running(..))) {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
         }
@@ -256,6 +281,8 @@ impl Launcher {
 
         let installed = apps.iter().filter(|a| self.installed.apps.contains_key(&a.id)).count();
         let updates = apps.iter().filter(|a| self.has_update(a)).count();
+        nav_row(ui, &mut self.view, View::Auto, "Assistant", Some(Color32::from_rgb(0x8b, 0x6c, 0xff)), None);
+        ui.add_space(14.0);
         heading(ui, "BIBLIOTHÈQUE");
         nav_row(ui, &mut self.view, View::All, "Toutes les apps", None, Some(apps.len()));
         nav_row(ui, &mut self.view, View::Installed, "Installées", None, Some(installed));
@@ -286,6 +313,10 @@ impl Launcher {
     }
 
     fn main(&mut self, ui: &mut Ui, ctx: &egui::Context, apps: &[AppEntry]) {
+        if self.view == View::Auto {
+            self.auto.show(ui, ctx);
+            return;
+        }
         ui.horizontal(|ui| {
             let width = (ui.available_width() - 60.0).clamp(220.0, 520.0);
             search_pill(ui, &mut self.search, width);
@@ -298,6 +329,7 @@ impl Launcher {
         ui.add_space(26.0);
 
         let title = match self.view {
+            View::Auto => "Assistant",
             View::All => "Toutes les apps",
             View::Installed => "Installées",
             View::Updates => "Mises à jour",
@@ -680,7 +712,8 @@ fn main() -> eframe::Result {
             .with_title("Ethone Studio")
             .with_icon(Arc::new(studio_ui::app_window_icon("studio")))
             .with_inner_size([1240.0, 800.0])
-            .with_min_inner_size([860.0, 560.0]),
+            .with_min_inner_size([860.0, 560.0])
+            .with_drag_and_drop(true),
         ..Default::default()
     };
     eframe::run_native("Ethone Studio", options, Box::new(|cc| Ok(Box::new(Launcher::new(cc)))))

@@ -69,6 +69,29 @@ const DESC: [&str; 17] = [
     "Résumé et questions, en local",
 ];
 
+pub fn by_name(n: &str) -> Option<Panel> {
+    Some(match n {
+        "comment" => Panel::Comment,
+        "fillsign" | "signer" => Panel::FillSign,
+        "organize" | "organiser" => Panel::Organize,
+        "combine" | "combiner" => Panel::Combine,
+        "create" => Panel::Create,
+        "ocr" => Panel::Ocr,
+        "redact" | "caviarder" => Panel::Redact,
+        "protect" | "proteger" => Panel::Protect,
+        "compress" | "compresser" => Panel::Compress,
+        "stamp" | "filigrane" => Panel::Stamp,
+        "export" | "exporter" => Panel::Export,
+        "compare" | "comparer" => Panel::Compare,
+        "search" | "rechercher" => Panel::Search,
+        "bookmarks" | "signets" => Panel::Bookmarks,
+        "props" => Panel::Props,
+        "measure" => Panel::Measure,
+        "ai" | "ia" => Panel::Ai,
+        _ => return None,
+    })
+}
+
 pub struct Cmp {
     pub name: String,
     pub bytes: Arc<Vec<u8>>,

@@ -5,6 +5,9 @@ edition = "2024"
 
 [dependencies]
 eframe = { version = "0.37.0", default-features = false, features = ["wgpu", "default_fonts"] }
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp", "bmp", "gif", "tiff"] }
+rfd = "0.18.0"
+studio-auto = { version = "0.1.0", path = "../../crates/studio-auto" }
 studio-core = { version = "0.1.0", path = "../../crates/studio-core" }
 studio-ui = { version = "0.1.0", path = "../../crates/studio-ui" }
 

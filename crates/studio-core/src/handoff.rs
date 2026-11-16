@@ -32,7 +32,7 @@ fn alive(id: &str) -> bool {
     std::fs::metadata(root().join(format!("{id}.alive"))).and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|d| d < Duration::from_secs(4))
 }
 
-fn exe(id: &str) -> Option<PathBuf> {
+pub fn exe(id: &str) -> Option<PathBuf> {
     let installed = exe_path(id);
     if installed.is_file() {
         return Some(installed);
@@ -53,6 +53,14 @@ pub fn send(target: &str, file: &Path) -> Result<String, String> {
     let cwd = if app_dir(target).is_dir() { app_dir(target) } else { exe.parent().map(Path::to_path_buf).unwrap_or_default() };
     std::process::Command::new(&exe).arg(file).current_dir(cwd).spawn().map_err(|e| e.to_string())?;
     Ok(format!("{} s'ouvre avec ton envoi", name(target)))
+}
+
+/// Starts an app with extra command-line arguments (e.g. a file and a mode flag).
+pub fn open_with(target: &str, args: &[std::ffi::OsString]) -> Result<String, String> {
+    let exe = exe(target).ok_or_else(|| format!("{} n'est pas installé : installe-le depuis le launcher", name(target)))?;
+    let cwd = if app_dir(target).is_dir() { app_dir(target) } else { exe.parent().map(Path::to_path_buf).unwrap_or_default() };
+    std::process::Command::new(&exe).args(args).current_dir(cwd).spawn().map_err(|e| e.to_string())?;
+    Ok(format!("{} s'ouvre", name(target)))
 }
 
 pub fn received_dir(id: &str) -> PathBuf {
