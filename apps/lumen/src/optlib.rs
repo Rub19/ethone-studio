@@ -100,6 +100,22 @@ pub fn settings_for(id: &str, cur: &Settings) -> Option<Settings> {
 
 impl Lumen {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((_, label, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            let targets: Vec<usize> = self.targets().into_iter().filter(|i| *i < self.files.len()).collect();
+            if targets.is_empty() {
+                studio_ui::handoff::toast(ctx, "Choisis d'abord une photo".into(), false);
+                return true;
+            }
+            let mut done = 0;
+            for i in targets {
+                let Ok(img) = develop::load(&self.files[i], 640) else { continue };
+                let s = f(&self.settings(i), &img);
+                self.set_settings(i, s);
+                done += 1;
+            }
+            studio_ui::handoff::toast(ctx, format!("{label} : {done} photo(s)"), done > 0);
+            return true;
+        }
         if id == "lr-xmp" {
             let Some(p) = rfd::FileDialog::new().add_filter("Préréglage Lightroom", &["xmp"]).pick_file() else { return true };
             let targets: Vec<usize> = self.targets().into_iter().filter(|i| *i < self.files.len()).collect();

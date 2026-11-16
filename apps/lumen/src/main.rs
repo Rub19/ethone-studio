@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod develop;
 mod devui;
 mod library;
@@ -1233,6 +1234,7 @@ impl Lumen {
             studio_ui::palette::Cmd::new("Effacer les drapeaux des photos choisies", "Lot · neutre", "batch-flag:0"),
 
         ];
+        v.extend(outils::TOOLS.iter().map(|(id, label, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Lumen · nouvel outil · photo courante ou choisies", format!("tool:{id}"))));
         let photos = self.files.len();
         let current = self.current.is_some_and(|i| i < photos);
         let targets = self.targets().into_iter().filter(|i| *i < photos).count();
