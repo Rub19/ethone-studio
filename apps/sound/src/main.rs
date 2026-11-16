@@ -1088,6 +1088,7 @@ impl Sound {
 impl eframe::App for Sound {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
         }
@@ -1132,7 +1133,7 @@ impl eframe::App for Sound {
 impl Sound {
     fn top_bar(&mut self, root: &mut Ui) {
         egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
-            let full = ui.max_rect();
+            let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = 320.0;
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
             ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| {
@@ -2875,7 +2876,7 @@ fn draw_spectrum(ui: &mut Ui, spec: &[f32]) {
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
+        viewport: egui::ViewportBuilder::default().with_decorations(false)
             .with_title("Sound")
             .with_icon(Arc::new(studio_ui::app_window_icon("sound")))
             .with_inner_size([1440.0, 880.0])

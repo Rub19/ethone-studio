@@ -1221,6 +1221,7 @@ impl Pixel {
 impl eframe::App for Pixel {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
         }
@@ -1282,7 +1283,7 @@ impl eframe::App for Pixel {
 impl Pixel {
     fn menu_bar(&mut self, root: &mut Ui) {
         egui::Panel::top("menu").exact_size(40.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
-            let full = ui.max_rect();
+            let full = studio_ui::chrome::bar(ui, 10.0);
             let right_w = if self.home { 0.0 } else { 250.0 };
             if !self.home {
                 let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
@@ -2020,7 +2021,7 @@ fn image_dialog() -> rfd::FileDialog {
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_title("Pixel").with_icon(Arc::new(studio_ui::app_window_icon("pixel"))).with_inner_size([1440.0, 900.0]).with_min_inner_size([1000.0, 640.0]).with_drag_and_drop(true),
+        viewport: egui::ViewportBuilder::default().with_decorations(false).with_title("Pixel").with_icon(Arc::new(studio_ui::app_window_icon("pixel"))).with_inner_size([1440.0, 900.0]).with_min_inner_size([1000.0, 640.0]).with_drag_and_drop(true),
         ..Default::default()
     };
     eframe::run_native("Pixel", options, Box::new(|cc| Ok(Box::new(Pixel::new(cc)))))

@@ -208,6 +208,7 @@ impl Launcher {
 impl eframe::App for Launcher {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        studio_ui::chrome::resize(ctx);
         let (apps, source) = {
             let c = self.catalog.lock().unwrap();
             let s = match &c.1 {
@@ -222,6 +223,9 @@ impl eframe::App for Launcher {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
         }
 
+        egui::Panel::top("ethone-title").exact_size(34.0).frame(Frame::new().fill(P.page)).show(root, |ui| {
+            studio_ui::chrome::bar(ui, 0.0);
+        });
         egui::Panel::left("sidebar")
             .resizable(false)
             .exact_size(SIDEBAR_W)
@@ -672,7 +676,7 @@ fn menu_item(ui: &mut Ui, label: &str, color: Color32) -> bool {
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
+        viewport: egui::ViewportBuilder::default().with_decorations(false)
             .with_title("Ethone Studio")
             .with_icon(Arc::new(studio_ui::app_window_icon("studio")))
             .with_inner_size([1240.0, 800.0])

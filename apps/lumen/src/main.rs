@@ -1279,6 +1279,7 @@ impl Lumen {
 impl eframe::App for Lumen {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p, ctx);
         }
@@ -1332,26 +1333,29 @@ impl eframe::App for Lumen {
 impl Lumen {
     fn menu_bar(&mut self, root: &mut Ui, ctx: &egui::Context) {
         egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
-            ui.horizontal_centered(|ui| {
-                ui.add(egui::Image::new((self.icon.id(), Vec2::splat(22.0))));
-                ui.add_space(4.0);
-                egui::MenuBar::new().ui(ui, |ui| {
-                    self.file_menu(ui, ctx);
-                    self.edit_menu(ui, ctx);
-                    self.photo_menu(ui, ctx);
-                    self.view_menu(ui);
-                    self.help.menu(ui);
-                });
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if !self.files.is_empty() {
-                        let label = if self.picked.len() > 1 { format!("Exporter {}", self.picked.len()) } else if self.view == View::Develop { "Exporter".to_string() } else { format!("Exporter {}", self.visible().len()) };
-                        let dev = self.view == View::Develop && self.picked.len() < 2;
-                        if pro::primary_icon(ui, &label, export_glyph).on_hover_text("Ctrl+Maj+E").clicked() {
-                            self.open_export(dev);
+            let full = studio_ui::chrome::bar(ui, 12.0);
+            ui.scope_builder(egui::UiBuilder::new().max_rect(full), |ui| {
+                ui.horizontal_centered(|ui| {
+                    ui.add(egui::Image::new((self.icon.id(), Vec2::splat(22.0))));
+                    ui.add_space(4.0);
+                    egui::MenuBar::new().ui(ui, |ui| {
+                        self.file_menu(ui, ctx);
+                        self.edit_menu(ui, ctx);
+                        self.photo_menu(ui, ctx);
+                        self.view_menu(ui);
+                        self.help.menu(ui);
+                    });
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if !self.files.is_empty() {
+                            let label = if self.picked.len() > 1 { format!("Exporter {}", self.picked.len()) } else if self.view == View::Develop { "Exporter".to_string() } else { format!("Exporter {}", self.visible().len()) };
+                            let dev = self.view == View::Develop && self.picked.len() < 2;
+                            if pro::primary_icon(ui, &label, export_glyph).on_hover_text("Ctrl+Maj+E").clicked() {
+                                self.open_export(dev);
+                            }
+                            ui.add_space(8.0);
+                            view_switch(ui, &mut self.view, self.current.is_some());
                         }
-                        ui.add_space(8.0);
-                        view_switch(ui, &mut self.view, self.current.is_some());
-                    }
+                    });
                 });
             });
         });
@@ -1987,7 +1991,7 @@ fn export_glyph(p: &egui::Painter, r: Rect, c: Color32) {
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
+        viewport: egui::ViewportBuilder::default().with_decorations(false)
             .with_title("Lumen")
             .with_icon(Arc::new(studio_ui::app_window_icon("lumen")))
             .with_inner_size([1480.0, 920.0])

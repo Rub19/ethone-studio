@@ -1475,6 +1475,7 @@ impl Motion {
 impl eframe::App for Motion {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
         }
@@ -1538,7 +1539,7 @@ impl eframe::App for Motion {
 impl Motion {
     fn top_bar(&mut self, root: &mut Ui) {
         egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
-            let full = ui.max_rect();
+            let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = if self.home { 0.0 } else { 330.0 };
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
             ui.scope_builder(egui::UiBuilder::new().max_rect(left), |ui| {
@@ -2800,7 +2801,7 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32) -> egui::R
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
+        viewport: egui::ViewportBuilder::default().with_decorations(false)
             .with_title("Motion")
             .with_icon(Arc::new(studio_ui::app_window_icon("motion")))
             .with_inner_size([1560.0, 960.0])

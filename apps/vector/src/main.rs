@@ -2283,6 +2283,7 @@ impl VectorApp {
 impl eframe::App for VectorApp {
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
         }
@@ -2341,7 +2342,7 @@ impl eframe::App for VectorApp {
 impl VectorApp {
     fn menu_bar(&mut self, root: &mut Ui) {
         egui::Panel::top("menu").exact_size(40.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
-            let full = ui.max_rect();
+            let full = studio_ui::chrome::bar(ui, 10.0);
             let right_w = if self.home { 0.0 } else { 300.0 };
             if !self.home {
                 let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
@@ -2978,7 +2979,7 @@ fn mi(ui: &mut Ui, label: &str, sc: &str, enabled: bool) -> bool {
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
+        viewport: egui::ViewportBuilder::default().with_decorations(false)
             .with_title("Vector")
             .with_icon(Arc::new(studio_ui::app_window_icon("vector")))
             .with_inner_size([1440.0, 900.0])
