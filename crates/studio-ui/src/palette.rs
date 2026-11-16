@@ -581,3 +581,51 @@ mod bank_tests {
         assert!(b.iter().any(|(n, c)| *n == "24 Carrot" && *c == [0xe5, 0x6e, 0x24]));
     }
 }
+
+/// (name, keywords, inner SVG) of the 2 359 bundled Lucide icons (ISC, see assets/LUCIDE-LICENSE.txt).
+pub fn icon_bank() -> &'static [(&'static str, &'static str, &'static str)] {
+    static I: std::sync::OnceLock<Vec<(&'static str, &'static str, &'static str)>> = std::sync::OnceLock::new();
+    I.get_or_init(|| {
+        include_str!("../assets/lucide.tsv")
+            .lines()
+            .filter_map(|l| {
+                let mut p = l.splitn(3, '\t');
+                Some((p.next()?, p.next()?, p.next()?))
+            })
+            .collect()
+    })
+}
+
+/// A standalone SVG of an icon at `size` px, stroked with `color`.
+pub fn icon_svg(inner: &str, size: f32, color: [u8; 3]) -> String {
+    format!(
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="#{:02x}{:02x}{:02x}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{inner}</svg>"##,
+        color[0], color[1], color[2]
+    )
+}
+
+/// Writes an icon to the shared icon folder so documents can reference it by path.
+pub fn icon_file(k: usize) -> Result<std::path::PathBuf, String> {
+    let (name, _, inner) = icon_bank().get(k).ok_or("icône inconnue")?;
+    let dir = studio_core::data_dir().join("icones");
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let path = dir.join(format!("{name}.svg"));
+    std::fs::write(&path, icon_svg(inner, 512.0, [30, 30, 36])).map_err(|e| e.to_string())?;
+    Ok(path)
+}
+
+/// Palette entries for every icon, with the given id prefix ("pi:" → "pi:0", "pi:1"…).
+pub fn icon_cmds(app: &str, prefix: &str) -> impl Iterator<Item = Cmd> {
+    let (app, prefix) = (app.to_string(), prefix.to_string());
+    icon_bank().iter().enumerate().map(move |(k, (name, tags, _))| Cmd::new(format!("Icône {}", name.replace('-', " ")), format!("{app} · banque d'icônes · {tags}"), format!("{prefix}{k}")))
+}
+
+#[cfg(test)]
+mod icon_tests {
+    #[test]
+    fn icon_bank_loads() {
+        assert_eq!(super::icon_bank().len(), 2359);
+        assert_eq!(super::icon_cmds("X", "x:").count(), 2359);
+        assert!(super::icon_svg("<path d=\"M0 0\"/>", 24.0, [255, 0, 16]).contains("#ff0010"));
+    }
+}

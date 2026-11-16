@@ -3,7 +3,7 @@
 use crate::model::Kind;
 use crate::{FONTS, PageApp};
 use eframe::egui;
-use studio_ui::palette::{Cmd, Library, NAMED_COLORS};
+use studio_ui::palette::{Cmd, Library, icon_cmds, icon_file, NAMED_COLORS};
 
 pub const SIZES: [f32; 24] = [8.0, 9.0, 10.0, 11.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 54.0, 60.0, 66.0, 72.0, 84.0, 96.0, 120.0];
 pub const COLORS: [&str; 12] = ["Noir", "Anthracite", "Blanc", "Rouge", "Corail", "Orange", "Or", "Vert", "Sarcelle", "Azur", "Marine", "Violet"];
@@ -23,12 +23,20 @@ pub fn lib() -> &'static Library {
                 }
             }
         }
+        v.extend(icon_cmds("Page", "pi:"));
         Library::new(v)
     })
 }
 
 impl PageApp {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some(k) = id.strip_prefix("pi:").and_then(|k| k.parse::<usize>().ok()) {
+            match icon_file(k) {
+                Ok(p) => self.place_image_path(&p),
+                Err(e) => studio_ui::handoff::toast(ctx, format!("Icône : {e}"), false),
+            }
+            return true;
+        }
         let Some(rest) = id.strip_prefix("pg:") else { return false };
         let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
         let (Some(&f), Some(&s), Some(&c)) = (n.first(), n.get(1), n.get(2)) else { return true };

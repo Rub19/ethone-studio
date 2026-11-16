@@ -118,7 +118,11 @@ pub fn ops() -> &'static Vec<(Op, String, &'static str)> {
 
 pub fn lib() -> &'static Library {
     static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
-    L.get_or_init(|| Library::new(ops().iter().enumerate().map(|(k, (_, label, hint))| Cmd::new(label.clone(), format!("Sound · {hint} · sélection ou fichier"), format!("sd:{k}"))).collect()))
+    L.get_or_init(|| {
+        let ops = ops().iter().enumerate().map(|(k, (_, label, hint))| Cmd::new(label.clone(), format!("Sound · {hint} · sélection ou fichier"), format!("sd:{k}")));
+        let sfx = crate::sfx::SFX.iter().enumerate().map(|(k, (pack, name, kw, _, _))| Cmd::new(format!("Bruitage {} · {name}", pack.to_lowercase()), format!("Sound · bruitages libres CC0 · {kw} · insérer au curseur"), format!("sx:{k}")));
+        Library::new(ops.chain(sfx).collect())
+    })
 }
 
 pub fn apply(c: &mut Clip, a: usize, b: usize, op: Op) {
@@ -152,8 +156,25 @@ pub fn apply(c: &mut Clip, a: usize, b: usize, op: Op) {
     }
 }
 
+/// Decodes one bundled sound effect through a temporary file (the decoder reads paths).
+pub fn sfx_clip(k: usize) -> Result<Clip, String> {
+    let (_, name, _, bytes, ext) = crate::sfx::SFX.get(k).ok_or("bruitage inconnu")?;
+    let path = std::env::temp_dir().join(format!("ethone-sfx-{k}.{ext}"));
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
+    let clip = Clip::decode(&path).map_err(|e| format!("{name} : {e}"));
+    let _ = std::fs::remove_file(&path);
+    clip
+}
+
 impl Sound {
     pub fn run_lib(&mut self, id: &str, _ctx: &egui::Context) -> bool {
+        if let Some(k) = id.strip_prefix("sx:").and_then(|k| k.parse::<usize>().ok()) {
+            match sfx_clip(k) {
+                Ok(c) => self.insert_sfx(c, crate::sfx::SFX[k].1),
+                Err(e) => self.notice = Some((e, false)),
+            }
+            return true;
+        }
         let Some(k) = id.strip_prefix("sd:").and_then(|k| k.parse::<usize>().ok()) else { return false };
         let Some((op, label, _)) = ops().get(k).cloned() else { return true };
         if self.clip.len() == 0 {
@@ -172,7 +193,11 @@ mod tests {
 
     #[test]
     fn library_and_ops() {
-        assert!(lib().len() >= 6000, "{}", lib().len());
+        assert!(lib().len() >= 6000 + 313, "{}", lib().len());
+        for k in 0..crate::sfx::SFX.len() {
+            let c = sfx_clip(k).unwrap_or_else(|e| panic!("{e}"));
+            assert!(c.len() > 100 && !c.ch.is_empty(), "{}", crate::sfx::SFX[k].1);
+        }
         let mut ids = std::collections::HashSet::new();
         assert!(ops().iter().all(|o| ids.insert(o.1.clone())), "libellés en double");
         let mut c = Clip { rate: 1000, ch: vec![vec![0.5; 2000]] };

@@ -1,9 +1,9 @@
-//! Vector option library: 6 000 generated palettes, 2 359 Lucide icons (ISC, assets/LUCIDE-LICENSE.txt)
+//! Vector option library: 6 000 generated palettes, 2 359 Lucide icons (studio-ui icon bank)
 //! and 5 000 named colours for fill or stroke (Ctrl+K).
 
 use crate::VectorApp;
 use eframe::egui;
-use studio_ui::palette::{Cmd, Library, color_bank, color_name};
+use studio_ui::palette::{Cmd, Library, color_bank, color_name, icon_bank, icon_cmds};
 
 pub const SCHEMES: [(&str, &[f32]); 10] = [
     ("monochrome", &[0.0]),
@@ -61,24 +61,14 @@ pub fn remap(colors: &[[u8; 4]], pal: &[[u8; 3]]) -> Vec<[u8; 4]> {
         .collect()
 }
 
-/// (name, keywords, inner SVG) of every bundled icon.
-pub fn icons() -> &'static [(&'static str, &'static str, &'static str)] {
-    static I: std::sync::OnceLock<Vec<(&'static str, &'static str, &'static str)>> = std::sync::OnceLock::new();
-    I.get_or_init(|| {
-        include_str!("../assets/lucide.tsv")
-            .lines()
-            .filter_map(|l| {
-                let mut p = l.splitn(3, '\t');
-                Some((p.next()?, p.next()?, p.next()?))
-            })
-            .collect()
-    })
-}
-
 pub const ICON_SIZE: f32 = 192.0;
 
-pub fn icon_svg(inner: &str) -> String {
-    format!(r##"<svg xmlns="http://www.w3.org/2000/svg" width="{ICON_SIZE}" height="{ICON_SIZE}" viewBox="0 0 24 24" fill="none" stroke="#1e1e24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{inner}</svg>"##)
+fn icons() -> &'static [(&'static str, &'static str, &'static str)] {
+    icon_bank()
+}
+
+fn icon_svg(inner: &str) -> String {
+    studio_ui::palette::icon_svg(inner, ICON_SIZE, [30, 30, 36])
 }
 
 pub fn lib() -> &'static Library {
@@ -94,9 +84,7 @@ pub fn lib() -> &'static Library {
                 }
             }
         }
-        for (k, (name, tags, _)) in icons().iter().enumerate() {
-            v.push(Cmd::new(format!("Icône {}", name.replace('-', " ")), format!("Vector · banque d'icônes · {tags}"), format!("vi:{k}")));
-        }
+        v.extend(icon_cmds("Vector", "vi:"));
         for (k, (n, c)) in color_bank().iter().enumerate() {
             let hex = format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2]);
             v.push(Cmd::new(format!("Remplissage « {n} » {hex}"), "Vector · banque de couleurs · sélection", format!("vf:{k}")));

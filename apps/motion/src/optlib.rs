@@ -3,7 +3,7 @@
 use crate::Motion;
 use crate::model::{self, ANIM_PRESETS, Ease, Key};
 use eframe::egui;
-use studio_ui::palette::{Cmd, Library};
+use studio_ui::palette::{Cmd, Library, icon_cmds, icon_file};
 
 pub const DURATIONS: [f32; 10] = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0];
 pub const DELAYS: [f32; 5] = [0.0, 0.1, 0.25, 0.5, 1.0];
@@ -27,6 +27,7 @@ pub fn lib() -> &'static Library {
                 }
             }
         }
+        v.extend(icon_cmds("Motion", "mi:"));
         Library::new(v)
     })
 }
@@ -59,6 +60,13 @@ pub fn apply_timed(l: &mut model::Layer, p: usize, w: f32, h: f32, dur: f32, eas
 
 impl Motion {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some(k) = id.strip_prefix("mi:").and_then(|k| k.parse::<usize>().ok()) {
+            match icon_file(k) {
+                Ok(p) => self.add_image_path(&p),
+                Err(e) => studio_ui::handoff::toast(ctx, format!("Icône : {e}"), false),
+            }
+            return true;
+        }
         let Some(rest) = id.strip_prefix("mo:") else { return false };
         let n: Vec<usize> = rest.split(':').filter_map(|x| x.parse().ok()).collect();
         let (Some(&p), Some(&d), Some(&e), Some(&w)) = (n.first(), n.get(1), n.get(2), n.get(3)) else { return true };

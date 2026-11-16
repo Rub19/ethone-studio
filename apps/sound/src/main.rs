@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod sfx;
 mod audio;
 mod dsp;
 mod effects;
@@ -519,6 +520,25 @@ impl Sound {
                 m.0 = (m.0 as i64 + by).max(from as i64) as usize;
             }
         }
+    }
+
+    fn insert_sfx(&mut self, sfx: Clip, name: &str) {
+        let label = format!("Bruitage « {name} »");
+        if self.clip.len() == 0 {
+            self.snapshot(&label);
+            self.clip = sfx;
+            self.sel = None;
+            self.cursor = 0;
+        } else {
+            let at = self.sel.map_or(self.cursor, |s| s.0).min(self.clip.len());
+            self.snapshot(&label);
+            self.clip.insert(at, &sfx);
+            let len = sfx.resampled(self.clip.rate).len();
+            self.sel = Some((at, at + len));
+        }
+        self.modified = true;
+        self.changed();
+        self.notice = Some((format!("{label} inséré"), true));
     }
 
     fn paste(&mut self) {

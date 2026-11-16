@@ -460,7 +460,13 @@ impl PageApp {
             return;
         }
         let (pw, ph) = self.cur_size();
-        let (w, h) = image::image_dimensions(&p).map(|(w, h)| (w as f32, h as f32)).unwrap_or((400.0, 300.0));
+        let svg = p.extension().is_some_and(|e| e.eq_ignore_ascii_case("svg"));
+        let dims = if svg {
+            std::fs::read(p).ok().and_then(|b| resvg::usvg::Tree::from_data(&b, &resvg::usvg::Options::default()).ok()).map(|t| (t.size().width(), t.size().height()))
+        } else {
+            image::image_dimensions(p).ok().map(|(w, h)| (w as f32, h as f32))
+        };
+        let (w, h) = dims.unwrap_or((400.0, 300.0));
         let s = ((pw - 2.0 * self.doc.margin) / w).min((ph - 2.0 * self.doc.margin) / h).min(1.0);
         let mut f = Frame::new((pw - w * s) / 2.0, (ph - h * s) / 2.0, w * s, h * s, Kind::image(&path, 0.0));
         f.fx.layer = self.layer;
