@@ -329,7 +329,10 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
                 ops.extend([json!({"op":"low_cut","hz":90}), json!({"op":"eq","low":-2,"mid":2,"high":3}), json!({"op":"compress","threshold":-22,"ratio":3.5,"makeup":4}), json!({"op":"loudness","db":-16})]);
                 s.push("Voix de podcast : égalisation, compression, −16 LUFS".into());
             }
-            if has(&t, &["plus fort", "volume", "normalise", "augmente", "louder"]) && !has(&t, &["moins fort", "baisse"]) {
+            if has(&t, &["lufs", "volume percu", "sonie"]) {
+                ops.push(json!({"op":"loudness","db":-16}));
+                s.push("Normaliser le volume perçu à −16 LUFS".into());
+            } else if has(&t, &["plus fort", "volume", "normalise", "augmente", "louder"]) && !has(&t, &["moins fort", "baisse"]) {
                 ops.push(json!({"op":"normalize","db":-1}));
                 s.push("Monter le volume au maximum sans saturer".into());
             }
@@ -474,6 +477,7 @@ mod tests {
         assert!(matches!(&p("nettoie ce podcast", "a.wav").steps[0], Step::Sound(o) if o.len() > 3));
         assert!(matches!(&p("supprime les silences", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "cut_silences"));
         assert!(matches!(&p("rogne le silence au début et à la fin", "a.wav").steps[0], Step::Sound(o) if o[0]["op"] == "trim_silence_edges"));
+        assert!(matches!(&p("normalise ce son à -16 LUFS", "a.wav").steps[0], Step::Sound(o) if o.iter().any(|op| op["op"] == "loudness") && o.iter().all(|op| op["op"] != "normalize")));
         assert_eq!(p("retire le filigrane", "x.jpg").steps, vec![Step::Watermark]);
         assert_eq!(p("enlève le watermark shutterstock", "x.jpg").steps, vec![Step::Watermark]);
         assert_eq!(p("efface le texte", "x.png").steps, vec![Step::EraseText]);

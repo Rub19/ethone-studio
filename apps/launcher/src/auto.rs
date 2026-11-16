@@ -25,7 +25,7 @@ fn suggestions(k: Kind) -> &'static [&'static str] {
     match k {
         Kind::Image | Kind::Raw => &["Retire les oiseaux", "Retire le filigrane", "Supprime le fond", "Étends l'image en format story", "Efface le texte", "Traduis le texte en anglais", "Noir et blanc et plus lumineuse", "Couleurs vives et plus nette", "Recadre en carré", "Rends-la vintage", "Anime-la en GIF", "Lis le texte", "Recadre aux pixels visibles"],
         Kind::Video => &["Extrais le son", "Monte cette vidéo"],
-        Kind::Audio => &["Nettoie ce podcast", "Supprime les silences", "Rogne le silence au début et à la fin", "Rends-la bouclable", "Plus fort avec des fondus", "Ajoute de la réverbération", "Accélère un peu"],
+        Kind::Audio => &["Nettoie ce podcast", "Normalise ce son à −16 LUFS", "Supprime les silences", "Rogne le silence au début et à la fin", "Rends-la bouclable", "Plus fort avec des fondus", "Ajoute de la réverbération", "Accélère un peu"],
         Kind::Pdf => &["Résume ce document", "Fais l'OCR", "Je veux le signer", "Compresse-le", "Protège-le par mot de passe", "Ajoute un filigrane"],
         Kind::Nothing => &["Un logo « Nova Café »", "Une intro animée « Bienvenue »", "Je veux faire une affiche", "Un bip de 3 secondes", "Monter une vidéo"],
         _ => &[],

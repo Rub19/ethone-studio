@@ -1225,6 +1225,10 @@ impl Lumen {
             studio_ui::palette::Cmd::new("Redresser l'horizon sur les photos choisies", "Lot", "batch-straighten"),
             studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset"),
             studio_ui::palette::Cmd::new("Synchroniser les réglages vers les photos choisies", "Lot · copie la photo courante", "batch-sync"),
+            studio_ui::palette::Cmd::new("Attribuer 5 étoiles aux photos choisies", "Lot · classement", "batch-rate:5"),
+            studio_ui::palette::Cmd::new("Marquer les photos choisies comme retenues", "Lot · drapeau P", "batch-flag:1"),
+            studio_ui::palette::Cmd::new("Rejeter les photos choisies", "Lot · drapeau X", "batch-flag:-1"),
+            studio_ui::palette::Cmd::new("Effacer les drapeaux des photos choisies", "Lot · neutre", "batch-flag:0"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]));
@@ -1233,6 +1237,27 @@ impl Lumen {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if let Some(rating) = id.strip_prefix("batch-rate:").and_then(|value| value.parse::<u8>().ok()).filter(|value| *value <= 5) {
+            let file_count = self.files.len();
+            let targets: Vec<usize> = self.targets().into_iter().filter(|index| *index < file_count).collect();
+            for index in &targets {
+                self.entry(*index).rating = rating;
+            }
+            self.dirty_catalog |= !targets.is_empty();
+            studio_ui::handoff::toast(ctx, format!("{rating} étoile(s) attribuée(s) à {} photo(s)", targets.len()), !targets.is_empty());
+            return;
+        }
+        if let Some(flag) = id.strip_prefix("batch-flag:").and_then(|value| value.parse::<i8>().ok()).filter(|value| (-1..=1).contains(value)) {
+            let file_count = self.files.len();
+            let targets: Vec<usize> = self.targets().into_iter().filter(|index| *index < file_count).collect();
+            for index in &targets {
+                self.entry(*index).flag = flag;
+            }
+            self.dirty_catalog |= !targets.is_empty();
+            let action = match flag { -1 => "rejetée(s)", 1 => "retenue(s)", _ => "remise(s) à zéro" };
+            studio_ui::handoff::toast(ctx, format!("{} photo(s) {action}", targets.len()), !targets.is_empty());
+            return;
+        }
         if id == "batch-sync" {
             let Some(source) = self.current.filter(|i| *i < self.files.len()) else {
                 studio_ui::handoff::toast(ctx, "Choisis d'abord la photo source".into(), false);

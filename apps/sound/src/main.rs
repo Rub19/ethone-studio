@@ -1047,6 +1047,9 @@ impl Sound {
             studio_ui::palette::Cmd::new("Supprimer les silences (plus de 0,8 s)", "Édition", "silences"),
             studio_ui::palette::Cmd::new("Supprimer les silences courts (plus de 0,4 s)", "Édition", "silences-short"),
             studio_ui::palette::Cmd::new("Rogner les silences au début et à la fin", "Nettoyage · conserve les pauses internes", "trim-edges"),
+            studio_ui::palette::Cmd::new("Normaliser la crête à −1 dB", "Volume · sélection ou fichier entier", "normalize-peak"),
+            studio_ui::palette::Cmd::new("Normaliser le volume perçu à −16 LUFS", "Podcast et voix · sélection ou fichier entier", "normalize-lufs"),
+            studio_ui::palette::Cmd::new("Ajouter des micro-fondus aux bords", "20 ms · évite les clics", "micro-fades"),
             studio_ui::palette::Cmd::new("Découper aux silences en fichiers WAV…", "Prises, samples, chapitres", "split-files"),
             studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 0,5 s)", "Musique de jeu, ambiance", "loop:500"),
             studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 2 s)", "Musique de jeu, ambiance", "loop:2000"),
@@ -1082,6 +1085,15 @@ impl Sound {
             "play" => self.toggle_play(),
             "marker" => self.add_marker(),
             "silences" | "silences-short" => self.cut_silences(if id == "silences" { 800.0 } else { 400.0 }),
+            "normalize-peak" => self.edit("Normalisation à −1 dB", |clip, a, b| clip.normalize(a, b, -1.0)),
+            "normalize-lufs" => self.edit("Normalisation à −16 LUFS", |clip, a, b| clip.loudness_normalize(a, b, -16.0)),
+            "micro-fades" => self.edit("Micro-fondus de bord", |clip, a, b| {
+                let edge = ((clip.rate as f32 * 0.02) as usize).min((b - a) / 2);
+                if edge > 0 {
+                    clip.fade(a, a + edge, true);
+                    clip.fade(b - edge, b, false);
+                }
+            }),
             "trim-edges" => match self.clip.audible_bounds(-42.0, 10.0) {
                 Some((a, b)) if a > 0 || b < self.clip.len() => {
                     self.snapshot("Rogner les silences de bord");

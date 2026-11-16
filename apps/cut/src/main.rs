@@ -1736,6 +1736,9 @@ impl Cut {
             studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350"),
             studio_ui::palette::Cmd::new("Passer en paysage 16:9", "Séquence · clips recadrés au centre", "format:1920x1080"),
             studio_ui::palette::Cmd::new("Fermer tous les blancs de la piste", "Montage · rapproche tous les clips", "close-gaps"),
+            studio_ui::palette::Cmd::new("Normaliser l'audio sélectionné à −1 dB", "Clip ou musique sélectionné", "normalize-audio"),
+            studio_ui::palette::Cmd::new("Fondus de 0,5 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:0.5"),
+            studio_ui::palette::Cmd::new("Fondus de 1 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:1"),
 
         ];
         v.extend(studio_ui::palette::send_cmds(&[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]));
@@ -1744,6 +1747,29 @@ impl Cut {
     }
 
     fn run_cmd(&mut self, id: &str, ctx: &egui::Context) {
+        if id == "normalize-audio" {
+            match self.sel {
+                Some(selection @ (Sel::Clip(_) | Sel::Over(_) | Sel::Music(_))) => {
+                    self.error = None;
+                    self.normalize(selection, -1.0);
+                    match &self.error {
+                        Some(error) => studio_ui::handoff::toast(ctx, error.clone(), false),
+                        None => studio_ui::handoff::toast(ctx, "Audio normalisé à −1 dB".into(), true),
+                    }
+                }
+                _ => studio_ui::handoff::toast(ctx, "Sélectionne d'abord un clip ou une musique".into(), false),
+            }
+            return;
+        }
+        if let Some(seconds) = id.strip_prefix("fades-all:").and_then(|value| value.parse::<f64>().ok()) {
+            for clip in &mut self.proj.clips {
+                let fade = seconds.min(clip.len() / 2.0);
+                (clip.fade_in, clip.fade_out) = (fade, fade);
+            }
+            let count = self.proj.clips.len();
+            studio_ui::handoff::toast(ctx, format!("Fondus de {seconds:.1} s appliqués à {count} clip(s)"), count > 0);
+            return;
+        }
         if id == "close-gaps" {
             let count = self.proj.clips.iter().filter(|clip| clip.gap > 1e-6).count();
             self.proj.close_gaps();
