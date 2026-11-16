@@ -1,4 +1,4 @@
-//! Executes a plan with the suite's engines (ethone-mcp), the Windows OCR and a local vision model.
+//! Executes a plan with the suite's engines (ethone-mcp), the Windows OCR and, for watermarks only, a local vision model.
 
 use crate::plan::{Plan, Step};
 use serde_json::{Value, json};
@@ -66,7 +66,7 @@ pub fn ensure_ollama() -> Result<(), String> {
     if ollama_up() {
         return Ok(());
     }
-    let exe = ollama_exe().ok_or("Ollama n'est pas installé (ollama.com) : il faut une IA locale pour repérer les objets")?;
+    let exe = ollama_exe().ok_or("Ollama n'est pas installé (ollama.com) : il faut une IA locale pour repérer les filigranes automatiquement (ou entoure-les toi-même)")?;
     let mut cmd = std::process::Command::new(exe);
     cmd.arg("serve").stdin(std::process::Stdio::null()).stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null());
     #[cfg(windows)]
@@ -281,33 +281,6 @@ pub fn run(plan: &Plan, file: Option<&Path>, open: bool, tx: &Sender<Msg>) -> Re
                     })
                     .collect();
                 mcp("pixel_edit", &json!({ "input": src, "output": out_png, "operations": ops }), &work)?;
-                cur = Some(out_png);
-            }
-            Step::Remove(what) => {
-                let src = cur.clone().ok_or("Aucune image")?;
-                let img = image::open(&src).map_err(|e| e.to_string())?;
-                say(format!("Recherche de « {what} » avec l'IA de vision locale (1 à 2 min)…"));
-                let found = detect(&img, what)?;
-                if found.is_empty() {
-                    return Err(format!("Je n'ai trouvé aucun « {what} » dans l'image"));
-                }
-                say(format!("{} élément(s) trouvé(s), suppression et reconstruction du fond…", found.len()));
-                let rgba = img.to_rgba8();
-                let found: Vec<[f32; 4]> = found.iter().map(|b| refine(&rgba, *b)).collect();
-                let ops = remove_ops(&found, 0.06, 4.0, img.width(), img.height());
-                mcp("pixel_edit", &json!({ "input": src, "output": out_png, "operations": ops }), &work)?;
-                for pass in 1..=2 {
-                    let done = image::open(&out_png).map_err(|e| e.to_string())?.to_rgba8();
-                    let rest: Vec<[f32; 4]> = found.iter().filter_map(|b| leftover(&done, *b)).collect();
-                    if rest.is_empty() {
-                        break;
-                    }
-                    say(format!("Finition {pass} : {} reste(s) à nettoyer…", rest.len()));
-                    let again = work.join(format!("{base} - finition {pass}.png"));
-                    mcp("pixel_edit", &json!({ "input": out_png, "output": again, "operations": remove_ops(&rest, 0.08, 4.0, img.width(), img.height()) }), &work)?;
-                    std::fs::rename(&again, &out_png).map_err(|e| e.to_string())?;
-                }
-                notes.push(format!("{} élément(s) « {what} » supprimé(s)", found.len()));
                 cur = Some(out_png);
             }
             Step::Watermark => {

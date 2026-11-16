@@ -1,5 +1,5 @@
 //! "Texte de la photo": finds the text in a picture (Windows OCR), then lets you
-//! rewrite, erase, blur, copy or translate it, keeping the original colour and size.
+//! rewrite, erase, blur or copy it, keeping the original colour and size.
 
 use crate::Pixel;
 use crate::doc::Area;
@@ -23,7 +23,6 @@ pub struct Line {
 pub enum Job {
     Ocr(Result<Vec<Line>, String>),
     Erased(usize, RgbaImage, Vec<Line>, &'static str),
-    Translated(Result<Vec<String>, String>),
 }
 
 pub struct State {
@@ -51,11 +50,9 @@ pub struct State {
     pub find: String,
     pub repl: String,
     pub case: bool,
-    pub to_lang: usize,
     pub blur_px: f32,
 }
 
-pub const TARGETS: [&str; 8] = ["français", "anglais", "espagnol", "allemand", "italien", "portugais", "néerlandais", "japonais"];
 const METHODS: [&str; 3] = ["Reconstruction", "Couleur du fond", "Flou du fond"];
 
 impl Default for State {
@@ -87,7 +84,6 @@ impl Default for State {
             find: String::new(),
             repl: String::new(),
             case: false,
-            to_lang: 1,
             blur_px: 0.0,
         }
     }
@@ -235,17 +231,7 @@ impl Pixel {
                 self.pt.sel = None;
                 studio_ui::handoff::toast(ctx, if n > 0 { format!("{n} ligne(s) de texte trouvée(s)") } else { "Aucun texte trouvé".into() }, n > 0);
             }
-            Job::Ocr(Err(e)) | Job::Translated(Err(e)) => studio_ui::handoff::toast(ctx, e, false),
-            Job::Translated(Ok(t)) => {
-                let mut k = 0;
-                for (l, t) in self.pt.lines.iter_mut().filter(|l| l.on).zip(t) {
-                    if !t.trim().is_empty() {
-                        l.text = t;
-                        k += 1;
-                    }
-                }
-                studio_ui::handoff::toast(ctx, format!("{k} ligne(s) traduite(s) : clique « Appliquer » pour les écrire dans l'image"), true);
-            }
+            Job::Ocr(Err(e)) => studio_ui::handoff::toast(ctx, e, false),
             Job::Erased(layer, img, write, label) => {
                 if layer < self.doc.layers.len() && self.doc.layers[layer].img.dimensions() == img.dimensions() {
                     self.doc.next_label = Some(label.into());
@@ -369,35 +355,6 @@ impl Pixel {
         self.doc.set_selection(Some(area), Some(m));
     }
 
-    fn pt_translate(&mut self, ctx: &egui::Context) {
-        let src: Vec<String> = self.pt.lines.iter().filter(|l| l.on).map(|l| l.text.clone()).collect();
-        if src.is_empty() || self.pt.job.is_some() {
-            return;
-        }
-        let to = TARGETS[self.pt.to_lang];
-        let (tx, rx) = channel();
-        self.pt.job = Some(rx);
-        self.pt.busy = format!("Traduction en {to}…");
-        let ctx = ctx.clone();
-        std::thread::spawn(move || {
-            let numbered: String = src.iter().enumerate().map(|(i, s)| format!("{}. {s}\n", i + 1)).collect();
-            let a = studio_ui::help::ask_once(&format!("Tu es un traducteur. Traduis chaque ligne en {to}, de façon naturelle et courte (c'est du texte affiché sur une image). Réponds uniquement avec les lignes numérotées, au même format « N. texte », sans rien ajouter."), &numbered);
-            let mut out = vec![String::new(); src.len()];
-            for line in a.lines() {
-                let t = line.trim();
-                if let Some((n, rest)) = t.split_once(". ").or_else(|| t.split_once(") "))
-                    && let Ok(k) = n.trim().parse::<usize>()
-                    && (1..=src.len()).contains(&k)
-                {
-                    out[k - 1] = rest.trim().to_string();
-                }
-            }
-            let r = if out.iter().all(|s| s.is_empty()) { Err(format!("Traduction impossible : {}", a.chars().take(160).collect::<String>())) } else { Ok(out) };
-            let _ = tx.send(Job::Translated(r));
-            ctx.request_repaint();
-        });
-    }
-
     pub fn pt_hit(&self, x: f32, y: f32) -> Option<usize> {
         self.pt.lines.iter().position(|l| x >= l.rect[0] - 3.0 && x <= l.rect[0] + l.rect[2] + 3.0 && y >= l.rect[1] - 3.0 && y <= l.rect[1] + l.rect[3] + 3.0)
     }
@@ -460,7 +417,7 @@ impl Pixel {
             });
         });
         if self.pt.lines.is_empty() {
-            ui.label(RichText::new("Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le, floute-le ou traduis-le en gardant sa couleur et sa taille.").size(11.5).color(FAINT));
+            ui.label(RichText::new("Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.").size(11.5).color(FAINT));
             return;
         }
         ui.add_space(6.0);
@@ -560,17 +517,6 @@ impl Pixel {
                 }
                 studio_ui::handoff::toast(ctx, format!("{n} ligne(s) modifiée(s) : « Appliquer » pour les écrire dans l'image"), n > 0);
             }
-        });
-        egui::CollapsingHeader::new(RichText::new("Traduire (IA locale)").size(12.0)).id_salt("pt-tr").show(ui, |ui| {
-            egui::ComboBox::from_id_salt("pt-to").selected_text(TARGETS[self.pt.to_lang]).show_ui(ui, |ui| {
-                for (k, t) in TARGETS.iter().enumerate() {
-                    ui.selectable_value(&mut self.pt.to_lang, k, *t);
-                }
-            });
-            if ui.add_enabled(self.pt.job.is_none(), egui::Button::new("Traduire les lignes cochées")).clicked() {
-                self.pt_translate(ctx);
-            }
-            ui.label(RichText::new("Utilise l'assistant local (Ollama) : rien ne part en ligne.").size(11.0).color(FAINT));
         });
         egui::CollapsingHeader::new(RichText::new("Rendu du nouveau texte").size(12.0)).id_salt("pt-style").show(ui, |ui| {
             egui::ComboBox::from_id_salt("pt-font").selected_text(FONTS[self.pt.font].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {

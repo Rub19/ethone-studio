@@ -465,7 +465,7 @@ impl Palette {
 
     fn builtin(&self, help: &Help) -> Vec<Cmd> {
         let mut v: Vec<Cmd> = help.titles().into_iter().map(|t| Cmd::new(format!("Aide : {t}"), "Tutoriel", format!("help:{t}"))).collect();
-        v.push(Cmd::new("Ouvrir l'aide et l'assistant IA", "F1", "help:"));
+        v.push(Cmd::new("Ouvrir l'aide (tutoriels)", "F1", "help:"));
         v.push(Cmd::new("Préférences…", "Interface, outils, performances · Ctrl+,", "ui-prefs"));
         for z in SIZES {
             v.push(Cmd::new(format!("Interface : taille {:.0} %", z * 100.0), "Agrandit ou réduit toute l'interface", format!("ui-zoom:{z}")));

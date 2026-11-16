@@ -4,7 +4,7 @@ use eframe::egui::{self, Color32, CornerRadius, Rect, RichText, Sense, Stroke, S
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, mpsc};
-use studio_ui::pro::{self, BLUE, FAINT, INK, INK_STRONG, LINE, MUTED, semibold};
+use studio_ui::pro::{self, BLUE, FAINT, INK, INK_STRONG, MUTED, semibold};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[repr(u8)]
@@ -26,10 +26,9 @@ pub enum Panel {
     Bookmarks,
     Props,
     Measure,
-    Ai,
 }
 
-pub const LIST: [(Panel, &str); 17] = [
+pub const LIST: [(Panel, &str); 16] = [
     (Panel::Comment, "Commenter"),
     (Panel::FillSign, "Remplir et signer"),
     (Panel::Organize, "Organiser les pages"),
@@ -46,7 +45,6 @@ pub const LIST: [(Panel, &str); 17] = [
     (Panel::Bookmarks, "Signets"),
     (Panel::Props, "Propriétés"),
     (Panel::Measure, "Mesurer"),
-    (Panel::Ai, "Assistant IA"),
 ];
 
 const DESC: [&str; 17] = [
@@ -87,7 +85,6 @@ pub fn by_name(n: &str) -> Option<Panel> {
         "bookmarks" | "signets" => Panel::Bookmarks,
         "props" => Panel::Props,
         "measure" => Panel::Measure,
-        "ai" | "ia" => Panel::Ai,
         _ => return None,
     })
 }
@@ -129,8 +126,6 @@ pub struct State {
     pub meta: Vec<String>,
     pub fields: Vec<engine::Field>,
     pub vals: Vec<String>,
-    pub ai_q: String,
-    pub ai_answer: String,
     pub crop: [f32; 4],
     pub split_n: usize,
     pub blank: usize,
@@ -171,8 +166,6 @@ impl Default for State {
             meta: vec![String::new(); engine::META.len()],
             fields: Vec::new(),
             vals: Vec::new(),
-            ai_q: String::new(),
-            ai_answer: String::new(),
             crop: [10.0; 4],
             split_n: 1,
             blank: 0,
@@ -257,7 +250,6 @@ pub fn show(app: &mut Folio, ui: &mut Ui) {
                 Panel::Bookmarks => bookmarks(app, ui, &ctx),
                 Panel::Props => props(app, ui, &ctx),
                 Panel::Measure => measure(app, ui, &ctx),
-                Panel::Ai => ai(app, ui, &ctx),
             }
         });
     });
@@ -1244,64 +1236,6 @@ fn measure(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     }
 }
 
-fn ai(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
-    title(ui, app, "Assistant IA");
-    hint(ui, "Utilise l'assistant local (Ollama) : le document ne quitte pas ton PC.");
-    ui.add_space(6.0);
-    let mut ask: Option<String> = None;
-    ui.horizontal_wrapped(|ui| {
-        if ui.button("Résumer").clicked() {
-            ask = Some("Résume ce document en français en 5 à 8 points clairs.".into());
-        }
-        if ui.button("Points clés et dates").clicked() {
-            ask = Some("Liste les informations importantes de ce document : noms, montants, dates, échéances, obligations.".into());
-        }
-        if ui.button("Expliquer simplement").clicked() {
-            ask = Some("Explique ce document simplement, comme à quelqu'un qui n'est pas spécialiste.".into());
-        }
-    });
-    ui.add(egui::TextEdit::multiline(&mut app.st.ai_q).hint_text("Pose une question sur le document…").desired_rows(2).desired_width(f32::INFINITY));
-    if ui.add_enabled(app.jobs.is_none() && !app.st.ai_q.trim().is_empty(), egui::Button::new("Demander")).clicked() {
-        ask = Some(app.st.ai_q.trim().to_string());
-    }
-    if let Some(q) = ask
-        && let Some(o) = &mut app.od
-    {
-        let mut text = String::new();
-        for i in 0..o.n() {
-            text.push_str(o.text(i));
-            text.push('\n');
-            if text.len() > 12000 {
-                break;
-            }
-        }
-        if text.trim().is_empty() {
-            toast(ctx, "Aucun texte dans ce PDF : lance d'abord Numériser et OCR", false);
-        } else {
-            let text: String = text.chars().take(12000).collect();
-            let (tx, rx) = mpsc::channel();
-            app.jobs = Some(rx);
-            app.progress = Some((0, 1));
-            app.st.ai_answer = "Réflexion…".into();
-            std::thread::spawn(move || {
-                let a = studio_ui::help::ask_once("Tu es l'assistant de Folio, un lecteur PDF. Réponds en français, de façon précise, uniquement d'après le document fourni.", &format!("Document :\n{text}\n\nDemande : {q}"));
-                let _ = tx.send(Job::Ai(a));
-            });
-        }
-    }
-    if !app.st.ai_answer.is_empty() {
-        ui.add_space(8.0);
-        let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 1.0), Sense::hover());
-        ui.painter().rect_filled(r, CornerRadius::ZERO, LINE);
-        ui.add_space(6.0);
-        ui.label(RichText::new(&app.st.ai_answer).size(12.5).color(INK));
-        if ui.button("Copier").clicked() {
-            ctx.copy_text(app.st.ai_answer.clone());
-        }
-    }
-    let _ = (pos2(0.0, 0.0), StrokeKind::Inside);
-}
-
 pub fn panel_glyph(p: &egui::Painter, r: Rect, k: Panel, c: Color32) {
     use egui::Shape;
     let s = Stroke::new(1.6, c);
@@ -1398,17 +1332,5 @@ pub fn panel_glyph(p: &egui::Painter, r: Rect, k: Panel, c: Color32) {
             p.line_segment([at(0.5, 0.45), at(0.5, 0.78)], Stroke::new(2.0, c));
         }
         Panel::Measure => crate::glyph(p, r, Tool::Measure, c),
-        Panel::Ai => {
-            let star = |cx: f32, cy: f32, k: f32| {
-                let pts: Vec<egui::Pos2> = (0..8).map(|i| {
-                    let a = i as f32 / 8.0 * std::f32::consts::TAU;
-                    let rr = if i % 2 == 0 { k } else { k * 0.28 };
-                    at(cx + a.cos() * rr, cy + a.sin() * rr)
-                }).collect();
-                p.add(Shape::closed_line(pts, s));
-            };
-            star(0.42, 0.55, 0.42);
-            star(0.82, 0.18, 0.18);
-        }
     }
 }

@@ -41,8 +41,6 @@ pub enum Step {
     Pixel(Vec<Value>),
     /// lumen_develop settings
     Develop(Value),
-    /// Find these objects with the vision model and remove them.
-    Remove(String),
     /// OCR then remove every line of text.
     EraseText,
     /// Find watermarks (vision model, then OCR near the edges) and clean their strokes.
@@ -249,7 +247,7 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
     match kind {
         Kind::Image | Kind::Raw => {
             let text_words = ["texte", "ecriture", "mots", "lettres", "filigrane", "watermark", "inscription", "text"];
-            if has(&t, &["traduis", "translate", "modifie le texte", "change le texte", "remplace le texte", "corrige le texte", "edite le texte", "reecris"]) {
+            if has(&t, &["modifie le texte", "change le texte", "remplace le texte", "corrige le texte", "edite le texte", "reecris"]) {
                 return done("pixel", &["--texte-photo"], vec!["Ouvrir Pixel avec l'outil Texte de la photo et lire le texte".into()], steps);
             }
             if has(&t, &["lis ", "lire", "ocr", "extrais le texte", "recupere le texte", "copie le texte", "transcris", "scan"]) {
@@ -271,9 +269,7 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
                     steps.push(Step::Pixel(vec![json!({ "op": "remove_background" })]));
                     s.push("Rendre l'arrière-plan transparent (fond uni qui touche les bords)".into());
                 } else {
-                    s.push(format!("Repérer « {obj} » avec l'IA de vision locale"));
-                    s.push("Supprimer chaque élément et reconstruire le fond".into());
-                    steps.push(Step::Remove(obj));
+                    s.push(format!("Pour effacer « {obj} » : dans Pixel, entoure-le (lasso), puis Suppr, le fond est reconstruit"));
                 }
             }
             if has(&t, &["detoure", "fond transparent", "png transparent"]) && !steps.iter().any(|x| matches!(x, Step::Pixel(_))) {
@@ -308,7 +304,9 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
             let only_develop = steps.iter().all(|x| matches!(x, Step::Develop(_)));
             if steps.is_empty() {
                 let app = if kind == Kind::Raw || has(&t, &["developpe", "lumen", "catalogue"]) { "lumen" } else { "pixel" };
-                return done(app, &[], vec![format!("Ouvrir dans {}", studio_core::handoff::name(app))], steps);
+                let mut lines = vec![format!("Ouvrir dans {}", studio_core::handoff::name(app))];
+                lines.extend(s);
+                return done(app, &[], lines, steps);
             }
             done(if only_develop || kind == Kind::Raw { "lumen" } else { "pixel" }, &[], s, steps)
         }
@@ -383,7 +381,6 @@ pub fn plan(prompt: &str, file: Option<&Path>) -> Result<Plan, String> {
         }
         Kind::Pdf => {
             let panel = [
-                (&["resume", "explique", "question", "analyse", "points cles", "summar"][..], "ai", "Résumer et répondre avec l'assistant IA"),
                 (&["ocr", "scan", "texte", "lis ", "consultable", "searchable"][..], "", "Reconnaître le texte (OCR) et rendre le PDF consultable"),
                 (&["signe", "signature", "remplis", "formulaire"][..], "fillsign", "Remplir et signer"),
                 (&["fusionne", "combine", "assemble", "merge"][..], "combine", "Combiner avec d'autres fichiers"),
@@ -462,10 +459,10 @@ mod tests {
         assert_eq!(object_of(&norm("Retire les oiseaux et rends-la plus lumineuse")).as_deref(), Some("oiseaux"));
         assert_eq!(object_of(&norm("enlève le chat et le chien puis recadre")).as_deref(), Some("chat et le chien"));
         let a = p("retire les oiseaux", "x.jpg");
-        assert_eq!(a.steps, vec![Step::Remove("oiseaux".into())]);
+        assert!(a.steps.is_empty() && a.summary.iter().any(|l| l.contains("lasso")), "{:?}", a.summary);
         assert_eq!(a.app, "pixel");
         assert_eq!(p("efface le texte", "x.png").steps, vec![Step::EraseText]);
-        assert_eq!(p("traduis le texte en anglais", "x.png").args, vec!["--texte-photo"]);
+        assert_eq!(p("modifie le texte de l'affiche", "x.png").args, vec!["--texte-photo"]);
         assert_eq!(p("lis le texte de ce scan", "x.png").app, "folio");
         let b = p("mets-la en noir et blanc, plus lumineuse et recadre en carré", "x.jpg");
         assert!(matches!(&b.steps[0], Step::Develop(v) if v["mono"] == true && v["exposure"] == 0.7));
@@ -486,7 +483,7 @@ mod tests {
         assert_eq!(p("étends l'image en format story", "x.jpg").steps, vec![Step::Pixel(vec![json!({"op":"expand","aspect":0.5625})])]);
         assert_eq!(p("élargis la photo", "x.jpg").steps, vec![Step::Pixel(vec![json!({"op":"expand","margin":0.15})])]);
         assert!(matches!(&p("rends cette musique bouclable", "m.wav").steps[0], Step::Sound(o) if o[0]["op"] == "loop"));
-        assert_eq!(p("résume ce document", "d.pdf").args, vec!["--outil", "ai"]);
+        assert!(p("résume ce document", "d.pdf").args.is_empty());
         assert_eq!(p("fais l'ocr", "d.pdf").args, vec!["--ocr"]);
         assert_eq!(p("fais un logo pour Nova Café", "").steps, vec![Step::Logo("Nova Café".into())]);
         assert_eq!(p("logo \"Studio Lune\"", "").steps, vec![Step::Logo("Studio Lune".into())]);

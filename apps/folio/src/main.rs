@@ -131,7 +131,6 @@ impl Opened {
 pub enum Job {
     Progress(usize, usize),
     Ocr(Vec<(usize, String, Vec<(String, [f32; 4])>)>, bool),
-    Ai(String),
     Compare(Vec<f32>),
     Err(String),
 }
@@ -1174,11 +1173,6 @@ impl Folio {
                     self.progress = None;
                     self.jobs = None;
                     panels::ocr_done(self, ctx, pages, layer);
-                }
-                Job::Ai(s) => {
-                    self.progress = None;
-                    self.jobs = None;
-                    self.st.ai_answer = s;
                 }
                 Job::Compare(v) => {
                     self.progress = None;

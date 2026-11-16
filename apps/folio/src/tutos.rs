@@ -25,5 +25,4 @@ pub const FOLIO: &[Tuto] = &[
     t("Rechercher", "Ctrl+F", "Trouve un mot dans tout le document.", &["Les résultats indiquent la page et un extrait ; clique pour y aller.", "Un scan doit d'abord passer par l'OCR."]),
     t("Signets", "", "La table des matières du PDF.", &["Ajoute un signet pour la page courante, ou génère un signet par page.", "Les signets s'affichent dans tous les lecteurs PDF."]),
     t("Mesurer", "", "Distance réelle entre deux points.", &["Outil Mesure : glisse entre deux points, la distance s'affiche en millimètres."]),
-    t("Assistant IA", "", "Résume le document ou réponds à une question, en local.", &["Outils > Assistant IA : Résumer, ou pose une question sur le contenu.", "Utilise l'assistant local (Ollama) : le document ne quitte pas ton PC."]),
 ];
