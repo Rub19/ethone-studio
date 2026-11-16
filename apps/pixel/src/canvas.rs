@@ -639,6 +639,14 @@ impl Pixel {
                         });
                     }
                     Tool::RedEye if inside => self.fix_red_eye(x, y),
+                    Tool::PhotoText => match self.pt_hit(x, y) {
+                        Some(i) => self.pt.sel = Some(i),
+                        None if self.pt.lines.is_empty() => {
+                            let c = ui.ctx().clone();
+                            self.pt_detect(&c);
+                        }
+                        None => self.pt.sel = None,
+                    },
                     Tool::Count if inside => self.counts.push((x, y)),
                     Tool::PerspCrop => {
                         self.persp.push((x.clamp(0.0, w), y.clamp(0.0, h)));
@@ -764,6 +772,16 @@ impl Pixel {
                     for (vert, p) in &self.guides {
                         let (a, b) = if *vert { ((*p, -100000.0), (*p, 100000.0)) } else { ((-100000.0, *p), (100000.0, *p)) };
                         painter.line_segment([v.to_scr(a), v.to_scr(b)], gs);
+                    }
+                }
+                if self.pt.boxes && (self.tool == Tool::PhotoText || self.pt.sel.is_some()) {
+                    for (i, l) in self.pt.lines.iter().enumerate() {
+                        let r = egui::Rect::from_two_pos(v.to_scr((l.rect[0], l.rect[1])), v.to_scr((l.rect[0] + l.rect[2], l.rect[1] + l.rect[3]))).expand(2.0);
+                        let col = if self.pt.sel == Some(i) { Color32::from_rgb(10, 132, 255) } else if l.text != l.orig { Color32::from_rgb(255, 160, 40) } else { Color32::from_rgb(0, 200, 255) };
+                        if self.pt.sel == Some(i) {
+                            painter.rect_filled(r, egui::CornerRadius::same(2), col.gamma_multiply(0.18));
+                        }
+                        painter.rect_stroke(r, egui::CornerRadius::same(2), Stroke::new(if l.on { 1.5 } else { 0.8 }, col), egui::StrokeKind::Outside);
                     }
                 }
                 for (i, p) in self.counts.iter().enumerate() {

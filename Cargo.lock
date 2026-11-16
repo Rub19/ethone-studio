@@ -1235,8 +1235,8 @@ dependencies = [
  "serde",
  "serde_json",
  "studio-core",
+ "studio-ocr",
  "studio-ui",
- "windows",
  "winresource",
 ]
 
@@ -3047,6 +3047,7 @@ dependencies = [
  "rfd",
  "studio-core",
  "studio-fx",
+ "studio-ocr",
  "studio-ui",
  "winresource",
 ]
@@ -3967,6 +3968,14 @@ dependencies = [
  "image",
  "rayon",
  "serde",
+]
+
+[[package]]
+name = "studio-ocr"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "windows",
 ]
 
 [[package]]

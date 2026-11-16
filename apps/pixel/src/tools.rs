@@ -48,6 +48,7 @@ pub enum Tool {
     Sponge,
     TextH,
     TextV,
+    PhotoText,
     Rect,
     Ellipse,
     Polygon,
@@ -102,6 +103,7 @@ pub const TOOLS: &[(Tool, &str, Key, &str)] = &[
     (Tool::Sponge, "Éponge", Key::O, "O"),
     (Tool::TextH, "Texte horizontal", Key::T, "T"),
     (Tool::TextV, "Texte vertical", Key::T, "T"),
+    (Tool::PhotoText, "Texte de la photo (OCR)", Key::T, "T"),
     (Tool::Rect, "Rectangle", Key::U, "U"),
     (Tool::Ellipse, "Ellipse", Key::U, "U"),
     (Tool::Polygon, "Polygone", Key::U, "U"),
@@ -126,7 +128,7 @@ pub const GROUPS: [&[Tool]; 17] = [
     &[Tool::Gradient, Tool::Fill],
     &[Tool::Blur, Tool::Sharpen, Tool::Smudge],
     &[Tool::Dodge, Tool::Burn, Tool::Sponge],
-    &[Tool::TextH, Tool::TextV],
+    &[Tool::TextH, Tool::TextV, Tool::PhotoText],
     &[Tool::Rect, Tool::Ellipse, Tool::Polygon, Tool::Line, Tool::CustomShape],
     &[Tool::Hand, Tool::RotateView],
     &[Tool::Zoom],
@@ -476,6 +478,10 @@ impl Pixel {
                 blend_combo(ui, "shape-mode", &mut self.shape_mode, 120.0);
                 ui.checkbox(&mut self.shape_layer, "Nouveau calque");
             }
+            Tool::PhotoText => {
+                let ctx = ui.ctx().clone();
+                self.pt_options(ui, &ctx);
+            }
             Tool::TextH | Tool::TextV => {
                 combo(ui, "font", &mut self.text_font, &crate::shapes::FONTS.map(|f| f.0), 130.0);
                 ui.add(egui::DragValue::new(&mut self.text_size).range(4.0..=800.0).suffix(" px"));
@@ -634,7 +640,7 @@ pub fn tutorial_for(t: Tool) -> &'static str {
         Tool::Eraser | Tool::BgEraser | Tool::MagicEraser => "Gommes",
         Tool::Gradient | Tool::Fill => "Dégradés",
         t if is_shape(t) => "Formes",
-        Tool::TextH | Tool::TextV => "Texte",
+        Tool::TextH | Tool::TextV | Tool::PhotoText => "Texte",
         Tool::Picker | Tool::Sampler | Tool::Ruler | Tool::Note => "Pipette, règle et notes",
         Tool::Hand | Tool::RotateView | Tool::Zoom => "Navigation",
         Tool::Crop => "Recadrage",
@@ -885,6 +891,14 @@ pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
         }
         Tool::TextH => {
             p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(wd * 1.05), c);
+        }
+        Tool::PhotoText => {
+            for (x, y) in [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)] {
+                let (dx, dy) = (if x > 0.5 { -0.3 } else { 0.3 }, if y > 0.5 { -0.3 } else { 0.3 });
+                p.line_segment([at(x, y), at(x + dx, y)], Stroke::new(1.4, c));
+                p.line_segment([at(x, y), at(x, y + dy)], Stroke::new(1.4, c));
+            }
+            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(wd * 0.7), c);
         }
         Tool::TextV => {
             p.text(at(0.38, 0.5), Align2::CENTER_CENTER, "T", semibold(wd * 0.9), c);

@@ -1,7 +1,6 @@
 #![windows_subsystem = "windows"]
 
 mod engine;
-mod ocr;
 mod panels;
 mod render;
 mod tutos;

@@ -38,3 +38,20 @@ mod tests {
         assert!(p[1] > 150 && p[0] < 80, "{p:?}");
     }
 }
+
+#[cfg(all(test, windows))]
+mod ocr_tests {
+    #[test]
+    fn reads_rendered_text() {
+        let mut d = crate::engine::images_to_pdf(&[image::RgbaImage::from_pixel(600, 200, image::Rgba([255, 255, 255, 255]))], None).unwrap();
+        let s = crate::engine::Stamp { text: "Bonjour Folio 2026".into(), size: 36.0, color: [0, 0, 0], opacity: 1.0, angle: 0.0, bold: false, place: 0, under: false };
+        crate::engine::stamp_text(&mut d, &[0], &s, "", None).unwrap();
+        let bytes = crate::engine::save(&mut d).unwrap();
+        let pdf = super::open(std::sync::Arc::new(bytes)).unwrap();
+        let img = super::page(&pdf, 0, 2.0).unwrap();
+        let p = studio_ocr::recognize(&img, "").unwrap();
+        assert!(p.text.contains("Bonjour"), "{}", p.text);
+        assert!(p.words.iter().any(|w| w.text.contains("Folio") && w.rect[2] > 20.0));
+        assert_eq!(p.lines.len(), 1);
+    }
+}

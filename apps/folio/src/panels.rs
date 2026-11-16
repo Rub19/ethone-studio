@@ -1,4 +1,5 @@
-use crate::{Folio, Job, Opened, STAMPS, Tool, engine, ocr, render, toast};
+use crate::{Folio, Job, Opened, STAMPS, Tool, engine, render, toast};
+use studio_ocr as ocr;
 use eframe::egui::{self, Color32, CornerRadius, Rect, RichText, Sense, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, pos2, vec2};
 use std::collections::HashMap;
 use std::path::PathBuf;

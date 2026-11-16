@@ -7,6 +7,7 @@ mod extras;
 mod inpaint;
 mod newtools;
 mod panels;
+mod phototext;
 mod shapes;
 mod sheets;
 mod tools;
@@ -241,6 +242,8 @@ pub struct Pixel {
     last_removal: Option<Vec<bool>>,
     task_bar: bool,
     red_eye_dark: f32,
+    pt: phototext::State,
+    pt_auto: bool,
     persp: Vec<(f32, f32)>,
     counts: Vec<(f32, f32)>,
 }
@@ -412,6 +415,8 @@ impl Pixel {
             last_removal: None,
             task_bar: true,
             red_eye_dark: 0.6,
+            pt: phototext::State::default(),
+            pt_auto: false,
             persp: Vec::new(),
             counts: Vec::new(),
             sheet: None,
@@ -422,8 +427,13 @@ impl Pixel {
             last_filter: None,
             user_presets,
         };
-        if let Some(path) = std::env::args().nth(1) {
-            me.open_path(Path::new(&path));
+        let args: Vec<String> = std::env::args().skip(1).collect();
+        me.pt_auto = args.iter().any(|a| a == "--texte-photo");
+        if let Some(path) = args.iter().find(|a| !a.starts_with("--")) {
+            me.open_path(Path::new(path));
+        }
+        if me.pt_auto {
+            me.select_tool(tools::Tool::PhotoText);
         }
         me
     }
@@ -1270,7 +1280,12 @@ impl eframe::App for Pixel {
                 self.dock(root, ctx);
             }
             self.finish_fill();
+            self.pt_poll(ctx);
             self.sync_texture(ctx);
+            if self.pt_auto && !self.home && self.composite.dimensions() == (self.doc.width(), self.doc.height()) {
+                self.pt_auto = false;
+                self.pt_detect(ctx);
+            }
             self.sync_mask(ctx);
             self.canvas(root);
         }

@@ -44,6 +44,9 @@ impl Pixel {
         egui::Panel::right("dock").resizable(false).exact_size(296.0).frame(egui::Frame::new().fill(PANEL)).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                if self.tool == crate::tools::Tool::PhotoText || !self.pt.lines.is_empty() {
+                    pro::dock_panel(ui, "phototext", "Texte de la photo", |ui| self.pt_panel(ui, ctx));
+                }
                 pro::dock_panel(ui, "color", "Couleur", |ui| self.color_panel(ui));
                 pro::dock_panel(ui, "swatches", "Nuancier", |ui| self.swatch_panel(ui));
                 if brushy(self.tool) {
