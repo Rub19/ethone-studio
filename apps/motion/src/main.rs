@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 #[allow(dead_code)]
 #[path = "../../cut/src/media.rs"]
 mod media;
@@ -1463,6 +1464,10 @@ impl Motion {
         v.push(studio_ui::palette::Cmd::new("Dupliquer le calque", "Calque sélectionné · Ctrl+D", "duplicate-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
         for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")).enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        }
+        for (id, label, needs, _) in outils::TOOLS {
+            let cmd = studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Motion · nouvel outil · calque ou composition", format!("tool:{id}"));
+            v.push(if needs { cmd.enabled_if(has_layer, "Sélectionne d'abord un calque") } else { cmd });
         }
         v.extend(studio_ui::palette::send_cmds(&[("cut", "ajouter au montage"), ("pixel", "retoucher l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("lumen", "développer")]));
         v.extend(studio_ui::palette::effect_cmds());

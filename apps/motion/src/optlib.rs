@@ -98,6 +98,11 @@ pub fn apply_timed(l: &mut model::Layer, p: usize, w: f32, h: f32, dur: f32, eas
 
 impl Motion {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((_, label, _, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            let done = f(&mut self.comp, self.sel);
+            studio_ui::handoff::toast(ctx, if done { format!("{label} appliqué") } else { format!("{label} : rien à changer") }, done);
+            return true;
+        }
         if let Some(k) = id.strip_prefix("mi:").and_then(|k| k.parse::<usize>().ok()) {
             match icon_file(k) {
                 Ok(p) => self.add_image_path(&p),
