@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod outils;
 mod inspect;
 mod look;
 mod media;
@@ -1742,6 +1743,7 @@ impl Cut {
             studio_ui::palette::Cmd::new("Fondus de 1 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:1").confirm(),
 
         ];
+        v.extend(outils::TOOLS.iter().map(|(id, label, _, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Cut · nouvel outil · montage ou clip choisi", format!("tool:{id}"))));
         let clips = self.proj.clips.len();
         let has_gap = self.proj.clips.iter().any(|clip| clip.gap > 1e-6);
         let audio_selected = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_) | Sel::Music(_)));
@@ -1753,6 +1755,7 @@ impl Cut {
                     id if id.starts_with("trans-all:") => (clips > 1, "Il faut au moins deux clips dans la piste"),
                     "close-gaps" => (has_gap, "La piste n'a aucun blanc à fermer"),
                     "normalize-audio" => (audio_selected, "Sélectionne d'abord un clip ou une musique"),
+                    id if id.strip_prefix("tool:").is_some_and(|t| outils::TOOLS.iter().any(|x| x.0 == t && x.2)) => (matches!(self.sel, Some(Sel::Clip(_))), "Sélectionne d'abord un clip de la piste principale"),
                     _ => (clips > 0, "Ajoute d'abord un clip à la piste"),
                 };
                 command.enabled_if(ok, reason)

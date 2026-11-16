@@ -153,6 +153,15 @@ pub fn apply(c: &mut Clip, op: Op) {
 
 impl Cut {
     pub fn run_lib(&mut self, id: &str, ctx: &egui::Context) -> bool {
+        if let Some((_, label, _, f)) = id.strip_prefix("tool:").and_then(|t| crate::outils::TOOLS.iter().find(|x| x.0 == t)) {
+            let sel = match self.sel {
+                Some(Sel::Clip(i)) => Some(i),
+                _ => None,
+            };
+            let done = f(&mut self.proj, sel);
+            studio_ui::handoff::toast(ctx, if done { format!("{label} appliqué") } else { format!("{label} : rien à changer") }, done);
+            return true;
+        }
         if id == "ct-prproj" {
             let Some(p) = rfd::FileDialog::new().add_filter("Projet Premiere Pro", &["prproj"]).pick_file() else { return true };
             match std::fs::read(&p).map_err(|e| e.to_string()).and_then(|b| studio_fx::archive::premiere_media(&b)) {
