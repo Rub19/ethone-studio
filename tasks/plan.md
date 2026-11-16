@@ -24,9 +24,9 @@
 - [x] Task 4: Intégrer Cut, Lumen et Page.
 
 ### Checkpoint: Complete
-- [ ] 3 000 identifiants uniques et exécutables.
-- [ ] Tests et compilation du workspace.
-- [ ] Revue finale et commit local.
+- [x] 3 000 identifiants uniques et exécutables.
+- [x] Tests et compilation du workspace.
+- [x] Revue finale et commit local.
 
 ## Risks and Mitigations
 

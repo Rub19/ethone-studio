@@ -26,6 +26,6 @@
 
 ## Checkpoint final
 
-- [ ] `cargo test --workspace` réussit.
-- [ ] `cargo check --workspace` réussit.
-- [ ] Diff revu, sans secret ni changement hors périmètre.
+- [x] `cargo test --workspace` réussit.
+- [x] `cargo check --workspace` réussit.
+- [x] Diff revu, sans secret ni changement hors périmètre.

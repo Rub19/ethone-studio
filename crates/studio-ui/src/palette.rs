@@ -122,6 +122,10 @@ fn command_icon(id: &str) -> &'static str {
     }
 }
 
+fn include_effect_variants(query: &str) -> bool {
+    !query.trim().is_empty()
+}
+
 pub struct Palette {
     pub open: bool,
     query: String,
@@ -163,7 +167,8 @@ impl Palette {
         }
         let builtin = self.builtin(help);
         let words: Vec<String> = self.query.to_lowercase().split_whitespace().map(str::to_string).collect();
-        let hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(effect_variant_cmds()).filter(|c| {
+        let variants = if include_effect_variants(&self.query) { effect_variant_cmds() } else { &[] };
+        let hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(variants).filter(|c| {
             let hay = format!("{} {}", c.label, c.hint).to_lowercase();
             words.iter().all(|w| hay.contains(w.as_str()))
         }).collect();
@@ -255,5 +260,12 @@ mod tests {
         assert_eq!(command_icon("help:Découvrir"), "?");
         assert_eq!(command_icon("ui-zoom:1.25"), "◐");
         assert_eq!(command_icon("open"), "◆");
+    }
+
+    #[test]
+    fn creative_options_are_scanned_only_during_a_search() {
+        assert!(!include_effect_variants(""));
+        assert!(!include_effect_variants("   "));
+        assert!(include_effect_variants("cinéma"));
     }
 }
