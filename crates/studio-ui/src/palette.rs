@@ -100,6 +100,109 @@ pub fn apply_prefs(ctx: &Context, p: Prefs) {
 
 const PREF_TABS: [&str; 4] = ["Interface", "Outils", "Performances", "Général"];
 
+/// One setting of an app's own preference sections.
+pub enum PrefKind {
+    Toggle,
+    Choice(&'static [&'static str]),
+    Number { min: f64, max: f64, suffix: &'static str },
+}
+
+pub struct PrefItem {
+    pub key: &'static str,
+    pub label: &'static str,
+    pub kind: PrefKind,
+    pub default: f64,
+}
+
+pub struct PrefSection {
+    pub title: &'static str,
+    pub items: &'static [PrefItem],
+}
+
+pub const fn toggle(key: &'static str, label: &'static str, on: bool) -> PrefItem {
+    PrefItem { key, label, kind: PrefKind::Toggle, default: if on { 1.0 } else { 0.0 } }
+}
+
+pub const fn choice(key: &'static str, label: &'static str, options: &'static [&'static str], default: usize) -> PrefItem {
+    PrefItem { key, label, kind: PrefKind::Choice(options), default: default as f64 }
+}
+
+pub const fn number(key: &'static str, label: &'static str, min: f64, max: f64, suffix: &'static str, default: f64) -> PrefItem {
+    PrefItem { key, label, kind: PrefKind::Number { min, max, suffix }, default }
+}
+
+/// An app's own settings, saved in its data folder; values are read with `Palette::pref`.
+#[derive(Default)]
+struct AppPrefs {
+    id: &'static str,
+    sections: &'static [PrefSection],
+    values: std::collections::BTreeMap<String, f64>,
+    changed: bool,
+}
+
+impl AppPrefs {
+    fn path(id: &str) -> std::path::PathBuf {
+        studio_core::data_dir().join(id).join("preferences.json")
+    }
+
+    fn get(&self, key: &str) -> f64 {
+        self.values.get(key).copied().or_else(|| self.sections.iter().flat_map(|s| s.items).find(|i| i.key == key).map(|i| i.default)).unwrap_or(0.0)
+    }
+
+    fn save(&self) {
+        let p = Self::path(self.id);
+        if let Some(dir) = p.parent() {
+            let _ = std::fs::create_dir_all(dir);
+        }
+        if let Ok(t) = serde_json::to_string_pretty(&self.values) {
+            let _ = std::fs::write(p, t);
+        }
+    }
+
+    fn ui(&mut self, ui: &mut egui::Ui, section: usize) {
+        let Some(sec) = self.sections.get(section) else { return };
+        pref_title(ui, sec.title);
+        for item in sec.items {
+            let mut v = self.get(item.key);
+            let before = v;
+            match item.kind {
+                PrefKind::Toggle => {
+                    let mut on = v != 0.0;
+                    ui.checkbox(&mut on, item.label);
+                    v = if on { 1.0 } else { 0.0 };
+                }
+                PrefKind::Choice(options) => {
+                    ui.horizontal_wrapped(|ui| {
+                        ui.label(item.label);
+                        for (k, o) in options.iter().enumerate() {
+                            if ui.selectable_label(v as usize == k, *o).clicked() {
+                                v = k as f64;
+                            }
+                        }
+                    });
+                }
+                PrefKind::Number { min, max, suffix } => {
+                    ui.add(egui::Slider::new(&mut v, min..=max).text(item.label).suffix(suffix).max_decimals(if max - min > 20.0 { 0 } else { 1 }));
+                }
+            }
+            ui.add_space(4.0);
+            if v != before {
+                self.values.insert(item.key.to_string(), v);
+                self.changed = true;
+                self.save();
+            }
+        }
+        ui.add_space(8.0);
+        if ui.button("Valeurs par défaut de cette section").clicked() {
+            for item in sec.items {
+                self.values.remove(item.key);
+            }
+            self.changed = true;
+            self.save();
+        }
+    }
+}
+
 fn pref_title(ui: &mut egui::Ui, t: &str) {
     ui.label(RichText::new(t).size(17.0).strong().color(INK_STRONG));
     ui.add_space(10.0);
@@ -330,13 +433,38 @@ pub struct Palette {
     library: Option<fn() -> &'static Library>,
     pub prefs_open: bool,
     prefs_tab: usize,
+    app_prefs: AppPrefs,
 }
 
 impl Palette {
     pub fn new(ctx: &Context) -> Self {
         let prefs = load_prefs();
         apply_prefs(ctx, prefs);
-        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None, library: None, prefs_open: false, prefs_tab: 0 }
+        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new(), confirming: None, library: None, prefs_open: false, prefs_tab: 0, app_prefs: AppPrefs::default() }
+    }
+
+    /// Declares the app's own preference sections (shown after Interface, Outils, Performances) and loads their values.
+    pub fn declare_prefs(&mut self, id: &'static str, sections: &'static [PrefSection]) {
+        let values = std::fs::read(AppPrefs::path(id)).ok().and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or_default();
+        self.app_prefs = AppPrefs { id, sections, values, changed: true };
+    }
+
+    pub fn prefs_declared(&self) -> bool {
+        !self.app_prefs.id.is_empty()
+    }
+
+    /// Current value of an app preference (its default until the user changes it).
+    pub fn pref(&self, key: &str) -> f64 {
+        self.app_prefs.get(key)
+    }
+
+    pub fn pref_on(&self, key: &str) -> bool {
+        self.pref(key) != 0.0
+    }
+
+    /// True once after the user changed one of the app's preferences.
+    pub fn take_prefs_changed(&mut self) -> bool {
+        std::mem::take(&mut self.app_prefs.changed)
     }
 
     /// Gives this app's option library to the palette; it is built on the first search only.
@@ -369,7 +497,8 @@ impl Palette {
             ui.horizontal_top(|ui| {
                 ui.vertical(|ui| {
                     ui.set_width(150.0);
-                    for (k, name) in PREF_TABS.iter().enumerate() {
+                    let names: Vec<&str> = PREF_TABS[..3].iter().copied().chain(self.app_prefs.sections.iter().map(|s| s.title)).chain([PREF_TABS[3]]).collect();
+                    for (k, name) in names.iter().enumerate() {
                         if ui.selectable_label(self.prefs_tab == k, RichText::new(*name).size(13.5)).clicked() {
                             self.prefs_tab = k;
                         }
@@ -379,8 +508,13 @@ impl Palette {
                 ui.vertical(|ui| {
                     ui.set_width(430.0);
                     ui.set_min_height(300.0);
+                    let extra = self.app_prefs.sections.len();
+                    if (3..3 + extra).contains(&self.prefs_tab) {
+                        self.app_prefs.ui(ui, self.prefs_tab - 3);
+                        return;
+                    }
                     let p = &mut self.prefs;
-                    match self.prefs_tab {
+                    match self.prefs_tab.min(3 + extra) {
                         0 => {
                             pref_title(ui, "Interface");
                             ui.label("Taille de l'interface");
@@ -816,5 +950,33 @@ mod library_run_tests {
             out.textures_delta.clear();
         }
         assert_eq!(got.as_deref(), Some("zz:1"));
+    }
+}
+
+#[cfg(test)]
+mod prefs_window_tests {
+    use super::*;
+
+    const SECTIONS: &[PrefSection] = &[
+        PrefSection { title: "Curseurs", items: &[choice("mode", "Curseur", &["A", "B"], 1), toggle("grid", "Grille", true)] },
+        PrefSection { title: "Grille", items: &[number("step", "Pas", 2.0, 100.0, " px", 32.0)] },
+    ];
+
+    /// Every tab of the Preferences window (common and app sections) renders without panicking.
+    #[test]
+    fn every_tab_renders() {
+        let ctx = Context::default();
+        let mut pal = Palette::new(&ctx);
+        pal.declare_prefs("essai-prefs", SECTIONS);
+        assert!(pal.take_prefs_changed() && !pal.take_prefs_changed());
+        assert_eq!((pal.pref("mode"), pal.pref_on("grid"), pal.pref("step")), (1.0, true, 32.0));
+        pal.prefs_open = true;
+        for tab in 0..6 {
+            pal.prefs_tab = tab;
+            for _ in 0..2 {
+                let mut out = ctx.run_ui(egui::RawInput::default(), |ui| pal.preferences(ui.ctx()));
+                out.textures_delta.clear();
+            }
+        }
     }
 }

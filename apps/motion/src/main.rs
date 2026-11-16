@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod reglages;
 mod outils;
 #[allow(dead_code)]
 #[path = "../../cut/src/media.rs"]
@@ -1584,6 +1585,12 @@ impl eframe::App for Motion {
         let before = self.comp.clone();
         self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
+        if !self.palette.prefs_declared() {
+            self.palette.declare_prefs("motion", reglages::PREFS);
+        }
+        if self.palette.take_prefs_changed() {
+            self.apply_prefs();
+        }
         if self.palette.open {
             let cmds = self.commands();
             if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {

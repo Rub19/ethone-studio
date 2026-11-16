@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod reglages;
 mod outils;
 mod develop;
 mod devui;
@@ -1406,6 +1407,12 @@ impl eframe::App for Lumen {
         }
         self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
+        if !self.palette.prefs_declared() {
+            self.palette.declare_prefs("lumen", reglages::PREFS);
+        }
+        if self.palette.take_prefs_changed() {
+            self.apply_prefs();
+        }
         if self.palette.open {
             let cmds = self.commands();
             if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
