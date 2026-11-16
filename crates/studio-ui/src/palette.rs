@@ -126,18 +126,77 @@ fn include_effect_variants(query: &str) -> bool {
     !query.trim().is_empty()
 }
 
+fn search_key(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for character in text.to_lowercase().chars() {
+        match character {
+            'à' | 'á' | 'â' | 'ä' | 'ã' | 'å' => out.push('a'),
+            'ç' => out.push('c'),
+            'è' | 'é' | 'ê' | 'ë' => out.push('e'),
+            'ì' | 'í' | 'î' | 'ï' => out.push('i'),
+            'ñ' => out.push('n'),
+            'ò' | 'ó' | 'ô' | 'ö' | 'õ' => out.push('o'),
+            'ù' | 'ú' | 'û' | 'ü' => out.push('u'),
+            'ý' | 'ÿ' => out.push('y'),
+            'œ' => out.push_str("oe"),
+            'æ' => out.push_str("ae"),
+            other => out.push(other),
+        }
+    }
+    out
+}
+
+fn query_words(query: &str) -> Vec<String> {
+    search_key(query).split_whitespace().map(str::to_string).collect()
+}
+
+fn matches_words(command: &Cmd, words: &[String]) -> bool {
+    let haystack = search_key(&format!("{} {}", command.label, command.hint));
+    words.iter().all(|word| haystack.contains(word))
+}
+
+fn remember_recent(recent: &mut Vec<String>, id: &str) {
+    if id.is_empty() {
+        return;
+    }
+    recent.retain(|item| item != id);
+    recent.insert(0, id.to_string());
+    recent.truncate(8);
+}
+
+fn rank_recent(commands: &mut Vec<&Cmd>, recent: &[String]) {
+    commands.sort_by_key(|command| recent.iter().position(|id| id == &command.id).unwrap_or(usize::MAX));
+}
+
+pub fn validate_commands(commands: &[Cmd]) -> Result<(), String> {
+    let mut ids = std::collections::HashSet::new();
+    for command in commands {
+        if command.label.trim().is_empty() {
+            return Err(format!("La commande « {} » n'a pas de libellé", command.id));
+        }
+        if command.id.trim().is_empty() {
+            return Err(format!("La commande « {} » n'a pas d'identifiant", command.label));
+        }
+        if !ids.insert(command.id.as_str()) {
+            return Err(format!("Identifiant de commande dupliqué : {}", command.id));
+        }
+    }
+    Ok(())
+}
+
 pub struct Palette {
     pub open: bool,
     query: String,
     sel: usize,
     prefs: Prefs,
+    recent: Vec<String>,
 }
 
 impl Palette {
     pub fn new(ctx: &Context) -> Self {
         let prefs = load_prefs();
         apply_prefs(ctx, prefs);
-        Palette { open: false, query: String::new(), sel: 0, prefs }
+        Palette { open: false, query: String::new(), sel: 0, prefs, recent: Vec::new() }
     }
 
     pub fn keys(&mut self, ctx: &Context) {
@@ -165,13 +224,17 @@ impl Palette {
         if !self.open {
             return None;
         }
+        #[cfg(debug_assertions)]
+        if let Err(error) = validate_commands(&app) {
+            panic!("Registre Ctrl+K invalide : {error}");
+        }
         let builtin = self.builtin(help);
-        let words: Vec<String> = self.query.to_lowercase().split_whitespace().map(str::to_string).collect();
+        let words = query_words(&self.query);
         let variants = if include_effect_variants(&self.query) { effect_variant_cmds() } else { &[] };
-        let hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(variants).filter(|c| {
-            let hay = format!("{} {}", c.label, c.hint).to_lowercase();
-            words.iter().all(|w| hay.contains(w.as_str()))
-        }).collect();
+        let mut hits: Vec<&Cmd> = app.iter().chain(&builtin).chain(variants).filter(|command| matches_words(command, &words)).collect();
+        if self.query.trim().is_empty() {
+            rank_recent(&mut hits, &self.recent);
+        }
         let visible = hits.len().min(200);
         self.sel = self.sel.min(visible.saturating_sub(1));
         let (up, down, enter, esc) = ctx.input(|i| (i.key_pressed(Key::ArrowUp), i.key_pressed(Key::ArrowDown), i.key_pressed(Key::Enter), i.key_pressed(Key::Escape)));
@@ -192,7 +255,8 @@ impl Palette {
                     self.sel = 0;
                 }
                 ui.add_space(6.0);
-                ui.label(RichText::new(format!("{} résultat(s) · ↑ ↓ pour choisir · Entrée pour lancer · Échap pour fermer", hits.len())).size(11.0).color(FAINT));
+                let recent = if self.query.trim().is_empty() && !self.recent.is_empty() { " · récentes en premier" } else { "" };
+                ui.label(RichText::new(format!("{} résultat(s){recent} · ↑ ↓ pour choisir · Entrée pour lancer · Échap pour fermer", hits.len())).size(11.0).color(FAINT));
                 egui::ScrollArea::vertical().max_height(380.0).show(ui, |ui| {
                     for (k, c) in hits.iter().enumerate().take(200) {
                         let on = k == self.sel;
@@ -213,6 +277,7 @@ impl Palette {
         }
         let id = chosen?;
         self.open = false;
+        remember_recent(&mut self.recent, &id);
         if let Some(t) = id.strip_prefix("help:") {
             if t.is_empty() { help.toggle() } else { help.learn(t) }
             return None;
@@ -267,5 +332,40 @@ mod tests {
         assert!(!include_effect_variants(""));
         assert!(!include_effect_variants("   "));
         assert!(include_effect_variants("cinéma"));
+    }
+
+    #[test]
+    fn recent_commands_are_unique_newest_first_and_bounded() {
+        let mut recent = Vec::new();
+        for id in 0..10 {
+            remember_recent(&mut recent, &format!("cmd-{id}"));
+        }
+        remember_recent(&mut recent, "cmd-4");
+        assert_eq!(recent.first().map(String::as_str), Some("cmd-4"));
+        assert_eq!(recent.len(), 8);
+        assert_eq!(recent.iter().collect::<HashSet<_>>().len(), recent.len());
+    }
+
+    #[test]
+    fn command_search_ignores_case_and_accents() {
+        let command = Cmd::new("Synchroniser les réglages", "Photos choisies", "sync");
+        assert!(matches_words(&command, &query_words("REGLAGES choisies")));
+        assert!(!matches_words(&command, &query_words("audio")));
+    }
+
+    #[test]
+    fn recent_commands_are_ranked_before_the_default_order() {
+        let commands = [Cmd::new("Ouvrir", "", "open"), Cmd::new("Exporter", "", "export"), Cmd::new("Aplatir", "", "flatten")];
+        let mut hits: Vec<&Cmd> = commands.iter().collect();
+        rank_recent(&mut hits, &["flatten".into(), "open".into()]);
+        assert_eq!(hits.iter().map(|command| command.id.as_str()).collect::<Vec<_>>(), ["flatten", "open", "export"]);
+    }
+
+    #[test]
+    fn command_registry_rejects_empty_and_duplicate_entries() {
+        assert!(validate_commands(&[Cmd::new("Ouvrir", "", "open"), Cmd::new("Exporter", "", "export")]).is_ok());
+        assert!(validate_commands(&[Cmd::new("", "", "open")]).is_err());
+        assert!(validate_commands(&[Cmd::new("Ouvrir", "", "")]).is_err());
+        assert!(validate_commands(&[Cmd::new("A", "", "same"), Cmd::new("B", "", "same")]).is_err());
     }
 }

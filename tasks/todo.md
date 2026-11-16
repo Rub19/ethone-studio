@@ -52,3 +52,11 @@
 - [x] Slice B : suggestions du Launcher enrichies.
 - [x] Checkpoint final : workspace compilé et testé.
 - [x] Checkpoint final : diff revu et commit local créé.
+
+## Vague 4 — palette commune
+
+- [x] Slice A : commandes récentes, recherche sans accents et validation des registres.
+- [x] Slice A : tests ciblés et commit local.
+- [ ] Slice B : icônes de familles de commandes.
+- [ ] Slice B : feuille de route actualisée.
+- [ ] Checkpoint final : workspace compilé, testé et revu.

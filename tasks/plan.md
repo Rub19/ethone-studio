@@ -78,3 +78,20 @@ Aucune.
 - [x] Mettre à jour les suggestions audio du Launcher.
 - [x] Créer une feuille de route récapitulative dans `ROADMAP.md`.
 - [x] Tests complets, revue qualité et commit local.
+
+## Wave 4: palette commune plus intelligente
+
+### Slice A — recherche et fiabilité
+
+- [x] Afficher en premier les commandes récemment utilisées quand la recherche est vide.
+- [x] Dédupliquer l'historique récent et le limiter à huit commandes.
+- [x] Rendre la recherche insensible aux accents et à la casse.
+- [x] Valider les identifiants, libellés et doublons de chaque registre de commandes.
+- [x] Couvrir le moteur par des tests unitaires et créer un commit local.
+
+### Slice B — repères visuels et finalisation
+
+- [ ] Ajouter des icônes distinctes pour fichiers, sélection, disposition, lots et audio.
+- [ ] Mettre à jour la feuille de route avec la vague 4.
+- [ ] Compiler et tester tout le workspace.
+- [ ] Effectuer la revue qualité et créer les commits locaux.
