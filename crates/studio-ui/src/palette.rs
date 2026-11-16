@@ -117,6 +117,18 @@ fn command_icon(id: &str) -> &'static str {
         "?"
     } else if id.starts_with("ui-") {
         "◐"
+    } else if matches!(id, "open" | "save" | "saveas" | "timelapse" | "icon-pack") || id.starts_with("export") || id.starts_with("sprites:") {
+        "▣"
+    } else if matches!(id, "duplicate-layer" | "merge-visible" | "flatten-image" | "split-layer" | "fit-layer") {
+        "▤"
+    } else if id.starts_with("select") || matches!(id, "invert" | "deselect" | "duplicate" | "group" | "ungroup") {
+        "◎"
+    } else if id.starts_with("batch") || id.starts_with("blurry:") {
+        "◫"
+    } else if id.starts_with("normalize") || id.starts_with("fades-all:") || id.starts_with("loop:") || id.starts_with("rack:") || id.starts_with("apply:") || matches!(id, "play" | "marker" | "silences" | "silences-short" | "trim-edges" | "micro-fades" | "split-files") {
+        "♫"
+    } else if id.starts_with("rotate") || id.starts_with("flip") || id.starts_with("center") || id.starts_with("distribute") || id.starts_with("grid:") || id.starts_with("format:") || id.starts_with("cascade:") {
+        "⌖"
     } else {
         "◆"
     }
@@ -324,7 +336,14 @@ mod tests {
         assert_eq!(command_icon("send:pixel"), "↗");
         assert_eq!(command_icon("help:Découvrir"), "?");
         assert_eq!(command_icon("ui-zoom:1.25"), "◐");
-        assert_eq!(command_icon("open"), "◆");
+        assert_eq!(command_icon("export-page"), "▣");
+        assert_eq!(command_icon("select-inverse"), "◎");
+        assert_eq!(command_icon("batch-sync"), "◫");
+        assert_eq!(command_icon("normalize-lufs"), "♫");
+        assert_eq!(command_icon("rotate-right"), "⌖");
+        assert_eq!(command_icon("flatten-image"), "▤");
+        assert_eq!(command_icon("open"), "▣");
+        assert_eq!(command_icon("remove-bg"), "◆");
     }
 
     #[test]
