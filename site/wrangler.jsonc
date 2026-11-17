@@ -1,0 +1,6 @@
+{
+  "name": "ethone-studio-site",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "public", "not_found_handling": "none" },
+  "routes": [{ "pattern": "studio.ethone.dev", "custom_domain": true }]
+}
