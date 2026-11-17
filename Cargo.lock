@@ -3061,6 +3061,8 @@ dependencies = [
  "image",
  "rayon",
  "rfd",
+ "serde",
+ "serde_json",
  "studio-auto",
  "studio-core",
  "studio-fx",

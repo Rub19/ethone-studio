@@ -11,6 +11,7 @@ mod extras;
 mod inpaint;
 mod newtools;
 mod panels;
+mod project;
 mod phototext;
 mod shapes;
 mod sheets;
@@ -117,6 +118,9 @@ pub struct Pixel {
     doc: Document,
     home: bool,
     recents: Vec<PathBuf>,
+    file: Option<PathBuf>,
+    autosave: studio_core::recovery::Autosave,
+    recovered: bool,
     composite: RgbaImage,
     tex: Option<TextureHandle>,
     tex_filter: TextureOptions,
@@ -300,6 +304,9 @@ impl Pixel {
             doc: Document::new(1920, 1080, Some([255, 255, 255, 255])),
             home: true,
             recents,
+            file: None,
+            autosave: Default::default(),
+            recovered: false,
             composite: RgbaImage::new(1, 1),
             tex: None,
             tex_filter: TextureOptions::LINEAR,
@@ -441,6 +448,12 @@ impl Pixel {
         me.pt_auto = args.iter().any(|a| a == "--texte-photo");
         if let Some(path) = args.iter().find(|a| !a.starts_with("--")) {
             me.open_path(Path::new(path));
+        } else if let Some(rp) = studio_core::recovery::pending("pixel", "epix") {
+            me.open_path(&rp);
+            me.recents.retain(|p| p != &rp);
+            me.file = None;
+            me.recovered = true;
+            studio_ui::handoff::toast(&cc.egui_ctx, "Document récupéré après une fermeture inattendue : enregistre-le pour le garder".into(), true);
         }
         if me.pt_auto {
             me.select_tool(tools::Tool::PhotoText);
@@ -451,6 +464,8 @@ impl Pixel {
     fn set_doc(&mut self, doc: Document) {
         self.history_src = Some(doc.layers[0].img.clone());
         self.doc = doc;
+        self.file = None;
+        self.recovered = false;
         self.doc.undo_limit = studio_ui::palette::undo_levels(self.doc.undo_limit);
         self.tex = None;
         self.fit_pending = true;
@@ -485,6 +500,17 @@ impl Pixel {
     }
 
     fn open_path(&mut self, path: &Path) {
+        if path.extension().is_some_and(|e| e.eq_ignore_ascii_case("epix")) {
+            match std::fs::read(path).map_err(|e| e.to_string()).and_then(|b| project::decode(&b)) {
+                Ok(doc) => {
+                    self.set_doc(doc);
+                    self.file = Some(path.to_path_buf());
+                    self.remember(path);
+                }
+                Err(e) => self.error = Some(format!("Impossible d'ouvrir le projet : {e}")),
+            }
+            return;
+        }
         if studio_fx::psd::is_psd(path) {
             match std::fs::read(path).map_err(|e| e.to_string()).and_then(|b| studio_fx::psd::layers(&b)) {
                 Ok((_, _, layers)) => {
@@ -513,6 +539,31 @@ impl Pixel {
                 self.remember(path);
             }
             Err(e) => self.error = Some(format!("Impossible d'ouvrir l'image : {e}")),
+        }
+    }
+
+    /// Saves the layered project (.epix); `as_new` or an untitled document asks for a location.
+    fn save(&mut self, as_new: bool) {
+        let path = match (&self.file, as_new) {
+            (Some(p), false) => p.clone(),
+            _ => match rfd::FileDialog::new().add_filter("Projet Pixel", &["epix"]).set_file_name(format!("{}.epix", self.doc.name)).save_file() {
+                Some(p) => p,
+                None => return,
+            },
+        };
+        let tmp = path.with_extension("epix.tmp");
+        match project::encode(&self.doc).and_then(|b| std::fs::write(&tmp, b).map_err(|e| e.to_string())).and_then(|_| std::fs::rename(&tmp, &path).map_err(|e| e.to_string())) {
+            Ok(()) => {
+                self.doc.modified = false;
+                self.recovered = false;
+                studio_core::recovery::clear("pixel");
+                if let Some(stem) = path.file_stem() {
+                    self.doc.name = stem.to_string_lossy().into_owned();
+                }
+                self.remember(&path);
+                self.file = Some(path);
+            }
+            Err(e) => self.error = Some(format!("Enregistrement impossible : {e}")),
         }
     }
 
@@ -630,7 +681,6 @@ impl Pixel {
         })();
         match result {
             Ok(()) => {
-                self.doc.modified = false;
                 self.remember(&path);
             }
             Err(e) => self.error = Some(format!("Export impossible : {e}")),
@@ -937,8 +987,13 @@ impl Pixel {
         if sc(csa, Key::S) {
             self.quick_export();
         }
-        if sc(cs, Key::S) || sc(M::COMMAND, Key::E) {
+        if sc(M::COMMAND, Key::E) {
             self.export_sheet();
+        }
+        if sc(cs, Key::S) {
+            self.save(true);
+        } else if sc(M::COMMAND, Key::S) {
+            self.save(false);
         }
         if sc(M::COMMAND, Key::A) {
             self.doc.set_selection(Some(self.doc.full()), None);
@@ -1330,7 +1385,20 @@ impl Pixel {
 }
 
 impl eframe::App for Pixel {
+    fn on_exit(&mut self) {
+        studio_core::recovery::clear("pixel");
+    }
+
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
+        let dirty = !self.home && (self.recovered || self.doc.modified);
+        if dirty {
+            root.ctx().request_repaint_after(std::time::Duration::from_secs(61));
+        }
+        if self.autosave.due(root.ctx().input(|i| i.time), dirty)
+            && let Ok(b) = project::encode(&self.doc)
+        {
+            studio_core::recovery::Autosave::write("pixel", "epix", &b);
+        }
         let ctx = &root.ctx().clone();
         studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
@@ -1478,6 +1546,13 @@ impl Pixel {
             let home = self.home;
             if self.mie(ui, !home, "Importer comme calque…", "") {
                 self.import_layer();
+            }
+            ui.separator();
+            if self.mie(ui, !home, "Enregistrer", "Ctrl+S") {
+                self.save(false);
+            }
+            if self.mie(ui, !home, "Enregistrer sous…", "Ctrl+Maj+S") {
+                self.save(true);
             }
             ui.separator();
             if self.mie(ui, !home, "Exporter…", "Ctrl+E") {
@@ -2140,7 +2215,7 @@ pub fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
 }
 
 fn image_dialog() -> rfd::FileDialog {
-    rfd::FileDialog::new().add_filter("Images", &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "ico", "psd"])
+    rfd::FileDialog::new().add_filter("Images et projets", &["epix", "png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "ico", "psd"]).add_filter("Projet Pixel", &["epix"])
 }
 
 fn main() -> eframe::Result {

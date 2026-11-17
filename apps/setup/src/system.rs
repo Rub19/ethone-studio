@@ -123,7 +123,7 @@ pub fn remove_self_later() {
 
 /// (app, its own project types opened by default, other types offered in « Ouvrir avec » only).
 const TYPES: [(&str, &[&str], &[&str]); 8] = [
-    ("pixel", &[], &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "psd"]),
+    ("pixel", &["epix"], &["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff", "gif", "psd"]),
     ("lumen", &[], &["jpg", "jpeg", "png", "tif", "tiff", "psd", "dng", "cr2", "cr3", "nef", "arw", "raf", "orf", "rw2"]),
     ("vector", &["evec"], &["svg"]),
     ("cut", &["ecut"], &["mp4", "mov", "mkv", "webm", "avi", "prproj"]),
