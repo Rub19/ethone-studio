@@ -492,6 +492,41 @@ function cookieNotice() {
   dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
 }
 
+/* ---------- Theme: follows the system until the visitor picks one ---------- */
+
+function themeToggle() {
+  const KEY = 'ethone-theme';
+  const btn = document.getElementById('theme-toggle');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const systemLight = matchMedia('(prefers-color-scheme: light)');
+  const ICONS = {
+    auto: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path class="half" d="M12 4a8 8 0 0 1 0 16z"/></svg>',
+    dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+    light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  };
+  const NAMES = { auto: 'automatique', dark: 'sombre', light: 'clair' };
+  const read = () => { try { return localStorage.getItem(KEY) || 'auto'; } catch { return 'auto'; } };
+  const apply = (mode) => {
+    if (mode === 'auto') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = mode;
+    const light = mode === 'light' || (mode === 'auto' && systemLight.matches);
+    meta.content = light ? '#f3f0ea' : '#0e0e0e';
+    btn.innerHTML = ICONS[mode];
+    const label = `Thème : ${NAMES[mode]}`;
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  };
+  let mode = read();
+  apply(mode);
+  btn.addEventListener('click', () => {
+    mode = { auto: 'dark', dark: 'light', light: 'auto' }[mode];
+    try { mode === 'auto' ? localStorage.removeItem(KEY) : localStorage.setItem(KEY, mode); } catch { /* not saved in private mode */ }
+    apply(mode);
+  });
+  systemLight.addEventListener('change', () => { if (mode === 'auto') apply('auto'); });
+}
+
+themeToggle();
 buildStory();
 scenes();
 cookieNotice();

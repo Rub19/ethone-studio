@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#0e0e0e">
   <link rel="canonical" href="https://studio.ethone.dev/confidentialite">
   <link rel="icon" href="/icons/studio.svg" type="image/svg+xml">
+  <script>try { const t = localStorage.getItem("ethone-theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
   <link rel="preload" href="/fonts/bricolage-grotesque-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/fonts/fonts.css">
   <link rel="stylesheet" href="/styles.css">
@@ -15,14 +16,14 @@
     .legal { max-width: 760px; margin: 0 auto; padding: 140px var(--gutter) 100px; }
     .legal h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); }
     .legal h1 i { color: var(--signal); }
-    .legal .updated { margin: 16px 0 48px; color: var(--on-dark-muted); }
+    .legal .updated { margin: 16px 0 48px; color: var(--muted); }
     .legal h2 { font-size: 1.6rem; margin: 44px 0 12px; }
-    .legal p, .legal li { color: var(--on-dark-muted); line-height: 1.65; }
-    .legal strong { color: var(--on-dark); font-weight: 650; }
+    .legal p, .legal li { color: var(--muted); line-height: 1.65; }
+    .legal strong { color: var(--fg); font-weight: 650; }
     .legal ul { padding-left: 1.2em; }
-    .legal a { color: var(--on-dark); }
+    .legal a { color: var(--fg); }
     .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 8px; padding: 0; list-style: none; }
-    .summary li { padding: 18px; border-radius: 14px; border: 1px solid var(--line-dark); }
+    .summary li { padding: 18px; border-radius: 14px; border: 1px solid var(--line); }
     .summary b { display: block; font-family: var(--display); font-size: 1.6rem; color: var(--signal); letter-spacing: -0.03em; }
     @media (max-width: 720px) { .summary { grid-template-columns: 1fr; } }
   </style>
