@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs></defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="#F2F2F2"/>
-<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#000000" stroke-opacity="0.14"/>
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g><path d="M18 14 Q18 11 21 11 H38 L47 20 V50 Q47 53 44 53 H21 Q18 53 18 50 Z" fill="white"/></g><g><path d="M38 11 V18 Q38 20 40 20 H47" fill="none" stroke="black" stroke-width="2.4"/>
-<path d="M24 25 H39 M24 31 H41 M24 37 H34" stroke="black" stroke-width="2.6" stroke-linecap="round"/>
-<path d="M23 47 C26 41 29 41 29 45 C29 48 32 42 35 43 C37 44 37 47 41 45" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round"/></g></mask>
-<rect width="64" height="64" fill="#121212" mask="url(#m)"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="60" height="60" x="2" y="2" fill="#F2F2F2" rx="14"/><rect width="59" height="59" x="2.5" y="2.5" fill="none" stroke="#000" stroke-opacity=".14" rx="13.5"/><mask id="m" width="64" height="64" x="0" y="0" maskUnits="userSpaceOnUse"><rect width="64" height="64" fill="#000"/><g><path fill="#fff" d="M18 14 Q18 11 21 11 H38 L47 20 V50 Q47 53 44 53 H21 Q18 53 18 50 Z"/></g><g><path fill="none" stroke="#000" stroke-width="2.4" d="M38 11 V18 Q38 20 40 20 H47"/><path stroke="#000" stroke-linecap="round" stroke-width="2.6" d="M24 25 H39 M24 31 H41 M24 37 H34"/><path fill="none" stroke="#000" stroke-linecap="round" stroke-width="2.6" d="M23 47 C26 41 29 41 29 45 C29 48 32 42 35 43 C37 44 37 47 41 45"/></g></mask><rect width="64" height="64" fill="#121212" mask="url(#m)"/></svg>

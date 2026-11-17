@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs></defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="#B86BFF"/>
-
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g><rect x="13" y="17" width="38" height="30" rx="5" fill="white"/></g><g><rect x="17" y="20.5" width="4.5" height="4" rx="1" fill="black"/><rect x="25" y="20.5" width="4.5" height="4" rx="1" fill="black"/><rect x="34.5" y="20.5" width="4.5" height="4" rx="1" fill="black"/><rect x="42.5" y="20.5" width="4.5" height="4" rx="1" fill="black"/>
-<rect x="17" y="39.5" width="4.5" height="4" rx="1" fill="black"/><rect x="25" y="39.5" width="4.5" height="4" rx="1" fill="black"/><rect x="34.5" y="39.5" width="4.5" height="4" rx="1" fill="black"/><rect x="42.5" y="39.5" width="4.5" height="4" rx="1" fill="black"/>
-<rect x="17" y="27.5" width="30" height="9" rx="2" fill="black" fill-opacity="0.35"/>
-<path d="M20 52 L44 12" stroke="black" stroke-width="4.5" stroke-linecap="round"/></g></mask>
-<rect width="64" height="64" fill="#121212" mask="url(#m)"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="60" height="60" x="2" y="2" fill="#B86BFF" rx="14"/><mask id="m" width="64" height="64" x="0" y="0" maskUnits="userSpaceOnUse"><rect width="64" height="64" fill="#000"/><g><rect width="38" height="30" x="13" y="17" fill="#fff" rx="5"/></g><g><rect width="4.5" height="4" x="17" y="20.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="25" y="20.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="34.5" y="20.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="42.5" y="20.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="17" y="39.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="25" y="39.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="34.5" y="39.5" fill="#000" rx="1"/><rect width="4.5" height="4" x="42.5" y="39.5" fill="#000" rx="1"/><rect width="30" height="9" x="17" y="27.5" fill="#000" fill-opacity=".35" rx="2"/><path stroke="#000" stroke-linecap="round" stroke-width="4.5" d="M20 52 L44 12"/></g></mask><rect width="64" height="64" fill="#121212" mask="url(#m)"/></svg>

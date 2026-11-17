@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs></defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="#FFB000"/>
-
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g><path d="M32 12 L45 31 Q46.5 33.5 44.8 35.8 L38 46 H26 L19.2 35.8 Q17.5 33.5 19 31 Z" fill="white"/>
-<rect x="25" y="48" width="14" height="5" rx="2" fill="white"/></g><g><path d="M32 18 V33" stroke="black" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="35" r="3.4" fill="black"/></g></mask>
-<rect width="64" height="64" fill="#121212" mask="url(#m)"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="60" height="60" x="2" y="2" fill="#FFB000" rx="14"/><mask id="m" width="64" height="64" x="0" y="0" maskUnits="userSpaceOnUse"><rect width="64" height="64" fill="#000"/><g><path fill="#fff" d="M32 12 L45 31 Q46.5 33.5 44.8 35.8 L38 46 H26 L19.2 35.8 Q17.5 33.5 19 31 Z"/><rect width="14" height="5" x="25" y="48" fill="#fff" rx="2"/></g><g><path stroke="#000" stroke-linecap="round" stroke-width="3" d="M32 18 V33"/><circle cx="32" cy="35" r="3.4" fill="#000"/></g></mask><rect width="64" height="64" fill="#121212" mask="url(#m)"/></svg>
