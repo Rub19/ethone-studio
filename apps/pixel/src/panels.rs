@@ -41,7 +41,13 @@ fn hsv_rgb(h: f32, s: f32, v: f32) -> Color32 {
 impl Pixel {
     pub fn dock(&mut self, root: &mut Ui, ctx: &egui::Context) {
         self.sync_thumbs(ctx);
-        egui::Panel::right("dock").resizable(false).exact_size(296.0).frame(egui::Frame::new().fill(PANEL)).show(root, |ui| {
+        egui::Panel::right("dock").resizable(false).exact_size(296.0).frame(egui::Frame::new().fill(PANEL)).show(root, |outer| {
+            // Contents live in a clipped child so a row a few points too wide can never widen the panel past its fill.
+            let area = outer.available_rect_before_wrap();
+            outer.allocate_rect(area, Sense::hover());
+            let mut inner = outer.new_child(egui::UiBuilder::new().max_rect(area));
+            inner.set_clip_rect(area.intersect(outer.clip_rect()));
+            let ui = &mut inner;
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
                 if self.tool == crate::tools::Tool::PhotoText || !self.pt.lines.is_empty() {
@@ -275,7 +281,7 @@ impl Pixel {
                 self.doc.modified = true;
             }
         });
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             label(ui, "Verrou");
             let l = &mut self.doc.layers[a];
             ui.toggle_value(&mut l.lock_alpha, "Transparence").on_hover_text("Peindre sans modifier la transparence");
@@ -303,7 +309,7 @@ impl Pixel {
             }
         }
         if self.doc.layers[a].mask.is_some() {
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 label(ui, "Masque");
                 if ui.selectable_label(self.doc.edit_mask, "Modifier").clicked() {
                     self.doc.edit_mask = !self.doc.edit_mask;
