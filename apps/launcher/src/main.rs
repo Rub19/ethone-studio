@@ -6,6 +6,7 @@ use eframe::egui::{
     Sense, Shadow, Stroke, StrokeKind, TextureHandle, Ui, Vec2, pos2, vec2,
 };
 use std::collections::HashMap;
+use studio_ui::i18n::tl;
 use std::sync::{Arc, Mutex};
 use studio_core::{AppEntry, Catalog, Installed};
 use studio_ui::semibold;
@@ -273,7 +274,7 @@ impl Launcher {
             ui.add_space(6.0);
             ui.vertical(|ui| {
                 ui.add_space(1.0);
-                ui.label(RichText::new("Ethone Studio").font(semibold(16.0)).color(P.ink_strong));
+                ui.label(RichText::new(tl("Ethone Studio")).font(semibold(16.0)).color(P.ink_strong));
                 ui.label(RichText::new(format!("Version {}", env!("CARGO_PKG_VERSION"))).size(11.5).color(P.faint));
             });
         });
@@ -283,12 +284,12 @@ impl Launcher {
         let updates = apps.iter().filter(|a| self.has_update(a)).count();
         let list_h = (ui.available_height() - 64.0).max(80.0);
         egui::ScrollArea::vertical().id_salt("sidebar-list").max_height(list_h).auto_shrink([false, true]).show(ui, |ui| {
-        nav_row(ui, &mut self.view, View::Auto, "Assistant", Some(P.blue), None);
+        nav_row(ui, &mut self.view, View::Auto, tl("Assistant"), Some(P.blue), None);
         ui.add_space(14.0);
         heading(ui, "BIBLIOTHÈQUE");
-        nav_row(ui, &mut self.view, View::All, "Toutes les apps", None, Some(apps.len()));
-        nav_row(ui, &mut self.view, View::Installed, "Installées", None, Some(installed));
-        nav_row(ui, &mut self.view, View::Updates, "Mises à jour", None, (updates > 0).then_some(updates));
+        nav_row(ui, &mut self.view, View::All, tl("Toutes les apps"), None, Some(apps.len()));
+        nav_row(ui, &mut self.view, View::Installed, tl("Installées"), None, Some(installed));
+        nav_row(ui, &mut self.view, View::Updates, tl("Mises à jour"), None, (updates > 0).then_some(updates));
 
         ui.add_space(18.0);
         heading(ui, "CATÉGORIES");
@@ -362,8 +363,8 @@ impl Launcher {
             if visible.is_empty() {
                 ui.add_space(80.0);
                 ui.vertical_centered(|ui| {
-                    ui.label(RichText::new("Rien à afficher ici").font(semibold(17.0)).color(P.ink));
-                    ui.label(RichText::new("Essaie une autre recherche ou une autre catégorie.").color(P.muted));
+                    ui.label(RichText::new(tl("Rien à afficher ici")).font(semibold(17.0)).color(P.ink));
+                    ui.label(RichText::new(tl("Essaie une autre recherche ou une autre catégorie.")).color(P.muted));
                 });
                 return;
             }
@@ -538,7 +539,7 @@ impl Launcher {
             return;
         }
         let mut open = true;
-        egui::Window::new(RichText::new("Paramètres").font(semibold(17.0)))
+        egui::Window::new(RichText::new(tl("Paramètres")).font(semibold(17.0)))
             .collapsible(false)
             .resizable(false)
             .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
@@ -546,19 +547,19 @@ impl Launcher {
             .open(&mut open)
             .show(ctx, |ui| {
                 ui.set_width(420.0);
-                ui.label(RichText::new("Dossier des apps").font(semibold(12.5)).color(P.ink));
+                ui.label(RichText::new(tl("Dossier des apps")).font(semibold(12.5)).color(P.ink));
                 ui.label(RichText::new(studio_core::data_dir().join("apps").display().to_string()).size(12.0).color(P.muted));
                 ui.add_space(6.0);
-                if pill(ui, "Ouvrir le dossier", P.line, P.ink_strong, true).clicked() {
+                if pill(ui, tl("Ouvrir le dossier"), P.line, P.ink_strong, true).clicked() {
                     let dir = studio_core::data_dir().join("apps");
                     let _ = std::fs::create_dir_all(&dir);
                     let _ = std::process::Command::new("explorer").arg(dir).spawn();
                 }
                 ui.add_space(16.0);
-                ui.label(RichText::new("Source des mises à jour").font(semibold(12.5)).color(P.ink));
+                ui.label(RichText::new(tl("Source des mises à jour")).font(semibold(12.5)).color(P.ink));
                 ui.label(RichText::new(studio_core::MANIFEST_URL).size(12.0).color(P.muted));
                 ui.add_space(16.0);
-                ui.label(RichText::new("À propos").font(semibold(12.5)).color(P.ink));
+                ui.label(RichText::new(tl("À propos")).font(semibold(12.5)).color(P.ink));
                 ui.label(RichText::new(format!("Ethone Studio {} · écrit en Rust", env!("CARGO_PKG_VERSION"))).size(12.0).color(P.muted));
             });
         if !open {
@@ -655,7 +656,7 @@ fn search_pill(ui: &mut Ui, text: &mut String, width: f32) {
             ui.painter().line_segment([c + vec2(3.6, 3.6), c + vec2(7.0, 7.0)], Stroke::new(1.6, P.muted));
             ui.add(
                 egui::TextEdit::singleline(text)
-                    .hint_text(RichText::new("Rechercher une app").color(P.faint))
+                    .hint_text(RichText::new(tl("Rechercher une app")).color(P.faint))
                     .frame(Frame::NONE)
                     .desired_width(f32::INFINITY)
                     .font(FontId::proportional(13.0)),
@@ -681,7 +682,7 @@ fn dots_button(ui: &mut Ui) -> egui::Response {
     for dx in [-6.0, 0.0, 6.0] {
         ui.painter().circle_filled(rect.center() + vec2(dx, 0.0), 1.9, P.ink);
     }
-    resp.on_hover_text("Plus d'options").on_hover_cursor(egui::CursorIcon::PointingHand)
+    resp.on_hover_text(tl("Plus d'options")).on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
 fn refresh_button(ui: &mut Ui) -> egui::Response {
@@ -697,7 +698,7 @@ fn refresh_button(ui: &mut Ui) -> egui::Response {
     let end = *pts.last().unwrap_or(&c);
     ui.painter().add(egui::Shape::line(pts, Stroke::new(1.8, P.ink)));
     ui.painter().add(egui::Shape::convex_polygon(vec![end + vec2(-4.0, -1.0), end + vec2(3.0, -3.5), end + vec2(1.5, 3.5)], P.ink, Stroke::NONE));
-    resp.on_hover_text("Rechercher des mises à jour").on_hover_cursor(egui::CursorIcon::PointingHand)
+    resp.on_hover_text(tl("Rechercher des mises à jour")).on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
 fn menu_item(ui: &mut Ui, label: &str, color: Color32) -> bool {

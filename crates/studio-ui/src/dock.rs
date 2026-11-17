@@ -5,6 +5,7 @@
 //! *placed* at the slot the user chose, using the heights measured on the previous frame.
 
 use egui::{Color32, Context, CornerRadius, Id, Pos2, Rect, Sense, Stroke, Ui, UiBuilder, pos2, vec2};
+use crate::i18n::tl;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
@@ -187,14 +188,14 @@ fn draw(ui: &mut Ui, id: &str, title: &str, movable: bool, add: impl FnOnce(&mut
     }
     if movable {
         resp.context_menu(|ui| {
-            if ui.button("Masquer ce panneau").clicked() {
+            if ui.button(tl("Masquer ce panneau")).clicked() {
                 with_state(&ctx, |st| {
                     st.store.current.hidden.insert(id.to_string());
                     save(st);
                 });
                 ui.close();
             }
-            if ui.button("Réinitialiser l'espace de travail").clicked() {
+            if ui.button(tl("Réinitialiser l'espace de travail")).clicked() {
                 with_state(&ctx, |st| {
                     st.store.current = Layout::default();
                     save(st);
@@ -228,10 +229,10 @@ pub fn menu(ui: &mut Ui) {
     let ctx = ui.ctx().clone();
     let (titles, hidden, saved) = with_state(&ctx, |st| (st.titles.clone(), st.store.current.hidden.clone(), st.store.saved.keys().cloned().collect::<Vec<_>>()));
     if titles.is_empty() {
-        ui.label(egui::RichText::new("Aucun panneau déplaçable ici").color(crate::pro::FAINT));
+        ui.label(egui::RichText::new(tl("Aucun panneau déplaçable ici")).color(crate::pro::FAINT));
         return;
     }
-    ui.menu_button("Panneaux", |ui| {
+    ui.menu_button(tl("Panneaux"), |ui| {
         for (id, title) in &titles {
             let mut on = !hidden.contains(id);
             if ui.checkbox(&mut on, title).changed() {
@@ -265,9 +266,9 @@ pub fn menu(ui: &mut Ui) {
     match &mut naming {
         Some(name) => {
             ui.horizontal(|ui| {
-                let r = ui.add(egui::TextEdit::singleline(name).hint_text("Nom de l'espace").desired_width(140.0));
+                let r = ui.add(egui::TextEdit::singleline(name).hint_text(tl("Nom de l'espace")).desired_width(140.0));
                 r.request_focus();
-                let ok = ui.button("Enregistrer").clicked() || (r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)));
+                let ok = ui.button(tl("Enregistrer")).clicked() || (r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)));
                 if ok && !name.trim().is_empty() {
                     let n = name.trim().to_string();
                     with_state(&ctx, |st| {
@@ -281,7 +282,7 @@ pub fn menu(ui: &mut Ui) {
             });
         }
         None => {
-            if ui.button("Enregistrer l'espace de travail…").clicked() {
+            if ui.button(tl("Enregistrer l'espace de travail…")).clicked() {
                 naming = Some(String::new());
             }
         }
@@ -295,7 +296,7 @@ pub fn menu(ui: &mut Ui) {
             }
         });
     }
-    if ui.button("Réinitialiser l'espace de travail").clicked() {
+    if ui.button(tl("Réinitialiser l'espace de travail")).clicked() {
         with_state(&ctx, |st| {
             st.store.current = Layout::default();
             save(st);

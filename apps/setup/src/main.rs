@@ -8,6 +8,7 @@ mod payload;
 mod system;
 
 use eframe::egui::{self, Color32, RichText};
+use studio_ui::i18n::tl;
 use studio_ui::pro;
 
 /// The main call to action, at installer scale: wider and taller than the in-app buttons.
@@ -163,19 +164,19 @@ impl eframe::App for Setup {
                         Step::Ready if removing => {
                             ui.label(format!("{} va être supprimée de cet ordinateur. Tes documents ne sont jamais touchés.", system::name(&id)));
                             ui.add_space(10.0);
-                            ui.checkbox(&mut self.purge, "Supprimer aussi les préférences de l'application");
+                            ui.checkbox(&mut self.purge, tl("Supprimer aussi les préférences de l'application"));
                             ui.add_space(14.0);
-                            if cta(ui, "Désinstaller", false) {
+                            if cta(ui, tl("Désinstaller"), false) {
                                 self.start();
                             }
                         }
                         Step::Ready => {
                             ui.label(format!("Installation pour ton compte Windows, sans droits administrateur, dans :\n{}", system::dir(&id).display()));
                             ui.add_space(10.0);
-                            ui.checkbox(&mut self.desktop, "Créer un raccourci sur le Bureau");
-                            ui.checkbox(&mut self.open_after, "Ouvrir l'application à la fin");
+                            ui.checkbox(&mut self.desktop, tl("Créer un raccourci sur le Bureau"));
+                            ui.checkbox(&mut self.open_after, tl("Ouvrir l'application à la fin"));
                             ui.add_space(14.0);
-                            if cta(ui, "Installer", true) {
+                            if cta(ui, tl("Installer"), true) {
                                 self.start();
                             }
                         }
@@ -204,7 +205,7 @@ impl eframe::App for Setup {
                         Step::Failed(e) => {
                             ui.colored_label(pro::RED, format!("Échec : {e}"));
                             ui.add_space(12.0);
-                            if cta(ui, "Réessayer", false) {
+                            if cta(ui, tl("Réessayer"), false) {
                                 *self.step.lock().unwrap_or_else(|e| e.into_inner()) = Step::Ready;
                             }
                         }

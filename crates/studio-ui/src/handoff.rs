@@ -1,12 +1,13 @@
 use crate::pro::{CHROME, FAINT, GREEN, INK, LINE, RED};
+use crate::i18n::tl;
 use egui::{Align2, Context, CornerRadius, Frame, Margin, RichText, Stroke, Ui};
 use std::path::{Path, PathBuf};
 use studio_core::handoff::{Inbox, name};
 
 pub fn menu(ui: &mut Ui, targets: &[(&'static str, &str)]) -> Option<&'static str> {
     let mut pick = None;
-    ui.menu_button("Envoyer vers", |ui| {
-        ui.label(RichText::new("Ouvre ton travail dans une autre app, en un clic").size(11.5).color(FAINT));
+    ui.menu_button(tl("Envoyer vers"), |ui| {
+        ui.label(RichText::new(tl("Ouvre ton travail dans une autre app, en un clic")).size(11.5).color(FAINT));
         for (id, what) in targets {
             let r = ui
                 .horizontal(|ui| {

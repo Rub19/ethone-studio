@@ -1,4 +1,5 @@
 use crate::pro::{FAINT, INK_STRONG, MUTED};
+use crate::i18n::tl;
 use egui::{Align, Layout, RichText, Ui};
 use studio_fx::stack::{self, Fx};
 
@@ -6,7 +7,7 @@ pub fn effects_panel(ui: &mut Ui, id: &str, list: &mut Vec<Fx>) -> bool {
     let before = list.clone();
     ui.spacing_mut().item_spacing.y = 4.0;
     ui.label(RichText::new(format!("{} effets, empilés dans l'ordre, chacun avec son intensité", stack::count())).size(11.5).color(FAINT));
-    ui.menu_button(RichText::new("+ Ajouter un effet").size(12.5), |ui| {
+    ui.menu_button(RichText::new(tl("+ Ajouter un effet")).size(12.5), |ui| {
         for (g, kinds) in stack::groups() {
             ui.menu_button(g, |ui| {
                 egui::ScrollArea::vertical().max_height(420.0).show(ui, |ui| {
@@ -28,16 +29,16 @@ pub fn effects_panel(ui: &mut Ui, id: &str, list: &mut Vec<Fx>) -> bool {
             ui.checkbox(&mut c.on, "");
             ui.label(RichText::new(k.title()).size(12.5).color(INK_STRONG));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if ui.small_button("×").on_hover_text("Retirer").clicked() {
+                if ui.small_button("×").on_hover_text(tl("Retirer")).clicked() {
                     remove = Some(i);
                 }
-                if i > 0 && ui.small_button("▲").on_hover_text("Monter").clicked() {
+                if i > 0 && ui.small_button("▲").on_hover_text(tl("Monter")).clicked() {
                     up = Some(i);
                 }
             });
         });
         ui.add(egui::Slider::new(&mut c.amount, 0.0..=100.0).suffix(" %").text("Intensité"));
-        egui::CollapsingHeader::new(RichText::new("Réglages").size(12.0).color(MUTED)).id_salt((id, "fx", i, &c.kind)).show(ui, |ui| {
+        egui::CollapsingHeader::new(RichText::new(tl("Réglages")).size(12.0).color(MUTED)).id_salt((id, "fx", i, &c.kind)).show(ui, |ui| {
             if !k.presets().is_empty() {
                 ui.horizontal_wrapped(|ui| {
                     for (name, vals) in k.presets() {
@@ -66,7 +67,7 @@ pub fn effects_panel(ui: &mut Ui, id: &str, list: &mut Vec<Fx>) -> bool {
                     ui.add(egui::Slider::new(v, prm.min..=prm.max).text(prm.label).suffix(prm.suffix));
                 }
             }
-            if ui.small_button("Valeurs par défaut").clicked() {
+            if ui.small_button(tl("Valeurs par défaut")).clicked() {
                 c.vals = k.defaults();
             }
         });

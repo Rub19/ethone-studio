@@ -1,4 +1,5 @@
 use crate::help::Help;
+use crate::i18n::tl;
 use crate::pro::{CHROME, FAINT, INK, INK_STRONG, LINE, MUTED};
 use egui::{Align2, Color32, Context, CornerRadius, Frame, Key, KeyboardShortcut, Margin, Modifiers, RichText, Stroke};
 use serde::{Deserialize, Serialize};
@@ -50,11 +51,13 @@ pub struct Prefs {
     pub undo_levels: usize,
     /// Corners of panels and buttons: 0 square, 1 rounded, 2 very rounded.
     pub rounding: u8,
+    /// Interface language, an index into `i18n::LANGS`.
+    pub lang: usize,
 }
 
 impl Default for Prefs {
     fn default() -> Self {
-        Prefs { zoom: 1.0, accent: 0, animations: true, tooltips: 1, undo_levels: 0, rounding: 1 }
+        Prefs { zoom: 1.0, accent: 0, animations: true, tooltips: 1, undo_levels: 0, rounding: 1, lang: 0 }
     }
 }
 
@@ -78,6 +81,7 @@ pub fn load_prefs() -> Prefs {
 }
 
 pub fn apply_prefs(ctx: &Context, p: Prefs) {
+    crate::i18n::set_lang(p.lang);
     ctx.set_zoom_factor(p.zoom.clamp(0.7, 2.0));
     let c = ACCENTS[p.accent.min(ACCENTS.len() - 1)].1;
     let a = Color32::from_rgb(c[0], c[1], c[2]);
@@ -193,7 +197,7 @@ impl AppPrefs {
             }
         }
         ui.add_space(8.0);
-        if ui.button("Valeurs par défaut de cette section").clicked() {
+        if ui.button(tl("Valeurs par défaut de cette section")).clicked() {
             for item in sec.items {
                 self.values.remove(item.key);
             }
@@ -493,7 +497,7 @@ impl Palette {
         }
         let before = self.prefs;
         let mut open = true;
-        egui::Window::new(RichText::new("Préférences").size(16.0).strong()).open(&mut open).collapsible(false).resizable(false).default_width(620.0).anchor(Align2::CENTER_CENTER, [0.0, 0.0]).show(ctx, |ui| {
+        egui::Window::new(RichText::new(tl("Préférences")).size(16.0).strong()).open(&mut open).collapsible(false).resizable(false).default_width(620.0).anchor(Align2::CENTER_CENTER, [0.0, 0.0]).show(ctx, |ui| {
             ui.horizontal_top(|ui| {
                 ui.vertical(|ui| {
                     ui.set_width(150.0);
@@ -516,15 +520,22 @@ impl Palette {
                     let p = &mut self.prefs;
                     match self.prefs_tab.min(3 + extra) {
                         0 => {
-                            pref_title(ui, "Interface");
-                            ui.label("Taille de l'interface");
+                            pref_title(ui, tl("Interface"));
+                            ui.label(tl("Langue / Language"));
+                            ui.horizontal_wrapped(|ui| {
+                                for (k, name) in crate::i18n::LANGS.iter().enumerate() {
+                                    ui.selectable_value(&mut p.lang, k, *name);
+                                }
+                            });
+                            ui.add_space(10.0);
+                            ui.label(tl("Taille de l'interface"));
                             ui.horizontal_wrapped(|ui| {
                                 for z in SIZES {
                                     ui.selectable_value(&mut p.zoom, z, format!("{:.0} %", z * 100.0));
                                 }
                             });
                             ui.add_space(10.0);
-                            ui.label("Couleur d'accentuation");
+                            ui.label(tl("Couleur d'accentuation"));
                             ui.horizontal_wrapped(|ui| {
                                 for (k, (name, c)) in ACCENTS.iter().enumerate() {
                                     let (rect, resp) = ui.allocate_exact_size(egui::vec2(28.0, 28.0), egui::Sense::click());
@@ -539,29 +550,29 @@ impl Palette {
                             });
                             ui.add_space(10.0);
                             ui.horizontal(|ui| {
-                                ui.label("Coins");
+                                ui.label(tl("Coins"));
                                 for (k, name) in ROUNDING.iter().enumerate() {
                                     ui.selectable_value(&mut p.rounding, k as u8, *name);
                                 }
                             });
                             ui.add_space(6.0);
-                            ui.checkbox(&mut p.animations, "Animations de l'interface");
+                            ui.checkbox(&mut p.animations, tl("Animations de l'interface"));
                         }
                         1 => {
-                            pref_title(ui, "Outils");
+                            pref_title(ui, tl("Outils"));
                             ui.horizontal(|ui| {
-                                ui.label("Info-bulles");
+                                ui.label(tl("Info-bulles"));
                                 for (k, (name, _)) in TOOLTIPS.iter().enumerate() {
                                     ui.selectable_value(&mut p.tooltips, k as u8, *name);
                                 }
                             });
                             ui.add_space(8.0);
-                            ui.label(RichText::new("Ctrl+K ouvre la palette de commandes, Ctrl+, ces préférences.").color(MUTED));
+                            ui.label(RichText::new(tl("Ctrl+K ouvre la palette de commandes, Ctrl+, ces préférences.")).color(MUTED));
                         }
                         2 => {
-                            pref_title(ui, "Performances");
+                            pref_title(ui, tl("Performances"));
                             let mut own = p.undo_levels == 0;
-                            ui.checkbox(&mut own, "Historique : valeur conseillée par chaque app");
+                            ui.checkbox(&mut own, tl("Historique : valeur conseillée par chaque app"));
                             if own {
                                 p.undo_levels = 0;
                             } else {
@@ -570,17 +581,17 @@ impl Palette {
                                 }
                                 ui.add(egui::Slider::new(&mut p.undo_levels, 5..=500).text("états d'historique"));
                             }
-                            ui.label(RichText::new("Plus d'états permet d'annuler plus loin, mais utilise plus de mémoire. Pris en compte au prochain document ou au redémarrage de l'app.").size(12.0).color(MUTED));
+                            ui.label(RichText::new(tl("Plus d'états permet d'annuler plus loin, mais utilise plus de mémoire. Pris en compte au prochain document ou au redémarrage de l'app.")).size(12.0).color(MUTED));
                         }
                         _ => {
-                            pref_title(ui, "Général");
-                            ui.label(RichText::new("Ces préférences sont communes à toutes les apps d'Ethone Studio.").color(MUTED));
+                            pref_title(ui, tl("Général"));
+                            ui.label(RichText::new(tl("Ces préférences sont communes à toutes les apps d'Ethone Studio.")).color(MUTED));
                             ui.add_space(8.0);
-                            if ui.button("Ouvrir le dossier des préférences").clicked() {
+                            if ui.button(tl("Ouvrir le dossier des préférences")).clicked() {
                                 let _ = std::process::Command::new("explorer").arg(studio_core::data_dir()).spawn();
                             }
                             ui.add_space(4.0);
-                            if ui.button("Rétablir les préférences par défaut").clicked() {
+                            if ui.button(tl("Rétablir les préférences par défaut")).clicked() {
                                 *p = Prefs::default();
                             }
                         }
@@ -599,8 +610,8 @@ impl Palette {
 
     fn builtin(&self, help: &Help) -> Vec<Cmd> {
         let mut v: Vec<Cmd> = help.titles().into_iter().map(|t| Cmd::new(format!("Aide : {t}"), "Tutoriel", format!("help:{t}"))).collect();
-        v.push(Cmd::new("Ouvrir l'aide (tutoriels)", "F1", "help:"));
-        v.push(Cmd::new("Préférences…", "Interface, outils, performances · Ctrl+,", "ui-prefs"));
+        v.push(Cmd::new(tl("Ouvrir l'aide (tutoriels)"), tl("F1"), "help:"));
+        v.push(Cmd::new(tl("Préférences…"), tl("Interface, outils, performances · Ctrl+,"), "ui-prefs"));
         for z in SIZES {
             v.push(Cmd::new(format!("Interface : taille {:.0} %", z * 100.0), "Agrandit ou réduit toute l'interface", format!("ui-zoom:{z}")));
         }
@@ -768,7 +779,7 @@ mod tests {
 
     #[test]
     fn command_search_ignores_case_and_accents() {
-        let command = Cmd::new("Synchroniser les réglages", "Photos choisies", "sync");
+        let command = Cmd::new(tl("Synchroniser les réglages"), tl("Photos choisies"), "sync");
         assert!(matches_words(&command, &query_words("REGLAGES choisies")));
         assert!(!matches_words(&command, &query_words("audio")));
     }
@@ -813,7 +824,7 @@ mod tests {
 
     #[test]
     fn library_search_uses_precomputed_keys() {
-        let lib = Library::new(vec![Cmd::new("Look Portra · 40 %", "Pellicule", "lm:a"), Cmd::new("Palette Corail", "Triade", "vc:b")]);
+        let lib = Library::new(vec![Cmd::new(tl("Look Portra · 40 %"), tl("Pellicule"), "lm:a"), Cmd::new(tl("Palette Corail"), tl("Triade"), "vc:b")]);
         let words = query_words("portra");
         assert_eq!(lib.matching(&words).map(|c| c.id.as_str()).collect::<Vec<_>>(), ["lm:a"]);
         assert_eq!(lib.matching(&query_words("CORAIL triade")).count(), 1);
@@ -924,7 +935,7 @@ mod library_run_tests {
 
     fn lib() -> &'static Library {
         static L: std::sync::OnceLock<Library> = std::sync::OnceLock::new();
-        L.get_or_init(|| Library::new(vec![Cmd::new("Zébulon magique", "essai", "zz:1")]))
+        L.get_or_init(|| Library::new(vec![Cmd::new(tl("Zébulon magique"), tl("essai"), "zz:1")]))
     }
 
     /// Typing a library option and pressing Enter must hand its id to the app (it used to be dropped).

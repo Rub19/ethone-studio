@@ -1,4 +1,5 @@
 use crate::pro::{BLUE, CHROME, FIELD, INK, INK_STRONG, LINE, MUTED, PANEL, semibold};
+use crate::i18n::tl;
 use egui::{Align2, Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui, vec2};
 
 pub struct Tuto {
@@ -36,8 +37,8 @@ impl Help {
     }
 
     pub fn menu(&mut self, ui: &mut Ui) {
-        ui.menu_button("Aide", |ui| {
-            if ui.button("Apprendre                F1").clicked() {
+        ui.menu_button(tl("Aide"), |ui| {
+            if ui.button(tl("Apprendre                F1")).clicked() {
                 self.open = true;
             }
         });
@@ -60,7 +61,7 @@ impl Help {
             .frame(Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(14)).inner_margin(Margin::same(14)).shadow(ctx.global_style().visuals.window_shadow))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Apprendre").font(semibold(15.0)).color(INK_STRONG));
+                    ui.label(RichText::new(tl("Apprendre")).font(semibold(15.0)).color(INK_STRONG));
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         if ui.add(egui::Button::new(RichText::new("✕").color(MUTED)).frame(false)).clicked() {
                             open = false;
@@ -76,7 +77,7 @@ impl Help {
     fn learn_tab(&mut self, ui: &mut Ui) {
         if let Some(i) = self.selected {
             let t = &self.tutos[i];
-            if ui.add(egui::Button::new(RichText::new("‹  Tous les tutoriels").color(BLUE)).frame(false)).clicked() {
+            if ui.add(egui::Button::new(RichText::new(tl("‹  Tous les tutoriels")).color(BLUE)).frame(false)).clicked() {
                 self.selected = None;
             }
             ui.add_space(6.0);
@@ -101,7 +102,7 @@ impl Help {
             });
             return;
         }
-        ui.add(egui::TextEdit::singleline(&mut self.query).hint_text("Rechercher un outil ou une fonction").desired_width(f32::INFINITY));
+        ui.add(egui::TextEdit::singleline(&mut self.query).hint_text(tl("Rechercher un outil ou une fonction")).desired_width(f32::INFINITY));
         ui.add_space(6.0);
         let q = self.query.to_lowercase();
         egui::ScrollArea::vertical().show(ui, |ui| {

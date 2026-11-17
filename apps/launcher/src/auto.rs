@@ -1,4 +1,5 @@
 use crate::P;
+use studio_ui::i18n::tl;
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Key, Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, pos2, vec2};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{Receiver, channel};
@@ -61,16 +62,16 @@ impl Auto {
         }
         ui.add_space(22.0);
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Transferts récents").font(semibold(13.0)).color(P.ink_strong));
-            ui.label(RichText::new("entre les apps et depuis l'Assistant").size(12.0).color(P.faint));
-            if !self.transfers.is_empty() && ui.add(egui::Button::new(RichText::new("Effacer").size(12.0).color(P.muted)).frame(false)).clicked() {
+            ui.label(RichText::new(tl("Transferts récents")).font(semibold(13.0)).color(P.ink_strong));
+            ui.label(RichText::new(tl("entre les apps et depuis l'Assistant")).size(12.0).color(P.faint));
+            if !self.transfers.is_empty() && ui.add(egui::Button::new(RichText::new(tl("Effacer")).size(12.0).color(P.muted)).frame(false)).clicked() {
                 studio_core::handoff::clear_history();
                 self.transfers.clear();
             }
         });
         ui.add_space(6.0);
         if self.transfers.is_empty() {
-            ui.label(RichText::new("Rien pour l'instant : utilise « Envoyer vers » dans une app, ou lance une demande ici.").size(12.0).color(P.faint));
+            ui.label(RichText::new(tl("Rien pour l'instant : utilise « Envoyer vers » dans une app, ou lance une demande ici.")).size(12.0).color(P.faint));
             return;
         }
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
@@ -86,12 +87,12 @@ impl Auto {
                     ui.add(egui::Label::new(RichText::new(&name).size(12.0).color(if exists { P.ink } else { P.faint })).truncate()).on_hover_text(t.file.display().to_string());
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(RichText::new(studio_core::handoff::ago(t.at, now)).size(11.5).color(P.faint));
-                        if exists && ui.small_button("Dossier").clicked()
+                        if exists && ui.small_button(tl("Dossier")).clicked()
                             && let Some(d) = t.file.parent()
                         {
                             let _ = std::process::Command::new("explorer").arg(d).spawn();
                         }
-                        if exists && ui.small_button("Rouvrir").on_hover_text(format!("Rouvre ce fichier dans {}", studio_core::handoff::name(&t.to))).clicked() {
+                        if exists && ui.small_button(tl("Rouvrir")).on_hover_text(format!("Rouvre ce fichier dans {}", studio_core::handoff::name(&t.to))).clicked() {
                             reopen = Some((t.to.clone(), t.file.clone()));
                         }
                     });
@@ -178,8 +179,8 @@ impl Auto {
                 sparkle(ui.painter(), r.center() + vec2(9.0, -9.0), 5.0, ACCENT);
                 ui.add_space(6.0);
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Assistant").font(semibold(26.0)).color(P.ink_strong));
-                    ui.label(RichText::new("Dépose une image, une vidéo, un son ou un PDF, dis ce que tu veux : Ethone choisit l'app et les outils.").size(12.5).color(P.muted));
+                    ui.label(RichText::new(tl("Assistant")).font(semibold(26.0)).color(P.ink_strong));
+                    ui.label(RichText::new(tl("Dépose une image, une vidéo, un son ou un PDF, dis ce que tu veux : Ethone choisit l'app et les outils.")).size(12.5).color(P.muted));
                 });
             });
             ui.add_space(18.0);
@@ -221,14 +222,14 @@ impl Auto {
             }
             if self.file.is_some() {
                 ui.add_space(4.0);
-                if ui.add(egui::Button::new(RichText::new("Retirer le fichier").size(12.0).color(P.muted)).frame(false)).clicked() {
+                if ui.add(egui::Button::new(RichText::new(tl("Retirer le fichier")).size(12.0).color(P.muted)).frame(false)).clicked() {
                     self.file = None;
                 }
             }
             ui.add_space(14.0);
-            ui.label(RichText::new("Que veux-tu faire ?").font(semibold(13.0)).color(P.ink_strong));
+            ui.label(RichText::new(tl("Que veux-tu faire ?")).font(semibold(13.0)).color(P.ink_strong));
             ui.add_space(6.0);
-            let edit = ui.add(egui::TextEdit::multiline(&mut self.prompt).hint_text("Ex. : retire les oiseaux du ciel et rends la photo plus lumineuse").desired_rows(2).desired_width(w).font(FontId::proportional(15.0)));
+            let edit = ui.add(egui::TextEdit::multiline(&mut self.prompt).hint_text(tl("Ex. : retire les oiseaux du ciel et rends la photo plus lumineuse")).desired_rows(2).desired_width(w).font(FontId::proportional(15.0)));
             let go_key = edit.has_focus() && ui.input(|i| i.key_pressed(Key::Enter) && i.modifiers.command);
             ui.add_space(8.0);
             ui.horizontal_wrapped(|ui| {
@@ -246,14 +247,14 @@ impl Auto {
                 ui.set_width(w - 32.0);
                 match &preview {
                     None => {
-                        ui.label(RichText::new("Le plan s'affichera ici dès que tu écris ta demande.").size(12.0).color(P.faint));
+                        ui.label(RichText::new(tl("Le plan s'affichera ici dès que tu écris ta demande.")).size(12.0).color(P.faint));
                     }
                     Some(Err(e)) => {
                         ui.label(RichText::new(e).size(12.5).color(Color32::from_rgb(255, 160, 90)));
                     }
                     Some(Ok(p)) => {
                         ui.horizontal(|ui| {
-                            ui.label(RichText::new("Ce que je vais faire").font(semibold(12.5)).color(P.ink_strong));
+                            ui.label(RichText::new(tl("Ce que je vais faire")).font(semibold(12.5)).color(P.ink_strong));
                             ui.label(RichText::new(format!("→ {}", studio_core::handoff::name(p.app))).font(semibold(12.5)).color(ACCENT));
                         });
                         ui.add_space(4.0);
@@ -266,11 +267,11 @@ impl Auto {
             ui.add_space(12.0);
             ui.horizontal(|ui| {
                 let can = matches!(preview, Some(Ok(_))) && self.running.is_none();
-                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(13.0)).color(Color32::WHITE)).fill(if can { ACCENT } else { P.field }).corner_radius(CornerRadius::same(4)).min_size(vec2(110.0, 30.0));
-                if (ui.add_enabled(can, b).on_hover_text("Ctrl+Entrée").clicked() || (go_key && can)) && can {
+                let b = egui::Button::new(RichText::new(tl("  Lancer  ")).font(semibold(13.0)).color(Color32::WHITE)).fill(if can { ACCENT } else { P.field }).corner_radius(CornerRadius::same(4)).min_size(vec2(110.0, 30.0));
+                if (ui.add_enabled(can, b).on_hover_text(tl("Ctrl+Entrée")).clicked() || (go_key && can)) && can {
                     self.start(ctx);
                 }
-                ui.checkbox(&mut self.open, "Ouvrir le résultat dans l'app");
+                ui.checkbox(&mut self.open, tl("Ouvrir le résultat dans l'app"));
                 if self.running.is_some() {
                     ui.add(egui::Spinner::new().color(ACCENT));
                     if let Some(t) = self.started {
@@ -300,12 +301,12 @@ impl Auto {
                     }
                     if let Some(f) = o.file.clone() {
                         ui.horizontal(|ui| {
-                            if ui.button("Ouvrir le dossier").clicked()
+                            if ui.button(tl("Ouvrir le dossier")).clicked()
                                 && let Some(d) = f.parent()
                             {
                                 let _ = std::process::Command::new("explorer").arg(d).spawn();
                             }
-                            if !matches!(kind_of(Some(&f)), Kind::Other | Kind::Nothing) && ui.button("Continuer avec ce résultat").on_hover_text("Le résultat devient le fichier de départ").clicked() {
+                            if !matches!(kind_of(Some(&f)), Kind::Other | Kind::Nothing) && ui.button(tl("Continuer avec ce résultat")).on_hover_text(tl("Le résultat devient le fichier de départ")).clicked() {
                                 self.set_file(f);
                                 self.prompt.clear();
                             }

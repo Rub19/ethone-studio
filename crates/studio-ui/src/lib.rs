@@ -3,6 +3,7 @@ pub mod dock;
 pub mod fxpanel;
 pub mod handoff;
 pub mod help;
+pub mod i18n;
 pub mod palette;
 pub mod pro;
 use egui::epaint::CubicBezierShape;
