@@ -1,4 +1,4 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
 Fusion de données (CSV)…	
 Publipostage : «Nom» dans les textes	
 QR code du texte sélectionné	
@@ -357,3 +357,54 @@ Couleurs, contour, opacité, angles et effets du bloc sélectionné.
 Supprimer la note	
 Terminer (Entrée)	
 Fermer le tracé	
+≡ Gtl(	
+)≡ Ctl(	
+)≡ Dtl(	
+)≡ J	
+Remplirtl(	
+)Ajustertl(	
+)Déformer	
+Propriétéstl(	
+)Calquestl(	
+)Lienstl(	
+)Contrôle	
+Couleur du contour	
+Gauchetl(	
+)Centretl(	
+)Droitetl(	
+)Justifié	
+Couleur du filet	
+Hauttl(	
+)Milieutl(	
+)Bas	
+Remplir le cadretl(	
+)Ajuster dans le cadre	
+Rectangletl(	
+)Ellipsetl(	
+)Polygone	
+Rondestl(	
+)Carréestl(	
+)Droites	
+Couleur du fond	
+Couleur du trait	
+Traits	
+)Droite	
+Fond de l'en-tête	
+Fond alterné	
+Couleur de l'ombre	
+Couleur de la lueur	
+Papier	
+Format	
+Pages	
+Toutestl(	
+)Page affichéetl(	
+)Plage	
+Résolution	
+Qualité JPEG	
+Vers	
+Documenttl(	
+)Pagetl(	
+)Bloc sélectionné	
+Côtés	
+Branches	
+Creux	

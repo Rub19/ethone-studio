@@ -1,4 +1,4 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
 Ouvrir un son…	
 Ctrl+O	
 Exporter…	
@@ -151,3 +151,85 @@ G D
 ▶ Écouter	
 Essaie l'effet sur 15 s sans rien modifier	
 Appliquer	
+Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme	
+Gain	
+Normaliser la crête à	
+Limiteur (plafond)	
+Linéairetl(	
+)Logtl(	
+)En S	
+Intensité	
+Porte de bruit	
+Coupe-bas	
+Coupe-haut	
+Seuil	
+Pauses de plus de	
+Garder	
+Ratio	
+Gain de sortie	
+Saturation	
+Bits	
+Sous-échantillonnage	
+Profondeur	
+Vitesse	
+Mélange	
+Réinjection	
+Amplitude	
+Modulation en anneau (robot)	
+Délai d'écho	
+Taille de la pièce	
+Mélange réverb	
+Vitesse (comme une bande)	
+Tempo (même hauteur)	
+Hauteur en demi-tons (même durée)	
+Balance	
+Largeur stéréo	
+Durée	
+Fréquence	
+Blanctl(	
+)Rosetl(	
+)Brun	
+Jusqu'à	
+Tempo	
+Seuil du silence	
+Silence minimum	
+Son minimum	
+Qualité	
+16 bits (CD)tl(	
+)24 bitstl(	
+)32 flottanttl(	
+)8 bits	
+Dither (adoucit la réduction de bits)	
+Aucuntl(	
+)Triangulairetl(	
+)Mise en forme	
+Originaletl(	
+)44,1 ktl(	
+)48 ktl(	
+)22 ktl(	
+)96 k	
+Canaux	
+Originauxtl(	
+)Monotl(	
+)Stéréo	
+Plage	
+Touttl(	
+)Sélectiontl(	
+)Un fichier par marqueur	
+Échelle	
+Logtl(	
+)Linéaire	
+FFT	
+Taille	
+Forme d'ondetl(	
+)Spectrogramme	
+Sélection temporelle	
+Main (défilement)	
+Rectangle de fréquences	
+Lasso spectral	
+Pinceau spectral	
+Correction des taches	
+Crayon	
+Rasoir	
+Fondus par poignées	
+Enveloppe de volume	

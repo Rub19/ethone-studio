@@ -765,7 +765,7 @@ impl Folio {
     fn left_panel(&mut self, root: &mut Ui) {
         let ctx = root.ctx().clone();
         egui::Panel::left("pages").resizable(false).exact_size(190.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(10, 10))).show(root, |ui| {
-            pro::segmented(ui, &mut self.left_tab, &[tl("Pages"), tl("Signets"), tl("Notes")]);
+            pro::segmented(ui, &mut self.left_tab, &[tl("Pagestl("), tl(")Signetstl("), tl(")Notes")]);
             ui.add_space(8.0);
             match self.left_tab {
                 0 => {

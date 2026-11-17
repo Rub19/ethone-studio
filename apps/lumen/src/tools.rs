@@ -311,7 +311,7 @@ impl Lumen {
                 }
             }
             Tool::Straighten => {
-                caption(ui, "Trace une ligne le long de l'horizon ou d'une verticale");
+                caption(ui, tl("Trace une ligne le long de l'horizon ou d'une verticale"));
                 ui.add(egui::Slider::new(&mut s.straighten, -45.0..=45.0).step_by(0.1).suffix("°"));
                 if pro::ghost(ui, tl("Auto")).clicked()
                     && let Some((_, src)) = &self.source
@@ -368,7 +368,7 @@ impl Lumen {
                         self.sel_eye = None;
                     }
                 }
-                caption(ui, "Clique sur l'œil ou glisse pour tracer le cercle");
+                caption(ui, tl("Clique sur l'œil ou glisse pour tracer le cercle"));
                 if !s.red_eyes.is_empty() && pro::ghost(ui, tl("Tout effacer")).clicked() {
                     s.red_eyes.clear();
                     self.sel_eye = None;
@@ -392,11 +392,11 @@ impl Lumen {
                 ui.checkbox(&mut self.show_overlay, tl("Superposition (O)"));
             }
             Tool::WbPicker => {
-                caption(ui, "Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.");
+                caption(ui, tl("Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil."));
             }
             Tool::Target => {
                 pro::segmented(ui, &mut self.target_mode, &TARGET_MODES);
-                caption(ui, "Glisse vers le haut ou le bas sur une couleur ou un ton de la photo");
+                caption(ui, tl("Glisse vers le haut ou le bas sur une couleur ou un ton de la photo"));
             }
             Tool::Sky | Tool::Subject => {}
         }

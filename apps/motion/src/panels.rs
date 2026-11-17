@@ -139,8 +139,8 @@ impl Motion {
         pro::dock_panel(ui, "comp-fx", tl("Finition de l'image"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-            slider(ui, "Vignettage", &mut self.comp.vignette, 0.0..=100.0, " %");
-            slider(ui, "Grain film", &mut self.comp.grain, 0.0..=100.0, " %");
+            slider(ui, tl("Vignettage"), &mut self.comp.vignette, 0.0..=100.0, " %");
+            slider(ui, tl("Grain film"), &mut self.comp.grain, 0.0..=100.0, " %");
             ui.label(RichText::new(tl("Bandes cinéma")).size(12.0).color(MUTED));
             let mut k = LETTERBOX.iter().position(|l| (l.1 - self.comp.letterbox).abs() < 0.01).unwrap_or(0);
             let labels: Vec<&str> = LETTERBOX.iter().map(|l| l.0).collect();
@@ -361,29 +361,29 @@ impl Motion {
             pro::dock_panel(ui, "path", tl("Tracé et opérateurs"), |ui| {
                 ui.spacing_mut().item_spacing.y = 5.0;
                 ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-                sub(ui, "Couper le tracé");
+                sub(ui, tl("Couper le tracé"));
                 for (pi, label) in [(14, "Début %"), (15, "Fin %"), (16, "Décalage %")] {
                     prop_row(ui, l, pi, t, &mut go, label);
                 }
                 let mut m = l.fx.trim_mode as usize;
-                if pro::segmented(ui, &mut m, &[tl("Simultané"), tl("Un par un")]) {
+                if pro::segmented(ui, &mut m, &[tl("Simultanétl("), tl(")Un par un")]) {
                     l.fx.trim_mode = m as u8;
                 }
                 let fx = &mut l.fx;
-                sub(ui, "Opérateurs de forme");
-                amount(ui, "Arrondir les angles", &mut fx.round, 0.0..=300.0, " px");
-                amount(ui, "Fronce et dilatation", &mut fx.pucker, -100.0..=100.0, " %");
-                if amount(ui, "Zigzag", &mut fx.zig_amp, -100.0..=100.0, " px") {
+                sub(ui, tl("Opérateurs de forme"));
+                amount(ui, tl("Arrondir les angles"), &mut fx.round, 0.0..=300.0, " px");
+                amount(ui, tl("Fronce et dilatation"), &mut fx.pucker, -100.0..=100.0, " %");
+                if amount(ui, tl("Zigzag"), &mut fx.zig_amp, -100.0..=100.0, " px") {
                     ui.horizontal(|ui| {
                         ui.add(egui::DragValue::new(&mut fx.zig_ridges).range(1..=200).prefix("Crêtes "));
                         ui.checkbox(&mut fx.zig_smooth, tl("Ondulé"));
                     });
                 }
-                if amount(ui, "Agitation", &mut fx.rough, 0.0..=100.0, " px") {
-                    slider(ui, "Détail", &mut fx.rough_detail, 0.5..=40.0, " /100 px");
-                    slider(ui, "Vitesse d'agitation", &mut fx.rough_speed, 0.0..=20.0, " /s");
+                if amount(ui, tl("Agitation"), &mut fx.rough, 0.0..=100.0, " px") {
+                    slider(ui, tl("Détail"), &mut fx.rough_detail, 0.5..=40.0, " /100 px");
+                    slider(ui, tl("Vitesse d'agitation"), &mut fx.rough_speed, 0.0..=20.0, " /s");
                 }
-                amount(ui, "Torsion", &mut fx.twist, -720.0..=720.0, "°");
+                amount(ui, tl("Torsion"), &mut fx.twist, -720.0..=720.0, "°");
             });
             if let Some(g) = go {
                 self.t = g;
@@ -417,16 +417,16 @@ impl Motion {
                 let cur = l.fx.stroke;
                 color_anim(ui, &mut l.stroke_keys, t_now, cur, "le contour");
                 let fx = &mut l.fx;
-                if amount(ui, "Pointillés (0 = plein)", &mut fx.dash, 0.0..=200.0, " px") {
-                    slider(ui, "Espace entre tirets", &mut fx.dash_gap, 5.0..=400.0, " %");
+                if amount(ui, tl("Pointillés (0 = plein)"), &mut fx.dash, 0.0..=200.0, " px") {
+                    slider(ui, tl("Espace entre tirets"), &mut fx.dash_gap, 5.0..=400.0, " %");
                 }
                 ui.label(RichText::new(tl("Extrémités et angles")).size(12.0).color(MUTED));
                 let mut c = fx.cap as usize;
-                if pro::segmented(ui, &mut c, &[tl("Plates"), tl("Rondes"), tl("Carrées")]) {
+                if pro::segmented(ui, &mut c, &[tl("Platestl("), tl(")Rondestl("), tl(")Carrées")]) {
                     fx.cap = c as u8;
                 }
                 let mut j = fx.join as usize;
-                if pro::segmented(ui, &mut j, &[tl("Arrondis"), tl("Pointus"), tl("Biseautés")]) {
+                if pro::segmented(ui, &mut j, &[tl("Arrondistl("), tl(")Pointustl("), tl(")Biseautés")]) {
                     fx.join = j as u8;
                 }
             }
@@ -442,15 +442,15 @@ impl Motion {
             });
             if fx.gradient.is_some() {
                 let mut k = fx.gradient_kind as usize;
-                if pro::segmented(ui, &mut k, &[tl("Linéaire"), tl("Radial")]) {
+                if pro::segmented(ui, &mut k, &[tl("Linéairetl("), tl(")Radial")]) {
                     fx.gradient_kind = k as u8;
                 }
                 if fx.gradient_kind == 0 {
-                    slider(ui, "Angle du dégradé", &mut fx.gradient_angle, -180.0..=180.0, "°");
+                    slider(ui, tl("Angle du dégradé"), &mut fx.gradient_angle, -180.0..=180.0, "°");
                 } else {
-                    slider(ui, "Centre X", &mut fx.grad_cx, 0.0..=100.0, " %");
-                    slider(ui, "Centre Y", &mut fx.grad_cy, 0.0..=100.0, " %");
-                    slider(ui, "Rayon", &mut fx.grad_r, 5.0..=200.0, " %");
+                    slider(ui, tl("Centre X"), &mut fx.grad_cx, 0.0..=100.0, " %");
+                    slider(ui, tl("Centre Y"), &mut fx.grad_cy, 0.0..=100.0, " %");
+                    slider(ui, tl("Rayon"), &mut fx.grad_r, 5.0..=200.0, " %");
                 }
             }
             ui.label(RichText::new(tl("Mode de fusion")).size(12.0).color(MUTED));
@@ -471,11 +471,11 @@ impl Motion {
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
             prop_row(ui, l, 6, t_now, &mut go, "Flou animé px");
             let fx = &mut l.fx;
-            slider(ui, "Flou fixe", &mut fx.blur, 0.0..=80.0, " px");
-            if amount(ui, "Flou directionnel", &mut fx.dir_blur, 0.0..=120.0, " px") {
-                slider(ui, "Direction", &mut fx.dir_angle, -180.0..=180.0, "°");
+            slider(ui, tl("Flou fixe"), &mut fx.blur, 0.0..=80.0, " px");
+            if amount(ui, tl("Flou directionnel"), &mut fx.dir_blur, 0.0..=120.0, " px") {
+                slider(ui, tl("Direction"), &mut fx.dir_angle, -180.0..=180.0, "°");
             }
-            amount(ui, "Flou radial (zoom)", &mut fx.zoom_blur, 0.0..=100.0, " %");
+            amount(ui, tl("Flou radial (zoom)"), &mut fx.zoom_blur, 0.0..=100.0, " %");
             ui.horizontal(|ui| {
                 ui.label(RichText::new(tl("Lueur")).size(12.0).color(MUTED));
                 color_button(ui, &mut fx.glow_color);
@@ -488,10 +488,10 @@ impl Motion {
                 }
             });
             if fx.shadow {
-                slider(ui, "Décalage X", &mut fx.shadow_dx, -100.0..=100.0, " px");
-                slider(ui, "Décalage Y", &mut fx.shadow_dy, -100.0..=100.0, " px");
-                slider(ui, "Douceur", &mut fx.shadow_blur, 0.0..=80.0, " px");
-                slider(ui, "Opacité", &mut fx.shadow_alpha, 0.0..=100.0, " %");
+                slider(ui, tl("Décalage X"), &mut fx.shadow_dx, -100.0..=100.0, " px");
+                slider(ui, tl("Décalage Y"), &mut fx.shadow_dy, -100.0..=100.0, " px");
+                slider(ui, tl("Douceur"), &mut fx.shadow_blur, 0.0..=80.0, " px");
+                slider(ui, tl("Opacité"), &mut fx.shadow_alpha, 0.0..=100.0, " %");
             }
             ui.horizontal(|ui| {
                 ui.checkbox(&mut fx.inner, tl("Ombre interne"));
@@ -500,9 +500,9 @@ impl Motion {
                 }
             });
             if fx.inner {
-                slider(ui, "Décalage X ", &mut fx.inner_dx, -60.0..=60.0, " px");
-                slider(ui, "Décalage Y ", &mut fx.inner_dy, -60.0..=60.0, " px");
-                slider(ui, "Douceur ", &mut fx.inner_blur, 0.0..=60.0, " px");
+                slider(ui, tl("Décalage X "), &mut fx.inner_dx, -60.0..=60.0, " px");
+                slider(ui, tl("Décalage Y "), &mut fx.inner_dy, -60.0..=60.0, " px");
+                slider(ui, tl("Douceur "), &mut fx.inner_blur, 0.0..=60.0, " px");
             }
         });
         pro::dock_panel(ui, "color", tl("Couleur"), |ui| {
@@ -510,13 +510,13 @@ impl Motion {
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
             prop_row(ui, l, 18, t_now, &mut go, "Teinte animée °");
             let fx = &mut l.fx;
-            slider(ui, "Teinte", &mut fx.hue, -180.0..=180.0, "°");
-            slider(ui, "Saturation", &mut fx.saturation, 0.0..=300.0, " %");
-            slider(ui, "Luminosité", &mut fx.brightness, 0.0..=300.0, " %");
-            slider(ui, "Contraste", &mut fx.contrast, 0.0..=300.0, " %");
-            slider(ui, "Gamma", &mut fx.gamma, 0.2..=3.0, "");
-            amount(ui, "Sépia", &mut fx.sepia, 0.0..=100.0, " %");
-            if amount(ui, "Teinte bicolore", &mut fx.tint, 0.0..=100.0, " %") {
+            slider(ui, tl("Teinte"), &mut fx.hue, -180.0..=180.0, "°");
+            slider(ui, tl("Saturation"), &mut fx.saturation, 0.0..=300.0, " %");
+            slider(ui, tl("Luminosité"), &mut fx.brightness, 0.0..=300.0, " %");
+            slider(ui, tl("Contraste"), &mut fx.contrast, 0.0..=300.0, " %");
+            slider(ui, tl("Gamma"), &mut fx.gamma, 0.2..=3.0, "");
+            amount(ui, tl("Sépia"), &mut fx.sepia, 0.0..=100.0, " %");
+            if amount(ui, tl("Teinte bicolore"), &mut fx.tint, 0.0..=100.0, " %") {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Ombres")).size(12.0).color(MUTED));
                     color_button(ui, &mut fx.tint_dark);
@@ -524,10 +524,10 @@ impl Motion {
                     color_button(ui, &mut fx.tint_light);
                 });
             }
-            amount(ui, "Inversion", &mut fx.invert, 0.0..=100.0, " %");
-            amount(ui, "Seuil (0 = non)", &mut fx.threshold, 0.0..=100.0, " %");
+            amount(ui, tl("Inversion"), &mut fx.invert, 0.0..=100.0, " %");
+            amount(ui, tl("Seuil (0 = non)"), &mut fx.threshold, 0.0..=100.0, " %");
             let mut po = fx.posterize as f32;
-            slider(ui, "Postérisation (0 = non)", &mut po, 0.0..=16.0, " niv.");
+            slider(ui, tl("Postérisation (0 = non)"), &mut po, 0.0..=16.0, " niv.");
             fx.posterize = if po < 1.5 { 0 } else { po.round() as u32 };
             ui.horizontal(|ui| {
                 ui.checkbox(&mut fx.fill_on, tl("Remplir d'une couleur"));
@@ -544,30 +544,30 @@ impl Motion {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
             let fx = &mut l.fx;
-            if amount(ui, "Séparation RVB", &mut fx.rgb_split, 0.0..=60.0, " px") {
-                slider(ui, "Angle RVB", &mut fx.rgb_angle, -180.0..=180.0, "°");
+            if amount(ui, tl("Séparation RVB"), &mut fx.rgb_split, 0.0..=60.0, " px") {
+                slider(ui, tl("Angle RVB"), &mut fx.rgb_angle, -180.0..=180.0, "°");
             }
-            if amount(ui, "Glitch", &mut fx.glitch, 0.0..=300.0, " px") {
-                slider(ui, "Fréquence du glitch", &mut fx.glitch_freq, 0.5..=30.0, " /s");
+            if amount(ui, tl("Glitch"), &mut fx.glitch, 0.0..=300.0, " px") {
+                slider(ui, tl("Fréquence du glitch"), &mut fx.glitch_freq, 0.5..=30.0, " /s");
             }
-            amount(ui, "Grain", &mut fx.grain, 0.0..=100.0, " %");
-            if amount(ui, "Distorsion", &mut fx.distort, 0.0..=200.0, " px") {
-                slider(ui, "Taille des ondes", &mut fx.distort_scale, 4.0..=400.0, " px");
-                slider(ui, "Évolution", &mut fx.distort_speed, 0.0..=10.0, " /s");
+            amount(ui, tl("Grain"), &mut fx.grain, 0.0..=100.0, " %");
+            if amount(ui, tl("Distorsion"), &mut fx.distort, 0.0..=200.0, " px") {
+                slider(ui, tl("Taille des ondes"), &mut fx.distort_scale, 4.0..=400.0, " px");
+                slider(ui, tl("Évolution"), &mut fx.distort_speed, 0.0..=10.0, " /s");
             }
-            amount(ui, "Scintillement", &mut fx.flicker, 0.0..=100.0, " %");
+            amount(ui, tl("Scintillement"), &mut fx.flicker, 0.0..=100.0, " %");
         });
         if is_text {
             pro::dock_panel(ui, "textanim", tl("Animateur de texte"), |ui| {
                 ui.spacing_mut().item_spacing.y = 6.0;
                 ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                 let fx = &mut l.fx;
-                slider(ui, "Machine à écrire (0 = non)", &mut fx.typewriter, 0.0..=10.0, " s");
+                slider(ui, tl("Machine à écrire (0 = non)"), &mut fx.typewriter, 0.0..=10.0, " s");
                 let ta = &mut fx.ta;
                 ui.checkbox(&mut ta.on, tl("Animer lettre par lettre"));
                 if ta.on {
                     let mut m = ta.mode as usize;
-                    if pro::segmented(ui, &mut m, &[tl("Entrée"), tl("Sortie"), tl("Les deux")]) {
+                    if pro::segmented(ui, &mut m, &[tl("Entréetl("), tl(")Sortietl("), tl(")Les deux")]) {
                         ta.mode = m as u8;
                     }
                     ui.label(RichText::new(tl("Ordre")).size(12.0).color(MUTED));
@@ -576,8 +576,8 @@ impl Motion {
                             ui.selectable_value(&mut ta.order, k as u8, *n);
                         }
                     });
-                    slider(ui, "Décalage entre lettres", &mut ta.delay, 0.0..=0.5, " s");
-                    slider(ui, "Durée par lettre", &mut ta.dur, 0.02..=3.0, " s");
+                    slider(ui, tl("Décalage entre lettres"), &mut ta.delay, 0.0..=0.5, " s");
+                    slider(ui, tl("Durée par lettre"), &mut ta.dur, 0.02..=3.0, " s");
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Courbe")).size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("ta-ease").selected_text(Ease::ALL.iter().find(|e| e.0 == ta.ease).map_or("", |e| e.1)).show_ui(ui, |ui| {
@@ -586,12 +586,12 @@ impl Motion {
                             }
                         });
                     });
-                    sub(ui, "Valeurs de départ");
-                    slider(ui, "Opacité", &mut ta.opacity, 0.0..=100.0, " %");
-                    slider(ui, "Décalage X", &mut ta.dx, -500.0..=500.0, " px");
-                    slider(ui, "Décalage Y", &mut ta.dy, -500.0..=500.0, " px");
-                    slider(ui, "Échelle", &mut ta.scale, 0.0..=400.0, " %");
-                    slider(ui, "Rotation", &mut ta.rot, -360.0..=360.0, "°");
+                    sub(ui, tl("Valeurs de départ"));
+                    slider(ui, tl("Opacité"), &mut ta.opacity, 0.0..=100.0, " %");
+                    slider(ui, tl("Décalage X"), &mut ta.dx, -500.0..=500.0, " px");
+                    slider(ui, tl("Décalage Y"), &mut ta.dy, -500.0..=500.0, " px");
+                    slider(ui, tl("Échelle"), &mut ta.scale, 0.0..=400.0, " %");
+                    slider(ui, tl("Rotation"), &mut ta.rot, -360.0..=360.0, "°");
                 }
             });
         }
@@ -599,43 +599,43 @@ impl Motion {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
             let fx = &mut l.fx;
-            slider(ui, "Tremblement de position", &mut fx.wiggle, 0.0..=200.0, " px");
+            slider(ui, tl("Tremblement de position"), &mut fx.wiggle, 0.0..=200.0, " px");
             if fx.wiggle > 0.0 {
                 if fx.wiggle_freq <= 0.0 {
                     fx.wiggle_freq = 2.0;
                 }
-                slider(ui, "Fréquence", &mut fx.wiggle_freq, 0.1..=12.0, " /s");
+                slider(ui, tl("Fréquence"), &mut fx.wiggle_freq, 0.1..=12.0, " /s");
             }
             ui.label(RichText::new(tl("Répéter toutes les clés")).size(12.0).color(MUTED));
             let mut mode = if fx.pingpong { 2 } else if fx.loop_keys { 1 } else { 0 };
-            if pro::segmented(ui, &mut mode, &[tl("Non"), tl("Boucle"), tl("Aller-retour")]) {
+            if pro::segmented(ui, &mut mode, &[tl("Nontl("), tl(")Boucletl("), tl(")Aller-retour")]) {
                 fx.loop_keys = mode == 1;
                 fx.pingpong = mode == 2;
             }
             ui.add_space(4.0);
             let mut echo = fx.echo as f32;
-            slider(ui, "Écho (traînée)", &mut echo, 0.0..=12.0, " copies");
+            slider(ui, tl("Écho (traînée)"), &mut echo, 0.0..=12.0, " copies");
             fx.echo = echo.round() as u32;
             if fx.echo > 0 {
-                slider(ui, "Délai entre échos", &mut fx.echo_delay, 0.01..=0.5, " s");
+                slider(ui, tl("Délai entre échos"), &mut fx.echo_delay, 0.01..=0.5, " s");
             }
             let mut rep = fx.repeat as f32;
-            slider(ui, "Répéteur", &mut rep, 0.0..=40.0, " copies");
+            slider(ui, tl("Répéteur"), &mut rep, 0.0..=40.0, " copies");
             fx.repeat = rep.round() as u32;
             if fx.repeat > 0 {
-                slider(ui, "Décalage X", &mut fx.rep_dx, -1000.0..=1000.0, " px");
-                slider(ui, "Décalage Y", &mut fx.rep_dy, -1000.0..=1000.0, " px");
-                slider(ui, "Rotation par copie", &mut fx.rep_rot, -180.0..=180.0, "°");
-                slider(ui, "Échelle par copie", &mut fx.rep_scale, 20.0..=200.0, " %");
-                slider(ui, "Fondu par copie", &mut fx.rep_fade, 0.0..=100.0, " %");
+                slider(ui, tl("Décalage X"), &mut fx.rep_dx, -1000.0..=1000.0, " px");
+                slider(ui, tl("Décalage Y"), &mut fx.rep_dy, -1000.0..=1000.0, " px");
+                slider(ui, tl("Rotation par copie"), &mut fx.rep_rot, -180.0..=180.0, "°");
+                slider(ui, tl("Échelle par copie"), &mut fx.rep_scale, 20.0..=200.0, " %");
+                slider(ui, tl("Fondu par copie"), &mut fx.rep_fade, 0.0..=100.0, " %");
             }
         });
         pro::dock_panel(ui, "time", tl("Temps"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
             let fx = &mut l.fx;
-            slider(ui, "Vitesse", &mut fx.speed, 5.0..=800.0, " %");
-            slider(ui, "Décalage temporel", &mut fx.time_offset, -10.0..=10.0, " s");
+            slider(ui, tl("Vitesse"), &mut fx.speed, 5.0..=800.0, " %");
+            slider(ui, tl("Décalage temporel"), &mut fx.time_offset, -10.0..=10.0, " s");
             ui.horizontal(|ui| {
                 ui.checkbox(&mut fx.reverse_time, tl("Lecture inversée"));
                 if ui.checkbox(&mut fx.freeze, tl("Figer")).on_hover_text(tl("Fige l'image du calque à l'instant choisi")).changed() && fx.freeze {

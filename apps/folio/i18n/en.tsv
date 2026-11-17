@@ -1,4 +1,4 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
 Enregistrer	
 Ctrl+S	
 Tous les outils	
@@ -130,3 +130,63 @@ Version PDF
 Format (page courante)	
 Emplacement	
 Ajouter comme annotation	
+Pagestl(	
+)Signetstl(	
+)Notes	
+Couleur	
+Tampon	
+Glisse sur la page pour poser le tampon, ou clique pour une taille standard.	
+Signature	
+Texte : clique où écrire. Date du jour : un clic.	
+Ce PDF n'a pas de champs : utilise Texte, Date et Signature pour le remplir.	
+Insérer après la page courante	
+Extraire et diviser	
+Impression économique	
+Recadrer (marges en mm : gauche, haut, droite, bas)	
+Ajoute des PDF et des images (ou glisse-les dans la fenêtre), mets-les dans l'ordre, puis combine.	
+Chaque image devient une page. Lance ensuite l'OCR pour rendre le texte des scans consultable.	
+Lit le texte des pages scannées ou photographiées avec le moteur OCR de Windows, sans rien envoyer en ligne.	
+Langue du document	
+Aucune langue OCR installée : Paramètres Windows › Heure et langue › Langue.	
+Trace des rectangles avec l'outil Caviardage sur ce qui doit disparaître. Appliquer remplace ces pages par une image : le texte caché n'existe plus du tout dans le fichier.	
+Chiffrement AES-256. Une copie protégée est enregistrée, le document ouvert reste modifiable.	
+Mot de passe d'ouverture	
+Mot de passe des autorisations (facultatif)	
+Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus.	
+Compression forte (pages en images)	
+72 ppptl(	
+)110 ppptl(	
+)150 ppp	
+Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite.	
+Filigranetl(	
+)En-têtetl(	
+)Piedtl(	
+)Numérostl(	
+)Bates	
+Arrière-plan	
+PNGtl(	
+)JPEGtl(	
+)Textetl(	
+)Word	
+Résolution	
+)150 ppptl(	
+)300 ppp	
+Envoyer la page courante	
+Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge.	
+Un scan doit d'abord passer par Numériser et OCR.	
+Aucun signet. Outils › Signets pour en créer.	
+Glisse entre deux points de la page : la distance s'affiche en millimètres (à l'échelle 1:1 du document).	
+Main (H)	
+Surligner	
+Souligner	
+Barrer	
+Note	
+Zone de texte	
+Rectangle	
+Ellipse	
+Ligne	
+Flèche	
+Dessin à main levée	
+Date du jour	
+Caviardage	
+Mesure	

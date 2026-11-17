@@ -1907,7 +1907,7 @@ impl PageApp {
                                 ui.toggle_value(upper, RichText::new(tl("AA"))).on_hover_text(tl("Majuscules · Ctrl+Maj+K"));
                                 pro::toolbar_sep(ui);
                                 let mut a = (*align as usize).min(3);
-                                if pro::segmented(ui, &mut a, &[tl("≡ G"), tl("≡ C"), tl("≡ D"), tl("≡ J")]) {
+                                if pro::segmented(ui, &mut a, &[tl("≡ Gtl("), tl(")≡ Ctl("), tl(")≡ Dtl("), tl(")≡ J")]) {
                                     *align = a as u8;
                                 }
                                 pro::toolbar_sep(ui);
@@ -1954,7 +1954,7 @@ impl PageApp {
                             }
                             Kind::Image { cover, filter, zoom, stretch, .. } => {
                                 let mut c = if *stretch { 2 } else if *cover { 0 } else { 1 };
-                                if pro::segmented(ui, &mut c, &[tl("Remplir"), tl("Ajuster"), tl("Déformer")]) {
+                                if pro::segmented(ui, &mut c, &[tl("Remplirtl("), tl(")Ajustertl("), tl(")Déformer")]) {
                                     (*cover, *stretch) = (c == 0, c == 2);
                                 }
                                 ui.add(egui::DragValue::new(zoom).range(0.05..=20.0).speed(0.01).prefix("Échelle ").max_decimals(2));
@@ -2187,7 +2187,7 @@ impl PageApp {
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
                     ui.add_space(10.0);
-                    pro::segmented(ui, &mut self.tab, &[tl("Propriétés"), tl("Calques"), tl("Liens"), tl("Contrôle")]);
+                    pro::segmented(ui, &mut self.tab, &[tl("Propriétéstl("), tl(")Calquestl("), tl(")Lienstl("), tl(")Contrôle")]);
                 });
                 ui.add_space(8.0);
                 match self.tab {
@@ -2285,7 +2285,7 @@ impl PageApp {
                         ui.toggle_value(underline, RichText::new(tl(" S ")).underline());
                         ui.toggle_value(upper, RichText::new(tl(" AA ")));
                     });
-                    color_row(ui, "Couleur", color, &swatches);
+                    color_row(ui, tl("Couleur"), color, &swatches);
                     ui.horizontal(|ui| {
                         ui.checkbox(&mut opts.small_caps, tl("Petites capitales"));
                         ui.checkbox(&mut opts.strike, tl("Barré"));
@@ -2309,7 +2309,7 @@ impl PageApp {
                         opts.outline = on.then_some([255, 255, 255, 255]);
                     }
                     if let Some(c) = &mut opts.outline {
-                        color_row(ui, "Couleur du contour", c, &swatches);
+                        color_row(ui, tl("Couleur du contour"), c, &swatches);
                         ui.add(egui::Slider::new(&mut opts.outline_w, 0.1..=6.0).suffix(" pt"));
                     }
                 });
@@ -2317,7 +2317,7 @@ impl PageApp {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                     let mut a = *al as usize;
-                    if pro::segmented(ui, &mut a, &[tl("Gauche"), tl("Centre"), tl("Droite"), tl("Justifié")]) {
+                    if pro::segmented(ui, &mut a, &[tl("Gauchetl("), tl(")Centretl("), tl(")Droitetl("), tl(")Justifié")]) {
                         *al = a as u8;
                     }
                     ui.label(RichText::new(tl("Interligne")).size(12.0).color(MUTED));
@@ -2396,7 +2396,7 @@ impl PageApp {
                         ui.checkbox(&mut opts.rule_below, tl("en dessous"));
                     });
                     if opts.rule_above || opts.rule_below {
-                        color_row(ui, "Couleur du filet", &mut opts.rule_color, &swatches);
+                        color_row(ui, tl("Couleur du filet"), &mut opts.rule_color, &swatches);
                         ui.horizontal(|ui| {
                             ui.label(RichText::new(tl("Épaisseur")).size(12.0).color(MUTED));
                             ui.add(egui::DragValue::new(&mut opts.rule_w).range(0.1..=20.0).speed(0.1).suffix(" pt"));
@@ -2424,7 +2424,7 @@ impl PageApp {
                     });
                     ui.label(RichText::new(tl("Alignement vertical")).size(12.0).color(MUTED));
                     let mut v = *valign as usize;
-                    if pro::segmented(ui, &mut v, &[tl("Haut"), tl("Milieu"), tl("Bas")]) {
+                    if pro::segmented(ui, &mut v, &[tl("Hauttl("), tl(")Milieutl("), tl(")Bas")]) {
                         *valign = v as u8;
                     }
                     ui.label(RichText::new(tl("Marge intérieure")).size(12.0).color(MUTED));
@@ -2434,7 +2434,7 @@ impl PageApp {
                         *background = on.then_some([245, 245, 247, 255]);
                     }
                     if let Some(bg) = background {
-                        color_row(ui, "Fond", bg, &swatches);
+                        color_row(ui, tl("Fond"), bg, &swatches);
                     }
                     ui.label(RichText::new(tl("Suite du texte dans")).size(12.0).color(MUTED));
                     let cur = link.and_then(|l| texts.iter().find(|t| t.0 == l)).map_or("Aucun bloc".to_string(), |t| t.1.clone());
@@ -2463,7 +2463,7 @@ impl PageApp {
                         }
                     });
                     let mut c = if *cover { 0 } else { 1 };
-                    if pro::segmented(ui, &mut c, &[tl("Remplir le cadre"), tl("Ajuster dans le cadre")]) {
+                    if pro::segmented(ui, &mut c, &[tl("Remplir le cadretl("), tl(")Ajuster dans le cadre")]) {
                         *cover = c == 0;
                     }
                     ui.checkbox(stretch, tl("Étirer sans garder les proportions"));
@@ -2483,7 +2483,7 @@ impl PageApp {
                     });
                     ui.label(RichText::new(tl("Forme du cadre")).size(12.0).color(MUTED));
                     let mut sh = *shape as usize;
-                    if pro::segmented(ui, &mut sh, &[tl("Rectangle"), tl("Ellipse"), tl("Polygone")]) {
+                    if pro::segmented(ui, &mut sh, &[tl("Rectangletl("), tl(")Ellipsetl("), tl(")Polygone")]) {
                         *shape = sh as u8;
                     }
                     if *shape == 2 {
@@ -2506,7 +2506,7 @@ impl PageApp {
                 pro::dock_panel(ui, "shape", tl("Forme"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-                    color_row(ui, "Fond", fill, &swatches);
+                    color_row(ui, tl("Fond"), fill, &swatches);
                     ui.label(RichText::new(tl("Arrondi")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(radius, 0.0..=300.0).suffix(" pt"));
                     gradient_row(ui, &mut f.fill2, &mut f.grad_angle, &swatches);
@@ -2516,7 +2516,7 @@ impl PageApp {
                 pro::dock_panel(ui, "shape", tl("Forme"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-                    color_row(ui, "Fond", fill, &swatches);
+                    color_row(ui, tl("Fond"), fill, &swatches);
                     gradient_row(ui, &mut f.fill2, &mut f.grad_angle, &swatches);
                 });
             }
@@ -2524,7 +2524,7 @@ impl PageApp {
                 pro::dock_panel(ui, "shape", tl("Forme"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-                    color_row(ui, "Fond", fill, &swatches);
+                    color_row(ui, tl("Fond"), fill, &swatches);
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Côtés / branches")).size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(sides).range(3..=48));
@@ -2538,7 +2538,7 @@ impl PageApp {
                 pro::dock_panel(ui, "shape", tl("Ligne"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-                    color_row(ui, "Couleur", color, &swatches);
+                    color_row(ui, tl("Couleur"), color, &swatches);
                     ui.label(RichText::new(tl("Épaisseur")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(width, 0.25..=30.0).suffix(" pt"));
                     ui.label(RichText::new(tl("Pointillés (0 = plein)")).size(12.0).color(MUTED));
@@ -2549,7 +2549,7 @@ impl PageApp {
                     });
                     ui.label(RichText::new(tl("Extrémités")).size(12.0).color(MUTED));
                     let mut c = *cap as usize;
-                    if pro::segmented(ui, &mut c, &[tl("Rondes"), tl("Carrées"), tl("Droites")]) {
+                    if pro::segmented(ui, &mut c, &[tl("Rondestl("), tl(")Carréestl("), tl(")Droites")]) {
                         *cap = c as u8;
                     }
                     ui.label(RichText::new(tl("Direction")).size(12.0).color(MUTED));
@@ -2569,9 +2569,9 @@ impl PageApp {
                         *fill = on.then_some([120, 200, 255, 255]);
                     }
                     if let Some(c) = fill {
-                        color_row(ui, "Couleur du fond", c, &swatches);
+                        color_row(ui, tl("Couleur du fond"), c, &swatches);
                     }
-                    color_row(ui, "Couleur du trait", color, &swatches);
+                    color_row(ui, tl("Couleur du trait"), color, &swatches);
                     ui.label(RichText::new(tl("Épaisseur")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(width, 0.0..=30.0).suffix(" pt"));
                     studio_ui::pro::tip(ui, tl("Sélection directe (A) pour déplacer les points et leurs poignées."));
@@ -2599,7 +2599,7 @@ impl PageApp {
                         ui.checkbox(show_path, tl("Voir le tracé"));
                         ui.checkbox(closed, tl("Fermé"));
                     });
-                    color_row(ui, "Couleur", color, &swatches);
+                    color_row(ui, tl("Couleur"), color, &swatches);
                 });
             }
             Kind::Table { cells, size, family, color, line, header, stripe, align: talign, first_col } => {
@@ -2644,10 +2644,10 @@ impl PageApp {
                         ui.label(RichText::new(tl("Taille")).size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(size).range(4.0..=72.0).speed(0.2).suffix(" pt"));
                     });
-                    color_row(ui, "Texte", color, &swatches);
-                    color_row(ui, "Traits", line, &swatches);
+                    color_row(ui, tl("Texte"), color, &swatches);
+                    color_row(ui, tl("Traits"), line, &swatches);
                     let mut a = *talign as usize;
-                    if pro::segmented(ui, &mut a, &[tl("Gauche"), tl("Centre"), tl("Droite")]) {
+                    if pro::segmented(ui, &mut a, &[tl("Gauchetl("), tl(")Centretl("), tl(")Droite")]) {
                         *talign = a as u8;
                     }
                     ui.checkbox(first_col, tl("Première colonne en gras"));
@@ -2656,14 +2656,14 @@ impl PageApp {
                         *header = on.then_some([30, 30, 40, 255]);
                     }
                     if let Some(h) = header {
-                        color_row(ui, "Fond de l'en-tête", h, &swatches);
+                        color_row(ui, tl("Fond de l'en-tête"), h, &swatches);
                     }
                     let mut on = stripe.is_some();
                     if ui.checkbox(&mut on, tl("Lignes alternées")).changed() {
                         *stripe = on.then_some([245, 245, 248, 255]);
                     }
                     if let Some(s) = stripe {
-                        color_row(ui, "Fond alterné", s, &swatches);
+                        color_row(ui, tl("Fond alterné"), s, &swatches);
                     }
                 });
             }
@@ -2682,7 +2682,7 @@ impl PageApp {
                     f.stroke = on.then_some([20, 20, 24, 255]);
                 }
                 if let Some(c) = &mut f.stroke {
-                    color_row(ui, "Couleur du contour", c, &swatches);
+                    color_row(ui, tl("Couleur du contour"), c, &swatches);
                     ui.add(egui::Slider::new(&mut f.stroke_w, 0.25..=20.0).suffix(" pt"));
                     ui.label(RichText::new(tl("Pointillés")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut f.dash, 0.0..=40.0).suffix(" pt"));
@@ -2718,11 +2718,11 @@ impl PageApp {
                     ui.label(RichText::new(tl("Flou")).size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.shadow_blur).range(0.0..=60.0).speed(0.2));
                 });
-                color_row(ui, "Couleur de l'ombre", &mut f.fx.shadow_color, &swatches);
+                color_row(ui, tl("Couleur de l'ombre"), &mut f.fx.shadow_color, &swatches);
             }
             ui.checkbox(&mut f.fx.glow, tl("Lueur externe"));
             if f.fx.glow {
-                color_row(ui, "Couleur de la lueur", &mut f.fx.glow_color, &swatches);
+                color_row(ui, tl("Couleur de la lueur"), &mut f.fx.glow_color, &swatches);
                 ui.add(egui::Slider::new(&mut f.fx.glow_size, 0.5..=40.0).suffix(" pt"));
             }
             ui.label(RichText::new(tl("Contour progressif")).size(12.0).color(MUTED));
@@ -2861,7 +2861,7 @@ impl PageApp {
                 ui.add(egui::DragValue::new(&mut self.doc.first_number).range(1..=9999));
             });
             let sw = self.doc.swatches.clone();
-            color_row(ui, "Papier", &mut self.doc.paper, &sw);
+            color_row(ui, tl("Papier"), &mut self.doc.paper, &sw);
             if page != MASTER {
                 let mut use_master = !self.doc.pages[page].no_master;
                 if ui.checkbox(&mut use_master, tl("Utiliser le gabarit sur cette page")).changed() {
@@ -3441,19 +3441,19 @@ impl PageApp {
                 let row = |ui: &mut Ui, s: &str| {
                     ui.label(RichText::new(s).size(12.0).color(MUTED));
                 };
-                row(ui, "Format");
+                row(ui, tl("Format"));
                 pro::segmented(ui, &mut o.format, &FORMATS);
                 ui.add_space(8.0);
-                row(ui, "Pages");
+                row(ui, tl("Pages"));
                 ui.horizontal(|ui| {
-                    pro::segmented(ui, &mut o.pages, &[tl("Toutes"), tl("Page affichée"), tl("Plage")]);
+                    pro::segmented(ui, &mut o.pages, &[tl("Toutestl("), tl(")Page affichéetl("), tl(")Plage")]);
                     if o.pages == 2 {
                         ui.add(egui::TextEdit::singleline(&mut o.range).hint_text(format!("ex. 1-3, 5 (sur {n})")).desired_width(120.0));
                     }
                 });
                 ui.add_space(8.0);
                 if o.format == 1 || o.format == 2 {
-                    row(ui, "Résolution");
+                    row(ui, tl("Résolution"));
                     let labels: Vec<&str> = DPIS.iter().map(|d| d.0).collect();
                     pro::segmented(ui, &mut o.dpi, &labels);
                     let s = DPIS[o.dpi].1 / 72.0;
@@ -3461,7 +3461,7 @@ impl PageApp {
                     ui.add_space(8.0);
                 }
                 if o.format == 2 {
-                    row(ui, "Qualité JPEG");
+                    row(ui, tl("Qualité JPEG"));
                     ui.add(egui::Slider::new(&mut o.quality, 40..=100).suffix(" %"));
                     ui.add_space(8.0);
                 }
@@ -3636,7 +3636,7 @@ fn gradient_row(ui: &mut Ui, fill2: &mut Option<[u8; 4]>, angle: &mut f32, swatc
         *fill2 = on.then_some([10, 132, 255, 255]);
     }
     if let Some(c) = fill2 {
-        color_row(ui, "Vers", c, swatches);
+        color_row(ui, tl("Vers"), c, swatches);
         ui.label(RichText::new(tl("Angle")).size(12.0).color(MUTED));
         ui.add(egui::Slider::new(angle, -180.0..=180.0).suffix("°"));
     }

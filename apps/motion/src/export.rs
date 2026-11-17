@@ -386,7 +386,7 @@ impl Motion {
             let row = |ui: &mut Ui, s: &str| {
                 ui.label(RichText::new(s).size(12.0).color(MUTED));
             };
-            row(ui, "Format");
+            row(ui, tl("Format"));
             let w = (ui.available_width() - 18.0) / 4.0;
             for chunk in FORMATS.chunks(4).enumerate() {
                 ui.horizontal(|ui| {
@@ -405,7 +405,7 @@ impl Motion {
             }
             ui.add_space(10.0);
             if !matches!(o.format, 4 | 5 | 7) {
-                row(ui, "Taille");
+                row(ui, tl("Taille"));
                 let labels: Vec<&str> = SCALES.iter().map(|s| s.0).collect();
                 pro::segmented(ui, &mut o.scale, &labels);
                 let (w, h) = out_size(&self.comp, SCALES[o.scale].1, o.format == 0);
@@ -413,9 +413,9 @@ impl Motion {
                 ui.add_space(8.0);
             }
             if matches!(o.format, 0 | 1 | 2 | 5 | 6) {
-                row(ui, "Plage");
+                row(ui, tl("Plage"));
                 let has_work = self.comp.work.is_some();
-                pro::segmented(ui, &mut o.range, &[tl("Toute la composition"), tl("Zone de travail"), tl("Personnalisée")]);
+                pro::segmented(ui, &mut o.range, &[tl("Toute la compositiontl("), tl(")Zone de travailtl("), tl(")Personnalisée")]);
                 if o.range == 1 && !has_work {
                     o.range = 0;
                 }
@@ -436,7 +436,7 @@ impl Motion {
             }
             match o.format {
                 0 => {
-                    row(ui, "Qualité (débit)");
+                    row(ui, tl("Qualité (débit)"));
                     let labels: Vec<&str> = MP4_Q.iter().map(|s| s.0).collect();
                     pro::segmented(ui, &mut o.quality, &labels);
                     let (w, h) = out_size(&self.comp, SCALES[o.scale].1, true);
@@ -444,14 +444,14 @@ impl Motion {
                     ui.label(RichText::new(format!("≈ {br:.1} Mb/s · audio muet AAC")).size(11.5).color(FAINT));
                 }
                 1 => {
-                    row(ui, "Images par seconde");
+                    row(ui, tl("Images par seconde"));
                     let labels: Vec<&str> = GIF_FPS.iter().map(|s| s.0).collect();
                     pro::segmented(ui, &mut o.gif_fps, &labels);
                     ui.add_space(6.0);
-                    row(ui, "Lecture en boucle");
+                    row(ui, tl("Lecture en boucle"));
                     pro::segmented(ui, &mut o.gif_loop, &GIF_LOOP);
                     ui.add_space(6.0);
-                    row(ui, "Palette");
+                    row(ui, tl("Palette"));
                     let labels: Vec<&str> = GIF_SPEED.iter().map(|s| s.0).collect();
                     pro::segmented(ui, &mut o.gif_speed, &labels);
                 }

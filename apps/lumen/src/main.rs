@@ -1841,7 +1841,7 @@ impl Lumen {
             let mut close = false;
             let keep = pro::sheet(ctx, "copy", 420.0, |ui| {
                 ui.label(RichText::new(tl("Réglages à copier")).font(semibold(18.0)).color(INK_STRONG));
-                widgets::caption(ui, "Coller (Ctrl+V) n'appliquera que les groupes cochés.");
+                widgets::caption(ui, tl("Coller (Ctrl+V) n'appliquera que les groupes cochés."));
                 ui.add_space(8.0);
                 egui::Grid::new("copy-groups").num_columns(2).spacing([24.0, 6.0]).show(ui, |ui| {
                     for (k, g) in meta::GROUPS.iter().enumerate() {
@@ -1874,7 +1874,7 @@ impl Lumen {
             if let Some((_, sm)) = &mut self.smart_edit {
                 keep = pro::sheet(ctx, "smart", 420.0, |ui| {
                     ui.label(RichText::new(tl("Collection dynamique")).font(semibold(18.0)).color(INK_STRONG));
-                    widgets::caption(ui, "Les photos qui remplissent toutes les règles y apparaissent automatiquement.");
+                    widgets::caption(ui, tl("Les photos qui remplissent toutes les règles y apparaissent automatiquement."));
                     ui.add_space(8.0);
                     egui::Grid::new("smart").num_columns(2).spacing([14.0, 8.0]).show(ui, |ui| {
                         ui.label(tl("Nom"));
@@ -1906,13 +1906,13 @@ impl Lumen {
                         ui.end_row();
                         ui.label(tl("Retouche"));
                         let mut ed = sm.edited as usize;
-                        if pro::segmented(ui, &mut ed, &[tl("Toutes"), tl("Modifiées"), tl("Intactes")]) {
+                        if pro::segmented(ui, &mut ed, &[tl("Toutestl("), tl(")Modifiéestl("), tl(")Intactes")]) {
                             sm.edited = ed as u8;
                         }
                         ui.end_row();
                         ui.label(tl("Type"));
                         let mut kd = sm.kind as usize;
-                        if pro::segmented(ui, &mut kd, &[tl("Tous"), tl("RAW"), tl("JPEG, PNG…")]) {
+                        if pro::segmented(ui, &mut kd, &[tl("Toustl("), tl(")RAWtl("), tl(")JPEG, PNG…")]) {
                             sm.kind = kd as u8;
                         }
                         ui.end_row();
@@ -1950,7 +1950,7 @@ impl Lumen {
         ui.label(RichText::new(format!("Exporter {n} photo{}", if n > 1 { "s" } else { "" })).font(semibold(18.0)).color(INK_STRONG));
         ui.add_space(8.0);
         egui::ScrollArea::vertical().max_height(ui.ctx().content_rect().height() * 0.68).show(ui, |ui| {
-            heading(ui, "EMPLACEMENT");
+            heading(ui, tl("EMPLACEMENT"));
             ui.checkbox(&mut o.same_folder, tl("Même dossier que l'original"));
             if !o.same_folder {
                 ui.horizontal(|ui| {
@@ -1976,7 +1976,7 @@ impl Lumen {
                 });
             });
             ui.add_space(10.0);
-            heading(ui, "NOM DES FICHIERS");
+            heading(ui, tl("NOM DES FICHIERS"));
             ui.horizontal(|ui| {
                 let current = meta::TEMPLATES.iter().find(|t| t.1 == o.template).map(|t| t.0).unwrap_or("Personnalisé");
                 egui::ComboBox::from_id_salt("template").selected_text(current).width(180.0).show_ui(ui, |ui| {
@@ -1998,7 +1998,7 @@ impl Lumen {
                 ui.add(egui::DragValue::new(&mut o.start).range(0..=99999));
             });
             ui.add_space(10.0);
-            heading(ui, "FORMAT");
+            heading(ui, tl("FORMAT"));
             ui.horizontal(|ui| {
                 pro::segmented(ui, &mut o.format, &meta::FORMATS);
                 if o.format == 0 {
@@ -2013,7 +2013,7 @@ impl Lumen {
                 _ => "WebP sans perte, sRGB : léger et net pour le web.",
             });
             ui.add_space(10.0);
-            heading(ui, "TAILLE");
+            heading(ui, tl("TAILLE"));
             ui.horizontal_wrapped(|ui| {
                 for (name, mode, w, h) in meta::SIZE_PRESETS {
                     let on = o.size == w && (w == 0 || (o.size_mode == mode && (mode != 4 || o.size_h == h)));
@@ -2036,7 +2036,7 @@ impl Lumen {
                 ui.checkbox(&mut o.no_enlarge, tl("Ne pas agrandir"));
             });
             ui.add_space(10.0);
-            heading(ui, "ACCENTUATION DE SORTIE");
+            heading(ui, tl("ACCENTUATION DE SORTIE"));
             ui.horizontal(|ui| {
                 pro::segmented(ui, &mut o.sharpen_for, &meta::SHARPEN_FOR);
                 if o.sharpen_for > 0 {
@@ -2044,7 +2044,7 @@ impl Lumen {
                 }
             });
             ui.add_space(10.0);
-            heading(ui, "MÉTADONNÉES");
+            heading(ui, tl("MÉTADONNÉES"));
             egui::ComboBox::from_id_salt("meta").selected_text(meta::METADATA[o.metadata.min(3)]).width(240.0).show_ui(ui, |ui| {
                 for (k, m) in meta::METADATA.iter().enumerate() {
                     ui.selectable_value(&mut o.metadata, k, *m);
@@ -2057,7 +2057,7 @@ impl Lumen {
                 ui.add(egui::TextEdit::singleline(&mut o.copyright).hint_text(tl("© 2026 …")).desired_width(150.0));
             });
             ui.add_space(10.0);
-            heading(ui, "FILIGRANE");
+            heading(ui, tl("FILIGRANE"));
             ui.checkbox(&mut o.watermark, tl("Ajouter un filigrane texte"));
             if o.watermark {
                 ui.horizontal(|ui| {
@@ -2082,7 +2082,7 @@ impl Lumen {
                 });
             }
             ui.add_space(10.0);
-            heading(ui, "APRÈS L'EXPORT");
+            heading(ui, tl("APRÈS L'EXPORT"));
             ui.checkbox(&mut o.open_after, tl("Ouvrir le dossier dans l'Explorateur"));
         });
         ui.add_space(12.0);

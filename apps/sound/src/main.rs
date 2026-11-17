@@ -1531,7 +1531,7 @@ impl Sound {
                         }
                     }
                     None => {
-                        pro::shortcuts(ui, "Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme");
+                        pro::shortcuts(ui, tl("Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme"));
                     }
                 }
             });
@@ -1615,10 +1615,10 @@ impl Sound {
                 pro::dock_panel(ui, "amp", tl("Volume"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.label(RichText::new(format!("Appliqué {scope}")).size(11.5).color(FAINT));
-                    slider(ui, "Gain", &mut fx.gain, -24.0..=24.0, " dB");
+                    slider(ui, tl("Gain"), &mut fx.gain, -24.0..=24.0, " dB");
                     let g = fx.gain;
                     act!(ui, "Gain", move |c: &mut Clip, a, b| c.gain_db(a, b, g));
-                    slider(ui, "Normaliser la crête à", &mut fx.peak, -12.0..=0.0, " dB");
+                    slider(ui, tl("Normaliser la crête à"), &mut fx.peak, -12.0..=0.0, " dB");
                     let pk = fx.peak;
                     act!(ui, "Normalisation", move |c: &mut Clip, a, b| c.normalize(a, b, pk));
                     ui.label(RichText::new(tl("Volume perçu (LUFS)")).size(12.0).color(MUTED));
@@ -1627,11 +1627,11 @@ impl Sound {
                     ui.label(RichText::new(["Spotify, YouTube, réseaux", "Podcasts", "Voix posée, livres audio", "Télévision (EBU R128)"][fx.lufs]).size(11.5).color(FAINT));
                     let target = LUFS[fx.lufs].1;
                     act!(ui, "Volume perçu", move |c: &mut Clip, a, b| c.loudness_normalize(a, b, target));
-                    slider(ui, "Limiteur (plafond)", &mut fx.ceiling, -12.0..=0.0, " dB");
+                    slider(ui, tl("Limiteur (plafond)"), &mut fx.ceiling, -12.0..=0.0, " dB");
                     let ce = fx.ceiling;
                     act!(ui, "Limiteur", move |c: &mut Clip, a, b| c.limiter(a, b, ce));
                     ui.label(RichText::new(tl("Courbe des fondus")).size(12.0).color(MUTED));
-                    pro::segmented(ui, &mut fx.fade_shape, &[tl("Linéaire"), tl("Log"), tl("En S")]);
+                    pro::segmented(ui, &mut fx.fade_shape, &[tl("Linéairetl("), tl(")Logtl("), tl(")En S")]);
                     let shape = fx.fade_shape as u8;
                     ui.horizontal(|ui| {
                         if pro::secondary(ui, tl("Fondu entrant")).clicked() {
@@ -1649,18 +1649,18 @@ impl Sound {
                     if pro::secondary(ui, if has_noise { "✓ Profil capturé · recapturer" } else { "Capturer le profil de bruit" }).clicked() {
                         capture = true;
                     }
-                    slider(ui, "Intensité", &mut fx.denoise, 0.1..=1.0, "");
+                    slider(ui, tl("Intensité"), &mut fx.denoise, 0.1..=1.0, "");
                     if has_noise {
                         let amt = fx.denoise;
                         let prof = self.noise.clone().unwrap_or_default();
                         act!(ui, "Réduction de bruit", move |c: &mut Clip, a, b| c.denoise(a, b, &prof, amt));
                     }
                     ui.add_space(4.0);
-                    slider(ui, "Porte de bruit", &mut fx.gate, -80.0..=-10.0, " dB");
+                    slider(ui, tl("Porte de bruit"), &mut fx.gate, -80.0..=-10.0, " dB");
                     let gt = fx.gate;
                     act!(ui, "Porte de bruit", move |c: &mut Clip, a, b| c.gate(a, b, gt));
-                    slider(ui, "Coupe-bas", &mut fx.low_cut, 20.0..=500.0, " Hz");
-                    slider(ui, "Coupe-haut", &mut fx.high_cut, 1000.0..=20_000.0, " Hz");
+                    slider(ui, tl("Coupe-bas"), &mut fx.low_cut, 20.0..=500.0, " Hz");
+                    slider(ui, tl("Coupe-haut"), &mut fx.high_cut, 1000.0..=20_000.0, " Hz");
                     let (lo, hi) = (fx.low_cut, fx.high_cut);
                     act!(ui, "Filtres coupe-bas / coupe-haut", move |c: &mut Clip, a, b| {
                         c.filter(a, b, 4, lo, 0.0, 0.707);
@@ -1668,9 +1668,9 @@ impl Sound {
                     });
                     ui.add_space(4.0);
                     ui.label(RichText::new(tl("Supprimer les silences")).size(12.0).color(INK));
-                    slider(ui, "Seuil", &mut fx.silence[0], -70.0..=-20.0, " dB");
-                    slider(ui, "Pauses de plus de", &mut fx.silence[1], 100.0..=3000.0, " ms");
-                    slider(ui, "Garder", &mut fx.silence[2], 0.0..=1000.0, " ms");
+                    slider(ui, tl("Seuil"), &mut fx.silence[0], -70.0..=-20.0, " dB");
+                    slider(ui, tl("Pauses de plus de"), &mut fx.silence[1], 100.0..=3000.0, " ms");
+                    slider(ui, tl("Garder"), &mut fx.silence[2], 0.0..=1000.0, " ms");
                     if pro::secondary(ui, tl("Raccourcir les blancs")).clicked() {
                         truncate = true;
                     }
@@ -1704,75 +1704,75 @@ impl Sound {
                 });
                 pro::dock_panel(ui, "dyn", tl("Dynamique"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    slider(ui, "Seuil", &mut fx.comp[0], -60.0..=0.0, " dB");
-                    slider(ui, "Ratio", &mut fx.comp[1], 1.0..=20.0, ":1");
-                    slider(ui, "Gain de sortie", &mut fx.comp[2], 0.0..=24.0, " dB");
+                    slider(ui, tl("Seuil"), &mut fx.comp[0], -60.0..=0.0, " dB");
+                    slider(ui, tl("Ratio"), &mut fx.comp[1], 1.0..=20.0, ":1");
+                    slider(ui, tl("Gain de sortie"), &mut fx.comp[2], 0.0..=24.0, " dB");
                     let cp = fx.comp;
                     act!(ui, "Compresseur", move |c: &mut Clip, a, b| c.compress(a, b, cp[0], cp[1], cp[2]));
-                    slider(ui, "Saturation", &mut fx.drive, 0.0..=1.0, "");
+                    slider(ui, tl("Saturation"), &mut fx.drive, 0.0..=1.0, "");
                     let dr = fx.drive;
                     act!(ui, "Saturation", move |c: &mut Clip, a, b| c.saturate(a, b, dr));
-                    slider(ui, "Bits", &mut fx.crush[0], 2.0..=16.0, "");
-                    slider(ui, "Sous-échantillonnage", &mut fx.crush[1], 1.0..=20.0, "×");
+                    slider(ui, tl("Bits"), &mut fx.crush[0], 2.0..=16.0, "");
+                    slider(ui, tl("Sous-échantillonnage"), &mut fx.crush[1], 1.0..=20.0, "×");
                     let cr = fx.crush;
                     act!(ui, "Bitcrusher", move |c: &mut Clip, a, b| c.bitcrush(a, b, cr[0], cr[1] as usize));
                 });
                 pro::dock_panel(ui, "mod", tl("Modulation"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.label(RichText::new(tl("Chorus")).size(12.0).color(INK));
-                    slider(ui, "Profondeur", &mut fx.chorus[0], 1.0..=20.0, " ms");
-                    slider(ui, "Vitesse", &mut fx.chorus[1], 0.1..=5.0, " Hz");
-                    slider(ui, "Mélange", &mut fx.chorus[2], 0.0..=1.0, "");
+                    slider(ui, tl("Profondeur"), &mut fx.chorus[0], 1.0..=20.0, " ms");
+                    slider(ui, tl("Vitesse"), &mut fx.chorus[1], 0.1..=5.0, " Hz");
+                    slider(ui, tl("Mélange"), &mut fx.chorus[2], 0.0..=1.0, "");
                     let ch = fx.chorus;
                     act!(ui, "Chorus", move |c: &mut Clip, a, b| c.mod_delay(a, b, 20.0, ch[0], ch[1], 0.0, ch[2]));
                     ui.label(RichText::new(tl("Flanger")).size(12.0).color(INK));
-                    slider(ui, "Vitesse", &mut fx.flanger[0], 0.05..=3.0, " Hz");
-                    slider(ui, "Profondeur", &mut fx.flanger[1], 0.5..=8.0, " ms");
-                    slider(ui, "Réinjection", &mut fx.flanger[2], 0.0..=0.9, "");
+                    slider(ui, tl("Vitesse"), &mut fx.flanger[0], 0.05..=3.0, " Hz");
+                    slider(ui, tl("Profondeur"), &mut fx.flanger[1], 0.5..=8.0, " ms");
+                    slider(ui, tl("Réinjection"), &mut fx.flanger[2], 0.0..=0.9, "");
                     let fl = fx.flanger;
                     act!(ui, "Flanger", move |c: &mut Clip, a, b| c.mod_delay(a, b, 1.5, fl[1], fl[0], fl[2], 0.7));
                     ui.label(RichText::new(tl("Trémolo")).size(12.0).color(INK));
-                    slider(ui, "Vitesse", &mut fx.trem[0], 0.5..=20.0, " Hz");
-                    slider(ui, "Profondeur", &mut fx.trem[1], 0.0..=1.0, "");
+                    slider(ui, tl("Vitesse"), &mut fx.trem[0], 0.5..=20.0, " Hz");
+                    slider(ui, tl("Profondeur"), &mut fx.trem[1], 0.0..=1.0, "");
                     let tr = fx.trem;
                     act!(ui, "Trémolo", move |c: &mut Clip, a, b| c.tremolo(a, b, tr[0], tr[1]));
                     ui.label(RichText::new(tl("Panoramique automatique")).size(12.0).color(INK));
-                    slider(ui, "Vitesse", &mut fx.autopan[0], 0.05..=8.0, " Hz");
-                    slider(ui, "Amplitude", &mut fx.autopan[1], 0.0..=1.0, "");
+                    slider(ui, tl("Vitesse"), &mut fx.autopan[0], 0.05..=8.0, " Hz");
+                    slider(ui, tl("Amplitude"), &mut fx.autopan[1], 0.0..=1.0, "");
                     let ap = fx.autopan;
                     act!(ui, "Panoramique automatique", move |c: &mut Clip, a, b| c.auto_pan(a, b, ap[0], ap[1]));
-                    slider(ui, "Modulation en anneau (robot)", &mut fx.ring, 10.0..=1000.0, " Hz");
+                    slider(ui, tl("Modulation en anneau (robot)"), &mut fx.ring, 10.0..=1000.0, " Hz");
                     let rf = fx.ring;
                     act!(ui, "Modulation en anneau", move |c: &mut Clip, a, b| c.ring(a, b, rf));
                 });
                 pro::dock_panel(ui, "space", tl("Espace"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    slider(ui, "Délai d'écho", &mut fx.echo[0], 20.0..=1500.0, " ms");
-                    slider(ui, "Réinjection", &mut fx.echo[1], 0.0..=0.9, "");
-                    slider(ui, "Mélange", &mut fx.echo[2], 0.0..=1.0, "");
+                    slider(ui, tl("Délai d'écho"), &mut fx.echo[0], 20.0..=1500.0, " ms");
+                    slider(ui, tl("Réinjection"), &mut fx.echo[1], 0.0..=0.9, "");
+                    slider(ui, tl("Mélange"), &mut fx.echo[2], 0.0..=1.0, "");
                     let e = fx.echo;
                     act!(ui, "Écho", move |c: &mut Clip, a, b| c.echo(a, b, e[0], e[1], e[2]));
-                    slider(ui, "Taille de la pièce", &mut fx.verb[0], 0.0..=1.0, "");
-                    slider(ui, "Mélange réverb", &mut fx.verb[1], 0.0..=1.0, "");
+                    slider(ui, tl("Taille de la pièce"), &mut fx.verb[0], 0.0..=1.0, "");
+                    slider(ui, tl("Mélange réverb"), &mut fx.verb[1], 0.0..=1.0, "");
                     let v = fx.verb;
                     act!(ui, "Réverbération", move |c: &mut Clip, a, b| c.reverb(a, b, v[0], v[1]));
                 });
                 pro::dock_panel(ui, "time", tl("Temps et hauteur"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    slider(ui, "Vitesse (comme une bande)", &mut fx.speed, 25.0..=400.0, " %");
+                    slider(ui, tl("Vitesse (comme une bande)"), &mut fx.speed, 25.0..=400.0, " %");
                     let sp = fx.speed;
                     act!(ui, "Vitesse", move |c: &mut Clip, a, b| c.speed(a, b, sp / 100.0));
-                    slider(ui, "Tempo (même hauteur)", &mut fx.tempo, 50.0..=200.0, " %");
+                    slider(ui, tl("Tempo (même hauteur)"), &mut fx.tempo, 50.0..=200.0, " %");
                     let tp = fx.tempo;
                     act!(ui, "Tempo", move |c: &mut Clip, a, b| c.stretch(a, b, 100.0 / tp));
-                    slider(ui, "Hauteur en demi-tons (même durée)", &mut fx.semis, -12.0..=12.0, "");
+                    slider(ui, tl("Hauteur en demi-tons (même durée)"), &mut fx.semis, -12.0..=12.0, "");
                     let st = fx.semis;
                     act!(ui, "Hauteur", move |c: &mut Clip, a, b| c.pitch(a, b, st));
                 });
                 pro::dock_panel(ui, "stereo", tl("Stéréo"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    slider(ui, "Balance", &mut fx.pan, -1.0..=1.0, "");
-                    slider(ui, "Largeur stéréo", &mut fx.width, 0.0..=200.0, " %");
+                    slider(ui, tl("Balance"), &mut fx.pan, -1.0..=1.0, "");
+                    slider(ui, tl("Largeur stéréo"), &mut fx.width, 0.0..=200.0, " %");
                     let (pn, wd) = (fx.pan, fx.width);
                     act!(ui, "Stéréo", move |c: &mut Clip, a, b| c.stereo(a, b, pn, wd / 100.0));
                     ui.horizontal(|ui| {
@@ -1787,16 +1787,16 @@ impl Sound {
                 pro::dock_panel(ui, "gen", tl("Générer"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.label(RichText::new(tl("Inséré au curseur")).size(11.5).color(FAINT));
-                    slider(ui, "Durée", &mut fx.secs, 0.1..=120.0, " s");
-                    slider(ui, "Volume", &mut fx.amp, 0.0..=1.0, "");
+                    slider(ui, tl("Durée"), &mut fx.secs, 0.1..=120.0, " s");
+                    slider(ui, tl("Volume"), &mut fx.amp, 0.0..=1.0, "");
                     ui.label(RichText::new(tl("Tonalité")).size(12.0).color(INK));
                     pro::segmented(ui, &mut fx.wave, &WAVES);
-                    slider(ui, "Fréquence", &mut fx.freq, 20.0..=10_000.0, " Hz");
+                    slider(ui, tl("Fréquence"), &mut fx.freq, 20.0..=10_000.0, " Hz");
                     if pro::secondary(ui, tl("Insérer la tonalité")).clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, fx.wave as u8, fx.freq, 0.0, fx.amp), WAVES[fx.wave].to_string()));
                     }
                     ui.label(RichText::new(tl("Bruit")).size(12.0).color(INK));
-                    pro::segmented(ui, &mut fx.noise_kind, &[tl("Blanc"), tl("Rose"), tl("Brun")]);
+                    pro::segmented(ui, &mut fx.noise_kind, &[tl("Blanctl("), tl(")Rosetl("), tl(")Brun")]);
                     if pro::secondary(ui, tl("Insérer le bruit")).clicked() {
                         let c = if fx.noise_kind == 0 {
                             let mut c = Clip { rate, ch: vec![Vec::new(); nch] };
@@ -1810,12 +1810,12 @@ impl Sound {
                         generated = Some((c, "Bruit".into()));
                     }
                     ui.label(RichText::new(tl("Balayage")).size(12.0).color(INK));
-                    slider(ui, "Jusqu'à", &mut fx.freq2, 20.0..=20_000.0, " Hz");
+                    slider(ui, tl("Jusqu'à"), &mut fx.freq2, 20.0..=20_000.0, " Hz");
                     if pro::secondary(ui, tl("Insérer un balayage")).clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, 6, fx.freq, fx.freq2, fx.amp), "Balayage".into()));
                     }
                     ui.label(RichText::new(tl("Métronome")).size(12.0).color(INK));
-                    slider(ui, "Tempo", &mut fx.bpm, 30.0..=240.0, " BPM");
+                    slider(ui, tl("Tempo"), &mut fx.bpm, 30.0..=240.0, " BPM");
                     if pro::secondary(ui, tl("Insérer le métronome")).clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, 7, fx.bpm, 0.0, fx.amp), "Métronome".into()));
                     }
@@ -1881,9 +1881,9 @@ impl Sound {
             }
             ui.add_space(4.0);
             ui.label(RichText::new(tl("Repérer les sons (un marqueur par prise)")).size(12.0).color(INK));
-            slider(ui, "Seuil du silence", &mut self.regions[0], -70.0..=-10.0, " dB");
-            slider(ui, "Silence minimum", &mut self.regions[1], 50.0..=3000.0, " ms");
-            slider(ui, "Son minimum", &mut self.regions[2], 10.0..=2000.0, " ms");
+            slider(ui, tl("Seuil du silence"), &mut self.regions[0], -70.0..=-10.0, " dB");
+            slider(ui, tl("Silence minimum"), &mut self.regions[1], 50.0..=3000.0, " ms");
+            slider(ui, tl("Son minimum"), &mut self.regions[2], 10.0..=2000.0, " ms");
             if pro::secondary(ui, tl("Poser les marqueurs")).clicked() {
                 regions = true;
             }
@@ -2079,25 +2079,25 @@ impl Sound {
                 let row = |ui: &mut Ui, s: &str| {
                     ui.label(RichText::new(s).size(12.0).color(MUTED));
                 };
-                row(ui, "Qualité");
-                pro::segmented(ui, &mut o.bits, &[tl("16 bits (CD)"), tl("24 bits"), tl("32 flottant"), tl("8 bits")]);
+                row(ui, tl("Qualité"));
+                pro::segmented(ui, &mut o.bits, &[tl("16 bits (CD)tl("), tl(")24 bitstl("), tl(")32 flottanttl("), tl(")8 bits")]);
                 if o.bits != 2 {
-                    row(ui, "Dither (adoucit la réduction de bits)");
-                    pro::segmented(ui, &mut o.dither, &[tl("Aucun"), tl("Triangulaire"), tl("Mise en forme")]);
+                    row(ui, tl("Dither (adoucit la réduction de bits)"));
+                    pro::segmented(ui, &mut o.dither, &[tl("Aucuntl("), tl(")Triangulairetl("), tl(")Mise en forme")]);
                 }
                 ui.add_space(8.0);
-                row(ui, "Fréquence");
-                pro::segmented(ui, &mut o.rate, &[tl("Originale"), tl("44,1 k"), tl("48 k"), tl("22 k"), tl("96 k")]);
+                row(ui, tl("Fréquence"));
+                pro::segmented(ui, &mut o.rate, &[tl("Originaletl("), tl(")44,1 ktl("), tl(")48 ktl("), tl(")22 ktl("), tl(")96 k")]);
                 if o.rate > 0 {
                     ui.checkbox(&mut o.hq, tl("Conversion haute qualité (filtre sinc)"));
                 }
                 ui.add_space(8.0);
-                row(ui, "Canaux");
-                pro::segmented(ui, &mut o.channels, &[tl("Originaux"), tl("Mono"), tl("Stéréo")]);
+                row(ui, tl("Canaux"));
+                pro::segmented(ui, &mut o.channels, &[tl("Originauxtl("), tl(")Monotl("), tl(")Stéréo")]);
                 ui.add_space(8.0);
-                row(ui, "Plage");
+                row(ui, tl("Plage"));
                 let mut r = o.range;
-                pro::segmented(ui, &mut r, &[tl("Tout"), tl("Sélection"), tl("Un fichier par marqueur")]);
+                pro::segmented(ui, &mut r, &[tl("Touttl("), tl(")Sélectiontl("), tl(")Un fichier par marqueur")]);
                 if (r == 1 && has_sel) || (r == 2 && has_marks) || r == 0 {
                     o.range = r;
                 }
@@ -2224,19 +2224,19 @@ impl Sound {
                 small(ui, t.help());
             }
             Tool::SpecRect | Tool::Lasso | Tool::Brush | Tool::Heal => {
-                small(ui, "Échelle");
+                small(ui, tl("Échelle"));
                 let mut l = !self.spec_log as usize;
-                if pro::segmented(ui, &mut l, &[tl("Log"), tl("Linéaire")]) {
+                if pro::segmented(ui, &mut l, &[tl("Logtl("), tl(")Linéaire")]) {
                     self.spec_log = l == 0;
                 }
-                small(ui, "FFT");
+                small(ui, tl("FFT"));
                 egui::ComboBox::from_id_salt("fft").width(64.0).selected_text(FFT_SIZES[self.fft].to_string()).show_ui(ui, |ui| {
                     for (k, n) in FFT_SIZES.iter().enumerate() {
                         ui.selectable_value(&mut self.fft, k, n.to_string());
                     }
                 });
                 if matches!(t, Tool::Brush | Tool::Heal) {
-                    small(ui, "Taille");
+                    small(ui, tl("Taille"));
                     ui.add(egui::Slider::new(&mut self.brush, 3.0..=80.0).suffix(" px").integer());
                 }
                 if t != Tool::Heal {
@@ -2505,7 +2505,7 @@ impl Sound {
         let head = Rect::from_min_size(full.min, vec2(full.width(), head_h));
         ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(full.min, vec2(full.width(), 30.0))), |ui| {
             ui.horizontal_centered(|ui| {
-                pro::segmented(ui, &mut self.view_mode, &[tl("Forme d'onde"), tl("Spectrogramme")]);
+                pro::segmented(ui, &mut self.view_mode, &[tl("Forme d'ondetl("), tl(")Spectrogramme")]);
                 pro::toolbar_sep(ui);
                 ui.label(RichText::new(tl("Hauteur")).size(12.0).color(MUTED));
                 ui.spacing_mut().slider_width = 64.0;

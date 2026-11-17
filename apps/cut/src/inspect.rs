@@ -286,7 +286,7 @@ impl Cut {
             });
             ui.add_space(8.0);
             let mut tab = self.tab;
-            if pro::segmented(ui, &mut tab, &[tl("Clip"), tl("Image"), tl("Effets"), tl("Couleur"), tl("Audio")]) {
+            if pro::segmented(ui, &mut tab, &[tl("Cliptl("), tl(")Imagetl("), tl(")Effetstl("), tl(")Couleurtl("), tl(")Audio")]) {
                 self.tab = tab;
             }
         });
@@ -315,9 +315,9 @@ impl Cut {
                 });
                 pro::dock_panel(ui, "clip-time", tl("Durée et vitesse"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    field_time(ui, "Entrée", &mut c.inp, 0.0, c.out - 0.05);
-                    field_time(ui, "Sortie", &mut c.out, c.inp + 0.05, max);
-                    row_slider(ui, "Vitesse", &mut c.speed, 0.1..=8.0, " ×", true);
+                    field_time(ui, tl("Entrée"), &mut c.inp, 0.0, c.out - 0.05);
+                    field_time(ui, tl("Sortie"), &mut c.out, c.inp + 0.05, max);
+                    row_slider(ui, tl("Vitesse"), &mut c.speed, 0.1..=8.0, " ×", true);
                     if let Some(k) = chips(ui, &["10 %", "25 %", "50 %", "75 %", "100 %", "150 %", "200 %", "400 %", "800 %"], None) {
                         c.speed = [0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0, 8.0][k];
                     }
@@ -329,7 +329,7 @@ impl Cut {
                         }
                     }
                     if c.hold > 0.0 {
-                        field_time(ui, "Durée figée", &mut c.hold, 0.1, 600.0);
+                        field_time(ui, tl("Durée figée"), &mut c.hold, 0.1, 600.0);
                     }
                     if pro::secondary(ui, tl("Vitesse/Durée…")).on_hover_text(tl("Ctrl+R")).clicked() {
                         act = Some(Act::Speed);
@@ -344,7 +344,7 @@ impl Cut {
                             }
                         });
                         if c.trans > 0 {
-                            row_slider(ui, "Durée", &mut c.trans_dur, 0.1..=5.0, " s", false);
+                            row_slider(ui, tl("Durée"), &mut c.trans_dur, 0.1..=5.0, " s", false);
                             if let Some(k) = chips(ui, &["0,25 s", "0,5 s", "1 s", "2 s", "3 s"], None) {
                                 c.trans_dur = [0.25, 0.5, 1.0, 2.0, 3.0][k];
                             }
@@ -364,12 +364,12 @@ impl Cut {
                 pro::dock_panel(ui, "clip-fades", tl("Fondus"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let len = c.len();
-                    row_slider(ui, "Fondu d'entrée", &mut c.fade_in, 0.0..=len.min(10.0), " s", false);
-                    row_slider(ui, "Fondu de sortie", &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
+                    row_slider(ui, tl("Fondu d'entrée"), &mut c.fade_in, 0.0..=len.min(10.0), " s", false);
+                    row_slider(ui, tl("Fondu de sortie"), &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
                     let mut white = c.fade_white as usize;
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Fondu vers")).size(12.0).color(MUTED));
-                        if pro::segmented(ui, &mut white, &[tl("Noir"), tl("Blanc")]) {
+                        if pro::segmented(ui, &mut white, &[tl("Noirtl("), tl(")Blanc")]) {
                             c.fade_white = white == 1;
                         }
                     });
@@ -413,7 +413,7 @@ impl Cut {
                         c.zoom_end = if kb { c.zoom * 1.15 } else { 0.0 };
                     }
                     if c.zoom_end > 0.0 {
-                        pct_slider(ui, "Échelle finale", &mut c.zoom_end, 0.1..=4.0);
+                        pct_slider(ui, tl("Échelle finale"), &mut c.zoom_end, 0.1..=4.0);
                     }
                     ui.horizontal_wrapped(|ui| {
                         if ui.small_button(tl("↺ 90°")).clicked() {
@@ -481,14 +481,14 @@ impl Cut {
                     if let Some(t) = kf_row(ui, c, local, 5, 0.0..=100.0, 1.0, "") {
                         act = Some(Act::Seek(start + t));
                     }
-                    row_slider(ui, "Netteté", &mut c.sharpen, 0.0..=100.0, "", false);
+                    row_slider(ui, tl("Netteté"), &mut c.sharpen, 0.0..=100.0, "", false);
                 });
                 pro::dock_panel(ui, "fx-style", tl("Stylisation"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    row_slider(ui, "Mosaïque", &mut c.pixelate, 0.0..=100.0, "", false);
-                    row_slider(ui, "Postérisation", &mut c.posterize, 0.0..=16.0, " niveaux", false);
-                    row_slider(ui, "Grain", &mut c.grain, 0.0..=100.0, "", false);
-                    row_slider(ui, "Vignettage", &mut c.vignette, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Mosaïque"), &mut c.pixelate, 0.0..=100.0, "", false);
+                    row_slider(ui, tl("Postérisation"), &mut c.posterize, 0.0..=16.0, " niveaux", false);
+                    row_slider(ui, tl("Grain"), &mut c.grain, 0.0..=100.0, "", false);
+                    row_slider(ui, tl("Vignettage"), &mut c.vignette, -100.0..=100.0, "", false);
                     ui.checkbox(&mut c.invert, tl("Négatif (inverser les couleurs)"));
                 });
                 pro::dock_panel(ui, "fx-key", tl("Incrustation (fond vert)"), |ui| {
@@ -506,13 +506,13 @@ impl Cut {
                             (c.key_color, c.key_on) = ([0, 71, 187], true);
                         }
                     });
-                    row_slider(ui, "Tolérance", &mut c.key_tol, 0.0..=100.0, "", false);
-                    row_slider(ui, "Douceur", &mut c.key_soft, 0.0..=100.0, "", false);
+                    row_slider(ui, tl("Tolérance"), &mut c.key_tol, 0.0..=100.0, "", false);
+                    row_slider(ui, tl("Douceur"), &mut c.key_soft, 0.0..=100.0, "", false);
                 });
                 pro::dock_panel(ui, "fx-mask", tl("Masque"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let mut kind = c.mask.as_ref().map_or(0, |m| m.kind as usize + 1);
-                    if pro::segmented(ui, &mut kind, &[tl("Aucun"), tl("Rectangle"), tl("Ellipse"), tl("Plume")]) {
+                    if pro::segmented(ui, &mut kind, &[tl("Aucuntl("), tl(")Rectangletl("), tl(")Ellipsetl("), tl(")Plume")]) {
                         c.mask = match kind {
                             0 => None,
                             3 => Some(Mask { kind: 2, pts: vec![[0.3, 0.25], [0.7, 0.25], [0.75, 0.75], [0.25, 0.75]], feather: 5.0, invert: false }),
@@ -520,7 +520,7 @@ impl Cut {
                         };
                     }
                     if let Some(m) = &mut c.mask {
-                        row_slider(ui, "Contour progressif", &mut m.feather, 0.0..=100.0, "", false);
+                        row_slider(ui, tl("Contour progressif"), &mut m.feather, 0.0..=100.0, "", false);
                         ui.checkbox(&mut m.invert, tl("Inverser le masque"));
                     }
                     let mut sides = ui.ctx().data(|d| d.get_temp::<u32>(sides_id)).unwrap_or(6);
@@ -544,32 +544,32 @@ impl Cut {
                     if let Some(t) = kf_row(ui, c, local, 8, -100.0..=100.0, 1.0, "") {
                         act = Some(Act::Seek(start + t));
                     }
-                    row_slider(ui, "Contraste", &mut c.contrast, -100.0..=100.0, "", false);
-                    row_slider(ui, "Hautes lumières", &mut c.highlights, -100.0..=100.0, "", false);
-                    row_slider(ui, "Ombres", &mut c.shadows, -100.0..=100.0, "", false);
-                    row_slider(ui, "Blancs", &mut c.whites, -100.0..=100.0, "", false);
-                    row_slider(ui, "Noirs", &mut c.blacks, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Contraste"), &mut c.contrast, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Hautes lumières"), &mut c.highlights, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Ombres"), &mut c.shadows, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Blancs"), &mut c.whites, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Noirs"), &mut c.blacks, -100.0..=100.0, "", false);
                     if let Some(t) = kf_row(ui, c, local, 6, -100.0..=100.0, 1.0, "") {
                         act = Some(Act::Seek(start + t));
                     }
-                    row_slider(ui, "Température", &mut c.temperature, -100.0..=100.0, "", false);
-                    row_slider(ui, "Teinte", &mut c.tint, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Température"), &mut c.temperature, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Teinte"), &mut c.tint, -100.0..=100.0, "", false);
                     if let Some(t) = kf_row(ui, c, local, 7, -100.0..=100.0, 1.0, "") {
                         act = Some(Act::Seek(start + t));
                     }
-                    row_slider(ui, "Vibrance", &mut c.vibrance, -100.0..=100.0, "", false);
+                    row_slider(ui, tl("Vibrance"), &mut c.vibrance, -100.0..=100.0, "", false);
                 });
                 pro::dock_panel(ui, "color-look", tl("Créatif"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     if let Some(k) = chips(ui, &LOOKS, Some(c.look as usize)) {
                         c.look = k as u8;
                     }
-                    pct_slider(ui, "Intensité du look", &mut c.look_amt, 0.0..=1.0);
-                    row_slider(ui, "Rotation de teinte", &mut c.hue, -180.0..=180.0, "°", false);
+                    pct_slider(ui, tl("Intensité du look"), &mut c.look_amt, 0.0..=1.0);
+                    row_slider(ui, tl("Rotation de teinte"), &mut c.hue, -180.0..=180.0, "°", false);
                 });
                 pro::dock_panel(ui, "color-curves", tl("Courbes"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    pro::segmented(ui, &mut ch, &[tl("Maître"), tl("Rouge"), tl("Vert"), tl("Bleu")]);
+                    pro::segmented(ui, &mut ch, &[tl("Maîtretl("), tl(")Rougetl("), tl(")Verttl("), tl(")Bleu")]);
                     ui.add_space(4.0);
                     let col = [Color32::WHITE, Color32::from_rgb(255, 90, 80), Color32::from_rgb(80, 220, 110), Color32::from_rgb(90, 150, 255)][ch.min(3)];
                     curve(ui, &mut c.curves[ch.min(3)], col);
@@ -617,7 +617,7 @@ impl Cut {
                     if let Some(t) = kf_row(ui, c, local, 9, -40.0..=12.0, 1.0, " dB") {
                         act = Some(Act::Seek(start + t));
                     }
-                    row_slider(ui, "Balance", &mut c.pan, -1.0..=1.0, "", false);
+                    row_slider(ui, tl("Balance"), &mut c.pan, -1.0..=1.0, "", false);
                     if c.hold > 0.0 {
                         ui.label(RichText::new(tl("Une image figée n'a pas de son.")).size(12.0).color(FAINT));
                     }
@@ -634,8 +634,8 @@ impl Cut {
                 pro::dock_panel(ui, "clip-afade", tl("Fondus audio"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let len = c.len();
-                    row_slider(ui, "Fondu d'entrée", &mut c.fade_in, 0.0..=len.min(10.0), " s", false);
-                    row_slider(ui, "Fondu de sortie", &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
+                    row_slider(ui, tl("Fondu d'entrée"), &mut c.fade_in, 0.0..=len.min(10.0), " s", false);
+                    row_slider(ui, tl("Fondu de sortie"), &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
                     if src.has_audio && pro::secondary(ui, tl("Détacher l'audio sur A2")).clicked() {
                         act = Some(Act::Detach);
                     }
@@ -670,9 +670,9 @@ impl Cut {
         pro::dock_panel(ui, "music", tl("Musique"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.label(RichText::new(short(&src.name(), 30)).font(semibold(12.5)).color(INK));
-            field_time(ui, "Début", &mut m.start, 0.0, 36000.0);
-            field_time(ui, "Entrée", &mut m.inp, 0.0, m.out - 0.05);
-            field_time(ui, "Sortie", &mut m.out, m.inp + 0.05, src.duration);
+            field_time(ui, tl("Début"), &mut m.start, 0.0, 36000.0);
+            field_time(ui, tl("Entrée"), &mut m.inp, 0.0, m.out - 0.05);
+            field_time(ui, tl("Sortie"), &mut m.out, m.inp + 0.05, src.duration);
             if pro::secondary(ui, tl("Placer à la tête de lecture")).clicked() {
                 m.start = t;
             }
@@ -681,13 +681,13 @@ impl Cut {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.checkbox(&mut m.mute, tl("Couper"));
             let mut db = 20.0 * m.volume.max(1e-4).log10();
-            if row_slider(ui, "Volume", &mut db, -40.0..=12.0, " dB", false) {
+            if row_slider(ui, tl("Volume"), &mut db, -40.0..=12.0, " dB", false) {
                 m.volume = 10f32.powf(db / 20.0);
             }
-            row_slider(ui, "Balance", &mut m.pan, -1.0..=1.0, "", false);
+            row_slider(ui, tl("Balance"), &mut m.pan, -1.0..=1.0, "", false);
             let len = m.out - m.inp;
-            row_slider(ui, "Fondu d'entrée", &mut m.fade_in, 0.0..=len.min(20.0), " s", false);
-            row_slider(ui, "Fondu de sortie", &mut m.fade_out, 0.0..=len.min(20.0), " s", false);
+            row_slider(ui, tl("Fondu d'entrée"), &mut m.fade_in, 0.0..=len.min(20.0), " s", false);
+            row_slider(ui, tl("Fondu de sortie"), &mut m.fade_out, 0.0..=len.min(20.0), " s", false);
             ui.horizontal_wrapped(|ui| {
                 for (label, db) in [("Normaliser −1 dB", -1.0), ("−6 dB", -6.0), ("−12 dB (fond)", -12.0)] {
                     if pro::secondary(ui, label).clicked() {
@@ -735,13 +735,13 @@ impl Cut {
                     }
                 });
             });
-            pct_slider(ui, "Taille", &mut t.size, 0.02..=0.3);
-            row_slider(ui, "Espacement des lettres", &mut t.spacing, -0.1..=1.0, "", false);
-            row_slider(ui, "Interligne", &mut t.leading, -0.5..=2.0, "", false);
+            pct_slider(ui, tl("Taille"), &mut t.size, 0.02..=0.3);
+            row_slider(ui, tl("Espacement des lettres"), &mut t.spacing, -0.1..=1.0, "", false);
+            row_slider(ui, tl("Interligne"), &mut t.leading, -0.5..=2.0, "", false);
             let mut al = t.align as usize;
             ui.horizontal(|ui| {
                 ui.label(RichText::new(tl("Alignement")).size(12.0).color(MUTED));
-                if pro::segmented(ui, &mut al, &[tl("Auto"), tl("Gauche"), tl("Centre"), tl("Droite")]) {
+                if pro::segmented(ui, &mut al, &[tl("Autotl("), tl(")Gauchetl("), tl(")Centretl("), tl(")Droite")]) {
                     t.align = al as u8;
                 }
             });
@@ -760,29 +760,29 @@ impl Cut {
                     });
                 });
             };
-            color_row(ui, "Couleur du texte", &mut t.color);
-            row_slider(ui, "Contour", &mut t.outline, 0.0..=100.0, "", false);
+            color_row(ui, tl("Couleur du texte"), &mut t.color);
+            row_slider(ui, tl("Contour"), &mut t.outline, 0.0..=100.0, "", false);
             if t.outline > 0.0 {
-                color_row(ui, "Couleur du contour", &mut t.outline_color);
+                color_row(ui, tl("Couleur du contour"), &mut t.outline_color);
             }
             ui.horizontal(|ui| {
                 ui.checkbox(&mut t.shadow, tl("Ombre portée"));
                 ui.checkbox(&mut t.band, tl("Bandeau"));
             });
             if t.band || t.place == 3 {
-                color_row(ui, "Couleur du bandeau", &mut t.band_color);
+                color_row(ui, tl("Couleur du bandeau"), &mut t.band_color);
             }
         });
         pro::dock_panel(ui, "title-place", tl("Position et durée"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let mut place = t.place as usize;
-            if pro::segmented(ui, &mut place, &[tl("Haut"), tl("Centre"), tl("Bas"), tl("Tiers")]) {
+            if pro::segmented(ui, &mut place, &[tl("Hauttl("), tl(")Centretl("), tl(")Bastl("), tl(")Tiers")]) {
                 t.place = place as u8;
             }
-            row_slider(ui, "Décalage X", &mut t.dx, -0.5..=0.5, "", false);
-            row_slider(ui, "Décalage Y", &mut t.dy, -0.5..=0.5, "", false);
-            field_time(ui, "Début", &mut t.start, 0.0, 36000.0);
-            field_time(ui, "Durée", &mut t.dur, 0.2, 600.0);
+            row_slider(ui, tl("Décalage X"), &mut t.dx, -0.5..=0.5, "", false);
+            row_slider(ui, tl("Décalage Y"), &mut t.dy, -0.5..=0.5, "", false);
+            field_time(ui, tl("Début"), &mut t.start, 0.0, 36000.0);
+            field_time(ui, tl("Durée"), &mut t.dur, 0.2, 600.0);
             let mut roll = t.roll as usize;
             ui.label(RichText::new(tl("Défilement")).size(12.0).color(MUTED));
             if pro::segmented(ui, &mut roll, &ROLLS) {
@@ -826,8 +826,8 @@ impl Cut {
         });
         pro::dock_panel(ui, "mixer", tl("Mixage"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
-            row_slider(ui, "Volume général", &mut self.proj.master_db, -24.0..=12.0, " dB", false);
-            row_slider(ui, "Atténuation musique sous les voix", &mut self.proj.duck_db, -30.0..=0.0, " dB", false);
+            row_slider(ui, tl("Volume général"), &mut self.proj.master_db, -24.0..=12.0, " dB", false);
+            row_slider(ui, tl("Atténuation musique sous les voix"), &mut self.proj.duck_db, -30.0..=0.0, " dB", false);
             studio_ui::pro::tip(ui, tl("La musique (A2) baisse automatiquement quand un clip V1 a du son."));
         });
         if !self.proj.markers.is_empty() {

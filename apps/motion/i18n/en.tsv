@@ -1,4 +1,4 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
 Exporter l'animation	
 Toute la composition	
 Zone de travail	
@@ -243,3 +243,119 @@ Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisibl
 Depuis le centre	
 Terminer (Entrée)	
 Inversé	
+Plage	
+Toute la compositiontl(	
+)Zone de travailtl(	
+)Personnalisée	
+Qualité (débit)	
+Lecture en boucle	
+Palette	
+Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	
+Centretl(	
+)Gauchetl(	
+)Droite	
+Vignettage	
+Grain film	
+Couper le tracé	
+Simultanétl(	
+)Un par un	
+Opérateurs de forme	
+Arrondir les angles	
+Fronce et dilatation	
+Zigzag	
+Agitation	
+Détail	
+Vitesse d'agitation	
+Torsion	
+Pointillés (0 = plein)	
+Espace entre tirets	
+Platestl(	
+)Rondestl(	
+)Carrées	
+Arrondistl(	
+)Pointustl(	
+)Biseautés	
+Linéairetl(	
+)Radial	
+Angle du dégradé	
+Centre X	
+Centre Y	
+Flou fixe	
+Flou directionnel	
+Direction	
+Flou radial (zoom)	
+Décalage X	
+Décalage Y	
+Douceur	
+Opacité	
+Décalage X 	
+Décalage Y 	
+Douceur 	
+Teinte	
+Saturation	
+Luminosité	
+Contraste	
+Gamma	
+Sépia	
+Teinte bicolore	
+Inversion	
+Seuil (0 = non)	
+Postérisation (0 = non)	
+Séparation RVB	
+Angle RVB	
+Glitch	
+Fréquence du glitch	
+Grain	
+Distorsion	
+Taille des ondes	
+Évolution	
+Scintillement	
+Machine à écrire (0 = non)	
+Entréetl(	
+)Sortietl(	
+)Les deux	
+Décalage entre lettres	
+Durée par lettre	
+Valeurs de départ	
+Échelle	
+Rotation	
+Tremblement de position	
+Fréquence	
+Nontl(	
+)Boucletl(	
+)Aller-retour	
+Écho (traînée)	
+Délai entre échos	
+Répéteur	
+Rotation par copie	
+Échelle par copie	
+Fondu par copie	
+Décalage temporel	
+Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe	
+Glisser pour tourner le calque · Maj : pas de 15°	
+Glisser l'ancre sans bouger le calque · Placer :	
+Clic dans la vue pour écrire	
+Peint sur le calque Peinture sélectionné	
+Sélectionne un calque puis trace : seule la zone dessinée reste visible	
+Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur	
+Efface les traits du calque Peinture	
+Sélection	
+Main	
+Zoom avant	
+Zoom arrière	
+Point d'ancrage	
+Rectangle	
+Rectangle arrondi	
+Ellipse	
+Polygone	
+Étoile	
+Plume	
+Ajout de sommet	
+Suppression de sommet	
+Conversion de sommet	
+Texte horizontal	
+Pinceau	
+Gomme	
+Masque rectangulaire	
+Masque elliptique	
+Marionnette	

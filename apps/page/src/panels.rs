@@ -992,7 +992,7 @@ impl PageApp {
                 });
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Dans")).size(12.0).color(MUTED));
-                    pro::segmented(ui, &mut st.scope, &[tl("Document"), tl("Page"), tl("Bloc sélectionné")]);
+                    pro::segmented(ui, &mut st.scope, &[tl("Documenttl("), tl(")Pagetl("), tl(")Bloc sélectionné")]);
                 });
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Style de paragraphe")).size(12.0).color(MUTED));
@@ -1181,7 +1181,7 @@ impl PageApp {
                     cs.color = on.then_some([255, 112, 52, 255]);
                 }
                 if let Some(c) = &mut cs.color {
-                    color_row(ui, "Couleur", c, &sw);
+                    color_row(ui, tl("Couleur"), c, &sw);
                 }
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Taille relative")).size(12.0).color(MUTED));

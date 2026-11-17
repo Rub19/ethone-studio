@@ -1,4 +1,4 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
 Note	
 Filtre	
 Quantité	
@@ -231,3 +231,141 @@ Nouveau masque
 Superposition (O)	
 Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro	
 Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer	
+Température	
+Exposition	
+Contraste	
+Hautes lumières	
+Ombres	
+Blancs	
+Noirs	
+Texture	
+Clarté	
+Correction du voile	
+Décalage de teinte	
+Netteté	
+Bruit	
+Intensité couleur	
+PRÉRÉGLAGES	
+INSTANTANÉS	
+Mémorise une version pour y revenir.	
+HISTORIQUE	
+Chaque réglage apparaît ici.	
+État actuel	
+Importation (original)	
+NAVIGATEUR	
+Survole la photo pour lire les valeurs RVB	
+Couleurtl(	
+)Noir et blanc	
+Tonalité	
+Présence	
+Vibrance	
+Param.tl(	
+)RVBtl(	
+)Rtl(	
+)Vtl(	
+)B	
+Teintetl(	
+)Saturationtl(	
+)Luminancetl(	
+)Tout	
+En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).	
+Lum. ombres	
+Lum. tons moyens	
+Lum. hautes lum.	
+Global	
+Lum. globale	
+Fusion	
+Équilibre	
+Gain	
+Rayon	
+Détail	
+Masquage	
+Réduction du bruit	
+Détail lum.	
+Détail couleur	
+Lissage	
+Vignetage de l'objectif	
+Point milieu	
+Distorsion	
+Aberration chromatique	
+Rouge / cyan	
+Bleu / jaune	
+Frange violette	
+Frange verte	
+Verticale	
+Horizontale	
+Rotation	
+Aspect	
+Échelle	
+Décalage X	
+Décalage Y	
+Redresser	
+Vignettage après recadrage	
+Arrondi	
+Contour progressif	
+Grain	
+Quantité 	
+Rugosité	
+Style	
+Halo lumineux	
+Délavé	
+Teinte des ombres	
+Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages.	
+Composants	
+Glisse les poignées sur la photo (outil M ou Main).	
+Largeur	
+Hauteur	
+Minimum	
+Maximum	
+Teinte ciblée	
+Tolérance	
+Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image).	
+Détection automatique du sujet (ce qui se distingue du fond, au centre).	
+Couvre toute l'image : combine avec Soustraire pour exclure une zone.	
+Réglages du masque	
+CATALOGUE	
+COLLECTIONS DYNAMIQUES	
+Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…	
+ÉTIQUETTES	
+MOTS-CLÉS	
+Ajoute des mots-clés dans le panneau de droite.	
+DOSSIERS	
+↑ Dossier parent	
+Récents	
+Sélectionne une photo pour voir ses informations.	
+Suggestions	
+Titre	
+Légende	
+Aucune donnée EXIF lisible dans ce fichier.	
+À gauche : la référence (photo active). À droite : le candidat.	
+Coller (Ctrl+V) n'appliquera que les groupes cochés.	
+Les photos qui remplissent toutes les règles y apparaissent automatiquement.	
+Toutestl(	
+)Modifiéestl(	
+)Intactes	
+Toustl(	
+)RAWtl(	
+)JPEG, PNG…	
+EMPLACEMENT	
+NOM DES FICHIERS	
+FORMAT	
+TAILLE	
+ACCENTUATION DE SORTIE	
+MÉTADONNÉES	
+FILIGRANE	
+APRÈS L'EXPORT	
+Trace une ligne le long de l'horizon ou d'une verticale	
+Clique sur l'œil ou glisse pour tracer le cercle	
+Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.	
+Glisse vers le haut ou le bas sur une couleur ou un ton de la photo	
+Recadrage	
+Redressement (règle)	
+Suppression de taches	
+Yeux rouges	
+Filtre gradué	
+Filtre radial	
+Pinceau de réglage	
+Sélectionner le ciel	
+Sélectionner le sujet	
+Pipette de balance des blancs	
+Main et zoom	

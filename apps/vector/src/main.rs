@@ -2549,10 +2549,10 @@ impl VectorApp {
             self.send_to(t, &ctx);
         }
         ui.separator();
-        if mi(ui, "Nouveau…", "Ctrl+N", true) {
+        if mi(ui, tl("Nouveau…"), "Ctrl+N", true) {
             self.new_doc = Some(NewDoc { w: 1000.0, h: 1000.0, preset: 0, transparent: false });
         }
-        if mi(ui, "Ouvrir…", "Ctrl+O", true) {
+        if mi(ui, tl("Ouvrir…"), "Ctrl+O", true) {
             self.open();
         }
         ui.menu_button(tl("Ouvrir un fichier récent"), |ui| {
@@ -2571,23 +2571,23 @@ impl VectorApp {
         });
         let on = !self.home;
         ui.separator();
-        if mi(ui, "Enregistrer", "Ctrl+S", on) {
+        if mi(ui, tl("Enregistrer"), "Ctrl+S", on) {
             self.save(false);
         }
-        if mi(ui, "Enregistrer sous…", "Ctrl+Maj+S", on) {
+        if mi(ui, tl("Enregistrer sous…"), "Ctrl+Maj+S", on) {
             self.save(true);
         }
         ui.separator();
-        if mi(ui, "Importer une image…", "", on) {
+        if mi(ui, tl("Importer une image…"), "", on) {
             self.place_image();
         }
-        if mi(ui, "Importer un SVG…", "", on)
+        if mi(ui, tl("Importer un SVG…"), "", on)
             && let Some(p) = rfd::FileDialog::new().add_filter("SVG", &["svg"]).pick_file()
         {
             self.import_svg(&p);
         }
         ui.separator();
-        if mi(ui, "Exporter…", "Ctrl+Alt+E", on) {
+        if mi(ui, tl("Exporter…"), "Ctrl+Alt+E", on) {
             self.export = Some(ExportOpts { format: 0, scale: 2.0, transparent: false, quality: 90, scope: 0, minify: false });
         }
         ui.add_enabled_ui(on, |ui| {
@@ -2609,45 +2609,45 @@ impl VectorApp {
             });
         });
         ui.separator();
-        if mi(ui, "Fermer", "", on) {
+        if mi(ui, tl("Fermer"), "", on) {
             self.home = true;
         }
     }
 
     fn menu_edit(&mut self, ui: &mut Ui) {
         let has = self.sel.is_some();
-        if mi(ui, "Annuler", "Ctrl+Z", !self.undo.is_empty()) {
+        if mi(ui, tl("Annuler"), "Ctrl+Z", !self.undo.is_empty()) {
             self.undo();
         }
-        if mi(ui, "Rétablir", "Ctrl+Y", !self.redo.is_empty()) {
+        if mi(ui, tl("Rétablir"), "Ctrl+Y", !self.redo.is_empty()) {
             self.redo();
         }
         ui.separator();
-        if mi(ui, "Couper", "Ctrl+X", has) {
+        if mi(ui, tl("Couper"), "Ctrl+X", has) {
             self.copy_items();
             self.delete_selected();
         }
-        if mi(ui, "Copier", "Ctrl+C", has) {
+        if mi(ui, tl("Copier"), "Ctrl+C", has) {
             self.copy_items();
         }
         let clip = !self.clip.is_empty();
-        if mi(ui, "Coller", "Ctrl+V", clip) {
+        if mi(ui, tl("Coller"), "Ctrl+V", clip) {
             self.paste_items(0);
         }
-        if mi(ui, "Coller devant", "Ctrl+F", clip) {
+        if mi(ui, tl("Coller devant"), "Ctrl+F", clip) {
             self.paste_items(2);
         }
-        if mi(ui, "Coller derrière", "Ctrl+B", clip) {
+        if mi(ui, tl("Coller derrière"), "Ctrl+B", clip) {
             self.paste_items(3);
         }
-        if mi(ui, "Coller en place", "Ctrl+Maj+V", clip) {
+        if mi(ui, tl("Coller en place"), "Ctrl+Maj+V", clip) {
             self.paste_items(1);
         }
-        if mi(ui, "Supprimer", "Suppr", has) {
+        if mi(ui, tl("Supprimer"), "Suppr", has) {
             self.delete_selected();
         }
         ui.separator();
-        if mi(ui, "Dupliquer", "Ctrl+Alt+D", has) {
+        if mi(ui, tl("Dupliquer"), "Ctrl+Alt+D", has) {
             self.duplicate_selected();
         }
         ui.separator();
@@ -2714,7 +2714,7 @@ impl VectorApp {
         let has = self.sel.is_some();
         let multi = self.selection().len() >= 2;
         ui.menu_button(tl("Transformation"), |ui| {
-            if mi(ui, "Transformer à nouveau", "Ctrl+D", has) {
+            if mi(ui, tl("Transformer à nouveau"), "Ctrl+D", has) {
                 self.transform_again();
             }
             ui.separator();
@@ -2737,10 +2737,10 @@ impl VectorApp {
                     self.rotate_sel(deg);
                 }
             }
-            if mi(ui, "Symétrie horizontale", "", has) {
+            if mi(ui, tl("Symétrie horizontale"), "", has) {
                 self.flip(0);
             }
-            if mi(ui, "Symétrie verticale", "", has) {
+            if mi(ui, tl("Symétrie verticale"), "", has) {
                 self.flip(1);
             }
         });
@@ -2760,47 +2760,47 @@ impl VectorApp {
             });
         });
         ui.separator();
-        if mi(ui, "Grouper", "Ctrl+G", multi) {
+        if mi(ui, tl("Grouper"), "Ctrl+G", multi) {
             self.group();
         }
-        if mi(ui, "Dissocier", "Ctrl+Maj+G", has) {
+        if mi(ui, tl("Dissocier"), "Ctrl+Maj+G", has) {
             self.ungroup();
         }
-        if mi(ui, "Verrouiller la sélection", "Ctrl+2", has) {
+        if mi(ui, tl("Verrouiller la sélection"), "Ctrl+2", has) {
             self.lock_selected();
         }
-        if mi(ui, "Tout déverrouiller", "Ctrl+Alt+2", true) {
+        if mi(ui, tl("Tout déverrouiller"), "Ctrl+Alt+2", true) {
             self.checkpoint();
             self.doc.items.iter_mut().for_each(|it| it.locked = false);
         }
-        if mi(ui, "Masquer la sélection", "Ctrl+3", has) {
+        if mi(ui, tl("Masquer la sélection"), "Ctrl+3", has) {
             self.hide_selected();
         }
-        if mi(ui, "Tout afficher", "Ctrl+Alt+3", true) {
+        if mi(ui, tl("Tout afficher"), "Ctrl+Alt+3", true) {
             self.checkpoint();
             self.doc.items.iter_mut().for_each(|it| it.visible = true);
         }
         ui.separator();
-        if mi(ui, "Décomposer", "", has) {
+        if mi(ui, tl("Décomposer"), "", has) {
             self.expand();
         }
-        if mi(ui, "Vectoriser le contour", "", has) {
+        if mi(ui, tl("Vectoriser le contour"), "", has) {
             self.outline_selected();
         }
         ui.menu_button(tl("Tracé"), |ui| {
-            if mi(ui, "Joindre", "Ctrl+J", has) {
+            if mi(ui, tl("Joindre"), "Ctrl+J", has) {
                 self.join();
             }
-            if mi(ui, "Convertir les points en sommets", "Ctrl+Alt+J", has) {
+            if mi(ui, tl("Convertir les points en sommets"), "Ctrl+Alt+J", has) {
                 self.path_op(6);
             }
-            if mi(ui, "Décalage du tracé…", "", has) {
+            if mi(ui, tl("Décalage du tracé…"), "", has) {
                 self.open_dlg(Dlg::Offset { d: 10.0 });
             }
-            if mi(ui, "Simplifier…", "", has) {
+            if mi(ui, tl("Simplifier…"), "", has) {
                 self.open_dlg(Dlg::Simplify { tol: 2.0, smooth: true });
             }
-            if mi(ui, "Convertir en tracé", "", has) {
+            if mi(ui, tl("Convertir en tracé"), "", has) {
                 self.path_op(0);
             }
             for (label, op) in [("Lisser le tracé", 1), ("Simplifier (rapide)", 2), ("Inverser le sens", 3), ("Fermer / ouvrir le tracé", 4), ("Ajouter des points d'ancrage", 5)] {
@@ -2808,7 +2808,7 @@ impl VectorApp {
                     self.path_op(op);
                 }
             }
-            if mi(ui, "Nettoyer les objets vides", "", true) {
+            if mi(ui, tl("Nettoyer les objets vides"), "", true) {
                 self.cleanup();
             }
         });
@@ -2823,36 +2823,36 @@ impl VectorApp {
             }
         });
         ui.menu_button(tl("Fusion"), |ui| {
-            if mi(ui, "Créer une fusion…", "Ctrl+Alt+B", multi) {
+            if mi(ui, tl("Créer une fusion…"), "Ctrl+Alt+B", multi) {
                 self.open_dlg(Dlg::Blend { steps: 5 });
             }
         });
         ui.menu_button(tl("Masque d'écrêtage"), |ui| {
-            if mi(ui, "Créer", "Ctrl+7", multi) {
+            if mi(ui, tl("Créer"), "Ctrl+7", multi) {
                 self.make_clip(false);
             }
-            if mi(ui, "Annuler", "Ctrl+Alt+7", has) {
+            if mi(ui, tl("Annuler"), "Ctrl+Alt+7", has) {
                 self.release_clip();
             }
         });
         ui.menu_button(tl("Masque d'opacité"), |ui| {
-            if mi(ui, "Créer", "", multi) {
+            if mi(ui, tl("Créer"), "", multi) {
                 self.make_clip(true);
             }
-            if mi(ui, "Annuler", "", has) {
+            if mi(ui, tl("Annuler"), "", has) {
                 self.release_clip();
             }
         });
         ui.menu_button(tl("Tracé transparent composé"), |ui| {
-            if mi(ui, "Créer", "Ctrl+8", multi) {
+            if mi(ui, tl("Créer"), "Ctrl+8", multi) {
                 self.make_compound();
             }
-            if mi(ui, "Annuler", "Ctrl+Alt+8", has) {
+            if mi(ui, tl("Annuler"), "Ctrl+Alt+8", has) {
                 self.release_compound();
             }
         });
         let is_img = self.sel.is_some_and(|i| matches!(self.doc.items[i].geom, Geom::Image { .. }));
-        if mi(ui, "Vectorisation dynamique…", "", is_img) {
+        if mi(ui, tl("Vectorisation dynamique…"), "", is_img) {
             self.open_trace();
         }
         ui.menu_button(tl("Plans de travail"), |ui| {
@@ -2924,10 +2924,10 @@ impl VectorApp {
             }
         });
         ui.separator();
-        if mi(ui, "Vectoriser", "Ctrl+Maj+O", on) {
+        if mi(ui, tl("Vectoriser"), "Ctrl+Maj+O", on) {
             self.text_outlines();
         }
-        if mi(ui, "Convertir en texte captif", "", on) {
+        if mi(ui, tl("Convertir en texte captif"), "", on) {
             self.checkpoint();
             for &i in &texts {
                 let w = self.doc.items[i].bbox().size()[0].max(100.0);
@@ -2937,14 +2937,14 @@ impl VectorApp {
                 it.text_path.clear();
             }
         }
-        if mi(ui, "Convertir en texte de point", "", on) {
+        if mi(ui, tl("Convertir en texte de point"), "", on) {
             self.checkpoint();
             for &i in &texts {
                 self.doc.items[i].box_w = 0.0;
                 self.doc.items[i].box_h = 0.0;
             }
         }
-        if mi(ui, "Orientation horizontale / verticale", "", on) {
+        if mi(ui, tl("Orientation horizontale / verticale"), "", on) {
             self.checkpoint();
             for &i in &texts {
                 self.doc.items[i].vertical = !self.doc.items[i].vertical;
@@ -2954,13 +2954,13 @@ impl VectorApp {
 
     fn menu_select(&mut self, ui: &mut Ui) {
         let has = self.sel.is_some();
-        if mi(ui, "Tout sélectionner", "Ctrl+A", true) {
+        if mi(ui, tl("Tout sélectionner"), "Ctrl+A", true) {
             self.select_all();
         }
-        if mi(ui, "Désélectionner", "Ctrl+Maj+A", has) {
+        if mi(ui, tl("Désélectionner"), "Ctrl+Maj+A", has) {
             self.set_selection(Vec::new());
         }
-        if mi(ui, "Sélection inverse", "", true) {
+        if mi(ui, tl("Sélection inverse"), "", true) {
             self.select_inverse();
         }
         ui.separator();
@@ -2971,29 +2971,29 @@ impl VectorApp {
                 }
             }
         });
-        if mi(ui, "Objets du calque actif", "", true) {
+        if mi(ui, tl("Objets du calque actif"), "", true) {
             let v = (0..self.doc.items.len()).filter(|i| self.doc.items[*i].layer == self.active_layer && self.doc.editable(*i)).collect();
             self.set_selection(v);
         }
-        if mi(ui, "Objets du plan de travail actif", "", true) {
+        if mi(ui, tl("Objets du plan de travail actif"), "", true) {
             let b = &self.doc.all_boards()[self.active_board.min(self.doc.boards.len())];
             let r = BBox { min: [b.x, b.y], max: [b.x + b.w, b.y + b.h] };
             let v = (0..self.doc.items.len()).filter(|i| self.doc.editable(*i) && r.overlaps(&self.doc.items[*i].bbox())).collect();
             self.set_selection(v);
         }
-        if mi(ui, "Tous les textes", "", true) {
+        if mi(ui, tl("Tous les textes"), "", true) {
             let v = (0..self.doc.items.len()).filter(|i| self.doc.editable(*i) && matches!(self.doc.items[*i].geom, Geom::Text { .. })).collect();
             self.set_selection(v);
         }
-        if mi(ui, "Tracés ouverts", "", true) {
+        if mi(ui, tl("Tracés ouverts"), "", true) {
             let v = (0..self.doc.items.len()).filter(|i| self.doc.editable(*i) && matches!(self.doc.items[*i].geom, Geom::Path { closed: false, .. })).collect();
             self.set_selection(v);
         }
-        if mi(ui, "Images", "", true) {
+        if mi(ui, tl("Images"), "", true) {
             let v = (0..self.doc.items.len()).filter(|i| self.doc.editable(*i) && matches!(self.doc.items[*i].geom, Geom::Image { .. })).collect();
             self.set_selection(v);
         }
-        if mi(ui, "Masques d'écrêtage", "", true) {
+        if mi(ui, tl("Masques d'écrêtage"), "", true) {
             let v = (0..self.doc.items.len()).filter(|i| self.doc.items[*i].clip || self.doc.items[*i].mask).collect();
             self.set_selection(v);
         }
@@ -3011,14 +3011,14 @@ impl VectorApp {
                 self.dock_tab = 0;
             }
         };
-        live(ui, "Ombre portée", &|it| it.shadow = true);
-        live(ui, "Lueur externe", &|it| it.glow_out = it.glow_out.max(10.0));
-        live(ui, "Lueur interne", &|it| it.glow_in = it.glow_in.max(8.0));
-        live(ui, "Contour progressif", &|it| it.feather = it.feather.max(6.0));
-        live(ui, "Flou gaussien", &|it| it.blur = it.blur.max(4.0));
-        live(ui, "Distorsion dynamique", &|it| it.rough = it.rough.max(8.0));
-        live(ui, "Grain", &|it| it.grain = it.grain.max(0.3));
-        live(ui, "Retirer tous les effets", &|it| {
+        live(ui, tl("Ombre portée"), &|it| it.shadow = true);
+        live(ui, tl("Lueur externe"), &|it| it.glow_out = it.glow_out.max(10.0));
+        live(ui, tl("Lueur interne"), &|it| it.glow_in = it.glow_in.max(8.0));
+        live(ui, tl("Contour progressif"), &|it| it.feather = it.feather.max(6.0));
+        live(ui, tl("Flou gaussien"), &|it| it.blur = it.blur.max(4.0));
+        live(ui, tl("Distorsion dynamique"), &|it| it.rough = it.rough.max(8.0));
+        live(ui, tl("Grain"), &|it| it.grain = it.grain.max(0.3));
+        live(ui, tl("Retirer tous les effets"), &|it| {
             it.shadow = false;
             it.glow_out = 0.0;
             it.glow_in = 0.0;
@@ -3066,25 +3066,25 @@ impl VectorApp {
     }
 
     fn menu_view(&mut self, ui: &mut Ui) {
-        if mi(ui, "Zoom avant", "Ctrl++", true) {
+        if mi(ui, tl("Zoom avant"), "Ctrl++", true) {
             self.zoom_by(1.25);
         }
-        if mi(ui, "Zoom arrière", "Ctrl+−", true) {
+        if mi(ui, tl("Zoom arrière"), "Ctrl+−", true) {
             self.zoom_by(0.8);
         }
-        if mi(ui, "Ajuster le plan de travail", "Ctrl+0", true) {
+        if mi(ui, tl("Ajuster le plan de travail"), "Ctrl+0", true) {
             self.fit_view(false);
         }
-        if mi(ui, "Tout ajuster", "Ctrl+Alt+0", true) {
+        if mi(ui, tl("Tout ajuster"), "Ctrl+Alt+0", true) {
             self.fit_view(true);
         }
-        if mi(ui, "Taille réelle", "Ctrl+1", true) {
+        if mi(ui, tl("Taille réelle"), "Ctrl+1", true) {
             self.zoom_by(1.0 / self.zoom);
         }
-        if mi(ui, "Zoom sur la sélection", "", self.sel.is_some()) {
+        if mi(ui, tl("Zoom sur la sélection"), "", self.sel.is_some()) {
             self.zoom_to_selection();
         }
-        if mi(ui, "Réinitialiser la rotation de la vue", "", self.rot != 0.0) {
+        if mi(ui, tl("Réinitialiser la rotation de la vue"), "", self.rot != 0.0) {
             self.rot = 0.0;
             self.fit_view(false);
         }

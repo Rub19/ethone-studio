@@ -898,13 +898,13 @@ impl PageApp {
         };
         match self.tool {
             Polygon | FramePolygon => {
-                lbl(ui, "Côtés");
+                lbl(ui, tl("Côtés"));
                 ui.add(egui::DragValue::new(&mut self.polygon_sides).range(3..=24));
             }
             Star => {
-                lbl(ui, "Branches");
+                lbl(ui, tl("Branches"));
                 ui.add(egui::DragValue::new(&mut self.star_points).range(3..=48));
-                lbl(ui, "Creux");
+                lbl(ui, tl("Creux"));
                 ui.add(egui::Slider::new(&mut self.polygon_inner, 0.15..=0.95).show_value(false));
             }
             Measure => {
@@ -914,7 +914,7 @@ impl PageApp {
                         lbl(ui, t);
                         ui.label(RichText::new(format!("{v:.1} mm")).size(12.0).monospace());
                     }
-                    lbl(ui, "Angle");
+                    lbl(ui, tl("Angle"));
                     ui.label(RichText::new(format!("{:.1}°", -dy.atan2(dx).to_degrees())).size(12.0).monospace());
                     return;
                 }
@@ -922,9 +922,9 @@ impl PageApp {
             PageTool if self.page != MASTER => {
                 let (w, h) = self.doc.page_size(self.page);
                 let (mut wm, mut hm) = (w / MM, h / MM);
-                lbl(ui, "Largeur");
+                lbl(ui, tl("Largeur"));
                 let a = ui.add(egui::DragValue::new(&mut wm).range(10.0..=2000.0).suffix(" mm").max_decimals(1)).changed();
-                lbl(ui, "Hauteur");
+                lbl(ui, tl("Hauteur"));
                 let b = ui.add(egui::DragValue::new(&mut hm).range(10.0..=2000.0).suffix(" mm").max_decimals(1)).changed();
                 if a || b {
                     self.doc.pages[self.page].size = Some([wm * MM, hm * MM]);

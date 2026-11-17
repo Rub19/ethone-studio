@@ -223,7 +223,7 @@ impl Motion {
                 };
                 let o = &mut self.topts;
                 match self.tool {
-                    Tool::Select => lab(ui, "Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe"),
+                    Tool::Select => lab(ui, tl("Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe")),
                     Tool::Hand | Tool::ZoomIn | Tool::ZoomOut => {
                         lab(ui, if self.tool == Tool::Hand { "Glisser pour déplacer la vue" } else { "Clic : zoom · Alt+clic : inverse" });
                         for (n, z) in [("Ajuster", None), ("50 %", Some(0.5)), ("100 %", Some(1.0)), ("200 %", Some(2.0))] {
@@ -233,9 +233,9 @@ impl Motion {
                             }
                         }
                     }
-                    Tool::Rotate => lab(ui, "Glisser pour tourner le calque · Maj : pas de 15°"),
+                    Tool::Rotate => lab(ui, tl("Glisser pour tourner le calque · Maj : pas de 15°")),
                     Tool::Anchor => {
-                        lab(ui, "Glisser l'ancre sans bouger le calque · Placer :");
+                        lab(ui, tl("Glisser l'ancre sans bouger le calque · Placer :"));
                         for (n, k) in [("Centre", 4u8), ("Haut", 1), ("Bas", 7), ("Gauche", 3), ("Droite", 5)] {
                             if ui.small_button(n).clicked() {
                                 self.anchor_to(k);
@@ -243,7 +243,7 @@ impl Motion {
                         }
                     }
                     Tool::Rect | Tool::RoundRect | Tool::Ellipse | Tool::Polygon | Tool::Star => {
-                        lab(ui, "Fond");
+                        lab(ui, tl("Fond"));
                         color_button(ui, &mut o.fill);
                         ui.checkbox(&mut o.stroke_on, tl("Contour"));
                         if o.stroke_on {
@@ -270,7 +270,7 @@ impl Motion {
                         if o.pen_fill {
                             color_button(ui, &mut o.pen_color);
                         }
-                        lab(ui, "Contour");
+                        lab(ui, tl("Contour"));
                         color_button(ui, &mut o.pen_stroke);
                         ui.add(egui::DragValue::new(&mut o.pen_w).range(0.0..=80.0).speed(0.2).suffix(" px"));
                         if self.pen.is_some() && ui.small_button(tl("Terminer (Entrée)")).clicked() {
@@ -293,25 +293,25 @@ impl Motion {
                         });
                         ui.add(egui::DragValue::new(&mut o.text_size).range(8.0..=600.0).suffix(" px"));
                         color_button(ui, &mut o.text_color);
-                        lab(ui, "Clic dans la vue pour écrire");
+                        lab(ui, tl("Clic dans la vue pour écrire"));
                     }
                     Tool::Brush => {
                         ui.add(egui::DragValue::new(&mut o.brush).range(0.5..=200.0).speed(0.3).prefix("Taille ").suffix(" px"));
                         color_button(ui, &mut o.brush_color);
                         ui.add(egui::DragValue::new(&mut o.smooth).range(0..=8).prefix("Lissage "));
-                        lab(ui, "Peint sur le calque Peinture sélectionné");
+                        lab(ui, tl("Peint sur le calque Peinture sélectionné"));
                     }
                     Tool::MaskRect | Tool::MaskEllipse => {
                         ui.checkbox(&mut o.mask_invert, tl("Inversé"));
-                        lab(ui, "Sélectionne un calque puis trace : seule la zone dessinée reste visible");
+                        lab(ui, tl("Sélectionne un calque puis trace : seule la zone dessinée reste visible"));
                     }
                     Tool::Puppet => {
                         ui.add(egui::DragValue::new(&mut o.puppet).range(10.0..=1000.0).speed(1.0).prefix("Portée ").suffix(" px"));
-                        lab(ui, "Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur");
+                        lab(ui, tl("Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur"));
                     }
                     Tool::Eraser => {
                         ui.add(egui::DragValue::new(&mut o.eraser).range(2.0..=400.0).speed(0.5).prefix("Taille ").suffix(" px"));
-                        lab(ui, "Efface les traits du calque Peinture");
+                        lab(ui, tl("Efface les traits du calque Peinture"));
                     }
                 }
             });

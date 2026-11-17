@@ -309,12 +309,12 @@ fn comment(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Commenter");
     tool_buttons(app, ui, &[Tool::Highlight, Tool::Underline, Tool::Strike, Tool::Note, Tool::TextBox, Tool::Rect, Tool::Ellipse, Tool::Line, Tool::Arrow, Tool::Ink, Tool::Stamp]);
     ui.add_space(8.0);
-    label(ui, "Couleur");
+    label(ui, tl("Couleur"));
     color_row(ui, &mut app.color);
     pro::option_slider(ui, tl("Épaisseur"), &mut app.width, 0.5..=12.0, " pt", false);
     pro::option_slider(ui, tl("Taille du texte"), &mut app.text_size, 6.0..=48.0, " pt", false);
     ui.add_space(8.0);
-    label(ui, "Tampon");
+    label(ui, tl("Tampon"));
     ui.horizontal_wrapped(|ui| {
         for (k, (name, c)) in STAMPS.iter().enumerate() {
             let t = RichText::new(name.to_uppercase()).size(11.0).color(Color32::from_rgb(c[0], c[1], c[2]));
@@ -324,7 +324,7 @@ fn comment(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
             }
         }
     });
-    hint(ui, "Glisse sur la page pour poser le tampon, ou clique pour une taille standard.");
+    hint(ui, tl("Glisse sur la page pour poser le tampon, ou clique pour une taille standard."));
     ui.add_space(10.0);
     if pro::secondary(ui, tl("Supprimer les commentaires de la page")).clicked() {
         let p = app.scope(0);
@@ -334,7 +334,7 @@ fn comment(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 
 fn fill_sign(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Remplir et signer");
-    label(ui, "Signature");
+    label(ui, tl("Signature"));
     ui.horizontal(|ui| {
         if pro::primary(ui, if app.signature.is_empty() { "Créer ma signature" } else { "Poser ma signature" }).clicked() {
             if app.signature.is_empty() {
@@ -350,11 +350,11 @@ fn fill_sign(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     });
     ui.add_space(6.0);
     tool_buttons(app, ui, &[Tool::TextBox, Tool::Date, Tool::Sign]);
-    hint(ui, "Texte : clique où écrire. Date du jour : un clic.");
+    hint(ui, tl("Texte : clique où écrire. Date du jour : un clic."));
     ui.add_space(12.0);
     label(ui, &format!("Champs du formulaire · {}", app.st.fields.len()));
     if app.st.fields.is_empty() {
-        hint(ui, "Ce PDF n'a pas de champs : utilise Texte, Date et Signature pour le remplir.");
+        hint(ui, tl("Ce PDF n'a pas de champs : utilise Texte, Date et Signature pour le remplir."));
         return;
     }
     let st = &mut app.st;
@@ -432,7 +432,7 @@ fn organize(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     });
     ui.add_space(10.0);
-    label(ui, "Insérer après la page courante");
+    label(ui, tl("Insérer après la page courante"));
     egui::ComboBox::from_id_salt("blank").selected_text(SIZES[app.st.blank].0).show_ui(ui, |ui| {
         for (k, s) in SIZES.iter().enumerate() {
             ui.selectable_value(&mut app.st.blank, k, s.0);
@@ -460,7 +460,7 @@ fn organize(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     });
     ui.add_space(10.0);
-    label(ui, "Extraire et diviser");
+    label(ui, tl("Extraire et diviser"));
     ui.horizontal(|ui| {
         if ui.button(tl("Extraire la sélection…")).clicked()
             && let Some(o) = &app.od
@@ -506,7 +506,7 @@ fn organize(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     }
     ui.add_space(6.0);
-    label(ui, "Impression économique");
+    label(ui, tl("Impression économique"));
     ui.horizontal(|ui| {
         for (k, name) in [(2usize, "2 pages par feuille"), (4, "4 pages par feuille")] {
             if ui.button(name).on_hover_text(tl("Nouvelle mise en page A4 : chaque feuille regroupe plusieurs pages réduites")).clicked() {
@@ -515,7 +515,7 @@ fn organize(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     });
     ui.add_space(10.0);
-    label(ui, "Recadrer (marges en mm : gauche, haut, droite, bas)");
+    label(ui, tl("Recadrer (marges en mm : gauche, haut, droite, bas)"));
     ui.horizontal(|ui| {
         for v in app.st.crop.iter_mut() {
             ui.add(egui::DragValue::new(v).range(0.0..=200.0).speed(0.5));
@@ -554,7 +554,7 @@ fn load_many(files: &[PathBuf]) -> engine::R<lopdf::Document> {
 
 fn combine(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Combiner des fichiers");
-    hint(ui, "Ajoute des PDF et des images (ou glisse-les dans la fenêtre), mets-les dans l'ordre, puis combine.");
+    hint(ui, tl("Ajoute des PDF et des images (ou glisse-les dans la fenêtre), mets-les dans l'ordre, puis combine."));
     ui.add_space(6.0);
     ui.horizontal(|ui| {
         if ui.button(tl("Ajouter des fichiers…")).clicked()
@@ -650,7 +650,7 @@ fn create(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         blank(app, ctx);
     }
     ui.add_space(8.0);
-    hint(ui, "Chaque image devient une page. Lance ensuite l'OCR pour rendre le texte des scans consultable.");
+    hint(ui, tl("Chaque image devient une page. Lance ensuite l'OCR pour rendre le texte des scans consultable."));
 }
 
 pub fn send_page(app: &mut Folio, ctx: &egui::Context, target: &'static str) {
@@ -706,11 +706,11 @@ pub fn ocr_done(app: &mut Folio, ctx: &egui::Context, pages: Vec<(usize, String,
 
 fn ocr_panel(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Numériser et OCR");
-    hint(ui, "Lit le texte des pages scannées ou photographiées avec le moteur OCR de Windows, sans rien envoyer en ligne.");
+    hint(ui, tl("Lit le texte des pages scannées ou photographiées avec le moteur OCR de Windows, sans rien envoyer en ligne."));
     ui.add_space(6.0);
-    label(ui, "Langue du document");
+    label(ui, tl("Langue du document"));
     if app.st.langs.is_empty() {
-        hint(ui, "Aucune langue OCR installée : Paramètres Windows › Heure et langue › Langue.");
+        hint(ui, tl("Aucune langue OCR installée : Paramètres Windows › Heure et langue › Langue."));
     } else {
         let cur = app.st.langs.get(app.st.ocr_lang).map(|l| l.1.clone()).unwrap_or_default();
         egui::ComboBox::from_id_salt("ocr-lang").selected_text(cur).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
@@ -719,7 +719,7 @@ fn ocr_panel(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
             }
         });
     }
-    label(ui, "Pages");
+    label(ui, tl("Pages"));
     scope_pick(ui, &mut app.st.ocr_scope, !app.sel.is_empty());
     ui.checkbox(&mut app.st.ocr_layer, tl("Rendre le PDF consultable (calque de texte invisible)"));
     ui.add_space(6.0);
@@ -746,7 +746,7 @@ fn ocr_panel(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 
 fn redact(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Caviarder");
-    hint(ui, "Trace des rectangles avec l'outil Caviardage sur ce qui doit disparaître. Appliquer remplace ces pages par une image : le texte caché n'existe plus du tout dans le fichier.");
+    hint(ui, tl("Trace des rectangles avec l'outil Caviardage sur ce qui doit disparaître. Appliquer remplace ces pages par une image : le texte caché n'existe plus du tout dans le fichier."));
     ui.add_space(6.0);
     tool_buttons(app, ui, &[Tool::Redact]);
     label(ui, &format!("{} zone(s) à caviarder", app.redactions.len()));
@@ -798,11 +798,11 @@ fn redact(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 
 fn protect(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Protéger");
-    hint(ui, "Chiffrement AES-256. Une copie protégée est enregistrée, le document ouvert reste modifiable.");
+    hint(ui, tl("Chiffrement AES-256. Une copie protégée est enregistrée, le document ouvert reste modifiable."));
     ui.add_space(6.0);
-    label(ui, "Mot de passe d'ouverture");
+    label(ui, tl("Mot de passe d'ouverture"));
     ui.add(egui::TextEdit::singleline(&mut app.st.pw).password(true).desired_width(f32::INFINITY));
-    label(ui, "Mot de passe des autorisations (facultatif)");
+    label(ui, tl("Mot de passe des autorisations (facultatif)"));
     ui.add(egui::TextEdit::singleline(&mut app.st.pw_owner).password(true).desired_width(f32::INFINITY));
     ui.checkbox(&mut app.st.perm[0], tl("Autoriser l'impression"));
     ui.checkbox(&mut app.st.perm[1], tl("Autoriser la copie du texte"));
@@ -820,7 +820,7 @@ fn protect(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     }
     ui.add_space(10.0);
-    hint(ui, "Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus.");
+    hint(ui, tl("Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus."));
 }
 
 fn size_text(n: usize) -> String {
@@ -840,13 +840,13 @@ fn compress(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         toast(ctx, format!("{} → {}", size_text(before), size_text(after)), true);
     }
     ui.add_space(10.0);
-    label(ui, "Compression forte (pages en images)");
-    pro::segmented(ui, &mut app.st.comp_dpi, &[tl("72 ppp"), tl("110 ppp"), tl("150 ppp")]);
+    label(ui, tl("Compression forte (pages en images)"));
+    pro::segmented(ui, &mut app.st.comp_dpi, &[tl("72 ppptl("), tl(")110 ppptl("), tl(")150 ppp")]);
     ui.horizontal(|ui| {
         ui.label(RichText::new(tl("Qualité JPEG")).size(12.0).color(MUTED));
         ui.add(egui::Slider::new(&mut app.st.comp_q, 30..=95));
     });
-    hint(ui, "Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite.");
+    hint(ui, tl("Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite."));
     if pro::secondary(ui, tl("Compression forte")).clicked() {
         let dpi = [72.0, 110.0, 150.0][app.st.comp_dpi];
         let n = app.od.as_ref().map_or(0, |o| o.n());
@@ -866,7 +866,7 @@ fn compress(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 fn stamp(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Filigrane et numérotation");
     let mut mode = app.st.st_mode;
-    if pro::segmented(ui, &mut mode, &[tl("Filigrane"), tl("En-tête"), tl("Pied"), tl("Numéros"), tl("Bates")]) {
+    if pro::segmented(ui, &mut mode, &[tl("Filigranetl("), tl(")En-têtetl("), tl(")Piedtl("), tl(")Numérostl("), tl(")Bates")]) {
         app.st.st_mode = mode;
         app.st.st = stamp_preset(mode);
     }
@@ -897,7 +897,7 @@ fn stamp(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     });
     s.place = place as u8;
-    label(ui, "Pages");
+    label(ui, tl("Pages"));
     scope_pick(ui, &mut app.st.st_scope, !app.sel.is_empty());
     ui.add_space(6.0);
     if pro::primary(ui, tl("Appliquer")).clicked() {
@@ -908,7 +908,7 @@ fn stamp(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         app.edit(ctx, "Texte ajouté aux pages", |d| engine::stamp_text(d, &idx, &st, &name, bates));
     }
     ui.add_space(12.0);
-    label(ui, "Arrière-plan");
+    label(ui, tl("Arrière-plan"));
     color_row(ui, &mut app.st.bg);
     if ui.button(tl("Appliquer la couleur de fond")).clicked() {
         let idx = app.scope(app.st.st_scope);
@@ -919,12 +919,12 @@ fn stamp(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 
 fn export(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Exporter");
-    pro::segmented(ui, &mut app.st.exp_fmt, &[tl("PNG"), tl("JPEG"), tl("Texte"), tl("Word")]);
+    pro::segmented(ui, &mut app.st.exp_fmt, &[tl("PNGtl("), tl(")JPEGtl("), tl(")Textetl("), tl(")Word")]);
     if app.st.exp_fmt < 2 {
-        label(ui, "Résolution");
-        pro::segmented(ui, &mut app.st.exp_dpi, &[tl("72 ppp"), tl("150 ppp"), tl("300 ppp")]);
+        label(ui, tl("Résolution"));
+        pro::segmented(ui, &mut app.st.exp_dpi, &[tl("72 ppptl("), tl(")150 ppptl("), tl(")300 ppp")]);
     }
-    label(ui, "Pages");
+    label(ui, tl("Pages"));
     scope_pick(ui, &mut app.st.exp_scope, !app.sel.is_empty());
     ui.add_space(6.0);
     if pro::primary(ui, tl("Exporter…")).clicked() {
@@ -981,7 +981,7 @@ fn export(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     }
     ui.add_space(10.0);
-    label(ui, "Envoyer la page courante");
+    label(ui, tl("Envoyer la page courante"));
     ui.horizontal(|ui| {
         if ui.button(tl("Vers Pixel")).clicked() {
             send_page(app, ctx, "pixel");
@@ -1027,7 +1027,7 @@ fn compare(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
         }
     }
     let Some(c) = &app.st.cmp else {
-        hint(ui, "Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge.");
+        hint(ui, tl("Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge."));
         return;
     };
     label(ui, &format!("Comparé à : {}", c.name));
@@ -1120,12 +1120,12 @@ fn search(app: &mut Folio, ui: &mut Ui) {
     if let Some(i) = go {
         app.goto = Some(i);
     }
-    hint(ui, "Un scan doit d'abord passer par Numériser et OCR.");
+    hint(ui, tl("Un scan doit d'abord passer par Numériser et OCR."));
 }
 
 pub fn bookmarks_list(app: &mut Folio, ui: &mut Ui) {
     if app.st.bm.is_empty() {
-        hint(ui, "Aucun signet. Outils › Signets pour en créer.");
+        hint(ui, tl("Aucun signet. Outils › Signets pour en créer."));
         return;
     }
     let mut go = None;
@@ -1224,7 +1224,7 @@ fn props(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 fn measure(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Mesurer");
     tool_buttons(app, ui, &[Tool::Measure]);
-    hint(ui, "Glisse entre deux points de la page : la distance s'affiche en millimètres (à l'échelle 1:1 du document).");
+    hint(ui, tl("Glisse entre deux points de la page : la distance s'affiche en millimètres (à l'échelle 1:1 du document)."));
     if let Some((p, a, b)) = app.measure {
         let d = (a[0] - b[0]).hypot(a[1] - b[1]) * 25.4 / 72.0;
         ui.add_space(6.0);

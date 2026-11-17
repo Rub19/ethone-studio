@@ -1,4 +1,4 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
 Annuler	
 Proportionnelle	
 Mettre à l'échelle les contours et effets	
@@ -247,3 +247,261 @@ Crénage
 Texte vertical	
 Détacher du tracé	
 Vectorisation dynamique…	
+Distance	
+Verticale	
+Horizontaltl(	
+)Verticaltl(	
+)Angle	
+Angle de l'axe	
+Angle d'inclinaison	
+Axe horizontaltl(	
+)Axe vertical	
+Échelle horizontale	
+Échelle verticale	
+Déplacement horizontal	
+Déplacement vertical	
+Rotation	
+Décalage (négatif = vers l'intérieur)	
+Précision (plus haut = moins de points)	
+Rayon	
+Amplitude	
+Pointestl(	
+)Arrondis	
+Détail (points par 100 px)	
+Anglestl(	
+Contraction ← → Dilatation	
+Angle des hachures	
+Espacement	
+Variation	
+Teinte	
+Saturation	
+Luminosité	
+Copies	
+Décalage X	
+Décalage Y	
+Rotation par copie	
+OK	
+PNGtl(	
+)JPEGtl(	
+)SVGtl(	
+)PDF	
+Contenu	
+Plan actiftl(	
+)Tous les planstl(	
+)Sélection	
+Échelle	
+Vectorisation dynamique	
+Noir et blanctl(	
+)Niveaux de gristl(	
+)Couleurs	
+Seuil	
+Bruit ignoré	
+Courbes (plus haut = plus arrondi)	
+Vectoriser	
+Recolorer l'illustration	
+Nouveau document	
+Nouveau…	
+Enregistrer	
+Enregistrer sous…	
+Importer une image…	
+Importer un SVG…	
+Fermer	
+Rétablir	
+Couper	
+Copier	
+Coller	
+Coller devant	
+Coller derrière	
+Coller en place	
+Transformer à nouveau	
+Symétrie horizontale	
+Symétrie verticale	
+Verrouiller la sélection	
+Tout déverrouiller	
+Masquer la sélection	
+Tout afficher	
+Décomposer	
+Joindre	
+Convertir les points en sommets	
+Décalage du tracé…	
+Convertir en tracé	
+Nettoyer les objets vides	
+Créer une fusion…	
+Convertir en texte captif	
+Convertir en texte de point	
+Orientation horizontale / verticale	
+Désélectionner	
+Sélection inverse	
+Objets du calque actif	
+Objets du plan de travail actif	
+Tous les textes	
+Tracés ouverts	
+Images	
+Masques d'écrêtage	
+Lueur externe	
+Lueur interne	
+Contour progressif	
+Flou gaussien	
+Distorsion dynamique	
+Grain	
+Retirer tous les effets	
+Zoom avant	
+Zoom arrière	
+Ajuster le plan de travail	
+Tout ajuster	
+Taille réelle	
+Zoom sur la sélection	
+Réinitialiser la rotation de la vue	
+Opacité de la couleur	
+Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.	
+Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone	
+Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit	
+Critères	
+Entoure les objets à sélectionner · Maj ajoute à la sélection	
+Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer	
+Clique sur un tracé pour ajouter un point sans changer sa forme	
+Clique un point d'ancrage pour le supprimer	
+Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques	
+Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer	
+Maj : proportions fixes	
+Rangées	
+Colonnes	
+Cercles	
+Rayons	
+Anneaux	
+Glisse depuis le centre du halo	
+Frotte le tracé sélectionné	
+Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint	
+Pas Maj	
+Tire un coin du cadre pour déformer en perspective libre	
+Tire une partie du tracé sélectionné : les points voisins suivent en douceur	
+Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur	
+Étapes	
+Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole	
+Glisse pour pulvériser des occurrences du symbole	
+Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	
+Clique une zone fermée pour la peindre avec le fond	
+Linéairetl(	
+)Radial	
+Glisse sur l'objet sélectionné pour placer le dégradé	
+Rayon du point	
+Clic : point de couleur · Alt+clic : le retirer	
+Glisse pour mesurer une distance et un angle	
+Clique sur un tracé pour le couper à cet endroit	
+Trace un trait à main levée à travers les formes pour les découper	
+Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	
+Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	
+Propriétéstl(	
+)Calquestl(	
+)Bibliothèques	
+Pas	
+Déplacement clavier	
+Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	
+L	
+H	
+Fond du document	
+X	
+Y	
+Aligner sur	
+Sélectiontl(	
+)Plantl(	
+)Clé	
+Objet clé : le premier sélectionné (contour bleu épais).	
+Répartir les objets	
+Répartir l'espacement	
+Modes de forme	
+Pathfinders	
+Gris	
+Nuances du document	
+Ajoute ici les couleurs de ton projet.	
+Sans sélection, le style devient celui des nouveaux objets.	
+Opacité	
+Mode de fusion	
+Position du contour	
+Centretl(	
+)Intérieurtl(	
+)Extérieur	
+Bouts	
+Rondstl(	
+)Platstl(	
+)Carrés	
+)Pointustl(	
+)Biseaux	
+Limite de pointe	
+Pointillés	
+Tiret	
+Espace	
+Tiret 2	
+Espace 2	
+Pointes de flèche (début · fin)	
+Taille des pointes	
+Profil de largeur	
+Aucuntl(	
+)Linéairetl(	
+Flou	
+Distorsion	
+Finesse	
+Arrondi des coins	
+Aatl(	
+)AAtl(	
+)aatl(	
+)Titre	
+Gauchetl(	
+)Centretl(	
+)Droite	
+Approche	
+Interlignage	
+Ligne de base	
+Largeur du cadre	
+Départ sur le tracé	
+Sélection directe	
+Sélection de groupe	
+Baguette magique	
+Lasso	
+Plume	
+Ajout de point d'ancrage	
+Suppression de point d'ancrage	
+Conversion de point d'ancrage	
+Courbure	
+Texte captif	
+Texte curviligne	
+Segment	
+Arc	
+Spirale	
+Grille rectangulaire	
+Grille polaire	
+Flèche	
+Rectangle	
+Rectangle arrondi	
+Ellipse	
+Polygone	
+Étoile	
+Halo	
+Cœur	
+Pinceau	
+Pinceau goutte	
+Crayon	
+Gomme de tracé	
+Miroir	
+Remodelage	
+Déformation	
+Torsion	
+Contraction	
+Dilatation	
+Festons	
+Cristallisation	
+Fronces	
+Concepteur de forme	
+Pot de peinture dynamique	
+Dégradé de formes	
+Pulvérisation de symboles	
+Filet	
+Pipette	
+Mesure	
+Ciseaux	
+Cutter	
+Gomme	
+Main	
+Rotation de la vue	
+Zoom	
+Plan de travail	

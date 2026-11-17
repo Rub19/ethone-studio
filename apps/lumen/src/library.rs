@@ -10,7 +10,7 @@ impl Lumen {
         egui::Panel::left("lib-nav").resizable(false).exact_size(236.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(12, 14))).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 1.0;
-                heading(ui, "CATALOGUE");
+                heading(ui, tl("CATALOGUE"));
                 let all = self.files.len();
                 let entries: Vec<crate::Entry> = (0..all).map(|i| self.get(i)).collect();
                 let count = |f: &dyn Fn(&crate::Entry) -> bool| entries.iter().filter(|e| f(e)).count();
@@ -31,7 +31,7 @@ impl Lumen {
                 }
                 ui.add_space(12.0);
                 ui.horizontal(|ui| {
-                    heading(ui, "COLLECTIONS DYNAMIQUES");
+                    heading(ui, tl("COLLECTIONS DYNAMIQUES"));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if ui.small_button("+").on_hover_text(tl("Nouvelle collection dynamique")).clicked() {
                             self.smart_edit = Some((None, Smart { min_rating: 0, ..Default::default() }));
@@ -58,7 +58,7 @@ impl Lumen {
                     });
                 }
                 if smarts.is_empty() {
-                    caption(ui, "Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…");
+                    caption(ui, tl("Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…"));
                 }
                 if let Some(k) = remove {
                     self.catalog.smart.remove(k);
@@ -66,7 +66,7 @@ impl Lumen {
                     self.dirty_catalog = true;
                 }
                 ui.add_space(12.0);
-                heading(ui, "ÉTIQUETTES");
+                heading(ui, tl("ÉTIQUETTES"));
                 ui.horizontal(|ui| {
                     for (k, (name, c)) in LABELS.iter().enumerate() {
                         let (r, resp) = ui.allocate_exact_size(Vec2::splat(26.0), Sense::click());
@@ -81,7 +81,7 @@ impl Lumen {
                     }
                 });
                 ui.add_space(12.0);
-                heading(ui, "MOTS-CLÉS");
+                heading(ui, tl("MOTS-CLÉS"));
                 let mut kw: Vec<(String, usize)> = Vec::new();
                 for e in &entries {
                     for k in &e.keywords {
@@ -93,7 +93,7 @@ impl Lumen {
                 }
                 kw.sort();
                 if kw.is_empty() {
-                    caption(ui, "Ajoute des mots-clés dans le panneau de droite.");
+                    caption(ui, tl("Ajoute des mots-clés dans le panneau de droite."));
                 }
                 for (k, n) in kw {
                     let on = self.collection == Collection::Keyword(k.clone());
@@ -102,7 +102,7 @@ impl Lumen {
                     }
                 }
                 ui.add_space(12.0);
-                heading(ui, "DOSSIERS");
+                heading(ui, tl("DOSSIERS"));
                 let current = self.catalog.folder.clone();
                 if ui.checkbox(&mut self.catalog.recursive, tl("Inclure les sous-dossiers")).changed()
                     && let Some(f) = current.clone()
@@ -115,7 +115,7 @@ impl Lumen {
                     let mut subs: Vec<std::path::PathBuf> = rd.flatten().map(|e| e.path()).filter(|p| p.is_dir()).collect();
                     subs.sort();
                     if let Some(parent) = cur.parent()
-                        && nav_row(ui, "↑ Dossier parent", usize::MAX, false).clicked()
+                        && nav_row(ui, tl("↑ Dossier parent"), usize::MAX, false).clicked()
                     {
                         self.open_folder(parent.to_path_buf(), ctx);
                     }
@@ -128,7 +128,7 @@ impl Lumen {
                     }
                 }
                 ui.add_space(6.0);
-                caption(ui, "Récents");
+                caption(ui, tl("Récents"));
                 for f in self.catalog.recent_folders.clone() {
                     let name = f.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| f.display().to_string());
                     if nav_row(ui, &name, usize::MAX, current.as_ref() == Some(&f)).on_hover_text(f.display().to_string()).clicked() && current.as_ref() != Some(&f) {
@@ -263,7 +263,7 @@ impl Lumen {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
                 let Some(i) = self.current else {
-                    Frame::new().inner_margin(Margin::same(16)).show(ui, |ui| caption(ui, "Sélectionne une photo pour voir ses informations."));
+                    Frame::new().inner_margin(Margin::same(16)).show(ui, |ui| caption(ui, tl("Sélectionne une photo pour voir ses informations.")));
                     return;
                 };
                 let targets = self.targets();
@@ -358,7 +358,7 @@ impl Lumen {
                     all.dedup();
                     all.retain(|k| !e.keywords.contains(k));
                     if !all.is_empty() {
-                        caption(ui, "Suggestions");
+                        caption(ui, tl("Suggestions"));
                         ui.horizontal_wrapped(|ui| {
                             for k in all.into_iter().take(12) {
                                 if ui.small_button(&k).clicked() {
@@ -379,9 +379,9 @@ impl Lumen {
                     ui.spacing_mut().item_spacing.y = 4.0;
                     let mut e = self.get(i);
                     let before = (e.title.clone(), e.caption.clone(), e.rating, e.label, e.flag);
-                    caption(ui, "Titre");
+                    caption(ui, tl("Titre"));
                     ui.add(egui::TextEdit::singleline(&mut e.title).desired_width(f32::INFINITY));
-                    caption(ui, "Légende");
+                    caption(ui, tl("Légende"));
                     ui.add(egui::TextEdit::multiline(&mut e.caption).desired_rows(2).desired_width(f32::INFINITY));
                     ui.horizontal(|ui| {
                         for r in 1..=5u8 {
@@ -421,7 +421,7 @@ impl Lumen {
                         pro::label_value(ui, k, &short(v, 30));
                     }
                     if exif.is_empty() {
-                        caption(ui, "Aucune donnée EXIF lisible dans ce fichier.");
+                        caption(ui, tl("Aucune donnée EXIF lisible dans ce fichier."));
                     }
                     ui.add_space(4.0);
                     if pro::ghost(ui, tl("Afficher dans l'Explorateur")).clicked() {
@@ -645,7 +645,7 @@ impl Lumen {
                     self.picked.clear();
                     self.select(b, ctx);
                 }
-                caption(ui, "À gauche : la référence (photo active). À droite : le candidat.");
+                caption(ui, tl("À gauche : la référence (photo active). À droite : le candidat."));
             });
         });
         egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x12)).inner_margin(Margin::same(16))).show(root, |ui| {

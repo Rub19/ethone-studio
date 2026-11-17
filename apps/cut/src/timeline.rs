@@ -819,13 +819,13 @@ impl Cut {
                 ui.close();
             }
         };
-        item(ui, "Scinder à la tête de lecture", 2, menu);
-        item(ui, "Dupliquer", 1, menu);
-        item(ui, "Copier", 3, menu);
-        item(ui, "Figer l'image à la tête", 7, menu);
-        item(ui, "Vitesse/Durée…", 8, menu);
-        item(ui, "Inverser la lecture", 9, menu);
-        item(ui, "Activer / désactiver", 10, menu);
+        item(ui, tl("Scinder à la tête de lecture"), 2, menu);
+        item(ui, tl("Dupliquer"), 1, menu);
+        item(ui, tl("Copier"), 3, menu);
+        item(ui, tl("Figer l'image à la tête"), 7, menu);
+        item(ui, tl("Vitesse/Durée…"), 8, menu);
+        item(ui, tl("Inverser la lecture"), 9, menu);
+        item(ui, tl("Activer / désactiver"), 10, menu);
         ui.menu_button(tl("Vitesse"), |ui| {
             for (k, v) in ["25 %", "50 %", "75 %", "100 %", "150 %", "200 %", "400 %"].iter().enumerate() {
                 if ui.button(*v).clicked() {
@@ -869,17 +869,17 @@ impl Cut {
             }
         });
         ui.separator();
-        item(ui, "Couper / réactiver le son", 5, menu);
-        item(ui, "Normaliser l'audio (−1 dB)", 6, menu);
-        item(ui, "Détacher l'audio sur A2", 11, menu);
+        item(ui, tl("Couper / réactiver le son"), 5, menu);
+        item(ui, tl("Normaliser l'audio (−1 dB)"), 6, menu);
+        item(ui, tl("Détacher l'audio sur A2"), 11, menu);
         item(ui, if matches!(s, Sel::Over(_)) { "Ramener sur V1" } else { "Monter sur V2 (à la même place)" }, 12, menu);
-        item(ui, "Réinitialiser les effets", 13, menu);
+        item(ui, tl("Réinitialiser les effets"), 13, menu);
         ui.separator();
         if matches!(s, Sel::Clip(_)) {
-            item(ui, "Lever (laisser un vide)", 14, menu);
-            item(ui, "Supprimer et refermer", 15, menu);
+            item(ui, tl("Lever (laisser un vide)"), 14, menu);
+            item(ui, tl("Supprimer et refermer"), 15, menu);
         } else {
-            item(ui, "Supprimer", 0, menu);
+            item(ui, tl("Supprimer"), 0, menu);
         }
     }
 }

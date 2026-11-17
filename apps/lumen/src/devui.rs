@@ -33,23 +33,23 @@ fn hue_color(h: f32) -> Color32 {
 }
 
 fn local_sliders(ui: &mut Ui, a: &mut Local) {
-    slider_track(ui, "Température", &mut a.temperature, -100.0..=100.0, 1.0, COLD_WARM);
-    slider_track(ui, "Teinte", &mut a.tint, -100.0..=100.0, 1.0, GREEN_MAGENTA);
-    slider(ui, "Exposition", &mut a.exposure, -4.0..=4.0, 0.01);
-    slider(ui, "Contraste", &mut a.contrast, -100.0..=100.0, 1.0);
-    slider(ui, "Hautes lumières", &mut a.highlights, -100.0..=100.0, 1.0);
-    slider(ui, "Ombres", &mut a.shadows, -100.0..=100.0, 1.0);
-    slider(ui, "Blancs", &mut a.whites, -100.0..=100.0, 1.0);
-    slider(ui, "Noirs", &mut a.blacks, -100.0..=100.0, 1.0);
-    slider(ui, "Texture", &mut a.texture, -100.0..=100.0, 1.0);
-    slider(ui, "Clarté", &mut a.clarity, -100.0..=100.0, 1.0);
-    slider(ui, "Correction du voile", &mut a.dehaze, -100.0..=100.0, 1.0);
-    slider(ui, "Décalage de teinte", &mut a.hue, -100.0..=100.0, 1.0);
-    slider(ui, "Saturation", &mut a.saturation, -100.0..=100.0, 1.0);
-    slider(ui, "Netteté", &mut a.sharpness, -100.0..=100.0, 1.0);
-    slider(ui, "Bruit", &mut a.noise, 0.0..=100.0, 1.0);
-    hue_slider(ui, "Couleur", &mut a.color_hue);
-    slider_track(ui, "Intensité couleur", &mut a.color_sat, 0.0..=100.0, 1.0, [Color32::from_gray(90), hue_color(a.color_hue)]);
+    slider_track(ui, tl("Température"), &mut a.temperature, -100.0..=100.0, 1.0, COLD_WARM);
+    slider_track(ui, tl("Teinte"), &mut a.tint, -100.0..=100.0, 1.0, GREEN_MAGENTA);
+    slider(ui, tl("Exposition"), &mut a.exposure, -4.0..=4.0, 0.01);
+    slider(ui, tl("Contraste"), &mut a.contrast, -100.0..=100.0, 1.0);
+    slider(ui, tl("Hautes lumières"), &mut a.highlights, -100.0..=100.0, 1.0);
+    slider(ui, tl("Ombres"), &mut a.shadows, -100.0..=100.0, 1.0);
+    slider(ui, tl("Blancs"), &mut a.whites, -100.0..=100.0, 1.0);
+    slider(ui, tl("Noirs"), &mut a.blacks, -100.0..=100.0, 1.0);
+    slider(ui, tl("Texture"), &mut a.texture, -100.0..=100.0, 1.0);
+    slider(ui, tl("Clarté"), &mut a.clarity, -100.0..=100.0, 1.0);
+    slider(ui, tl("Correction du voile"), &mut a.dehaze, -100.0..=100.0, 1.0);
+    slider(ui, tl("Décalage de teinte"), &mut a.hue, -100.0..=100.0, 1.0);
+    slider(ui, tl("Saturation"), &mut a.saturation, -100.0..=100.0, 1.0);
+    slider(ui, tl("Netteté"), &mut a.sharpness, -100.0..=100.0, 1.0);
+    slider(ui, tl("Bruit"), &mut a.noise, 0.0..=100.0, 1.0);
+    hue_slider(ui, tl("Couleur"), &mut a.color_hue);
+    slider_track(ui, tl("Intensité couleur"), &mut a.color_sat, 0.0..=100.0, 1.0, [Color32::from_gray(90), hue_color(a.color_hue)]);
 }
 
 fn kind_menu(ui: &mut Ui) -> Option<PartKind> {
@@ -145,7 +145,7 @@ impl Lumen {
                 ui.spacing_mut().item_spacing.y = 1.0;
                 self.navigator(ui);
                 ui.add_space(10.0);
-                heading(ui, "PRÉRÉGLAGES");
+                heading(ui, tl("PRÉRÉGLAGES"));
                 ui.spacing_mut().slider_width = 96.0;
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Quantité")).size(12.0).color(MUTED));
@@ -246,7 +246,7 @@ impl Lumen {
                 });
                 ui.add_space(10.0);
                 ui.horizontal(|ui| {
-                    heading(ui, "INSTANTANÉS");
+                    heading(ui, tl("INSTANTANÉS"));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if ui.small_button("+").on_hover_text(tl("Nouvel instantané (Ctrl+N)")).clicked() {
                             self.snapshot_name = Some(format!("Instantané {}", self.get(i).snapshots.len() + 1));
@@ -264,7 +264,7 @@ impl Lumen {
                 }
                 let snaps = self.get(i).snapshots;
                 if snaps.is_empty() {
-                    caption(ui, "Mémorise une version pour y revenir.");
+                    caption(ui, tl("Mémorise une version pour y revenir."));
                 }
                 let mut remove = None;
                 for (k, (name, st)) in snaps.iter().enumerate() {
@@ -290,7 +290,7 @@ impl Lumen {
                 }
                 ui.add_space(10.0);
                 ui.horizontal(|ui| {
-                    heading(ui, "HISTORIQUE");
+                    heading(ui, tl("HISTORIQUE"));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if ui.small_button(tl("Effacer")).clicked() {
                             self.history.retain(|h| h.0 != i);
@@ -300,10 +300,10 @@ impl Lumen {
                 });
                 let steps: Vec<(usize, String)> = self.history.iter().enumerate().filter(|(_, h)| h.0 == i).map(|(k, h)| (k, h.2.clone())).collect();
                 if steps.is_empty() {
-                    caption(ui, "Chaque réglage apparaît ici.");
+                    caption(ui, tl("Chaque réglage apparaît ici."));
                 }
                 let mut target = None;
-                if nav_row(ui, "État actuel", usize::MAX, true).clicked() {}
+                if nav_row(ui, tl("État actuel"), usize::MAX, true).clicked() {}
                 for (n, (k, label)) in steps.iter().enumerate().rev().take(40) {
                     if nav_row(ui, &format!("{}. {label}", n + 1), usize::MAX, false).on_hover_text(tl("Revenir à l'état avant cette étape")).clicked() {
                         target = Some(*k);
@@ -316,7 +316,7 @@ impl Lumen {
                 }
                 if !steps.is_empty() {
                     let base = self.history.iter().find(|h| h.0 == i).map(|h| h.1.clone());
-                    if nav_row(ui, "Importation (original)", usize::MAX, false).clicked()
+                    if nav_row(ui, tl("Importation (original)"), usize::MAX, false).clicked()
                         && let Some(b) = base
                     {
                         self.set_settings(i, b);
@@ -328,7 +328,7 @@ impl Lumen {
     }
 
     fn navigator(&mut self, ui: &mut Ui) {
-        heading(ui, "NAVIGATEUR");
+        heading(ui, tl("NAVIGATEUR"));
         let (box_r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 132.0), Sense::click_and_drag());
         ui.painter().rect_filled(box_r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14));
         let Some(t) = &self.preview else { return };
@@ -387,7 +387,7 @@ impl Lumen {
                     ui.horizontal(|ui| {
                         match hover {
                             Some(c) => caption(ui, &format!("R {:.0} %   V {:.0} %   B {:.0} %", c[0] as f32 / 2.55, c[1] as f32 / 2.55, c[2] as f32 / 2.55)),
-                            None => caption(ui, "Survole la photo pour lire les valeurs RVB"),
+                            None => caption(ui, tl("Survole la photo pour lire les valeurs RVB")),
                         }
                         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                             ui.toggle_value(&mut clipping, RichText::new(tl("Écrêtage")).size(11.5)).on_hover_text(tl("J"));
@@ -418,11 +418,11 @@ impl Lumen {
                         });
                     });
                     let mut bw = s.mono as usize;
-                    if pro::segmented(ui, &mut bw, &[tl("Couleur"), tl("Noir et blanc")]) {
+                    if pro::segmented(ui, &mut bw, &[tl("Couleurtl("), tl(")Noir et blanc")]) {
                         s.mono = bw == 1;
                     }
                     ui.add_space(6.0);
-                    caption(ui, "Balance des blancs");
+                    caption(ui, tl("Balance des blancs"));
                     ui.horizontal(|ui| {
                         ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
                             if ui.small_button(tl("Pipette")).on_hover_text(tl("W")).clicked() {
@@ -445,27 +445,27 @@ impl Lumen {
                             });
                         });
                     });
-                    slider_track(ui, "Température", &mut s.temperature, -100.0..=100.0, 1.0, COLD_WARM);
-                    slider_track(ui, "Teinte", &mut s.tint, -100.0..=100.0, 1.0, GREEN_MAGENTA);
+                    slider_track(ui, tl("Température"), &mut s.temperature, -100.0..=100.0, 1.0, COLD_WARM);
+                    slider_track(ui, tl("Teinte"), &mut s.tint, -100.0..=100.0, 1.0, GREEN_MAGENTA);
                     ui.add_space(6.0);
-                    caption(ui, "Tonalité");
-                    slider_full(ui, "Exposition", &mut s.exposure, -4.0..=4.0, 0.01, 0.0, None, " IL");
-                    slider(ui, "Contraste", &mut s.contrast, -100.0..=100.0, 1.0);
-                    slider(ui, "Hautes lumières", &mut s.highlights, -100.0..=100.0, 1.0);
-                    slider(ui, "Ombres", &mut s.shadows, -100.0..=100.0, 1.0);
-                    slider(ui, "Blancs", &mut s.whites, -100.0..=100.0, 1.0);
-                    slider(ui, "Noirs", &mut s.blacks, -100.0..=100.0, 1.0);
+                    caption(ui, tl("Tonalité"));
+                    slider_full(ui, tl("Exposition"), &mut s.exposure, -4.0..=4.0, 0.01, 0.0, None, " IL");
+                    slider(ui, tl("Contraste"), &mut s.contrast, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Hautes lumières"), &mut s.highlights, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Ombres"), &mut s.shadows, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Blancs"), &mut s.whites, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Noirs"), &mut s.blacks, -100.0..=100.0, 1.0);
                     ui.add_space(6.0);
-                    caption(ui, "Présence");
-                    slider(ui, "Texture", &mut s.texture, -100.0..=100.0, 1.0);
-                    slider(ui, "Clarté", &mut s.clarity, -100.0..=100.0, 1.0);
-                    slider(ui, "Correction du voile", &mut s.dehaze, -100.0..=100.0, 1.0);
-                    slider(ui, "Vibrance", &mut s.vibrance, -100.0..=100.0, 1.0);
-                    slider(ui, "Saturation", &mut s.saturation, -100.0..=100.0, 1.0);
+                    caption(ui, tl("Présence"));
+                    slider(ui, tl("Texture"), &mut s.texture, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Clarté"), &mut s.clarity, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Correction du voile"), &mut s.dehaze, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Vibrance"), &mut s.vibrance, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Saturation"), &mut s.saturation, -100.0..=100.0, 1.0);
                 });
                 let mut channel = self.curve_channel;
                 solo_dock(solo, ui, &mut opened, "curve", "Courbe des tonalités", |ui| {
-                    pro::segmented(ui, &mut channel, &[tl("Param."), tl("RVB"), tl("R"), tl("V"), tl("B")]);
+                    pro::segmented(ui, &mut channel, &[tl("Param.tl("), tl(")RVBtl("), tl(")Rtl("), tl(")Vtl("), tl(")B")]);
                     ui.add_space(6.0);
                     let lum = hist.as_ref().map(|h| h[3]);
                     match channel {
@@ -505,7 +505,7 @@ impl Lumen {
                 self.curve_channel = channel;
                 let mut tab = self.hsl_tab;
                 solo_dock(solo, ui, &mut opened, "hsl", "TSL / Couleur", |ui| {
-                    pro::segmented(ui, &mut tab, &[tl("Teinte"), tl("Saturation"), tl("Luminance"), tl("Tout")]);
+                    pro::segmented(ui, &mut tab, &[tl("Teintetl("), tl(")Saturationtl("), tl(")Luminancetl("), tl(")Tout")]);
                     ui.add_space(6.0);
                     let tabs: Vec<usize> = if tab == 3 { vec![0, 1, 2] } else { vec![tab] };
                     for t in tabs {
@@ -531,7 +531,7 @@ impl Lumen {
                         }
                     });
                     if s.mono {
-                        caption(ui, "En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).");
+                        caption(ui, tl("En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B)."));
                     }
                 });
                 self.hsl_tab = tab;
@@ -543,45 +543,45 @@ impl Lumen {
                         color_wheel(&mut cols[2], "Hautes lum.", w, &mut s.split_high_hue, &mut s.split_high_sat);
                     });
                     ui.add_space(4.0);
-                    slider_track(ui, "Lum. ombres", &mut s.grade_shadow_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
-                    slider_track(ui, "Lum. tons moyens", &mut s.grade_mid_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
-                    slider_track(ui, "Lum. hautes lum.", &mut s.grade_high_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
+                    slider_track(ui, tl("Lum. ombres"), &mut s.grade_shadow_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
+                    slider_track(ui, tl("Lum. tons moyens"), &mut s.grade_mid_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
+                    slider_track(ui, tl("Lum. hautes lum."), &mut s.grade_high_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
                     ui.add_space(4.0);
                     ui.horizontal(|ui| {
-                        color_wheel(ui, "Global", 90.0, &mut s.grade_global_hue, &mut s.grade_global_sat);
+                        color_wheel(ui, tl("Global"), 90.0, &mut s.grade_global_hue, &mut s.grade_global_sat);
                     });
-                    slider_track(ui, "Lum. globale", &mut s.grade_global_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
+                    slider_track(ui, tl("Lum. globale"), &mut s.grade_global_lum, -100.0..=100.0, 1.0, DARK_LIGHT);
                     let mut blend = s.grade_blend + 50.0;
-                    if slider_full(ui, "Fusion", &mut blend, 0.0..=100.0, 1.0, 50.0, None, "") {
+                    if slider_full(ui, tl("Fusion"), &mut blend, 0.0..=100.0, 1.0, 50.0, None, "") {
                         s.grade_blend = blend - 50.0;
                     }
-                    slider(ui, "Équilibre", &mut s.split_balance, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Équilibre"), &mut s.split_balance, -100.0..=100.0, 1.0);
                 });
                 solo_dock(solo, ui, &mut opened, "detail", "Détail", |ui| {
-                    caption(ui, "Netteté");
-                    slider(ui, "Gain", &mut s.sharpen, 0.0..=150.0, 1.0);
-                    slider_full(ui, "Rayon", &mut s.sharpen_radius, 0.0..=3.0, 0.1, 0.0, None, " px");
-                    slider(ui, "Détail", &mut s.sharpen_detail, 0.0..=100.0, 1.0);
-                    slider(ui, "Masquage", &mut s.sharpen_masking, 0.0..=100.0, 1.0);
+                    caption(ui, tl("Netteté"));
+                    slider(ui, tl("Gain"), &mut s.sharpen, 0.0..=150.0, 1.0);
+                    slider_full(ui, tl("Rayon"), &mut s.sharpen_radius, 0.0..=3.0, 0.1, 0.0, None, " px");
+                    slider(ui, tl("Détail"), &mut s.sharpen_detail, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Masquage"), &mut s.sharpen_masking, 0.0..=100.0, 1.0);
                     ui.add_space(6.0);
-                    caption(ui, "Réduction du bruit");
-                    slider(ui, "Luminance", &mut s.noise, 0.0..=100.0, 1.0);
-                    slider(ui, "Détail lum.", &mut s.noise_detail, 0.0..=100.0, 1.0);
-                    slider(ui, "Couleur", &mut s.color_noise, 0.0..=100.0, 1.0);
-                    slider(ui, "Détail couleur", &mut s.color_noise_detail, 0.0..=100.0, 1.0);
-                    slider(ui, "Lissage", &mut s.color_noise_smooth, 0.0..=100.0, 1.0);
+                    caption(ui, tl("Réduction du bruit"));
+                    slider(ui, tl("Luminance"), &mut s.noise, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Détail lum."), &mut s.noise_detail, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Couleur"), &mut s.color_noise, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Détail couleur"), &mut s.color_noise_detail, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Lissage"), &mut s.color_noise_smooth, 0.0..=100.0, 1.0);
                 });
                 solo_dock(solo, ui, &mut opened, "optics", "Optique", |ui| {
-                    caption(ui, "Vignetage de l'objectif");
-                    slider(ui, "Quantité", &mut s.lens_vignette, -100.0..=100.0, 1.0);
-                    slider(ui, "Point milieu", &mut s.lens_vignette_mid, -100.0..=100.0, 1.0);
-                    slider(ui, "Distorsion", &mut s.distortion, -100.0..=100.0, 1.0);
+                    caption(ui, tl("Vignetage de l'objectif"));
+                    slider(ui, tl("Quantité"), &mut s.lens_vignette, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Point milieu"), &mut s.lens_vignette_mid, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Distorsion"), &mut s.distortion, -100.0..=100.0, 1.0);
                     ui.add_space(6.0);
-                    caption(ui, "Aberration chromatique");
-                    slider_track(ui, "Rouge / cyan", &mut s.ca_red, -100.0..=100.0, 1.0, [Color32::from_rgb(60, 210, 220), Color32::from_rgb(240, 70, 70)]);
-                    slider_track(ui, "Bleu / jaune", &mut s.ca_blue, -100.0..=100.0, 1.0, [Color32::from_rgb(240, 210, 60), Color32::from_rgb(70, 110, 250)]);
-                    slider(ui, "Frange violette", &mut s.defringe_purple, 0.0..=100.0, 1.0);
-                    slider(ui, "Frange verte", &mut s.defringe_green, 0.0..=100.0, 1.0);
+                    caption(ui, tl("Aberration chromatique"));
+                    slider_track(ui, tl("Rouge / cyan"), &mut s.ca_red, -100.0..=100.0, 1.0, [Color32::from_rgb(60, 210, 220), Color32::from_rgb(240, 70, 70)]);
+                    slider_track(ui, tl("Bleu / jaune"), &mut s.ca_blue, -100.0..=100.0, 1.0, [Color32::from_rgb(240, 210, 60), Color32::from_rgb(70, 110, 250)]);
+                    slider(ui, tl("Frange violette"), &mut s.defringe_purple, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Frange verte"), &mut s.defringe_green, 0.0..=100.0, 1.0);
                     if ui.small_button(tl("Supprimer l'aberration (auto)")).on_hover_text(tl("Applique une correction de frange standard")).clicked() {
                         (s.defringe_purple, s.defringe_green) = (40.0, 25.0);
                     }
@@ -600,16 +600,16 @@ impl Lumen {
                             (s.persp_v, s.persp_h, s.persp_rotate, s.persp_aspect, s.persp_scale, s.persp_x, s.persp_y) = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         }
                     });
-                    slider(ui, "Verticale", &mut s.persp_v, -100.0..=100.0, 1.0);
-                    slider(ui, "Horizontale", &mut s.persp_h, -100.0..=100.0, 1.0);
-                    slider_full(ui, "Rotation", &mut s.persp_rotate, -10.0..=10.0, 0.1, 0.0, None, "°");
-                    slider(ui, "Aspect", &mut s.persp_aspect, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Verticale"), &mut s.persp_v, -100.0..=100.0, 1.0);
+                    slider(ui, tl("Horizontale"), &mut s.persp_h, -100.0..=100.0, 1.0);
+                    slider_full(ui, tl("Rotation"), &mut s.persp_rotate, -10.0..=10.0, 0.1, 0.0, None, "°");
+                    slider(ui, tl("Aspect"), &mut s.persp_aspect, -100.0..=100.0, 1.0);
                     let mut scale = s.persp_scale + 100.0;
-                    if slider_full(ui, "Échelle", &mut scale, 50.0..=150.0, 1.0, 100.0, None, " %") {
+                    if slider_full(ui, tl("Échelle"), &mut scale, 50.0..=150.0, 1.0, 100.0, None, " %") {
                         s.persp_scale = scale - 100.0;
                     }
-                    slider(ui, "Décalage X", &mut s.persp_x, -100.0..=100.0, 0.5);
-                    slider(ui, "Décalage Y", &mut s.persp_y, -100.0..=100.0, 0.5);
+                    slider(ui, tl("Décalage X"), &mut s.persp_x, -100.0..=100.0, 0.5);
+                    slider(ui, tl("Décalage Y"), &mut s.persp_y, -100.0..=100.0, 0.5);
                     ui.checkbox(&mut s.flip_v, tl("Miroir vertical"));
                 });
                 solo_dock(solo, ui, &mut opened, "geometry", "Recadrage et rotation", |ui| {
@@ -623,11 +623,11 @@ impl Lumen {
                             s.straighten = develop::auto_straighten(src);
                         }
                     });
-                    slider_full(ui, "Redresser", &mut s.straighten, -45.0..=45.0, 0.1, 0.0, None, "°");
+                    slider_full(ui, tl("Redresser"), &mut s.straighten, -45.0..=45.0, 0.1, 0.0, None, "°");
                     for (k, label) in ["Marge gauche", "Marge haute", "Marge droite", "Marge basse"].into_iter().enumerate() {
                         pct(ui, label, &mut s.crop[k], 0.0, 0.45, 0.0);
                     }
-                    caption(ui, "Format");
+                    caption(ui, tl("Format"));
                     ui.horizontal_wrapped(|ui| {
                         for (k, (name, _)) in develop::RATIOS.iter().enumerate() {
                             if ui.small_button(*name).clicked() {
@@ -649,31 +649,31 @@ impl Lumen {
                     });
                 });
                 solo_dock(solo, ui, &mut opened, "effects", "Effets", |ui| {
-                    caption(ui, "Vignettage après recadrage");
+                    caption(ui, tl("Vignettage après recadrage"));
                     egui::ComboBox::from_id_salt("vig-style").width(ui.available_width() - 4.0).selected_text(develop::VIGNETTE_STYLES[(s.vignette_style as usize).min(2)]).show_ui(ui, |ui| {
                         for (k, n) in develop::VIGNETTE_STYLES.iter().enumerate() {
                             ui.selectable_value(&mut s.vignette_style, k as u8, *n);
                         }
                     });
-                    slider_track(ui, "Quantité", &mut s.vignette, -100.0..=100.0, 1.0, DARK_LIGHT);
-                    slider(ui, "Point milieu", &mut s.vignette_mid, 0.0..=100.0, 1.0);
-                    slider(ui, "Arrondi", &mut s.vignette_round, -100.0..=100.0, 1.0);
+                    slider_track(ui, tl("Quantité"), &mut s.vignette, -100.0..=100.0, 1.0, DARK_LIGHT);
+                    slider(ui, tl("Point milieu"), &mut s.vignette_mid, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Arrondi"), &mut s.vignette_round, -100.0..=100.0, 1.0);
                     let mut f = s.vignette_feather + 50.0;
-                    if slider_full(ui, "Contour progressif", &mut f, 0.0..=100.0, 1.0, 50.0, None, "") {
+                    if slider_full(ui, tl("Contour progressif"), &mut f, 0.0..=100.0, 1.0, 50.0, None, "") {
                         s.vignette_feather = f - 50.0;
                     }
                     if s.vignette_style == 1 {
-                        slider(ui, "Hautes lumières", &mut s.vignette_highlights, 0.0..=100.0, 1.0);
+                        slider(ui, tl("Hautes lumières"), &mut s.vignette_highlights, 0.0..=100.0, 1.0);
                     }
                     ui.add_space(6.0);
-                    caption(ui, "Grain");
-                    slider(ui, "Quantité ", &mut s.grain, 0.0..=100.0, 1.0);
-                    slider(ui, "Taille", &mut s.grain_size, 0.0..=100.0, 1.0);
-                    slider(ui, "Rugosité", &mut s.grain_rough, 0.0..=100.0, 1.0);
+                    caption(ui, tl("Grain"));
+                    slider(ui, tl("Quantité "), &mut s.grain, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Taille"), &mut s.grain_size, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Rugosité"), &mut s.grain_rough, 0.0..=100.0, 1.0);
                     ui.add_space(6.0);
-                    caption(ui, "Style");
-                    slider(ui, "Halo lumineux", &mut s.glow, 0.0..=100.0, 1.0);
-                    slider(ui, "Délavé", &mut s.fade, 0.0..=100.0, 1.0);
+                    caption(ui, tl("Style"));
+                    slider(ui, tl("Halo lumineux"), &mut s.glow, 0.0..=100.0, 1.0);
+                    slider(ui, tl("Délavé"), &mut s.fade, 0.0..=100.0, 1.0);
                 });
                 solo_dock(solo, ui, &mut opened, "masks", "Masques", |ui| self.masks_panel(ui, &mut s, &mut tool_req));
                 solo_dock(solo, ui, &mut opened, "retouch", "Retouche", |ui| {
@@ -704,11 +704,11 @@ impl Lumen {
                     });
                 });
                 solo_dock(solo, ui, &mut opened, "calib", "Étalonnage de l'appareil", |ui| {
-                    slider_track(ui, "Teinte des ombres", &mut s.cal_shadow_tint, -100.0..=100.0, 1.0, GREEN_MAGENTA);
+                    slider_track(ui, tl("Teinte des ombres"), &mut s.cal_shadow_tint, -100.0..=100.0, 1.0, GREEN_MAGENTA);
                     for (name, h0, hue, sat) in [("Primaire rouge", 0.0f32, &mut s.cal_red_hue, &mut s.cal_red_sat), ("Primaire verte", 120.0, &mut s.cal_green_hue, &mut s.cal_green_sat), ("Primaire bleue", 240.0, &mut s.cal_blue_hue, &mut s.cal_blue_sat)] {
                         caption(ui, name);
-                        slider_track(ui, "Teinte", hue, -100.0..=100.0, 1.0, [hue_color(h0 - 30.0), hue_color(h0 + 30.0)]);
-                        slider_track(ui, "Saturation", sat, -100.0..=100.0, 1.0, [Color32::from_gray(120), hue_color(h0)]);
+                        slider_track(ui, tl("Teinte"), hue, -100.0..=100.0, 1.0, [hue_color(h0 - 30.0), hue_color(h0 + 30.0)]);
+                        slider_track(ui, tl("Saturation"), sat, -100.0..=100.0, 1.0, [Color32::from_gray(120), hue_color(h0)]);
                     }
                 });
                 solo_dock(solo, ui, &mut opened, "actions", "Réglages", |ui| {
@@ -790,7 +790,7 @@ impl Lumen {
             });
         });
         if s.masks.is_empty() {
-            caption(ui, "Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages.");
+            caption(ui, tl("Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages."));
             return;
         }
         let mut remove = None;
@@ -837,8 +837,8 @@ impl Lumen {
             ui.add(egui::TextEdit::singleline(&mut m.name).desired_width(140.0));
             ui.checkbox(&mut m.invert, tl("Inverser"));
         });
-        slider_full(ui, "Quantité", &mut m.amount, 0.0..=100.0, 1.0, 100.0, None, " %");
-        caption(ui, "Composants");
+        slider_full(ui, tl("Quantité"), &mut m.amount, 0.0..=100.0, 1.0, 100.0, None, " %");
+        caption(ui, tl("Composants"));
         let mut drop = None;
         for (k, p) in m.parts.iter_mut().enumerate() {
             ui.horizontal(|ui| {
@@ -876,12 +876,12 @@ impl Lumen {
         });
         if let Some(p) = m.parts.get_mut(self.sel_part) {
             match p.kind {
-                PartKind::Linear => caption(ui, "Glisse les poignées sur la photo (outil M ou Main)."),
+                PartKind::Linear => caption(ui, tl("Glisse les poignées sur la photo (outil M ou Main).")),
                 PartKind::Radial => {
-                    pct(ui, "Contour progressif", &mut p.feather, 0.02, 1.0, 0.5);
-                    slider_full(ui, "Angle", &mut p.angle, -90.0..=90.0, 1.0, 0.0, None, "°");
-                    pct(ui, "Largeur", &mut p.rx, 0.005, 1.5, 0.25);
-                    pct(ui, "Hauteur", &mut p.ry, 0.005, 1.5, 0.25);
+                    pct(ui, tl("Contour progressif"), &mut p.feather, 0.02, 1.0, 0.5);
+                    slider_full(ui, tl("Angle"), &mut p.angle, -90.0..=90.0, 1.0, 0.0, None, "°");
+                    pct(ui, tl("Largeur"), &mut p.rx, 0.005, 1.5, 0.25);
+                    pct(ui, tl("Hauteur"), &mut p.ry, 0.005, 1.5, 0.25);
                 }
                 PartKind::Brush => {
                     ui.horizontal(|ui| {
@@ -895,21 +895,21 @@ impl Lumen {
                     });
                 }
                 PartKind::Luminance => {
-                    pct(ui, "Minimum", &mut p.lo, 0.0, 1.0, 0.5);
-                    pct(ui, "Maximum", &mut p.hi, 0.0, 1.0, 1.0);
-                    pct(ui, "Lissage", &mut p.smooth, 0.0, 0.5, 0.1);
+                    pct(ui, tl("Minimum"), &mut p.lo, 0.0, 1.0, 0.5);
+                    pct(ui, tl("Maximum"), &mut p.hi, 0.0, 1.0, 1.0);
+                    pct(ui, tl("Lissage"), &mut p.smooth, 0.0, 0.5, 0.1);
                 }
                 PartKind::Color => {
-                    hue_slider(ui, "Teinte ciblée", &mut p.hue);
-                    slider_full(ui, "Tolérance", &mut p.range, 5.0..=120.0, 1.0, 30.0, None, "°");
+                    hue_slider(ui, tl("Teinte ciblée"), &mut p.hue);
+                    slider_full(ui, tl("Tolérance"), &mut p.range, 5.0..=120.0, 1.0, 30.0, None, "°");
                 }
-                PartKind::Sky => caption(ui, "Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image)."),
-                PartKind::Subject => caption(ui, "Détection automatique du sujet (ce qui se distingue du fond, au centre)."),
-                PartKind::All => caption(ui, "Couvre toute l'image : combine avec Soustraire pour exclure une zone."),
+                PartKind::Sky => caption(ui, tl("Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image).")),
+                PartKind::Subject => caption(ui, tl("Détection automatique du sujet (ce qui se distingue du fond, au centre).")),
+                PartKind::All => caption(ui, tl("Couvre toute l'image : combine avec Soustraire pour exclure une zone.")),
             }
         }
         ui.add_space(6.0);
-        caption(ui, "Réglages du masque");
+        caption(ui, tl("Réglages du masque"));
         local_sliders(ui, &mut m.adj);
         if ui.small_button(tl("Réinitialiser les réglages du masque")).clicked() {
             m.adj = Local::default();

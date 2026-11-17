@@ -2544,7 +2544,7 @@ impl Cut {
             });
             ui.add_space(6.0);
             ui.horizontal(|ui| {
-                pro::segmented(ui, &mut self.bin_filter, &[tl("Tout"), tl("Vidéo"), tl("Son"), tl("Image")]);
+                pro::segmented(ui, &mut self.bin_filter, &[tl("Touttl("), tl(")Vidéotl("), tl(")Sontl("), tl(")Image")]);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.menu_button(RichText::new("⇅").color(MUTED), |ui| {
                         ui.label(RichText::new(tl("Trier par")).size(12.0).color(FAINT));
@@ -3035,7 +3035,7 @@ impl Cut {
                 let label = |ui: &mut Ui, t: &str| {
                     ui.label(RichText::new(t).size(12.0).color(MUTED));
                 };
-                label(ui, "Préréglage");
+                label(ui, tl("Préréglage"));
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                     for (k, p) in EXPORT_PRESETS.iter().enumerate() {
@@ -3050,7 +3050,7 @@ impl Cut {
                 ui.separator();
                 ui.add_space(6.0);
                 egui::Grid::new("export-grid").num_columns(2).spacing(vec2(14.0, 8.0)).show(ui, |ui| {
-                    label(ui, "Format");
+                    label(ui, tl("Format"));
                     egui::ComboBox::from_id_salt("exp-kind").selected_text(KINDS[opts.kind]).width(200.0).show_ui(ui, |ui| {
                         for (k, n) in KINDS.iter().enumerate() {
                             ui.selectable_value(&mut opts.kind, k, *n);
@@ -3058,7 +3058,7 @@ impl Cut {
                     });
                     ui.end_row();
                     if opts.kind != 1 {
-                        label(ui, "Taille");
+                        label(ui, tl("Taille"));
                         ui.horizontal(|ui| {
                             let mut seq = opts.w == 0 && opts.h == 0;
                             if ui.checkbox(&mut seq, tl("Séquence")).changed() {
@@ -3071,15 +3071,15 @@ impl Cut {
                             }
                         });
                         ui.end_row();
-                        label(ui, "Cadrage");
+                        label(ui, tl("Cadrage"));
                         let mut f = opts.fill as usize;
-                        if pro::segmented(ui, &mut f, &[tl("Ajuster (bandes)"), tl("Remplir (recadrer)")]) {
+                        if pro::segmented(ui, &mut f, &[tl("Ajuster (bandes)tl("), tl(")Remplir (recadrer)")]) {
                             opts.fill = f == 1;
                         }
                         ui.end_row();
                     }
                     if matches!(opts.kind, 0 | 2 | 3) {
-                        label(ui, "Images/s");
+                        label(ui, tl("Images/s"));
                         ui.horizontal(|ui| {
                             if ui.selectable_label(opts.fps == 0, tl("Séquence")).clicked() {
                                 opts.fps = 0;
@@ -3093,19 +3093,19 @@ impl Cut {
                         ui.end_row();
                     }
                     if opts.kind == 0 {
-                        label(ui, "Débit vidéo");
+                        label(ui, tl("Débit vidéo"));
                         ui.horizontal(|ui| {
                             ui.spacing_mut().slider_width = 200.0;
                             ui.add(egui::Slider::new(&mut opts.mbps, 1.0..=80.0).logarithmic(true).suffix(" Mb/s").max_decimals(1));
                         });
                         ui.end_row();
-                        label(ui, "Audio AAC");
+                        label(ui, tl("Audio AAC"));
                         let names: Vec<&str> = ABR.iter().map(|a| a.0).collect();
                         pro::segmented(ui, &mut opts.abr, &names);
                         ui.end_row();
                     }
                     if opts.kind < 4 {
-                        label(ui, "Plage");
+                        label(ui, tl("Plage"));
                         let has_marks = self.mark_in.is_some() || self.mark_out.is_some();
                         let has_clip = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_)));
                         egui::ComboBox::from_id_salt("exp-range").selected_text(["Toute la séquence", "Entre entrée et sortie", "Clip sélectionné"][opts.range.min(2)]).width(200.0).show_ui(ui, |ui| {
@@ -3363,13 +3363,13 @@ fn media_menu(ui: &mut Ui, s: &Source, i: usize, action: &mut Option<(u8, usize)
         }
     };
     if s.has_video {
-        item(ui, "Ajouter à la fin de V1", 0, action);
-        item(ui, "Insérer à la tête de lecture", 4, action);
-        item(ui, "Incruster sur V2 à la tête", 5, action);
-        item(ui, "Remplacer le clip sélectionné", 6, action);
+        item(ui, tl("Ajouter à la fin de V1"), 0, action);
+        item(ui, tl("Insérer à la tête de lecture"), 4, action);
+        item(ui, tl("Incruster sur V2 à la tête"), 5, action);
+        item(ui, tl("Remplacer le clip sélectionné"), 6, action);
     }
     if s.has_audio {
-        item(ui, "Ajouter comme musique (A2)", 1, action);
+        item(ui, tl("Ajouter comme musique (A2)"), 1, action);
     }
     ui.menu_button(tl("Étiquette"), |ui| {
         if ui.button(tl("Aucune")).clicked() {
@@ -3385,10 +3385,10 @@ fn media_menu(ui: &mut Ui, s: &Source, i: usize, action: &mut Option<(u8, usize)
     });
     ui.separator();
     if !s.is_generator() {
-        item(ui, "Remplacer le fichier…", 7, action);
-        item(ui, "Afficher dans l'explorateur", 2, action);
+        item(ui, tl("Remplacer le fichier…"), 7, action);
+        item(ui, tl("Afficher dans l'explorateur"), 2, action);
     }
-    item(ui, "Retirer du projet", 3, action);
+    item(ui, tl("Retirer du projet"), 3, action);
 }
 
 fn waveform(p: &Painter, r: Rect, data: &[f32], inp: f64, out: f64, color: Color32) {

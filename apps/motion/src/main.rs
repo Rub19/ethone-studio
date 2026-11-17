@@ -1713,7 +1713,7 @@ impl Motion {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 if !self.home {
-                    pro::shortcuts(ui, "Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce");
+                    pro::shortcuts(ui, tl("Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce"));
                 }
                 if let Some(j) = &self.job
                     && j.done.load(Ordering::Relaxed) == usize::MAX
@@ -2504,7 +2504,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             });
             ui.label(RichText::new(tl("Alignement sur le point")).size(12.0).color(MUTED));
             let mut a = *align as usize;
-            if pro::segmented(ui, &mut a, &[tl("Centre"), tl("Gauche"), tl("Droite")]) {
+            if pro::segmented(ui, &mut a, &[tl("Centretl("), tl(")Gauchetl("), tl(")Droite")]) {
                 *align = a as u8;
             }
             ui.label(RichText::new(tl("Espacement des lettres")).size(12.0).color(MUTED));
