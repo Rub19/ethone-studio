@@ -1,14 +1,14 @@
 use resvg::{tiny_skia, usvg};
 
 pub const APPS: [(&str, &str, &str); 9] = [
-    ("pixel", "#FF5A7E", "#E0184B"),
-    ("cut", "#C77DFF", "#8A2BE2"),
-    ("vector", "#FFB23F", "#F07800"),
-    ("motion", "#4CC9F0", "#0A84D6"),
-    ("lumen", "#3EE0A4", "#0FA36B"),
-    ("page", "#FF8A5B", "#E2461B"),
-    ("sound", "#7C83FF", "#4B3BDB"),
-    ("folio", "#FF5F57", "#C8102E"),
+    ("pixel", "#FF4D6D", "#E0184B"),
+    ("cut", "#B86BFF", "#8A2BE2"),
+    ("vector", "#FFB000", "#F07800"),
+    ("motion", "#3DBEF5", "#0A84D6"),
+    ("lumen", "#2FD69A", "#0FA36B"),
+    ("page", "#FF7A3D", "#E2461B"),
+    ("sound", "#8C8CFF", "#4B3BDB"),
+    ("folio", "#F2F2F2", "#C8102E"),
     ("studio", "#8B7CFF", "#2E8BFF"),
 ];
 
@@ -82,20 +82,38 @@ fn glyph(id: &str) -> (String, String) {
     }
 }
 
-pub fn svg(id: &str, top: &str, bottom: &str) -> String {
+fn studio_mark() -> String {
+    r##"<rect x="14" y="14" width="10" height="36" rx="3" fill="#F3F0EA"/>
+<rect x="27" y="14" width="23" height="10" rx="3" fill="#FF4F1F"/>
+<rect x="27" y="27" width="16" height="10" rx="3" fill="#FF4F1F"/>
+<rect x="27" y="40" width="23" height="10" rx="3" fill="#FF4F1F"/>"##
+        .into()
+}
+
+pub fn svg(id: &str, top: &str, _bottom: &str) -> String {
     let (shape, cutouts) = glyph(id);
+    let (tile, mark) = if id == "studio" {
+        ("#121212".to_string(), studio_mark())
+    } else {
+        (
+            top.to_string(),
+            format!(
+                r##"<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g>{shape}</g><g>{cutouts}</g></mask>
+<rect width="64" height="64" fill="#121212" mask="url(#m)"/>"##
+            ),
+        )
+    };
+    let edge = match id {
+        "studio" => r##"<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.16"/>"##,
+        "folio" => r##"<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#000000" stroke-opacity="0.14"/>"##,
+        _ => "",
+    };
     format!(
         r##"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs>
-<linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="{top}"/><stop offset="1" stop-color="{bottom}"/></linearGradient>
-<linearGradient id="hi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g>{shape}</g><g>{cutouts}</g></mask>
-<filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.4" flood-color="#000000" flood-opacity="0.28"/></filter>
-</defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="url(#hi)"/>
-<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
-<g filter="url(#sh)"><rect width="64" height="64" fill="#ffffff" mask="url(#m)"/></g>
+<defs></defs>
+<rect x="2" y="2" width="60" height="60" rx="14" fill="{tile}"/>
+{edge}
+{mark}
 </svg>"##
     )
 }

@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Ethone Studio · La suite créative locale</title>
   <meta name="description" content="Neuf apps de création pour Windows : retouche photo, vectoriel, montage, animation, mise en page, PDF, audio. Gratuites, sans abonnement, tout reste sur ton PC.">
-  <meta name="theme-color" content="#0b0b0f">
+  <meta name="theme-color" content="#0e0e0e">
   <meta property="og:title" content="Ethone Studio">
   <meta property="og:description" content="Neuf apps de création. Gratuites, locales, sans abonnement.">
   <meta property="og:image" content="/icons/studio.png">
-  <link rel="icon" href="/icons/studio.png">
+  <link rel="icon" href="/icons/studio.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/icons/studio.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&display=swap">
   <link rel="stylesheet" href="/styles.css">
   <script type="importmap">{ "imports": { "three": "/vendor/three.module.min.js" } }</script>
   <script type="module" src="/main.js"></script>
@@ -17,8 +21,8 @@
 <body>
   <header class="nav" id="nav">
     <a class="brand" href="#top" aria-label="Ethone Studio, haut de page">
-      <img src="/icons/studio.png" alt="" width="28" height="28">
-      <span>Ethone Studio</span>
+      <img src="/icons/studio.svg" alt="" width="30" height="30">
+      <span>Ethone <i>Studio</i></span>
     </a>
     <nav aria-label="Sections">
       <a href="#apps">Apps</a>
@@ -34,8 +38,8 @@
       <canvas id="scene" aria-hidden="true"></canvas>
       <div class="hero-fallback" id="fallback" aria-hidden="true"></div>
       <div class="hero-copy">
-        <p class="eyebrow">Version 0.8.0 · Windows 10 et 11</p>
-        <h1 id="hero-title">Toute ta création.<br><span class="grad">Sur ton PC.</span></h1>
+        <p class="chip"><img src="/icons/studio.svg" alt="" width="24" height="24"><span>Ethone Studio</span><em>0.8 · Windows 10 et 11</em></p>
+        <h1 id="hero-title">Toute ta création, <i>chez toi.</i></h1>
         <p class="lede">Neuf apps pour la photo, le dessin, la vidéo, l'animation, la mise en page, les PDF et le son. Gratuites, sans abonnement, sans compte.</p>
         <div class="cta">
           <a class="button primary" href="https://github.com/Rub19/ethone-studio/releases/latest/download/Ethone-Studio-Setup.exe">Télécharger la suite</a>
@@ -43,29 +47,46 @@
         </div>
       </div>
       <p class="hint" id="tile-label" aria-live="polite"></p>
-      <a class="scroll-cue" href="#apps" aria-label="Faire défiler vers les apps"><span></span></a>
     </section>
 
-    <section class="stats reveal" aria-label="En chiffres">
+    <section class="showcase" id="showcase" aria-labelledby="show-title">
+      <div class="show-sticky">
+        <div class="show-copy" id="show-copy">
+          <p class="eyebrow">Le studio</p>
+          <h2 id="show-title">Neuf apps. <i>Une seule maison.</i></h2>
+          <p class="sub">Le lanceur installe, met à jour et ouvre toutes tes apps. Tes projets récents t'attendent au même endroit.</p>
+        </div>
+        <figure class="show-window" id="show-window">
+          <img src="/shots/studio.png" alt="Le lanceur Ethone Studio avec les apps de la suite" width="1600" height="960">
+        </figure>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="En chiffres">
       <div><strong data-count="9">0</strong><span>apps</span></div>
       <div><strong data-count="300">0</strong><span>outils en un clic</span></div>
       <div><strong data-count="150000" data-plus>0</strong><span>options dans Ctrl+K</span></div>
       <div><strong data-count="0" data-suffix=" €">0</strong><span>pour toujours</span></div>
     </section>
 
-    <section class="apps" id="apps" aria-labelledby="apps-title">
+    <section class="story" id="apps" aria-labelledby="apps-title">
       <div class="section-head reveal">
         <p class="eyebrow">La suite</p>
-        <h2 id="apps-title">Une app pour chaque idée.</h2>
+        <h2 id="apps-title">Une app pour <i>chaque idée.</i></h2>
         <p class="sub">Chaque app s'installe seule, et elles s'envoient tes fichiers entre elles en un clic.</p>
       </div>
-      <div class="grid" id="app-grid"></div>
+      <div class="story-track" id="story">
+        <div class="story-sticky">
+          <div class="story-panels" id="story-panels"></div>
+          <nav class="story-rail" id="story-rail" aria-label="Aller à une app"></nav>
+        </div>
+      </div>
     </section>
 
     <section class="palette-band" id="palette" aria-labelledby="palette-title">
       <div class="section-head reveal">
         <p class="eyebrow">Ctrl+K</p>
-        <h2 id="palette-title">Tape ce que tu veux faire.</h2>
+        <h2 id="palette-title">Tape ce que tu veux <i>faire.</i></h2>
         <p class="sub">Une seule palette pour tout : commandes, outils, looks, préférences. Les options s'écrivent en français, pas en jargon.</p>
       </div>
       <div class="palette reveal" aria-hidden="true">
@@ -75,36 +96,38 @@
     </section>
 
     <section class="features" aria-label="Points forts">
-      <article class="feature reveal">
-        <span class="badge" style="--c: 255 59 107">Préférences</span>
-        <h3>Réglée comme tu aimes.</h3>
-        <p>Ctrl+, ouvre les préférences, comme Photoshop : taille de l'interface, couleur d'accent, historique, curseurs, grilles, et des onglets propres à chaque app.</p>
+      <article class="feature reveal" data-speed="0.04">
+        <span class="num">1/3</span>
+        <h3>Réglée comme <i>tu aimes.</i></h3>
+        <p>Ctrl+, ouvre les préférences : taille de l'interface, couleur d'accent, historique, curseurs, grilles, et des onglets propres à chaque app.</p>
+        <img src="https://images.unsplash.com/photo-1733232073397-80fb13ef3212?w=900&q=70&auto=format&fit=crop" alt="" loading="lazy">
       </article>
-      <article class="feature reveal">
-        <span class="badge" style="--c: 30 170 240">Installateurs</span>
-        <h3>Une app, un fichier.</h3>
+      <article class="feature reveal" data-speed="0.1">
+        <span class="num">2/3</span>
+        <h3>Une app, <i>un fichier.</i></h3>
         <p>Installe uniquement ce dont tu as besoin, sans lanceur obligatoire et sans droits administrateur. Tes projets s'ouvrent d'un double-clic.</p>
+        <img src="https://images.unsplash.com/photo-1632187981988-40f3cbaeef5e?w=900&q=70&auto=format&fit=crop" alt="" loading="lazy">
       </article>
-      <article class="feature reveal">
-        <span class="badge" style="--c: 30 200 140">Ressources</span>
-        <h3>Prêt à créer.</h3>
+      <article class="feature reveal" data-speed="0.16">
+        <span class="num">3/3</span>
+        <h3>Prêt à <i>créer.</i></h3>
         <p>2 359 icônes, 5 000 couleurs nommées, 311 bruitages et 7 looks pellicule, intégrés et libres de droits.</p>
+        <img src="https://images.unsplash.com/photo-1589903308904-1010c2294adc?w=900&q=70&auto=format&fit=crop" alt="" loading="lazy">
       </article>
     </section>
 
     <section class="formats" id="formats" aria-labelledby="formats-title">
       <div class="section-head reveal">
         <p class="eyebrow">Compatibilité</p>
-        <h2 id="formats-title">Tes fichiers Adobe s'ouvrent.</h2>
+        <h2 id="formats-title">Tes fichiers Adobe <i>s'ouvrent.</i></h2>
         <p class="sub">Garde ton travail : les formats que tu utilises déjà sont lus par la bonne app.</p>
       </div>
       <ul class="chips reveal" id="chips"></ul>
     </section>
 
     <section class="privacy" id="prive" aria-labelledby="prive-title">
-      <div class="privacy-card reveal">
-        <div class="lock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="4" y="11" width="16" height="10" rx="3"/></svg></div>
-        <h2 id="prive-title">Tes créations restent chez toi.</h2>
+      <div class="privacy-inner reveal">
+        <h2 id="prive-title">Tes créations restent <i>chez toi.</i></h2>
         <p>Pas de compte, pas de cloud imposé, pas d'IA qui lit tes documents. Les apps fonctionnent hors ligne. La seule IA présente, facultative et locale, sert à retirer un filigrane si tu le demandes.</p>
       </div>
     </section>
@@ -112,11 +135,11 @@
     <section class="download" id="telecharger" aria-labelledby="dl-title">
       <div class="section-head reveal">
         <p class="eyebrow">Gratuit</p>
-        <h2 id="dl-title">Commence maintenant.</h2>
+        <h2 id="dl-title">Commence <i>maintenant.</i></h2>
         <p class="sub">Le lanceur installe et met à jour toutes les apps. Tu peux aussi n'installer qu'une seule app.</p>
       </div>
       <div class="dl-main reveal">
-        <img src="/icons/studio.png" alt="" width="72" height="72">
+        <img src="/icons/studio.svg" alt="" width="72" height="72">
         <div>
           <h3>Ethone Studio</h3>
           <p>Le lanceur et toutes les apps · 20 Mo</p>
@@ -130,12 +153,13 @@
 
   <footer class="footer">
     <div>
-      <img src="/icons/studio.png" alt="" width="20" height="20">
+      <img src="/icons/studio.svg" alt="" width="22" height="22">
       <span>Ethone Studio · une création Ethone</span>
     </div>
     <nav aria-label="Liens">
       <a href="https://github.com/Rub19/ethone-studio">Code source</a>
       <a href="https://github.com/Rub19/ethone-studio/releases">Toutes les versions</a>
+      <a href="https://unsplash.com/license">Photos : Unsplash</a>
       <a href="/vendor/LICENSE-three.txt">Licence three.js</a>
     </nav>
   </footer>
