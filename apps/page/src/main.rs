@@ -106,6 +106,9 @@ struct PageApp {
     fonts: Fonts,
     tex: Option<TextureHandle>,
     rendered: Option<(Doc, usize, f32, bool)>,
+    thumbs: std::collections::HashMap<usize, TextureHandle>,
+    thumbs_for: Option<Doc>,
+    thumbs_changed: Option<f64>,
     overflow: Vec<bool>,
     zoom: f32,
     fit_pending: bool,
@@ -178,6 +181,9 @@ impl PageApp {
             fonts: Fonts { db: Arc::new(db) },
             tex: None,
             rendered: None,
+            thumbs: Default::default(),
+            thumbs_for: None,
+            thumbs_changed: None,
             overflow: Vec::new(),
             zoom: 1.0,
             fit_pending: true,
@@ -2015,7 +2021,32 @@ impl PageApp {
         });
     }
 
-    fn thumb(&self, ui: &mut Ui, page: Option<&Page>, frames: &[Frame], selected: bool, label: &str) -> egui::Response {
+    /// Keeps one rendered thumbnail per page, rebuilt a moment after the last edit, one page per frame.
+    fn refresh_thumbs(&mut self, ctx: &egui::Context) {
+        let now = ctx.input(|i| i.time);
+        if self.thumbs_for.as_ref() != Some(&self.doc) {
+            let since = *self.thumbs_changed.get_or_insert(now);
+            if now - since < 0.4 {
+                ctx.request_repaint_after(std::time::Duration::from_millis(400));
+                return;
+            }
+            self.thumbs.clear();
+            self.thumbs_for = Some(self.doc.clone());
+            self.thumbs_changed = None;
+        }
+        let Some(page) = std::iter::once(MASTER).chain(0..self.doc.pages.len()).find(|p| !self.thumbs.contains_key(p)) else { return };
+        let w = 192.0f32;
+        let scale = w / self.doc.width;
+        let (svg, _) = self.doc.to_svg(page, &self.measure(), false);
+        let Ok(tree) = usvg::Tree::from_str(&svg, &self.opts()) else { return };
+        let Some(mut pix) = tiny_skia::Pixmap::new(w as u32, (self.doc.height * scale).ceil() as u32) else { return };
+        resvg::render(&tree, tiny_skia::Transform::from_scale(scale, scale), &mut pix.as_mut());
+        let img = egui::ColorImage::from_rgba_premultiplied([pix.width() as usize, pix.height() as usize], pix.data());
+        self.thumbs.insert(page, ctx.load_texture(format!("page-thumb-{page}"), img, TextureOptions::LINEAR));
+        ctx.request_repaint();
+    }
+
+    fn thumb(&self, ui: &mut Ui, index: usize, page: Option<&Page>, frames: &[Frame], selected: bool, label: &str) -> egui::Response {
         let ratio = self.doc.height / self.doc.width;
         let w = 96.0f32.min(130.0 / ratio);
         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), w * ratio + 24.0), Sense::click());
@@ -2026,7 +2057,11 @@ impl PageApp {
         let s = w / self.doc.width;
         let master: &[Frame] = if page.is_some_and(|p| !p.no_master) { &self.doc.master.frames } else { &[] };
         let pc = p.with_clip_rect(card);
-        for f in master.iter().chain(frames).filter(|f| !f.hidden) {
+        let rendered = self.thumbs.get(&index);
+        if let Some(t) = rendered {
+            p.image(t.id(), card, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
+        }
+        for f in master.iter().chain(frames).filter(|f| !f.hidden && rendered.is_none()) {
             let fr = Rect::from_min_size(card.min + vec2(f.x, f.y) * s, vec2(f.w, f.h) * s);
             match &f.kind {
                 Kind::Text { size, color, background, .. } => {
@@ -2076,9 +2111,10 @@ impl PageApp {
                 });
             });
             ui.add_space(6.0);
+            self.refresh_thumbs(ui.ctx());
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 let master = self.doc.master.frames.clone();
-                if self.thumb(ui, None, &master, self.page == MASTER, "Gabarit").on_hover_text("Ses blocs apparaissent sur toutes les pages").clicked() {
+                if self.thumb(ui, MASTER, None, &master, self.page == MASTER, "Gabarit").on_hover_text("Ses blocs apparaissent sur toutes les pages").clicked() {
                     self.page = MASTER;
                     self.sel = None;
                 }
@@ -2087,7 +2123,7 @@ impl PageApp {
                 for i in 0..self.doc.pages.len() {
                     let pg = self.doc.pages[i].clone();
                     let label = format!("{}{}", self.doc.page_label(i), if pg.no_master { " · sans gabarit" } else { "" });
-                    let r = self.thumb(ui, Some(&pg), &pg.frames, self.page == i, &label);
+                    let r = self.thumb(ui, i, Some(&pg), &pg.frames, self.page == i, &label);
                     if r.clicked() {
                         self.page = i;
                         self.sel = None;

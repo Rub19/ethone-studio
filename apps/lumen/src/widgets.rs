@@ -77,7 +77,7 @@ pub fn slider_full(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::Range
     }
     let kx = line.left() + line.width() * frac(*v);
     let hot = resp.hovered() || resp.dragged();
-    p.circle(pos2(kx, line.center().y), if hot { 6.5 } else { 5.5 }, Color32::WHITE, Stroke::new(1.0, Color32::from_black_alpha(120)));
+    p.circle(pos2(kx, line.center().y), if hot { 5.0 } else { 4.2 }, Color32::from_gray(if hot { 235 } else { 200 }), Stroke::new(1.0, Color32::from_black_alpha(150)));
     if resp.double_clicked() {
         *v = default;
     } else if (resp.dragged() || resp.clicked())
@@ -134,7 +134,7 @@ pub fn hue_slider(ui: &mut Ui, label: &str, v: &mut f32) -> bool {
         p.rect_filled(seg, CornerRadius::ZERO, Color32::from(egui::ecolor::Hsva::new(h, 0.75, 0.95, 1.0)));
     }
     let x = r.left() + r.width() * (*v / 360.0);
-    p.circle(pos2(x, r.center().y), 6.0, Color32::WHITE, Stroke::new(1.5, Color32::from_black_alpha(160)));
+    p.circle(pos2(x, r.center().y), 4.5, Color32::from_gray(215), Stroke::new(1.0, Color32::from_black_alpha(160)));
     p.text(pos2(row.right(), row.center().y), Align2::RIGHT_CENTER, format!("{:.0}°", *v), FontId::proportional(12.0), MUTED);
     if resp.double_clicked() {
         *v = 0.0;

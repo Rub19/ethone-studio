@@ -1781,16 +1781,16 @@ impl Motion {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
                 pro::dock_panel(ui, "add", "Ajouter un calque", |ui| {
-                    ui.spacing_mut().item_spacing = vec2(6.0, 6.0);
-                    let w = (ui.available_width() - 12.0) / 3.0;
-                    for row in KINDS.chunks(3) {
+                    ui.spacing_mut().item_spacing = vec2(2.0, 2.0);
+                    let w = (ui.available_width() - 6.0) / 4.0;
+                    for row in KINDS.chunks(4) {
                         ui.horizontal(|ui| {
                             for (label, kind) in row {
-                                let (r, resp) = ui.allocate_exact_size(vec2(w, 58.0), Sense::click());
+                                let (r, resp) = ui.allocate_exact_size(vec2(w, 46.0), Sense::click());
                                 let p = ui.painter();
-                                p.rect(r, CornerRadius::same(9), if resp.hovered() { FIELD } else { Color32::from_rgb(0x26, 0x26, 0x2b) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
-                                layer_glyph(p, Rect::from_center_size(r.center() - vec2(0.0, 8.0), Vec2::splat(18.0)), *kind, INK);
-                                p.text(r.center() + vec2(0.0, 16.0), Align2::CENTER_CENTER, *label, FontId::proportional(11.5), INK);
+                                if resp.hovered() { p.rect_filled(r, CornerRadius::same(3), FIELD); }
+                                layer_glyph(p, Rect::from_center_size(r.center() - vec2(0.0, 7.0), Vec2::splat(15.0)), *kind, if resp.hovered() { INK } else { MUTED });
+                                p.text(r.center() + vec2(0.0, 13.0), Align2::CENTER_CENTER, *label, FontId::proportional(10.5), MUTED);
                                 if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                                     self.add_kind(*kind);
                                 }
@@ -1802,15 +1802,15 @@ impl Motion {
                     ui.spacing_mut().item_spacing.y = 4.0;
                     let mut pick = None;
                     for (k, (name, hint)) in TEMPLATES.iter().enumerate() {
-                        let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 40.0), Sense::click());
+                        let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 36.0), Sense::click());
                         let p = ui.painter();
                         if resp.hovered() {
-                            p.rect_filled(r, CornerRadius::same(8), Color32::from_white_alpha(10));
+                            p.rect_filled(r, CornerRadius::same(3), Color32::from_white_alpha(10));
                         }
                         let ic = Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(16.0, 11.0));
                         p.rect(ic, CornerRadius::same(2), LABELS[k % LABELS.len()].gamma_multiply(0.35), Stroke::new(1.2, LABELS[k % LABELS.len()]), StrokeKind::Inside);
-                        p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), INK);
-                        p.text(r.left_top() + vec2(30.0, 22.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
+                        p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, *name, FontId::proportional(12.0), INK);
+                        p.text(r.left_top() + vec2(30.0, 20.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text("Ajouté à la tête de lecture").clicked() {
                             pick = Some(k);
                         }

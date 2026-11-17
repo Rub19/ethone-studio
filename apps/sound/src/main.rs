@@ -1423,12 +1423,12 @@ impl Sound {
     }
 
     fn transport(&mut self, root: &mut Ui, playing: bool, pos: usize) {
-        egui::Panel::top("transport").exact_size(62.0).frame(Frame::new().fill(Color32::from_rgb(0x20, 0x20, 0x24)).inner_margin(Margin::symmetric(16, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("transport").exact_size(46.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 ui.spacing_mut().item_spacing.x = 4.0;
                 let small = |ui: &mut Ui, kind: u8, tip: &str, on: bool| -> bool {
-                    let (r, resp) = ui.allocate_exact_size(Vec2::splat(34.0), Sense::click());
-                    ui.painter().circle_filled(r.center(), 17.0, if on { ACCENT.gamma_multiply(0.35) } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
+                    let (r, resp) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::click());
+                    ui.painter().rect_filled(r, CornerRadius::same(3), if on { ACCENT.gamma_multiply(0.35) } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
                     transport_glyph(ui.painter(), r.center(), kind, if on { INK_STRONG } else { INK });
                     resp.on_hover_text(tip).clicked()
                 };
@@ -1440,15 +1440,15 @@ impl Sound {
                 if small(ui, 1, "Marqueur précédent (↑)", false) {
                     self.jump(-1);
                 }
-                let (r, resp) = ui.allocate_exact_size(Vec2::splat(44.0), Sense::click());
-                ui.painter().circle_filled(r.center(), 22.0, if resp.hovered() { ACCENT.lerp_to_gamma(Color32::WHITE, 0.12) } else { ACCENT });
+                let (r, resp) = ui.allocate_exact_size(Vec2::splat(32.0), Sense::click());
+                ui.painter().circle_filled(r.center(), 15.0, if resp.hovered() { ACCENT.lerp_to_gamma(Color32::WHITE, 0.12) } else { ACCENT });
                 let c = r.center();
                 if playing {
                     for dx in [-4.5, 4.5] {
-                        ui.painter().rect_filled(Rect::from_center_size(c + vec2(dx, 0.0), vec2(4.5, 15.0)), CornerRadius::same(1), Color32::WHITE);
+                        ui.painter().rect_filled(Rect::from_center_size(c + vec2(dx * 0.75, 0.0), vec2(3.5, 11.0)), CornerRadius::same(1), Color32::WHITE);
                     }
                 } else {
-                    ui.painter().add(Shape::convex_polygon(vec![c + vec2(-5.0, -9.0), c + vec2(9.0, 0.0), c + vec2(-5.0, 9.0)], Color32::WHITE, Stroke::NONE));
+                    ui.painter().add(Shape::convex_polygon(vec![c + vec2(-3.5, -6.5), c + vec2(6.5, 0.0), c + vec2(-3.5, 6.5)], Color32::WHITE, Stroke::NONE));
                 }
                 if resp.on_hover_text("Lecture / pause (Espace)").clicked() {
                     self.toggle_play();
@@ -1465,9 +1465,9 @@ impl Sound {
                     self.reveal(self.cursor);
                 }
                 let rec = self.recorder.is_some();
-                let (r, resp) = ui.allocate_exact_size(Vec2::splat(34.0), Sense::click());
-                ui.painter().circle_filled(r.center(), 17.0, if rec { RED.gamma_multiply(0.3) } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
-                ui.painter().circle_filled(r.center(), if rec { 6.0 + (ui.input(|i| i.time) * 4.0).sin().abs() as f32 * 2.0 } else { 7.0 }, RED);
+                let (r, resp) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::click());
+                ui.painter().rect_filled(r, CornerRadius::same(3), if rec { RED.gamma_multiply(0.3) } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
+                ui.painter().circle_filled(r.center(), if rec { 4.5 + (ui.input(|i| i.time) * 4.0).sin().abs() as f32 * 1.5 } else { 5.0 }, RED);
                 if resp.on_hover_text("Enregistrer au micro au curseur (R)").clicked() {
                     self.toggle_record();
                 }
@@ -1477,9 +1477,9 @@ impl Sound {
                 ui.add_space(12.0);
                 let shown = if playing { pos } else { self.cursor };
                 ui.vertical(|ui| {
-                    ui.add_space(8.0);
-                    ui.label(RichText::new(fmt_time(self.clip.secs(shown))).font(FontId::monospace(21.0)).color(INK_STRONG));
-                    ui.label(RichText::new(format!("sur {}", fmt_time(self.clip.secs(self.clip.len())))).monospace().size(11.0).color(MUTED));
+                    ui.add_space(5.0);
+                    ui.label(RichText::new(fmt_time(self.clip.secs(shown))).font(FontId::monospace(17.0)).color(INK_STRONG));
+                    ui.label(RichText::new(format!("sur {}", fmt_time(self.clip.secs(self.clip.len())))).monospace().size(10.0).color(MUTED));
                 });
                 ui.add_space(12.0);
                 if let Some(r) = &self.recorder {
