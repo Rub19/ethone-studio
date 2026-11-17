@@ -106,11 +106,11 @@ pub fn graphic_styles() -> Vec<(&'static str, Item)> {
 
 pub fn row_label(ui: &mut Ui, t: &str, w: f32) {
     let (r, _) = ui.allocate_exact_size(vec2(w, 20.0), Sense::hover());
-    ui.painter().text(r.left_center(), Align2::LEFT_CENTER, t, FontId::proportional(12.5), MUTED);
+    ui.painter().text(r.left_center(), Align2::LEFT_CENTER, t, FontId::proportional(12.0), MUTED);
 }
 
 fn small(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.5).color(MUTED));
+    ui.label(RichText::new(t).size(12.0).color(MUTED));
 }
 
 fn hint(ui: &mut Ui, t: &str) {
@@ -135,7 +135,7 @@ fn dv(ui: &mut Ui, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &s
 }
 
 fn opt_dv<N: egui::emath::Numeric>(ui: &mut Ui, label: &str, v: &mut N, range: std::ops::RangeInclusive<N>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.5).color(MUTED));
+    ui.label(RichText::new(label).size(12.0).color(MUTED));
     ui.add(egui::DragValue::new(v).range(range).suffix(suffix));
     ui.add_space(8.0);
 }
@@ -147,7 +147,7 @@ pub fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32, select
     let area = Rect::from_center_size(r.center_top() + vec2(0.0, 42.0), vec2(width - 40.0, 52.0));
     let s = (area.width() / w).min(area.height() / h);
     p.rect(Rect::from_center_size(area.center(), vec2(w, h) * s), CornerRadius::same(3), Color32::from_white_alpha(18), Stroke::new(1.2, if selected { BLUE } else { MUTED }), StrokeKind::Inside);
-    p.text(pos2(r.center().x, r.bottom() - 34.0), Align2::CENTER_CENTER, name, semibold(13.0), INK_STRONG);
+    p.text(pos2(r.center().x, r.bottom() - 34.0), Align2::CENTER_CENTER, name, semibold(12.5), INK_STRONG);
     p.text(pos2(r.center().x, r.bottom() - 16.0), Align2::CENTER_CENTER, detail, FontId::proportional(10.5), MUTED);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
@@ -238,9 +238,9 @@ fn checker_rect(p: &Painter, r: Rect) {
 }
 
 fn style_swatches(ui: &mut Ui, style: &mut Style) {
-    ui.label(RichText::new("Fond").size(12.5).color(MUTED));
+    ui.label(RichText::new("Fond").size(12.0).color(MUTED));
     swatch_btn(ui, &mut style.fill);
-    ui.label(RichText::new("Contour").size(12.5).color(MUTED));
+    ui.label(RichText::new("Contour").size(12.0).color(MUTED));
     swatch_btn(ui, &mut style.stroke);
     ui.add(egui::DragValue::new(&mut style.stroke_w).range(0.0..=200.0).speed(0.2).suffix(" px"));
     ui.add_space(8.0);
@@ -269,7 +269,7 @@ impl VectorApp {
             ui.add_space(26.0);
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::hover());
             ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.22));
-            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(14.0), INK_STRONG);
+            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(13.0), INK_STRONG);
             ui.add_space(14.0);
             hint(ui, "Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.");
         });
@@ -312,7 +312,7 @@ impl VectorApp {
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Tes dessins enregistrés apparaîtront ici", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .evec · glisse-en un pour l'ouvrir", FontId::proportional(13.0), MUTED);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .evec · glisse-en un pour l'ouvrir", FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -321,7 +321,7 @@ impl VectorApp {
                             ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
                         }
                         let name = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, name, semibold(14.0), INK);
+                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, name, semibold(13.0), INK);
                         ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| d.display().to_string()).unwrap_or_default(), FontId::proportional(12.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             open = Some(p.clone());
@@ -340,13 +340,13 @@ impl VectorApp {
     }
 
     pub(crate) fn options_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("options").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("options").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 ui.spacing_mut().slider_width = 110.0;
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
                 ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
                 tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
-                ui.label(RichText::new(tool_name(self.tool)).font(semibold(13.0)).color(INK));
+                ui.label(RichText::new(tool_name(self.tool)).font(semibold(12.5)).color(INK));
                 sep(ui);
                 let has = self.sel.is_some();
                 match self.tool {
@@ -590,7 +590,7 @@ impl VectorApp {
     }
 
     pub(crate) fn status_bar(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let s = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 ui.label(s(format!("{:.0} %", self.zoom * 100.0)));
@@ -1092,7 +1092,7 @@ impl VectorApp {
             let eye = Rect::from_center_size(row.left_center() + vec2(18.0, 0.0), Vec2::splat(18.0));
             eye_icon(p, eye, l.visible);
             let count = self.doc.items.iter().filter(|it| it.layer == li).count();
-            p.text(row.left_center() + vec2(36.0, 0.0), Align2::LEFT_CENTER, &l.name, semibold(12.5), INK_STRONG);
+            p.text(row.left_center() + vec2(36.0, 0.0), Align2::LEFT_CENTER, &l.name, semibold(12.0), INK_STRONG);
             p.text(row.right_center() - vec2(34.0, 0.0), Align2::RIGHT_CENTER, count.to_string(), FontId::proportional(11.5), FAINT);
             let lock = Rect::from_center_size(row.right_center() - vec2(14.0, 0.0), Vec2::splat(16.0));
             lock_icon(p, lock, l.locked, if l.locked { INK } else { FAINT });
@@ -1127,7 +1127,7 @@ impl VectorApp {
                 if it.sym != 0 {
                     name = format!("◆ {name}");
                 }
-                let g = p.layout(name, if on { semibold(12.5) } else { FontId::proportional(12.5) }, if on { INK_STRONG } else { INK }, row.width() - 100.0);
+                let g = p.layout(name, if on { semibold(12.0) } else { FontId::proportional(12.0) }, if on { INK_STRONG } else { INK }, row.width() - 100.0);
                 p.galley(pos2(row.left() + 62.0, row.center().y - g.size().y / 2.0), g, INK);
                 let lock = Rect::from_center_size(row.right_center() - vec2(14.0, 0.0), Vec2::splat(16.0));
                 if it.locked || resp.hovered() {
@@ -1195,7 +1195,7 @@ impl VectorApp {
                 p.rect_filled(row, CornerRadius::same(7), Color32::from_white_alpha(8));
             }
             p.text(row.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, format!("{}", k + 1), FontId::proportional(12.0), FAINT);
-            p.text(row.left_center() + vec2(30.0, 0.0), Align2::LEFT_CENTER, &b.name, FontId::proportional(12.5), INK);
+            p.text(row.left_center() + vec2(30.0, 0.0), Align2::LEFT_CENTER, &b.name, FontId::proportional(12.0), INK);
             p.text(row.right_center() - vec2(10.0, 0.0), Align2::RIGHT_CENTER, format!("{:.0} × {:.0}", b.w, b.h), FontId::proportional(11.5), MUTED);
             if resp.clicked() {
                 pick = Some(k);
@@ -1388,7 +1388,7 @@ impl VectorApp {
                 draw_items(ui.painter(), r.shrink(5.0), &s.items);
                 ui.vertical(|ui| {
                     let count = self.doc.items.iter().filter(|i| i.sym == k as u32 + 1).count();
-                    ui.label(RichText::new(&s.name).size(12.5).color(INK));
+                    ui.label(RichText::new(&s.name).size(12.0).color(INK));
                     ui.horizontal(|ui| {
                         if pro::ghost(ui, "Placer").clicked() {
                             place = Some(k);

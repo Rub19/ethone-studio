@@ -1461,7 +1461,7 @@ impl eframe::App for Lumen {
 
 impl Lumen {
     fn menu_bar(&mut self, root: &mut Ui, ctx: &egui::Context) {
-        egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 12.0);
             ui.scope_builder(egui::UiBuilder::new().max_rect(full), |ui| {
                 ui.horizontal_centered(|ui| {
@@ -1734,7 +1734,7 @@ impl Lumen {
     }
 
     fn status_bar(&mut self, root: &mut Ui, ctx: &egui::Context) {
-        egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 match &self.catalog.folder {
@@ -1800,7 +1800,7 @@ impl Lumen {
                         let recents: Vec<PathBuf> = self.catalog.recent_folders.iter().filter(|f| f.is_dir()).cloned().collect();
                         if !recents.is_empty() {
                             ui.add_space(16.0);
-                            ui.label(RichText::new("Dossiers récents").font(semibold(13.0)).color(INK));
+                            ui.label(RichText::new("Dossiers récents").font(semibold(12.5)).color(INK));
                             for f in recents.into_iter().take(4) {
                                 if ui.link(RichText::new(f.display().to_string()).color(BLUE)).clicked() {
                                     self.open_folder(f, ctx);
@@ -2103,7 +2103,7 @@ fn view_switch(ui: &mut Ui, view: &mut View, can_develop: bool) {
         if on {
             ui.painter().rect_filled(r, CornerRadius::same(12), Color32::from_rgb(0x4a, 0x4a, 0x52));
         }
-        ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, *label, if on { semibold(12.5) } else { egui::FontId::proportional(12.5) }, if !enabled { studio_ui::pro::FAINT } else if on { INK_STRONG } else { MUTED });
+        ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, *label, if on { semibold(12.0) } else { egui::FontId::proportional(12.0) }, if !enabled { studio_ui::pro::FAINT } else if on { INK_STRONG } else { MUTED });
         if resp.clicked() {
             *view = *v;
         }

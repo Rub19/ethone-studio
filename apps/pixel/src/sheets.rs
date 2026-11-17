@@ -42,7 +42,7 @@ const SHORTCUTS: &[(&str, &str)] = &[
 ];
 
 fn label(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.5).color(MUTED));
+    ui.label(RichText::new(t).size(12.0).color(MUTED));
 }
 
 fn color_row(ui: &mut Ui, name: &str, color: &mut [u8; 4]) {
@@ -422,7 +422,7 @@ impl Pixel {
                         egui::Grid::new("sc").num_columns(2).spacing([16.0, 6.0]).show(ui, |ui| {
                             for (k, d) in SHORTCUTS {
                                 ui.label(RichText::new(*k).monospace().size(12.0).color(INK_STRONG));
-                                ui.label(RichText::new(*d).size(12.5).color(MUTED));
+                                ui.label(RichText::new(*d).size(12.0).color(MUTED));
                                 ui.end_row();
                             }
                         });
@@ -550,7 +550,7 @@ impl Pixel {
             ui.horizontal_top(|ui| {
                 ui.vertical(|ui| {
                     ui.set_width(450.0);
-                    ui.label(RichText::new("Préréglages").font(semibold(13.0)).color(MUTED));
+                    ui.label(RichText::new("Préréglages").font(semibold(12.5)).color(MUTED));
                     ui.add_space(6.0);
                     egui::ScrollArea::vertical().max_height(430.0).show(ui, |ui| {
                         for (ri, row) in PRESETS.chunks(3).enumerate() {
@@ -571,7 +571,7 @@ impl Pixel {
                 });
                 ui.add_space(16.0);
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Détails").font(semibold(13.0)).color(MUTED));
+                    ui.label(RichText::new("Détails").font(semibold(12.5)).color(MUTED));
                     ui.add_space(6.0);
                     ui.add(egui::TextEdit::singleline(&mut nd.name).desired_width(f32::INFINITY));
                     ui.add_space(10.0);

@@ -266,7 +266,7 @@ fn all(app: &mut Folio, ui: &mut Ui) {
         let ic = Rect::from_min_size(r.min + vec2(8.0, 9.0), egui::Vec2::splat(30.0));
         ui.painter().rect_filled(ic, CornerRadius::same(8), crate::ACCENT.gamma_multiply(0.2));
         panel_glyph(ui.painter(), ic.shrink(7.0), *p, crate::ACCENT);
-        ui.painter().text(r.min + vec2(48.0, 16.0), egui::Align2::LEFT_CENTER, *name, semibold(13.0), INK);
+        ui.painter().text(r.min + vec2(48.0, 16.0), egui::Align2::LEFT_CENTER, *name, semibold(12.5), INK);
         ui.painter().text(r.min + vec2(48.0, 33.0), egui::Align2::LEFT_CENTER, d, egui::FontId::proportional(11.0), FAINT);
         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
             app.panel = *p;
@@ -1110,7 +1110,7 @@ fn search(app: &mut Folio, ui: &mut Ui) {
     let mut go = None;
     for (i, s) in &app.st.results {
         ui.add_space(4.0);
-        let resp = ui.add(egui::Label::new(RichText::new(format!("Page {}", i + 1)).font(semibold(12.5)).color(INK)).sense(Sense::click()));
+        let resp = ui.add(egui::Label::new(RichText::new(format!("Page {}", i + 1)).font(semibold(12.0)).color(INK)).sense(Sense::click()));
         ui.label(RichText::new(s).size(11.5).color(MUTED));
         if resp.clicked() {
             go = Some(*i);

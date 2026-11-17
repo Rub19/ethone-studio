@@ -1648,7 +1648,7 @@ impl eframe::App for Motion {
 
 impl Motion {
     fn top_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = if self.home { 0.0 } else { 330.0 };
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
@@ -1683,7 +1683,7 @@ impl Motion {
     }
 
     fn status(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 if !self.home {
@@ -1753,7 +1753,7 @@ impl Motion {
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Tes animations enregistrées apparaîtront ici", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .emot", FontId::proportional(13.0), MUTED);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .emot", FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -1762,7 +1762,7 @@ impl Motion {
                             ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
                         }
                         let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(14.0), INK);
+                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(13.0), INK);
                         ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| d.display().to_string()).unwrap_or_default(), FontId::proportional(12.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             open = Some(p.clone());
@@ -1809,7 +1809,7 @@ impl Motion {
                         }
                         let ic = Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(16.0, 11.0));
                         p.rect(ic, CornerRadius::same(2), LABELS[k % LABELS.len()].gamma_multiply(0.35), Stroke::new(1.2, LABELS[k % LABELS.len()]), StrokeKind::Inside);
-                        p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, *name, FontId::proportional(13.0), INK);
+                        p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), INK);
                         p.text(r.left_top() + vec2(30.0, 22.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text("Ajouté à la tête de lecture").clicked() {
                             pick = Some(k);
@@ -1843,7 +1843,7 @@ impl Motion {
                                 p.rect_filled(r, CornerRadius::same(8), Color32::from_white_alpha(10));
                             }
                             diamond(p, r.left_center() + vec2(12.0, 0.0), 4.5, if enabled { KEY } else { FAINT });
-                            p.text(r.left_top() + vec2(26.0, 4.0), Align2::LEFT_TOP, *name, FontId::proportional(13.0), if enabled { INK } else { FAINT });
+                            p.text(r.left_top() + vec2(26.0, 4.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), if enabled { INK } else { FAINT });
                             p.text(r.left_top() + vec2(26.0, 21.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
                             if resp.on_hover_text("Ajoutée à partir de la tête de lecture").clicked() && enabled {
                                 pick = Some(*id);
@@ -1878,7 +1878,7 @@ impl Motion {
             let keep = pro::sheet(ctx, "comp", 470.0, |ui| {
                 ui.label(RichText::new("Réglages de la composition").font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
-                ui.label(RichText::new("Format").size(12.5).color(MUTED));
+                ui.label(RichText::new("Format").size(12.0).color(MUTED));
                 ui.horizontal_wrapped(|ui| {
                     for (name, _, w, h) in PRESETS {
                         let on = self.comp.width == w && self.comp.height == h;
@@ -1897,7 +1897,7 @@ impl Motion {
                     }
                 });
                 ui.add_space(8.0);
-                ui.label(RichText::new("Images par seconde").size(12.5).color(MUTED));
+                ui.label(RichText::new("Images par seconde").size(12.0).color(MUTED));
                 ui.horizontal(|ui| {
                     for f in FPS_CHOICES {
                         if ui.selectable_label(self.comp.fps == f, f.to_string()).clicked() {
@@ -1908,7 +1908,7 @@ impl Motion {
                 });
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Durée").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Durée").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut self.comp.duration).range(0.1..=600.0).speed(0.1).suffix(" s"));
                     if ui.button("Ajuster à l'animation").clicked() {
                         self.fit_duration();
@@ -1935,7 +1935,7 @@ impl Motion {
             let head = Rect::from_min_size(full.min, vec2(full.width(), 38.0));
             ui.scope_builder(egui::UiBuilder::new().max_rect(head.shrink2(vec2(12.0, 4.0))), |ui| {
                 ui.horizontal_centered(|ui| {
-                    ui.label(RichText::new("Timeline").font(semibold(13.0)).color(INK));
+                    ui.label(RichText::new("Timeline").font(semibold(12.5)).color(INK));
                     ui.add_space(10.0);
                     if pro::icon_button(ui, 28.0, false, "Ajouter un repère (M)", |p, r, c| glyph(p, r, G::Marker, c)).clicked() {
                         self.add_marker();
@@ -1959,7 +1959,7 @@ impl Motion {
                         }
                         ui.spacing_mut().slider_width = 130.0;
                         ui.add(egui::Slider::new(&mut self.pps, 30.0..=800.0).logarithmic(true).show_value(false));
-                        ui.label(RichText::new("Zoom").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Zoom").size(12.0).color(MUTED));
                     });
                 });
             });
@@ -2087,7 +2087,7 @@ impl Motion {
             p.rect_filled(Rect::from_min_size(pos2(rect.min.x + 92.0, row.center().y - 6.0), vec2(4.0, 12.0)), CornerRadius::same(2), color);
             let name_col = if l.visible { if on { INK_STRONG } else { INK } } else { FAINT };
             let parent_tag = l.parent.map(|_| "↳ ").unwrap_or("");
-            p.text(pos2(rect.min.x + 102.0, row.center().y), Align2::LEFT_CENTER, format!("{parent_tag}{}", short(&l.name, 15)), if on { semibold(12.5) } else { FontId::proportional(12.5) }, name_col);
+            p.text(pos2(rect.min.x + 102.0, row.center().y), Align2::LEFT_CENTER, format!("{parent_tag}{}", short(&l.name, 15)), if on { semibold(12.0) } else { FontId::proportional(12.0) }, name_col);
             if l.has_effects() {
                 let fr = Rect::from_center_size(pos2(x0 - 16.0, row.center().y), vec2(20.0, 14.0));
                 p.rect_filled(fr, CornerRadius::same(4), BLUE.gamma_multiply(0.35));
@@ -2395,7 +2395,7 @@ fn secs(t: f32) -> String {
 }
 
 fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.5).color(MUTED));
+    ui.label(RichText::new(label).size(12.0).color(MUTED));
     ui.scope(|ui| {
         ui.spacing_mut().slider_width = (ui.available_width() - 112.0).max(60.0);
         ui.add(egui::Slider::new(v, range).suffix(suffix).max_decimals(2));
@@ -2427,7 +2427,7 @@ fn ease_combo(ui: &mut Ui, id: (&str, usize), k: &mut model::Key) {
 
 fn bg_editor(ui: &mut Ui, comp: &mut Comp) {
     let mut bg = Color32::from_rgba_unmultiplied(comp.background[0], comp.background[1], comp.background[2], comp.background[3]);
-    ui.label(RichText::new("Fond").size(12.5).color(MUTED));
+    ui.label(RichText::new("Fond").size(12.0).color(MUTED));
     let w = ui.available_width();
     pro::color_picker(ui, &mut bg, w);
     comp.background = bg.to_srgba_unmultiplied();
@@ -2446,7 +2446,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
     match content {
         Content::Rect { w, h, r, color } => {
             size_row(ui, w, h);
-            ui.label(RichText::new("Arrondi").size(12.5).color(MUTED));
+            ui.label(RichText::new("Arrondi").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(r, 0.0..=w.min(*h) / 2.0));
             color_row(ui, color);
         }
@@ -2460,7 +2460,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
                 te.request_focus();
             }
             ui.checkbox(vertical, "Texte vertical");
-            ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+            ui.label(RichText::new("Taille").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
             egui::ComboBox::from_id_salt("font").selected_text(family.as_str()).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for f in FONTS {
@@ -2471,12 +2471,12 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
                 ui.checkbox(bold, "Gras");
                 ui.checkbox(italic, "Italique");
             });
-            ui.label(RichText::new("Alignement sur le point").size(12.5).color(MUTED));
+            ui.label(RichText::new("Alignement sur le point").size(12.0).color(MUTED));
             let mut a = *align as usize;
             if pro::segmented(ui, &mut a, &["Centre", "Gauche", "Droite"]) {
                 *align = a as u8;
             }
-            ui.label(RichText::new("Espacement des lettres").size(12.5).color(MUTED));
+            ui.label(RichText::new("Espacement des lettres").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(tracking, -20.0..=120.0).suffix(" px"));
             color_row(ui, color);
         }
@@ -2486,23 +2486,23 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
         }
         Content::Star { points, radius, inner, color } => {
             ui.add(egui::DragValue::new(points).range(3..=24).prefix("Branches "));
-            ui.label(RichText::new("Rayon").size(12.5).color(MUTED));
+            ui.label(RichText::new("Rayon").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(radius, 4.0..=2000.0).logarithmic(true));
-            ui.label(RichText::new("Creux (1 = polygone)").size(12.5).color(MUTED));
+            ui.label(RichText::new("Creux (1 = polygone)").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(inner, 0.1..=1.0));
             color_row(ui, color);
         }
         Content::Line { w, thickness, color } | Content::Arrow { w, thickness, color } => {
-            ui.label(RichText::new("Longueur").size(12.5).color(MUTED));
+            ui.label(RichText::new("Longueur").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(w, 4.0..=4000.0).logarithmic(true));
-            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(thickness, 1.0..=200.0));
             color_row(ui, color);
         }
         Content::Ring { radius, thickness, color } => {
-            ui.label(RichText::new("Rayon").size(12.5).color(MUTED));
+            ui.label(RichText::new("Rayon").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(radius, 4.0..=2000.0).logarithmic(true));
-            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(thickness, 1.0..=300.0));
             ui.label(RichText::new("Révélation % = longueur de l'arc : anime-la pour une jauge.").size(11.5).color(FAINT));
             color_row(ui, color);
@@ -2515,7 +2515,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
                 ui.add(egui::DragValue::new(to).speed(1.0));
             });
             ui.add(egui::DragValue::new(decimals).range(0..=3).prefix("Décimales "));
-            ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+            ui.label(RichText::new("Taille").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
             ui.horizontal(|ui| {
                 ui.label(RichText::new("Avant").color(MUTED));
@@ -2557,7 +2557,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
         }
         Content::Strokes { strokes, width, color } => {
             ui.label(RichText::new(format!("{} traits · Pinceau (Ctrl+B) pour peindre, Gomme pour effacer", strokes.len())).size(12.0).color(FAINT));
-            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(width, 0.5..=200.0).logarithmic(true).suffix(" px"));
             ui.horizontal(|ui| {
                 if ui.add_enabled(!strokes.is_empty(), egui::Button::new("Annuler le dernier trait").small()).clicked() {
@@ -2785,7 +2785,7 @@ fn layer_glyph(p: &Painter, r: Rect, kind: u8, c: Color32) {
             p.add(Shape::line(pts, Stroke::new(2.6, c)));
         }
         7 => {
-            p.text(r.center(), Align2::CENTER_CENTER, "123", semibold(12.5), c);
+            p.text(r.center(), Align2::CENTER_CENTER, "123", semibold(12.0), c);
         }
         0 => {
             p.line_segment([r.left_top() + vec2(2.0, 2.0), r.right_top() + vec2(-2.0, 2.0)], Stroke::new(2.4, c));
@@ -2888,7 +2888,7 @@ fn size_row(ui: &mut Ui, w: &mut f32, h: &mut f32) {
 
 fn color_row(ui: &mut Ui, c: &mut [u8; 4]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
-    ui.label(RichText::new("Couleur").size(12.5).color(MUTED));
+    ui.label(RichText::new("Couleur").size(12.0).color(MUTED));
     let w = ui.available_width();
     pro::color_picker(ui, &mut col, w);
     *c = col.to_srgba_unmultiplied();
@@ -2904,7 +2904,7 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32) -> egui::R
     let shape = Rect::from_center_size(area.center(), vec2(w, h) * s);
     p.rect(shape, CornerRadius::same(3), Color32::from_white_alpha(18), Stroke::new(1.2, MUTED), StrokeKind::Inside);
     diamond(p, shape.center(), 5.0, KEY);
-    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(13.0), INK_STRONG);
+    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(12.5), INK_STRONG);
     p.text(pos2(r.center().x, r.bottom() - 17.0), Align2::CENTER_CENTER, detail, FontId::proportional(11.0), MUTED);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }

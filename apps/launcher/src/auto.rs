@@ -61,7 +61,7 @@ impl Auto {
         }
         ui.add_space(22.0);
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Transferts récents").font(semibold(14.0)).color(P.ink_strong));
+            ui.label(RichText::new("Transferts récents").font(semibold(13.0)).color(P.ink_strong));
             ui.label(RichText::new("entre les apps et depuis l'Assistant").size(12.0).color(P.faint));
             if !self.transfers.is_empty() && ui.add(egui::Button::new(RichText::new("Effacer").size(12.0).color(P.muted)).frame(false)).clicked() {
                 studio_core::handoff::clear_history();
@@ -70,7 +70,7 @@ impl Auto {
         });
         ui.add_space(6.0);
         if self.transfers.is_empty() {
-            ui.label(RichText::new("Rien pour l'instant : utilise « Envoyer vers » dans une app, ou lance une demande ici.").size(12.5).color(P.faint));
+            ui.label(RichText::new("Rien pour l'instant : utilise « Envoyer vers » dans une app, ou lance une demande ici.").size(12.0).color(P.faint));
             return;
         }
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
@@ -82,8 +82,8 @@ impl Auto {
                     let exists = t.file.is_file();
                     let name = t.file.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
                     let from = if t.from == "launcher" { "Assistant" } else { studio_core::handoff::name(&t.from) };
-                    ui.label(RichText::new(format!("{from} → {}", studio_core::handoff::name(&t.to))).font(semibold(12.5)).color(VIOLET));
-                    ui.add(egui::Label::new(RichText::new(&name).size(12.5).color(if exists { P.ink } else { P.faint })).truncate()).on_hover_text(t.file.display().to_string());
+                    ui.label(RichText::new(format!("{from} → {}", studio_core::handoff::name(&t.to))).font(semibold(12.0)).color(VIOLET));
+                    ui.add(egui::Label::new(RichText::new(&name).size(12.0).color(if exists { P.ink } else { P.faint })).truncate()).on_hover_text(t.file.display().to_string());
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(RichText::new(studio_core::handoff::ago(t.at, now)).size(11.5).color(P.faint));
                         if exists && ui.small_button("Dossier").clicked()
@@ -179,7 +179,7 @@ impl Auto {
                 ui.add_space(6.0);
                 ui.vertical(|ui| {
                     ui.label(RichText::new("Assistant").font(semibold(26.0)).color(P.ink_strong));
-                    ui.label(RichText::new("Dépose une image, une vidéo, un son ou un PDF, dis ce que tu veux : Ethone choisit l'app et les outils.").size(13.0).color(P.muted));
+                    ui.label(RichText::new("Dépose une image, une vidéo, un son ou un PDF, dis ce que tu veux : Ethone choisit l'app et les outils.").size(12.5).color(P.muted));
                 });
             });
             ui.add_space(18.0);
@@ -210,7 +210,7 @@ impl Auto {
                     ui.painter().text(pos2(x, drop.center().y + 12.0), Align2::LEFT_CENTER, format!("{kind} · clique pour en choisir un autre"), FontId::proportional(12.0), P.muted);
                 }
                 None => {
-                    ui.painter().text(drop.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Glisse un fichier ici, ou clique pour le choisir", semibold(14.0), P.ink);
+                    ui.painter().text(drop.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Glisse un fichier ici, ou clique pour le choisir", semibold(13.0), P.ink);
                     ui.painter().text(drop.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Facultatif : sans fichier, l'assistant crée (logo, titre animé, affiche…)", FontId::proportional(12.0), P.faint);
                 }
             }
@@ -226,7 +226,7 @@ impl Auto {
                 }
             }
             ui.add_space(14.0);
-            ui.label(RichText::new("Que veux-tu faire ?").font(semibold(14.0)).color(P.ink_strong));
+            ui.label(RichText::new("Que veux-tu faire ?").font(semibold(13.0)).color(P.ink_strong));
             ui.add_space(6.0);
             let edit = ui.add(egui::TextEdit::multiline(&mut self.prompt).hint_text("Ex. : retire les oiseaux du ciel et rends la photo plus lumineuse").desired_rows(2).desired_width(w).font(FontId::proportional(15.0)));
             let go_key = edit.has_focus() && ui.input(|i| i.key_pressed(Key::Enter) && i.modifiers.command);
@@ -234,7 +234,7 @@ impl Auto {
             ui.horizontal_wrapped(|ui| {
                 ui.set_max_width(w);
                 for s in suggestions(kind_of(self.file.as_deref())) {
-                    let b = egui::Button::new(RichText::new(*s).size(12.5).color(P.ink)).fill(P.field).corner_radius(CornerRadius::same(14));
+                    let b = egui::Button::new(RichText::new(*s).size(12.0).color(P.ink)).fill(P.field).corner_radius(CornerRadius::same(14));
                     if ui.add(b).clicked() {
                         self.prompt = s.to_string();
                     }
@@ -246,19 +246,19 @@ impl Auto {
                 ui.set_width(w - 32.0);
                 match &preview {
                     None => {
-                        ui.label(RichText::new("Le plan s'affichera ici dès que tu écris ta demande.").size(12.5).color(P.faint));
+                        ui.label(RichText::new("Le plan s'affichera ici dès que tu écris ta demande.").size(12.0).color(P.faint));
                     }
                     Some(Err(e)) => {
-                        ui.label(RichText::new(e).size(13.0).color(Color32::from_rgb(255, 160, 90)));
+                        ui.label(RichText::new(e).size(12.5).color(Color32::from_rgb(255, 160, 90)));
                     }
                     Some(Ok(p)) => {
                         ui.horizontal(|ui| {
-                            ui.label(RichText::new("Ce que je vais faire").font(semibold(13.0)).color(P.ink_strong));
-                            ui.label(RichText::new(format!("→ {}", studio_core::handoff::name(p.app))).font(semibold(13.0)).color(VIOLET));
+                            ui.label(RichText::new("Ce que je vais faire").font(semibold(12.5)).color(P.ink_strong));
+                            ui.label(RichText::new(format!("→ {}", studio_core::handoff::name(p.app))).font(semibold(12.5)).color(VIOLET));
                         });
                         ui.add_space(4.0);
                         for (k, s) in p.summary.iter().enumerate() {
-                            ui.label(RichText::new(format!("{}. {s}", k + 1)).size(13.0).color(P.ink));
+                            ui.label(RichText::new(format!("{}. {s}", k + 1)).size(12.5).color(P.ink));
                         }
                     }
                 }
@@ -266,7 +266,7 @@ impl Auto {
             ui.add_space(12.0);
             ui.horizontal(|ui| {
                 let can = matches!(preview, Some(Ok(_))) && self.running.is_none();
-                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(14.0)).color(Color32::WHITE)).fill(if can { VIOLET } else { P.field }).corner_radius(CornerRadius::same(18)).min_size(vec2(120.0, 36.0));
+                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(13.0)).color(Color32::WHITE)).fill(if can { VIOLET } else { P.field }).corner_radius(CornerRadius::same(18)).min_size(vec2(120.0, 36.0));
                 if (ui.add_enabled(can, b).on_hover_text("Ctrl+Entrée").clicked() || (go_key && can)) && can {
                     self.start(ctx);
                 }
@@ -281,7 +281,7 @@ impl Auto {
             if !self.log.is_empty() || self.result.is_some() {
                 ui.add_space(14.0);
                 for l in &self.log {
-                    ui.label(RichText::new(format!("• {l}")).size(12.5).color(P.muted));
+                    ui.label(RichText::new(format!("• {l}")).size(12.0).color(P.muted));
                 }
             }
             self.transfers_ui(ui, w);
@@ -290,7 +290,7 @@ impl Auto {
                     ui.add_space(10.0);
                     ui.label(RichText::new(if o.opened.is_empty() { "Terminé".to_string() } else { format!("Terminé · {}", o.opened) }).font(semibold(15.0)).color(P.green));
                     for n in &o.notes {
-                        ui.label(RichText::new(n).size(12.5).color(P.ink));
+                        ui.label(RichText::new(n).size(12.0).color(P.ink));
                     }
                     if let Some(t) = &self.result_tex {
                         ui.add_space(8.0);
@@ -314,7 +314,7 @@ impl Auto {
                 }
                 Some(Err(e)) => {
                     ui.add_space(10.0);
-                    ui.label(RichText::new(e).size(13.0).color(P.red));
+                    ui.label(RichText::new(e).size(12.5).color(P.red));
                 }
                 None => {}
             }

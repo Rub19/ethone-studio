@@ -166,7 +166,7 @@ impl Lumen {
                     }
                 }
                 for cat in cats {
-                    egui::CollapsingHeader::new(RichText::new(cat).size(12.5).color(INK)).id_salt(("cat", cat)).default_open(cat == "Couleur").show(ui, |ui| {
+                    egui::CollapsingHeader::new(RichText::new(cat).size(12.0).color(INK)).id_salt(("cat", cat)).default_open(cat == "Couleur").show(ui, |ui| {
                         for (_, name, st) in catalog.iter().filter(|c| c.0 == cat) {
                             let on = current == *st;
                             let r = nav_row(ui, name, usize::MAX, on);
@@ -190,7 +190,7 @@ impl Lumen {
                 }
                 let favs: Vec<(&str, Settings)> = catalog.iter().filter(|c| self.catalog.favorites.iter().any(|f| f == c.1)).map(|c| (c.1, c.2.clone())).collect();
                 if !favs.is_empty() {
-                    egui::CollapsingHeader::new(RichText::new("★ Favoris").size(12.5).color(INK)).id_salt("cat-fav").default_open(true).show(ui, |ui| {
+                    egui::CollapsingHeader::new(RichText::new("★ Favoris").size(12.0).color(INK)).id_salt("cat-fav").default_open(true).show(ui, |ui| {
                         for (name, st) in favs {
                             if nav_row(ui, name, usize::MAX, current == st).clicked() {
                                 self.apply_preset(&st);
@@ -198,7 +198,7 @@ impl Lumen {
                         }
                     });
                 }
-                egui::CollapsingHeader::new(RichText::new("Mes préréglages").size(12.5).color(INK)).id_salt("cat-user").default_open(true).show(ui, |ui| {
+                egui::CollapsingHeader::new(RichText::new("Mes préréglages").size(12.0).color(INK)).id_salt("cat-user").default_open(true).show(ui, |ui| {
                     let mut remove = None;
                     for (k, (name, st)) in self.catalog.user_presets.clone().into_iter().enumerate() {
                         let r = nav_row(ui, &name, usize::MAX, current == st).on_hover_text("Clic droit : options");
@@ -401,7 +401,7 @@ impl Lumen {
                 let mut tool_req: Option<Tool> = None;
                 solo_dock(solo, ui, &mut opened, "basic", "Réglages de base", |ui| {
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Profil").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Profil").size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("profile").width(120.0).selected_text(develop::PROFILES[(s.profile as usize).min(5)]).show_ui(ui, |ui| {
                             for (k, p) in develop::PROFILES.iter().enumerate() {
                                 ui.selectable_value(&mut s.profile, k as u8, *p);
@@ -730,7 +730,7 @@ impl Lumen {
                         }
                     });
                     ui.add_space(4.0);
-                    ui.menu_button(RichText::new("Réinitialiser un groupe…").size(12.5), |ui| {
+                    ui.menu_button(RichText::new("Réinitialiser un groupe…").size(12.0), |ui| {
                         for (k, g) in meta::GROUPS.iter().enumerate() {
                             if ui.button(*g).clicked() {
                                 let mut only = vec![false; meta::GROUPS.len()];
@@ -766,7 +766,7 @@ impl Lumen {
     fn masks_panel(&mut self, ui: &mut Ui, s: &mut Settings, tool_req: &mut Option<Tool>) {
         ui.spacing_mut().item_spacing.y = 3.0;
         ui.horizontal(|ui| {
-            ui.menu_button(RichText::new("+ Nouveau masque").size(12.5).color(BLUE), |ui| {
+            ui.menu_button(RichText::new("+ Nouveau masque").size(12.0).color(BLUE), |ui| {
                 if let Some(k) = kind_menu(ui) {
                     match k {
                         PartKind::Linear => *tool_req = Some(Tool::Linear),
@@ -799,7 +799,7 @@ impl Lumen {
             ui.horizontal(|ui| {
                 ui.checkbox(&mut m.on, "").on_hover_text("Activer ou masquer");
                 let name = if m.name.is_empty() { format!("Masque {}", k + 1) } else { m.name.clone() };
-                if ui.add(egui::Button::selectable(sel, RichText::new(short(&name, 20)).size(12.5).color(if sel { INK_STRONG } else { INK }))).clicked() {
+                if ui.add(egui::Button::selectable(sel, RichText::new(short(&name, 20)).size(12.0).color(if sel { INK_STRONG } else { INK }))).clicked() {
                     self.sel_mask = if sel { None } else { Some(k) };
                     self.sel_part = 0;
                     self.rename_mask = None;
@@ -923,7 +923,7 @@ impl Lumen {
             ui.scope_builder(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(14.0, 4.0))), |ui| {
                 ui.horizontal_centered(|ui| {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        let held = ui.add(egui::Button::new(RichText::new("Original").size(12.5)).corner_radius(CornerRadius::same(7)).sense(Sense::click_and_drag()));
+                        let held = ui.add(egui::Button::new(RichText::new("Original").size(12.0)).corner_radius(CornerRadius::same(7)).sense(Sense::click_and_drag()));
                         if held.is_pointer_button_down_on() {
                             self.before = true;
                         }
@@ -951,7 +951,7 @@ impl Lumen {
                             self.hide_panels = !self.hide_panels;
                         }
                         ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
-                            ui.add(egui::Label::new(RichText::new(display_name(&self.files[i])).size(13.0).color(MUTED)).truncate());
+                            ui.add(egui::Label::new(RichText::new(display_name(&self.files[i])).size(12.5).color(MUTED)).truncate());
                         });
                     });
                 });
@@ -1015,8 +1015,8 @@ impl Lumen {
                     let bf = (left.width() / bw as f32).min(left.height() / bh as f32);
                     let br = Rect::from_center_size(left.center(), vec2(bw as f32, bh as f32) * bf);
                     p.image(bt.id(), br, uv, Color32::WHITE);
-                    p.text(br.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Avant", semibold(12.5), Color32::WHITE);
-                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Après", semibold(12.5), Color32::WHITE);
+                    p.text(br.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Avant", semibold(12.0), Color32::WHITE);
+                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Après", semibold(12.0), Color32::WHITE);
                 }
                 c => {
                     let vertical = c == 1;
@@ -1028,8 +1028,8 @@ impl Lumen {
                     let knob = if vertical { pos2(at, r.center().y) } else { pos2(r.center().x, at) };
                     painter.circle(knob, 12.0, Color32::from_black_alpha(160), Stroke::new(2.0, Color32::WHITE));
                     painter.text(knob, Align2::CENTER_CENTER, if vertical { "⇔" } else { "⇕" }, FontId::proportional(12.0), Color32::WHITE);
-                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Avant", semibold(12.5), Color32::WHITE);
-                    painter.text(r.right_bottom() - vec2(10.0, 10.0), Align2::RIGHT_BOTTOM, "Après", semibold(12.5), Color32::WHITE);
+                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Avant", semibold(12.0), Color32::WHITE);
+                    painter.text(r.right_bottom() - vec2(10.0, 10.0), Align2::RIGHT_BOTTOM, "Après", semibold(12.0), Color32::WHITE);
                     let hr = if vertical { Rect::from_center_size(knob, vec2(28.0, r.height())) } else { Rect::from_center_size(knob, vec2(r.width(), 28.0)) };
                     let handle = ui.interact(hr, ui.make_persistent_id("split"), Sense::drag());
                     if handle.hovered() || handle.dragged() {
@@ -1052,7 +1052,7 @@ impl Lumen {
         if self.before {
             let tag = Rect::from_min_size(r.left_top() + vec2(12.0, r.height() - 38.0), vec2(80.0, 26.0));
             painter.rect_filled(tag, CornerRadius::same(13), Color32::from_black_alpha(170));
-            painter.text(tag.center(), Align2::CENTER_CENTER, "Original", FontId::proportional(12.5), Color32::WHITE);
+            painter.text(tag.center(), Align2::CENTER_CENTER, "Original", FontId::proportional(12.0), Color32::WHITE);
         }
     }
 }

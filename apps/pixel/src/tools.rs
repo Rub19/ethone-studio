@@ -220,11 +220,11 @@ pub fn blend_combo(ui: &mut Ui, id: &str, value: &mut Blend, width: f32) -> bool
 }
 
 fn hint(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.5).color(MUTED));
+    ui.label(RichText::new(t).size(12.0).color(MUTED));
 }
 
 fn small(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.5).color(MUTED));
+    ui.label(RichText::new(t).size(12.0).color(MUTED));
 }
 
 impl Pixel {
@@ -306,20 +306,20 @@ impl Pixel {
     }
 
     pub fn options_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("options").exact_size(44.0).frame(egui::Frame::new().fill(pro::CHROME).inner_margin(egui::Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("options").exact_size(34.0).frame(egui::Frame::new().fill(pro::CHROME).inner_margin(egui::Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 ui.spacing_mut().slider_width = 72.0;
-                let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
-                ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
-                tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
-                ui.label(RichText::new(tool_name(self.tool)).font(semibold(13.0)).color(INK));
+                let (r, _) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::hover());
+                ui.painter().rect_filled(r, CornerRadius::same(3), FIELD);
+                tool_icon(ui.painter(), r.shrink(5.0), self.tool, INK);
+                ui.label(RichText::new(tool_name(self.tool)).font(semibold(12.0)).color(INK));
                 pro::toolbar_sep(ui);
                 let right = 120.0;
                 let avail = ui.available_width() - right;
-                ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(ui.cursor().min, vec2(avail.max(100.0), 44.0))), |ui| {
+                ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(ui.cursor().min, vec2(avail.max(100.0), 34.0))), |ui| {
                     ui.set_clip_rect(ui.max_rect().intersect(ui.clip_rect()));
                     egui::ScrollArea::horizontal().id_salt("pixel-options").scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
-                        ui.set_min_height(44.0);
+                        ui.set_min_height(34.0);
                         ui.horizontal_centered(|ui| self.tool_options(ui));
                     });
                 });
@@ -438,7 +438,7 @@ impl Pixel {
                 small(ui, "Grille");
                 combo(ui, "cover", &mut self.crop_overlay, &["Aucune", "Règle des tiers", "Grille", "Diagonale", "Nombre d'or"], 130.0);
                 if let Some(c) = self.crop {
-                    ui.label(RichText::new(format!("{} × {} px", c.width(), c.height())).size(12.5).color(INK));
+                    ui.label(RichText::new(format!("{} × {} px", c.width(), c.height())).size(12.0).color(INK));
                     if pro::primary(ui, "Valider").clicked() {
                         self.commit_crop();
                     }
@@ -570,7 +570,7 @@ impl Pixel {
             Tool::Ruler => {
                 if let Some((a, b)) = self.ruler {
                     let (dx, dy) = (b.0 - a.0, b.1 - a.1);
-                    ui.label(RichText::new(format!("L {:.1} px   A {:.1}°   ΔX {:.0}   ΔY {:.0}", (dx * dx + dy * dy).sqrt(), -dy.atan2(dx).to_degrees(), dx, dy)).size(12.5).color(INK).monospace());
+                    ui.label(RichText::new(format!("L {:.1} px   A {:.1}°   ΔX {:.0}   ΔY {:.0}", (dx * dx + dy * dy).sqrt(), -dy.atan2(dx).to_degrees(), dx, dy)).size(12.0).color(INK).monospace());
                     if pro::secondary(ui, "Redresser le calque").clicked() {
                         let mut ang = dy.atan2(dx).to_degrees();
                         if ang.abs() > 45.0 {

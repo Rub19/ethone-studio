@@ -2471,7 +2471,7 @@ impl eframe::App for VectorApp {
 
 impl VectorApp {
     fn menu_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(40.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 10.0);
             let right_w = if self.home { 0.0 } else { 300.0 };
             if !self.home {

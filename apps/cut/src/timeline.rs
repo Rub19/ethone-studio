@@ -754,7 +754,7 @@ impl Cut {
         }
         for (m, label) in [(self.mark_in, "{"), (self.mark_out, "}")] {
             if let Some(m) = m {
-                p.text(pos2(x_of(m), ruler.max.y - 2.0), Align2::CENTER_BOTTOM, label, semibold(13.0), MARK);
+                p.text(pos2(x_of(m), ruler.max.y - 2.0), Align2::CENTER_BOTTOM, label, semibold(12.5), MARK);
             }
         }
         let x = x_of(self.t);

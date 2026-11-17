@@ -34,7 +34,7 @@ impl Cmd {
     }
 }
 
-pub const ACCENTS: [(&str, [u8; 3]); 7] = [("Bleu", [10, 132, 255]), ("Violet", [140, 90, 255]), ("Rose", [255, 70, 140]), ("Orange", [255, 140, 30]), ("Vert", [48, 190, 90]), ("Turquoise", [20, 190, 200]), ("Graphite", [140, 140, 150])];
+pub const ACCENTS: [(&str, [u8; 3]); 8] = [("Vermillon", [242, 85, 44]), ("Bleu", [10, 132, 255]), ("Violet", [140, 90, 255]), ("Rose", [255, 70, 140]), ("Orange", [255, 140, 30]), ("Vert", [48, 190, 90]), ("Turquoise", [20, 190, 200]), ("Graphite", [140, 140, 150])];
 pub const SIZES: [f32; 6] = [0.85, 0.9, 1.0, 1.1, 1.25, 1.5];
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
@@ -89,11 +89,11 @@ pub fn apply_prefs(ctx: &Context, p: Prefs) {
         s.visuals.text_cursor.stroke.color = a;
         s.animation_time = if p.animations { 1.0 / 12.0 } else { 0.0 };
         s.interaction.tooltip_delay = TOOLTIPS[(p.tooltips as usize).min(3)].1;
-        let r = [2u8, 6, 12][(p.rounding as usize).min(2)];
+        let r = [0u8, 3, 8][(p.rounding as usize).min(2)];
         for w in [&mut s.visuals.widgets.noninteractive, &mut s.visuals.widgets.inactive, &mut s.visuals.widgets.hovered, &mut s.visuals.widgets.active, &mut s.visuals.widgets.open] {
             w.corner_radius = egui::CornerRadius::same(r);
         }
-        s.visuals.window_corner_radius = egui::CornerRadius::same(r + 4);
+        s.visuals.window_corner_radius = egui::CornerRadius::same(r + 5);
         s.visuals.menu_corner_radius = egui::CornerRadius::same(r + 2);
     });
 }

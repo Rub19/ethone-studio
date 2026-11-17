@@ -565,7 +565,7 @@ impl Folio {
     }
 
     fn top_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = 420.0;
             ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()))), |ui| {
@@ -684,7 +684,7 @@ impl Folio {
     }
 
     fn status(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("status").exact_size(30.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let Some(n) = self.od.as_ref().map(|o| o.n()) else {
                     ui.label(RichText::new("Glisse un PDF ou une image dans la fenêtre").size(12.0).color(FAINT));
@@ -834,7 +834,7 @@ impl Folio {
                 ui.add(egui::Image::new((self.icon.id(), Vec2::splat(40.0))));
                 ui.vertical(|ui| {
                     ui.label(RichText::new("Bienvenue dans Folio").font(semibold(28.0)).color(INK_STRONG));
-                    ui.label(RichText::new("Lis, annote, signe, organise et numérise tes PDF").size(13.0).color(MUTED));
+                    ui.label(RichText::new("Lis, annote, signe, organise et numérise tes PDF").size(12.5).color(MUTED));
                 });
             });
             ui.add_space(26.0);
@@ -855,7 +855,7 @@ impl Folio {
                     let ic = Rect::from_min_size(r.min + vec2(16.0, 24.0), Vec2::splat(42.0));
                     ui.painter().rect_filled(ic, CornerRadius::same(10), ACCENT.gamma_multiply(0.22));
                     home_glyph(ui.painter(), ic.shrink(10.0), k, ACCENT);
-                    ui.painter().text(r.min + vec2(72.0, 30.0), Align2::LEFT_CENTER, title, semibold(14.0), INK_STRONG);
+                    ui.painter().text(r.min + vec2(72.0, 30.0), Align2::LEFT_CENTER, title, semibold(13.0), INK_STRONG);
                     ui.painter().text(r.min + vec2(72.0, 54.0), Align2::LEFT_CENTER, sub, FontId::proportional(11.5), MUTED);
                     if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                         match k {
@@ -888,7 +888,7 @@ impl Folio {
                     ui.horizontal(|ui| {
                         ui.add_space(52.0);
                         let name = p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-                        let resp = ui.add(egui::Label::new(RichText::new(&name).font(semibold(13.0)).color(INK)).sense(Sense::click()));
+                        let resp = ui.add(egui::Label::new(RichText::new(&name).font(semibold(12.5)).color(INK)).sense(Sense::click()));
                         ui.label(RichText::new(p.parent().map(|d| d.display().to_string()).unwrap_or_default()).size(11.0).color(FAINT));
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             self.open_path(&p, &ctx);

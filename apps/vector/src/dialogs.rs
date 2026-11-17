@@ -7,7 +7,7 @@ use studio_ui::pro::{self, FAINT, INK_STRONG, MUTED, semibold};
 fn title(ui: &mut Ui, t: &str, sub: &str) {
     ui.label(RichText::new(t).font(semibold(19.0)).color(INK_STRONG));
     if !sub.is_empty() {
-        ui.label(RichText::new(sub).size(12.5).color(MUTED));
+        ui.label(RichText::new(sub).size(12.0).color(MUTED));
     }
     ui.add_space(12.0);
 }
@@ -30,7 +30,7 @@ fn num(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f3
 }
 
 fn slide(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.5).color(MUTED));
+    ui.label(RichText::new(label).size(12.0).color(MUTED));
     ui.spacing_mut().slider_width = ui.available_width() - 80.0;
     ui.add(egui::Slider::new(v, range).suffix(suffix));
 }
@@ -286,12 +286,12 @@ impl VectorApp {
                         Geom::Path { nodes, .. } => nodes.len() + it.sub.iter().map(|s| s.len()).sum::<usize>(),
                         _ => 0,
                     }).sum();
-                    ui.label(RichText::new(format!("Points : {pts} → {now}")).size(12.5).color(MUTED));
+                    ui.label(RichText::new(format!("Points : {pts} → {now}")).size(12.0).color(MUTED));
                 }
                 Dlg::Round { r } => slide(ui, "Rayon", r, 0.5..=300.0, " px"),
                 Dlg::Zigzag { size, ridges, smooth } => {
                     slide(ui, "Amplitude", size, 0.5..=200.0, " px");
-                    ui.label(RichText::new("Nombre d'ondes").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Nombre d'ondes").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(ridges, 2..=300));
                     let mut s = *smooth as usize;
                     if pro::segmented(ui, &mut s, &["Pointes", "Arrondis"]) {
@@ -321,7 +321,7 @@ impl VectorApp {
                     });
                 }
                 Dlg::Blend { steps } => {
-                    ui.label(RichText::new("Étapes intermédiaires").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Étapes intermédiaires").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(steps, 1..=100));
                     ui.label(RichText::new("Formes et couleurs se fondent progressivement.").size(12.0).color(FAINT));
                 }
@@ -414,7 +414,7 @@ impl VectorApp {
                     ui.add(egui::DragValue::new(&mut o.scale).range(0.05..=16.0).speed(0.05).prefix("×"));
                 });
                 if let Some((_, r, _)) = parts.first() {
-                    ui.label(RichText::new(format!("Taille : {:.0} × {:.0} px{}", r[2] * o.scale, r[3] * o.scale, if parts.len() > 1 { format!(" · {} fichiers", parts.len()) } else { String::new() })).size(12.5).color(MUTED));
+                    ui.label(RichText::new(format!("Taille : {:.0} × {:.0} px{}", r[2] * o.scale, r[3] * o.scale, if parts.len() > 1 { format!(" · {} fichiers", parts.len()) } else { String::new() })).size(12.0).color(MUTED));
                 }
             }
             match o.format {
@@ -422,7 +422,7 @@ impl VectorApp {
                     ui.checkbox(&mut o.transparent, "Fond transparent");
                 }
                 1 => {
-                    ui.label(RichText::new("Qualité").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Qualité").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut o.quality, 10..=100).suffix(" %"));
                 }
                 2 => {
@@ -473,10 +473,10 @@ impl VectorApp {
             if t.opts.mode == 0 {
                 slide(ui, "Seuil", &mut t.opts.threshold, 1.0..=254.0, "");
             } else {
-                ui.label(RichText::new(if t.opts.mode == 1 { "Niveaux" } else { "Couleurs" }).size(12.5).color(MUTED));
+                ui.label(RichText::new(if t.opts.mode == 1 { "Niveaux" } else { "Couleurs" }).size(12.0).color(MUTED));
                 ui.add(egui::Slider::new(&mut t.opts.colors, 2..=16));
             }
-            ui.label(RichText::new("Précision").size(12.5).color(MUTED));
+            ui.label(RichText::new("Précision").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(&mut t.opts.precision, 100..=1200).suffix(" px"));
             slide(ui, "Bruit ignoré", &mut t.opts.noise, 0.0..=200.0, " px²");
             slide(ui, "Courbes (plus haut = plus arrondi)", &mut t.opts.corners, 0.0..=90.0, "°");
@@ -625,9 +625,9 @@ impl VectorApp {
                 });
                 ui.add_space(16.0);
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Largeur").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Largeur").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut nd.w).range(1.0..=20000.0).suffix(" px"));
-                    ui.label(RichText::new("Hauteur").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Hauteur").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut nd.h).range(1.0..=20000.0).suffix(" px"));
                     if ui.button("⇄ Orientation").clicked() {
                         std::mem::swap(&mut nd.w, &mut nd.h);

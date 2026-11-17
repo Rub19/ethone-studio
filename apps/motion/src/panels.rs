@@ -16,7 +16,7 @@ fn prop_row(ui: &mut Ui, l: &mut Layer, pi: usize, t: f32, go: &mut Option<f32>,
             p.toggle_key(t);
         }
         let name = if p.expressive() { format!("{label} ≈") } else { label.to_string() };
-        let lab = ui.add(egui::Label::new(RichText::new(name).size(12.5).color(if p.animated() || p.expressive() { INK } else { MUTED })).sense(Sense::click()));
+        let lab = ui.add(egui::Label::new(RichText::new(name).size(12.0).color(if p.animated() || p.expressive() { INK } else { MUTED })).sense(Sense::click()));
         lab.on_hover_text("Clic droit : réinitialiser, tremblement, boucle").context_menu(|ui| {
             if ui.button("Réinitialiser la valeur").clicked() {
                 p.set(t, def);
@@ -124,7 +124,7 @@ impl Motion {
             pro::label_value(ui, "Format", &format!("{} × {}", self.comp.width, self.comp.height));
             pro::label_value(ui, "Images/s", &self.comp.fps.to_string());
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Durée").size(12.5).color(MUTED));
+                ui.label(RichText::new("Durée").size(12.0).color(MUTED));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.add(egui::DragValue::new(&mut self.comp.duration).range(0.1..=600.0).speed(0.1).suffix(" s"));
                 });
@@ -140,7 +140,7 @@ impl Motion {
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
             slider(ui, "Vignettage", &mut self.comp.vignette, 0.0..=100.0, " %");
             slider(ui, "Grain film", &mut self.comp.grain, 0.0..=100.0, " %");
-            ui.label(RichText::new("Bandes cinéma").size(12.5).color(MUTED));
+            ui.label(RichText::new("Bandes cinéma").size(12.0).color(MUTED));
             let mut k = LETTERBOX.iter().position(|l| (l.1 - self.comp.letterbox).abs() < 0.01).unwrap_or(0);
             let labels: Vec<&str> = LETTERBOX.iter().map(|l| l.0).collect();
             if pro::segmented(ui, &mut k, &labels) {
@@ -235,13 +235,13 @@ impl Motion {
                     ui.checkbox(&mut l.solo, "Solo");
                 });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("De").size(12.5).color(MUTED));
+                    ui.label(RichText::new("De").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut l.start).range(0.0..=l.end).speed(0.05).suffix(" s"));
-                    ui.label(RichText::new("à").size(12.5).color(MUTED));
+                    ui.label(RichText::new("à").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut l.end).range(l.start..=dur).speed(0.05).suffix(" s"));
                 });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Parent").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Parent").size(12.0).color(MUTED));
                     let label = cur_parent.and_then(|p| names.iter().find(|n| n.0 == p)).map_or("Aucun".to_string(), |n| n.1.clone());
                     egui::ComboBox::from_id_salt("parent").selected_text(short(&label, 22)).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                         if ui.selectable_label(cur_parent.is_none(), "Aucun").clicked() {
@@ -255,7 +255,7 @@ impl Motion {
                     });
                 });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Étiquette").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Étiquette").size(12.0).color(MUTED));
                     let cur = l.label.unwrap_or((i % LABELS.len()) as u8);
                     for (k, c) in LABELS.iter().enumerate() {
                         let (r, resp) = ui.allocate_exact_size(Vec2::splat(18.0), Sense::click());
@@ -419,7 +419,7 @@ impl Motion {
                 if amount(ui, "Pointillés (0 = plein)", &mut fx.dash, 0.0..=200.0, " px") {
                     slider(ui, "Espace entre tirets", &mut fx.dash_gap, 5.0..=400.0, " %");
                 }
-                ui.label(RichText::new("Extrémités et angles").size(12.5).color(MUTED));
+                ui.label(RichText::new("Extrémités et angles").size(12.0).color(MUTED));
                 let mut c = fx.cap as usize;
                 if pro::segmented(ui, &mut c, &["Plates", "Rondes", "Carrées"]) {
                     fx.cap = c as u8;
@@ -452,7 +452,7 @@ impl Motion {
                     slider(ui, "Rayon", &mut fx.grad_r, 5.0..=200.0, " %");
                 }
             }
-            ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
+            ui.label(RichText::new("Mode de fusion").size(12.0).color(MUTED));
             egui::ComboBox::from_id_salt("blend").selected_text(BLENDS.get(fx.blend as usize).map_or("Normal", |b| b.1)).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for (k, (_, name)) in BLENDS.iter().enumerate() {
                     ui.selectable_value(&mut fx.blend, k as u8, *name);
@@ -476,7 +476,7 @@ impl Motion {
             }
             amount(ui, "Flou radial (zoom)", &mut fx.zoom_blur, 0.0..=100.0, " %");
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Lueur").size(12.5).color(MUTED));
+                ui.label(RichText::new("Lueur").size(12.0).color(MUTED));
                 color_button(ui, &mut fx.glow_color);
             });
             ui.add(egui::Slider::new(&mut fx.glow, 0.0..=80.0).suffix(" px"));
@@ -569,7 +569,7 @@ impl Motion {
                     if pro::segmented(ui, &mut m, &["Entrée", "Sortie", "Les deux"]) {
                         ta.mode = m as u8;
                     }
-                    ui.label(RichText::new("Ordre").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Ordre").size(12.0).color(MUTED));
                     egui::ComboBox::from_id_salt("ta-order").selected_text(TEXT_ORDERS[(ta.order as usize).min(4)]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                         for (k, n) in TEXT_ORDERS.iter().enumerate() {
                             ui.selectable_value(&mut ta.order, k as u8, *n);
@@ -578,7 +578,7 @@ impl Motion {
                     slider(ui, "Décalage entre lettres", &mut ta.delay, 0.0..=0.5, " s");
                     slider(ui, "Durée par lettre", &mut ta.dur, 0.02..=3.0, " s");
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Courbe").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Courbe").size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("ta-ease").selected_text(Ease::ALL.iter().find(|e| e.0 == ta.ease).map_or("", |e| e.1)).show_ui(ui, |ui| {
                             for (e, n) in Ease::ALL {
                                 ui.selectable_value(&mut ta.ease, e, n);
@@ -605,7 +605,7 @@ impl Motion {
                 }
                 slider(ui, "Fréquence", &mut fx.wiggle_freq, 0.1..=12.0, " /s");
             }
-            ui.label(RichText::new("Répéter toutes les clés").size(12.5).color(MUTED));
+            ui.label(RichText::new("Répéter toutes les clés").size(12.0).color(MUTED));
             let mut mode = if fx.pingpong { 2 } else if fx.loop_keys { 1 } else { 0 };
             if pro::segmented(ui, &mut mode, &["Non", "Boucle", "Aller-retour"]) {
                 fx.loop_keys = mode == 1;

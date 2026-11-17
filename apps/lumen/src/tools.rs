@@ -264,7 +264,7 @@ impl Lumen {
         ui.spacing_mut().slider_width = 90.0;
         ui.spacing_mut().item_spacing.x = 8.0;
         let name = GROUPS.iter().flat_map(|g| g.iter()).find(|g| g.0 == self.tool).map(|g| g.1).unwrap_or("Main et zoom");
-        ui.label(RichText::new(name).font(semibold(12.5)).color(INK));
+        ui.label(RichText::new(name).font(semibold(12.0)).color(INK));
         pro::toolbar_sep(ui);
         let mut s = self.settings(i);
         let before = s.clone();
@@ -592,7 +592,7 @@ impl Lumen {
                     let d = b - a;
                     let theta = (-d.y).atan2(d.x).to_degrees();
                     let res = theta - (theta / 90.0).round() * 90.0;
-                    painter.text(b + vec2(12.0, -12.0), Align2::LEFT_BOTTOM, format!("{:+.1}°", res), semibold(13.0), Color32::WHITE);
+                    painter.text(b + vec2(12.0, -12.0), Align2::LEFT_BOTTOM, format!("{:+.1}°", res), semibold(12.5), Color32::WHITE);
                     if resp.drag_stopped() {
                         if d.length() > 8.0 {
                             let sign = if s.flip ^ s.flip_v { -1.0 } else { 1.0 };
@@ -805,7 +805,7 @@ impl Lumen {
                     && let Some(p) = pointer
                 {
                     let txt = if self.target_mode == 0 { format!("Ton {:.0} %", lum * 100.0) } else { format!("{} · {}", develop::BANDS[develop::band_weights(hue)[0].0].0, TARGET_MODES[self.target_mode]) };
-                    painter.text(p + vec2(14.0, -14.0), Align2::LEFT_BOTTOM, txt, semibold(12.5), Color32::WHITE);
+                    painter.text(p + vec2(14.0, -14.0), Align2::LEFT_BOTTOM, txt, semibold(12.0), Color32::WHITE);
                 }
             }
             Tool::Brush => {
@@ -816,7 +816,7 @@ impl Lumen {
                     painter.circle_stroke(h, outer, Stroke::new(1.2, Color32::WHITE));
                     painter.circle_stroke(h, outer * (1.0 - self.brush_feather / 100.0 * 0.9), Stroke::new(1.0, Color32::from_white_alpha(110)));
                     if alt || self.brush_erase {
-                        painter.text(h, Align2::CENTER_CENTER, "−", semibold(14.0), Color32::WHITE);
+                        painter.text(h, Align2::CENTER_CENTER, "−", semibold(13.0), Color32::WHITE);
                     }
                     ctx.set_cursor_icon(egui::CursorIcon::None);
                 }
@@ -1034,7 +1034,7 @@ impl Lumen {
         let bg = Rect::from_min_size(r.left_top() + vec2(12.0, 12.0), vec2(w, h));
         painter.rect_filled(bg, CornerRadius::same(8), Color32::from_black_alpha(170));
         for (k, l) in lines.iter().enumerate() {
-            painter.text(bg.min + vec2(10.0, 8.0 + k as f32 * 17.0), Align2::LEFT_TOP, short(l, 60), if k == 0 { semibold(12.5) } else { FontId::proportional(12.0) }, if k == 0 { Color32::WHITE } else { Color32::from_white_alpha(200) });
+            painter.text(bg.min + vec2(10.0, 8.0 + k as f32 * 17.0), Align2::LEFT_TOP, short(l, 60), if k == 0 { semibold(12.0) } else { FontId::proportional(12.0) }, if k == 0 { Color32::WHITE } else { Color32::from_white_alpha(200) });
         }
     }
 }

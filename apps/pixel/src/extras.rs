@@ -185,7 +185,7 @@ impl Pixel {
             Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(12)).inner_margin(Margin::symmetric(8, 5)).shadow(egui::epaint::Shadow { offset: [0, 6], blur: 18, spread: 0, color: Color32::from_black_alpha(140) }).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.spacing_mut().item_spacing.x = 2.0;
-                    let b = |ui: &mut Ui, t: &str, tip: &str| ui.add(egui::Button::new(RichText::new(t).size(12.5).color(INK)).fill(Color32::TRANSPARENT).stroke(Stroke::NONE).corner_radius(CornerRadius::same(8)).min_size(egui::vec2(0.0, 26.0))).on_hover_text(tip).clicked();
+                    let b = |ui: &mut Ui, t: &str, tip: &str| ui.add(egui::Button::new(RichText::new(t).size(12.0).color(INK)).fill(Color32::TRANSPARENT).stroke(Stroke::NONE).corner_radius(CornerRadius::same(8)).min_size(egui::vec2(0.0, 26.0))).on_hover_text(tip).clicked();
                     if let Some((_, split)) = &mut self.compare {
                         ui.label(RichText::new("Avant").size(12.0).color(MUTED));
                         ui.spacing_mut().slider_width = 160.0;

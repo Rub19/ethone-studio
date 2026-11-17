@@ -31,7 +31,7 @@ pub fn nav_row(ui: &mut Ui, label: &str, count: usize, selected: bool) -> egui::
     } else if resp.hovered() {
         p.rect_filled(rect, CornerRadius::same(7), Color32::from_white_alpha(8));
     }
-    p.text(rect.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, short(label, 28), if selected { semibold(13.0) } else { FontId::proportional(13.0) }, if selected { INK_STRONG } else { INK });
+    p.text(rect.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, short(label, 28), if selected { semibold(12.5) } else { FontId::proportional(12.5) }, if selected { INK_STRONG } else { INK });
     if count != usize::MAX {
         p.text(rect.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, count.to_string(), FontId::proportional(12.0), FAINT);
     }
@@ -52,7 +52,7 @@ pub fn slider_full(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::Range
     let lr = Rect::from_min_size(row.min, vec2(label_w, row.height()));
     let lresp = ui.interact(lr, ui.make_persistent_id(("sl-label", label, row.min.y as i32)), Sense::click());
     if !label.is_empty() {
-        ui.painter().text(lr.left_center(), Align2::LEFT_CENTER, short(label, (label_w / 6.6) as usize), FontId::proportional(12.5), if *v != default { INK } else { MUTED });
+        ui.painter().text(lr.left_center(), Align2::LEFT_CENTER, short(label, (label_w / 6.6) as usize), FontId::proportional(12.0), if *v != default { INK } else { MUTED });
     }
     if lresp.on_hover_text(format!("{label}\nDouble-clic : valeur par défaut")).double_clicked() {
         *v = default;
@@ -123,7 +123,7 @@ pub fn hue_slider(ui: &mut Ui, label: &str, v: &mut f32) -> bool {
     let width = ui.available_width();
     let (row, _) = ui.allocate_exact_size(vec2(width, 22.0), Sense::hover());
     let label_w = (width * 0.38).min(112.0);
-    ui.painter().text(row.left_center(), Align2::LEFT_CENTER, short(label, (label_w / 6.6) as usize), FontId::proportional(12.5), if *v != 0.0 { INK } else { MUTED });
+    ui.painter().text(row.left_center(), Align2::LEFT_CENTER, short(label, (label_w / 6.6) as usize), FontId::proportional(12.0), if *v != 0.0 { INK } else { MUTED });
     let r = Rect::from_min_max(pos2(row.left() + label_w + 4.0, row.top() + 5.0), pos2(row.right() - 52.0, row.bottom() - 5.0));
     let resp = ui.interact(r.expand(4.0), ui.make_persistent_id(("hue", label, row.min.y as i32)), Sense::click_and_drag());
     let p = ui.painter();
@@ -301,7 +301,7 @@ pub fn draw_histogram(ui: &mut Ui, hist: Option<&[[u32; 256]; 4]>, clip: (bool, 
     let p = ui.painter();
     p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
     let Some(h) = hist else {
-        p.text(r.center(), Align2::CENTER_CENTER, "—", FontId::proportional(14.0), FAINT);
+        p.text(r.center(), Align2::CENTER_CENTER, "—", FontId::proportional(13.0), FAINT);
         return;
     };
     let max = h[..3].iter().flat_map(|c| c[2..254].iter()).copied().max().unwrap_or(1).max(1) as f32;

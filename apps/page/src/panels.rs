@@ -638,7 +638,7 @@ impl PageApp {
             ui.horizontal(|ui| {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(12.0), Sense::hover());
                 ui.painter().circle_filled(r.center(), 5.0, if errors > 0 { RED } else { GREEN });
-                ui.label(RichText::new(if errors > 0 { format!("{errors} erreur(s), {} avertissement(s)", issues.len() - errors) } else if issues.is_empty() { "Aucun problème".into() } else { format!("Aucune erreur, {} avertissement(s)", issues.len()) }).size(12.5).color(INK));
+                ui.label(RichText::new(if errors > 0 { format!("{errors} erreur(s), {} avertissement(s)", issues.len() - errors) } else if issues.is_empty() { "Aucun problème".into() } else { format!("Aucune erreur, {} avertissement(s)", issues.len()) }).size(12.0).color(INK));
             });
             ui.add_space(6.0);
             for (k, is) in issues.iter().enumerate().take(80) {
@@ -691,7 +691,7 @@ impl PageApp {
         pro::dock_panel(ui, "links", "Liens", |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             let missing = links.iter().filter(|l| !std::path::Path::new(&l.2).is_file()).count();
-            ui.label(RichText::new(format!("{} image(s) placée(s) · {missing} manquante(s)", links.len())).size(12.5).color(if missing > 0 { RED } else { MUTED }));
+            ui.label(RichText::new(format!("{} image(s) placée(s) · {missing} manquante(s)", links.len())).size(12.0).color(if missing > 0 { RED } else { MUTED }));
             for (p, i, path) in &links {
                 let ok = std::path::Path::new(path).is_file();
                 let name = std::path::Path::new(path).file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
@@ -787,7 +787,7 @@ impl PageApp {
                     p.rect_filled(r, CornerRadius::same(6), Color32::from_white_alpha(8));
                 }
                 p.rect_filled(egui::Rect::from_center_size(r.left_center() + vec2(58.0, 0.0), vec2(4.0, 16.0)), CornerRadius::same(2), Color32::from_rgb(col[0], col[1], col[2]));
-                p.text(r.left_center() + vec2(68.0, 0.0), Align2::LEFT_CENTER, &name, FontId::proportional(12.5), if vis { INK } else { FAINT });
+                p.text(r.left_center() + vec2(68.0, 0.0), Align2::LEFT_CENTER, &name, FontId::proportional(12.0), if vis { INK } else { FAINT });
                 p.text(r.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, counts[l].to_string(), FontId::proportional(11.0), FAINT);
                 for (k, (glyph, on, tip)) in [("👁", vis, "Afficher / masquer"), ("🔒", lock, "Verrouiller"), ("🖨", print, "Imprimer ce calque")].into_iter().enumerate() {
                     let br = egui::Rect::from_center_size(r.left_center() + vec2(10.0 + k as f32 * 16.0, 0.0), Vec2::splat(16.0));
@@ -882,7 +882,7 @@ impl PageApp {
             for (k, s) in self.doc.char_styles.iter().enumerate() {
                 ui.horizontal(|ui| {
                     let c = s.color.unwrap_or([230, 230, 235, 255]);
-                    let mut t = RichText::new(&s.name).size(12.5).color(Color32::from_rgb(c[0], c[1], c[2]));
+                    let mut t = RichText::new(&s.name).size(12.0).color(Color32::from_rgb(c[0], c[1], c[2]));
                     if s.bold {
                         t = t.strong();
                     }
@@ -917,7 +917,7 @@ impl PageApp {
             }
             for (k, s) in self.doc.obj_styles.iter().enumerate() {
                 ui.horizontal(|ui| {
-                    if ui.add_enabled(has, egui::Button::new(RichText::new(&s.name).size(12.5)).frame(false)).on_hover_text("Appliquer à la sélection").clicked() {
+                    if ui.add_enabled(has, egui::Button::new(RichText::new(&s.name).size(12.0)).frame(false)).on_hover_text("Appliquer à la sélection").clicked() {
                         apply_o = Some(k);
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -977,12 +977,12 @@ impl PageApp {
             let keep = pro::sheet(ctx, "find", 420.0, |ui| {
                 ui.label(RichText::new("Rechercher et remplacer").font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(10.0);
-                ui.label(RichText::new("Rechercher").size(12.5).color(MUTED));
+                ui.label(RichText::new("Rechercher").size(12.0).color(MUTED));
                 let r = ui.add(egui::TextEdit::singleline(&mut st.find).desired_width(f32::INFINITY));
                 if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
                     next = true;
                 }
-                ui.label(RichText::new("Remplacer par").size(12.5).color(MUTED));
+                ui.label(RichText::new("Remplacer par").size(12.0).color(MUTED));
                 ui.add(egui::TextEdit::singleline(&mut st.with).desired_width(f32::INFINITY));
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
@@ -990,11 +990,11 @@ impl PageApp {
                     ui.checkbox(&mut st.word, "Mot entier");
                 });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Dans").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Dans").size(12.0).color(MUTED));
                     pro::segmented(ui, &mut st.scope, &["Document", "Page", "Bloc sélectionné"]);
                 });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Style de paragraphe").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Style de paragraphe").size(12.0).color(MUTED));
                     egui::ComboBox::from_id_salt("fstyle").selected_text(if st.style.is_empty() { "Tous" } else { st.style.as_str() }).show_ui(ui, |ui| {
                         ui.selectable_value(&mut st.style, String::new(), "Tous");
                         for s in &styles {
@@ -1004,7 +1004,7 @@ impl PageApp {
                 });
                 ui.label(RichText::new("Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.").size(11.0).color(FAINT));
                 if let Some(r) = &st.result {
-                    ui.label(RichText::new(r).size(12.5).color(GREEN));
+                    ui.label(RichText::new(r).size(12.0).color(GREEN));
                 }
                 ui.add_space(12.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -1085,7 +1085,7 @@ impl PageApp {
                 ui.label(RichText::new("Liste les blocs portant ces styles de paragraphe, avec leur numéro de page et des points de conduite.").size(12.0).color(MUTED));
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Titre").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Titre").size(12.0).color(MUTED));
                     ui.add(egui::TextEdit::singleline(&mut o.title).desired_width(f32::INFINITY));
                 });
                 egui::ScrollArea::vertical().max_height(180.0).show(ui, |ui| {
@@ -1183,7 +1183,7 @@ impl PageApp {
                     color_row(ui, "Couleur", c, &sw);
                 }
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Taille relative").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Taille relative").size(12.0).color(MUTED));
                     let mut pct = cs.scale * 100.0;
                     if ui.add(egui::DragValue::new(&mut pct).range(30.0..=400.0).suffix(" %")).changed() {
                         cs.scale = pct / 100.0;

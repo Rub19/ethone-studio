@@ -1406,7 +1406,7 @@ impl eframe::App for Pixel {
 
 impl Pixel {
     fn menu_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(40.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(10, 0))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 10.0);
             let right_w = if self.home { 0.0 } else { 250.0 };
             if !self.home {
@@ -2011,7 +2011,7 @@ impl Pixel {
             ui.add_space(26.0);
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::hover());
             ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.22));
-            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(14.0), INK_STRONG);
+            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(13.0), INK_STRONG);
         });
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD).inner_margin(Margin { left: 40, right: 40, top: 34, bottom: 20 })).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
@@ -2048,7 +2048,7 @@ impl Pixel {
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose une image n'importe où pour l'ouvrir", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO", FontId::proportional(13.0), MUTED);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO", FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -2057,7 +2057,7 @@ impl Pixel {
                             ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
                         }
                         let name = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, name, semibold(14.0), INK);
+                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, name, semibold(13.0), INK);
                         ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| d.display().to_string()).unwrap_or_default(), FontId::proportional(12.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             open = Some(p.clone());
@@ -2076,7 +2076,7 @@ impl Pixel {
     }
 
     fn status_bar(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 ui.label(small(format!("{:.0} %", self.zoom * 100.0)));
@@ -2116,7 +2116,7 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: u32, h: u32, selected: 
     let s = (area.width() / w as f32).min(area.height() / h as f32);
     let shape = Rect::from_center_size(area.center(), vec2(w as f32, h as f32) * s);
     p.rect(shape, CornerRadius::same(3), Color32::from_white_alpha(18), Stroke::new(1.2, if selected { BLUE } else { MUTED }), StrokeKind::Inside);
-    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(13.0), INK_STRONG);
+    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(12.5), INK_STRONG);
     p.text(pos2(r.center().x, r.bottom() - 17.0), Align2::CENTER_CENTER, detail, FontId::proportional(11.0), MUTED);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }

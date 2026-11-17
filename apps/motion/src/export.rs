@@ -383,7 +383,7 @@ impl Motion {
             });
             ui.add_space(14.0);
             let row = |ui: &mut Ui, s: &str| {
-                ui.label(RichText::new(s).size(12.5).color(MUTED));
+                ui.label(RichText::new(s).size(12.0).color(MUTED));
             };
             row(ui, "Format");
             let w = (ui.available_width() - 18.0) / 4.0;
@@ -456,7 +456,7 @@ impl Motion {
                 }
                 2 | 5 => {
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Préfixe").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Préfixe").size(12.0).color(MUTED));
                         ui.add(egui::TextEdit::singleline(&mut o.prefix).desired_width(110.0));
                         ui.add(egui::DragValue::new(&mut o.start_no).range(0..=99999).prefix("Premier n° "));
                         ui.add(egui::DragValue::new(&mut o.step).range(1..=30).prefix("Une image sur "));
@@ -483,7 +483,7 @@ impl Motion {
             ui.add_space(8.0);
             let n = work_of(&self.comp, &o);
             if matches!(o.format, 0 | 1 | 2 | 5) {
-                ui.label(RichText::new(format!("{n} images · {}", secs(n as f32 / self.comp.fps as f32))).size(12.5).color(FAINT));
+                ui.label(RichText::new(format!("{n} images · {}", secs(n as f32 / self.comp.fps as f32))).size(12.0).color(FAINT));
             }
             ui.add_space(14.0);
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -524,13 +524,13 @@ impl Motion {
             ui.label(RichText::new("Plusieurs exports à la suite, en une seule fois.").size(12.0).color(MUTED));
             ui.add_space(12.0);
             if self.queue.is_empty() {
-                ui.label(RichText::new("La file est vide : dans Exporter, choisis « Ajouter à la file ».").size(12.5).color(FAINT));
+                ui.label(RichText::new("La file est vide : dans Exporter, choisis « Ajouter à la file ».").size(12.0).color(FAINT));
             }
             for (k, q) in self.queue.iter().enumerate() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 42.0), Sense::hover());
                 let p = ui.painter();
                 p.rect(r, CornerRadius::same(8), pro::WELL, Stroke::new(1.0, LINE), StrokeKind::Inside);
-                p.text(r.left_top() + vec2(12.0, 6.0), Align2::LEFT_TOP, format!("{}. {} · {}", k + 1, FORMATS[q.o.format].0, SCALES[q.o.scale].0), semibold(12.5), INK);
+                p.text(r.left_top() + vec2(12.0, 6.0), Align2::LEFT_TOP, format!("{}. {} · {}", k + 1, FORMATS[q.o.format].0, SCALES[q.o.scale].0), semibold(12.0), INK);
                 p.text(r.left_top() + vec2(12.0, 24.0), Align2::LEFT_TOP, short(&q.path.display().to_string(), 70), FontId::proportional(11.0), FAINT);
                 let xr = Rect::from_center_size(r.right_center() - vec2(18.0, 0.0), Vec2::splat(22.0));
                 if ui.put(xr, egui::Button::new("×").small()).on_hover_text("Retirer").clicked() {

@@ -1967,7 +1967,7 @@ impl eframe::App for Cut {
 
 impl Cut {
     fn top_bar(&mut self, root: &mut Ui, ctx: &egui::Context, name: &str) {
-        egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = if self.home { 0.0 } else { 330.0 };
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
@@ -1980,7 +1980,7 @@ impl Cut {
                         if !self.home {
                             ui.add_space(12.0);
                             pro::toolbar_sep(ui);
-                            ui.label(RichText::new(name).font(semibold(13.0)).color(INK));
+                            ui.label(RichText::new(name).font(semibold(12.5)).color(INK));
                             if self.proj != self.saved {
                                 ui.label(RichText::new("•").color(MUTED)).on_hover_text("Modifications non enregistrées");
                             }
@@ -2346,7 +2346,7 @@ impl Cut {
     }
 
     fn status(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 if !self.home {
@@ -2457,7 +2457,7 @@ impl Cut {
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose des vidéos, des photos ou de la musique n'importe où", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…", FontId::proportional(13.0), MUTED);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…", FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -2466,7 +2466,7 @@ impl Cut {
                             ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
                         }
                         let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(14.0), INK);
+                        ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(13.0), INK);
                         ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| short_path(&d.display().to_string(), 90)).unwrap_or_default(), FontId::proportional(12.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             open = Some(p.clone());
@@ -2484,7 +2484,7 @@ impl Cut {
         egui::Panel::left("bin").resizable(false).exact_size(272.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(12, 12))).show(root, |ui| {
             let mut gen_k = None;
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Médias").font(semibold(13.5)).color(INK_STRONG));
+                ui.label(RichText::new("Médias").font(semibold(12.5)).color(INK_STRONG));
                 ui.label(RichText::new(self.proj.sources.len().to_string()).size(12.0).color(FAINT));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::secondary_icon(ui, "", |p, r, c| glyph(p, r, G::Plus, c)).on_hover_text("Importer des médias (Ctrl+I)").clicked() {
@@ -2532,7 +2532,7 @@ impl Cut {
             if self.proj.sources.is_empty() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 120.0), Sense::hover());
                 ui.painter().rect(r, CornerRadius::same(10), Color32::from_white_alpha(3), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                ui.painter().text(r.center() - vec2(0.0, 8.0), Align2::CENTER_CENTER, "Glisse tes fichiers ici", semibold(13.0), INK);
+                ui.painter().text(r.center() - vec2(0.0, 8.0), Align2::CENTER_CENTER, "Glisse tes fichiers ici", semibold(12.5), INK);
                 ui.painter().text(r.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, "Vidéos, photos et musiques", FontId::proportional(11.5), FAINT);
                 return;
             }
@@ -2563,7 +2563,7 @@ impl Cut {
                         let pic = Rect::from_min_size(r.min + vec2(4.0, 6.0), vec2(56.0, 32.0));
                         self.media_thumb(ui.painter(), pic, i);
                         self.label_tag(ui.painter(), pic, i);
-                        ui.painter().text(pic.right_top() + vec2(10.0, 2.0), Align2::LEFT_TOP, short(&s.name(), 22), FontId::proportional(12.5), INK);
+                        ui.painter().text(pic.right_top() + vec2(10.0, 2.0), Align2::LEFT_TOP, short(&s.name(), 22), FontId::proportional(12.0), INK);
                         ui.painter().text(pic.right_bottom() + vec2(10.0, -2.0), Align2::LEFT_BOTTOM, format!("{} · {}{}", kind_label(s), if s.kind() == 2 { "image".into() } else { tc(s.duration, 30) }, match self.uses(i) { 0 => String::new(), n => format!(" · {n}×") }), FontId::proportional(11.0), FAINT);
                         let resp = resp.on_hover_text(media_info(s));
                         if resp.double_clicked() {
@@ -2658,7 +2658,7 @@ impl Cut {
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD)).show(root, |ui| {
             let full = ui.max_rect();
             let head = Rect::from_min_size(full.min, vec2(full.width(), 34.0));
-            ui.painter().text(head.left_center() + vec2(16.0, 0.0), Align2::LEFT_CENTER, "Programme", semibold(12.5), INK);
+            ui.painter().text(head.left_center() + vec2(16.0, 0.0), Align2::LEFT_CENTER, "Programme", semibold(12.0), INK);
             if let Some((i, _)) = self.proj.local_at(self.t) {
                 let src = &self.proj.sources[self.proj.clips[i].src];
                 ui.painter().text(head.left_center() + vec2(100.0, 0.0), Align2::LEFT_CENTER, short(&src.name(), 40), FontId::proportional(12.0), FAINT);
@@ -2675,7 +2675,7 @@ impl Cut {
                 p.image(t.id(), frame, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             } else if self.proj.clips.is_empty() {
                 p.text(frame.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Importe une vidéo pour commencer", semibold(16.0), INK);
-                p.text(frame.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Glisse un fichier ici ou Ctrl+I", FontId::proportional(12.5), MUTED);
+                p.text(frame.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Glisse un fichier ici ou Ctrl+I", FontId::proportional(12.0), MUTED);
             }
             let guide = Stroke::new(1.0, Color32::from_white_alpha(70));
             if self.safe {
@@ -3002,7 +3002,7 @@ impl Cut {
                 });
                 ui.add_space(12.0);
                 let label = |ui: &mut Ui, t: &str| {
-                    ui.label(RichText::new(t).size(12.5).color(MUTED));
+                    ui.label(RichText::new(t).size(12.0).color(MUTED));
                 };
                 label(ui, "Préréglage");
                 ui.horizontal_wrapped(|ui| {
@@ -3103,7 +3103,7 @@ impl Cut {
                     4 | 5 => format!("{w} × {h} · image à {}", tc(self.t, self.proj.fps)),
                     _ => format!("{w} × {h} · {} i/s · durée {} · environ {:.0} Mo", fps, tc(secs, self.proj.fps), secs * (opts.mbps as f64 * 1e6 + ABR[opts.abr.min(3)].1 as f64 * 8.0) / 8e6),
                 };
-                ui.label(RichText::new(info).size(12.5).color(FAINT));
+                ui.label(RichText::new(info).size(12.0).color(FAINT));
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::primary(ui, "Exporter…").clicked() {
@@ -3126,7 +3126,7 @@ impl Cut {
             let keep = pro::sheet(ctx, "sequence", 500.0, |ui| {
                 ui.label(RichText::new("Réglages de la séquence").font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
-                ui.label(RichText::new("Format").size(12.5).color(MUTED));
+                ui.label(RichText::new("Format").size(12.0).color(MUTED));
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                     for (label, kind, w, h) in PRESETS {
@@ -3151,7 +3151,7 @@ impl Cut {
                     }
                 });
                 ui.add_space(8.0);
-                ui.label(RichText::new("Images par seconde").size(12.5).color(MUTED));
+                ui.label(RichText::new("Images par seconde").size(12.0).color(MUTED));
                 ui.horizontal(|ui| {
                     for f in FPS {
                         if ui.selectable_label(self.proj.fps == f, format!("{f}")).clicked() {
@@ -3161,7 +3161,7 @@ impl Cut {
                 });
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Couleur de fond").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Couleur de fond").size(12.0).color(MUTED));
                     let b = self.proj.background;
                     let mut col = Color32::from_rgb(b[0], b[1], b[2]);
                     if ui.color_edit_button_srgba(&mut col).changed() {
@@ -3712,7 +3712,7 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32) -> egui::R
     let shape = Rect::from_center_size(area.center(), vec2(w, h) * s);
     p.rect(shape, CornerRadius::same(3), Color32::from_white_alpha(18), Stroke::new(1.2, MUTED), StrokeKind::Inside);
     p.add(Shape::convex_polygon(vec![shape.center() + vec2(-5.0, -7.0), shape.center() + vec2(7.0, 0.0), shape.center() + vec2(-5.0, 7.0)], MUTED, Stroke::NONE));
-    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(13.0), INK_STRONG);
+    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(12.5), INK_STRONG);
     p.text(pos2(r.center().x, r.bottom() - 17.0), Align2::CENTER_CENTER, detail, FontId::proportional(11.0), MUTED);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }

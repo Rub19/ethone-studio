@@ -1226,7 +1226,7 @@ impl eframe::App for PageApp {
 
 impl PageApp {
     fn top_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(44.0).frame(EFrame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(EFrame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = if self.home { 0.0 } else { 300.0 };
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
@@ -1811,7 +1811,7 @@ impl PageApp {
                         ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
                     }
                     let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-                    ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(14.0), INK);
+                    ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(13.0), INK);
                     ui.painter().text(r.left_top() + vec2(14.0, 27.0), Align2::LEFT_TOP, p.parent().map(|d| d.display().to_string()).unwrap_or_default(), FontId::proportional(12.0), FAINT);
                     if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                         open = Some(p.clone());
@@ -1825,12 +1825,12 @@ impl PageApp {
     }
 
     fn options_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("options").exact_size(42.0).frame(EFrame::new().fill(Color32::from_rgb(0x20, 0x20, 0x24)).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("options").exact_size(34.0).frame(EFrame::new().fill(Color32::from_rgb(0x20, 0x20, 0x24)).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
                 ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
                 tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
-                ui.label(RichText::new(tool_name(self.tool)).font(semibold(13.0)).color(INK));
+                ui.label(RichText::new(tool_name(self.tool)).font(semibold(12.5)).color(INK));
                 pro::toolbar_sep(ui);
                 let swatches = self.doc.swatches.clone();
                 let sel = self.sel.filter(|i| *i < self.frames_ref().len());
@@ -1838,7 +1838,7 @@ impl PageApp {
                 let select_like = matches!(self.tool, Tool::Select | Tool::Direct | Tool::FreeTransform);
                 match (select_like, sel) {
                     (true, Some(_)) if n_sel > 1 => {
-                        ui.label(RichText::new(format!("{n_sel} blocs")).size(12.5).color(MUTED));
+                        ui.label(RichText::new(format!("{n_sel} blocs")).size(12.0).color(MUTED));
                         for (t, axis, to) in [("⇤", 0, 0.0), ("↔", 0, 0.5), ("⇥", 0, 1.0), ("⤒", 1, 0.0), ("↕", 1, 0.5), ("⤓", 1, 1.0)] {
                             if ui.button(t).on_hover_text("Aligner sur la sélection").clicked() {
                                 self.align_to(axis, to, 0);
@@ -1888,9 +1888,9 @@ impl PageApp {
                                 });
                             }
                             Kind::Rect { fill, .. } | Kind::Ellipse { fill } | Kind::Polygon { fill, .. } => {
-                                ui.label(RichText::new("Fond").size(12.5).color(MUTED));
+                                ui.label(RichText::new("Fond").size(12.0).color(MUTED));
                                 swatch_button(ui, fill, &swatches);
-                                ui.label(RichText::new("Contour").size(12.5).color(MUTED));
+                                ui.label(RichText::new("Contour").size(12.0).color(MUTED));
                                 let mut on = f.stroke.is_some();
                                 if ui.checkbox(&mut on, "").changed() {
                                     f.stroke = on.then_some([20, 20, 24, 255]);
@@ -1909,7 +1909,7 @@ impl PageApp {
                                 if let Some(c) = fill {
                                     swatch_button(ui, c, &swatches);
                                 }
-                                ui.label(RichText::new("Trait").size(12.5).color(MUTED));
+                                ui.label(RichText::new("Trait").size(12.0).color(MUTED));
                                 swatch_button(ui, color, &swatches);
                                 ui.add(egui::DragValue::new(width).range(0.0..=40.0).speed(0.1).suffix(" pt"));
                             }
@@ -1932,7 +1932,7 @@ impl PageApp {
                                 });
                             }
                             Kind::Table { size, .. } | Kind::TextPath { size, .. } => {
-                                ui.label(RichText::new("Taille du texte").size(12.5).color(MUTED));
+                                ui.label(RichText::new("Taille du texte").size(12.0).color(MUTED));
                                 ui.add(egui::DragValue::new(size).range(4.0..=200.0).speed(0.2).suffix(" pt"));
                             }
                         }
@@ -1954,7 +1954,7 @@ impl PageApp {
     fn status(&mut self, root: &mut Ui) {
         let busy = root.ctx().input(|i| i.pointer.any_down()) || self.edit_text.is_some();
         let errors = if busy { self.preflight.as_ref().map_or(0, |p| p.1.iter().filter(|i| i.error).count()) } else { self.issues().iter().filter(|i| i.error).count() };
-        egui::Panel::bottom("status").exact_size(28.0).frame(EFrame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(EFrame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 let (dot, resp) = ui.allocate_exact_size(vec2(14.0, 14.0), Sense::click());
@@ -2215,9 +2215,9 @@ impl PageApp {
                             ui.selectable_value(family, name.to_string(), name);
                         }
                     });
-                    ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Taille").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(size, 4.0..=200.0).logarithmic(true).suffix(" pt"));
-                    ui.label(RichText::new("Approche").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Approche").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(tracking, -2.0..=20.0).suffix(" pt"));
                     ui.horizontal(|ui| {
                         ui.toggle_value(bold, RichText::new(" G ").strong());
@@ -2230,15 +2230,15 @@ impl PageApp {
                         ui.checkbox(&mut opts.small_caps, "Petites capitales");
                         ui.checkbox(&mut opts.strike, "Barré");
                     });
-                    ui.label(RichText::new("Décalage de la ligne de base").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Décalage de la ligne de base").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut opts.baseline_shift, -30.0..=30.0).suffix(" pt"));
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Échelle H").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Échelle H").size(12.0).color(MUTED));
                         let mut h = opts.hscale * 100.0;
                         if ui.add(egui::DragValue::new(&mut h).range(40.0..=250.0).suffix(" %").max_decimals(0)).changed() {
                             opts.hscale = h / 100.0;
                         }
-                        ui.label(RichText::new("V").size(12.5).color(MUTED));
+                        ui.label(RichText::new("V").size(12.0).color(MUTED));
                         let mut v = opts.vscale * 100.0;
                         if ui.add(egui::DragValue::new(&mut v).range(40.0..=250.0).suffix(" %").max_decimals(0)).changed() {
                             opts.vscale = v / 100.0;
@@ -2260,14 +2260,14 @@ impl PageApp {
                     if pro::segmented(ui, &mut a, &["Gauche", "Centre", "Droite", "Justifié"]) {
                         *al = a as u8;
                     }
-                    ui.label(RichText::new("Interligne").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Interligne").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(leading, 0.8..=2.5));
-                    ui.label(RichText::new("Espace après paragraphe").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Espace après paragraphe").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(para_space, 0.0..=40.0).suffix(" pt"));
-                    ui.label(RichText::new("Retrait de première ligne").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Retrait de première ligne").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(indent, 0.0..=60.0).suffix(" pt"));
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Liste").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Liste").size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("list").selected_text(LISTS[(*list as usize).min(LISTS.len() - 1)]).width(90.0).show_ui(ui, |ui| {
                             for (k, n) in LISTS.iter().enumerate() {
                                 ui.selectable_value(list, k as u8, *n);
@@ -2287,7 +2287,7 @@ impl PageApp {
                         ui.checkbox(&mut opts.hang, "Retrait négatif (texte aligné après la puce)");
                     }
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Style").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Style").size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("pstyle").selected_text("Appliquer…").width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                             for (k, (n, ..)) in STYLES.iter().enumerate() {
                                 if ui.button(*n).clicked() {
@@ -2308,23 +2308,23 @@ impl PageApp {
                 pro::dock_panel(ui, "para2", "Paragraphe avancé", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 100.0).max(80.0);
-                    ui.label(RichText::new("Espace avant paragraphe").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Espace avant paragraphe").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut opts.space_before, 0.0..=40.0).suffix(" pt"));
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Retrait gauche").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Retrait gauche").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(&mut opts.indent_left).range(0.0..=200.0).suffix(" pt"));
-                        ui.label(RichText::new("droit").size(12.5).color(MUTED));
+                        ui.label(RichText::new("droit").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(&mut opts.indent_right).range(0.0..=200.0).suffix(" pt"));
                     });
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Lettrine sur").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Lettrine sur").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(&mut opts.drop_lines).range(0..=6).suffix(" lignes"));
                     });
                     ui.checkbox(&mut opts.hyphen, "Césure des mots longs");
                     ui.checkbox(&mut opts.orphans, "Éviter les lignes veuves et orphelines");
                     ui.checkbox(&mut opts.grid_align, "Aligner sur la grille de base");
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Tabulation tous les").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Tabulation tous les").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(&mut opts.tab).range(4.0..=400.0).suffix(" pt"));
                     });
                     ui.horizontal(|ui| {
@@ -2338,9 +2338,9 @@ impl PageApp {
                     if opts.rule_above || opts.rule_below {
                         color_row(ui, "Couleur du filet", &mut opts.rule_color, &swatches);
                         ui.horizontal(|ui| {
-                            ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+                            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
                             ui.add(egui::DragValue::new(&mut opts.rule_w).range(0.1..=20.0).speed(0.1).suffix(" pt"));
-                            ui.label(RichText::new("Écart").size(12.5).color(MUTED));
+                            ui.label(RichText::new("Écart").size(12.0).color(MUTED));
                             ui.add(egui::DragValue::new(&mut opts.rule_off).range(0.0..=40.0).suffix(" pt"));
                         });
                     }
@@ -2349,9 +2349,9 @@ impl PageApp {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Colonnes").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Colonnes").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(columns).range(1..=6));
-                        ui.label(RichText::new("Gouttière").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Gouttière").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(gutter).range(0.0..=80.0).suffix(" pt"));
                     });
                     ui.horizontal(|ui| {
@@ -2362,12 +2362,12 @@ impl PageApp {
                         ui.checkbox(&mut opts.auto_h, "Hauteur auto");
                         ui.checkbox(&mut opts.no_wrap, "Ignorer l'habillage");
                     });
-                    ui.label(RichText::new("Alignement vertical").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Alignement vertical").size(12.0).color(MUTED));
                     let mut v = *valign as usize;
                     if pro::segmented(ui, &mut v, &["Haut", "Milieu", "Bas"]) {
                         *valign = v as u8;
                     }
-                    ui.label(RichText::new("Marge intérieure").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Marge intérieure").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(padding, 0.0..=60.0).suffix(" pt"));
                     let mut on = background.is_some();
                     if ui.checkbox(&mut on, "Fond coloré").changed() {
@@ -2376,7 +2376,7 @@ impl PageApp {
                     if let Some(bg) = background {
                         color_row(ui, "Fond", bg, &swatches);
                     }
-                    ui.label(RichText::new("Suite du texte dans").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Suite du texte dans").size(12.0).color(MUTED));
                     let cur = link.and_then(|l| texts.iter().find(|t| t.0 == l)).map_or("Aucun bloc".to_string(), |t| t.1.clone());
                     egui::ComboBox::from_id_salt("link").selected_text(cur).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                         ui.selectable_value(link, None, "Aucun bloc");
@@ -2407,21 +2407,21 @@ impl PageApp {
                         *cover = c == 0;
                     }
                     ui.checkbox(stretch, "Étirer sans garder les proportions");
-                    ui.label(RichText::new("Zoom de l'image dans le cadre").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Zoom de l'image dans le cadre").size(12.0).color(MUTED));
                     let mut z = *zoom * 100.0;
                     if ui.add(egui::Slider::new(&mut z, 10.0..=600.0).logarithmic(true).suffix(" %")).changed() {
                         *zoom = z / 100.0;
                     }
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Décalage X").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Décalage X").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(ox).speed(0.5).suffix(" pt"));
-                        ui.label(RichText::new("Y").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Y").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(oy).speed(0.5).suffix(" pt"));
                         if ui.small_button("Centrer").clicked() {
                             (*ox, *oy, *zoom) = (0.0, 0.0, 1.0);
                         }
                     });
-                    ui.label(RichText::new("Forme du cadre").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Forme du cadre").size(12.0).color(MUTED));
                     let mut sh = *shape as usize;
                     if pro::segmented(ui, &mut sh, &["Rectangle", "Ellipse", "Polygone"]) {
                         *shape = sh as u8;
@@ -2430,14 +2430,14 @@ impl PageApp {
                         ui.add(egui::DragValue::new(sides).range(3..=24).prefix("Côtés "));
                     }
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Filtre").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Filtre").size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("ifilter").selected_text(FILTERS[(*filter as usize).min(FILTERS.len() - 1)]).width(150.0).show_ui(ui, |ui| {
                             for (k, n) in FILTERS.iter().enumerate() {
                                 ui.selectable_value(filter, k as u8, *n);
                             }
                         });
                     });
-                    ui.label(RichText::new("Arrondi des coins").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Arrondi des coins").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(radius, 0.0..=300.0).suffix(" pt"));
                     ui.checkbox(flip, "Miroir horizontal");
                 });
@@ -2447,7 +2447,7 @@ impl PageApp {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                     color_row(ui, "Fond", fill, &swatches);
-                    ui.label(RichText::new("Arrondi").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Arrondi").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(radius, 0.0..=300.0).suffix(" pt"));
                     gradient_row(ui, &mut f.fill2, &mut f.grad_angle, &swatches);
                 });
@@ -2466,10 +2466,10 @@ impl PageApp {
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                     color_row(ui, "Fond", fill, &swatches);
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Côtés / branches").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Côtés / branches").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(sides).range(3..=48));
                     });
-                    ui.label(RichText::new("Creux (1 = polygone)").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Creux (1 = polygone)").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(inner, 0.1..=1.0));
                     gradient_row(ui, &mut f.fill2, &mut f.grad_angle, &swatches);
                 });
@@ -2479,20 +2479,20 @@ impl PageApp {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                     color_row(ui, "Couleur", color, &swatches);
-                    ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(width, 0.25..=30.0).suffix(" pt"));
-                    ui.label(RichText::new("Pointillés (0 = plein)").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Pointillés (0 = plein)").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut f.dash, 0.0..=40.0).suffix(" pt"));
                     ui.horizontal(|ui| {
                         ui.checkbox(arrow, "Flèche à la fin");
                         ui.checkbox(start_arrow, "au début");
                     });
-                    ui.label(RichText::new("Extrémités").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Extrémités").size(12.0).color(MUTED));
                     let mut c = *cap as usize;
                     if pro::segmented(ui, &mut c, &["Rondes", "Carrées", "Droites"]) {
                         *cap = c as u8;
                     }
-                    ui.label(RichText::new("Direction").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Direction").size(12.0).color(MUTED));
                     let mut d = *dir as usize;
                     if pro::segmented(ui, &mut d, &["—", "|", "╲", "╱"]) {
                         *dir = d as u8;
@@ -2512,7 +2512,7 @@ impl PageApp {
                         color_row(ui, "Couleur du fond", c, &swatches);
                     }
                     color_row(ui, "Couleur du trait", color, &swatches);
-                    ui.label(RichText::new("Épaisseur").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(width, 0.0..=30.0).suffix(" pt"));
                     ui.label(RichText::new("Sélection directe (A) pour déplacer les points et leurs poignées.").size(11.5).color(FAINT));
                 });
@@ -2527,11 +2527,11 @@ impl PageApp {
                             ui.selectable_value(family, name.to_string(), name);
                         }
                     });
-                    ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Taille").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(size, 4.0..=200.0).logarithmic(true).suffix(" pt"));
-                    ui.label(RichText::new("Approche").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Approche").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(tracking, -2.0..=30.0).suffix(" pt"));
-                    ui.label(RichText::new("Départ le long du tracé").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Départ le long du tracé").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(offset, 0.0..=1.0));
                     ui.horizontal(|ui| {
                         ui.toggle_value(bold, RichText::new(" G ").strong());
@@ -2547,7 +2547,7 @@ impl PageApp {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let cols = cells.iter().map(|r| r.len()).max().unwrap_or(1);
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new(format!("{} lignes", cells.len())).size(12.5).color(MUTED));
+                        ui.label(RichText::new(format!("{} lignes", cells.len())).size(12.0).color(MUTED));
                         if ui.small_button("−").clicked() && cells.len() > 1 {
                             cells.pop();
                         }
@@ -2555,7 +2555,7 @@ impl PageApp {
                             cells.push(vec![String::new(); cols]);
                         }
                         ui.add_space(10.0);
-                        ui.label(RichText::new(format!("{cols} colonnes")).size(12.5).color(MUTED));
+                        ui.label(RichText::new(format!("{cols} colonnes")).size(12.0).color(MUTED));
                         if ui.small_button("−").clicked() && cols > 1 {
                             cells.iter_mut().for_each(|r| {
                                 r.truncate(cols - 1);
@@ -2581,7 +2581,7 @@ impl PageApp {
                         }
                     });
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Taille").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Taille").size(12.0).color(MUTED));
                         ui.add(egui::DragValue::new(size).range(4.0..=72.0).speed(0.2).suffix(" pt"));
                     });
                     color_row(ui, "Texte", color, &swatches);
@@ -2611,7 +2611,7 @@ impl PageApp {
         pro::dock_panel(ui, "look", "Aspect", |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
-            ui.label(RichText::new("Opacité").size(12.5).color(MUTED));
+            ui.label(RichText::new("Opacité").size(12.0).color(MUTED));
             let mut op = f.opacity * 100.0;
             if ui.add(egui::Slider::new(&mut op, 0.0..=100.0).suffix(" %")).changed() {
                 f.opacity = op / 100.0;
@@ -2624,11 +2624,11 @@ impl PageApp {
                 if let Some(c) = &mut f.stroke {
                     color_row(ui, "Couleur du contour", c, &swatches);
                     ui.add(egui::Slider::new(&mut f.stroke_w, 0.25..=20.0).suffix(" pt"));
-                    ui.label(RichText::new("Pointillés").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Pointillés").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut f.dash, 0.0..=40.0).suffix(" pt"));
                 }
             }
-            ui.label(RichText::new("Mode de fusion").size(12.5).color(MUTED));
+            ui.label(RichText::new("Mode de fusion").size(12.0).color(MUTED));
             egui::ComboBox::from_id_salt("fblend").selected_text(BLENDS[(f.fx.blend as usize).min(BLENDS.len() - 1)].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for (k, (n, _)) in BLENDS.iter().enumerate() {
                     ui.selectable_value(&mut f.fx.blend, k as u8, *n);
@@ -2651,11 +2651,11 @@ impl PageApp {
             ui.checkbox(&mut f.shadow, "Ombre portée");
             if f.shadow {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("X").size(12.5).color(MUTED));
+                    ui.label(RichText::new("X").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.shadow_dx).range(-60.0..=60.0).speed(0.2).suffix(" pt"));
-                    ui.label(RichText::new("Y").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Y").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.shadow_dy).range(-60.0..=60.0).speed(0.2).suffix(" pt"));
-                    ui.label(RichText::new("Flou").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Flou").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.shadow_blur).range(0.0..=60.0).speed(0.2));
                 });
                 color_row(ui, "Couleur de l'ombre", &mut f.fx.shadow_color, &swatches);
@@ -2665,20 +2665,20 @@ impl PageApp {
                 color_row(ui, "Couleur de la lueur", &mut f.fx.glow_color, &swatches);
                 ui.add(egui::Slider::new(&mut f.fx.glow_size, 0.5..=40.0).suffix(" pt"));
             }
-            ui.label(RichText::new("Contour progressif").size(12.5).color(MUTED));
+            ui.label(RichText::new("Contour progressif").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(&mut f.fx.feather, 0.0..=60.0).suffix(" pt"));
             ui.checkbox(&mut f.fx.gfeather, "Contour progressif dégradé");
             if f.fx.gfeather {
                 ui.add(egui::Slider::new(&mut f.fx.gf_angle, -180.0..=180.0).suffix("°"));
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("De").size(12.5).color(MUTED));
+                    ui.label(RichText::new("De").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.gf_start).range(0.0..=1.0).speed(0.01));
-                    ui.label(RichText::new("à").size(12.5).color(MUTED));
+                    ui.label(RichText::new("à").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.gf_end).range(0.0..=1.0).speed(0.01));
                 });
             }
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Angles").size(12.5).color(MUTED));
+                ui.label(RichText::new("Angles").size(12.0).color(MUTED));
                 egui::ComboBox::from_id_salt("corner").selected_text(CORNERS[(f.fx.corner as usize).min(CORNERS.len() - 1)]).width(120.0).show_ui(ui, |ui| {
                     for (k, n) in CORNERS.iter().enumerate() {
                         ui.selectable_value(&mut f.fx.corner, k as u8, *n);
@@ -2690,7 +2690,7 @@ impl PageApp {
             });
             ui.checkbox(&mut f.fx.radial, "Dégradé radial (si un dégradé est actif)");
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Inclinaison").size(12.5).color(MUTED));
+                ui.label(RichText::new("Inclinaison").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut f.fx.skew).range(-60.0..=60.0).speed(0.5).suffix("°"));
                 ui.checkbox(&mut f.fx.flip_h, "Miroir ↔");
                 ui.checkbox(&mut f.fx.flip_v, "↕");
@@ -2705,7 +2705,7 @@ impl PageApp {
             });
             if f.fx.wrap > 0 {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Distance").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Distance").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut f.fx.wrap_off).range(0.0..=80.0).suffix(" pt"));
                 });
                 ui.label(RichText::new("Les textes voisins contournent ce bloc.").size(11.5).color(FAINT));
@@ -2717,7 +2717,7 @@ impl PageApp {
         pro::dock_panel(ui, "arrange", "Disposition", |ui| {
             ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
             let w = (ui.available_width() - 8.0) / 3.0;
-            ui.label(RichText::new("Aligner sur les marges").size(12.5).color(MUTED));
+            ui.label(RichText::new("Aligner sur les marges").size(12.0).color(MUTED));
             for row in [[("Gauche", 0, 0.0), ("Centre ↔", 0, 0.5), ("Droite", 0, 1.0)], [("Haut", 1, 0.0), ("Milieu ↕", 1, 0.5), ("Bas", 1, 1.0)]] {
                 ui.horizontal(|ui| {
                     for (label, axis, to) in row {
@@ -2728,7 +2728,7 @@ impl PageApp {
                 });
             }
             ui.add_space(4.0);
-            ui.label(RichText::new("Ordre").size(12.5).color(MUTED));
+            ui.label(RichText::new("Ordre").size(12.0).color(MUTED));
             let w4 = (ui.available_width() - 12.0) / 4.0;
             ui.horizontal(|ui| {
                 for (label, to) in [("Devant", i32::MAX), ("Avancer", 1), ("Reculer", -1), ("Derrière", i32::MIN)] {
@@ -2771,7 +2771,7 @@ impl PageApp {
         pro::dock_panel(ui, "doc", "Document", |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.horizontal(|ui| {
-                ui.label(RichText::new(format!("{:.0} × {:.0} mm", self.doc.width / MM, self.doc.height / MM)).size(12.5).color(INK));
+                ui.label(RichText::new(format!("{:.0} × {:.0} mm", self.doc.width / MM, self.doc.height / MM)).size(12.0).color(INK));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::secondary(ui, "Format…").clicked() {
                         self.doc_sheet = true;
@@ -2779,25 +2779,25 @@ impl PageApp {
                 });
             });
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Titre").size(12.5).color(MUTED));
+                ui.label(RichText::new("Titre").size(12.0).color(MUTED));
                 ui.add(egui::TextEdit::singleline(&mut self.doc.title).hint_text("Titre du document (variable {title})").desired_width(ui.available_width() - 16.0));
             });
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Marges").size(12.5).color(MUTED));
+                ui.label(RichText::new("Marges").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut self.doc.margin).range(0.0..=300.0).suffix(" pt"));
-                ui.label(RichText::new("Colonnes").size(12.5).color(MUTED));
+                ui.label(RichText::new("Colonnes").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut self.doc.grid).range(1..=12));
             });
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Gouttière").size(12.5).color(MUTED));
+                ui.label(RichText::new("Gouttière").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut self.doc.grid_gutter).range(0.0..=80.0).suffix(" pt"));
-                ui.label(RichText::new("Grille").size(12.5).color(MUTED));
+                ui.label(RichText::new("Grille").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut self.doc.baseline).range(0.0..=60.0).suffix(" pt")).on_hover_text("Grille de base (0 = masquée)");
             });
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Fond perdu").size(12.5).color(MUTED));
+                ui.label(RichText::new("Fond perdu").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut self.doc.bleed).range(0.0..=36.0).suffix(" pt")).on_hover_text("3 mm = 8,5 pt pour un imprimeur");
-                ui.label(RichText::new("1re page n°").size(12.5).color(MUTED));
+                ui.label(RichText::new("1re page n°").size(12.0).color(MUTED));
                 ui.add(egui::DragValue::new(&mut self.doc.first_number).range(1..=9999));
             });
             let sw = self.doc.swatches.clone();
@@ -2848,7 +2848,7 @@ impl PageApp {
             let mut remove = None;
             for (k, s) in self.doc.styles.iter().enumerate() {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new(&s.name).size(12.5).color(INK));
+                    ui.label(RichText::new(&s.name).size(12.0).color(INK));
                     ui.label(RichText::new(format!("{} {:.1} pt", s.family, s.size)).size(11.0).color(FAINT));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if ui.small_button("×").clicked() {
@@ -2927,7 +2927,7 @@ impl PageApp {
                 }
                 let t = [Tool::Text, Tool::FrameRect, Tool::Rect, Tool::Ellipse, Tool::Line, Tool::Polygon, Tool::Table, Tool::Pen, Tool::TextPath][k as usize];
                 tool_icon(p, Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), Vec2::splat(12.0)), t, MUTED);
-                p.text(r.left_center() + vec2(28.0, 0.0), Align2::LEFT_CENTER, name, FontId::proportional(12.5), if hidden { FAINT } else { INK });
+                p.text(r.left_center() + vec2(28.0, 0.0), Align2::LEFT_CENTER, name, FontId::proportional(12.0), if hidden { FAINT } else { INK });
                 for (n, (label, on)) in [("👁", !hidden), ("🔒", locked)].into_iter().enumerate() {
                     let br = Rect::from_center_size(r.right_center() - vec2(14.0 + n as f32 * 22.0, 0.0), Vec2::splat(20.0));
                     let b = ui.interact(br, ui.make_persistent_id(("obj", i, n)), Sense::click());
@@ -3002,7 +3002,7 @@ impl PageApp {
             ui.painter().rect_filled(tab_bar, CornerRadius::ZERO, PANEL);
             let where_ = if self.page == MASTER { "Gabarit".to_string() } else { format!("page {}", self.doc.page_label(self.page)) };
             let label = format!("{name} · {where_} @ {:.0} %{}", self.zoom * 100.0, if self.doc != self.saved { " •" } else { "" });
-            let g = ui.painter().layout_no_wrap(label, FontId::proportional(12.5), INK);
+            let g = ui.painter().layout_no_wrap(label, FontId::proportional(12.0), INK);
             let tab = Rect::from_min_size(tab_bar.min + vec2(8.0, 4.0), vec2(g.size().x + 28.0, 28.0));
             ui.painter().rect_filled(tab, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, PASTEBOARD);
             ui.painter().galley(tab.left_center() + vec2(14.0, -g.size().y / 2.0), g, INK);
@@ -3303,7 +3303,7 @@ impl PageApp {
                         }
                     });
                 });
-                let out = egui::TextEdit::multiline(text).desired_rows(8).desired_width(f32::INFINITY).font(FontId::proportional(14.0)).show(ui);
+                let out = egui::TextEdit::multiline(text).desired_rows(8).desired_width(f32::INFINITY).font(FontId::proportional(13.0)).show(ui);
                 if let Some(cr) = out.cursor_range {
                     cursor = (cr.primary.index.0, cr.secondary.index.0);
                 }
@@ -3379,7 +3379,7 @@ impl PageApp {
                 });
                 ui.add_space(14.0);
                 let row = |ui: &mut Ui, s: &str| {
-                    ui.label(RichText::new(s).size(12.5).color(MUTED));
+                    ui.label(RichText::new(s).size(12.0).color(MUTED));
                 };
                 row(ui, "Format");
                 pro::segmented(ui, &mut o.format, &FORMATS);
@@ -3449,11 +3449,11 @@ impl PageApp {
                 ui.horizontal(|ui| {
                     let mut wm = self.doc.width / MM;
                     let mut hm = self.doc.height / MM;
-                    ui.label(RichText::new("Largeur").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Largeur").size(12.0).color(MUTED));
                     if ui.add(egui::DragValue::new(&mut wm).range(10.0..=2000.0).speed(0.5).suffix(" mm").max_decimals(1)).changed() {
                         self.doc.width = wm * MM;
                     }
-                    ui.label(RichText::new("Hauteur").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Hauteur").size(12.0).color(MUTED));
                     if ui.add(egui::DragValue::new(&mut hm).range(10.0..=2000.0).speed(0.5).suffix(" mm").max_decimals(1)).changed() {
                         self.doc.height = hm * MM;
                     }
@@ -3467,12 +3467,12 @@ impl PageApp {
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
                     let mut mm = self.doc.margin / MM;
-                    ui.label(RichText::new("Marges").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Marges").size(12.0).color(MUTED));
                     if ui.add(egui::DragValue::new(&mut mm).range(0.0..=100.0).speed(0.2).suffix(" mm").max_decimals(1)).changed() {
                         self.doc.margin = mm * MM;
                     }
                     let mut bm = self.doc.bleed / MM;
-                    ui.label(RichText::new("Fond perdu").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Fond perdu").size(12.0).color(MUTED));
                     if ui.add(egui::DragValue::new(&mut bm).range(0.0..=12.0).speed(0.1).suffix(" mm").max_decimals(1)).changed() {
                         self.doc.bleed = bm * MM;
                     }
@@ -3481,11 +3481,11 @@ impl PageApp {
                     }
                 });
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Colonnes").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Colonnes").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut self.doc.grid).range(1..=12));
-                    ui.label(RichText::new("Gouttière").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Gouttière").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut self.doc.grid_gutter).range(0.0..=80.0).suffix(" pt"));
-                    ui.label(RichText::new("Grille de base").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Grille de base").size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut self.doc.baseline).range(0.0..=60.0).suffix(" pt"));
                 });
                 ui.add_space(14.0);
@@ -3555,7 +3555,7 @@ fn swatch_button(ui: &mut Ui, c: &mut [u8; 4], swatches: &[[u8; 4]]) {
 fn color_row(ui: &mut Ui, label: &str, c: &mut [u8; 4], swatches: &[[u8; 4]]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
     ui.horizontal(|ui| {
-        ui.label(RichText::new(label).size(12.5).color(MUTED));
+        ui.label(RichText::new(label).size(12.0).color(MUTED));
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.color_edit_button_srgba(&mut col);
             for s in swatches.iter().rev().take(7) {
@@ -3577,7 +3577,7 @@ fn gradient_row(ui: &mut Ui, fill2: &mut Option<[u8; 4]>, angle: &mut f32, swatc
     }
     if let Some(c) = fill2 {
         color_row(ui, "Vers", c, swatches);
-        ui.label(RichText::new("Angle").size(12.5).color(MUTED));
+        ui.label(RichText::new("Angle").size(12.0).color(MUTED));
         ui.add(egui::Slider::new(angle, -180.0..=180.0).suffix("°"));
     }
 }
@@ -3611,7 +3611,7 @@ fn preset_card(ui: &mut Ui, name: &str, kind: &str, w: f32, h: f32, template: bo
             }
         }
     }
-    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(13.0), INK_STRONG);
+    p.text(pos2(r.center().x, r.bottom() - 36.0), Align2::CENTER_CENTER, name, semibold(12.5), INK_STRONG);
     p.text(pos2(r.center().x, r.bottom() - 17.0), Align2::CENTER_CENTER, kind, FontId::proportional(10.5), MUTED);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }

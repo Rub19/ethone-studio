@@ -142,7 +142,7 @@ impl eframe::App for Setup {
                             Some(v) => format!("Version {version} · remplace la {v}"),
                             None => format!("Version {version}"),
                         };
-                        ui.label(RichText::new(line).size(13.0).weak());
+                        ui.label(RichText::new(line).size(12.5).weak());
                     }
                 });
             });

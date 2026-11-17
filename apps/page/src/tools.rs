@@ -893,7 +893,7 @@ impl PageApp {
 
     pub fn tool_options(&mut self, ui: &mut Ui) {
         let lbl = |ui: &mut Ui, t: &str| {
-            ui.label(RichText::new(t).size(12.5).color(MUTED));
+            ui.label(RichText::new(t).size(12.0).color(MUTED));
         };
         match self.tool {
             Polygon | FramePolygon => {
@@ -911,10 +911,10 @@ impl PageApp {
                     let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
                     for (t, v) in [("D", dx.hypot(dy) / MM), ("ΔX", dx / MM), ("ΔY", dy / MM)] {
                         lbl(ui, t);
-                        ui.label(RichText::new(format!("{v:.1} mm")).size(12.5).monospace());
+                        ui.label(RichText::new(format!("{v:.1} mm")).size(12.0).monospace());
                     }
                     lbl(ui, "Angle");
-                    ui.label(RichText::new(format!("{:.1}°", -dy.atan2(dx).to_degrees())).size(12.5).monospace());
+                    ui.label(RichText::new(format!("{:.1}°", -dy.atan2(dx).to_degrees())).size(12.0).monospace());
                     return;
                 }
             }
@@ -945,7 +945,7 @@ impl PageApp {
             }
             _ => {}
         }
-        ui.label(RichText::new(hint(self.tool)).size(12.5).color(MUTED));
+        ui.label(RichText::new(hint(self.tool)).size(12.0).color(MUTED));
     }
 
     pub fn tool_overlay(&self, painter: &Painter, to_scr: &dyn Fn([f32; 2]) -> Pos2) {

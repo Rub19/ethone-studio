@@ -253,7 +253,7 @@ impl Pixel {
                 let p = ui.painter();
                 p.rect_filled(tab_bar, CornerRadius::ZERO, PANEL);
                 let label = format!("{} @ {:.0} %{}{}", self.doc.name, self.zoom * 100.0, if self.doc.edit_mask && self.doc.layers[self.doc.active].mask.is_some() { " (masque)" } else { "" }, if self.doc.modified { " •" } else { "" });
-                let g = p.layout_no_wrap(label, FontId::proportional(12.5), studio_ui::pro::INK);
+                let g = p.layout_no_wrap(label, FontId::proportional(12.0), studio_ui::pro::INK);
                 let tab = Rect::from_min_size(tab_bar.min + vec2(8.0, 4.0), vec2(g.size().x + 28.0, tab_h - 4.0));
                 p.rect_filled(tab, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, bg);
                 p.galley(tab.left_center() + vec2(14.0, -g.size().y / 2.0), g, studio_ui::pro::INK);
@@ -700,7 +700,7 @@ impl Pixel {
                 painter.line_segment([a, b], Stroke::new(2.0, Color32::WHITE));
                 let mid = a + (b - a) * 0.5;
                 painter.circle_filled(mid, 11.0, Color32::WHITE);
-                painter.text(mid, Align2::CENTER_CENTER, "⇔", FontId::proportional(13.0), Color32::BLACK);
+                painter.text(mid, Align2::CENTER_CENTER, "⇔", FontId::proportional(12.5), Color32::BLACK);
                 painter.text(a + vec2(-8.0, 10.0), Align2::RIGHT_TOP, "Avant", semibold(12.0), Color32::WHITE);
                 painter.text(a + vec2(8.0, 10.0), Align2::LEFT_TOP, "Après", semibold(12.0), Color32::WHITE);
                 let grip = Rect::from_two_pos(a, b).expand2(vec2(8.0, 0.0));
@@ -805,7 +805,7 @@ impl Pixel {
                     painter.rect(r, CornerRadius::same(3), Color32::from_rgb(255, 214, 10), Stroke::new(1.0, Color32::from_black_alpha(160)), egui::StrokeKind::Outside);
                     painter.text(r.center(), Align2::CENTER_CENTER, format!("{}", i + 1), FontId::proportional(10.0), Color32::BLACK);
                     if pointer.is_some_and(|q| r.expand(4.0).contains(q)) {
-                        let g = painter.layout(text.clone(), FontId::proportional(12.5), Color32::BLACK, 240.0);
+                        let g = painter.layout(text.clone(), FontId::proportional(12.0), Color32::BLACK, 240.0);
                         let tip = Rect::from_min_size(r.right_top() + vec2(6.0, 0.0), g.size() + vec2(16.0, 12.0));
                         painter.rect_filled(tip, CornerRadius::same(6), Color32::from_rgb(255, 240, 160));
                         painter.galley(tip.min + vec2(8.0, 6.0), g, Color32::BLACK);
@@ -962,7 +962,7 @@ impl Pixel {
                     let a = time * 6.0 + k as f32 * std::f32::consts::TAU / 8.0;
                     painter.circle_filled(c + vec2(a.cos(), a.sin()) * 8.0, 2.0, Color32::from_white_alpha(60 + k * 24));
                 }
-                painter.text(tag.left_center() + vec2(46.0, 0.0), Align2::LEFT_CENTER, "Reconstruction du fond…", semibold(13.0), Color32::WHITE);
+                painter.text(tag.left_center() + vec2(46.0, 0.0), Align2::LEFT_CENTER, "Reconstruction du fond…", semibold(12.5), Color32::WHITE);
             }
             if rulers {
                 let p = ui.painter();

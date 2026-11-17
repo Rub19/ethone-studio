@@ -164,7 +164,7 @@ impl Lumen {
                     let on = self.min_rating == r;
                     let (rect, resp) = ui.allocate_exact_size(vec2(if r == 0 { 56.0 } else { 34.0 }, 26.0), Sense::click());
                     ui.painter().rect_filled(rect, CornerRadius::same(13), if on { BLUE } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
-                    ui.painter().text(rect.center(), Align2::CENTER_CENTER, label, FontId::proportional(12.5), if on { Color32::WHITE } else { INK });
+                    ui.painter().text(rect.center(), Align2::CENTER_CENTER, label, FontId::proportional(12.0), if on { Color32::WHITE } else { INK });
                     if resp.clicked() {
                         self.min_rating = r;
                     }
@@ -197,7 +197,7 @@ impl Lumen {
         }
         egui::Panel::top("lib-sel").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(18, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                ui.label(RichText::new(format!("{} photos sélectionnées", self.picked.len())).font(semibold(13.0)).color(INK_STRONG));
+                ui.label(RichText::new(format!("{} photos sélectionnées", self.picked.len())).font(semibold(12.5)).color(INK_STRONG));
                 pro::toolbar_sep(ui);
                 let picked = self.picked.clone();
                 if pro::secondary(ui, "Synchroniser").on_hover_text("Copie les réglages de la photo active (groupes cochés dans Copier les réglages)").clicked()
@@ -571,7 +571,7 @@ impl Lumen {
         p.text(pos2(rect.right() - 12.0, y), Align2::RIGHT_CENTER, stars, FontId::proportional(12.0), if e.rating > 0 { STAR } else { FAINT });
         if e.flag < 0 {
             p.rect_filled(img_area, CornerRadius::same(6), Color32::from_black_alpha(150));
-            p.text(img_area.right_top() + vec2(-14.0, 14.0), Align2::CENTER_CENTER, "✕", semibold(14.0), RED);
+            p.text(img_area.right_top() + vec2(-14.0, 14.0), Align2::CENTER_CENTER, "✕", semibold(13.0), RED);
         } else if e.flag > 0 {
             let b = Rect::from_center_size(img_area.right_top() + vec2(-14.0, 14.0), Vec2::splat(20.0));
             p.circle_filled(b.center(), 10.0, GREEN);
@@ -659,7 +659,7 @@ impl Lumen {
 
     fn big_photo(&mut self, ui: &mut Ui, r: Rect, idx: Option<usize>, active: bool, ctx: &egui::Context) -> Option<egui::Response> {
         let Some(i) = idx else {
-            ui.painter().text(r.center(), Align2::CENTER_CENTER, "Aucune photo", FontId::proportional(14.0), MUTED);
+            ui.painter().text(r.center(), Align2::CENTER_CENTER, "Aucune photo", FontId::proportional(13.0), MUTED);
             return None;
         };
         let path = self.files[i].clone();
@@ -677,8 +677,8 @@ impl Lumen {
         }
         let e = self.get(i);
         let stars: String = (0..5).map(|k| if k < e.rating { '★' } else { '☆' }).collect();
-        ui.painter().text(pos2(r.left() + 4.0, r.bottom() - 14.0), Align2::LEFT_CENTER, display_name(&path), FontId::proportional(12.5), INK);
-        ui.painter().text(pos2(r.right() - 4.0, r.bottom() - 14.0), Align2::RIGHT_CENTER, format!("{}{stars}", if e.flag > 0 { "✓  " } else if e.flag < 0 { "✕  " } else { "" }), FontId::proportional(13.0), if e.rating > 0 { STAR } else { FAINT });
+        ui.painter().text(pos2(r.left() + 4.0, r.bottom() - 14.0), Align2::LEFT_CENTER, display_name(&path), FontId::proportional(12.0), INK);
+        ui.painter().text(pos2(r.right() - 4.0, r.bottom() - 14.0), Align2::RIGHT_CENTER, format!("{}{stars}", if e.flag > 0 { "✓  " } else if e.flag < 0 { "✕  " } else { "" }), FontId::proportional(12.5), if e.rating > 0 { STAR } else { FAINT });
         let resp = ui.interact(fit_rect, ui.make_persistent_id(("big", i)), Sense::click());
         if resp.double_clicked() {
             self.picked.clear();
@@ -717,7 +717,7 @@ impl Lumen {
                     let xr = ui.interact(x, ui.make_persistent_id(("drop", i)), Sense::click());
                     if resp.hovered() || xr.hovered() {
                         ui.painter().circle_filled(x.center(), 11.0, Color32::from_black_alpha(180));
-                        ui.painter().text(x.center(), Align2::CENTER_CENTER, "×", semibold(14.0), Color32::WHITE);
+                        ui.painter().text(x.center(), Align2::CENTER_CENTER, "×", semibold(13.0), Color32::WHITE);
                     }
                     if xr.clicked() {
                         drop = Some(i);

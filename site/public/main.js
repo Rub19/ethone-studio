@@ -78,7 +78,7 @@ function buildStory() {
       </div>
       <div class="panel-art">
         <div class="panel-photo"><img src="${U(a.photo)}" alt="" loading="lazy"></div>
-        <div class="panel-shot"><img src="/shots/${a.id}.png" alt="${a.name} en cours d'utilisation" loading="lazy"></div>
+        <div class="panel-shot"><img src="/shots/${a.id}.webp" alt="${a.name} en cours d'utilisation" loading="lazy"></div>
       </div>`;
     panels.append(el);
     const b = document.createElement('button');

@@ -1252,7 +1252,7 @@ impl eframe::App for Sound {
 
 impl Sound {
     fn top_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("menu").exact_size(44.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("menu").exact_size(34.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             let full = studio_ui::chrome::bar(ui, 12.0);
             let right_w = 320.0;
             let left = Rect::from_min_max(full.min, pos2(full.right() - right_w, full.bottom()));
@@ -1483,7 +1483,7 @@ impl Sound {
                 });
                 ui.add_space(12.0);
                 if let Some(r) = &self.recorder {
-                    ui.label(RichText::new(format!("● Enregistrement {:.1} s", r.seconds())).font(semibold(13.0)).color(RED));
+                    ui.label(RichText::new(format!("● Enregistrement {:.1} s", r.seconds())).font(semibold(12.5)).color(RED));
                 } else {
                     let rate = self.clip.rate as f64;
                     let n = self.clip.len();
@@ -1517,7 +1517,7 @@ impl Sound {
     }
 
     fn status(&mut self, root: &mut Ui) {
-        egui::Panel::bottom("status").exact_size(26.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
+        egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 match self.notice.clone() {
                     Some((n, ok)) => {
@@ -1600,7 +1600,7 @@ impl Sound {
                             ui.painter().rect_filled(r, CornerRadius::same(8), Color32::from_white_alpha(10));
                         }
                         ui.painter().circle_filled(r.left_center() + vec2(12.0, 0.0), 4.0, WAVE);
-                        ui.painter().text(r.left_top() + vec2(24.0, 3.0), Align2::LEFT_TOP, *name, FontId::proportional(13.0), INK);
+                        ui.painter().text(r.left_top() + vec2(24.0, 3.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), INK);
                         ui.painter().text(r.left_top() + vec2(24.0, 20.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             preset = Some(k);
@@ -1616,7 +1616,7 @@ impl Sound {
                     slider(ui, "Normaliser la crête à", &mut fx.peak, -12.0..=0.0, " dB");
                     let pk = fx.peak;
                     act!(ui, "Normalisation", move |c: &mut Clip, a, b| c.normalize(a, b, pk));
-                    ui.label(RichText::new("Volume perçu (LUFS)").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Volume perçu (LUFS)").size(12.0).color(MUTED));
                     let labels: Vec<&str> = LUFS.iter().map(|l| l.0).collect();
                     pro::segmented(ui, &mut fx.lufs, &labels);
                     ui.label(RichText::new(["Spotify, YouTube, réseaux", "Podcasts", "Voix posée, livres audio", "Télévision (EBU R128)"][fx.lufs]).size(11.5).color(FAINT));
@@ -1625,7 +1625,7 @@ impl Sound {
                     slider(ui, "Limiteur (plafond)", &mut fx.ceiling, -12.0..=0.0, " dB");
                     let ce = fx.ceiling;
                     act!(ui, "Limiteur", move |c: &mut Clip, a, b| c.limiter(a, b, ce));
-                    ui.label(RichText::new("Courbe des fondus").size(12.5).color(MUTED));
+                    ui.label(RichText::new("Courbe des fondus").size(12.0).color(MUTED));
                     pro::segmented(ui, &mut fx.fade_shape, &["Linéaire", "Log", "En S"]);
                     let shape = fx.fade_shape as u8;
                     ui.horizontal(|ui| {
@@ -1639,7 +1639,7 @@ impl Sound {
                 });
                 pro::dock_panel(ui, "clean", "Nettoyage", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.label(RichText::new("Réduction de bruit").size(12.5).color(INK));
+                    ui.label(RichText::new("Réduction de bruit").size(12.0).color(INK));
                     ui.label(RichText::new("1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.").size(11.5).color(FAINT));
                     if pro::secondary(ui, if has_noise { "✓ Profil capturé · recapturer" } else { "Capturer le profil de bruit" }).clicked() {
                         capture = true;
@@ -1662,7 +1662,7 @@ impl Sound {
                         c.filter(a, b, 3, hi, 0.0, 0.707);
                     });
                     ui.add_space(4.0);
-                    ui.label(RichText::new("Supprimer les silences").size(12.5).color(INK));
+                    ui.label(RichText::new("Supprimer les silences").size(12.0).color(INK));
                     slider(ui, "Seuil", &mut fx.silence[0], -70.0..=-20.0, " dB");
                     slider(ui, "Pauses de plus de", &mut fx.silence[1], 100.0..=3000.0, " ms");
                     slider(ui, "Garder", &mut fx.silence[2], 0.0..=1000.0, " ms");
@@ -1714,24 +1714,24 @@ impl Sound {
                 });
                 pro::dock_panel(ui, "mod", "Modulation", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.label(RichText::new("Chorus").size(12.5).color(INK));
+                    ui.label(RichText::new("Chorus").size(12.0).color(INK));
                     slider(ui, "Profondeur", &mut fx.chorus[0], 1.0..=20.0, " ms");
                     slider(ui, "Vitesse", &mut fx.chorus[1], 0.1..=5.0, " Hz");
                     slider(ui, "Mélange", &mut fx.chorus[2], 0.0..=1.0, "");
                     let ch = fx.chorus;
                     act!(ui, "Chorus", move |c: &mut Clip, a, b| c.mod_delay(a, b, 20.0, ch[0], ch[1], 0.0, ch[2]));
-                    ui.label(RichText::new("Flanger").size(12.5).color(INK));
+                    ui.label(RichText::new("Flanger").size(12.0).color(INK));
                     slider(ui, "Vitesse", &mut fx.flanger[0], 0.05..=3.0, " Hz");
                     slider(ui, "Profondeur", &mut fx.flanger[1], 0.5..=8.0, " ms");
                     slider(ui, "Réinjection", &mut fx.flanger[2], 0.0..=0.9, "");
                     let fl = fx.flanger;
                     act!(ui, "Flanger", move |c: &mut Clip, a, b| c.mod_delay(a, b, 1.5, fl[1], fl[0], fl[2], 0.7));
-                    ui.label(RichText::new("Trémolo").size(12.5).color(INK));
+                    ui.label(RichText::new("Trémolo").size(12.0).color(INK));
                     slider(ui, "Vitesse", &mut fx.trem[0], 0.5..=20.0, " Hz");
                     slider(ui, "Profondeur", &mut fx.trem[1], 0.0..=1.0, "");
                     let tr = fx.trem;
                     act!(ui, "Trémolo", move |c: &mut Clip, a, b| c.tremolo(a, b, tr[0], tr[1]));
-                    ui.label(RichText::new("Panoramique automatique").size(12.5).color(INK));
+                    ui.label(RichText::new("Panoramique automatique").size(12.0).color(INK));
                     slider(ui, "Vitesse", &mut fx.autopan[0], 0.05..=8.0, " Hz");
                     slider(ui, "Amplitude", &mut fx.autopan[1], 0.0..=1.0, "");
                     let ap = fx.autopan;
@@ -1784,13 +1784,13 @@ impl Sound {
                     ui.label(RichText::new("Inséré au curseur").size(11.5).color(FAINT));
                     slider(ui, "Durée", &mut fx.secs, 0.1..=120.0, " s");
                     slider(ui, "Volume", &mut fx.amp, 0.0..=1.0, "");
-                    ui.label(RichText::new("Tonalité").size(12.5).color(INK));
+                    ui.label(RichText::new("Tonalité").size(12.0).color(INK));
                     pro::segmented(ui, &mut fx.wave, &WAVES);
                     slider(ui, "Fréquence", &mut fx.freq, 20.0..=10_000.0, " Hz");
                     if pro::secondary(ui, "Insérer la tonalité").clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, fx.wave as u8, fx.freq, 0.0, fx.amp), WAVES[fx.wave].to_string()));
                     }
-                    ui.label(RichText::new("Bruit").size(12.5).color(INK));
+                    ui.label(RichText::new("Bruit").size(12.0).color(INK));
                     pro::segmented(ui, &mut fx.noise_kind, &["Blanc", "Rose", "Brun"]);
                     if pro::secondary(ui, "Insérer le bruit").clicked() {
                         let c = if fx.noise_kind == 0 {
@@ -1804,12 +1804,12 @@ impl Sound {
                         };
                         generated = Some((c, "Bruit".into()));
                     }
-                    ui.label(RichText::new("Balayage").size(12.5).color(INK));
+                    ui.label(RichText::new("Balayage").size(12.0).color(INK));
                     slider(ui, "Jusqu'à", &mut fx.freq2, 20.0..=20_000.0, " Hz");
                     if pro::secondary(ui, "Insérer un balayage").clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, 6, fx.freq, fx.freq2, fx.amp), "Balayage".into()));
                     }
-                    ui.label(RichText::new("Métronome").size(12.5).color(INK));
+                    ui.label(RichText::new("Métronome").size(12.0).color(INK));
                     slider(ui, "Tempo", &mut fx.bpm, 30.0..=240.0, " BPM");
                     if pro::secondary(ui, "Insérer le métronome").clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, 7, fx.bpm, 0.0, fx.amp), "Métronome".into()));
@@ -1867,14 +1867,14 @@ impl Sound {
                     bpm = true;
                 }
                 if let Some((b, _)) = self.bpm {
-                    ui.label(RichText::new(format!("{b:.1} BPM")).font(semibold(13.0)).color(WAVE));
+                    ui.label(RichText::new(format!("{b:.1} BPM")).font(semibold(12.5)).color(WAVE));
                 }
             });
             if self.bpm.is_some() && pro::ghost(ui, "Marqueur sur chaque mesure").clicked() {
                 beats = true;
             }
             ui.add_space(4.0);
-            ui.label(RichText::new("Repérer les sons (un marqueur par prise)").size(12.5).color(INK));
+            ui.label(RichText::new("Repérer les sons (un marqueur par prise)").size(12.0).color(INK));
             slider(ui, "Seuil du silence", &mut self.regions[0], -70.0..=-10.0, " dB");
             slider(ui, "Silence minimum", &mut self.regions[1], 50.0..=3000.0, " ms");
             slider(ui, "Son minimum", &mut self.regions[2], 10.0..=2000.0, " ms");
@@ -1968,7 +1968,7 @@ impl Sound {
             let k = self.rack_pick;
             let d = &effects::DEFS[k];
             ui.add_space(4.0);
-            ui.label(RichText::new(d.name).font(semibold(13.0)).color(INK_STRONG));
+            ui.label(RichText::new(d.name).font(semibold(12.5)).color(INK_STRONG));
             ui.label(RichText::new(d.hint).size(11.5).color(FAINT));
             if !d.presets.is_empty() {
                 ui.horizontal_wrapped(|ui| {
@@ -1982,7 +1982,7 @@ impl Sound {
             }
             let vals = &mut self.rack_vals[k];
             for (i, prm) in d.params.iter().enumerate() {
-                ui.label(RichText::new(prm.name).size(12.5).color(MUTED));
+                ui.label(RichText::new(prm.name).size(12.0).color(MUTED));
                 if !prm.choices.is_empty() {
                     let mut c = (vals[i].round() as usize).min(prm.choices.len() - 1);
                     if prm.choices.len() <= 3 {
@@ -2069,7 +2069,7 @@ impl Sound {
                 });
                 ui.add_space(14.0);
                 let row = |ui: &mut Ui, s: &str| {
-                    ui.label(RichText::new(s).size(12.5).color(MUTED));
+                    ui.label(RichText::new(s).size(12.0).color(MUTED));
                 };
                 row(ui, "Qualité");
                 pro::segmented(ui, &mut o.bits, &["16 bits (CD)", "24 bits", "32 flottant", "8 bits"]);
@@ -2099,7 +2099,7 @@ impl Sound {
                 ui.add_space(8.0);
                 ui.checkbox(&mut o.normalize, "Normaliser à −1 dB avant l'export");
                 ui.checkbox(&mut o.cues, "Inclure les marqueurs (repères lus par les éditeurs audio)");
-                egui::CollapsingHeader::new(RichText::new("Métadonnées").size(12.5).color(MUTED)).id_salt("meta").show(ui, |ui| {
+                egui::CollapsingHeader::new(RichText::new("Métadonnées").size(12.0).color(MUTED)).id_salt("meta").show(ui, |ui| {
                     egui::Grid::new("meta-grid").num_columns(2).spacing(vec2(8.0, 4.0)).show(ui, |ui| {
                         for (k, (_, label)) in INFO_IDS.iter().enumerate() {
                             ui.label(RichText::new(*label).size(12.0).color(MUTED));
@@ -2135,9 +2135,9 @@ impl Sound {
             let keep = pro::sheet(ctx, "props", 420.0, |ui| {
                 ui.label(RichText::new("Propriétés du son").font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(10.0);
-                ui.label(RichText::new(format!("{} Hz · {} canal(aux) · {} · {} échantillons", self.clip.rate, self.clip.ch.len(), fmt_time(self.clip.secs(self.clip.len())), self.clip.len())).size(12.5).color(MUTED));
+                ui.label(RichText::new(format!("{} Hz · {} canal(aux) · {} · {} échantillons", self.clip.rate, self.clip.ch.len(), fmt_time(self.clip.secs(self.clip.len())), self.clip.len())).size(12.0).color(MUTED));
                 ui.add_space(10.0);
-                ui.label(RichText::new("Convertir la fréquence d'échantillonnage").size(12.5).color(MUTED));
+                ui.label(RichText::new("Convertir la fréquence d'échantillonnage").size(12.0).color(MUTED));
                 ui.horizontal(|ui| {
                     for r in [22_050u32, 32_000, 44_100, 48_000, 96_000] {
                         if ui.selectable_label(self.clip.rate == r, format!("{r} Hz")).clicked() && self.clip.rate != r {
@@ -2195,7 +2195,7 @@ impl Sound {
     fn options_bar(&mut self, ui: &mut Ui) {
         ui.spacing_mut().slider_width = 90.0;
         let t = self.tool;
-        ui.label(RichText::new(t.name()).font(semibold(12.5)).color(INK_STRONG));
+        ui.label(RichText::new(t.name()).font(semibold(12.0)).color(INK_STRONG));
         pro::toolbar_sep(ui);
         let small = |ui: &mut Ui, s: &str| {
             ui.add(egui::Label::new(RichText::new(s).size(12.0).color(MUTED)).truncate());
@@ -2929,7 +2929,7 @@ fn export_glyph(p: &Painter, r: Rect, c: Color32) {
 }
 
 fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.5).color(MUTED));
+    ui.label(RichText::new(label).size(12.0).color(MUTED));
     ui.spacing_mut().slider_width = (ui.available_width() - 118.0).max(80.0);
     ui.add(egui::Slider::new(v, range).suffix(suffix).max_decimals(1));
 }

@@ -14,7 +14,7 @@ fn swatch(ui: &mut Ui, c: Color32, size: f32) -> egui::Response {
 }
 
 fn label(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.5).color(MUTED));
+    ui.label(RichText::new(t).size(12.0).color(MUTED));
 }
 
 fn fixed_label(ui: &mut Ui, w: f32, t: &str, size: f32, color: Color32) {
@@ -434,7 +434,7 @@ impl Pixel {
                 } else if resp.hovered() {
                     ui.painter().rect_filled(r, CornerRadius::same(5), Color32::from_white_alpha(8));
                 }
-                ui.painter().text(r.left_center() + vec2(8.0, 0.0), Align2::LEFT_CENTER, name, FontId::proportional(12.5), if i > cur { FAINT } else { INK });
+                ui.painter().text(r.left_center() + vec2(8.0, 0.0), Align2::LEFT_CENTER, name, FontId::proportional(12.0), if i > cur { FAINT } else { INK });
                 if resp.clicked() {
                     jump = Some(i);
                 }
@@ -485,7 +485,7 @@ impl Pixel {
             }
             let mut x = row.left() + 30.0;
             if l.clip {
-                p.text(pos2(x + 4.0, row.center().y), Align2::LEFT_CENTER, "↳", FontId::proportional(14.0), MUTED);
+                p.text(pos2(x + 4.0, row.center().y), Align2::LEFT_CENTER, "↳", FontId::proportional(13.0), MUTED);
                 x += 14.0;
             }
             let thumb = Rect::from_min_size(pos2(x, row.top() + 7.0), Vec2::splat(38.0));
@@ -544,7 +544,7 @@ impl Pixel {
             } else {
                 let l = &self.doc.layers[i];
                 let maxw = row.right() - 30.0 - name_pos.x;
-                let g = ui.painter().layout(l.name.clone(), if selected { semibold(13.0) } else { FontId::proportional(13.0) }, if selected { INK_STRONG } else { INK }, maxw.max(20.0));
+                let g = ui.painter().layout(l.name.clone(), if selected { semibold(12.5) } else { FontId::proportional(12.5) }, if selected { INK_STRONG } else { INK }, maxw.max(20.0));
                 ui.painter().galley(name_pos - vec2(0.0, 7.0 + g.size().y / 2.0), g, INK);
                 let sub = format!("{:.0} %{}", l.opacity * 100.0, if l.blend != crate::doc::Blend::Normal { format!(" · {}", crate::doc::blend_name(l.blend)) } else { String::new() });
                 ui.painter().text(name_pos + vec2(0.0, 10.0), Align2::LEFT_CENTER, sub, FontId::proportional(11.0), FAINT);
@@ -644,7 +644,7 @@ impl Pixel {
                 if resp.hovered() {
                     ui.painter().rect_filled(r, CornerRadius::same(7), Color32::from_white_alpha(14));
                 }
-                ui.painter().text(r.center(), Align2::CENTER_CENTER, glyph, FontId::proportional(14.0), INK);
+                ui.painter().text(r.center(), Align2::CENTER_CENTER, glyph, FontId::proportional(13.0), INK);
                 resp.on_hover_text(tip)
             };
             if b(ui, "Nouveau calque", "+").clicked() {

@@ -298,7 +298,7 @@ impl Motion {
             ui.horizontal_centered(|ui| {
                 ui.spacing_mut().item_spacing.x = 6.0;
                 let name = TOOL_GROUPS.iter().flat_map(|g| g.iter()).find(|t| t.0 == self.tool).map_or("", |t| t.1);
-                ui.label(RichText::new(name).font(semibold(12.5)).color(INK));
+                ui.label(RichText::new(name).font(semibold(12.0)).color(INK));
                 pro::toolbar_sep(ui);
                 let lab = |ui: &mut Ui, s: &str| {
                     ui.add(egui::Label::new(RichText::new(s).size(12.0).color(MUTED)).truncate());

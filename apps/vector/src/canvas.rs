@@ -57,7 +57,7 @@ impl VectorApp {
             let p = ui.painter();
             p.rect_filled(tab_bar, CornerRadius::ZERO, PANEL);
             let label = format!("{name} @ {:.0} %{}", self.zoom * 100.0, if self.doc != self.saved { " •" } else { "" });
-            let g = p.layout_no_wrap(label, FontId::proportional(12.5), INK);
+            let g = p.layout_no_wrap(label, FontId::proportional(12.0), INK);
             let tab = Rect::from_min_size(tab_bar.min + vec2(8.0, 4.0), vec2(g.size().x + 28.0, tab_h - 4.0));
             p.rect_filled(tab, CornerRadius { nw: 8, ne: 8, sw: 0, se: 0 }, PASTEBOARD);
             p.galley(tab.left_center() + vec2(14.0, -g.size().y / 2.0), g, INK);

@@ -58,7 +58,7 @@ pub fn title_preset(t: &mut Title, k: usize) {
 
 pub fn row_slider<N: egui::emath::Numeric>(ui: &mut Ui, label: &str, v: &mut N, range: std::ops::RangeInclusive<N>, suffix: &str, log: bool) -> bool {
     let reset = ui.horizontal(|ui| {
-        let r = ui.add(egui::Label::new(RichText::new(label).size(12.5).color(MUTED)).sense(Sense::click()));
+        let r = ui.add(egui::Label::new(RichText::new(label).size(12.0).color(MUTED)).sense(Sense::click()));
         r.on_hover_text("Double-clic pour réinitialiser").double_clicked()
     });
     ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
@@ -83,7 +83,7 @@ pub fn pct_slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeI
 
 pub fn field_time(ui: &mut Ui, label: &str, v: &mut f64, min: f64, max: f64) {
     ui.horizontal(|ui| {
-        ui.label(RichText::new(label).size(12.5).color(MUTED));
+        ui.label(RichText::new(label).size(12.0).color(MUTED));
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.add(egui::DragValue::new(v).range(min..=max.max(min)).speed(0.02).max_decimals(2).suffix(" s"));
         });
@@ -115,7 +115,7 @@ fn kf_row(ui: &mut Ui, c: &mut Clip, local: f64, prop: u8, range: std::ops::Rang
     let mut seek = None;
     let mut reset = false;
     ui.horizontal(|ui| {
-        let r = ui.add(egui::Label::new(RichText::new(KPROPS[prop as usize]).size(12.5).color(if keyed { BLUE } else { MUTED })).sense(Sense::click()));
+        let r = ui.add(egui::Label::new(RichText::new(KPROPS[prop as usize]).size(12.0).color(if keyed { BLUE } else { MUTED })).sense(Sense::click()));
         reset = r.on_hover_text("Double-clic pour réinitialiser").double_clicked();
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.spacing_mut().item_spacing.x = 2.0;
@@ -278,7 +278,7 @@ impl Cut {
                 ui.painter().rect_filled(r, CornerRadius::same(2), Color32::from_rgb(col[0], col[1], col[2]));
                 ui.vertical(|ui| {
                     let title = if c0.name.is_empty() { src.name() } else { c0.name.clone() };
-                    ui.label(RichText::new(short(&title, 30)).font(semibold(13.5)).color(INK_STRONG));
+                    ui.label(RichText::new(short(&title, 30)).font(semibold(12.5)).color(INK_STRONG));
                     let track = if matches!(s, Sel::Over(_)) { "V2" } else { "V1" };
                     ui.label(RichText::new(format!("{track} · {} × {} · {}", src.width, src.height, tc(c0.len(), self.proj.fps))).size(11.5).color(FAINT));
                 });
@@ -366,7 +366,7 @@ impl Cut {
                     row_slider(ui, "Fondu de sortie", &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
                     let mut white = c.fade_white as usize;
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Fondu vers").size(12.5).color(MUTED));
+                        ui.label(RichText::new("Fondu vers").size(12.0).color(MUTED));
                         if pro::segmented(ui, &mut white, &["Noir", "Blanc"]) {
                             c.fade_white = white == 1;
                         }
@@ -665,7 +665,7 @@ impl Cut {
         let m = &mut self.proj.music[i];
         pro::dock_panel(ui, "music", "Musique", |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
-            ui.label(RichText::new(short(&src.name(), 30)).font(semibold(13.5)).color(INK));
+            ui.label(RichText::new(short(&src.name(), 30)).font(semibold(12.5)).color(INK));
             field_time(ui, "Début", &mut m.start, 0.0, 36000.0);
             field_time(ui, "Entrée", &mut m.inp, 0.0, m.out - 0.05);
             field_time(ui, "Sortie", &mut m.out, m.inp + 0.05, src.duration);
@@ -722,7 +722,7 @@ impl Cut {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.add(egui::TextEdit::multiline(&mut t.text).desired_rows(3).desired_width(f32::INFINITY));
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Police").size(12.5).color(MUTED));
+                ui.label(RichText::new("Police").size(12.0).color(MUTED));
                 egui::ComboBox::from_id_salt("font").selected_text(FONTS[t.font as usize % FONTS.len()].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                     for (k, (name, _)) in FONTS.iter().enumerate() {
                         ui.selectable_value(&mut t.font, k as u8, *name);
@@ -734,7 +734,7 @@ impl Cut {
             row_slider(ui, "Interligne", &mut t.leading, -0.5..=2.0, "", false);
             let mut al = t.align as usize;
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Alignement").size(12.5).color(MUTED));
+                ui.label(RichText::new("Alignement").size(12.0).color(MUTED));
                 if pro::segmented(ui, &mut al, &["Auto", "Gauche", "Centre", "Droite"]) {
                     t.align = al as u8;
                 }
@@ -745,7 +745,7 @@ impl Cut {
             ui.spacing_mut().item_spacing.y = 6.0;
             let color_row = |ui: &mut Ui, label: &str, c: &mut [u8; 4]| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new(label).size(12.5).color(MUTED));
+                    ui.label(RichText::new(label).size(12.0).color(MUTED));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
                         if ui.color_edit_button_srgba(&mut col).changed() {
@@ -778,7 +778,7 @@ impl Cut {
             field_time(ui, "Début", &mut t.start, 0.0, 36000.0);
             field_time(ui, "Durée", &mut t.dur, 0.2, 600.0);
             let mut roll = t.roll as usize;
-            ui.label(RichText::new("Défilement").size(12.5).color(MUTED));
+            ui.label(RichText::new("Défilement").size(12.0).color(MUTED));
             if pro::segmented(ui, &mut roll, &ROLLS) {
                 t.roll = roll as u8;
             }

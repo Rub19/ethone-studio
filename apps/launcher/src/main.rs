@@ -27,17 +27,17 @@ struct Palette {
 }
 
 const P: Palette = Palette {
-    page: Color32::from_rgb(0x1c, 0x1c, 0x1f),
-    sidebar: Color32::from_rgb(0x15, 0x15, 0x18),
-    tile: Color32::from_rgb(0x27, 0x27, 0x2b),
-    tile_hover: Color32::from_rgb(0x2e, 0x2e, 0x33),
-    field: Color32::from_rgb(0x2a, 0x2a, 0x2e),
-    ink: Color32::from_rgb(0xe8, 0xe8, 0xed),
+    page: Color32::from_rgb(0x1f, 0x1f, 0x1f),
+    sidebar: Color32::from_rgb(0x18, 0x18, 0x18),
+    tile: Color32::from_rgb(0x28, 0x28, 0x28),
+    tile_hover: Color32::from_rgb(0x30, 0x30, 0x30),
+    field: Color32::from_rgb(0x2e, 0x2e, 0x2e),
+    ink: Color32::from_rgb(0xdc, 0xdc, 0xdc),
     ink_strong: Color32::WHITE,
-    muted: Color32::from_rgb(0x98, 0x98, 0xa0),
-    faint: Color32::from_rgb(0x6c, 0x6c, 0x74),
-    line: Color32::from_rgb(0x34, 0x34, 0x39),
-    blue: Color32::from_rgb(0x0a, 0x84, 0xff),
+    muted: Color32::from_rgb(0x9c, 0x9c, 0x9c),
+    faint: Color32::from_rgb(0x6c, 0x6c, 0x6c),
+    line: Color32::from_rgb(0x33, 0x33, 0x33),
+    blue: Color32::from_rgb(0xf2, 0x55, 0x2c),
     green: Color32::from_rgb(0x30, 0xd1, 0x58),
     red: Color32::from_rgb(0xff, 0x45, 0x3a),
 };
@@ -105,8 +105,8 @@ impl Launcher {
             s.visuals.panel_fill = P.page;
             s.visuals.window_fill = P.tile;
             s.visuals.window_stroke = Stroke::new(1.0, P.line);
-            s.visuals.window_corner_radius = CornerRadius::same(14);
-            s.visuals.menu_corner_radius = CornerRadius::same(10);
+            s.visuals.window_corner_radius = CornerRadius::same(8);
+            s.visuals.menu_corner_radius = CornerRadius::same(5);
             s.visuals.popup_shadow = Shadow { offset: [0, 10], blur: 30, spread: 0, color: Color32::from_black_alpha(130) };
             s.visuals.window_shadow = s.visuals.popup_shadow;
             s.visuals.selection.bg_fill = P.blue;
@@ -355,7 +355,7 @@ impl Launcher {
             1 => "1 app".to_string(),
             n => format!("{n} apps"),
         };
-        ui.label(RichText::new(subtitle).size(13.5).color(P.muted));
+        ui.label(RichText::new(subtitle).size(12.5).color(P.muted));
         ui.add_space(18.0);
 
         egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
@@ -403,7 +403,7 @@ impl Launcher {
         let hovered = ui.rect_contains_pointer(rect);
         let lift = ctx.animate_bool_with_time(egui::Id::NULL.with(("lift", &app.id)), hovered, 0.18);
         let painter = ui.painter().clone();
-        let radius = CornerRadius::same(16);
+        let radius = CornerRadius::same(8);
         let shadow = Shadow {
             offset: [0, (3.0 + 7.0 * lift) as i8],
             blur: (14.0 + 18.0 * lift) as u8,
@@ -420,7 +420,7 @@ impl Launcher {
 
         let text_x = icon_rect.right() + 16.0;
         painter.text(pos2(text_x, icon_rect.top() + 6.0), Align2::LEFT_TOP, &app.name, semibold(19.0), P.ink_strong);
-        painter.text(pos2(text_x, icon_rect.top() + 33.0), Align2::LEFT_TOP, &app.tagline, FontId::proportional(13.5), P.muted);
+        painter.text(pos2(text_x, icon_rect.top() + 33.0), Align2::LEFT_TOP, &app.tagline, FontId::proportional(12.5), P.muted);
 
         let installed = self.installed.apps.get(&app.id).cloned();
         let job = self.jobs.lock().unwrap().get(&app.id).map(|j| match j {
@@ -440,7 +440,7 @@ impl Launcher {
         };
         let status_color = if installed.is_some() { P.green } else { P.faint };
         let foot_y = rect.bottom() - pad - 17.0;
-        painter.text(pos2(rect.left() + pad, foot_y), Align2::LEFT_CENTER, &status, FontId::proportional(12.5), status_color);
+        painter.text(pos2(rect.left() + pad, foot_y), Align2::LEFT_CENTER, &status, FontId::proportional(12.0), status_color);
 
         let bar = Rect::from_min_max(pos2(rect.center().x - 20.0, foot_y - 17.0), pos2(rect.right() - pad, foot_y + 17.0));
         let mut actions = ui.new_child(egui::UiBuilder::new().max_rect(bar).layout(Layout::right_to_left(Align::Center)));
@@ -546,8 +546,8 @@ impl Launcher {
             .open(&mut open)
             .show(ctx, |ui| {
                 ui.set_width(420.0);
-                ui.label(RichText::new("Dossier des apps").font(semibold(13.5)).color(P.ink));
-                ui.label(RichText::new(studio_core::data_dir().join("apps").display().to_string()).size(12.5).color(P.muted));
+                ui.label(RichText::new("Dossier des apps").font(semibold(12.5)).color(P.ink));
+                ui.label(RichText::new(studio_core::data_dir().join("apps").display().to_string()).size(12.0).color(P.muted));
                 ui.add_space(6.0);
                 if pill(ui, "Ouvrir le dossier", P.line, P.ink_strong, true).clicked() {
                     let dir = studio_core::data_dir().join("apps");
@@ -555,11 +555,11 @@ impl Launcher {
                     let _ = std::process::Command::new("explorer").arg(dir).spawn();
                 }
                 ui.add_space(16.0);
-                ui.label(RichText::new("Source des mises à jour").font(semibold(13.5)).color(P.ink));
+                ui.label(RichText::new("Source des mises à jour").font(semibold(12.5)).color(P.ink));
                 ui.label(RichText::new(studio_core::MANIFEST_URL).size(12.0).color(P.muted));
                 ui.add_space(16.0);
-                ui.label(RichText::new("À propos").font(semibold(13.5)).color(P.ink));
-                ui.label(RichText::new(format!("Ethone Studio {} · écrit en Rust", env!("CARGO_PKG_VERSION"))).size(12.5).color(P.muted));
+                ui.label(RichText::new("À propos").font(semibold(12.5)).color(P.ink));
+                ui.label(RichText::new(format!("Ethone Studio {} · écrit en Rust", env!("CARGO_PKG_VERSION"))).size(12.0).color(P.muted));
             });
         if !open {
             self.settings_open = false;
@@ -578,7 +578,7 @@ impl Launcher {
             .anchor(Align2::RIGHT_BOTTOM, vec2(-24.0, -24.0))
             .show(ctx, |ui| {
                 for t in &self.toasts {
-                    Frame::popup(ui.style()).inner_margin(Margin::symmetric(16, 12)).corner_radius(CornerRadius::same(12)).show(ui, |ui| {
+                    Frame::popup(ui.style()).inner_margin(Margin::symmetric(16, 12)).corner_radius(CornerRadius::same(6)).show(ui, |ui| {
                         ui.horizontal(|ui| {
                             let (dot, _) = ui.allocate_exact_size(Vec2::splat(10.0), Sense::hover());
                             ui.painter().circle_filled(dot.center(), 4.0, if t.good { P.green } else { P.red });
@@ -620,10 +620,10 @@ fn nav_row(ui: &mut Ui, view: &mut View, value: View, label: &str, dot: Option<C
         p.circle_filled(pos2(x + 4.0, rect.center().y), 4.0, c);
         x += 18.0;
     }
-    let font = if selected { semibold(14.0) } else { FontId::proportional(14.0) };
+    let font = if selected { semibold(13.0) } else { FontId::proportional(13.0) };
     p.text(pos2(x, rect.center().y), Align2::LEFT_CENTER, label, font, if selected { P.ink_strong } else { P.ink });
     if let Some(n) = count {
-        p.text(pos2(rect.right() - 12.0, rect.center().y), Align2::RIGHT_CENTER, n.to_string(), FontId::proportional(12.5), if selected { P.ink } else { P.faint });
+        p.text(pos2(rect.right() - 12.0, rect.center().y), Align2::RIGHT_CENTER, n.to_string(), FontId::proportional(12.0), if selected { P.ink } else { P.faint });
     }
     if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
         *view = value;
@@ -641,12 +641,12 @@ fn plain_row(ui: &mut Ui, label: &str) -> bool {
         ui.painter().line_segment([c + vec2(a.cos(), a.sin()) * 5.0, c + vec2(a.cos(), a.sin()) * 7.5], Stroke::new(2.0, P.muted));
     }
     ui.painter().circle_stroke(c, 4.0, Stroke::new(1.6, P.muted));
-    ui.painter().text(rect.left_center() + vec2(34.0, 0.0), Align2::LEFT_CENTER, label, FontId::proportional(14.0), P.ink);
+    ui.painter().text(rect.left_center() + vec2(34.0, 0.0), Align2::LEFT_CENTER, label, FontId::proportional(13.0), P.ink);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked()
 }
 
 fn search_pill(ui: &mut Ui, text: &mut String, width: f32) {
-    Frame::new().fill(P.field).corner_radius(CornerRadius::same(18)).inner_margin(Margin::symmetric(14, 0)).stroke(Stroke::new(1.0, P.line)).show(ui, |ui| {
+    Frame::new().fill(P.field).corner_radius(CornerRadius::same(4)).inner_margin(Margin::symmetric(14, 0)).stroke(Stroke::new(1.0, P.line)).show(ui, |ui| {
         ui.set_width(width - 28.0);
         ui.horizontal_centered(|ui| {
             let (g, _) = ui.allocate_exact_size(vec2(16.0, 36.0), Sense::hover());
@@ -658,18 +658,18 @@ fn search_pill(ui: &mut Ui, text: &mut String, width: f32) {
                     .hint_text(RichText::new("Rechercher une app").color(P.faint))
                     .frame(Frame::NONE)
                     .desired_width(f32::INFINITY)
-                    .font(FontId::proportional(14.0)),
+                    .font(FontId::proportional(13.0)),
             );
         });
     });
 }
 
 fn pill(ui: &mut Ui, label: &str, fill: Color32, ink: Color32, enabled: bool) -> egui::Response {
-    let galley = ui.painter().layout_no_wrap(label.to_string(), semibold(13.5), ink);
-    let size = vec2(galley.size().x + 32.0, 34.0);
+    let galley = ui.painter().layout_no_wrap(label.to_string(), semibold(12.0), ink);
+    let size = vec2(galley.size().x + 24.0, 28.0);
     let (rect, resp) = ui.allocate_exact_size(size, if enabled { Sense::click() } else { Sense::hover() });
     let fill = if resp.hovered() && enabled { fill.lerp_to_gamma(Color32::WHITE, 0.12) } else { fill };
-    ui.painter().rect_filled(rect, CornerRadius::same(17), fill);
+    ui.painter().rect_filled(rect, CornerRadius::same(4), fill);
     ui.painter().galley(rect.center() - galley.size() / 2.0, galley, ink);
     if enabled { resp.on_hover_cursor(egui::CursorIcon::PointingHand) } else { resp }
 }
@@ -705,7 +705,7 @@ fn menu_item(ui: &mut Ui, label: &str, color: Color32) -> bool {
     if resp.hovered() {
         ui.painter().rect_filled(rect, CornerRadius::same(7), Color32::from_white_alpha(14));
     }
-    ui.painter().text(rect.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, label, FontId::proportional(14.0), color);
+    ui.painter().text(rect.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, label, FontId::proportional(13.0), color);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked()
 }
 
