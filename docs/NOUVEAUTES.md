@@ -1,6 +1,13 @@
 # Nouveautés Ethone Studio
 
-Version **0.9.0**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur [studio.ethone.dev](https://studio.ethone.dev) et sur la page des versions GitHub du projet.
+Version **0.9.1**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur [studio.ethone.dev](https://studio.ethone.dev) et sur la page des versions GitHub du projet.
+
+## 0.9.1
+
+- **Page** : le panneau Pages affiche le vrai rendu de chaque page, photos comprises.
+- **Lumen** : poignées des curseurs plus petites, comme dans Lightroom.
+- **Motion** : palette « Ajouter un calque » compacte sur 4 colonnes.
+- **Sound** : barre de transport plus fine (boutons carrés, lecture et minutage plus discrets).
 
 ## Nouvelle identité (0.9.0)
 
@@ -133,6 +140,7 @@ Chaque option est une vraie combinaison des réglages de l'app, nommée en fran�
 
 ## Rappel des versions précédentes
 
+- v0.9.1 : miniatures de Page, curseurs de Lumen, palette de Motion, transport de Sound.
 - v0.9.0 : nouvelle identité et interface pro (section du haut).
 - v0.8.0 : préférences, installateurs, ressources et outils décrits sur cette page.
 
