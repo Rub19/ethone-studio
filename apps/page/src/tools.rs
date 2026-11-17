@@ -945,7 +945,7 @@ impl PageApp {
             }
             _ => {}
         }
-        ui.label(RichText::new(hint(self.tool)).size(12.0).color(MUTED));
+        studio_ui::pro::tip(ui, hint(self.tool));
     }
 
     pub fn tool_overlay(&self, painter: &Painter, to_scr: &dyn Fn([f32; 2]) -> Pos2) {

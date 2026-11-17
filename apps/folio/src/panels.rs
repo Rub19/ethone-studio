@@ -212,7 +212,7 @@ fn title(ui: &mut Ui, app: &mut Folio, t: &str) {
 }
 
 fn hint(ui: &mut Ui, s: &str) {
-    ui.label(RichText::new(s).size(11.5).color(FAINT));
+    studio_ui::pro::tip(ui, s);
 }
 
 fn label(ui: &mut Ui, s: &str) {

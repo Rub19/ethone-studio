@@ -7,8 +7,14 @@ pub fn heading(ui: &mut Ui, text: &str) {
     ui.add_space(4.0);
 }
 
+/// Short captions are sub-headings and empty states; long explanations fold into an (i) tooltip.
 pub fn caption(ui: &mut Ui, text: &str) {
-    ui.label(RichText::new(text).size(11.5).color(FAINT));
+    let empty_state = ["Aucun", "Aucune", "Sélectionne", "Chaque réglage"].iter().any(|p| text.starts_with(p));
+    if text.chars().count() > 40 && !empty_state {
+        studio_ui::pro::tip(ui, text);
+    } else {
+        ui.label(RichText::new(text).size(11.5).color(FAINT));
+    }
 }
 
 pub fn short(s: &str, n: usize) -> String {

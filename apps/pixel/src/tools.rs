@@ -1,6 +1,6 @@
 use crate::doc::{BLENDS, Blend, blend_name};
 use crate::{Pixel, Sheet};
-use eframe::egui::{self, Align, Align2, Color32, CornerRadius, Key, Layout, Painter, Pos2, Rect, RichText, Sense, Shape, Stroke, StrokeKind, Ui, Vec2, pos2, vec2};
+use eframe::egui::{self, Align2, Color32, CornerRadius, Key, Painter, Pos2, Rect, RichText, Sense, Shape, Stroke, StrokeKind, Ui, Vec2, pos2, vec2};
 use studio_ui::pro::{self, FIELD, INK, LINE, MUTED, PANEL, semibold};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -220,7 +220,7 @@ pub fn blend_combo(ui: &mut Ui, id: &str, value: &mut Blend, width: f32) -> bool
 }
 
 fn hint(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.0).color(MUTED));
+    pro::tip(ui, t);
 }
 
 fn small(ui: &mut Ui, t: &str) {
@@ -314,7 +314,7 @@ impl Pixel {
                 tool_icon(ui.painter(), r.shrink(5.0), self.tool, INK);
                 ui.label(RichText::new(tool_name(self.tool)).font(semibold(12.0)).color(INK));
                 pro::toolbar_sep(ui);
-                let right = 120.0;
+                let right = 8.0;
                 let avail = ui.available_width() - right;
                 ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(ui.cursor().min, vec2(avail.max(100.0), 34.0))), |ui| {
                     ui.set_clip_rect(ui.max_rect().intersect(ui.clip_rect()));
@@ -322,11 +322,6 @@ impl Pixel {
                         ui.set_min_height(34.0);
                         ui.horizontal_centered(|ui| self.tool_options(ui));
                     });
-                });
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::secondary(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
-                        self.help.learn(tutorial_for(self.tool));
-                    }
                 });
             });
         });

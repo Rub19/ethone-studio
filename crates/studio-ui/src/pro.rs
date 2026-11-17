@@ -172,6 +172,36 @@ pub fn kbd(ui: &mut Ui, key: &str) {
     ui.painter().galley(rect.center() - galley.size() / 2.0, galley, MUTED);
 }
 
+/// A colour swatch that opens the suite's picker in a popup, instead of a picker always taking space.
+pub fn color_swatch(ui: &mut Ui, color: &mut Color32) -> bool {
+    let (r, resp) = ui.allocate_exact_size(vec2(44.0, 22.0), Sense::click());
+    let p = ui.painter();
+    p.rect_filled(r, CornerRadius::same(3), *color);
+    p.rect_stroke(r, CornerRadius::same(3), Stroke::new(1.0, if resp.hovered() { INK } else { Color32::from_white_alpha(40) }), egui::StrokeKind::Inside);
+    let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
+    let mut changed = false;
+    egui::Popup::from_toggle_button_response(&resp).close_behavior(egui::PopupCloseBehavior::CloseOnClickOutside).show(|ui| {
+        ui.set_width(220.0);
+        changed = color_picker(ui, color, 220.0);
+    });
+    changed
+}
+
+/// A small (i) that shows its help text on hover, so guidance stays out of the way as in pro tools.
+pub fn tip(ui: &mut Ui, text: &str) -> Response {
+    let (r, resp) = ui.allocate_exact_size(vec2(16.0, 16.0), Sense::hover());
+    let c = if resp.hovered() { INK } else { FAINT };
+    ui.painter().circle_stroke(r.center(), 6.5, Stroke::new(1.2, c));
+    ui.painter().text(r.center() + vec2(0.0, 0.5), Align2::CENTER_CENTER, "i", semibold(9.5), c);
+    resp.on_hover_text(text)
+}
+
+/// A quiet "Raccourcis" label whose tooltip lists the shortcuts, one per line, for status bars.
+pub fn shortcuts(ui: &mut Ui, list: &str) -> Response {
+    let resp = ui.add(egui::Label::new(RichText::new("Raccourcis").size(11.0).color(FAINT)).sense(Sense::hover()));
+    resp.on_hover_text(list.replace(" · ", "\n"))
+}
+
 /// Thin vertical divider for toolbars.
 pub fn toolbar_sep(ui: &mut Ui) {
     ui.add_space(4.0);

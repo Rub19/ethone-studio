@@ -429,7 +429,7 @@ impl Cut {
                         pip(c, k);
                     }
                     ui.add_space(4.0);
-                    ui.label(RichText::new("Idéal sur la piste V2, au-dessus de la vidéo principale.").size(11.5).color(FAINT));
+                    studio_ui::pro::tip(ui, "Idéal sur la piste V2, au-dessus de la vidéo principale.");
                 });
                 pro::dock_panel(ui, "clip-crop", "Recadrage", |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
@@ -528,7 +528,7 @@ impl Cut {
                             ui.ctx().data_mut(|d| d.insert_temp(sides_id, sides));
                         }
                     });
-                    ui.label(RichText::new("Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.").size(11.5).color(FAINT));
+                    studio_ui::pro::tip(ui, "Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.");
                 });
                 pro::dock_panel(ui, "fx-reset", "Réinitialiser", |ui| {
                     if pro::secondary(ui, "Réinitialiser tous les effets").clicked() {
@@ -589,7 +589,7 @@ impl Cut {
                             wheel(ui, label, &mut c.wheels[k], size);
                         }
                     });
-                    ui.label(RichText::new("Double-clic sur une roue pour la remettre au centre.").size(11.5).color(FAINT));
+                    studio_ui::pro::tip(ui, "Double-clic sur une roue pour la remettre au centre.");
                 });
                 pro::dock_panel(ui, "color-tools", "Étalonnage", |ui| {
                     ui.horizontal_wrapped(|ui| {
@@ -820,7 +820,7 @@ impl Cut {
             ui.spacing_mut().item_spacing.y = 6.0;
             row_slider(ui, "Volume général", &mut self.proj.master_db, -24.0..=12.0, " dB", false);
             row_slider(ui, "Atténuation musique sous les voix", &mut self.proj.duck_db, -30.0..=0.0, " dB", false);
-            ui.label(RichText::new("La musique (A2) baisse automatiquement quand un clip V1 a du son.").size(11.5).color(FAINT));
+            studio_ui::pro::tip(ui, "La musique (A2) baisse automatiquement quand un clip V1 a du son.");
         });
         if !self.proj.markers.is_empty() {
             let fps = self.proj.fps;

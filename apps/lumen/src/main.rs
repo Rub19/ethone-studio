@@ -1773,7 +1773,7 @@ impl Lumen {
                         View::Develop => "R recadrer · Q retouche · E yeux rouges · M masques · K pinceau · W pipette · T ciblage · Y avant/après · Tab panneaux",
                         _ => "0-5 noter · P/X drapeau · 6-9 couleur · D développer · C comparer · N ensemble · Ctrl+G empiler",
                     };
-                    ui.add(egui::Label::new(small(hint.into())).truncate());
+                    pro::shortcuts(ui, hint);
                 });
             });
         });

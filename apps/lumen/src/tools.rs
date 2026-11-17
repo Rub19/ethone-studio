@@ -270,7 +270,7 @@ impl Lumen {
         let before = s.clone();
         match self.tool {
             Tool::None => {
-                caption(ui, "Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom");
+                studio_ui::pro::tip(ui, "Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom");
             }
             Tool::Crop => {
                 ui.label(RichText::new("Format").size(12.0).color(MUTED));

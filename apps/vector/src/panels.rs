@@ -114,7 +114,7 @@ fn small(ui: &mut Ui, t: &str) {
 }
 
 fn hint(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.0).color(FAINT));
+    pro::tip(ui, t);
 }
 
 fn sep(ui: &mut Ui) {
@@ -378,7 +378,7 @@ impl VectorApp {
                                 self.duplicate_selected();
                             }
                         } else {
-                            small(ui, "Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone");
+                            hint(ui, "Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone");
                         }
                     }
                     Tool::Direct => small(ui, "Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit"),
@@ -577,14 +577,9 @@ impl VectorApp {
                         if pro::secondary(ui, "Réorganiser").clicked() {
                             self.arrange_boards();
                         }
-                        small(ui, "Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr");
+                        hint(ui, "Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr");
                     }
                 }
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::secondary(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
-                        self.help.learn(tool_name(self.tool));
-                    }
-                });
             });
         });
     }

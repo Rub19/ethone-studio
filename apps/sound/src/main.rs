@@ -1527,7 +1527,7 @@ impl Sound {
                         }
                     }
                     None => {
-                        ui.label(RichText::new("Glisser = sélection · bords = ajuster · molette = zoom · Maj+molette = défiler · double-clic = entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme").size(12.0).color(MUTED));
+                        pro::shortcuts(ui, "Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme");
                     }
                 }
             });
@@ -1968,8 +1968,10 @@ impl Sound {
             let k = self.rack_pick;
             let d = &effects::DEFS[k];
             ui.add_space(4.0);
-            ui.label(RichText::new(d.name).font(semibold(12.5)).color(INK_STRONG));
-            ui.label(RichText::new(d.hint).size(11.5).color(FAINT));
+            ui.horizontal(|ui| {
+                ui.label(RichText::new(d.name).font(semibold(12.5)).color(INK_STRONG));
+                pro::tip(ui, d.hint);
+            });
             if !d.presets.is_empty() {
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
@@ -2022,7 +2024,7 @@ impl Sound {
         pro::dock_panel(ui, "markers", "Marqueurs", |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             if self.markers.is_empty() {
-                ui.label(RichText::new("M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.").size(11.5).color(FAINT));
+                studio_ui::pro::tip(ui, "M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.");
             }
             let mut go = None;
             let mut remove = None;
@@ -2094,7 +2096,7 @@ impl Sound {
                     o.range = r;
                 }
                 if !has_marks {
-                    ui.label(RichText::new("Pose des marqueurs (M) pour découper en plusieurs fichiers.").size(11.5).color(FAINT));
+                    studio_ui::pro::tip(ui, "Pose des marqueurs (M) pour découper en plusieurs fichiers.");
                 }
                 ui.add_space(8.0);
                 ui.checkbox(&mut o.normalize, "Normaliser à −1 dB avant l'export");

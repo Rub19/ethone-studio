@@ -1948,11 +1948,6 @@ impl PageApp {
                     }
                     _ => self.tool_options(ui),
                 }
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::ghost(ui, "?  Tutoriel").on_hover_text("F1").clicked() {
-                        self.help.learn(tool_name(self.tool));
-                    }
-                });
             });
         });
     }
@@ -2420,7 +2415,7 @@ impl PageApp {
                             ui.selectable_value(link, Some(*k), n);
                         }
                     });
-                    ui.label(RichText::new("Le texte qui ne tient pas continue dans ce bloc (texte chaîné).").size(11.5).color(FAINT));
+                    studio_ui::pro::tip(ui, "Le texte qui ne tient pas continue dans ce bloc (texte chaîné).");
                 });
             }
             Kind::Image { path, cover, radius, filter, flip, ox, oy, zoom, stretch, shape, sides } => {
@@ -2550,7 +2545,7 @@ impl PageApp {
                     color_row(ui, "Couleur du trait", color, &swatches);
                     ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(width, 0.0..=30.0).suffix(" pt"));
-                    ui.label(RichText::new("Sélection directe (A) pour déplacer les points et leurs poignées.").size(11.5).color(FAINT));
+                    studio_ui::pro::tip(ui, "Sélection directe (A) pour déplacer les points et leurs poignées.");
                 });
             }
             Kind::TextPath { text, size, family, bold, italic, color, tracking, closed, offset, show_path, .. } => {
@@ -2853,7 +2848,7 @@ impl PageApp {
         pro::dock_panel(ui, "swatches", "Nuancier", |ui| {
             ui.spacing_mut().item_spacing = vec2(6.0, 6.0);
             if self.doc.swatches.is_empty() {
-                ui.label(RichText::new("Les couleurs du document, réutilisables partout d'un clic.").size(12.0).color(FAINT));
+                studio_ui::pro::tip(ui, "Les couleurs du document, réutilisables partout d'un clic.");
             }
             let mut remove = None;
             ui.horizontal_wrapped(|ui| {
@@ -2879,7 +2874,7 @@ impl PageApp {
         pro::dock_panel(ui, "styles", "Styles de paragraphe", |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             if self.doc.styles.is_empty() {
-                ui.label(RichText::new("Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.").size(12.0).color(FAINT));
+                studio_ui::pro::tip(ui, "Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.");
             }
             let mut remove = None;
             for (k, s) in self.doc.styles.iter().enumerate() {
@@ -2900,7 +2895,7 @@ impl PageApp {
         pro::dock_panel(ui, "guides", "Repères", |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             if self.doc.guides.is_empty() {
-                ui.label(RichText::new("Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.").size(12.0).color(FAINT));
+                studio_ui::pro::tip(ui, "Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.");
             }
             let mut remove = None;
             for (k, g) in self.doc.guides.iter_mut().enumerate() {
@@ -3541,7 +3536,7 @@ impl PageApp {
             let keep = pro::sheet(ctx, "style", 360.0, |ui| {
                 ui.label(RichText::new("Nouveau style de paragraphe").font(semibold(17.0)).color(INK_STRONG));
                 ui.add_space(8.0);
-                ui.label(RichText::new("Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.").size(12.0).color(MUTED));
+                studio_ui::pro::tip(ui, "Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.");
                 ui.add_space(8.0);
                 let r = ui.add(egui::TextEdit::singleline(&mut name).desired_width(f32::INFINITY));
                 r.request_focus();

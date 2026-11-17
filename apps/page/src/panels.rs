@@ -670,7 +670,7 @@ impl PageApp {
         let mut go = None;
         pro::dock_panel(ui, "notes", "Notes", |ui| {
             if notes.is_empty() {
-                ui.label(RichText::new("Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.").size(12.0).color(FAINT));
+                studio_ui::pro::tip(ui, "Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.");
             }
             for (p, i, n) in &notes {
                 if ui.add(egui::Button::new(RichText::new(format!("p. {} · {}", self.doc.page_label(*p), n.lines().next().unwrap_or(""))).size(12.0)).frame(false)).clicked() {
@@ -821,7 +821,7 @@ impl PageApp {
                     act = Some((self.layer, 5));
                 }
             });
-            ui.label(RichText::new("Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.").size(11.0).color(FAINT));
+            studio_ui::pro::tip(ui, "Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.");
         });
         if add {
             self.ensure_layers();
@@ -877,7 +877,7 @@ impl PageApp {
         pro::dock_panel(ui, "cstyles", "Styles de caractère", |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             if self.doc.char_styles.is_empty() {
-                ui.label(RichText::new("Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.").size(12.0).color(FAINT));
+                studio_ui::pro::tip(ui, "Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.");
             }
             for (k, s) in self.doc.char_styles.iter().enumerate() {
                 ui.horizontal(|ui| {
@@ -913,7 +913,7 @@ impl PageApp {
         pro::dock_panel(ui, "ostyles", "Styles d'objet", |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             if self.doc.obj_styles.is_empty() {
-                ui.label(RichText::new("Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.").size(12.0).color(FAINT));
+                studio_ui::pro::tip(ui, "Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.");
             }
             for (k, s) in self.doc.obj_styles.iter().enumerate() {
                 ui.horizontal(|ui| {
@@ -1210,7 +1210,7 @@ impl PageApp {
             let (mut ok, mut close) = (false, false);
             let keep = pro::sheet(ctx, "ostyle", 340.0, |ui| {
                 ui.label(RichText::new("Nouveau style d'objet").font(semibold(17.0)).color(INK_STRONG));
-                ui.label(RichText::new("Couleurs, contour, opacité, angles et effets du bloc sélectionné.").size(12.0).color(MUTED));
+                studio_ui::pro::tip(ui, "Couleurs, contour, opacité, angles et effets du bloc sélectionné.");
                 ui.add_space(8.0);
                 let r = ui.add(egui::TextEdit::singleline(&mut name).desired_width(f32::INFINITY));
                 if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {

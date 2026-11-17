@@ -1685,9 +1685,8 @@ impl Motion {
     fn status(&mut self, root: &mut Ui) {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
                 if !self.home {
-                    ui.label(small("Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce".into()));
+                    pro::shortcuts(ui, "Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce");
                 }
                 if let Some(j) = &self.job
                     && j.done.load(Ordering::Relaxed) == usize::MAX
@@ -2404,7 +2403,7 @@ fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive
 
 fn color_button(ui: &mut Ui, c: &mut [u8; 4]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
-    if ui.color_edit_button_srgba(&mut col).changed() {
+    if pro::color_swatch(ui, &mut col) {
         *c = col.to_srgba_unmultiplied();
     }
 }
@@ -2427,9 +2426,10 @@ fn ease_combo(ui: &mut Ui, id: (&str, usize), k: &mut model::Key) {
 
 fn bg_editor(ui: &mut Ui, comp: &mut Comp) {
     let mut bg = Color32::from_rgba_unmultiplied(comp.background[0], comp.background[1], comp.background[2], comp.background[3]);
-    ui.label(RichText::new("Fond").size(12.0).color(MUTED));
-    let w = ui.available_width();
-    pro::color_picker(ui, &mut bg, w);
+    ui.horizontal(|ui| {
+        ui.label(RichText::new("Fond").size(12.0).color(MUTED));
+        pro::color_swatch(ui, &mut bg);
+    });
     comp.background = bg.to_srgba_unmultiplied();
     let mut grad = comp.background2.is_some();
     ui.horizontal(|ui| {
@@ -2504,7 +2504,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             ui.add(egui::Slider::new(radius, 4.0..=2000.0).logarithmic(true));
             ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
             ui.add(egui::Slider::new(thickness, 1.0..=300.0));
-            ui.label(RichText::new("Révélation % = longueur de l'arc : anime-la pour une jauge.").size(11.5).color(FAINT));
+            studio_ui::pro::tip(ui, "Révélation % = longueur de l'arc : anime-la pour une jauge.");
             color_row(ui, color);
         }
         Content::Counter { from, to, decimals, size, color, prefix, suffix } => {
@@ -2888,9 +2888,10 @@ fn size_row(ui: &mut Ui, w: &mut f32, h: &mut f32) {
 
 fn color_row(ui: &mut Ui, c: &mut [u8; 4]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
-    ui.label(RichText::new("Couleur").size(12.0).color(MUTED));
-    let w = ui.available_width();
-    pro::color_picker(ui, &mut col, w);
+    ui.horizontal(|ui| {
+        ui.label(RichText::new("Couleur").size(12.0).color(MUTED));
+        pro::color_swatch(ui, &mut col);
+    });
     *c = col.to_srgba_unmultiplied();
 }
 
