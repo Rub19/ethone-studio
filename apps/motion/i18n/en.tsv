@@ -1,339 +1,339 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Exporter l'animation	
-Toute la composition	
-Zone de travail	
-Personnalisée	
-Tête → début	
-Tête → fin	
-Préfixe	
-Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.	
-Fond transparent	
-Exporter…	
-Ajouter à la file	
-Ctrl+Alt+M ouvre la file de rendu	
-Annuler	
-File de rendu	
-Plusieurs exports à la suite, en une seule fois.	
-La file est vide : dans Exporter, choisis « Ajouter à la file ».	
-Retirer	
-Ajouter…	
-Vider	
-Fermer	
-Éditeur de courbe	
-Vitesse	
-Préréglages	
-Revenir à la courbe choisie dans la liste	
-Copier sur la sélection	
-Même courbe pour toutes les clés sélectionnées (ou tout le calque)	
-Valeur	
-Aligner tous les calques au même départ	
-Composition	
-Inverser les images clés du calque	
-Animation · plage des clés	
-Répartir régulièrement les images clés	
-Animation · calque sélectionné	
-Ajuster le calque à la composition	
-Calque sélectionné · contenir	
-Adapter la durée aux calques	
-Composition · fin du dernier calque	
-Fractionner le calque à la tête	
-Calque sélectionné · Ctrl+Maj+D	
-Dupliquer le calque	
-Calque sélectionné · Ctrl+D	
-Exporter	
-MP4, GIF, PNG ou SVG · Ctrl+M	
-Réglages de la composition · Ctrl+K	
-Nouvelle composition	
-Ouvrir…	
-Bienvenue dans Motion	
-Titres animés, logos et graphismes en mouvement	
-Projets récents	
-Ajouter un calque	
-Modèles	
-Ajouté à la tête de lecture	
-Animations prêtes	
-Rechercher une animation	
-Sélectionne un calque pour lui appliquer une animation.	
-Ajoutée à partir de la tête de lecture	
-Réglages de la composition	
-Format	
-Inverser largeur et hauteur	
-Images par seconde	
-Durée	
-Ajuster à l'animation	
-Terminé	
-Timeline	
-[ Début zone	
-B	
-Fin zone ]	
-N	
-Effacer la zone de travail	
-Ajuster	
-Toute la durée visible	
-Zoom	
-Ajouter un repère ici	
-Début de zone à la tête	
-Fin de zone à la tête	
-Supprimer ce repère	
-Autres courbes	
-Courbe douce (F9)	
-Éditer la courbe…	
-Copier (Ctrl+C)	
-Sélectionner toute la propriété	
-Supprimer (Suppr)	
-Dupliquer	
-Fractionner à la tête	
-Copier l'animation	
-Premier plan	
-Arrière-plan	
-Couleur d'étiquette	
-Supprimer	
-Fond	
-Dégradé vers le bas	
-Arrondi	
-Texte vertical	
-Taille	
-Gras	
-Italique	
-Alignement sur le point	
-Centre	
-Gauche	
-Droite	
-Espacement des lettres	
-Rayon	
-Creux (1 = polygone)	
-Longueur	
-Épaisseur	
-Révélation % = longueur de l'arc : anime-la pour une jauge.	
-De	
-Avant	
-Après	
-Compte pendant 80 % de la durée du calque	
-Tracé fermé	
-Remplir	
-Tout lisser	
-Tout en angles	
-Inverser	
-Sans remplissage : règle le contour dans Apparence.	
-Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	
-Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	
-L	
-H	
-Couleur	
-Fichier	
-Ouvrir un projet récent	
-Aucun projet récent	
-Exporter directement	
-Édition	
-Calque	
-Nouveau	
-Modèle	
-Transformer	
-Orientation automatique	
-Temps	
-Lecture inversée	
-Mode de fusion	
-Masque	
-Visible	
-Verrouillé	
-Solo	
-Animation	
-Courbe de Bézier	
-Afficher dans la timeline	
-Finition	
-Affichage	
-Espace de travail	
-Grille et tiers                  Ctrl+'	
-Divisions de la grille	
-Zones sûres	
-Type de zones sûres	
-Axes centraux	
-Règles                              Ctrl+R	
-Repères de mise en page   Ctrl+;	
-Damier de transparence	
-Trajectoires de mouvement	
-Pelure d'oignon	
-Réglages de la pelure	
-Magnétisme	
-Lecture en boucle               L	
-Qualité de l'aperçu	
-Ajouter ou retirer une image clé ici	
-Clic droit : réinitialiser, tremblement, boucle	
-Réinitialiser la valeur	
-Expression	
-Tremblement	
-Après la dernière clé	
-Clé suivante	
-Clé précédente	
-Courbe	
-Supprimer l'animation de couleur	
-Images/s	
-Réglages…	
-Finition de l'image	
-Bandes cinéma	
-Effets de composition	
-Repères	
-Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.	
-Aller au repère	
-+ Repère à la tête de lecture	
-Repères de mise en page	
-Avec les règles (Ctrl+R), glisse depuis une règle pour tirer un repère ; glisse-le hors de la vue pour le supprimer.	
-+ Centre	
-+ Tiers	
-+ Marges 5 %	
-Tout effacer	
-Verrou	
-Parent	
-Aucun	
-Étiquette	
-Transformation	
-Orientation auto	
-Le calque tourne dans le sens de sa trajectoire	
-Centrer l'ancre	
-Réinitialiser	
-Remet échelle, rotations, ancre et opacité par défaut	
-Aligner sur la composition	
-Met le calque à l'échelle de la composition	
-Centrer au milieu	
-Contenu	
-Tracé et opérateurs	
-Simultané	
-Un par un	
-Ondulé	
-Apparence	
-Contour	
-Extrémités et angles	
-Plates	
-Rondes	
-Carrées	
-Arrondis	
-Pointus	
-Biseautés	
-Dégradé vers	
-Linéaire	
-Radial	
-Miroir horizontal	
-Vertical	
-Flou et lumière	
-Lueur	
-Ombre portée	
-Ombre interne	
-Ombres	
-Lumières	
-Remplir d'une couleur	
-Réinitialiser la couleur	
-Stylisation	
-Animateur de texte	
-Animer lettre par lettre	
-Entrée	
-Sortie	
-Les deux	
-Ordre	
-Mouvement	
-Répéter toutes les clés	
-Non	
-Boucle	
-Aller-retour	
-Figer	
-Fige l'image du calque à l'instant choisi	
-Tête	
-Réinitialiser le temps	
-Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme (ou en dehors, en mode inversé).	
-?  Tutoriels	
-Depuis le centre	
-Terminer (Entrée)	
-Inversé	
-Plage	
-Qualité (débit)	
-Lecture en boucle	
-Palette	
-Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	
-Vignettage	
-Grain film	
-Couper le tracé	
-Opérateurs de forme	
-Arrondir les angles	
-Fronce et dilatation	
-Zigzag	
-Agitation	
-Détail	
-Vitesse d'agitation	
-Torsion	
-Pointillés (0 = plein)	
-Espace entre tirets	
-Angle du dégradé	
-Centre X	
-Centre Y	
-Flou fixe	
-Flou directionnel	
-Direction	
-Flou radial (zoom)	
-Décalage X	
-Décalage Y	
-Douceur	
-Opacité	
-Décalage X 	
-Décalage Y 	
-Douceur 	
-Teinte	
-Saturation	
-Luminosité	
-Contraste	
-Gamma	
-Sépia	
-Teinte bicolore	
-Inversion	
-Seuil (0 = non)	
-Postérisation (0 = non)	
-Séparation RVB	
-Angle RVB	
-Glitch	
-Fréquence du glitch	
-Grain	
-Distorsion	
-Taille des ondes	
-Évolution	
-Scintillement	
-Machine à écrire (0 = non)	
-Décalage entre lettres	
-Durée par lettre	
-Valeurs de départ	
-Échelle	
-Rotation	
-Tremblement de position	
-Fréquence	
-Écho (traînée)	
-Délai entre échos	
-Répéteur	
-Rotation par copie	
-Échelle par copie	
-Fondu par copie	
-Décalage temporel	
-Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe	
-Glisser pour tourner le calque · Maj : pas de 15°	
-Glisser l'ancre sans bouger le calque · Placer :	
-Clic dans la vue pour écrire	
-Peint sur le calque Peinture sélectionné	
-Sélectionne un calque puis trace : seule la zone dessinée reste visible	
-Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur	
-Efface les traits du calque Peinture	
-Sélection	
-Main	
-Zoom avant	
-Zoom arrière	
-Point d'ancrage	
-Rectangle	
-Rectangle arrondi	
-Ellipse	
-Polygone	
-Étoile	
-Plume	
-Ajout de sommet	
-Suppression de sommet	
-Conversion de sommet	
-Texte horizontal	
-Pinceau	
-Gomme	
-Masque rectangulaire	
-Masque elliptique	
-Marionnette	
+Exporter l'animation	Export animation
+Toute la composition	Whole composition
+Zone de travail	Work area
+Personnalisée	Custom
+Tête → début	Playhead → start
+Tête → fin	Playhead → end
+Préfixe	Prefix
+Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.	Shapes, paths, nulls, parents, transforms, trimmed paths, fills and strokes. Text, images and effects are not exported.
+Fond transparent	Transparent background
+Exporter…	Export…
+Ajouter à la file	Add to queue
+Ctrl+Alt+M ouvre la file de rendu	Ctrl+Alt+M opens the render queue
+Annuler	Cancel
+File de rendu	Render queue
+Plusieurs exports à la suite, en une seule fois.	Several exports in a row, in one go.
+La file est vide : dans Exporter, choisis « Ajouter à la file ».	The queue is empty: in Export, choose “Add to queue”.
+Retirer	Remove
+Ajouter…	Add…
+Vider	Clear
+Fermer	Close
+Éditeur de courbe	Graph editor
+Vitesse	Speed
+Préréglages	Presets
+Revenir à la courbe choisie dans la liste	Go back to the curve chosen in the list
+Copier sur la sélection	Copy to selection
+Même courbe pour toutes les clés sélectionnées (ou tout le calque)	Same curve for all selected keys (or the whole layer)
+Valeur	Value
+Aligner tous les calques au même départ	Align all layers to the same start
+Composition	Composition
+Inverser les images clés du calque	Reverse the layer's keyframes
+Animation · plage des clés	Animation · key range
+Répartir régulièrement les images clés	Space keyframes evenly
+Animation · calque sélectionné	Animation · selected layer
+Ajuster le calque à la composition	Fit layer to composition
+Calque sélectionné · contenir	Selected layer · contain
+Adapter la durée aux calques	Fit duration to layers
+Composition · fin du dernier calque	Composition · end of last layer
+Fractionner le calque à la tête	Split layer at playhead
+Calque sélectionné · Ctrl+Maj+D	Selected layer · Ctrl+Shift+D
+Dupliquer le calque	Duplicate layer
+Calque sélectionné · Ctrl+D	Selected layer · Ctrl+D
+Exporter	Export
+MP4, GIF, PNG ou SVG · Ctrl+M	MP4, GIF, PNG or SVG · Ctrl+M
+Réglages de la composition · Ctrl+K	Composition settings · Ctrl+K
+Nouvelle composition	New composition
+Ouvrir…	Open…
+Bienvenue dans Motion	Welcome to Motion
+Titres animés, logos et graphismes en mouvement	Animated titles, logos and motion graphics
+Projets récents	Recent projects
+Ajouter un calque	Add a layer
+Modèles	Templates
+Ajouté à la tête de lecture	Added at the playhead
+Animations prêtes	Ready-made animations
+Rechercher une animation	Search animations
+Sélectionne un calque pour lui appliquer une animation.	Select a layer to apply an animation to it.
+Ajoutée à partir de la tête de lecture	Added from the playhead
+Réglages de la composition	Composition settings
+Format	Format
+Inverser largeur et hauteur	Swap width and height
+Images par seconde	Frames per second
+Durée	Duration
+Ajuster à l'animation	Fit to animation
+Terminé	Done
+Timeline	Timeline
+[ Début zone	[ Work area start
+B	B
+Fin zone ]	Work area end ]
+N	N
+Effacer la zone de travail	Clear work area
+Ajuster	Fit
+Toute la durée visible	Whole duration visible
+Zoom	Zoom
+Ajouter un repère ici	Add a marker here
+Début de zone à la tête	Work area start at playhead
+Fin de zone à la tête	Work area end at playhead
+Supprimer ce repère	Delete this marker
+Autres courbes	Other curves
+Courbe douce (F9)	Easy ease (F9)
+Éditer la courbe…	Edit curve…
+Copier (Ctrl+C)	Copy (Ctrl+C)
+Sélectionner toute la propriété	Select whole property
+Supprimer (Suppr)	Delete (Del)
+Dupliquer	Duplicate
+Fractionner à la tête	Split at playhead
+Copier l'animation	Copy animation
+Premier plan	Bring to front
+Arrière-plan	Send to back
+Couleur d'étiquette	Label color
+Supprimer	Delete
+Fond	Background
+Dégradé vers le bas	Gradient to bottom
+Arrondi	Roundness
+Texte vertical	Vertical text
+Taille	Size
+Gras	Bold
+Italique	Italic
+Alignement sur le point	Alignment on the point
+Centre	Center
+Gauche	Left
+Droite	Right
+Espacement des lettres	Letter spacing
+Rayon	Radius
+Creux (1 = polygone)	Inner radius (1 = polygon)
+Longueur	Length
+Épaisseur	Thickness
+Révélation % = longueur de l'arc : anime-la pour une jauge.	Reveal % = arc length: animate it for a gauge.
+De	From
+Avant	Before
+Après	After
+Compte pendant 80 % de la durée du calque	Counts during 80% of the layer's duration
+Tracé fermé	Closed path
+Remplir	Fill
+Tout lisser	Smooth all
+Tout en angles	All corners
+Inverser	Reverse
+Sans remplissage : règle le contour dans Apparence.	No fill: set the stroke in Appearance.
+Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	A null is invisible in the render: make it a parent to drive several layers at once.
+Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	Adjustment layer: its effects (color, blur, grain, distortion…) apply to every layer below. Its opacity sets the mix.
+L	W
+H	H
+Couleur	Color
+Fichier	File
+Ouvrir un projet récent	Open recent project
+Aucun projet récent	No recent projects
+Exporter directement	Export directly
+Édition	Edit
+Calque	Layer
+Nouveau	New
+Modèle	Template
+Transformer	Transform
+Orientation automatique	Auto-orient
+Temps	Time
+Lecture inversée	Time reverse
+Mode de fusion	Blend mode
+Masque	Matte
+Visible	Visible
+Verrouillé	Locked
+Solo	Solo
+Animation	Animation
+Courbe de Bézier	Bézier curve
+Afficher dans la timeline	Show in timeline
+Finition	Finishing
+Affichage	View
+Espace de travail	Workspace
+Grille et tiers                  Ctrl+'	Grid and thirds                  Ctrl+'
+Divisions de la grille	Grid divisions
+Zones sûres	Safe zones
+Type de zones sûres	Safe zone type
+Axes centraux	Center axes
+Règles                              Ctrl+R	Rulers                              Ctrl+R
+Repères de mise en page   Ctrl+;	Layout guides   Ctrl+;
+Damier de transparence	Transparency grid
+Trajectoires de mouvement	Motion paths
+Pelure d'oignon	Onion skin
+Réglages de la pelure	Onion skin settings
+Magnétisme	Snap
+Lecture en boucle               L	Loop playback                   L
+Qualité de l'aperçu	Preview quality
+Ajouter ou retirer une image clé ici	Add or remove a keyframe here
+Clic droit : réinitialiser, tremblement, boucle	Right-click: reset, wiggle, loop
+Réinitialiser la valeur	Reset value
+Expression	Expression
+Tremblement	Wiggle
+Après la dernière clé	After last key
+Clé suivante	Next key
+Clé précédente	Previous key
+Courbe	Curve
+Supprimer l'animation de couleur	Remove color animation
+Images/s	Frames/s
+Réglages…	Settings…
+Finition de l'image	Image finishing
+Bandes cinéma	Letterbox
+Effets de composition	Composition effects
+Repères	Markers
+Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.	Press M to drop a marker at the playhead: it acts as a snap point and a J/K shortcut.
+Aller au repère	Go to marker
++ Repère à la tête de lecture	+ Marker at playhead
+Repères de mise en page	Layout guides
+Avec les règles (Ctrl+R), glisse depuis une règle pour tirer un repère ; glisse-le hors de la vue pour le supprimer.	With rulers on (Ctrl+R), drag from a ruler to pull a guide; drag it out of the view to delete it.
++ Centre	+ Center
++ Tiers	+ Thirds
++ Marges 5 %	+ 5% margins
+Tout effacer	Clear all
+Verrou	Lock
+Parent	Parent
+Aucun	None
+Étiquette	Label
+Transformation	Transform
+Orientation auto	Auto-orient
+Le calque tourne dans le sens de sa trajectoire	The layer rotates along its path
+Centrer l'ancre	Center anchor
+Réinitialiser	Reset
+Remet échelle, rotations, ancre et opacité par défaut	Resets scale, rotations, anchor and opacity
+Aligner sur la composition	Align to composition
+Met le calque à l'échelle de la composition	Scales the layer to the composition
+Centrer au milieu	Center in the middle
+Contenu	Content
+Tracé et opérateurs	Path and operators
+Simultané	Simultaneously
+Un par un	Individually
+Ondulé	Wavy
+Apparence	Appearance
+Contour	Stroke
+Extrémités et angles	Caps and joins
+Plates	Butt
+Rondes	Round
+Carrées	Projecting
+Arrondis	Round
+Pointus	Miter
+Biseautés	Bevel
+Dégradé vers	Gradient to
+Linéaire	Linear
+Radial	Radial
+Miroir horizontal	Flip horizontal
+Vertical	Vertical
+Flou et lumière	Blur and light
+Lueur	Glow
+Ombre portée	Drop shadow
+Ombre interne	Inner shadow
+Ombres	Shadows
+Lumières	Highlights
+Remplir d'une couleur	Fill with a color
+Réinitialiser la couleur	Reset color
+Stylisation	Stylize
+Animateur de texte	Text animator
+Animer lettre par lettre	Animate letter by letter
+Entrée	In
+Sortie	Out
+Les deux	Both
+Ordre	Order
+Mouvement	Motion
+Répéter toutes les clés	Repeat all keys
+Non	No
+Boucle	Loop
+Aller-retour	Ping-pong
+Figer	Freeze
+Fige l'image du calque à l'instant choisi	Freezes the layer's frame at the chosen time
+Tête	Playhead
+Réinitialiser le temps	Reset time
+Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme (ou en dehors, en mode inversé).	The layer just above in the timeline acts as a stencil: it becomes invisible and only shows this layer through its shape (or outside it, when inverted).
+?  Tutoriels	?  Tutorials
+Depuis le centre	From center
+Terminer (Entrée)	Finish (Enter)
+Inversé	Inverted
+Plage	Range
+Qualité (débit)	Quality (bitrate)
+Lecture en boucle	Loop playback
+Palette	Palette
+Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	Space play · J K keys · M marker · B N work area · V H Z W Y Q G tools · Ctrl+T text · Ctrl+B brush · P S R T A U properties · F9 easy ease
+Vignettage	Vignette
+Grain film	Film grain
+Couper le tracé	Trim path
+Opérateurs de forme	Shape operators
+Arrondir les angles	Round corners
+Fronce et dilatation	Pucker and bloat
+Zigzag	Zig zag
+Agitation	Wiggle paths
+Détail	Detail
+Vitesse d'agitation	Wiggle speed
+Torsion	Twist
+Pointillés (0 = plein)	Dashes (0 = solid)
+Espace entre tirets	Gap between dashes
+Angle du dégradé	Gradient angle
+Centre X	Center X
+Centre Y	Center Y
+Flou fixe	Fixed blur
+Flou directionnel	Directional blur
+Direction	Direction
+Flou radial (zoom)	Radial blur (zoom)
+Décalage X	Offset X
+Décalage Y	Offset Y
+Douceur	Softness
+Opacité	Opacity
+Décalage X 	Offset X
+Décalage Y 	Offset Y
+Douceur 	Softness
+Teinte	Hue
+Saturation	Saturation
+Luminosité	Brightness
+Contraste	Contrast
+Gamma	Gamma
+Sépia	Sepia
+Teinte bicolore	Duotone
+Inversion	Invert
+Seuil (0 = non)	Threshold (0 = off)
+Postérisation (0 = non)	Posterize (0 = off)
+Séparation RVB	RGB split
+Angle RVB	RGB angle
+Glitch	Glitch
+Fréquence du glitch	Glitch frequency
+Grain	Grain
+Distorsion	Distortion
+Taille des ondes	Wave size
+Évolution	Evolution
+Scintillement	Flicker
+Machine à écrire (0 = non)	Typewriter (0 = off)
+Décalage entre lettres	Delay between letters
+Durée par lettre	Duration per letter
+Valeurs de départ	Start values
+Échelle	Scale
+Rotation	Rotation
+Tremblement de position	Position wiggle
+Fréquence	Frequency
+Écho (traînée)	Echo (trail)
+Délai entre échos	Delay between echoes
+Répéteur	Repeater
+Rotation par copie	Rotation per copy
+Échelle par copie	Scale per copy
+Fondu par copie	Fade per copy
+Décalage temporel	Time offset
+Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe	Drag: move · corners: scale · circle: rotate · Shift: axis
+Glisser pour tourner le calque · Maj : pas de 15°	Drag to rotate the layer · Shift: 15° steps
+Glisser l'ancre sans bouger le calque · Placer :	Drag the anchor without moving the layer · Place:
+Clic dans la vue pour écrire	Click in the view to type
+Peint sur le calque Peinture sélectionné	Paints on the selected Paint layer
+Sélectionne un calque puis trace : seule la zone dessinée reste visible	Select a layer, then draw: only the drawn area stays visible
+Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur	Pull part of a path or paint stroke: nearby points follow smoothly
+Efface les traits du calque Peinture	Erases strokes on the Paint layer
+Sélection	Selection
+Main	Hand
+Zoom avant	Zoom in
+Zoom arrière	Zoom out
+Point d'ancrage	Anchor point
+Rectangle	Rectangle
+Rectangle arrondi	Rounded rectangle
+Ellipse	Ellipse
+Polygone	Polygon
+Étoile	Star
+Plume	Pen
+Ajout de sommet	Add vertex
+Suppression de sommet	Delete vertex
+Conversion de sommet	Convert vertex
+Texte horizontal	Horizontal type
+Pinceau	Brush
+Gomme	Eraser
+Masque rectangulaire	Rectangle mask
+Masque elliptique	Ellipse mask
+Marionnette	Puppet

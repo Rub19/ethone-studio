@@ -1,377 +1,377 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Fusion de données (CSV)…	
-Publipostage : «Nom» dans les textes	
-QR code du texte sélectionné	
-Lien, Wi-Fi, contact… · image nette	
-Répéter le bloc en grille (remplir la page)	
-Étiquettes, cartes, badges · écart 10 pt	
-Répéter le bloc en grille sans écart (traits de coupe communs)	
-Objet	
-Centrer les blocs sur la page	
-Disposition · sélection	
-Distribuer les blocs horizontalement	
-Disposition · 3 blocs minimum	
-Distribuer les blocs verticalement	
-Dupliquer les blocs	
-Disposition · Ctrl+D	
-Grouper les blocs	
-Disposition · Ctrl+G	
-Dégrouper les blocs	
-Disposition · Ctrl+Maj+G	
-Pivoter les blocs de 90°	
-Retourner les blocs horizontalement	
-Retourner les blocs verticalement	
-Exporter	
-PDF, PNG, JPEG ou SVG · Ctrl+E	
-Format du document · Ctrl+K	
-Fichier	
-Ouvrir un document récent	
-Aucun document récent	
-Exporter avec un préréglage	
-Édition	
-Corrections typographiques	
-Tout corriger	
-Disposition	
-Transformation	
-Symétrie horizontale	
-Symétrie verticale	
-Effacer les transformations	
-Aligner	
-Centrer sur la page	
-Remplir la page (fond perdu compris)	
-Ajustement	
-Options d'angle	
-Habillage	
-Effets	
-Mode de fusion	
-Effacer les effets	
-Styles d'objet	
-Nouveau à partir de la sélection…	
-Convertir en tracé	
-Rectangle, ellipse, polygone ou trait deviennent des tracés modifiables à la Plume	
-Texte	
-Police	
-Corps	
-Style de paragraphe	
-Casse	
-Listes	
-Lettrine	
-Insérer une variable	
-Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>	
-Page	
-Ajouter une page après	
-Ajouter une page avant	
-Dupliquer la page	
-Pages en vis-à-vis	
-Modifier le gabarit	
-Appliquer le gabarit à toutes les pages	
-Retirer le gabarit de toutes les pages	
-Affichage	
-Espace de travail	
-Zoom	
-Aperçu (masquer les repères)   W	
-Marges, colonnes et grille   Ctrl+;	
-Bords des blocs   Ctrl+H	
-Règles   Ctrl+R	
-Magnétisme	
-Notes	
-Fenêtre	
-Bienvenue dans Page	
-Mise en page de documents, magazines, affiches et PDF	
-Ouvrir…	
-Nouveau document	
-Modèles	
-Documents récents	
-Tes documents .epage apparaîtront ici	
-Aligner sur la sélection	
-Répartir ↔	
-Répartir ↕	
-Grouper	
-Ctrl+G	
-Corps · Ctrl+Maj+< / >	
-Interligne · Alt+↑ / ↓	
-Approche · Alt+← / →	
-G	
-Gras · Ctrl+Maj+B	
-I	
-Italique	
-S	
-Souligné · Ctrl+Maj+U	
-AA	
-Majuscules · Ctrl+Maj+K	
-≡ G	
-≡ C	
-≡ D	
-≡ J	
-Styles	
-Fond	
-Contour	
-Trait	
-Début	
-Flèche	
-Remplir	
-Ajuster	
-Déformer	
-Taille du texte	
-· texte en excès sur cette page	
-Ctrl+0	
-Aperçu	
-Masque cadres et repères (W)	
-PAGES	
-Ajouter une page à la fin	
-Ses blocs apparaissent sur toutes les pages	
-+ Page	
-Propriétés	
-Calques	
-Liens	
-Contrôle	
-Bloc	
-X	
-Y	
-L	
-H	
-Rotation	
-Effets de l'image	
-Le texte dépasse du bloc.	
-Ajuster la hauteur	
-Écrire sur la page (Entrée)	
-Caractère	
-Taille	
-Approche	
- G 	
- I 	
- S 	
- AA 	
-Petites capitales	
-Barré	
-Décalage de la ligne de base	
-Échelle H	
-V	
-Contour des lettres	
-Paragraphe	
-Gauche	
-Centre	
-Droite	
-Justifié	
-Interligne	
-Espace après paragraphe	
-Retrait de première ligne	
-Liste	
-Retrait négatif (texte aligné après la puce)	
-Style	
-+ Créer un style à partir de ce texte	
-Paragraphe avancé	
-Espace avant paragraphe	
-Retrait gauche	
-droit	
-Lettrine sur	
-Césure des mots longs	
-Éviter les lignes veuves et orphelines	
-Aligner sur la grille de base	
-Tabulation tous les	
-Points de conduite	
-Caler à droite	
-Filet au-dessus	
-en dessous	
-Épaisseur	
-Écart	
-Bloc de texte	
-Colonnes	
-Gouttière	
-Équilibrer	
-Filet entre colonnes	
-Hauteur auto	
-Ignorer l'habillage	
-Alignement vertical	
-Haut	
-Milieu	
-Bas	
-Marge intérieure	
-Fond coloré	
-Suite du texte dans	
-Aucun bloc	
-Le texte qui ne tient pas continue dans ce bloc (texte chaîné).	
-Image	
-Choisir…	
-Cadre aux proportions	
-Remplir le cadre	
-Ajuster dans le cadre	
-Étirer sans garder les proportions	
-Zoom de l'image dans le cadre	
-Décalage X	
-Centrer	
-Forme du cadre	
-Rectangle	
-Ellipse	
-Polygone	
-Filtre	
-Arrondi des coins	
-Miroir horizontal	
-Forme	
-Arrondi	
-Côtés / branches	
-Creux (1 = polygone)	
-Ligne	
-Pointillés (0 = plein)	
-Flèche à la fin	
-au début	
-Extrémités	
-Rondes	
-Carrées	
-Droites	
-Direction	
-Tracé	
-Tracé fermé	
-Sélection directe (A) pour déplacer les points et leurs poignées.	
-Texte sur tracé	
-Départ le long du tracé	
-Voir le tracé	
-Fermé	
-Tableau	
-Première colonne en gras	
-Ligne d'en-tête	
-Lignes alternées	
-Aspect	
-Opacité	
-Pointillés	
-Verrouillé	
-Masqué	
-Non imprimable (visible à l'écran seulement)	
-+ Ajouter la couleur au nuancier	
-Ombre portée	
-Flou	
-Lueur externe	
-Contour progressif	
-Contour progressif dégradé	
-De	
-Angles	
-Dégradé radial (si un dégradé est actif)	
-Inclinaison	
-Miroir ↔	
-Habillage du texte	
-Distance	
-Les textes voisins contournent ce bloc.	
-Note	
-Remarque pour toi ou un relecteur (non imprimée)	
-Aligner sur les marges	
-Ordre	
-Document	
-Format…	
-Titre	
-Marges	
-Grille	
-Grille de base (0 = masquée)	
-Fond perdu	
-3 mm = 8,5 pt pour un imprimeur	
-1re page n°	
-Utiliser le gabarit sur cette page	
-Tu modifies le gabarit : ses blocs apparaissent sur toutes les pages.	
-?  Tutoriels	
-Nuancier	
-Les couleurs du document, réutilisables partout d'un clic.	
-Supprimer cette couleur	
-Ajouter une couleur	
-Styles de paragraphe	
-Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.	
-Repères	
-Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.	
-+ Repère vertical au centre	
-+ Repère horizontal au centre	
-Objets de la page	
-Aucun bloc sur cette page.	
-Glisse vers la page pour poser un repère	
-Le rendu se met à jour sur la page en direct	
-Couleur	
-Style de caractère	
-Terminé	
-Exporter le document	
-Toutes	
-Page affichée	
-Plage	
-Fond perdu et traits de coupe (impression)	
-Règle un fond perdu dans le format du document pour l'activer.	
-Afficher le fichier après l'export	
-Attention : du texte dépasse d'un bloc sur la page affichée.	
-Exporter…	
-Annuler	
-Format du document	
-Largeur	
-Hauteur	
-Portrait	
-Paysage	
-3 mm	
-Valeur standard des imprimeurs	
-Grille de base	
-Nouveau style de paragraphe	
-Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.	
-Créer	
-Couleur du nuancier	
-Dégradé	
-Angle	
-Contrôle en amont	
-Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.	
-Afficher dans l'explorateur	
-Remplacer le lien…	
-Atteindre	
-Rechercher les liens manquants dans un dossier…	
-+ Nouveau calque	
-Placer la sélection	
-Déplace les blocs sélectionnés sur le calque actif	
-Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.	
-Styles de caractère	
-Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.	
-+ Nouveau style de caractère	
-Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.	
-Appliquer à la sélection	
-Rechercher et remplacer	
-Rechercher	
-Remplacer par	
-Respecter la casse	
-Mot entier	
-Dans	
-Bloc sélectionné	
-Tous	
-Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.	
-Tout remplacer	
-Suivant	
-Fermer	
-Dupliquer et décaler	
-Créer une grille	
-Lignes	
-Gouttière horizontale	
-Nombre de copies	
-Décalage horizontal	
-Rotation par copie	
-Table des matières	
-Liste les blocs portant ces styles de paragraphe, avec leur numéro de page et des points de conduite.	
-Sur une nouvelle page au début du document	
-Numérotation et sections	
-Dès la page	
-Nom	
-Préfixe	
- B 	
-Taille relative	
-Enregistrer	
-Nouveau style d'objet	
-Couleurs, contour, opacité, angles et effets du bloc sélectionné.	
-Supprimer la note	
-Terminer (Entrée)	
-Fermer le tracé	
-Couleur du contour	
-Couleur du filet	
-Couleur du fond	
-Couleur du trait	
-Traits	
-Fond de l'en-tête	
-Fond alterné	
-Couleur de l'ombre	
-Couleur de la lueur	
-Papier	
-Format	
-Pages	
-Résolution	
-Qualité JPEG	
-Vers	
-Côtés	
-Branches	
-Creux	
+Fusion de données (CSV)…	Data merge (CSV)…
+Publipostage : «Nom» dans les textes	Mail merge: «Name» in text frames
+QR code du texte sélectionné	QR code from selected text
+Lien, Wi-Fi, contact… · image nette	Link, Wi-Fi, contact… · sharp image
+Répéter le bloc en grille (remplir la page)	Step and repeat in a grid (fill the page)
+Étiquettes, cartes, badges · écart 10 pt	Labels, cards, badges · 10 pt gap
+Répéter le bloc en grille sans écart (traits de coupe communs)	Step and repeat with no gap (shared crop marks)
+Objet	Object
+Centrer les blocs sur la page	Center frames on the page
+Disposition · sélection	Arrange · selection
+Distribuer les blocs horizontalement	Distribute frames horizontally
+Disposition · 3 blocs minimum	Arrange · at least 3 frames
+Distribuer les blocs verticalement	Distribute frames vertically
+Dupliquer les blocs	Duplicate frames
+Disposition · Ctrl+D	Arrange · Ctrl+D
+Grouper les blocs	Group frames
+Disposition · Ctrl+G	Arrange · Ctrl+G
+Dégrouper les blocs	Ungroup frames
+Disposition · Ctrl+Maj+G	Arrange · Ctrl+Shift+G
+Pivoter les blocs de 90°	Rotate frames 90°
+Retourner les blocs horizontalement	Flip frames horizontally
+Retourner les blocs verticalement	Flip frames vertically
+Exporter	Export
+PDF, PNG, JPEG ou SVG · Ctrl+E	PDF, PNG, JPEG or SVG · Ctrl+E
+Format du document · Ctrl+K	Document setup · Ctrl+K
+Fichier	File
+Ouvrir un document récent	Open recent
+Aucun document récent	No recent documents
+Exporter avec un préréglage	Export with a preset
+Édition	Edit
+Corrections typographiques	Typographic fixes
+Tout corriger	Fix all
+Disposition	Arrange
+Transformation	Transform
+Symétrie horizontale	Flip horizontal
+Symétrie verticale	Flip vertical
+Effacer les transformations	Clear transformations
+Aligner	Align
+Centrer sur la page	Center on page
+Remplir la page (fond perdu compris)	Fill the page (including bleed)
+Ajustement	Fitting
+Options d'angle	Corner options
+Habillage	Text wrap
+Effets	Effects
+Mode de fusion	Blend mode
+Effacer les effets	Clear effects
+Styles d'objet	Object styles
+Nouveau à partir de la sélection…	New from selection…
+Convertir en tracé	Convert to path
+Rectangle, ellipse, polygone ou trait deviennent des tracés modifiables à la Plume	Rectangles, ellipses, polygons and lines become paths you can edit with the Pen
+Texte	Type
+Police	Font
+Corps	Size
+Style de paragraphe	Paragraph style
+Casse	Change case
+Listes	Lists
+Lettrine	Drop cap
+Insérer une variable	Insert variable
+Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>	Tags: <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>
+Page	Page
+Ajouter une page après	Add page after
+Ajouter une page avant	Add page before
+Dupliquer la page	Duplicate page
+Pages en vis-à-vis	Facing pages
+Modifier le gabarit	Edit master
+Appliquer le gabarit à toutes les pages	Apply master to all pages
+Retirer le gabarit de toutes les pages	Remove master from all pages
+Affichage	View
+Espace de travail	Workspace
+Zoom	Zoom
+Aperçu (masquer les repères)   W	Preview (hide guides)   W
+Marges, colonnes et grille   Ctrl+;	Margins, columns and grid   Ctrl+;
+Bords des blocs   Ctrl+H	Frame edges   Ctrl+H
+Règles   Ctrl+R	Rulers   Ctrl+R
+Magnétisme	Snap
+Notes	Notes
+Fenêtre	Window
+Bienvenue dans Page	Welcome to Page
+Mise en page de documents, magazines, affiches et PDF	Layout for documents, magazines, posters and PDF
+Ouvrir…	Open…
+Nouveau document	New document
+Modèles	Templates
+Documents récents	Recent documents
+Tes documents .epage apparaîtront ici	Your .epage documents will appear here
+Aligner sur la sélection	Align to selection
+Répartir ↔	Distribute ↔
+Répartir ↕	Distribute ↕
+Grouper	Group
+Ctrl+G	Ctrl+G
+Corps · Ctrl+Maj+< / >	Size · Ctrl+Shift+< / >
+Interligne · Alt+↑ / ↓	Leading · Alt+↑ / ↓
+Approche · Alt+← / →	Tracking · Alt+← / →
+G	B
+Gras · Ctrl+Maj+B	Bold · Ctrl+Shift+B
+I	I
+Italique	Italic
+S	U
+Souligné · Ctrl+Maj+U	Underline · Ctrl+Shift+U
+AA	AA
+Majuscules · Ctrl+Maj+K	All caps · Ctrl+Shift+K
+≡ G	≡ L
+≡ C	≡ C
+≡ D	≡ R
+≡ J	≡ J
+Styles	Styles
+Fond	Fill
+Contour	Stroke
+Trait	Line
+Début	Start
+Flèche	Arrow
+Remplir	Fill
+Ajuster	Fit
+Déformer	Distort
+Taille du texte	Text size
+· texte en excès sur cette page	· overset text on this page
+Ctrl+0	Ctrl+0
+Aperçu	Preview
+Masque cadres et repères (W)	Hides frames and guides (W)
+PAGES	PAGES
+Ajouter une page à la fin	Add a page at the end
+Ses blocs apparaissent sur toutes les pages	Its frames appear on every page
++ Page	+ Page
+Propriétés	Properties
+Calques	Layers
+Liens	Links
+Contrôle	Preflight
+Bloc	Frame
+X	X
+Y	Y
+L	W
+H	H
+Rotation	Rotation
+Effets de l'image	Image effects
+Le texte dépasse du bloc.	The text overflows the frame.
+Ajuster la hauteur	Fit height
+Écrire sur la page (Entrée)	Type on the page (Enter)
+Caractère	Character
+Taille	Size
+Approche	Tracking
+ G 	 B
+ I 	 I
+ S 	 U
+ AA 	 AA
+Petites capitales	Small caps
+Barré	Strikethrough
+Décalage de la ligne de base	Baseline shift
+Échelle H	Scale H
+V	V
+Contour des lettres	Letter outline
+Paragraphe	Paragraph
+Gauche	Left
+Centre	Center
+Droite	Right
+Justifié	Justified
+Interligne	Leading
+Espace après paragraphe	Space after
+Retrait de première ligne	First line indent
+Liste	List
+Retrait négatif (texte aligné après la puce)	Hanging indent (text aligned after the bullet)
+Style	Style
++ Créer un style à partir de ce texte	+ Create a style from this text
+Paragraphe avancé	Advanced paragraph
+Espace avant paragraphe	Space before
+Retrait gauche	Left indent
+droit	right
+Lettrine sur	Drop cap lines
+Césure des mots longs	Hyphenate long words
+Éviter les lignes veuves et orphelines	Avoid widows and orphans
+Aligner sur la grille de base	Align to baseline grid
+Tabulation tous les	Tab every
+Points de conduite	Leader dots
+Caler à droite	Right-align
+Filet au-dessus	Rule above
+en dessous	below
+Épaisseur	Weight
+Écart	Offset
+Bloc de texte	Text frame
+Colonnes	Columns
+Gouttière	Gutter
+Équilibrer	Balance
+Filet entre colonnes	Column rule
+Hauteur auto	Auto height
+Ignorer l'habillage	Ignore text wrap
+Alignement vertical	Vertical justification
+Haut	Top
+Milieu	Center
+Bas	Bottom
+Marge intérieure	Inset spacing
+Fond coloré	Background color
+Suite du texte dans	Text continues in
+Aucun bloc	No frame
+Le texte qui ne tient pas continue dans ce bloc (texte chaîné).	Text that doesn't fit continues in this frame (threaded text).
+Image	Image
+Choisir…	Choose…
+Cadre aux proportions	Fit frame to content
+Remplir le cadre	Fill frame
+Ajuster dans le cadre	Fit in frame
+Étirer sans garder les proportions	Stretch without keeping proportions
+Zoom de l'image dans le cadre	Image zoom in frame
+Décalage X	Offset X
+Centrer	Center
+Forme du cadre	Frame shape
+Rectangle	Rectangle
+Ellipse	Ellipse
+Polygone	Polygon
+Filtre	Filter
+Arrondi des coins	Corner radius
+Miroir horizontal	Flip horizontal
+Forme	Shape
+Arrondi	Radius
+Côtés / branches	Sides / points
+Creux (1 = polygone)	Inset (1 = polygon)
+Ligne	Line
+Pointillés (0 = plein)	Dashes (0 = solid)
+Flèche à la fin	Arrow at end
+au début	at start
+Extrémités	Caps
+Rondes	Round
+Carrées	Projecting
+Droites	Butt
+Direction	Direction
+Tracé	Path
+Tracé fermé	Closed path
+Sélection directe (A) pour déplacer les points et leurs poignées.	Direct selection (A) to move points and their handles.
+Texte sur tracé	Type on a path
+Départ le long du tracé	Start along the path
+Voir le tracé	Show path
+Fermé	Closed
+Tableau	Table
+Première colonne en gras	Bold first column
+Ligne d'en-tête	Header row
+Lignes alternées	Alternating rows
+Aspect	Appearance
+Opacité	Opacity
+Pointillés	Dashed
+Verrouillé	Locked
+Masqué	Hidden
+Non imprimable (visible à l'écran seulement)	Non-printing (on screen only)
++ Ajouter la couleur au nuancier	+ Add color to swatches
+Ombre portée	Drop shadow
+Flou	Blur
+Lueur externe	Outer glow
+Contour progressif	Feather
+Contour progressif dégradé	Gradient feather
+De	From
+Angles	Corners
+Dégradé radial (si un dégradé est actif)	Radial gradient (if a gradient is active)
+Inclinaison	Shear
+Miroir ↔	Flip ↔
+Habillage du texte	Text wrap
+Distance	Offset
+Les textes voisins contournent ce bloc.	Nearby text wraps around this frame.
+Note	Note
+Remarque pour toi ou un relecteur (non imprimée)	A note for you or a reviewer (not printed)
+Aligner sur les marges	Align to margins
+Ordre	Order
+Document	Document
+Format…	Setup…
+Titre	Title
+Marges	Margins
+Grille	Grid
+Grille de base (0 = masquée)	Baseline grid (0 = hidden)
+Fond perdu	Bleed
+3 mm = 8,5 pt pour un imprimeur	3 mm = 8.5 pt for a printer
+1re page n°	Start page number
+Utiliser le gabarit sur cette page	Use the master on this page
+Tu modifies le gabarit : ses blocs apparaissent sur toutes les pages.	You are editing the master: its frames appear on every page.
+?  Tutoriels	?  Tutorials
+Nuancier	Swatches
+Les couleurs du document, réutilisables partout d'un clic.	The document's colors, reusable anywhere in one click.
+Supprimer cette couleur	Delete this color
+Ajouter une couleur	Add a color
+Styles de paragraphe	Paragraph styles
+Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.	Select some text, then “Create a style” to reuse its formatting.
+Repères	Guides
+Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.	Drag from a ruler to place a guide; drag it back to the ruler to remove it.
++ Repère vertical au centre	+ Vertical guide at center
++ Repère horizontal au centre	+ Horizontal guide at center
+Objets de la page	Page objects
+Aucun bloc sur cette page.	No frames on this page.
+Glisse vers la page pour poser un repère	Drag onto the page to place a guide
+Le rendu se met à jour sur la page en direct	The page updates live
+Couleur	Color
+Style de caractère	Character style
+Terminé	Done
+Exporter le document	Export document
+Toutes	All
+Page affichée	Current page
+Plage	Range
+Fond perdu et traits de coupe (impression)	Bleed and crop marks (print)
+Règle un fond perdu dans le format du document pour l'activer.	Set a bleed in document setup to enable it.
+Afficher le fichier après l'export	Show the file after export
+Attention : du texte dépasse d'un bloc sur la page affichée.	Warning: text overflows a frame on the current page.
+Exporter…	Export…
+Annuler	Cancel
+Format du document	Document setup
+Largeur	Width
+Hauteur	Height
+Portrait	Portrait
+Paysage	Landscape
+3 mm	3 mm
+Valeur standard des imprimeurs	Printers' standard value
+Grille de base	Baseline grid
+Nouveau style de paragraphe	New paragraph style
+Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.	Font, size, weight, color, leading and spacing of the selected text.
+Créer	Create
+Couleur du nuancier	Swatch color
+Dégradé	Gradient
+Angle	Angle
+Contrôle en amont	Preflight
+Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.	Note tool: click a frame to attach a comment. Notes are never printed.
+Afficher dans l'explorateur	Show in Explorer
+Remplacer le lien…	Relink…
+Atteindre	Go to
+Rechercher les liens manquants dans un dossier…	Search a folder for missing links…
++ Nouveau calque	+ New layer
+Placer la sélection	Move selection here
+Déplace les blocs sélectionnés sur le calque actif	Moves the selected frames to the active layer
+Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.	Right-click: order, selection, delete. The top layer is in front.
+Styles de caractère	Character styles
+Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.	Formatting for a few words: in the text editor, select the text, then pick the style.
++ Nouveau style de caractère	+ New character style
+Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.	Saves a frame's look (colors, stroke, effects, corners) to reapply it.
+Appliquer à la sélection	Apply to selection
+Rechercher et remplacer	Find and replace
+Rechercher	Find
+Remplacer par	Change to
+Respecter la casse	Case sensitive
+Mot entier	Whole word
+Dans	In
+Bloc sélectionné	Selected frame
+Tous	All
+Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.	Tip: \\t is not interpreted; paste a real tab if needed.
+Tout remplacer	Change all
+Suivant	Next
+Fermer	Close
+Dupliquer et décaler	Duplicate and offset
+Créer une grille	Create a grid
+Lignes	Rows
+Gouttière horizontale	Horizontal gutter
+Nombre de copies	Number of copies
+Décalage horizontal	Horizontal offset
+Rotation par copie	Rotation per copy
+Table des matières	Table of contents
+Liste les blocs portant ces styles de paragraphe, avec leur numéro de page et des points de conduite.	Lists frames using these paragraph styles, with their page number and leader dots.
+Sur une nouvelle page au début du document	On a new page at the start of the document
+Numérotation et sections	Numbering and sections
+Dès la page	From page
+Nom	Name
+Préfixe	Prefix
+ B 	 S
+Taille relative	Relative size
+Enregistrer	Save
+Nouveau style d'objet	New object style
+Couleurs, contour, opacité, angles et effets du bloc sélectionné.	Colors, stroke, opacity, corners and effects of the selected frame.
+Supprimer la note	Delete note
+Terminer (Entrée)	Finish (Enter)
+Fermer le tracé	Close path
+Couleur du contour	Stroke color
+Couleur du filet	Rule color
+Couleur du fond	Fill color
+Couleur du trait	Line color
+Traits	Lines
+Fond de l'en-tête	Header fill
+Fond alterné	Alternating fill
+Couleur de l'ombre	Shadow color
+Couleur de la lueur	Glow color
+Papier	Paper
+Format	Format
+Pages	Pages
+Résolution	Resolution
+Qualité JPEG	JPEG quality
+Vers	To
+Côtés	Sides
+Branches	Points
+Creux	Inset
