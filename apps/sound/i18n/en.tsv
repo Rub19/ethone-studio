@@ -1,207 +1,207 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Ouvrir un son…	
-Ctrl+O	
-Exporter…	
-Ctrl+E	
-Tout sélectionner	
-Ctrl+A	
-Lecture / pause	
-Espace	
-Ajouter un marqueur	
-M	
-Supprimer les silences (plus de 0,8 s)	
-Édition	
-Supprimer les silences courts (plus de 0,4 s)	
-Rogner les silences au début et à la fin	
-Nettoyage · conserve les pauses internes	
-Normaliser la crête à −1 dB	
-Volume · sélection ou fichier entier	
-Normaliser le volume perçu à −16 LUFS	
-Podcast et voix · sélection ou fichier entier	
-Ajouter des micro-fondus aux bords	
-20 ms · évite les clics	
-Découper aux silences en fichiers WAV…	
-Prises, samples, chapitres	
-Boucle parfaite (fondu de 0,5 s)	
-Musique de jeu, ambiance	
-Boucle parfaite (fondu de 2 s)	
-Annuler	
-Ctrl+Z	
-Exporter	
-WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E	
-Fréquence d'échantillonnage et canaux	
-Fichier	
-Nouveau (5 s de silence)	
-Ouvrir…                         Ctrl+O	
-Exporter…                       Ctrl+E	
-Propriétés du son…	
-Tout sélectionner         Ctrl+A	
-Du curseur au début     Maj+Origine	
-Du curseur à la fin       Maj+Fin	
-Ajouter / retirer un marqueur   M	
-Effets	
-Préréglages	
-Générer	
-Plus de sons dans le panneau Générer	
-Affichage	
-Espace de travail	
-Tout afficher               Ctrl+0	
-Zoom avant                   Ctrl++	
-Zoom arrière                Ctrl+−	
-Spectrogramme                S	
-Suivre la lecture              F	
-Lecture en boucle            L	
-Lecture / pause (Espace)	
-Enregistrer au micro au curseur (R)	
-Sélection	
-Analyse	
-Volume	
-Écrêtés	
-Crête réelle	
-Volume perçu (LUFS)	
-Courbe des fondus	
-Linéaire	
-Log	
-En S	
-Fondu entrant	
-Fondu sortant	
-Nettoyage	
-Réduction de bruit	
-1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.	
-Supprimer les silences	
-Raccourcir les blancs	
-Égaliseur 5 bandes	
-Dynamique	
-Modulation	
-Chorus	
-Flanger	
-Trémolo	
-Panoramique automatique	
-Temps et hauteur	
-Stéréo	
-Mono	
-Échanger G/D	
-Inséré au curseur	
-Tonalité	
-Insérer la tonalité	
-Bruit	
-Blanc	
-Rose	
-Brun	
-Insérer le bruit	
-Balayage	
-Insérer un balayage	
-Métronome	
-Insérer le métronome	
-Détection	
-Détecter le tempo	
-Analyse la sélection ou tout le fichier	
-Marqueur sur chaque mesure	
-Repérer les sons (un marqueur par prise)	
-Poser les marqueurs	
-Rechercher un effet…	
-Valeurs par défaut	
-Marqueurs	
-M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.	
-Aller au marqueur	
-+ Marqueur au curseur	
-Exporter le son	
-WAV sans perte, lisible partout	
-16 bits (CD)	
-24 bits	
-32 flottant	
-8 bits	
-Aucun	
-Triangulaire	
-Mise en forme	
-Originale	
-44,1 k	
-48 k	
-22 k	
-96 k	
-Conversion haute qualité (filtre sinc)	
-Originaux	
-Tout	
-Un fichier par marqueur	
-Pose des marqueurs (M) pour découper en plusieurs fichiers.	
-Normaliser à −1 dB avant l'export	
-Inclure les marqueurs (repères lus par les éditeurs audio)	
-Métadonnées	
-Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.	
-Propriétés du son	
-Convertir la fréquence d'échantillonnage	
-Terminé	
-Zoom 1:1 (échantillons)	
-Entrée	
-Reconstruit la zone à partir de ce qui l'entoure	
-Garde seulement la zone (le reste devient silencieux)	
-Effacer la zone (Échap)	
-Zoom aux échantillons	
-Réinitialiser	
-Forme d'onde	
-Spectrogramme	
-Hauteur	
-Suivre	
-La vue suit la lecture (F)	
-Zoom	
-Z	
-Ctrl+0	
-Vue d'ensemble : clique ou glisse pour te déplacer	
-G D	
-▶ Écouter	
-Essaie l'effet sur 15 s sans rien modifier	
-Appliquer	
-Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme	
-Gain	
-Normaliser la crête à	
-Limiteur (plafond)	
-Intensité	
-Porte de bruit	
-Coupe-bas	
-Coupe-haut	
-Seuil	
-Pauses de plus de	
-Garder	
-Ratio	
-Gain de sortie	
-Saturation	
-Bits	
-Sous-échantillonnage	
-Profondeur	
-Vitesse	
-Mélange	
-Réinjection	
-Amplitude	
-Modulation en anneau (robot)	
-Délai d'écho	
-Taille de la pièce	
-Mélange réverb	
-Vitesse (comme une bande)	
-Tempo (même hauteur)	
-Hauteur en demi-tons (même durée)	
-Balance	
-Largeur stéréo	
-Durée	
-Fréquence	
-Jusqu'à	
-Tempo	
-Seuil du silence	
-Silence minimum	
-Son minimum	
-Qualité	
-Dither (adoucit la réduction de bits)	
-Canaux	
-Plage	
-Échelle	
-FFT	
-Taille	
-Sélection temporelle	
-Main (défilement)	
-Rectangle de fréquences	
-Lasso spectral	
-Pinceau spectral	
-Correction des taches	
-Crayon	
-Rasoir	
-Fondus par poignées	
-Enveloppe de volume	
+Ouvrir un son…	Open a sound…
+Ctrl+O	Ctrl+O
+Exporter…	Export…
+Ctrl+E	Ctrl+E
+Tout sélectionner	Select all
+Ctrl+A	Ctrl+A
+Lecture / pause	Play / pause
+Espace	Space
+Ajouter un marqueur	Add a marker
+M	M
+Supprimer les silences (plus de 0,8 s)	Remove silences (over 0.8 s)
+Édition	Edit
+Supprimer les silences courts (plus de 0,4 s)	Remove short silences (over 0.4 s)
+Rogner les silences au début et à la fin	Trim silence at start and end
+Nettoyage · conserve les pauses internes	Cleanup · keeps internal pauses
+Normaliser la crête à −1 dB	Normalize peak to −1 dB
+Volume · sélection ou fichier entier	Volume · selection or whole file
+Normaliser le volume perçu à −16 LUFS	Normalize loudness to −16 LUFS
+Podcast et voix · sélection ou fichier entier	Podcast and voice · selection or whole file
+Ajouter des micro-fondus aux bords	Add micro fades at the edges
+20 ms · évite les clics	20 ms · prevents clicks
+Découper aux silences en fichiers WAV…	Split at silences into WAV files…
+Prises, samples, chapitres	Takes, samples, chapters
+Boucle parfaite (fondu de 0,5 s)	Seamless loop (0.5 s crossfade)
+Musique de jeu, ambiance	Game music, ambience
+Boucle parfaite (fondu de 2 s)	Seamless loop (2 s crossfade)
+Annuler	Undo
+Ctrl+Z	Ctrl+Z
+Exporter	Export
+WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E	16/24/32-bit WAV, selection or segments · Ctrl+E
+Fréquence d'échantillonnage et canaux	Sample rate and channels
+Fichier	File
+Nouveau (5 s de silence)	New (5 s of silence)
+Ouvrir…                         Ctrl+O	Open…                           Ctrl+O
+Exporter…                       Ctrl+E	Export…                         Ctrl+E
+Propriétés du son…	Sound properties…
+Tout sélectionner         Ctrl+A	Select all                Ctrl+A
+Du curseur au début     Maj+Origine	Cursor to start         Shift+Home
+Du curseur à la fin       Maj+Fin	Cursor to end             Shift+End
+Ajouter / retirer un marqueur   M	Add / remove a marker           M
+Effets	Effects
+Préréglages	Presets
+Générer	Generate
+Plus de sons dans le panneau Générer	More sounds in the Generate panel
+Affichage	View
+Espace de travail	Workspace
+Tout afficher               Ctrl+0	Show all                    Ctrl+0
+Zoom avant                   Ctrl++	Zoom in                      Ctrl++
+Zoom arrière                Ctrl+−	Zoom out                    Ctrl+−
+Spectrogramme                S	Spectrogram                  S
+Suivre la lecture              F	Follow playback                F
+Lecture en boucle            L	Loop playback                L
+Lecture / pause (Espace)	Play / pause (Space)
+Enregistrer au micro au curseur (R)	Record from microphone at cursor (R)
+Sélection	Selection
+Analyse	Analysis
+Volume	Volume
+Écrêtés	Clipped
+Crête réelle	True peak
+Volume perçu (LUFS)	Loudness (LUFS)
+Courbe des fondus	Fade curve
+Linéaire	Linear
+Log	Log
+En S	S-curve
+Fondu entrant	Fade in
+Fondu sortant	Fade out
+Nettoyage	Cleanup
+Réduction de bruit	Noise reduction
+1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.	1. Select a passage with only the noise, 2. capture it, 3. select all and apply.
+Supprimer les silences	Remove silences
+Raccourcir les blancs	Shorten gaps
+Égaliseur 5 bandes	5-band equalizer
+Dynamique	Dynamics
+Modulation	Modulation
+Chorus	Chorus
+Flanger	Flanger
+Trémolo	Tremolo
+Panoramique automatique	Auto pan
+Temps et hauteur	Time and pitch
+Stéréo	Stereo
+Mono	Mono
+Échanger G/D	Swap L/R
+Inséré au curseur	Inserted at the cursor
+Tonalité	Tone
+Insérer la tonalité	Insert tone
+Bruit	Noise
+Blanc	White
+Rose	Pink
+Brun	Brown
+Insérer le bruit	Insert noise
+Balayage	Sweep
+Insérer un balayage	Insert a sweep
+Métronome	Metronome
+Insérer le métronome	Insert metronome
+Détection	Detection
+Détecter le tempo	Detect tempo
+Analyse la sélection ou tout le fichier	Analyzes the selection or the whole file
+Marqueur sur chaque mesure	Marker on every bar
+Repérer les sons (un marqueur par prise)	Find sounds (one marker per take)
+Poser les marqueurs	Place markers
+Rechercher un effet…	Search effects…
+Valeurs par défaut	Defaults
+Marqueurs	Markers
+M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.	M drops a marker at the cursor. Use them to navigate (↑ ↓) and to split the export into segments.
+Aller au marqueur	Go to marker
++ Marqueur au curseur	+ Marker at cursor
+Exporter le son	Export sound
+WAV sans perte, lisible partout	Lossless WAV, plays everywhere
+16 bits (CD)	16-bit (CD)
+24 bits	24-bit
+32 flottant	32-bit float
+8 bits	8-bit
+Aucun	None
+Triangulaire	Triangular
+Mise en forme	Shaped
+Originale	Original
+44,1 k	44.1 k
+48 k	48 k
+22 k	22 k
+96 k	96 k
+Conversion haute qualité (filtre sinc)	High-quality conversion (sinc filter)
+Originaux	Original
+Tout	All
+Un fichier par marqueur	One file per marker
+Pose des marqueurs (M) pour découper en plusieurs fichiers.	Place markers (M) to split into several files.
+Normaliser à −1 dB avant l'export	Normalize to −1 dB before export
+Inclure les marqueurs (repères lus par les éditeurs audio)	Include markers (cues read by audio editors)
+Métadonnées	Metadata
+Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.	Warning: some samples are clipped. The limiter or normalization fixes them.
+Propriétés du son	Sound properties
+Convertir la fréquence d'échantillonnage	Convert sample rate
+Terminé	Done
+Zoom 1:1 (échantillons)	Zoom 1:1 (samples)
+Entrée	Enter
+Reconstruit la zone à partir de ce qui l'entoure	Rebuilds the area from what surrounds it
+Garde seulement la zone (le reste devient silencieux)	Keep only the area (the rest goes silent)
+Effacer la zone (Échap)	Clear the area (Esc)
+Zoom aux échantillons	Zoom to samples
+Réinitialiser	Reset
+Forme d'onde	Waveform
+Spectrogramme	Spectrogram
+Hauteur	Height
+Suivre	Follow
+La vue suit la lecture (F)	The view follows playback (F)
+Zoom	Zoom
+Z	Z
+Ctrl+0	Ctrl+0
+Vue d'ensemble : clique ou glisse pour te déplacer	Overview: click or drag to move
+G D	L R
+▶ Écouter	▶ Preview
+Essaie l'effet sur 15 s sans rien modifier	Tries the effect on 15 s without changing anything
+Appliquer	Apply
+Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme	Drag: select · edges: adjust · wheel: zoom · Shift+wheel: scroll · double-click: between markers · M marker · Z zoom to selection · S spectrogram
+Gain	Gain
+Normaliser la crête à	Normalize peak to
+Limiteur (plafond)	Limiter (ceiling)
+Intensité	Amount
+Porte de bruit	Noise gate
+Coupe-bas	Low cut
+Coupe-haut	High cut
+Seuil	Threshold
+Pauses de plus de	Pauses longer than
+Garder	Keep
+Ratio	Ratio
+Gain de sortie	Output gain
+Saturation	Saturation
+Bits	Bits
+Sous-échantillonnage	Downsampling
+Profondeur	Depth
+Vitesse	Rate
+Mélange	Mix
+Réinjection	Feedback
+Amplitude	Amplitude
+Modulation en anneau (robot)	Ring modulation (robot)
+Délai d'écho	Echo delay
+Taille de la pièce	Room size
+Mélange réverb	Reverb mix
+Vitesse (comme une bande)	Speed (like tape)
+Tempo (même hauteur)	Tempo (same pitch)
+Hauteur en demi-tons (même durée)	Pitch in semitones (same duration)
+Balance	Balance
+Largeur stéréo	Stereo width
+Durée	Duration
+Fréquence	Frequency
+Jusqu'à	Up to
+Tempo	Tempo
+Seuil du silence	Silence threshold
+Silence minimum	Minimum silence
+Son minimum	Minimum sound
+Qualité	Quality
+Dither (adoucit la réduction de bits)	Dither (smooths bit reduction)
+Canaux	Channels
+Plage	Range
+Échelle	Scale
+FFT	FFT
+Taille	Size
+Sélection temporelle	Time selection
+Main (défilement)	Hand (scroll)
+Rectangle de fréquences	Frequency marquee
+Lasso spectral	Spectral lasso
+Pinceau spectral	Spectral brush
+Correction des taches	Spot healing
+Crayon	Pencil
+Rasoir	Razor
+Fondus par poignées	Fade handles
+Enveloppe de volume	Volume envelope

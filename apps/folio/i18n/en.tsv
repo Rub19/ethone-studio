@@ -1,175 +1,175 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Enregistrer	
-Ctrl+S	
-Tous les outils	
-Fichier	
-Ouvrir…                         Ctrl+O	
-Créer un PDF depuis des images…	
-Combiner des fichiers…	
-Nouveau PDF vierge (A4)	
-Récents	
-Édition	
-Rechercher               Ctrl+F	
-Supprimer tous les commentaires	
-Affichage	
-Page entière             Ctrl+0	
-Largeur de la page     Ctrl+2	
-Taille réelle              Ctrl+1	
-Outils	
-Glisse un PDF ou une image dans la fenêtre	
-Page précédente	
-Page suivante	
-Page	
-Ctrl+0	
-Largeur	
-Ctrl+2	
-Pages	
-Signets	
-Notes	
-Clic : aller à la page · Ctrl+clic / Maj+clic : sélectionner	
-Bienvenue dans Folio	
-Lis, annote, signe, organise et numérise tes PDF	
-Écris ici…	
-OK	
-Annuler	
-Document protégé	
-Mot de passe	
-Ouvrir	
-Créer ma signature	
-Dessine à la souris dans le cadre	
-Utiliser	
-Effacer	
-Ouvrir…	
-Ctrl+O	
-Enregistrer sous…	
-Ctrl+Maj+S	
-Exporter la page courante en PNG…	
-Page · rendu 200 ppp	
-Pivoter les pages à gauche	
-Page courante ou sélection	
-Pivoter les pages à droite	
-‹ Outils	
-Épaisseur	
-Taille du texte	
-Supprimer les commentaires de la page	
-Redessiner	
-Coché	
-Appliquer les valeurs	
-↺ Pivoter à gauche	
-↻ Pivoter à droite	
-Supprimer	
-Dupliquer	
-▲ Monter	
-▼ Descendre	
-Inverser l'ordre	
-Tout sélectionner	
-Page vierge	
-Depuis un fichier…	
-Extraire la sélection…	
-Diviser toutes les	
-page(s)	
-Diviser…	
-Supprimer les pages blanches	
-Détecte les pages presque vides (dos de scans, séparateurs) et les retire	
-Nouvelle mise en page A4 : chaque feuille regroupe plusieurs pages réduites	
-Recadrer la sélection	
-Ajouter des fichiers…	
-+ Document ouvert	
-Combiner	
-Depuis des images (pages A4)	
-Depuis des images (taille d'origine)	
-PDF vierge A4	
-Rendre le PDF consultable (calque de texte invisible)	
-Reconnaître le texte	
-Copier le texte	
-Enregistrer en .txt…	
-Relancer l'OCR sur ces pages (garde le reste consultable)	
-Appliquer le caviardage	
-Effacer les zones	
-Autoriser l'impression	
-Autoriser la copie du texte	
-Autoriser les modifications	
-Enregistrer une copie protégée…	
-Compression sans perte	
-72 ppp	
-110 ppp	
-150 ppp	
-Qualité JPEG	
-Compression forte	
-Filigrane	
-En-tête	
-Pied	
-Numéros	
-Bates	
-Premier numéro	
-Chiffres	
-Taille	
-Opacité	
-Angle	
-Gras	
-Derrière le contenu	
-Appliquer	
-Appliquer la couleur de fond	
-PNG	
-JPEG	
-Texte	
-Word	
-300 ppp	
-Exporter…	
-Extraire les images du PDF…	
-Enregistre en PNG chaque image contenue dans les pages choisies	
-Vers Pixel	
-Vers Lumen	
-Choisir l'autre version…	
-Afficher les différences sur les pages	
-Mot ou phrase	
-Ajouter pour la page courante	
-Un par page	
-Niveau inférieur	
-Version PDF	
-Format (page courante)	
-Emplacement	
-Ajouter comme annotation	
-Couleur	
-Tampon	
-Glisse sur la page pour poser le tampon, ou clique pour une taille standard.	
-Signature	
-Texte : clique où écrire. Date du jour : un clic.	
-Ce PDF n'a pas de champs : utilise Texte, Date et Signature pour le remplir.	
-Insérer après la page courante	
-Extraire et diviser	
-Impression économique	
-Recadrer (marges en mm : gauche, haut, droite, bas)	
-Ajoute des PDF et des images (ou glisse-les dans la fenêtre), mets-les dans l'ordre, puis combine.	
-Chaque image devient une page. Lance ensuite l'OCR pour rendre le texte des scans consultable.	
-Lit le texte des pages scannées ou photographiées avec le moteur OCR de Windows, sans rien envoyer en ligne.	
-Langue du document	
-Aucune langue OCR installée : Paramètres Windows › Heure et langue › Langue.	
-Trace des rectangles avec l'outil Caviardage sur ce qui doit disparaître. Appliquer remplace ces pages par une image : le texte caché n'existe plus du tout dans le fichier.	
-Chiffrement AES-256. Une copie protégée est enregistrée, le document ouvert reste modifiable.	
-Mot de passe d'ouverture	
-Mot de passe des autorisations (facultatif)	
-Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus.	
-Compression forte (pages en images)	
-Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite.	
-Arrière-plan	
-Résolution	
-Envoyer la page courante	
-Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge.	
-Un scan doit d'abord passer par Numériser et OCR.	
-Aucun signet. Outils › Signets pour en créer.	
-Glisse entre deux points de la page : la distance s'affiche en millimètres (à l'échelle 1:1 du document).	
-Main (H)	
-Surligner	
-Souligner	
-Barrer	
-Note	
-Zone de texte	
-Rectangle	
-Ellipse	
-Ligne	
-Flèche	
-Dessin à main levée	
-Date du jour	
-Caviardage	
-Mesure	
+Enregistrer	Save
+Ctrl+S	Ctrl+S
+Tous les outils	All tools
+Fichier	File
+Ouvrir…                         Ctrl+O	Open…                           Ctrl+O
+Créer un PDF depuis des images…	Create a PDF from images…
+Combiner des fichiers…	Combine files…
+Nouveau PDF vierge (A4)	New blank PDF (A4)
+Récents	Recent
+Édition	Edit
+Rechercher               Ctrl+F	Find                     Ctrl+F
+Supprimer tous les commentaires	Delete all comments
+Affichage	View
+Page entière             Ctrl+0	Whole page               Ctrl+0
+Largeur de la page     Ctrl+2	Page width             Ctrl+2
+Taille réelle              Ctrl+1	Actual size                Ctrl+1
+Outils	Tools
+Glisse un PDF ou une image dans la fenêtre	Drop a PDF or an image into the window
+Page précédente	Previous page
+Page suivante	Next page
+Page	Page
+Ctrl+0	Ctrl+0
+Largeur	Width
+Ctrl+2	Ctrl+2
+Pages	Pages
+Signets	Bookmarks
+Notes	Notes
+Clic : aller à la page · Ctrl+clic / Maj+clic : sélectionner	Click: go to page · Ctrl+click / Shift+click: select
+Bienvenue dans Folio	Welcome to Folio
+Lis, annote, signe, organise et numérise tes PDF	Read, annotate, sign, organize and scan your PDFs
+Écris ici…	Type here…
+OK	OK
+Annuler	Cancel
+Document protégé	Protected document
+Mot de passe	Password
+Ouvrir	Open
+Créer ma signature	Create my signature
+Dessine à la souris dans le cadre	Draw with the mouse in the box
+Utiliser	Use
+Effacer	Clear
+Ouvrir…	Open…
+Ctrl+O	Ctrl+O
+Enregistrer sous…	Save as…
+Ctrl+Maj+S	Ctrl+Shift+S
+Exporter la page courante en PNG…	Export current page as PNG…
+Page · rendu 200 ppp	Page · rendered at 200 dpi
+Pivoter les pages à gauche	Rotate pages left
+Page courante ou sélection	Current page or selection
+Pivoter les pages à droite	Rotate pages right
+‹ Outils	‹ Tools
+Épaisseur	Thickness
+Taille du texte	Text size
+Supprimer les commentaires de la page	Delete comments on this page
+Redessiner	Redraw
+Coché	Checked
+Appliquer les valeurs	Apply values
+↺ Pivoter à gauche	↺ Rotate left
+↻ Pivoter à droite	↻ Rotate right
+Supprimer	Delete
+Dupliquer	Duplicate
+▲ Monter	▲ Move up
+▼ Descendre	▼ Move down
+Inverser l'ordre	Reverse order
+Tout sélectionner	Select all
+Page vierge	Blank page
+Depuis un fichier…	From a file…
+Extraire la sélection…	Extract selection…
+Diviser toutes les	Split every
+page(s)	page(s)
+Diviser…	Split…
+Supprimer les pages blanches	Delete blank pages
+Détecte les pages presque vides (dos de scans, séparateurs) et les retire	Detects nearly empty pages (scan backs, separators) and removes them
+Nouvelle mise en page A4 : chaque feuille regroupe plusieurs pages réduites	New A4 layout: each sheet holds several reduced pages
+Recadrer la sélection	Crop selection
+Ajouter des fichiers…	Add files…
++ Document ouvert	+ Open document
+Combiner	Combine
+Depuis des images (pages A4)	From images (A4 pages)
+Depuis des images (taille d'origine)	From images (original size)
+PDF vierge A4	Blank A4 PDF
+Rendre le PDF consultable (calque de texte invisible)	Make the PDF searchable (invisible text layer)
+Reconnaître le texte	Recognize text
+Copier le texte	Copy text
+Enregistrer en .txt…	Save as .txt…
+Relancer l'OCR sur ces pages (garde le reste consultable)	Rerun OCR on these pages (keeps the rest searchable)
+Appliquer le caviardage	Apply redactions
+Effacer les zones	Clear areas
+Autoriser l'impression	Allow printing
+Autoriser la copie du texte	Allow copying text
+Autoriser les modifications	Allow changes
+Enregistrer une copie protégée…	Save a protected copy…
+Compression sans perte	Lossless compression
+72 ppp	72 dpi
+110 ppp	110 dpi
+150 ppp	150 dpi
+Qualité JPEG	JPEG quality
+Compression forte	Strong compression
+Filigrane	Watermark
+En-tête	Header
+Pied	Footer
+Numéros	Page numbers
+Bates	Bates
+Premier numéro	Start number
+Chiffres	Digits
+Taille	Size
+Opacité	Opacity
+Angle	Angle
+Gras	Bold
+Derrière le contenu	Behind the content
+Appliquer	Apply
+Appliquer la couleur de fond	Apply background color
+PNG	PNG
+JPEG	JPEG
+Texte	Text
+Word	Word
+300 ppp	300 dpi
+Exporter…	Export…
+Extraire les images du PDF…	Extract images from the PDF…
+Enregistre en PNG chaque image contenue dans les pages choisies	Saves every image in the chosen pages as PNG
+Vers Pixel	To Pixel
+Vers Lumen	To Lumen
+Choisir l'autre version…	Choose the other version…
+Afficher les différences sur les pages	Show differences on the pages
+Mot ou phrase	Word or phrase
+Ajouter pour la page courante	Add for the current page
+Un par page	One per page
+Niveau inférieur	Nested
+Version PDF	PDF version
+Format (page courante)	Size (current page)
+Emplacement	Location
+Ajouter comme annotation	Add as an annotation
+Couleur	Color
+Tampon	Stamp
+Glisse sur la page pour poser le tampon, ou clique pour une taille standard.	Drag on the page to place the stamp, or click for a standard size.
+Signature	Signature
+Texte : clique où écrire. Date du jour : un clic.	Text: click where to type. Today's date: one click.
+Ce PDF n'a pas de champs : utilise Texte, Date et Signature pour le remplir.	This PDF has no fields: use Text, Date and Signature to fill it in.
+Insérer après la page courante	Insert after current page
+Extraire et diviser	Extract and split
+Impression économique	Economy printing
+Recadrer (marges en mm : gauche, haut, droite, bas)	Crop (margins in mm: left, top, right, bottom)
+Ajoute des PDF et des images (ou glisse-les dans la fenêtre), mets-les dans l'ordre, puis combine.	Add PDFs and images (or drop them into the window), put them in order, then combine.
+Chaque image devient une page. Lance ensuite l'OCR pour rendre le texte des scans consultable.	Each image becomes a page. Then run OCR to make scanned text searchable.
+Lit le texte des pages scannées ou photographiées avec le moteur OCR de Windows, sans rien envoyer en ligne.	Reads text in scanned or photographed pages with the Windows OCR engine, without sending anything online.
+Langue du document	Document language
+Aucune langue OCR installée : Paramètres Windows › Heure et langue › Langue.	No OCR language installed: Windows Settings › Time & language › Language.
+Trace des rectangles avec l'outil Caviardage sur ce qui doit disparaître. Appliquer remplace ces pages par une image : le texte caché n'existe plus du tout dans le fichier.	Draw rectangles with the Redact tool over what must disappear. Apply replaces those pages with an image: the hidden text no longer exists in the file at all.
+Chiffrement AES-256. Une copie protégée est enregistrée, le document ouvert reste modifiable.	AES-256 encryption. A protected copy is saved; the open document stays editable.
+Mot de passe d'ouverture	Open password
+Mot de passe des autorisations (facultatif)	Permissions password (optional)
+Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus.	To remove a password: open the protected PDF, then Save: the copy no longer has one.
+Compression forte (pages en images)	Strong compression (pages as images)
+Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite.	Best for heavy scans. Text is no longer selectable: run OCR again afterwards.
+Arrière-plan	Background
+Résolution	Resolution
+Envoyer la page courante	Send current page
+Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge.	Compares the open document with another version: each page gets a difference score, and changed areas can be shown in red.
+Un scan doit d'abord passer par Numériser et OCR.	A scan must first go through Scan & OCR.
+Aucun signet. Outils › Signets pour en créer.	No bookmarks. Tools › Bookmarks to create some.
+Glisse entre deux points de la page : la distance s'affiche en millimètres (à l'échelle 1:1 du document).	Drag between two points on the page: the distance shows in millimeters (at the document's 1:1 scale).
+Main (H)	Hand (H)
+Surligner	Highlight
+Souligner	Underline
+Barrer	Strikethrough
+Note	Note
+Zone de texte	Text box
+Rectangle	Rectangle
+Ellipse	Ellipse
+Ligne	Line
+Flèche	Arrow
+Dessin à main levée	Freehand drawing
+Date du jour	Today's date
+Caviardage	Redact
+Mesure	Measure

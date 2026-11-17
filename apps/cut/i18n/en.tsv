@@ -1,275 +1,275 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Double-clic pour réinitialiser	
-Image clé suivante	
-Image clé précédente	
-Clip	
-Image	
-Effets	
-Couleur	
-Audio	
-Nom du clip	
-Activé	
-Maj+E	
-Lecture inversée	
-Durée et vitesse	
-Image figée	
-Vitesse/Durée…	
-Ctrl+R	
-Transition d'entrée	
-Un espace vide précède le clip : la transition est ignorée.	
-Fondus	
-Fondu vers	
-Noir	
-Blanc	
-Étiquette	
-Actions	
-Détacher l'audio	
-Ctrl+L	
-Trajectoire	
-Zoom progressif (Ken Burns)	
-↺ 90°	
-↻ 90°	
-Miroir	
-Retourner	
-Incrustation d'image	
-Idéal sur la piste V2, au-dessus de la vidéo principale.	
-Recadrage	
-Images clés	
-Bibliothèque d'effets	
-Préréglages d'effets	
-Flou et netteté	
-Stylisation	
-Négatif (inverser les couleurs)	
-Incrustation (fond vert)	
-Activer	
-Vert	
-Bleu	
-Masque	
-Aucun	
-Rectangle	
-Ellipse	
-Plume	
-Inverser le masque	
-Côtés du polygone	
-Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.	
-Réinitialiser	
-Réinitialiser tous les effets	
-Correction de base	
-Créatif	
-Courbes	
-Maître	
-Rouge	
-Roues chromatiques	
-Double-clic sur une roue pour la remettre au centre.	
-Étalonnage	
-Copier	
-Appliquer à tous	
-Copie cet étalonnage sur tous les clips V1 et V2	
-Son du clip	
-Couper le son du clip	
-Une image figée n'a pas de son.	
-Normalisation	
-Fondus audio	
-Détacher l'audio sur A2	
-Musique	
-Placer à la tête de lecture	
-Mixage	
-Couper	
-Styles prédéfinis	
-Texte	
-Police	
-Alignement	
-Auto	
-Gauche	
-Centre	
-Droite	
-Texte vertical	
-Apparence	
-Ombre portée	
-Bandeau	
-Position et durée	
-Haut	
-Bas	
-Tiers	
-Défilement	
-Animation d'entrée et de sortie	
-Séquence	
-Format	
-Images/s	
-Durée	
-V1 · V2 · titres · A2	
-Réglages de la séquence…	
-Ajouter	
-Titre	
-Marqueur	
-La musique (A2) baisse automatiquement quand un clip V1 a du son.	
-Marqueurs	
-Modifier	
-Copier comme chapitres YouTube	
-Historique	
-Revenir juste avant cette étape	
-Raccourcis	
-Tous les tutoriels  →	
-Fondu enchaîné entre tous les clips	
-Fondu au noir entre tous les clips	
-Retirer toutes les transitions	
-Couper le clip toutes les 2 s	
-Clip sélectionné, sinon toute la piste	
-Couper le clip toutes les 5 s	
-Couper le clip toutes les 10 s	
-Passer en vertical 9:16 (Shorts, Reels, TikTok)	
-Séquence · clips recadrés au centre	
-Passer en carré 1:1	
-Passer en portrait 4:5	
-Passer en paysage 16:9	
-Fermer tous les blancs de la piste	
-Montage · rapproche tous les clips	
-Normaliser l'audio sélectionné à −1 dB	
-Clip ou musique sélectionné	
-Fondus de 0,5 s sur tous les clips	
-Séquence · entrée et sortie	
-Fondus de 1 s sur tous les clips	
-Modifications non enregistrées	
-Annuler	
-Exporter	
-Ctrl+M	
-Réglages de la séquence	
-Fichier	
-Nouvel élément	
-Exporter avec un préréglage	
-Édition	
-Titre prédéfini	
-Outils	
-Affichage	
-Espace de travail	
-Magnétisme (Maj+S)	
-Lecture en boucle	
-Mode visionneuse (F)	
-Zones de sécurité	
-Grille des tiers	
-Repères vertical 9:16	
-Qualité de lecture	
-Vignettes des clips	
-Formes d'onde	
-Hauteur des pistes	
-Afficher	
-Nouveau projet	
-Ouvrir…	
-Importer des médias…	
-?  Tutoriels	
-Bienvenue dans Cut	
-Monte, coupe, étalonne et exporte tes vidéos	
-Projets récents	
-Médias	
-Importer des médias (Ctrl+I)	
-Nouvel élément : cache couleur, dégradé, mire…	
-Rechercher	
-Tout	
-Vidéo	
-Son	
-Trier par	
-Trier les médias	
-Volume d'écoute	
-Niveau audio du programme (crête, dBFS)	
-MP4 H.264 + AAC, GIF, WAV, PNG ou JPEG	
-Ajuster (bandes)	
-Remplir (recadrer)	
-Toute la séquence	
-Entre entrée et sortie	
-Clip sélectionné	
-Afficher le fichier une fois terminé	
-Exporter…	
-Inverser largeur et hauteur	
-Comme le 1er clip	
-Images par seconde	
-Couleur de fond	
-Terminé	
-Vitesse/Durée du clip	
-Vitesse	
-Options	
-Image figée (maintien)	
-Couper le son	
-Nom (chapitre)	
-Commentaire	
-Supprimer	
-Aucune	
-Dupliquer	
-Couper / réactiver le son	
-Normaliser (crête −1 dB)	
-Look	
-Effet prédéfini	
-Entrée	
-Sortie	
-Durée figée	
-Fondu d'entrée	
-Fondu de sortie	
-Échelle finale	
-Netteté	
-Mosaïque	
-Postérisation	
-Grain	
-Vignettage	
-Tolérance	
-Douceur	
-Contour progressif	
-Contraste	
-Hautes lumières	
-Ombres	
-Blancs	
-Noirs	
-Température	
-Teinte	
-Vibrance	
-Intensité du look	
-Rotation de teinte	
-Balance	
-Début	
-Volume	
-Taille	
-Espacement des lettres	
-Interligne	
-Couleur du texte	
-Contour	
-Couleur du contour	
-Couleur du bandeau	
-Décalage X	
-Décalage Y	
-Volume général	
-Atténuation musique sous les voix	
-Préréglage	
-Cadrage	
-Débit vidéo	
-Audio AAC	
-Plage	
-Ajouter à la fin de V1	
-Insérer à la tête de lecture	
-Incruster sur V2 à la tête	
-Remplacer le clip sélectionné	
-Ajouter comme musique (A2)	
-Remplacer le fichier…	
-Afficher dans l'explorateur	
-Retirer du projet	
-Scinder à la tête de lecture	
-Figer l'image à la tête	
-Inverser la lecture	
-Activer / désactiver	
-Normaliser l'audio (−1 dB)	
-Réinitialiser les effets	
-Lever (laisser un vide)	
-Supprimer et refermer	
-Sélection	
-Sélection de piste avant	
-Sélection de piste arrière	
-Modification par propagation	
-Modification par déplacement	
-Allongement de la durée	
-Cutter	
-Couper toutes les pistes	
-Glissement	
-Déplacement	
-Plume (masque)	
-Rectangle (masque)	
-Ellipse (masque)	
-Polygone (masque)	
-Main	
-Zoom	
+Double-clic pour réinitialiser	Double-click to reset
+Image clé suivante	Next keyframe
+Image clé précédente	Previous keyframe
+Clip	Clip
+Image	Video
+Effets	Effects
+Couleur	Color
+Audio	Audio
+Nom du clip	Clip name
+Activé	Enabled
+Maj+E	Shift+E
+Lecture inversée	Reverse playback
+Durée et vitesse	Duration and speed
+Image figée	Freeze frame
+Vitesse/Durée…	Speed/Duration…
+Ctrl+R	Ctrl+R
+Transition d'entrée	In transition
+Un espace vide précède le clip : la transition est ignorée.	There is a gap before the clip: the transition is ignored.
+Fondus	Fades
+Fondu vers	Fade to
+Noir	Black
+Blanc	White
+Étiquette	Label
+Actions	Actions
+Détacher l'audio	Unlink audio
+Ctrl+L	Ctrl+L
+Trajectoire	Motion
+Zoom progressif (Ken Burns)	Slow zoom (Ken Burns)
+↺ 90°	↺ 90°
+↻ 90°	↻ 90°
+Miroir	Mirror
+Retourner	Flip
+Incrustation d'image	Picture in picture
+Idéal sur la piste V2, au-dessus de la vidéo principale.	Best on track V2, above the main video.
+Recadrage	Crop
+Images clés	Keyframes
+Bibliothèque d'effets	Effects library
+Préréglages d'effets	Effect presets
+Flou et netteté	Blur and sharpen
+Stylisation	Stylize
+Négatif (inverser les couleurs)	Negative (invert colors)
+Incrustation (fond vert)	Chroma key (green screen)
+Activer	Enable
+Vert	Green
+Bleu	Blue
+Masque	Mask
+Aucun	None
+Rectangle	Rectangle
+Ellipse	Ellipse
+Plume	Pen
+Inverser le masque	Invert mask
+Côtés du polygone	Polygon sides
+Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.	Draw it in the monitor with the Pen (P), Rectangle, Ellipse or Polygon; move its points with Selection.
+Réinitialiser	Reset
+Réinitialiser tous les effets	Reset all effects
+Correction de base	Basic correction
+Créatif	Creative
+Courbes	Curves
+Maître	Master
+Rouge	Red
+Roues chromatiques	Color wheels
+Double-clic sur une roue pour la remettre au centre.	Double-click a wheel to recenter it.
+Étalonnage	Color grade
+Copier	Copy
+Appliquer à tous	Apply to all
+Copie cet étalonnage sur tous les clips V1 et V2	Copies this grade to every V1 and V2 clip
+Son du clip	Clip audio
+Couper le son du clip	Mute clip
+Une image figée n'a pas de son.	A freeze frame has no sound.
+Normalisation	Normalize
+Fondus audio	Audio fades
+Détacher l'audio sur A2	Unlink audio to A2
+Musique	Music
+Placer à la tête de lecture	Place at playhead
+Mixage	Mix
+Couper	Mute
+Styles prédéfinis	Preset styles
+Texte	Text
+Police	Font
+Alignement	Alignment
+Auto	Auto
+Gauche	Left
+Centre	Center
+Droite	Right
+Texte vertical	Vertical text
+Apparence	Appearance
+Ombre portée	Drop shadow
+Bandeau	Banner
+Position et durée	Position and duration
+Haut	Top
+Bas	Bottom
+Tiers	Lower third
+Défilement	Roll
+Animation d'entrée et de sortie	In and out animation
+Séquence	Sequence
+Format	Format
+Images/s	Frames/s
+Durée	Duration
+V1 · V2 · titres · A2	V1 · V2 · titles · A2
+Réglages de la séquence…	Sequence settings…
+Ajouter	Add
+Titre	Title
+Marqueur	Marker
+La musique (A2) baisse automatiquement quand un clip V1 a du son.	Music (A2) ducks automatically when a V1 clip has sound.
+Marqueurs	Markers
+Modifier	Edit
+Copier comme chapitres YouTube	Copy as YouTube chapters
+Historique	History
+Revenir juste avant cette étape	Go back to just before this step
+Raccourcis	Shortcuts
+Tous les tutoriels  →	All tutorials  →
+Fondu enchaîné entre tous les clips	Cross dissolve between all clips
+Fondu au noir entre tous les clips	Dip to black between all clips
+Retirer toutes les transitions	Remove all transitions
+Couper le clip toutes les 2 s	Split the clip every 2 s
+Clip sélectionné, sinon toute la piste	Selected clip, otherwise the whole track
+Couper le clip toutes les 5 s	Split the clip every 5 s
+Couper le clip toutes les 10 s	Split the clip every 10 s
+Passer en vertical 9:16 (Shorts, Reels, TikTok)	Switch to vertical 9:16 (Shorts, Reels, TikTok)
+Séquence · clips recadrés au centre	Sequence · clips cropped to center
+Passer en carré 1:1	Switch to square 1:1
+Passer en portrait 4:5	Switch to portrait 4:5
+Passer en paysage 16:9	Switch to landscape 16:9
+Fermer tous les blancs de la piste	Close all gaps on the track
+Montage · rapproche tous les clips	Edit · brings all clips together
+Normaliser l'audio sélectionné à −1 dB	Normalize selected audio to −1 dB
+Clip ou musique sélectionné	Selected clip or music
+Fondus de 0,5 s sur tous les clips	0.5 s fades on all clips
+Séquence · entrée et sortie	Sequence · in and out
+Fondus de 1 s sur tous les clips	1 s fades on all clips
+Modifications non enregistrées	Unsaved changes
+Annuler	Cancel
+Exporter	Export
+Ctrl+M	Ctrl+M
+Réglages de la séquence	Sequence settings
+Fichier	File
+Nouvel élément	New item
+Exporter avec un préréglage	Export with a preset
+Édition	Edit
+Titre prédéfini	Preset title
+Outils	Tools
+Affichage	View
+Espace de travail	Workspace
+Magnétisme (Maj+S)	Snap (Shift+S)
+Lecture en boucle	Loop playback
+Mode visionneuse (F)	Viewer mode (F)
+Zones de sécurité	Safe margins
+Grille des tiers	Rule of thirds grid
+Repères vertical 9:16	Vertical 9:16 guides
+Qualité de lecture	Playback quality
+Vignettes des clips	Clip thumbnails
+Formes d'onde	Waveforms
+Hauteur des pistes	Track height
+Afficher	Show
+Nouveau projet	New project
+Ouvrir…	Open…
+Importer des médias…	Import media…
+?  Tutoriels	?  Tutorials
+Bienvenue dans Cut	Welcome to Cut
+Monte, coupe, étalonne et exporte tes vidéos	Edit, cut, grade and export your videos
+Projets récents	Recent projects
+Médias	Media
+Importer des médias (Ctrl+I)	Import media (Ctrl+I)
+Nouvel élément : cache couleur, dégradé, mire…	New item: color matte, gradient, bars…
+Rechercher	Search
+Tout	All
+Vidéo	Video
+Son	Audio
+Trier par	Sort by
+Trier les médias	Sort media
+Volume d'écoute	Monitor volume
+Niveau audio du programme (crête, dBFS)	Program audio level (peak, dBFS)
+MP4 H.264 + AAC, GIF, WAV, PNG ou JPEG	MP4 H.264 + AAC, GIF, WAV, PNG or JPEG
+Ajuster (bandes)	Fit (bars)
+Remplir (recadrer)	Fill (crop)
+Toute la séquence	Entire sequence
+Entre entrée et sortie	Between in and out
+Clip sélectionné	Selected clip
+Afficher le fichier une fois terminé	Show the file when done
+Exporter…	Export…
+Inverser largeur et hauteur	Swap width and height
+Comme le 1er clip	Match the 1st clip
+Images par seconde	Frames per second
+Couleur de fond	Background color
+Terminé	Done
+Vitesse/Durée du clip	Clip speed/duration
+Vitesse	Speed
+Options	Options
+Image figée (maintien)	Freeze frame (hold)
+Couper le son	Mute
+Nom (chapitre)	Name (chapter)
+Commentaire	Comment
+Supprimer	Delete
+Aucune	None
+Dupliquer	Duplicate
+Couper / réactiver le son	Mute / unmute
+Normaliser (crête −1 dB)	Normalize (peak −1 dB)
+Look	Look
+Effet prédéfini	Preset effect
+Entrée	In
+Sortie	Out
+Durée figée	Hold duration
+Fondu d'entrée	Fade in
+Fondu de sortie	Fade out
+Échelle finale	End scale
+Netteté	Sharpen
+Mosaïque	Mosaic
+Postérisation	Posterize
+Grain	Grain
+Vignettage	Vignette
+Tolérance	Tolerance
+Douceur	Softness
+Contour progressif	Feather
+Contraste	Contrast
+Hautes lumières	Highlights
+Ombres	Shadows
+Blancs	Whites
+Noirs	Blacks
+Température	Temperature
+Teinte	Tint
+Vibrance	Vibrance
+Intensité du look	Look intensity
+Rotation de teinte	Hue rotation
+Balance	Balance
+Début	Start
+Volume	Volume
+Taille	Size
+Espacement des lettres	Letter spacing
+Interligne	Line spacing
+Couleur du texte	Text color
+Contour	Outline
+Couleur du contour	Outline color
+Couleur du bandeau	Banner color
+Décalage X	Offset X
+Décalage Y	Offset Y
+Volume général	Master volume
+Atténuation musique sous les voix	Music ducking under voices
+Préréglage	Preset
+Cadrage	Framing
+Débit vidéo	Video bitrate
+Audio AAC	AAC audio
+Plage	Range
+Ajouter à la fin de V1	Append to end of V1
+Insérer à la tête de lecture	Insert at playhead
+Incruster sur V2 à la tête	Overlay on V2 at playhead
+Remplacer le clip sélectionné	Replace selected clip
+Ajouter comme musique (A2)	Add as music (A2)
+Remplacer le fichier…	Replace file…
+Afficher dans l'explorateur	Show in Explorer
+Retirer du projet	Remove from project
+Scinder à la tête de lecture	Split at playhead
+Figer l'image à la tête	Freeze frame at playhead
+Inverser la lecture	Reverse playback
+Activer / désactiver	Enable / disable
+Normaliser l'audio (−1 dB)	Normalize audio (−1 dB)
+Réinitialiser les effets	Reset effects
+Lever (laisser un vide)	Lift (leave a gap)
+Supprimer et refermer	Ripple delete
+Sélection	Selection
+Sélection de piste avant	Track select forward
+Sélection de piste arrière	Track select backward
+Modification par propagation	Ripple edit
+Modification par déplacement	Rolling edit
+Allongement de la durée	Rate stretch
+Cutter	Razor
+Couper toutes les pistes	Razor all tracks
+Glissement	Slip
+Déplacement	Slide
+Plume (masque)	Pen (mask)
+Rectangle (masque)	Rectangle (mask)
+Ellipse (masque)	Ellipse (mask)
+Polygone (masque)	Polygon (mask)
+Main	Hand
+Zoom	Zoom
