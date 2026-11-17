@@ -753,7 +753,7 @@ impl Lumen {
                     let (u, v) = to_src(h);
                     let c = sample(src, u, v);
                     let sw_r = Rect::from_min_size(h + vec2(16.0, 16.0), vec2(120.0, 34.0));
-                    painter.rect_filled(sw_r, CornerRadius::same(8), Color32::from_black_alpha(200));
+                    painter.rect_filled(sw_r, CornerRadius::same(4), Color32::from_black_alpha(200));
                     painter.rect_filled(Rect::from_min_size(sw_r.min + vec2(6.0, 6.0), Vec2::splat(22.0)), CornerRadius::same(4), Color32::from_rgb((c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8));
                     let (t, ti) = develop::wb_from_pixel(c);
                     painter.text(sw_r.min + vec2(34.0, 17.0), Align2::LEFT_CENTER, format!("T {t:+.0} · Tt {ti:+.0}"), FontId::proportional(11.5), Color32::WHITE);
@@ -1032,7 +1032,7 @@ impl Lumen {
         let h = lines.len() as f32 * 17.0 + 12.0;
         let w = lines.iter().map(|l| l.chars().count()).max().unwrap_or(10) as f32 * 6.6 + 20.0;
         let bg = Rect::from_min_size(r.left_top() + vec2(12.0, 12.0), vec2(w, h));
-        painter.rect_filled(bg, CornerRadius::same(8), Color32::from_black_alpha(170));
+        painter.rect_filled(bg, CornerRadius::same(4), Color32::from_black_alpha(170));
         for (k, l) in lines.iter().enumerate() {
             painter.text(bg.min + vec2(10.0, 8.0 + k as f32 * 17.0), Align2::LEFT_TOP, short(l, 60), if k == 0 { semibold(12.0) } else { FontId::proportional(12.0) }, if k == 0 { Color32::WHITE } else { Color32::from_white_alpha(200) });
         }

@@ -425,7 +425,7 @@ impl Cut {
             }
         }
         for (r, id, label, track) in [(t1, "T1", "Titres", 0usize), (v2, "V2", "Incrustations", 1), (v1, "V1", "Vidéo", 2), (a2, "A2", "Musique", 3)] {
-            p.rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x19, 0x19, 0x1c));
+            p.rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x19, 0x19, 0x19));
             if self.proj.lock[track] {
                 let mut x = r.left() - (r.height());
                 while x < r.right() {

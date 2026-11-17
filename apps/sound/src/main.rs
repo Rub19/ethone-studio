@@ -1597,7 +1597,7 @@ impl Sound {
                     for (k, (name, hint)) in PRESETS.iter().enumerate() {
                         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 36.0), Sense::click());
                         if resp.hovered() {
-                            ui.painter().rect_filled(r, CornerRadius::same(8), Color32::from_white_alpha(10));
+                            ui.painter().rect_filled(r, CornerRadius::same(4), Color32::from_white_alpha(10));
                         }
                         ui.painter().circle_filled(r.left_center() + vec2(12.0, 0.0), 4.0, WAVE);
                         ui.painter().text(r.left_top() + vec2(24.0, 3.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), INK);
@@ -2060,7 +2060,7 @@ impl Sound {
             let keep = pro::sheet(ctx, "export", 460.0, |ui| {
                 ui.horizontal(|ui| {
                     let (r, _) = ui.allocate_exact_size(Vec2::splat(36.0), Sense::hover());
-                    ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.25));
+                    ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                     export_glyph(ui.painter(), r.shrink(9.0), BLUE);
                     ui.vertical(|ui| {
                         ui.label(RichText::new("Exporter le son").font(semibold(18.0)).color(INK_STRONG));
@@ -2714,7 +2714,7 @@ impl Sound {
                 let lane = Rect::from_min_size(pos2(wave.min.x, wave.min.y + ci as f32 * lane_h), vec2(width, lane_h));
                 let mid = lane.center().y;
                 let amp = lane_h * 0.45 * self.amp_zoom;
-                painter.rect_filled(lane.shrink2(vec2(0.0, 3.0)), CornerRadius::same(8), Color32::from_rgb(0x1c, 0x1c, 0x22));
+                painter.rect_filled(lane.shrink2(vec2(0.0, 3.0)), CornerRadius::same(4), Color32::from_rgb(0x1c, 0x1c, 0x1c));
                 for g in [-6.0f32, -12.0] {
                     let h = 10f32.powf(g / 20.0) * amp;
                     if h < lane_h * 0.48 {
@@ -2834,7 +2834,7 @@ impl Sound {
                 .collect();
             self.overview = Some((self.version, ocols, v));
         }
-        painter.rect_filled(overview, CornerRadius::same(6), Color32::from_rgb(0x1a, 0x1a, 0x1e));
+        painter.rect_filled(overview, CornerRadius::same(6), Color32::from_rgb(0x1a, 0x1a, 0x1a));
         if let Some((_, _, v)) = &self.overview {
             let mid = overview.center().y;
             for (x, p) in v.iter().enumerate() {
@@ -2877,7 +2877,7 @@ fn meters(ui: &mut Ui, levels: &[f32]) {
     let h = (r.height() - 4.0) / n as f32;
     for (k, v) in levels.iter().enumerate() {
         let bar = Rect::from_min_size(pos2(r.left(), r.top() + k as f32 * (h + 4.0)), vec2(r.width(), h - 2.0));
-        p.rect_filled(bar, CornerRadius::same(2), Color32::from_rgb(0x16, 0x16, 0x19));
+        p.rect_filled(bar, CornerRadius::same(2), Color32::from_rgb(0x16, 0x16, 0x16));
         let t = ((db(*v) + 60.0) / 60.0).clamp(0.0, 1.0);
         let segs = 30;
         for s in 0..((t * segs as f32) as usize) {
@@ -2951,7 +2951,7 @@ fn fx_buttons(ui: &mut Ui) -> Option<bool> {
 fn eq_curve(ui: &mut Ui, eq: &[f32; 5]) {
     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 70.0), Sense::hover());
     let p = ui.painter();
-    p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
+    p.rect_filled(r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14));
     p.line_segment([r.left_center(), r.right_center()], Stroke::new(1.0, LINE));
     let pts: Vec<Pos2> = (0..=60)
         .map(|k| {
@@ -2979,7 +2979,7 @@ fn eq_curve(ui: &mut Ui, eq: &[f32; 5]) {
 fn draw_spectrum(ui: &mut Ui, spec: &[f32]) {
     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 90.0), Sense::hover());
     let p = ui.painter();
-    p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
+    p.rect_filled(r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14));
     let w = r.width() / spec.len().max(1) as f32;
     for (i, db) in spec.iter().enumerate() {
         let h = ((db + 90.0) / 90.0).clamp(0.0, 1.0) * (r.height() - 8.0);

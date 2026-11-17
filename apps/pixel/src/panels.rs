@@ -234,7 +234,7 @@ impl Pixel {
             }
         });
         let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 44.0), Sense::hover());
-        ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x14, 0x14, 0x17));
+        ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x14, 0x14, 0x14));
         let b = self.brush;
         let k = (16.0 / b.radius.max(1.0)).min(1.0);
         let mut x = r.left() + 14.0;
@@ -381,7 +381,7 @@ impl Pixel {
             let h = &h[self.hist_channel.min(3)];
             let col = [Color32::from_gray(150), Color32::from_rgb(230, 80, 80), Color32::from_rgb(80, 200, 100), Color32::from_rgb(80, 140, 240)][self.hist_channel.min(3)];
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 60.0), Sense::hover());
-            ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x14, 0x14, 0x17));
+            ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgb(0x14, 0x14, 0x14));
             let max = *h.iter().max().unwrap_or(&1) as f32;
             for (k, v) in h.iter().enumerate() {
                 let x = r.left() + r.width() * k as f32 / 256.0;
@@ -468,9 +468,9 @@ impl Pixel {
             let l = &self.doc.layers[i];
             let p = ui.painter();
             if selected {
-                p.rect_filled(row, CornerRadius::same(9), BLUE.gamma_multiply(0.24));
+                p.rect_filled(row, CornerRadius::same(4), BLUE.gamma_multiply(0.24));
             } else if resp.hovered() {
-                p.rect_filled(row, CornerRadius::same(9), Color32::from_white_alpha(8));
+                p.rect_filled(row, CornerRadius::same(4), Color32::from_white_alpha(8));
             }
             if l.tag > 0 {
                 p.rect_filled(Rect::from_min_size(row.min + vec2(0.0, 8.0), vec2(3.0, 36.0)), CornerRadius::same(1), TAGS[l.tag as usize % 7]);
@@ -490,7 +490,7 @@ impl Pixel {
             }
             let thumb = Rect::from_min_size(pos2(x, row.top() + 7.0), Vec2::splat(38.0));
             if l.adjust.is_some() {
-                p.rect_filled(thumb, CornerRadius::same(6), Color32::from_rgb(0x2c, 0x2c, 0x31));
+                p.rect_filled(thumb, CornerRadius::same(6), Color32::from_rgb(0x2c, 0x2c, 0x2c));
                 p.circle_stroke(thumb.center(), 10.0, Stroke::new(1.6, INK));
                 p.add(Shape::convex_polygon(vec![thumb.center() + vec2(0.0, -10.0), thumb.center() + vec2(0.0, 10.0), thumb.center() + vec2(-8.5, 5.0), thumb.center() + vec2(-8.5, -5.0)], INK, Stroke::NONE));
             } else {

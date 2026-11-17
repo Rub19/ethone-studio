@@ -70,7 +70,7 @@ pub fn slider_full(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::Range
             p.rect_filled(seg, CornerRadius::ZERO, track_color(track, (a + b) / 2.0).unwrap_or(FIELD));
         }
     } else {
-        p.rect_filled(line, CornerRadius::same(2), Color32::from_rgb(0x3a, 0x3a, 0x42));
+        p.rect_filled(line, CornerRadius::same(2), Color32::from_rgb(0x3a, 0x3a, 0x3a));
         let zero = frac(default.clamp(lo, hi));
         let (a, b) = (zero.min(frac(*v)), zero.max(frac(*v)));
         p.rect_filled(Rect::from_min_max(pos2(line.left() + line.width() * a, line.top()), pos2(line.left() + line.width() * b, line.bottom())), CornerRadius::same(2), BLUE.gamma_multiply(0.85));
@@ -198,7 +198,7 @@ pub fn curve_editor(ui: &mut Ui, pts: &mut Vec<[f32; 2]>, ink: Color32, parametr
     let before = pts.clone();
     let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), ui.available_width().min(220.0)), Sense::click_and_drag());
     let p = ui.painter();
-    p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
+    p.rect_filled(r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14));
     if let Some(h) = hist {
         let max = h[2..254].iter().copied().max().unwrap_or(1).max(1) as f32;
         let mut mesh = egui::Mesh::default();
@@ -247,7 +247,7 @@ pub fn curve_editor(ui: &mut Ui, pts: &mut Vec<[f32; 2]>, ink: Color32, parametr
     let near = |s: Pos2, pts: &Vec<[f32; 2]>| pts.iter().position(|q| to_screen(*q).distance(s) < 9.0);
     for (k, q) in pts.iter().enumerate() {
         let hot = Some(k) == dragging || hover.is_some_and(|h| to_screen(*q).distance(h) < 9.0);
-        p.circle(to_screen(*q), if hot { 5.5 } else { 4.0 }, Color32::from_rgb(0x14, 0x14, 0x17), Stroke::new(1.5, ink));
+        p.circle(to_screen(*q), if hot { 5.5 } else { 4.0 }, Color32::from_rgb(0x14, 0x14, 0x14), Stroke::new(1.5, ink));
     }
     if resp.drag_started()
         && let Some(s) = resp.interact_pointer_pos()
@@ -299,7 +299,7 @@ pub fn curve_editor(ui: &mut Ui, pts: &mut Vec<[f32; 2]>, ink: Color32, parametr
 pub fn draw_histogram(ui: &mut Ui, hist: Option<&[[u32; 256]; 4]>, clip: (bool, bool)) {
     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 96.0), Sense::hover());
     let p = ui.painter();
-    p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
+    p.rect_filled(r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14));
     let Some(h) = hist else {
         p.text(r.center(), Align2::CENTER_CENTER, "—", FontId::proportional(13.0), FAINT);
         return;

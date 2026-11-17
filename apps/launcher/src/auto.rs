@@ -75,7 +75,7 @@ impl Auto {
         }
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
         let mut reopen = None;
-        egui::Frame::new().fill(P.tile).corner_radius(CornerRadius::same(12)).stroke(Stroke::new(1.0, P.line)).inner_margin(egui::Margin::same(10)).show(ui, |ui| {
+        egui::Frame::new().fill(P.tile).corner_radius(CornerRadius::same(6)).stroke(Stroke::new(1.0, P.line)).inner_margin(egui::Margin::same(10)).show(ui, |ui| {
             ui.set_width(w - 20.0);
             for t in self.transfers.iter().take(12) {
                 ui.horizontal(|ui| {
@@ -173,7 +173,7 @@ impl Auto {
             let w = ui.available_width().min(860.0);
             ui.horizontal(|ui| {
                 let (r, _) = ui.allocate_exact_size(vec2(40.0, 40.0), Sense::hover());
-                ui.painter().rect_filled(r, CornerRadius::same(11), VIOLET.gamma_multiply(0.25));
+                ui.painter().rect_filled(r, CornerRadius::same(5), VIOLET.gamma_multiply(0.25));
                 sparkle(ui.painter(), r.center() + vec2(-3.0, 3.0), 12.0, VIOLET);
                 sparkle(ui.painter(), r.center() + vec2(9.0, -9.0), 5.0, VIOLET);
                 ui.add_space(6.0);
@@ -186,7 +186,7 @@ impl Auto {
             let thumb = self.thumb(ctx);
             let (drop, resp) = ui.allocate_exact_size(vec2(w, 120.0), Sense::click());
             let hovering = ctx.input(|i| !i.raw.hovered_files.is_empty());
-            ui.painter().rect(drop, CornerRadius::same(14), if hovering || resp.hovered() { P.tile_hover } else { P.tile }, Stroke::new(1.0, if hovering { VIOLET } else { P.line }), StrokeKind::Inside);
+            ui.painter().rect(drop, CornerRadius::same(6), if hovering || resp.hovered() { P.tile_hover } else { P.tile }, Stroke::new(1.0, if hovering { VIOLET } else { P.line }), StrokeKind::Inside);
             match &self.file {
                 Some(f) => {
                     let mut x = drop.left() + 18.0;
@@ -234,7 +234,7 @@ impl Auto {
             ui.horizontal_wrapped(|ui| {
                 ui.set_max_width(w);
                 for s in suggestions(kind_of(self.file.as_deref())) {
-                    let b = egui::Button::new(RichText::new(*s).size(12.0).color(P.ink)).fill(P.field).corner_radius(CornerRadius::same(14));
+                    let b = egui::Button::new(RichText::new(*s).size(12.0).color(P.ink)).fill(P.field).corner_radius(CornerRadius::same(6));
                     if ui.add(b).clicked() {
                         self.prompt = s.to_string();
                     }
@@ -242,7 +242,7 @@ impl Auto {
             });
             ui.add_space(14.0);
             let preview = (!self.prompt.trim().is_empty()).then(|| plan(&self.prompt, self.file.as_deref()));
-            egui::Frame::new().fill(P.tile).corner_radius(CornerRadius::same(14)).stroke(Stroke::new(1.0, P.line)).inner_margin(egui::Margin::same(16)).show(ui, |ui| {
+            egui::Frame::new().fill(P.tile).corner_radius(CornerRadius::same(6)).stroke(Stroke::new(1.0, P.line)).inner_margin(egui::Margin::same(16)).show(ui, |ui| {
                 ui.set_width(w - 32.0);
                 match &preview {
                     None => {
@@ -266,7 +266,7 @@ impl Auto {
             ui.add_space(12.0);
             ui.horizontal(|ui| {
                 let can = matches!(preview, Some(Ok(_))) && self.running.is_none();
-                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(13.0)).color(Color32::WHITE)).fill(if can { VIOLET } else { P.field }).corner_radius(CornerRadius::same(18)).min_size(vec2(120.0, 36.0));
+                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(13.0)).color(Color32::WHITE)).fill(if can { VIOLET } else { P.field }).corner_radius(CornerRadius::same(8)).min_size(vec2(120.0, 36.0));
                 if (ui.add_enabled(can, b).on_hover_text("Ctrl+Entrée").clicked() || (go_key && can)) && can {
                     self.start(ctx);
                 }
@@ -296,7 +296,7 @@ impl Auto {
                         ui.add_space(8.0);
                         let s = t.size_vec2();
                         let k = (w / s.x).min(420.0 / s.y).min(1.0);
-                        ui.add(egui::Image::new((t.id(), s * k)).corner_radius(CornerRadius::same(10)));
+                        ui.add(egui::Image::new((t.id(), s * k)).corner_radius(CornerRadius::same(5)));
                     }
                     if let Some(f) = o.file.clone() {
                         ui.horizontal(|ui| {

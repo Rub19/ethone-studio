@@ -105,7 +105,7 @@ impl Launcher {
             s.visuals.panel_fill = P.page;
             s.visuals.window_fill = P.tile;
             s.visuals.window_stroke = Stroke::new(1.0, P.line);
-            s.visuals.window_corner_radius = CornerRadius::same(8);
+            s.visuals.window_corner_radius = CornerRadius::same(4);
             s.visuals.menu_corner_radius = CornerRadius::same(5);
             s.visuals.popup_shadow = Shadow { offset: [0, 10], blur: 30, spread: 0, color: Color32::from_black_alpha(130) };
             s.visuals.window_shadow = s.visuals.popup_shadow;
@@ -403,7 +403,7 @@ impl Launcher {
         let hovered = ui.rect_contains_pointer(rect);
         let lift = ctx.animate_bool_with_time(egui::Id::NULL.with(("lift", &app.id)), hovered, 0.18);
         let painter = ui.painter().clone();
-        let radius = CornerRadius::same(8);
+        let radius = CornerRadius::same(4);
         let shadow = Shadow {
             offset: [0, (3.0 + 7.0 * lift) as i8],
             blur: (14.0 + 18.0 * lift) as u8,
@@ -611,9 +611,9 @@ fn nav_row(ui: &mut Ui, view: &mut View, value: View, label: &str, dot: Option<C
     let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::click());
     let p = ui.painter();
     if selected {
-        p.rect_filled(rect, CornerRadius::same(9), P.blue.gamma_multiply(0.22));
+        p.rect_filled(rect, CornerRadius::same(4), P.blue.gamma_multiply(0.22));
     } else if resp.hovered() {
-        p.rect_filled(rect, CornerRadius::same(9), Color32::from_white_alpha(8));
+        p.rect_filled(rect, CornerRadius::same(4), Color32::from_white_alpha(8));
     }
     let mut x = rect.left() + 12.0;
     if let Some(c) = dot {
@@ -633,7 +633,7 @@ fn nav_row(ui: &mut Ui, view: &mut View, value: View, label: &str, dot: Option<C
 fn plain_row(ui: &mut Ui, label: &str) -> bool {
     let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::click());
     if resp.hovered() {
-        ui.painter().rect_filled(rect, CornerRadius::same(9), Color32::from_white_alpha(8));
+        ui.painter().rect_filled(rect, CornerRadius::same(4), Color32::from_white_alpha(8));
     }
     let c = rect.left_center() + vec2(18.0, 0.0);
     for k in 0..8 {

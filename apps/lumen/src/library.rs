@@ -163,7 +163,7 @@ impl Lumen {
                     let label = if r == 0 { "Toutes".to_string() } else { format!("{r}★") };
                     let on = self.min_rating == r;
                     let (rect, resp) = ui.allocate_exact_size(vec2(if r == 0 { 56.0 } else { 34.0 }, 26.0), Sense::click());
-                    ui.painter().rect_filled(rect, CornerRadius::same(13), if on { BLUE } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
+                    ui.painter().rect_filled(rect, CornerRadius::same(6), if on { BLUE } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
                     ui.painter().text(rect.center(), Align2::CENTER_CENTER, label, FontId::proportional(12.0), if on { Color32::WHITE } else { INK });
                     if resp.clicked() {
                         self.min_rating = r;
@@ -549,7 +549,7 @@ impl Lumen {
         let (rect, resp) = ui.allocate_exact_size(vec2(size, size + 30.0), Sense::click());
         let on = self.current == Some(i) || self.picked.contains(&i);
         let p = ui.painter();
-        p.rect(rect, CornerRadius::same(12), if on || resp.hovered() { Color32::from_rgb(0x2c, 0x2c, 0x32) } else { Color32::from_rgb(0x22, 0x22, 0x26) }, Stroke::new(if on { 2.0 } else { 1.0 }, if on { BLUE } else { LINE }), StrokeKind::Inside);
+        p.rect(rect, CornerRadius::same(6), if on || resp.hovered() { Color32::from_rgb(0x2c, 0x2c, 0x2c) } else { Color32::from_rgb(0x22, 0x22, 0x22) }, Stroke::new(if on { 2.0 } else { 1.0 }, if on { BLUE } else { LINE }), StrokeKind::Inside);
         let img_area = Rect::from_min_size(rect.min + vec2(8.0, 8.0), Vec2::splat(size - 16.0));
         let path = self.files[i].clone();
         match self.thumbs.get(&path) {
@@ -560,7 +560,7 @@ impl Lumen {
                 p.image(t.id(), fit, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             }
             None => {
-                p.rect_filled(img_area.shrink(10.0), CornerRadius::same(8), Color32::from_white_alpha(6));
+                p.rect_filled(img_area.shrink(10.0), CornerRadius::same(4), Color32::from_white_alpha(6));
             }
         }
         let e = self.get(i);
@@ -647,7 +647,7 @@ impl Lumen {
                 caption(ui, "À gauche : la référence (photo active). À droite : le candidat.");
             });
         });
-        egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x14)).inner_margin(Margin::same(16))).show(root, |ui| {
+        egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x12)).inner_margin(Margin::same(16))).show(root, |ui| {
             let full = ui.max_rect();
             let half = full.width() / 2.0 - 8.0;
             for (k, idx) in [a, b].into_iter().enumerate() {
@@ -699,7 +699,7 @@ impl Lumen {
                 caption(ui, if self.picked.len() > 1 { "Ensemble de la sélection : clique pour choisir, × pour écarter une photo, double-clic pour développer." } else { "Sélectionne plusieurs photos (Ctrl+clic) pour les comparer ici. Aperçu des 12 premières." });
             });
         });
-        egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x14)).inner_margin(Margin::same(16))).show(root, |ui| {
+        egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x12)).inner_margin(Margin::same(16))).show(root, |ui| {
             let full = ui.max_rect();
             let n = ids.len().max(1);
             let aspect = full.width() / full.height().max(1.0);

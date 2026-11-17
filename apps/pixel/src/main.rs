@@ -312,7 +312,7 @@ impl Pixel {
             brush: Brush::new(12.0, 0.8, 1.0),
             brush_preset: 0,
             smoothing: 0.0,
-            primary: Color32::from_rgb(20, 20, 24),
+            primary: Color32::from_rgb(20, 20, 20),
             secondary: Color32::WHITE,
             swatches,
             swatch_set: 0,
@@ -1134,7 +1134,7 @@ impl Pixel {
             std::mem::swap(&mut self.primary, &mut self.secondary);
         }
         if reset {
-            self.primary = Color32::from_rgb(20, 20, 24);
+            self.primary = Color32::from_rgb(20, 20, 20);
             self.secondary = Color32::WHITE;
         }
         if smaller {
@@ -2010,7 +2010,7 @@ impl Pixel {
             }
             ui.add_space(26.0);
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::hover());
-            ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.22));
+            ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.22));
             ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(13.0), INK_STRONG);
         });
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD).inner_margin(Margin { left: 40, right: 40, top: 34, bottom: 20 })).show(root, |ui| {
@@ -2046,7 +2046,7 @@ impl Pixel {
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 120.0), Sense::hover());
                     let p = ui.painter();
-                    p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
+                    p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose une image n'importe où pour l'ouvrir", semibold(15.0), INK);
                     p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO", FontId::proportional(12.5), MUTED);
                 } else {
@@ -2054,7 +2054,7 @@ impl Pixel {
                     for p in &self.recents {
                         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 46.0), Sense::click());
                         if resp.hovered() {
-                            ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
+                            ui.painter().rect_filled(r, CornerRadius::same(5), Color32::from_white_alpha(10));
                         }
                         let name = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                         ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, name, semibold(13.0), INK);
@@ -2105,13 +2105,13 @@ impl Pixel {
 }
 
 pub const GRID_COLORS: [(&str, [u8; 3]); 5] = [("Bleu", [10, 132, 255]), ("Gris", [150, 150, 150]), ("Rouge", [255, 69, 58]), ("Vert", [48, 209, 88]), ("Magenta", [255, 0, 200])];
-pub const PASTEBOARDS: [(&str, Color32); 4] = [("Sombre", PASTEBOARD), ("Gris moyen", Color32::from_rgb(0x3a, 0x3a, 0x3f)), ("Clair", Color32::from_rgb(0xb8, 0xb8, 0xbd)), ("Noir", Color32::BLACK)];
+pub const PASTEBOARDS: [(&str, Color32); 4] = [("Sombre", PASTEBOARD), ("Gris moyen", Color32::from_rgb(0x3a, 0x3a, 0x3a)), ("Clair", Color32::from_rgb(0xb8, 0xb8, 0xbd)), ("Noir", Color32::BLACK)];
 
 fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: u32, h: u32, selected: bool, width: f32) -> egui::Response {
     let (r, resp) = ui.allocate_exact_size(vec2(width, 132.0), Sense::click());
     let hover = resp.hovered();
     let p = ui.painter();
-    p.rect(r, CornerRadius::same(12), if hover { Color32::from_rgb(0x2f, 0x2f, 0x35) } else { Color32::from_rgb(0x27, 0x27, 0x2c) }, Stroke::new(if selected { 2.0 } else { 1.0 }, if selected { BLUE } else { LINE }), StrokeKind::Inside);
+    p.rect(r, CornerRadius::same(6), if hover { Color32::from_rgb(0x2f, 0x2f, 0x2f) } else { Color32::from_rgb(0x27, 0x27, 0x27) }, Stroke::new(if selected { 2.0 } else { 1.0 }, if selected { BLUE } else { LINE }), StrokeKind::Inside);
     let area = Rect::from_center_size(r.center_top() + vec2(0.0, 44.0), vec2(width - 40.0, 56.0));
     let s = (area.width() / w as f32).min(area.height() / h as f32);
     let shape = Rect::from_center_size(area.center(), vec2(w as f32, h as f32) * s);

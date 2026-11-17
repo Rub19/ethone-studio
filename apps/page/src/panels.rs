@@ -1120,7 +1120,7 @@ impl PageApp {
                 let mut remove = None;
                 let n = self.doc.pages.len();
                 for (k, s) in self.doc.sections.iter_mut().enumerate() {
-                    egui::Frame::new().fill(Color32::from_white_alpha(6)).corner_radius(CornerRadius::same(8)).inner_margin(8).show(ui, |ui| {
+                    egui::Frame::new().fill(Color32::from_white_alpha(6)).corner_radius(CornerRadius::same(4)).inner_margin(8).show(ui, |ui| {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new("Dès la page").size(12.0).color(MUTED));
                             let mut p = s.start + 1;

@@ -8,7 +8,7 @@ use studio_ui::pro::{self, BLUE, FAINT, INK, INK_STRONG, MUTED, PANEL, semibold}
 const ZOOMS: [(&str, f32); 6] = [("Ajuster", 0.0), ("25 %", 0.25), ("50 %", 0.5), ("100 %", 1.0), ("200 %", 2.0), ("400 %", 4.0)];
 const COLD_WARM: [Color32; 2] = [Color32::from_rgb(70, 120, 255), Color32::from_rgb(255, 205, 60)];
 const GREEN_MAGENTA: [Color32; 2] = [Color32::from_rgb(80, 200, 90), Color32::from_rgb(220, 80, 210)];
-const DARK_LIGHT: [Color32; 2] = [Color32::from_rgb(20, 20, 24), Color32::from_rgb(235, 235, 240)];
+const DARK_LIGHT: [Color32; 2] = [Color32::from_rgb(20, 20, 20), Color32::from_rgb(235, 235, 240)];
 const PANELS: [(&str, &str, bool); 14] = [
     ("basic", "Réglages de base", true),
     ("curve", "Courbe des tonalités", true),
@@ -116,7 +116,7 @@ impl Lumen {
                     for v in self.visible() {
                         let (r, resp) = ui.allocate_exact_size(vec2(110.0, 90.0), Sense::click());
                         let p = ui.painter();
-                        p.rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x22, 0x22, 0x26));
+                        p.rect_filled(r, CornerRadius::same(4), Color32::from_rgb(0x22, 0x22, 0x22));
                         if let Some(t) = self.thumbs.get(&self.files[v]) {
                             let [tw, th] = t.size();
                             let s = ((r.width() - 8.0) / tw as f32).min((r.height() - 8.0) / th as f32);
@@ -127,7 +127,7 @@ impl Lumen {
                             p.text(r.left_bottom() + vec2(6.0, -6.0), Align2::LEFT_BOTTOM, "★".repeat(e.rating as usize), FontId::proportional(10.0), STAR);
                         }
                         if v == i {
-                            p.rect_stroke(r, CornerRadius::same(8), Stroke::new(2.0, BLUE), StrokeKind::Inside);
+                            p.rect_stroke(r, CornerRadius::same(4), Stroke::new(2.0, BLUE), StrokeKind::Inside);
                         }
                         if resp.on_hover_text(display_name(&self.files[v])).clicked() {
                             self.select(v, ctx);
@@ -329,7 +329,7 @@ impl Lumen {
     fn navigator(&mut self, ui: &mut Ui) {
         heading(ui, "NAVIGATEUR");
         let (box_r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 132.0), Sense::click_and_drag());
-        ui.painter().rect_filled(box_r, CornerRadius::same(8), Color32::from_rgb(0x14, 0x14, 0x17));
+        ui.painter().rect_filled(box_r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14));
         let Some(t) = &self.preview else { return };
         let [w, h] = t.size();
         let s = (box_r.width() / w as f32).min(box_r.height() / h as f32);
@@ -917,7 +917,7 @@ impl Lumen {
     }
 
     fn central(&mut self, root: &mut Ui, ctx: &egui::Context, i: usize) {
-        egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x14))).show(root, |ui| {
+        egui::CentralPanel::default().frame(Frame::new().fill(Color32::from_rgb(0x12, 0x12, 0x12))).show(root, |ui| {
             let full = ui.max_rect();
             let bar = Rect::from_min_size(full.min, vec2(full.width(), 38.0));
             ui.scope_builder(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(14.0, 4.0))), |ui| {
@@ -957,12 +957,12 @@ impl Lumen {
                 });
             });
             let obar = Rect::from_min_size(pos2(full.left(), bar.bottom()), vec2(full.width(), 36.0));
-            ui.painter().rect_filled(obar, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1e));
+            ui.painter().rect_filled(obar, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1a));
             ui.scope_builder(egui::UiBuilder::new().max_rect(obar.shrink2(vec2(14.0, 3.0))), |ui| {
                 ui.horizontal_centered(|ui| self.option_bar(ui, i));
             });
             let strip = Rect::from_min_max(pos2(full.left(), obar.bottom()), pos2(full.left() + 52.0, full.bottom()));
-            ui.painter().rect_filled(strip, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1e));
+            ui.painter().rect_filled(strip, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1a));
             ui.scope_builder(egui::UiBuilder::new().max_rect(strip.shrink2(vec2(7.0, 10.0))), |ui| {
                 ui.vertical(|ui| self.tool_strip(ui, ctx));
             });

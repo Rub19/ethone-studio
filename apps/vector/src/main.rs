@@ -437,7 +437,7 @@ impl VectorApp {
             extra: Vec::new(),
             sel_node: None,
             tool: Tool::Select,
-            style: Style { fill: Some(Color32::from_rgb(255, 176, 46)), stroke: Some(Color32::from_rgb(20, 20, 24)), stroke_w: 2.0 },
+            style: Style { fill: Some(Color32::from_rgb(255, 176, 46)), stroke: Some(Color32::from_rgb(20, 20, 20)), stroke_w: 2.0 },
             o: Opts {
                 sides: 6,
                 star_ratio: 0.5,

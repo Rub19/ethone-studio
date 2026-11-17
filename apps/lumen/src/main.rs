@@ -1784,7 +1784,7 @@ impl Lumen {
             let area = ui.max_rect();
             let card = Rect::from_center_size(area.center(), vec2(520.0, 380.0));
             ui.scope_builder(egui::UiBuilder::new().max_rect(card), |ui| {
-                Frame::new().fill(CHROME).corner_radius(CornerRadius::same(18)).stroke(Stroke::new(1.0, LINE)).inner_margin(Margin::same(32)).show(ui, |ui| {
+                Frame::new().fill(CHROME).corner_radius(CornerRadius::same(8)).stroke(Stroke::new(1.0, LINE)).inner_margin(Margin::same(32)).show(ui, |ui| {
                     ui.vertical_centered(|ui| {
                         ui.add(egui::Image::new((self.icon.id(), Vec2::splat(64.0))));
                         ui.add_space(14.0);
@@ -2101,7 +2101,7 @@ fn view_switch(ui: &mut Ui, view: &mut View, can_develop: bool) {
         let resp = ui.interact(r, ui.make_persistent_id(("seg", k)), if enabled { egui::Sense::click() } else { egui::Sense::hover() });
         let on = *view == *v || (*v == View::Library && matches!(*view, View::Compare | View::Survey));
         if on {
-            ui.painter().rect_filled(r, CornerRadius::same(12), Color32::from_rgb(0x4a, 0x4a, 0x52));
+            ui.painter().rect_filled(r, CornerRadius::same(12), Color32::from_rgb(0x4a, 0x4a, 0x4a));
         }
         ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, *label, if on { semibold(12.0) } else { egui::FontId::proportional(12.0) }, if !enabled { studio_ui::pro::FAINT } else if on { INK_STRONG } else { MUTED });
         if resp.clicked() {

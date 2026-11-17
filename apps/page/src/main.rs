@@ -1814,7 +1814,7 @@ impl PageApp {
                 for p in &self.recents {
                     let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 46.0), Sense::click());
                     if resp.hovered() {
-                        ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
+                        ui.painter().rect_filled(r, CornerRadius::same(5), Color32::from_white_alpha(10));
                     }
                     let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                     ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(13.0), INK);
@@ -1831,7 +1831,7 @@ impl PageApp {
     }
 
     fn options_bar(&mut self, root: &mut Ui) {
-        egui::Panel::top("options").exact_size(34.0).frame(EFrame::new().fill(Color32::from_rgb(0x20, 0x20, 0x24)).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
+        egui::Panel::top("options").exact_size(34.0).frame(EFrame::new().fill(Color32::from_rgb(0x20, 0x20, 0x20)).inner_margin(Margin::symmetric(12, 0)).stroke(Stroke::new(1.0, LINE))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
                 ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
@@ -3201,7 +3201,7 @@ impl PageApp {
         let left = Rect::from_min_max(pos2(full.left(), area.top()), pos2(area.left(), full.bottom()));
         let corner = Rect::from_min_max(pos2(full.left(), tab_bar.bottom()), pos2(area.left(), area.top()));
         let p = ui.painter();
-        let bg = Color32::from_rgb(0x1d, 0x1d, 0x21);
+        let bg = Color32::from_rgb(0x1d, 0x1d, 0x1d);
         for r in [top, left, corner] {
             p.rect_filled(r, CornerRadius::ZERO, bg);
         }
@@ -3288,7 +3288,7 @@ impl PageApp {
             .resizable(true)
             .default_width(420.0)
             .anchor(Align2::CENTER_BOTTOM, vec2(0.0, -48.0))
-            .frame(EFrame::window(&ctx.global_style()).fill(CHROME).corner_radius(CornerRadius::same(14)).inner_margin(Margin::same(14)))
+            .frame(EFrame::window(&ctx.global_style()).fill(CHROME).corner_radius(CornerRadius::same(6)).inner_margin(Margin::same(14)))
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(format!("{fam} · {sz:.1} pt")).size(12.0).color(MUTED));
@@ -3406,7 +3406,7 @@ impl PageApp {
             let keep = pro::sheet(ctx, "export", 470.0, |ui| {
                 ui.horizontal(|ui| {
                     let (r, _) = ui.allocate_exact_size(Vec2::splat(36.0), Sense::hover());
-                    ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.25));
+                    ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                     export_glyph(ui.painter(), r.shrink(9.0), BLUE);
                     ui.vertical(|ui| {
                         ui.label(RichText::new("Exporter le document").font(semibold(18.0)).color(INK_STRONG));
@@ -3632,7 +3632,7 @@ fn preset_card(ui: &mut Ui, name: &str, kind: &str, w: f32, h: f32, template: bo
     let width = 168.0;
     let (r, resp) = ui.allocate_exact_size(vec2(width, 140.0), Sense::click());
     let p = ui.painter();
-    p.rect(r, CornerRadius::same(12), if resp.hovered() { Color32::from_rgb(0x2f, 0x2f, 0x35) } else { Color32::from_rgb(0x27, 0x27, 0x2c) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
+    p.rect(r, CornerRadius::same(6), if resp.hovered() { Color32::from_rgb(0x2f, 0x2f, 0x2f) } else { Color32::from_rgb(0x27, 0x27, 0x27) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
     let area = Rect::from_center_size(r.center_top() + vec2(0.0, 48.0), vec2(width - 60.0, 64.0));
     let s = (area.width() / w).min(area.height() / h);
     let sheet = Rect::from_center_size(area.center(), vec2(w, h) * s);

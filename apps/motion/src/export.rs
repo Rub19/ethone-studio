@@ -374,7 +374,7 @@ impl Motion {
         let keep = pro::sheet(ctx, "export", 520.0, |ui| {
             ui.horizontal(|ui| {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(36.0), Sense::hover());
-                ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.25));
+                ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                 glyph(ui.painter(), r.shrink(9.0), G::Export, BLUE);
                 ui.vertical(|ui| {
                     ui.label(RichText::new("Exporter l'animation").font(semibold(18.0)).color(INK_STRONG));
@@ -529,7 +529,7 @@ impl Motion {
             for (k, q) in self.queue.iter().enumerate() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 42.0), Sense::hover());
                 let p = ui.painter();
-                p.rect(r, CornerRadius::same(8), pro::WELL, Stroke::new(1.0, LINE), StrokeKind::Inside);
+                p.rect(r, CornerRadius::same(4), pro::WELL, Stroke::new(1.0, LINE), StrokeKind::Inside);
                 p.text(r.left_top() + vec2(12.0, 6.0), Align2::LEFT_TOP, format!("{}. {} · {}", k + 1, FORMATS[q.o.format].0, SCALES[q.o.scale].0), semibold(12.0), INK);
                 p.text(r.left_top() + vec2(12.0, 24.0), Align2::LEFT_TOP, short(&q.path.display().to_string(), 70), FontId::proportional(11.0), FAINT);
                 let xr = Rect::from_center_size(r.right_center() - vec2(18.0, 0.0), Vec2::splat(22.0));

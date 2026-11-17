@@ -686,7 +686,7 @@ impl Pixel {
                 if kind == crate::filters::Kind::Curves && adj.vals.len() >= 6 {
                     let (r, _) = ui.allocate_exact_size(egui::vec2(140.0, 140.0), Sense::hover());
                     let p = ui.painter();
-                    p.rect(r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x17), Stroke::new(1.0, LINE), StrokeKind::Inside);
+                    p.rect(r, CornerRadius::same(4), Color32::from_rgb(0x14, 0x14, 0x14), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     let lut = crate::filters::Kind::Curves.apply(&RgbaImage::from_fn(256, 1, |x, _| image::Rgba([x as u8, x as u8, x as u8, 255])), &[0.0, adj.vals[1], adj.vals[2], adj.vals[3], adj.vals[4], adj.vals[5]]);
                     let pts: Vec<egui::Pos2> = (0..256).step_by(4).map(|x| egui::pos2(r.left() + x as f32 / 255.0 * r.width(), r.bottom() - lut.get_pixel(x, 0).0[0] as f32 / 255.0 * r.height())).collect();
                     p.line_segment([r.left_bottom(), r.right_top()], Stroke::new(1.0, Color32::from_white_alpha(30)));

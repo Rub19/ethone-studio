@@ -147,7 +147,7 @@ impl Motion {
             let w = ui.available_width();
             let (r, _) = ui.allocate_exact_size(vec2(w, 150.0), Sense::hover());
             let p = ui.painter();
-            p.rect(r, CornerRadius::same(8), pro::WELL, Stroke::new(1.0, LINE), StrokeKind::Inside);
+            p.rect(r, CornerRadius::same(4), pro::WELL, Stroke::new(1.0, LINE), StrokeKind::Inside);
             let plot = r.shrink(12.0);
             let (lo, hi) = (-0.4f32, 1.4f32);
             let to = |x: f32, y: f32| pos2(plot.left() + x * plot.width(), plot.bottom() - (y - lo) / (hi - lo) * plot.height());

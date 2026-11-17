@@ -2455,7 +2455,7 @@ impl Cut {
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 110.0), Sense::hover());
                     let p = ui.painter();
-                    p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
+                    p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose des vidéos, des photos ou de la musique n'importe où", semibold(15.0), INK);
                     p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…", FontId::proportional(12.5), MUTED);
                 } else {
@@ -2463,7 +2463,7 @@ impl Cut {
                     for p in &self.recents {
                         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 46.0), Sense::click());
                         if resp.hovered() {
-                            ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
+                            ui.painter().rect_filled(r, CornerRadius::same(5), Color32::from_white_alpha(10));
                         }
                         let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                         ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(13.0), INK);
@@ -2531,7 +2531,7 @@ impl Cut {
             ui.add_space(8.0);
             if self.proj.sources.is_empty() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 120.0), Sense::hover());
-                ui.painter().rect(r, CornerRadius::same(10), Color32::from_white_alpha(3), Stroke::new(1.0, LINE), StrokeKind::Inside);
+                ui.painter().rect(r, CornerRadius::same(5), Color32::from_white_alpha(3), Stroke::new(1.0, LINE), StrokeKind::Inside);
                 ui.painter().text(r.center() - vec2(0.0, 8.0), Align2::CENTER_CENTER, "Glisse tes fichiers ici", semibold(12.5), INK);
                 ui.painter().text(r.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, "Vidéos, photos et musiques", FontId::proportional(11.5), FAINT);
                 return;
@@ -2558,7 +2558,7 @@ impl Cut {
                         let s = &self.proj.sources[i];
                         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 44.0), Sense::click());
                         if resp.hovered() {
-                            ui.painter().rect_filled(r, CornerRadius::same(8), Color32::from_white_alpha(8));
+                            ui.painter().rect_filled(r, CornerRadius::same(4), Color32::from_white_alpha(8));
                         }
                         let pic = Rect::from_min_size(r.min + vec2(4.0, 6.0), vec2(56.0, 32.0));
                         self.media_thumb(ui.painter(), pic, i);
@@ -2590,7 +2590,7 @@ impl Cut {
                                     p.circle_filled(pic.left_bottom() + vec2(10.0, -10.0), 4.0, GREEN);
                                 }
                                 if resp.hovered() {
-                                    p.rect_stroke(pic, CornerRadius::same(8), Stroke::new(1.5, BLUE), StrokeKind::Inside);
+                                    p.rect_stroke(pic, CornerRadius::same(4), Stroke::new(1.5, BLUE), StrokeKind::Inside);
                                     let plus = Rect::from_min_size(pic.right_top() + vec2(-26.0, 4.0), Vec2::splat(22.0));
                                     p.circle_filled(plus.center(), 11.0, BLUE);
                                     glyph(p, plus.shrink(5.0), G::Plus, Color32::WHITE);
@@ -2993,7 +2993,7 @@ impl Cut {
             let keep = pro::sheet(ctx, "export", 520.0, |ui| {
                 ui.horizontal(|ui| {
                     let (r, _) = ui.allocate_exact_size(Vec2::splat(36.0), Sense::hover());
-                    ui.painter().rect_filled(r, CornerRadius::same(9), BLUE.gamma_multiply(0.25));
+                    ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                     glyph(ui.painter(), r.shrink(9.0), G::Export, BLUE);
                     ui.vertical(|ui| {
                         ui.label(RichText::new("Exporter").font(semibold(18.0)).color(INK_STRONG));
@@ -3706,7 +3706,7 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32) -> egui::R
     let width = 176.0;
     let (r, resp) = ui.allocate_exact_size(vec2(width, 132.0), Sense::click());
     let p = ui.painter();
-    p.rect(r, CornerRadius::same(12), if resp.hovered() { Color32::from_rgb(0x2f, 0x2f, 0x35) } else { Color32::from_rgb(0x27, 0x27, 0x2c) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
+    p.rect(r, CornerRadius::same(6), if resp.hovered() { Color32::from_rgb(0x2f, 0x2f, 0x2f) } else { Color32::from_rgb(0x27, 0x27, 0x27) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
     let area = Rect::from_center_size(r.center_top() + vec2(0.0, 44.0), vec2(width - 40.0, 56.0));
     let s = (area.width() / w).min(area.height() / h);
     let shape = Rect::from_center_size(area.center(), vec2(w, h) * s);

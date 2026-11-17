@@ -8,6 +8,14 @@ mod payload;
 mod system;
 
 use eframe::egui::{self, Color32, RichText};
+use studio_ui::pro;
+
+/// The main call to action, at installer scale: wider and taller than the in-app buttons.
+fn cta(ui: &mut egui::Ui, label: &str, primary: bool) -> bool {
+    let text = RichText::new(label).font(pro::semibold(13.5)).color(if primary { Color32::WHITE } else { pro::INK_STRONG });
+    let b = egui::Button::new(text).fill(if primary { pro::BLUE } else { pro::FIELD }).corner_radius(4).min_size([150.0, 34.0].into());
+    ui.add(b).clicked()
+}
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone, PartialEq)]
@@ -133,16 +141,16 @@ impl eframe::App for Setup {
                 ui.add_space(18.0);
                 ui.vertical(|ui| {
                     ui.add_space(10.0);
-                    ui.label(RichText::new(system::name(&id)).size(30.0).strong());
+                    ui.label(RichText::new(system::name(&id)).font(pro::semibold(26.0)).color(pro::INK_STRONG));
                     let desc = system::APPS.iter().find(|a| a.0 == id).map_or("", |a| a.2);
-                    ui.label(RichText::new(desc).size(15.0).weak());
+                    ui.label(RichText::new(desc).size(13.5).color(pro::MUTED));
                     if !removing {
                         let line = match &self.previous {
                             Some(v) if *v == version => format!("Version {version} · déjà installée, elle sera réparée"),
                             Some(v) => format!("Version {version} · remplace la {v}"),
                             None => format!("Version {version}"),
                         };
-                        ui.label(RichText::new(line).size(12.5).weak());
+                        ui.label(RichText::new(line).size(12.0).color(pro::FAINT));
                     }
                 });
             });
@@ -157,7 +165,7 @@ impl eframe::App for Setup {
                             ui.add_space(10.0);
                             ui.checkbox(&mut self.purge, "Supprimer aussi les préférences de l'application");
                             ui.add_space(14.0);
-                            if ui.add(egui::Button::new(RichText::new("Désinstaller").size(16.0)).min_size([180.0, 40.0].into())).clicked() {
+                            if cta(ui, "Désinstaller", false) {
                                 self.start();
                             }
                         }
@@ -167,19 +175,24 @@ impl eframe::App for Setup {
                             ui.checkbox(&mut self.desktop, "Créer un raccourci sur le Bureau");
                             ui.checkbox(&mut self.open_after, "Ouvrir l'application à la fin");
                             ui.add_space(14.0);
-                            if ui.add(egui::Button::new(RichText::new("Installer").size(16.0)).fill(Color32::from_rgb(10, 132, 255)).min_size([180.0, 40.0].into())).clicked() {
+                            if cta(ui, "Installer", true) {
                                 self.start();
                             }
                         }
                         Step::Working(p, label) => {
-                            ui.label(RichText::new(label).size(15.0));
-                            ui.add_space(8.0);
-                            ui.add(egui::ProgressBar::new(*p).show_percentage().desired_height(14.0));
+                            ui.horizontal(|ui| {
+                                ui.label(RichText::new(label).size(13.0).color(pro::INK));
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    ui.label(RichText::new(format!("{:.0} %", p * 100.0)).size(12.0).color(pro::MUTED));
+                                });
+                            });
+                            ui.add_space(6.0);
+                            ui.add(egui::ProgressBar::new(*p).fill(pro::BLUE).corner_radius(2).desired_height(5.0));
                         }
                         Step::Done => {
-                            ui.label(RichText::new(if removing { "Désinstallation terminée." } else { "Installation terminée." }).size(18.0).strong());
-                            ui.add_space(16.0);
-                            if ui.add(egui::Button::new(RichText::new("Fermer").size(16.0)).min_size([180.0, 40.0].into())).clicked() {
+                            ui.label(RichText::new(if removing { "Désinstallation terminée." } else { "Installation terminée." }).font(pro::semibold(16.0)).color(pro::INK_STRONG));
+                            ui.add_space(14.0);
+                            if cta(ui, if removing || !self.open_after { "Fermer" } else { "Ouvrir" }, true) {
                                 if removing {
                                     system::remove_self_later();
                                 } else if self.open_after {
@@ -189,15 +202,19 @@ impl eframe::App for Setup {
                             }
                         }
                         Step::Failed(e) => {
-                            ui.colored_label(Color32::from_rgb(255, 110, 100), format!("Échec : {e}"));
+                            ui.colored_label(pro::RED, format!("Échec : {e}"));
                             ui.add_space(12.0);
-                            if ui.button("Réessayer").clicked() {
+                            if cta(ui, "Réessayer", false) {
                                 *self.step.lock().unwrap_or_else(|e| e.into_inner()) = Step::Ready;
                             }
                         }
                     }
                 });
             });
+            let foot = egui::Rect::from_min_max(egui::pos2(ui.max_rect().left(), ui.max_rect().bottom() - 34.0), ui.max_rect().max);
+            ui.painter().hline(foot.x_range(), foot.top(), egui::Stroke::new(1.0, pro::LINE));
+            ui.painter().text(foot.left_center() + egui::vec2(28.0, 0.0), egui::Align2::LEFT_CENTER, "Ethone Studio", pro::semibold(11.5), pro::MUTED);
+            ui.painter().text(foot.right_center() - egui::vec2(28.0, 0.0), egui::Align2::RIGHT_CENTER, "Sans compte · sans droits administrateur", egui::FontId::proportional(11.0), pro::FAINT);
         });
     }
 }

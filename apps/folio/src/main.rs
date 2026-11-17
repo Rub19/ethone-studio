@@ -851,9 +851,9 @@ impl Folio {
                 for (title, sub, k) in cards {
                     let (r, resp) = ui.allocate_exact_size(vec2(290.0, 92.0), Sense::click());
                     let hover = resp.hovered();
-                    ui.painter().rect(r, CornerRadius::same(12), if hover { Color32::from_rgb(0x2c, 0x2c, 0x32) } else { Color32::from_rgb(0x24, 0x24, 0x29) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
+                    ui.painter().rect(r, CornerRadius::same(6), if hover { Color32::from_rgb(0x2c, 0x2c, 0x2c) } else { Color32::from_rgb(0x24, 0x24, 0x24) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
                     let ic = Rect::from_min_size(r.min + vec2(16.0, 24.0), Vec2::splat(42.0));
-                    ui.painter().rect_filled(ic, CornerRadius::same(10), ACCENT.gamma_multiply(0.22));
+                    ui.painter().rect_filled(ic, CornerRadius::same(5), ACCENT.gamma_multiply(0.22));
                     home_glyph(ui.painter(), ic.shrink(10.0), k, ACCENT);
                     ui.painter().text(r.min + vec2(72.0, 30.0), Align2::LEFT_CENTER, title, semibold(13.0), INK_STRONG);
                     ui.painter().text(r.min + vec2(72.0, 54.0), Align2::LEFT_CENTER, sub, FontId::proportional(11.5), MUTED);
@@ -1053,7 +1053,7 @@ impl Folio {
                 let mut keep = true;
                 let mut commit = false;
                 egui::Area::new(egui::Id::NULL.with("folio-typing")).order(egui::Order::Foreground).fixed_pos(a).show(&ctx, |ui| {
-                    Frame::new().fill(CHROME).stroke(Stroke::new(1.0, BLUE)).corner_radius(CornerRadius::same(8)).inner_margin(Margin::same(8)).show(ui, |ui| {
+                    Frame::new().fill(CHROME).stroke(Stroke::new(1.0, BLUE)).corner_radius(CornerRadius::same(4)).inner_margin(Margin::same(8)).show(ui, |ui| {
                         ui.label(RichText::new(if kind == MarkKind::Note { "Note" } else { "Texte" }).size(12.0).color(MUTED));
                         let te = ui.add(egui::TextEdit::multiline(&mut text).desired_width(240.0).desired_rows(3).hint_text("Écris ici…"));
                         te.request_focus();
@@ -1125,7 +1125,7 @@ impl Folio {
                 ui.label(RichText::new("Dessine à la souris dans le cadre").size(12.0).color(MUTED));
                 ui.add_space(8.0);
                 let (r, resp) = ui.allocate_exact_size(vec2(420.0, 140.0), Sense::drag());
-                ui.painter().rect(r, CornerRadius::same(8), Color32::WHITE, Stroke::new(1.0, LINE), StrokeKind::Inside);
+                ui.painter().rect(r, CornerRadius::same(4), Color32::WHITE, Stroke::new(1.0, LINE), StrokeKind::Inside);
                 ui.painter().line_segment([pos2(r.left() + 20.0, r.bottom() - 30.0), pos2(r.right() - 20.0, r.bottom() - 30.0)], Stroke::new(1.0, Color32::from_gray(200)));
                 if let Some(p) = resp.interact_pointer_pos() {
                     let q = [((p.x - r.left()) / r.width()).clamp(0.0, 1.0), ((p.y - r.top()) / r.height()).clamp(0.0, 1.0)];

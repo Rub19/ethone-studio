@@ -1751,7 +1751,7 @@ impl Motion {
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 100.0), Sense::hover());
                     let p = ui.painter();
-                    p.rect(r, CornerRadius::same(14), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
+                    p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
                     p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Tes animations enregistrées apparaîtront ici", semibold(15.0), INK);
                     p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .emot", FontId::proportional(12.5), MUTED);
                 } else {
@@ -1759,7 +1759,7 @@ impl Motion {
                     for p in &self.recents {
                         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 46.0), Sense::click());
                         if resp.hovered() {
-                            ui.painter().rect_filled(r, CornerRadius::same(10), Color32::from_white_alpha(10));
+                            ui.painter().rect_filled(r, CornerRadius::same(5), Color32::from_white_alpha(10));
                         }
                         let nm = p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                         ui.painter().text(r.left_top() + vec2(14.0, 8.0), Align2::LEFT_TOP, nm, semibold(13.0), INK);
@@ -1840,7 +1840,7 @@ impl Motion {
                             let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 38.0), if enabled { Sense::click() } else { Sense::hover() });
                             let p = ui.painter();
                             if resp.hovered() && enabled {
-                                p.rect_filled(r, CornerRadius::same(8), Color32::from_white_alpha(10));
+                                p.rect_filled(r, CornerRadius::same(4), Color32::from_white_alpha(10));
                             }
                             diamond(p, r.left_center() + vec2(12.0, 0.0), 4.5, if enabled { KEY } else { FAINT });
                             p.text(r.left_top() + vec2(26.0, 4.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), if enabled { INK } else { FAINT });
@@ -1984,7 +1984,7 @@ impl Motion {
         let t_of = |x: f32| ((x - x0 - 8.0) / pps).clamp(0.0, dur);
         let ruler = Rect::from_min_max(pos2(x0, rect.min.y), pos2(rect.max.x, rect.min.y + 24.0));
         let p = ui.painter_at(rect);
-        p.rect_filled(ruler, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1d));
+        p.rect_filled(ruler, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1a));
         p.rect_filled(Rect::from_min_max(pos2(x_of(dur), ruler.max.y), rect.max), CornerRadius::ZERO, Color32::from_black_alpha(70));
         if let Some(_) = self.comp.work {
             let (a, b) = self.comp.range();
@@ -2061,7 +2061,7 @@ impl Motion {
             let on = self.sel == Some(li);
             let expanded = self.expanded.get(li).copied().unwrap_or(false);
             let row = Rect::from_min_max(pos2(rect.min.x, y), pos2(rect.max.x, y + row_h));
-            p.rect_filled(row.shrink2(vec2(0.0, 1.0)), CornerRadius::ZERO, if on { Color32::from_rgb(0x2a, 0x2c, 0x36) } else { Color32::from_rgb(0x22, 0x22, 0x26) });
+            p.rect_filled(row.shrink2(vec2(0.0, 1.0)), CornerRadius::ZERO, if on { Color32::from_rgb(0x2a, 0x2c, 0x36) } else { Color32::from_rgb(0x22, 0x22, 0x22) });
             let tw = Rect::from_center_size(pos2(rect.min.x + 12.0, row.center().y), Vec2::splat(16.0));
             let tri = if expanded { vec![tw.center() + vec2(-4.5, -2.5), tw.center() + vec2(4.5, -2.5), tw.center() + vec2(0.0, 3.5)] } else { vec![tw.center() + vec2(-2.5, -4.5), tw.center() + vec2(3.5, 0.0), tw.center() + vec2(-2.5, 4.5)] };
             p.add(Shape::convex_polygon(tri, MUTED, Stroke::NONE));
@@ -2156,7 +2156,7 @@ impl Motion {
                 for pi in self.shown_props(li) {
                     let name = PROPS[pi];
                     let sub = Rect::from_min_max(pos2(rect.min.x, y), pos2(rect.max.x, y + sub_h));
-                    p.rect_filled(sub, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x20));
+                    p.rect_filled(sub, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x1c));
                     let Some(prop) = self.comp.layers[li].props.get(pi) else { continue };
                     let live = prop.animated() || prop.expressive();
                     p.text(pos2(rect.min.x + 44.0, sub.center().y), Align2::LEFT_CENTER, if prop.expressive() { format!("{name} ≈") } else { name.to_string() }, FontId::proportional(11.5), if live { INK } else { FAINT });
@@ -2898,7 +2898,7 @@ fn preset_card(ui: &mut Ui, name: &str, detail: &str, w: f32, h: f32) -> egui::R
     let width = 176.0;
     let (r, resp) = ui.allocate_exact_size(vec2(width, 132.0), Sense::click());
     let p = ui.painter();
-    p.rect(r, CornerRadius::same(12), if resp.hovered() { Color32::from_rgb(0x2f, 0x2f, 0x35) } else { Color32::from_rgb(0x27, 0x27, 0x2c) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
+    p.rect(r, CornerRadius::same(6), if resp.hovered() { Color32::from_rgb(0x2f, 0x2f, 0x2f) } else { Color32::from_rgb(0x27, 0x27, 0x27) }, Stroke::new(1.0, LINE), StrokeKind::Inside);
     let area = Rect::from_center_size(r.center_top() + vec2(0.0, 44.0), vec2(width - 40.0, 56.0));
     let s = (area.width() / w).min(area.height() / h);
     let shape = Rect::from_center_size(area.center(), vec2(w, h) * s);

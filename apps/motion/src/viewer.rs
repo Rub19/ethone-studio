@@ -258,9 +258,9 @@ impl Motion {
             let (strip_w, bar_h, controls_h) = (46.0, 40.0, 54.0);
             let strip = Rect::from_min_max(full.min, pos2(full.left() + strip_w, full.bottom() - controls_h));
             let bar = Rect::from_min_max(pos2(strip.right(), full.top()), pos2(full.right(), full.top() + bar_h));
-            ui.painter().rect_filled(strip, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x20));
+            ui.painter().rect_filled(strip, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x1c));
             ui.painter().line_segment([strip.right_top(), strip.right_bottom()], Stroke::new(1.0, LINE));
-            ui.painter().rect_filled(bar, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x20));
+            ui.painter().rect_filled(bar, CornerRadius::ZERO, Color32::from_rgb(0x1c, 0x1c, 0x1c));
             ui.painter().line_segment([bar.left_bottom(), bar.right_bottom()], Stroke::new(1.0, LINE));
             ui.scope_builder(egui::UiBuilder::new().max_rect(strip.shrink2(vec2(6.0, 8.0))), |ui| {
                 ui.set_clip_rect(strip);
@@ -1203,9 +1203,9 @@ impl Motion {
             let top = Rect::from_min_max(pos2(inner.left(), canvas.top()), pos2(canvas.right(), inner.top()));
             let left = Rect::from_min_max(pos2(canvas.left(), inner.top()), pos2(inner.left(), canvas.bottom()));
             let rp = ui.painter_at(canvas);
-            rp.rect_filled(top, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1d));
-            rp.rect_filled(left, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1d));
-            rp.rect_filled(Rect::from_min_max(canvas.min, inner.min), CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1d));
+            rp.rect_filled(top, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1a));
+            rp.rect_filled(left, CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1a));
+            rp.rect_filled(Rect::from_min_max(canvas.min, inner.min), CornerRadius::ZERO, Color32::from_rgb(0x1a, 0x1a, 0x1a));
             let step = [10.0, 25.0, 50.0, 100.0, 200.0, 500.0, 1000.0].into_iter().find(|v| v * s >= 60.0).unwrap_or(2000.0);
             let mut v = 0.0;
             while v <= cw.max(ch) + 1e-3 {

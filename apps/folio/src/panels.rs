@@ -261,10 +261,10 @@ fn all(app: &mut Folio, ui: &mut Ui) {
     for ((p, name), d) in LIST.iter().zip(DESC) {
         let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 48.0), Sense::click());
         if resp.hovered() {
-            ui.painter().rect_filled(r, CornerRadius::same(8), Color32::from_rgb(0x2a, 0x2a, 0x30));
+            ui.painter().rect_filled(r, CornerRadius::same(4), Color32::from_rgb(0x2a, 0x2a, 0x2a));
         }
         let ic = Rect::from_min_size(r.min + vec2(8.0, 9.0), egui::Vec2::splat(30.0));
-        ui.painter().rect_filled(ic, CornerRadius::same(8), crate::ACCENT.gamma_multiply(0.2));
+        ui.painter().rect_filled(ic, CornerRadius::same(4), crate::ACCENT.gamma_multiply(0.2));
         panel_glyph(ui.painter(), ic.shrink(7.0), *p, crate::ACCENT);
         ui.painter().text(r.min + vec2(48.0, 16.0), egui::Align2::LEFT_CENTER, *name, semibold(12.5), INK);
         ui.painter().text(r.min + vec2(48.0, 33.0), egui::Align2::LEFT_CENTER, d, egui::FontId::proportional(11.0), FAINT);
