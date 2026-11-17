@@ -17,7 +17,7 @@ fn prop_row(ui: &mut Ui, l: &mut Layer, pi: usize, t: f32, go: &mut Option<f32>,
             p.toggle_key(t);
         }
         let name = if p.expressive() { format!("{label} ≈") } else { label.to_string() };
-        let lab = ui.add(egui::Label::new(RichText::new(name).size(12.0).color(if p.animated() || p.expressive() { INK } else { MUTED })).sense(Sense::click()));
+        let lab = ui.add(egui::Label::new(RichText::new(tl(&name)).size(12.0).color(if p.animated() || p.expressive() { INK } else { MUTED })).sense(Sense::click()));
         lab.on_hover_text(tl("Clic droit : réinitialiser, tremblement, boucle")).context_menu(|ui| {
             if ui.button(tl("Réinitialiser la valeur")).clicked() {
                 p.set(t, def);
@@ -40,7 +40,7 @@ fn prop_row(ui: &mut Ui, l: &mut Layer, pi: usize, t: f32, go: &mut Option<f32>,
             });
             ui.horizontal(|ui| {
                 ui.label(tl("Après la dernière clé"));
-                egui::ComboBox::from_id_salt(("cycle", pi)).selected_text(CYCLES[(p.cycle as usize).min(4)]).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt(("cycle", pi)).selected_text(tl(CYCLES[(p.cycle as usize).min(4)])).show_ui(ui, |ui| {
                     for (k, n) in CYCLES.iter().enumerate() {
                         ui.selectable_value(&mut p.cycle, k as u8, *n);
                     }
@@ -312,7 +312,7 @@ impl Motion {
             for row in [[("Gauche", 0u8), ("Centre ↔", 1), ("Droite", 2)], [("Haut", 3), ("Centre ↕", 4), ("Bas", 5)]] {
                 ui.horizontal(|ui| {
                     for (label, k) in row {
-                        if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(label).size(12.0))).clicked() {
+                        if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(tl(&label)).size(12.0))).clicked() {
                             how = Some(k);
                         }
                     }
@@ -321,7 +321,7 @@ impl Motion {
             let mut fit = None;
             ui.horizontal(|ui| {
                 for (label, k) in [("Ajuster", 0u8), ("Largeur", 1), ("Hauteur", 2)] {
-                    if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(label).size(12.0))).on_hover_text(tl("Met le calque à l'échelle de la composition")).clicked() {
+                    if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(tl(&label)).size(12.0))).on_hover_text(tl("Met le calque à l'échelle de la composition")).clicked() {
                         fit = Some(k);
                     }
                 }
@@ -571,7 +571,7 @@ impl Motion {
                         ta.mode = m as u8;
                     }
                     ui.label(RichText::new(tl("Ordre")).size(12.0).color(MUTED));
-                    egui::ComboBox::from_id_salt("ta-order").selected_text(TEXT_ORDERS[(ta.order as usize).min(4)]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+                    egui::ComboBox::from_id_salt("ta-order").selected_text(tl(TEXT_ORDERS[(ta.order as usize).min(4)])).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                         for (k, n) in TEXT_ORDERS.iter().enumerate() {
                             ui.selectable_value(&mut ta.order, k as u8, *n);
                         }
@@ -657,7 +657,7 @@ impl Motion {
         pro::dock_panel(ui, "matte", tl("Masque"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let fx = &mut l.fx;
-            egui::ComboBox::from_id_salt("matte").selected_text(MATTES[(fx.matte as usize).min(MATTES.len() - 1)]).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+            egui::ComboBox::from_id_salt("matte").selected_text(tl(MATTES[(fx.matte as usize).min(MATTES.len() - 1)])).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for (k, n) in MATTES.iter().enumerate() {
                     ui.selectable_value(&mut fx.matte, k as u8, *n);
                 }

@@ -1,4 +1,5 @@
 use crate::doc::{Area, Brush, Paint};
+use studio_ui::i18n::tl;
 use crate::tools::{self, CROP_RATIOS, Tool, brushy, is_marquee, is_shape};
 use crate::{Drag, GRID_COLORS, PASTEBOARDS, Pixel, Sheet, TextDraft, shapes};
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Frame, Key, Painter, Pos2, Rect, Sense, Shape, Stroke, TextureId, Vec2, pos2, vec2};
@@ -701,8 +702,8 @@ impl Pixel {
                 let mid = a + (b - a) * 0.5;
                 painter.circle_filled(mid, 11.0, Color32::WHITE);
                 painter.text(mid, Align2::CENTER_CENTER, "⇔", FontId::proportional(12.5), Color32::BLACK);
-                painter.text(a + vec2(-8.0, 10.0), Align2::RIGHT_TOP, "Avant", semibold(12.0), Color32::WHITE);
-                painter.text(a + vec2(8.0, 10.0), Align2::LEFT_TOP, "Après", semibold(12.0), Color32::WHITE);
+                painter.text(a + vec2(-8.0, 10.0), Align2::RIGHT_TOP, tl("Avant"), semibold(12.0), Color32::WHITE);
+                painter.text(a + vec2(8.0, 10.0), Align2::LEFT_TOP, tl("Après"), semibold(12.0), Color32::WHITE);
                 let grip = Rect::from_two_pos(a, b).expand2(vec2(8.0, 0.0));
                 let r = ui.interact(grip, ui.make_persistent_id("compare-split"), Sense::drag()).on_hover_cursor(egui::CursorIcon::ResizeHorizontal);
                 if r.dragged()
@@ -962,7 +963,7 @@ impl Pixel {
                     let a = time * 6.0 + k as f32 * std::f32::consts::TAU / 8.0;
                     painter.circle_filled(c + vec2(a.cos(), a.sin()) * 8.0, 2.0, Color32::from_white_alpha(60 + k * 24));
                 }
-                painter.text(tag.left_center() + vec2(46.0, 0.0), Align2::LEFT_CENTER, "Reconstruction du fond…", semibold(12.5), Color32::WHITE);
+                painter.text(tag.left_center() + vec2(46.0, 0.0), Align2::LEFT_CENTER, tl("Reconstruction du fond…"), semibold(12.5), Color32::WHITE);
             }
             if rulers {
                 let p = ui.painter();

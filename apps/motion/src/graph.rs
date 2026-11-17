@@ -217,7 +217,7 @@ impl Motion {
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                 for (name, pb) in BEZ_PRESETS {
-                    if ui.selectable_label(k.bez == Some(pb), RichText::new(name).size(11.5)).clicked() {
+                    if ui.selectable_label(k.bez == Some(pb), RichText::new(tl(&name)).size(11.5)).clicked() {
                         nb = Some(Some(pb));
                     }
                 }

@@ -21,6 +21,16 @@ for my $f (@ARGV) {
   $n += $s =~ s/self\.mi\(ui, $L/self.mi(ui, tl("$1")/g;
   $n += $s =~ s/self\.mie\(ui, ([^,]+), $L/self.mie(ui, $1, tl("$2")/g;
   $n += $s =~ s/\b(?!(?:dock_panel|begin|effects_panel|panel)\()([a-z_][a-z0-9_]*)\(ui, $L/$1(ui, tl("$2")/g;
+  $n += $s =~ s/\b(?!(?:dock_panel|begin|effects_panel|panel)\()([a-z_][a-z0-9_]*)\(ui, ([^,()"\n]+), $L/$1(ui, $2, tl("$3")/g;
+  $n += $s =~ s/Window::new\($L\)/Window::new(tl("$1"))/g;
+  $n += $s =~ s/\.(button|label|selectable_label|small_button)\(([a-z_][a-z0-9_]*)\)/.$1(tl(&$2))/g;
+  $n += $s =~ s/RichText::new\(([a-z_][a-z0-9_]*)\)/RichText::new(tl(&$1))/g;
+  $n += $s =~ s/\.(button|label|selectable_label|small_button)\(\*([a-z_][a-z0-9_]*)\)/.$1(tl(*$2))/g;
+  $n += $s =~ s/RichText::new\(\*([a-z_][a-z0-9_]*)\)/RichText::new(tl(*$1))/g;
+  $n += $s =~ s/RichText::new\((tool_name\([^()\n]*\))\)/RichText::new(tl($1))/g;
+  $n += $s =~ s/(Align2::[A-Z_]+, )\*([a-z_][a-z0-9_]*),/$1tl(*$2),/g;
+  $n += $s =~ s/(Align2::[A-Z_]+, )$L,/$1tl("$2"),/g;
+  $n += $s =~ s/selected_text\(([A-Z_]+\[[^\]\n]+\])\)/selected_text(tl($1))/g;
   $n += $s =~ s/pref_title\(ui, $L\)/pref_title(ui, tl("$1"))/g;
   $n += $s =~ s/Cmd::new\($L, $L/Cmd::new(tl("$1"), tl("$2")/g;
   $n += $s =~ s{(segmented\([^;\n]*?&\[)([^\]\n]*)(\])}{ my ($a, $b, $c) = ($1, $2, $3); $b =~ s/$L/tl("$1")/g unless $b =~ /\btl\(/; $a . $b . $c }ge;

@@ -59,7 +59,7 @@ pub fn title_preset(t: &mut Title, k: usize) {
 
 pub fn row_slider<N: egui::emath::Numeric>(ui: &mut Ui, label: &str, v: &mut N, range: std::ops::RangeInclusive<N>, suffix: &str, log: bool) -> bool {
     let reset = ui.horizontal(|ui| {
-        let r = ui.add(egui::Label::new(RichText::new(label).size(12.0).color(MUTED)).sense(Sense::click()));
+        let r = ui.add(egui::Label::new(RichText::new(tl(&label)).size(12.0).color(MUTED)).sense(Sense::click()));
         r.on_hover_text(tl("Double-clic pour réinitialiser")).double_clicked()
     });
     ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
@@ -84,7 +84,7 @@ pub fn pct_slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeI
 
 pub fn field_time(ui: &mut Ui, label: &str, v: &mut f64, min: f64, max: f64) {
     ui.horizontal(|ui| {
-        ui.label(RichText::new(label).size(12.0).color(MUTED));
+        ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.add(egui::DragValue::new(v).range(min..=max.max(min)).speed(0.02).max_decimals(2).suffix(" s"));
         });
@@ -194,7 +194,7 @@ fn wheel(ui: &mut Ui, label: &str, v: &mut [f32; 2], size: f32) -> bool {
             changed = true;
         }
         ui.add_space(2.0);
-        ui.label(RichText::new(label).size(11.0).color(MUTED));
+        ui.label(RichText::new(tl(&label)).size(11.0).color(MUTED));
     });
     changed
 }
@@ -338,7 +338,7 @@ impl Cut {
                 if matches!(s, Sel::Clip(_)) && !first_v1 {
                     pro::dock_panel(ui, "clip-trans", tl("Transition d'entrée"), |ui| {
                         ui.spacing_mut().item_spacing.y = 6.0;
-                        egui::ComboBox::from_id_salt("trans-kind").selected_text(TRANSITIONS[c.trans as usize % TRANSITIONS.len()]).width(ui.available_width() - 4.0).height(420.0).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("trans-kind").selected_text(tl(TRANSITIONS[c.trans as usize % TRANSITIONS.len()])).width(ui.available_width() - 4.0).height(420.0).show_ui(ui, |ui| {
                             for (k, n) in TRANSITIONS.iter().enumerate() {
                                 ui.selectable_value(&mut c.trans, k as u8, *n);
                             }
@@ -349,7 +349,7 @@ impl Cut {
                                 c.trans_dur = [0.25, 0.5, 1.0, 2.0, 3.0][k];
                             }
                             let mut al = c.trans_align as usize;
-                            egui::ComboBox::from_id_salt("trans-align").selected_text(ALIGNS[al.min(2)]).width(ui.available_width() - 4.0).show_ui(ui, |ui| {
+                            egui::ComboBox::from_id_salt("trans-align").selected_text(tl(ALIGNS[al.min(2)])).width(ui.available_width() - 4.0).show_ui(ui, |ui| {
                                 for (k, n) in ALIGNS.iter().enumerate() {
                                     ui.selectable_value(&mut al, k, *n);
                                 }
@@ -751,7 +751,7 @@ impl Cut {
             ui.spacing_mut().item_spacing.y = 6.0;
             let color_row = |ui: &mut Ui, label: &str, c: &mut [u8; 4]| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new(label).size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
                         if ui.color_edit_button_srgba(&mut col).changed() {
@@ -899,7 +899,7 @@ impl Cut {
             ] {
                 ui.horizontal(|ui| {
                     pro::kbd(ui, k);
-                    ui.label(RichText::new(d).size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl(&d)).size(12.0).color(MUTED));
                 });
             }
             ui.add_space(4.0);

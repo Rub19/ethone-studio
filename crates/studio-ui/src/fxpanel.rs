@@ -6,7 +6,7 @@ use studio_fx::stack::{self, Fx};
 pub fn effects_panel(ui: &mut Ui, id: &str, list: &mut Vec<Fx>) -> bool {
     let before = list.clone();
     ui.spacing_mut().item_spacing.y = 4.0;
-    ui.label(RichText::new(format!("{} effets, empilés dans l'ordre, chacun avec son intensité", stack::count())).size(11.5).color(FAINT));
+    ui.label(RichText::new(format!("{} {}", stack::count(), crate::i18n::tl("effets, empilés dans l'ordre, chacun avec son intensité"))).size(11.5).color(FAINT));
     ui.menu_button(RichText::new(tl("+ Ajouter un effet")).size(12.5), |ui| {
         for (g, kinds) in stack::groups() {
             ui.menu_button(g, |ui| {

@@ -2009,7 +2009,7 @@ impl Cut {
                         if !self.home {
                             ui.add_space(12.0);
                             pro::toolbar_sep(ui);
-                            ui.label(RichText::new(name).font(semibold(12.5)).color(INK));
+                            ui.label(RichText::new(tl(&name)).font(semibold(12.5)).color(INK));
                             if self.proj != self.saved {
                                 ui.label(RichText::new("•").color(MUTED)).on_hover_text(tl("Modifications non enregistrées"));
                             }
@@ -2047,40 +2047,40 @@ impl Cut {
     }
 
     fn menus(&mut self, ui: &mut Ui, ctx: &egui::Context) {
-        let row = |ui: &mut Ui, on: bool, label: &str, key: &str| -> bool { ui.add_enabled(on, egui::Button::new(label).shortcut_text(key)).clicked() };
+        let row = |ui: &mut Ui, on: bool, label: &str, key: &str| -> bool { ui.add_enabled(on, egui::Button::new(label).shortcut_text(studio_ui::i18n::keys(key))).clicked() };
         ui.menu_button(tl("Fichier"), |ui| {
             if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]) {
                 let ctx = ui.ctx().clone();
                 self.send_to(t, &ctx);
             }
             ui.separator();
-            if row(ui, true, "Nouveau projet", "") {
+            if row(ui, true, tl("Nouveau projet"), "") {
                 self.home = true;
             }
-            if row(ui, true, "Ouvrir un projet…", "") {
+            if row(ui, true, tl("Ouvrir un projet…"), "") {
                 self.open(ctx);
             }
-            if row(ui, true, "Importer des médias…", "Ctrl+I") {
+            if row(ui, true, tl("Importer des médias…"), "Ctrl+I") {
                 self.import_dialog(ctx);
             }
             ui.add_enabled_ui(!self.home, |ui| {
                 ui.menu_button(tl("Nouvel élément"), |ui| {
                     for (k, (_, name)) in GENERATORS.iter().enumerate() {
-                        if ui.button(*name).clicked() {
+                        if ui.button(tl(*name)).clicked() {
                             self.add_generator(k);
                             ui.close();
                         }
                     }
                 });
                 ui.separator();
-                if row(ui, true, "Enregistrer", "Ctrl+S") {
+                if row(ui, true, tl("Enregistrer"), "Ctrl+S") {
                     self.save(false);
                 }
-                if row(ui, true, "Enregistrer sous…", "Ctrl+Maj+S") {
+                if row(ui, true, tl("Enregistrer sous…"), "Ctrl+Maj+S") {
                     self.save(true);
                 }
                 ui.separator();
-                if row(ui, true, "Exporter…", "Ctrl+M") {
+                if row(ui, true, tl("Exporter…"), "Ctrl+M") {
                     self.export = Some(ExportOpts::from_preset(0));
                 }
                 ui.menu_button(tl("Exporter avec un préréglage"), |ui| {
@@ -2091,7 +2091,7 @@ impl Cut {
                         }
                     }
                 });
-                if row(ui, true, "Exporter l'image affichée (PNG)…", "Ctrl+Maj+E") {
+                if row(ui, true, tl("Exporter l'image affichée (PNG)…"), "Ctrl+Maj+E") {
                     self.run_export(&ExportOpts::from_preset(14));
                 }
                 if row(ui, !self.proj.markers.is_empty(), "Exporter les marqueurs (CSV)…", "")
@@ -2116,11 +2116,11 @@ impl Cut {
                 }
                 ui.separator();
                 let is_clip = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_)));
-                if row(ui, is_clip, "Couper", "Ctrl+X") {
+                if row(ui, is_clip, tl("Couper"), "Ctrl+X") {
                     self.copy_sel();
                     self.delete_sel();
                 }
-                if row(ui, is_clip, "Copier", "Ctrl+C") {
+                if row(ui, is_clip, tl("Copier"), "Ctrl+C") {
                     self.copy_sel();
                 }
                 if row(ui, self.clip_board.is_some(), "Coller à la tête de lecture", "Ctrl+V") {
@@ -2132,14 +2132,14 @@ impl Cut {
                 if row(ui, self.sel.is_some(), "Effacer", "Suppr") {
                     self.delete_sel();
                 }
-                if row(ui, is_clip, "Supprimer et refermer", "Maj+Suppr") {
+                if row(ui, is_clip, tl("Supprimer et refermer"), "Maj+Suppr") {
                     self.remove_sel(0);
                 }
-                if row(ui, is_clip, "Lever (laisser un vide)", "Alt+Suppr") {
+                if row(ui, is_clip, tl("Lever (laisser un vide)"), "Alt+Suppr") {
                     self.remove_sel(1);
                 }
                 ui.separator();
-                if row(ui, true, "Tout sélectionner", "Ctrl+A") {
+                if row(ui, true, tl("Tout sélectionner"), "Ctrl+A") {
                     self.select_all();
                 }
                 if row(ui, self.sel.is_some(), "Tout désélectionner", "Ctrl+Maj+A") {
@@ -2147,7 +2147,7 @@ impl Cut {
                     self.extra.clear();
                 }
                 if let Some(Sel::Clip(i)) = self.sel
-                    && row(ui, true, "Sélectionner la même étiquette", "")
+                    && row(ui, true, tl("Sélectionner la même étiquette"), "")
                 {
                     let l = self.proj.clips[i].label;
                     self.extra = self.proj.clips.iter().enumerate().filter(|(k, c)| c.label == l && *k != i).map(|(k, _)| Sel::Clip(k)).collect();
@@ -2161,25 +2161,25 @@ impl Cut {
             ui.menu_button(tl("Clip"), |ui| {
                 let s = self.sel;
                 let is_clip = matches!(s, Some(Sel::Clip(_) | Sel::Over(_)));
-                if row(ui, is_clip, "Vitesse/Durée…", "Ctrl+R") {
+                if row(ui, is_clip, tl("Vitesse/Durée…"), "Ctrl+R") {
                     self.speed_sheet = true;
                 }
-                if row(ui, is_clip, "Activer / désactiver", "Maj+E")
+                if row(ui, is_clip, tl("Activer / désactiver"), "Maj+E")
                     && let Some(s) = s
                 {
                     self.menu_action(s, 10);
                 }
-                if row(ui, is_clip, "Inverser la lecture", "")
+                if row(ui, is_clip, tl("Inverser la lecture"), "")
                     && let Some(s) = s
                 {
                     self.menu_action(s, 9);
                 }
-                if row(ui, is_clip, "Détacher l'audio", "Ctrl+L")
+                if row(ui, is_clip, tl("Détacher l'audio"), "Ctrl+L")
                     && let Some(s) = s
                 {
                     self.detach_audio(s);
                 }
-                if row(ui, is_clip, "Changer de piste (V1 ↔ V2)", "")
+                if row(ui, is_clip, tl("Changer de piste (V1 ↔ V2)"), "")
                     && let Some(s) = s
                 {
                     self.move_track(s);
@@ -2192,49 +2192,49 @@ impl Cut {
                 {
                     self.normalize(s, -1.0);
                 }
-                if row(ui, is_clip, "Réinitialiser les effets", "")
+                if row(ui, is_clip, tl("Réinitialiser les effets"), "")
                     && let Some(s) = s
                 {
                     self.menu_action(s, 13);
                 }
                 ui.separator();
-                if row(ui, is_clip, "Déplacer à gauche", "Alt+←") {
+                if row(ui, is_clip, tl("Déplacer à gauche"), "Alt+←") {
                     self.nudge_clip(-1);
                 }
-                if row(ui, is_clip, "Déplacer à droite", "Alt+→") {
+                if row(ui, is_clip, tl("Déplacer à droite"), "Alt+→") {
                     self.nudge_clip(1);
                 }
             });
             ui.menu_button(tl("Séquence"), |ui| {
-                if row(ui, true, "Réglages de la séquence…", "") {
+                if row(ui, true, tl("Réglages de la séquence…"), "") {
                     self.seq_sheet = true;
                 }
                 ui.separator();
-                if row(ui, true, "Scinder à la tête de lecture", "S") {
+                if row(ui, true, tl("Scinder à la tête de lecture"), "S") {
                     self.proj.split(self.t);
                 }
-                if row(ui, true, "Scinder toutes les pistes", "Ctrl+Maj+K") {
+                if row(ui, true, tl("Scinder toutes les pistes"), "Ctrl+Maj+K") {
                     self.proj.split_all(self.t);
                 }
-                if row(ui, true, "Rogner le début à la tête", "Q") {
+                if row(ui, true, tl("Rogner le début à la tête"), "Q") {
                     self.proj.trim_to(self.t, true);
                 }
-                if row(ui, true, "Rogner la fin à la tête", "W") {
+                if row(ui, true, tl("Rogner la fin à la tête"), "W") {
                     self.proj.trim_to(self.t, false);
                 }
-                if row(ui, true, "Figer l'image (2 s)", "Ctrl+Maj+F") {
+                if row(ui, true, tl("Figer l'image (2 s)"), "Ctrl+Maj+F") {
                     self.freeze_frame();
                 }
                 if row(ui, self.proj.clips.iter().any(|c| c.gap > 0.0), "Supprimer tous les espaces vides", "") {
                     self.proj.close_gaps();
                 }
                 ui.separator();
-                if row(ui, true, "Insérer un titre", "Ctrl+T") {
+                if row(ui, true, tl("Insérer un titre"), "Ctrl+T") {
                     self.add_title_at(0.0, 0.0, false);
                 }
                 ui.menu_button(tl("Titre prédéfini"), |ui| {
                     for (k, n) in inspect::TITLE_PRESETS.iter().enumerate() {
-                        if ui.button(*n).clicked() {
+                        if ui.button(tl(*n)).clicked() {
                             self.add_title_at(0.0, 0.0, false);
                             if let Some(Sel::Title(i)) = self.sel {
                                 inspect::title_preset(&mut self.proj.titles[i], k);
@@ -2248,34 +2248,34 @@ impl Cut {
                     }
                 });
                 ui.separator();
-                if row(ui, self.proj.solo != 0, "Désactiver tous les solos", "") {
+                if row(ui, self.proj.solo != 0, tl("Désactiver tous les solos"), "") {
                     self.proj.solo = 0;
                 }
-                if row(ui, true, "Déverrouiller toutes les pistes", "") {
+                if row(ui, true, tl("Déverrouiller toutes les pistes"), "") {
                     self.proj.lock = [false; 4];
                 }
-                if row(ui, true, "Afficher toutes les pistes", "") {
+                if row(ui, true, tl("Afficher toutes les pistes"), "") {
                     self.proj.hide = [false; 3];
                 }
             });
             ui.menu_button(tl("Marqueurs"), |ui| {
-                if row(ui, true, "Ajouter / modifier un marqueur", "M") {
+                if row(ui, true, tl("Ajouter / modifier un marqueur"), "M") {
                     self.add_marker();
                 }
-                if row(ui, true, "Supprimer le marqueur", "Maj+M") {
+                if row(ui, true, tl("Supprimer le marqueur"), "Maj+M") {
                     self.remove_marker();
                 }
-                if row(ui, true, "Marqueur précédent", "Maj+↑") {
+                if row(ui, true, tl("Marqueur précédent"), "Maj+↑") {
                     self.jump_marker(-1);
                 }
-                if row(ui, true, "Marqueur suivant", "Maj+↓") {
+                if row(ui, true, tl("Marqueur suivant"), "Maj+↓") {
                     self.jump_marker(1);
                 }
                 ui.separator();
-                if row(ui, true, "Point d'entrée", "I") {
+                if row(ui, true, tl("Point d'entrée"), "I") {
                     self.mark_in = Some(self.t);
                 }
-                if row(ui, true, "Point de sortie", "O") {
+                if row(ui, true, tl("Point de sortie"), "O") {
                     self.mark_out = Some(self.t);
                 }
                 if row(ui, self.mark_in.is_some(), "Aller à l'entrée", "Maj+I")
@@ -2289,7 +2289,7 @@ impl Cut {
                     self.seek(t);
                 }
                 if let Some(s @ (Sel::Clip(_) | Sel::Over(_))) = self.sel
-                    && row(ui, true, "Entrée/sortie sur le clip", "")
+                    && row(ui, true, tl("Entrée/sortie sur le clip"), "")
                 {
                     let (a, b) = {
                         let save = self.sel;
@@ -2300,15 +2300,15 @@ impl Cut {
                     };
                     (self.mark_in, self.mark_out) = (Some(a), Some(b));
                 }
-                if row(ui, true, "Effacer entrée et sortie", "Alt+X") {
+                if row(ui, true, tl("Effacer entrée et sortie"), "Alt+X") {
                     self.mark_in = None;
                     self.mark_out = None;
                 }
                 ui.separator();
-                if row(ui, true, "Point de montage précédent", "↑") {
+                if row(ui, true, tl("Point de montage précédent"), "↑") {
                     self.jump(-1);
                 }
-                if row(ui, true, "Point de montage suivant", "↓") {
+                if row(ui, true, tl("Point de montage suivant"), "↓") {
                     self.jump(1);
                 }
                 ui.separator();
@@ -2322,7 +2322,7 @@ impl Cut {
             ui.menu_button(tl("Outils"), |ui| {
                 for (g, (_, tools)) in GROUPS.iter().enumerate() {
                     for (k, (tool, name, key)) in tools.iter().enumerate() {
-                        if ui.add(egui::Button::selectable(self.tool == *tool, *name).shortcut_text(*key)).clicked() {
+                        if ui.add(egui::Button::selectable(self.tool == *tool, *name).shortcut_text(studio_ui::i18n::keys(key))).clicked() {
                             self.group_last[g] = k;
                             self.set_tool(*tool);
                             ui.close();
@@ -2362,13 +2362,13 @@ impl Cut {
                         }
                     }
                 });
-                if row(ui, true, "Ajuster la timeline", "\\") {
+                if row(ui, true, tl("Ajuster la timeline"), "\\") {
                     self.pps = 0.0;
                 }
-                if row(ui, true, "Zoom avant", "+") {
+                if row(ui, true, tl("Zoom avant"), "+") {
                     self.pps = (self.pps * 1.25).min(600.0);
                 }
-                if row(ui, true, "Zoom arrière", "−") {
+                if row(ui, true, tl("Zoom arrière"), "−") {
                     self.pps = (self.pps / 1.25).max(2.0);
                 }
             });
@@ -2379,7 +2379,7 @@ impl Cut {
     fn status(&mut self, root: &mut Ui) {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
+                let small = |t: String| RichText::new(tl(&t)).size(12.0).color(MUTED);
                 if !self.home {
                     let n = self.all_sel().len();
                     let sel = match self.sel {
@@ -2421,7 +2421,7 @@ impl Cut {
                     let _ = std::process::Command::new("explorer").arg(format!("/select,{}", p.display())).spawn();
                 }
                 if let Some(e) = self.error.clone() {
-                    ui.label(RichText::new(e).size(12.0).color(RED));
+                    ui.label(RichText::new(tl(&e)).size(12.0).color(RED));
                     if ui.small_button("×").clicked() {
                         self.error = None;
                     }
@@ -2487,8 +2487,8 @@ impl Cut {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 110.0), Sense::hover());
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose des vidéos, des photos ou de la musique n'importe où", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…", FontId::proportional(12.5), MUTED);
+                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, tl("Dépose des vidéos, des photos ou de la musique n'importe où"), semibold(15.0), INK);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, tl("MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…"), FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -2524,7 +2524,7 @@ impl Cut {
                     ui.menu_button(RichText::new("✦").color(MUTED), |ui| {
                         ui.label(RichText::new(tl("Nouvel élément")).size(12.0).color(FAINT));
                         for (k, (_, name)) in GENERATORS.iter().enumerate() {
-                            if ui.button(*name).clicked() {
+                            if ui.button(tl(*name)).clicked() {
                                 gen_k = Some(k);
                                 ui.close();
                             }
@@ -2563,8 +2563,8 @@ impl Cut {
             if self.proj.sources.is_empty() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 120.0), Sense::hover());
                 ui.painter().rect(r, CornerRadius::same(5), Color32::from_white_alpha(3), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                ui.painter().text(r.center() - vec2(0.0, 8.0), Align2::CENTER_CENTER, "Glisse tes fichiers ici", semibold(12.5), INK);
-                ui.painter().text(r.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, "Vidéos, photos et musiques", FontId::proportional(11.5), FAINT);
+                ui.painter().text(r.center() - vec2(0.0, 8.0), Align2::CENTER_CENTER, tl("Glisse tes fichiers ici"), semibold(12.5), INK);
+                ui.painter().text(r.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, tl("Vidéos, photos et musiques"), FontId::proportional(11.5), FAINT);
                 return;
             }
             let q = self.bin_query.to_lowercase();
@@ -2689,7 +2689,7 @@ impl Cut {
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD)).show(root, |ui| {
             let full = ui.max_rect();
             let head = Rect::from_min_size(full.min, vec2(full.width(), 34.0));
-            ui.painter().text(head.left_center() + vec2(16.0, 0.0), Align2::LEFT_CENTER, "Programme", semibold(12.0), INK);
+            ui.painter().text(head.left_center() + vec2(16.0, 0.0), Align2::LEFT_CENTER, tl("Programme"), semibold(12.0), INK);
             if let Some((i, _)) = self.proj.local_at(self.t) {
                 let src = &self.proj.sources[self.proj.clips[i].src];
                 ui.painter().text(head.left_center() + vec2(100.0, 0.0), Align2::LEFT_CENTER, short(&src.name(), 40), FontId::proportional(12.0), FAINT);
@@ -2705,8 +2705,8 @@ impl Cut {
             if let (Some(t), true) = (&self.tex, self.shown) {
                 p.image(t.id(), frame, Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), Color32::WHITE);
             } else if self.proj.clips.is_empty() {
-                p.text(frame.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Importe une vidéo pour commencer", semibold(16.0), INK);
-                p.text(frame.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Glisse un fichier ici ou Ctrl+I", FontId::proportional(12.0), MUTED);
+                p.text(frame.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, tl("Importe une vidéo pour commencer"), semibold(16.0), INK);
+                p.text(frame.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, tl("Glisse un fichier ici ou Ctrl+I"), FontId::proportional(12.0), MUTED);
             }
             let guide = Stroke::new(1.0, Color32::from_white_alpha(70));
             if self.safe {
@@ -3033,7 +3033,7 @@ impl Cut {
                 });
                 ui.add_space(12.0);
                 let label = |ui: &mut Ui, t: &str| {
-                    ui.label(RichText::new(t).size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl(&t)).size(12.0).color(MUTED));
                 };
                 label(ui, tl("Préréglage"));
                 ui.horizontal_wrapped(|ui| {
@@ -3051,7 +3051,7 @@ impl Cut {
                 ui.add_space(6.0);
                 egui::Grid::new("export-grid").num_columns(2).spacing(vec2(14.0, 8.0)).show(ui, |ui| {
                     label(ui, tl("Format"));
-                    egui::ComboBox::from_id_salt("exp-kind").selected_text(KINDS[opts.kind]).width(200.0).show_ui(ui, |ui| {
+                    egui::ComboBox::from_id_salt("exp-kind").selected_text(tl(KINDS[opts.kind])).width(200.0).show_ui(ui, |ui| {
                         for (k, n) in KINDS.iter().enumerate() {
                             ui.selectable_value(&mut opts.kind, k, *n);
                         }
@@ -3134,7 +3134,7 @@ impl Cut {
                     4 | 5 => format!("{w} × {h} · image à {}", tc(self.t, self.proj.fps)),
                     _ => format!("{w} × {h} · {} i/s · durée {} · environ {:.0} Mo", fps, tc(secs, self.proj.fps), secs * (opts.mbps as f64 * 1e6 + ABR[opts.abr.min(3)].1 as f64 * 8.0) / 8e6),
                 };
-                ui.label(RichText::new(info).size(12.0).color(FAINT));
+                ui.label(RichText::new(tl(&info)).size(12.0).color(FAINT));
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if pro::primary(ui, tl("Exporter…")).clicked() {
@@ -3199,7 +3199,7 @@ impl Cut {
                         self.proj.background = [col.r(), col.g(), col.b(), 255];
                     }
                     for (name, c) in [("Noir", [0, 0, 0]), ("Blanc", [255, 255, 255]), ("Gris", [40, 40, 44])] {
-                        if ui.small_button(name).clicked() {
+                        if ui.small_button(tl(&name)).clicked() {
                             self.proj.background = [c[0], c[1], c[2], 255];
                         }
                     }
@@ -3357,7 +3357,7 @@ fn media_info(s: &Source) -> String {
 
 fn media_menu(ui: &mut Ui, s: &Source, i: usize, action: &mut Option<(u8, usize)>) {
     let item = |ui: &mut Ui, label: &str, code: u8, action: &mut Option<(u8, usize)>| {
-        if ui.button(label).clicked() {
+        if ui.button(tl(&label)).clicked() {
             *action = Some((code, i));
             ui.close();
         }
@@ -3377,7 +3377,7 @@ fn media_menu(ui: &mut Ui, s: &Source, i: usize, action: &mut Option<(u8, usize)
             ui.close();
         }
         for (k, (name, _)) in LABELS.iter().enumerate() {
-            if ui.button(*name).clicked() {
+            if ui.button(tl(*name)).clicked() {
                 *action = Some((21 + k as u8, i));
                 ui.close();
             }

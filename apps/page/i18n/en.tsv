@@ -375,3 +375,197 @@ Vers	To
 Côtés	Sides
 Branches	Points
 Creux	Inset
+Nouveau…	New…
+Enregistrer sous…	Save as…
+Placer une image…	Place image…
+Assembler…	Assemble…
+Format du document…	Document size…
+Couper	Cut
+Copier	Copy
+Dupliquer	Duplicate
+Dupliquer et décaler…	Step and repeat…
+Supprimer	Delete
+Tout sélectionner	Select all
+Tout désélectionner	Deselect all
+Rechercher et remplacer…	Find and replace…
+Dissocier	Ungroup
+Note…	Note…
+Verrouiller	Lock
+Tout déverrouiller	Unlock all
+Masquer	Hide
+Tout afficher	Show all
+Non imprimable	Non-printing
+Modifier le texte	Edit text
+Ajuster la hauteur au texte	Fit height to text
+Remplir avec du faux texte	Fill with placeholder text
+Créer la table des matières…	Create table of contents…
+Nouveau style de caractère…	New character style…
+Première page	First page
+Dernière page	Last page
+Format de cette page…	This page's size…
+Numérotation et sections…	Numbering and sections…
+Ajuster à la fenêtre	Fit to window
+Taille réelle	Actual size
+Titre 1	Heading 1
+Titre 2	Heading 2
+Titre 3	Heading 3
+Légende	Caption
+Petit texte	Small text
+Impression haute qualité	High-quality print
+PDF/X (imprimeur)	PDF/X (print shop)
+Web léger	Light web
+Personnalisé	Custom
+Remplir le cadre proportionnellement	Fill frame proportionally
+Ajuster le contenu proportionnellement	Fit content proportionally
+Ajuster le contenu au cadre	Fit content to frame
+Centrer le contenu	Centre content
+Ajuster le cadre au contenu	Fit frame to content
+Premier plan	Foreground
+En avant	Forward
+En arrière	Backward
+Arrière-plan	Background
+Rotation de 90° horaire	Rotate 90° CW
+Rotation de 90° antihoraire	Rotate 90° CCW
+Rotation de 180°	Rotate 180°
+Centre horizontal	Horizontal centre
+Centre vertical	Vertical centre
+Centre ↔	Centre ↔
+Milieu ↕	Middle ↕
+Derrière	Behind
+Densité couleur −	Colour density −
+Densité couleur +	Colour density +
+Lumière crue	Harsh light
+Lumière tamisée	Dim light
+Différence	Difference
+Luminosité	Brightness
+Lettre US	US Letter
+Légal US	US Legal
+Tabloïd	Tabloid
+Livre 6 × 9 in	Book 6 × 9 in
+Carte de visite	Business card
+Carte postale	Postcard
+Carré	Square
+Portrait 4:5	Portrait 4:5
+Présentation	Presentation
+Bannière web	Web banner
+Miniature vidéo	Video thumbnail
+Brochure 3 volets	Trifold brochure
+Couverture de livre	Book cover
+Fiche produit	Product sheet
+Carte de vœux	Greeting card
+Entrées	Starters
+Velouté de potimarron	Red kuri squash soup
+Burrata et tomates anciennes	Burrata and heirloom tomatoes
+Risotto aux cèpes	Porcini risotto
+Filet de bar, beurre blanc	Sea bass fillet, beurre blanc
+Joue de bœuf confite	Braised beef cheek
+Tarte au citron meringuée	Lemon meringue pie
+Mousse au chocolat noir	Dark chocolate mousse
+Fromages affinés	Aged cheeses
+Variables : {page} {pages} {title} {date} {section}	Variables: {page} {pages} {title} {date} {section}
+Gabarit	Master
+sur	of
+mots	words
+sans gabarit	no master
+mm	
+Vectoriel, images d'origine, sans repères	Vector, original images, no marks
+Fond perdu, traits de coupe, repères de montage et infos	Bleed, crop marks, registration marks and info
+Images réduites et recompressées pour l'écran	Images downsized and recompressed for screen
+Tes propres réglages	Your own settings
+retoucher la page	edit the page
+développer	develop
+placer la page	place the page
+ajouter au montage	add to the edit
+animer la page	animate the page
+Numéro de page	Page number
+Nombre de pages	Page count
+Titre du document	Document title
+Date du jour	Today's date
+Nom de section	Section name
+Segoe UI	
+Segoe UI Semibold	
+Arial	
+Arial Black	
+Bahnschrift	
+Calibri	
+Candara	
+Corbel	
+Century Gothic	
+Franklin Gothic Medium	
+Trebuchet MS	
+Verdana	
+Georgia	
+Cambria	
+Constantia	
+Garamond	
+Palatino Linotype	
+Book Antiqua	
+Times New Roman	
+Consolas	
+Impact	
+Comic Sans MS	
+PDF	
+PNG	
+JPEG	
+SVG	
+Aucun	None
+Noir et blanc	Black and white
+Sépia	Sepia
+Délavé	Faded
+Contraste	Contrast
+Chaud	Warm
+Froid	Cool
+Négatif	Negative
+Aucune	None
+Puces	Bullets
+a)	
+A.	
+I.	
+i.	
+Biseau	Bevel
+Encoche	Notch
+Arrondi inversé	Inverted round
+Cadre de sélection	Bounding box
+Forme de l'objet	Object shape
+Sauter l'objet	Skip object
+I, II, III	
+i, ii, iii	
+A, B, C	
+a, b, c	
+b	
+i	
+u	
+s	
+sup	
+sub	
+sc	
+Espaces doubles	Double spaces
+Apostrophes typographiques	Smart apostrophes
+Guillemets français	French quotes
+Points de suspension	Ellipsis
+Espaces fines avant ; : ! ?	Thin spaces before ; : ! ?
+MAJUSCULES	UPPERCASE
+minuscules	lowercase
+Première Lettre En Capitale	Title Case
+Phrase normale.	Sentence case.
+Document, magazine	Document, magazine
+Livret, flyer	Booklet, flyer
+Carte, flyer de poche	Card, pocket flyer
+Livre, catalogue	Book, catalogue
+Roman, essai	Novel, essay
+Dépliant, enveloppe	Leaflet, envelope
+Publication 1:1	Post 1:1
+Réseaux sociaux	Social media
+A4, en-tête, colonnes	A4, header, columns
+A5, événement	A5, event
+A4, colonne latérale	A4, side column
+A4, carte et prix	A4, menu and prices
+A3, grand titre	A3, big headline
+A4, trois rubriques	A4, three sections
+A5, cérémonie	A5, ceremony
+A4 paysage, diplôme	A4 landscape, certificate
+A4 paysage, recto	A4 landscape, single-sided
+6 × 9 in, plat recto	6 × 9 in, front cover
+A4, photo et caractéristiques	A4, photo and specs
+A6, fête	A6, party
+A4, couverture et sommaire	A4, cover and contents

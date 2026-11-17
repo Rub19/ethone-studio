@@ -384,7 +384,7 @@ impl Motion {
             });
             ui.add_space(14.0);
             let row = |ui: &mut Ui, s: &str| {
-                ui.label(RichText::new(s).size(12.0).color(MUTED));
+                ui.label(RichText::new(tl(&s)).size(12.0).color(MUTED));
             };
             row(ui, tl("Format"));
             let w = (ui.available_width() - 18.0) / 4.0;
@@ -396,7 +396,7 @@ impl Motion {
                         let on = o.format == idx;
                         let (r, resp) = ui.allocate_exact_size(vec2(w, 30.0), Sense::click());
                         ui.painter().rect(r, CornerRadius::same(7), if on { BLUE.gamma_multiply(0.3) } else if resp.hovered() { FIELD } else { pro::WELL }, Stroke::new(1.0, if on { BLUE } else { LINE }), StrokeKind::Inside);
-                        ui.painter().text(r.center(), Align2::CENTER_CENTER, *name, if on { semibold(12.0) } else { FontId::proportional(12.0) }, if on { INK_STRONG } else { INK });
+                        ui.painter().text(r.center(), Align2::CENTER_CENTER, tl(*name), if on { semibold(12.0) } else { FontId::proportional(12.0) }, if on { INK_STRONG } else { INK });
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             o.format = idx;
                         }

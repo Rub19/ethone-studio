@@ -1670,7 +1670,7 @@ impl Lumen {
                 ui.menu_button(tl("Note"), |ui| {
                     for r in 0..=5u8 {
                         let label = if r == 0 { "Sans note   0".to_string() } else { format!("{}   {r}", "★".repeat(r as usize)) };
-                        if ui.button(label).clicked() {
+                        if ui.button(tl(&label)).clicked() {
                             for t in self.targets() {
                                 self.entry(t).rating = r;
                             }
@@ -1680,7 +1680,7 @@ impl Lumen {
                 });
                 ui.menu_button(tl("Drapeau"), |ui| {
                     for (label, f) in [("Retenue   P", 1i8), ("Sans drapeau   U", 0), ("Rejetée   X", -1)] {
-                        if ui.button(label).clicked() {
+                        if ui.button(tl(&label)).clicked() {
                             for t in self.targets() {
                                 self.entry(t).flag = f;
                             }
@@ -1737,7 +1737,7 @@ impl Lumen {
             });
             ui.menu_button(tl("Taille des vignettes"), |ui| {
                 for (l, v) in [("Petites", 140.0), ("Moyennes", 200.0), ("Grandes", 280.0), ("Très grandes", 340.0)] {
-                    if ui.button(l).clicked() {
+                    if ui.button(tl(&l)).clicked() {
                         self.thumb_size = v;
                     }
                 }
@@ -1748,14 +1748,14 @@ impl Lumen {
     fn status_bar(&mut self, root: &mut Ui, ctx: &egui::Context) {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
+                let small = |t: String| RichText::new(tl(&t)).size(12.0).color(MUTED);
                 match &self.catalog.folder {
                     Some(f) => ui.label(small(format!("{} · {} photo(s) · {} affichée(s){}", f.file_name().map_or_else(|| f.display().to_string(), |n| n.to_string_lossy().into_owned()), self.files.len(), self.visible().len(), if self.picked.len() > 1 { format!(" · {} sélectionnée(s)", self.picked.len()) } else { String::new() }))).on_hover_text(f.display().to_string()),
                     None => ui.label(small("Aucun dossier ouvert".into())),
                 };
                 if let Some((t, at)) = self.notice.clone() {
                     if ctx.input(|i| i.time) - at < 2.5 {
-                        ui.label(RichText::new(t).size(12.0).color(GREEN));
+                        ui.label(RichText::new(tl(&t)).size(12.0).color(GREEN));
                         ctx.request_repaint_after(std::time::Duration::from_millis(300));
                     } else {
                         self.notice = None;
@@ -1775,7 +1775,7 @@ impl Lumen {
                     }
                 }
                 if let Some(e) = self.error.clone() {
-                    ui.label(RichText::new(e).size(12.0).color(RED));
+                    ui.label(RichText::new(tl(&e)).size(12.0).color(RED));
                     if ui.small_button("×").clicked() {
                         self.error = None;
                     }
@@ -2115,7 +2115,7 @@ fn view_switch(ui: &mut Ui, view: &mut View, can_develop: bool) {
         if on {
             ui.painter().rect_filled(r, CornerRadius::same(12), Color32::from_rgb(0x4a, 0x4a, 0x4a));
         }
-        ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, *label, if on { semibold(12.0) } else { egui::FontId::proportional(12.0) }, if !enabled { studio_ui::pro::FAINT } else if on { INK_STRONG } else { MUTED });
+        ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, tl(*label), if on { semibold(12.0) } else { egui::FontId::proportional(12.0) }, if !enabled { studio_ui::pro::FAINT } else if on { INK_STRONG } else { MUTED });
         if resp.clicked() {
             *view = *v;
         }

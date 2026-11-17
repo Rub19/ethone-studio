@@ -6,9 +6,9 @@ use eframe::egui::{self, Align, Layout, RichText, Ui};
 use studio_ui::pro::{self, FAINT, INK_STRONG, MUTED, semibold};
 
 fn title(ui: &mut Ui, t: &str, sub: &str) {
-    ui.label(RichText::new(t).font(semibold(19.0)).color(INK_STRONG));
+    ui.label(RichText::new(tl(&t)).font(semibold(19.0)).color(INK_STRONG));
     if !sub.is_empty() {
-        ui.label(RichText::new(sub).size(12.0).color(MUTED));
+        ui.label(RichText::new(tl(&sub)).size(12.0).color(MUTED));
     }
     ui.add_space(12.0);
 }
@@ -31,7 +31,7 @@ fn num(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f3
 }
 
 fn slide(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
     ui.spacing_mut().slider_width = ui.available_width() - 80.0;
     ui.add(egui::Slider::new(v, range).suffix(suffix));
 }

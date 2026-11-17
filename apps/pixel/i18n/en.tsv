@@ -401,3 +401,241 @@ Trait	Line
 Forme personnalisée	Custom shape
 Main	Hand
 Zoom	Zoom
+Terminer	Done
+Supprimer l'objet	Remove object
+Rééclairer	Relight
+Agrandir ×2	Upscale ×2
+Comparer	Compare
+gridcol	gridcol
+Teinte	Hue
+Saturation	Saturation
+Hex	Hex
+Bibliothèque	Library
+swset	swset
+Harmonies	Harmonies
+Récentes	Recent
+Espacement	Spacing
+Angle	Angle
+Rondeur	Roundness
+Var. taille	Size jitter
+Var. flux	Flow jitter
+Dispersion	Scatter
+Fusion	Merge
+blend	blend
+Verrou	Lock
+Étiquette	Label
+Masque	Mask
+Ajouter un masque de fusion (depuis la sélection s'il y en a une)	Add layer mask (from the selection if any)
+Monter	Move up
+Descendre	Move down
+Ignorer les lignes de moins de	Ignore lines shorter than
+caractère(s)	character(s)
+Position de l'image actuelle	Current frame position
+Couleur d'extension	Canvas extension colour
+ext	ext
+Hauteur	Height
+Rééchantillonnage	Resampling
+resample	resample
+Résolution	Resolution
+Échelle	Scale
+Rotation	Rotation
+Inclinaison horizontale / verticale	Horizontal / vertical skew
+Perspective horizontale / verticale	Horizontal / vertical perspective
+Distance	Distance
+Profondeur	Depth
+Mode	Mode
+fxblend	fxblend
+crange	crange
+Prends la couleur avec la pipette (I)	Pick the colour with the eyedropper (I)
+Contenu	Content
+fillc	fillc
+fillb	fillb
+Format	Size
+Compression	Compression
+Qualité	Quality
+Tailles de l'icône	Icon sizes
+Fond des zones transparentes	Transparency background
+expbg	expbg
+États d'historique	History states
+Plan de travail	Artboard
+pboard	pboard
+Curseur de peinture	Painting cursor
+cmode	cmode
+Orientation	Orientation
+bg	bg
+Estomper	Fade
+adjb	adjb
+Police	Font
+tfont	tfont
+Approche	Tracking
+Interligne	Leading
+brush-mode	brush-mode
+Repeint la teinte avec la couleur principale en gardant la lumière	Repaints the hue with the main colour while keeping the light
+Plage	Beach
+Alt pour retirer	Alt to subtract
+mstyle	mstyle
+cratio	cratio
+Grille	Grid
+cover	cover
+Glisse pour tracer le cadre à conserver	Drag to draw the area to keep
+custom	custom
+shape-mode	shape-mode
+font	font
+gpreset	gpreset
+grad-mode	grad-mode
+Flèches : 1 px · Maj : 10 px	Arrows: 1 px · Shift: 10 px
+Échantillon	Sample
+psize	psize
+Jusqu'à 4 points, lus dans Infos	Up to 4 points, shown in Info
+Alt+clic : couleur secondaire	Alt+click: secondary colour
+Glisse pour mesurer une distance et un angle	Drag to measure a distance and an angle
+Peins sur ce qui doit disparaître : le fond est reconstruit autour	Paint over what should disappear: the background is rebuilt around it
+Clique sur chaque œil rouge	Click each red eye
+Trace un rectangle autour de l'objet : il est détouré automatiquement	Draw a rectangle around the object: it is cut out automatically
+Ton auto	Auto tone
+Retirer la brume	Dehaze
+Full HD	Full HD
+4K UHD	4K UHD
+Miniature YouTube	YouTube thumbnail
+Publication carrée	Square post
+Portrait 4:5	Portrait 4:5
+A4 300 ppp	A4 300 ppi
+A5 300 ppp	A5 300 ppi
+Carte de visite	Business card
+Icône	Icon
+Bannière	Banner
+Fond d'écran	Wallpaper
+Néon	Neon
+Matériel	Material
+Symétrie horizontale de la zone de travail	Flip work area horizontally
+Symétrie verticale de la zone de travail	Flip work area vertically
+Contour progressif…	Feather…
+Gris moyen	Mid grey
+Complémentaire	Complementary
+Tétrade	Tetrad
+Segoe UI	Segoe UI
+Trebuchet MS	Trebuchet MS
+Times New Roman	Times New Roman
+Courier New	Courier New
+Comic Sans MS	Comic Sans MS
+Ctrl+N / Ctrl+O / Ctrl+W	Ctrl+N / Ctrl+O / Ctrl+W
+Ctrl+E / Ctrl+Maj+Alt+S	Ctrl+E / Ctrl+Shift+Alt+S
+Ctrl+Z / Ctrl+Y	Ctrl+Z / Ctrl+Y
+Ctrl+C / Ctrl+Maj+C	Ctrl+C / Ctrl+Shift+C
+Ctrl+V / Ctrl+Maj+V	Ctrl+V / Ctrl+Shift+V
+Ctrl+J / Ctrl+Maj+J	Ctrl+J / Ctrl+Shift+J
+Ctrl+L / Ctrl+M / Ctrl+U / Ctrl+B	Ctrl+L / Ctrl+M / Ctrl+U / Ctrl+B
+Ctrl+I / Ctrl+Maj+U	Ctrl+I / Ctrl+Shift+U
+Ctrl+Maj+L / Ctrl+Maj+B	Ctrl+Shift+L / Ctrl+Shift+B
+Ctrl+Alt+I / Ctrl+Alt+C	Ctrl+Alt+I / Ctrl+Alt+C
+Ctrl+A / Ctrl+D / Ctrl+Maj+D	Ctrl+A / Ctrl+D / Ctrl+Shift+D
+Ctrl+Maj+I / Maj+F6	Ctrl+Shift+I / Shift+F6
+Maj+F5 / Alt+Retour	Shift+F5 / Alt+Backspace
+Ctrl+Maj+N / Ctrl+Alt+G	Ctrl+Shift+N / Ctrl+Alt+G
+Ctrl+[ / Ctrl+]	Ctrl+[ / Ctrl+]
+Ctrl+Maj+E / Ctrl+Alt+E	Ctrl+Shift+E / Ctrl+Alt+E
+Ctrl+R / Ctrl+' / Ctrl+;	Ctrl+R / Ctrl+' / Ctrl+;
+Ctrl+Maj+; / Ctrl+H	Ctrl+Shift+; / Ctrl+H
+Ctrl+0 / Ctrl+1 / Ctrl++ / Ctrl+−	Ctrl+0 / Ctrl+1 / Ctrl++ / Ctrl+−
+Lettre / Maj+lettre	Letter / Shift+letter
+[ ] / Maj+[ ]	[ ] / Shift+[ ]
+0 à 9	0 to 9
+X / D	X / D
+Flèches / Maj+flèches	Arrows / Shift+arrows
+Espace / Tab / F1	Space / Tab / F1
+Rond dur	Hard round
+Rond doux	Soft round
+Aérographe	Airbrush
+Encre calligraphique	Calligraphy ink
+Pinceau sec	Dry brush
+1:1 carré	1:1 square
+Reconstruction du fond…	Rebuilding the background…
+Accueil	Home
+Dépose une image n'importe où pour l'ouvrir	Drop an image anywhere to open it
+PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO	
+Corrige l'exposition et le contraste	Fixes exposure and contrast
+Ajoute une ou deux lumières (Relight)	Adds one or two lights (Relight)
+Supprime brume et effets d'ambiance	Removes haze and atmospheric effects
+Trois LUT créatifs empilables	Three stackable creative LUTs
+Retouche automatique de la peau	Automatic skin retouch
+Écran 16:9	Screen 16:9
+Vidéo	Video
+Réseaux sociaux	Social media
+développer la photo	develop the photo
+placer l'image	place the image
+mettre en page	lay out
+ajouter au montage	add to the edit
+animer l'image	animate the image
+Blanc	White
+Transparent	Transparent
+Noir	Black
+Couleur principale	Primary colour
+Couleur secondaire	Secondary colour
+Aucune	None
+Orange	Orange
+Jaune	Yellow
+Violet	Purple
+Reconstruction	Reconstruction
+Couleur du fond	Background colour
+Flou du fond	Background blur
+Nouveau, ouvrir, fermer	New, open, close
+Exporter, exportation rapide PNG	Export, quick PNG export
+Annuler, rétablir	Undo, redo
+Copier, copier avec fusion	Copy, copy merged
+Coller, coller en place	Paste, paste in place
+Calque par copie, par coupure	Layer via copy, via cut
+Transformation manuelle	Free transform
+Niveaux, courbes, teinte, balance	Levels, curves, hue, balance
+Négatif, noir et blanc	Negative, black and white
+Ton auto, couleur auto	Auto tone, auto colour
+Taille de l'image, de la zone	Image size, canvas size
+Tout, désélectionner, resélectionner	All, deselect, reselect
+Intervertir, contour progressif	Inverse, feather
+Remplir, remplir en couleur principale	Fill, fill with primary colour
+Nouveau calque, écrêtage	New layer, clipping
+Descendre, monter le calque	Move layer down, up
+Fusionner visibles, avec le dessous	Merge visible, merge down
+Règles, grille, repères	Rulers, grid, guides
+Magnétisme, extras	Snapping, extras
+Ajuster, 100 %, zoom	Fit, 100 %, zoom
+Outil, outil suivant du groupe	Tool, next tool in group
+Taille, dureté du pinceau	Brush size, hardness
+Flux ou opacité de l'outil	Tool flow or opacity
+Inverser, couleurs par défaut	Swap, default colours
+Déplacer le calque de 1 ou 10 px	Nudge the layer by 1 or 10 px
+Main, masquer les panneaux, aide	Hand, hide panels, help
+Plus proche voisin	Nearest neighbour
+Bilinéaire	Bilinear
+Bicubique	Bicubic
+Lanczos (net)	Lanczos (sharp)
+Gaussien (doux)	Gaussian (soft)
+Gris 50 %	50 % grey
+Selon le contenu	Content-aware
+Rouges	Reds
+Jaunes	Yellows
+Verts	Greens
+Cyans	Cyans
+Bleus	Blues
+Magentas	Magentas
+Tons chair	Skin tones
+Cœur	Heart
+Flèche	Arrow
+Bulle	Bubble
+Coche	Checkmark
+Croix	Cross
+Éclair	Lightning
+Goutte	Drop
+Lune	Moon
+Principale → secondaire	Primary → secondary
+Principale → transparent	Primary → transparent
+Noir → blanc	Black → white
+Arc-en-ciel	Rainbow
+Cuivre	Copper
+Chrome	Chrome
+Coucher de soleil	Sunset
+Océan	Ocean
+Point	Dot
+Moyenne 3 × 3	Average 3 × 3
+Moyenne 5 × 5	Average 5 × 5
+Moyenne 11 × 11	Average 11 × 11
+Moyenne 31 × 31	Average 31 × 31

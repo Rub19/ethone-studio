@@ -4,7 +4,7 @@ use image::RgbImage;
 use studio_ui::pro::{BLUE, FAINT, FIELD, INK, INK_STRONG, MUTED, semibold};
 
 pub fn heading(ui: &mut Ui, text: &str) {
-    ui.label(RichText::new(text).font(semibold(11.0)).color(FAINT));
+    ui.label(RichText::new(tl(&text)).font(semibold(11.0)).color(FAINT));
     ui.add_space(4.0);
 }
 
@@ -14,7 +14,7 @@ pub fn caption(ui: &mut Ui, text: &str) {
     if text.chars().count() > 40 && !empty_state {
         studio_ui::pro::tip(ui, text);
     } else {
-        ui.label(RichText::new(text).size(11.5).color(FAINT));
+        ui.label(RichText::new(tl(&text)).size(11.5).color(FAINT));
     }
 }
 
@@ -157,7 +157,7 @@ pub fn hue_slider(ui: &mut Ui, label: &str, v: &mut f32) -> bool {
 pub fn color_wheel(ui: &mut Ui, title: &str, size: f32, hue: &mut f32, sat: &mut f32) -> bool {
     let before = (*hue, *sat);
     ui.vertical_centered(|ui| {
-        ui.label(RichText::new(title).size(12.0).color(if *sat > 0.0 { INK } else { MUTED }));
+        ui.label(RichText::new(tl(&title)).size(12.0).color(if *sat > 0.0 { INK } else { MUTED }));
         let (r, resp) = ui.allocate_exact_size(Vec2::splat(size), Sense::click_and_drag());
         let c = r.center();
         let rad = size / 2.0 - 4.0;

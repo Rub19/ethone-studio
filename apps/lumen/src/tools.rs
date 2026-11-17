@@ -265,7 +265,7 @@ impl Lumen {
         ui.spacing_mut().slider_width = 90.0;
         ui.spacing_mut().item_spacing.x = 8.0;
         let name = GROUPS.iter().flat_map(|g| g.iter()).find(|g| g.0 == self.tool).map(|g| g.1).unwrap_or("Main et zoom");
-        ui.label(RichText::new(name).font(semibold(12.0)).color(INK));
+        ui.label(RichText::new(tl(&name)).font(semibold(12.0)).color(INK));
         pro::toolbar_sep(ui);
         let mut s = self.settings(i);
         let before = s.clone();
@@ -291,7 +291,7 @@ impl Lumen {
                     }
                 }
                 ui.label(RichText::new(tl("Superposition")).size(12.0).color(MUTED));
-                egui::ComboBox::from_id_salt("crop-ov").width(110.0).selected_text(OVERLAYS[self.crop_overlay]).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("crop-ov").width(110.0).selected_text(tl(OVERLAYS[self.crop_overlay])).show_ui(ui, |ui| {
                     for (k, n) in OVERLAYS.iter().enumerate() {
                         ui.selectable_value(&mut self.crop_overlay, k, *n);
                     }

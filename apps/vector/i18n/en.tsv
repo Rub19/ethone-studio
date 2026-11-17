@@ -462,3 +462,186 @@ Main	Hand
 Rotation de la vue	Rotate view
 Zoom	Zoom
 Plan de travail	Artboard
+lib	lib
+gray	gray
+docsw	docsw
+Serré	Tight
+Logo N&B	B&W logo
+Gris 4 niveaux	4-level grey
+Affiche 6 couleurs	6-colour poster
+Photo 16 couleurs	16-colour photo
+Teinte −60°	Hue −60°
+Complémentaires	Complementary
+Icône	Icon
+Full HD	Full HD
+Bannière	Banner
+Carte de visite	Business card
+Même couleur de fond	Same fill colour
+Même couleur de contour	Same stroke colour
+Même type d'objet	Same object type
+Même aspect complet	Same appearance
+PNG ×1	PNG ×1
+PNG ×2	PNG ×2
+PNG ×3	PNG ×3
+PNG ×4	PNG ×4
+PNG ×2 fond transparent	PNG ×2 transparent
+JPEG ×2	JPEG ×2
+SVG optimisé	Optimized SVG
+PDF (tous les plans de travail)	PDF (all artboards)
+Déplacement…	Move…
+Mise à l'échelle…	Scale…
+Transformer chaque…	Transform each…
+Répétition…	Repeat…
+Rotation 90° horaire	Rotate 90° CW
+Rotation 90° antihoraire	Rotate 90° CCW
+Rotation 180°	Rotate 180°
+Premier plan	Foreground
+En avant	Forward
+En arrière	Backward
+Arrière-plan	Background
+Lisser le tracé	Smooth path
+Simplifier (rapide)	Simplify (fast)
+Inverser le sens	Reverse direction
+Fermer / ouvrir le tracé	Close / open path
+Ajouter des points d'ancrage	Add anchor points
+Distorsion aléatoire…	Roughen…
+Contraction et dilatation…	Pucker & bloat…
+Néon	Neon
+Océan	Ocean
+Rétro	Retro
+Forêt	Forest
+Coucher de soleil	Sunset
+Métal	Metal
+Café	Café
+Pêche	Peach
+Années 80	80s
+Méditerranée	Mediterranean
+Désert	Desert
+Gris chauds	Warm greys
+Gris froids	Cool greys
+Fruits rouges	Red berries
+Haute couture	Haute couture
+Médical	Medical
+Contour épais	Thick stroke
+Ombre douce	Soft shadow
+Lueur dorée	Golden glow
+Flou artistique	Soft focus
+Néon rose	Pink neon
+Néon bleu	Blue neon
+Néon vert	Green neon
+Bouton iOS	iOS button
+Carte flottante	Floating card
+Verre dépoli	Frosted glass
+Sombre élégant	Elegant dark
+Pointillé rond	Round dots
+Tirets longs	Long dashes
+Double contour	Double stroke
+Ombre longue	Long shadow
+Ombre colorée	Coloured shadow
+Fantôme	Ghost
+Papier kraft	Kraft paper
+Aligner à gauche	Align left
+Centrer horizontalement	Centre horizontally
+Aligner à droite	Align right
+Aligner en haut	Align top
+Centrer verticalement	Centre vertically
+Aligner en bas	Align bottom
+Rotation 90°	Rotate 90°
+À gauche	Left
+Centres horizontaux	Horizontal centres
+À droite	Right
+En haut	Top
+Centres verticaux	Vertical centres
+En bas	Bottom
+Bords gauches	Left edges
+Bords droits	Right edges
+Bords hauts	Top edges
+Bords bas	Bottom edges
+Serrés	Tight
+Accueil	Home
+Tes dessins enregistrés apparaîtront ici	Your saved drawings will appear here
+Projets .evec · glisse-en un pour l'ouvrir	.evec projects · drag one in to open it
+Décale la sélection d'une distance précise	Moves the selection by an exact distance
+Agrandit ou réduit depuis le point de référence	Scales up or down from the reference point
+Fait pivoter autour du point de référence	Rotates around the reference point
+Retourne la sélection par rapport à un axe	Mirrors the selection across an axis
+Penche la sélection	Skews the selection
+Chaque objet autour de son propre centre	Each object around its own centre
+Crée un contour parallèle, à l'extérieur ou à l'intérieur	Creates a parallel outline, outside or inside
+Retire des points en gardant l'allure	Removes points while keeping the shape
+Arrondit les angles vifs	Rounds sharp corners
+Transforme le tracé en dents de scie	Turns the path into a zigzag
+Transforme le tracé en vagues régulières	Turns the path into regular waves
+Rend le tracé irrégulier, façon dessin à la main	Makes the path irregular, hand-drawn style
+Creuse ou gonfle les côtés	Pinches or bloats the sides
+Fait tourner davantage le centre que les bords	Twists the centre more than the edges
+Remplace le fond par des hachures dessinées	Replaces the fill with drawn hatching
+Crée des étapes intermédiaires entre les objets	Creates intermediate steps between objects
+Teinte, saturation et luminosité de la sélection	Hue, saturation and lightness of the selection
+Une série de copies décalées, tournées ou non	A series of offset copies, rotated or not
+Unir	Unite
+Soustraire	Subtract
+Intersection	Intersect
+Exclure	Exclude
+Diviser	Divide
+Découpe	Cutout
+Cadrer	Frame
+Détourage	Cutout
+Carré	Square
+Écran 16:9	Screen 16:9
+Réseaux sociaux	Social media
+retoucher en image	edit as an image
+placer le dessin	place the drawing
+animer le dessin	animate the drawing
+ajouter au montage	add to the edit
+développer	develop
+Marque déposée	Trademark
+Tiret cadratin	Em dash
+Tiret demi-cadratin	En dash
+Points de suspension	Ellipsis
+Degré	Degree
+Segoe UI	
+Arial	
+Georgia	
+Times New Roman	
+Consolas	
+Impact	
+Verdana	
+Trebuchet MS	
+Calibri	
+Cambria	
+Comic Sans MS	
+Courier New	
+Différence	Difference
+Densité couleur −	Colour density −
+Densité couleur +	Colour density +
+Lumière crue	Harsh light
+Lumière tamisée	Dim light
+round	
+butt	
+square	
+miter	
+bevel	
+Aucune	None
+Triangle	Triangle
+Triangle ouvert	Open triangle
+Flèche fine	Thin arrow
+Cercle	Circle
+Losange	Diamond
+Barre	Bar
+Point	Dot
+Uniforme	Uniform
+Lentille	Lens
+Pointe à la fin	Arrowhead at end
+Pointe au début	Arrowhead at start
+Goutte	Drop
+Vague	Wave
+Calligraphie	Calligraphy
+Décaler la teinte de +30°	Shift hue by +30°
+Décaler la teinte de −30°	Shift hue by −30°
+Teinte opposée (complémentaire)	Opposite hue (complementary)
+Négatif	Negative
+Plus saturé	More saturated
+Moins saturé	Less saturated
+Plus clair	Lighter
+Plus sombre	Darker

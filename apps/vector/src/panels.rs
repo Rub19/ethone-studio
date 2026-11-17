@@ -111,7 +111,7 @@ pub fn row_label(ui: &mut Ui, t: &str, w: f32) {
 }
 
 fn small(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&t)).size(12.0).color(MUTED));
 }
 
 fn hint(ui: &mut Ui, t: &str) {
@@ -136,7 +136,7 @@ fn dv(ui: &mut Ui, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &s
 }
 
 fn opt_dv<N: egui::emath::Numeric>(ui: &mut Ui, label: &str, v: &mut N, range: std::ops::RangeInclusive<N>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
     ui.add(egui::DragValue::new(v).range(range).suffix(suffix));
     ui.add_space(8.0);
 }
@@ -159,7 +159,7 @@ pub fn color_toggle(ui: &mut Ui, label: &str, c: &mut Option<Color32>) -> bool {
     let before = *c;
     ui.horizontal(|ui| {
         let mut on = c.is_some();
-        if ui.checkbox(&mut on, RichText::new(label).color(INK)).changed() {
+        if ui.checkbox(&mut on, RichText::new(tl(&label)).color(INK)).changed() {
             *c = on.then_some(c.unwrap_or(Color32::BLACK));
             open = on;
         }
@@ -270,7 +270,7 @@ impl VectorApp {
             ui.add_space(26.0);
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::hover());
             ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.22));
-            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(13.0), INK_STRONG);
+            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, tl("Accueil"), semibold(13.0), INK_STRONG);
             ui.add_space(14.0);
             hint(ui, tl("Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre."));
         });
@@ -312,8 +312,8 @@ impl VectorApp {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 110.0), Sense::hover());
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Tes dessins enregistrés apparaîtront ici", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .evec · glisse-en un pour l'ouvrir", FontId::proportional(12.5), MUTED);
+                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, tl("Tes dessins enregistrés apparaîtront ici"), semibold(15.0), INK);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, tl("Projets .evec · glisse-en un pour l'ouvrir"), FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -334,7 +334,7 @@ impl VectorApp {
                 }
                 if let Some(e) = self.error.clone() {
                     ui.add_space(12.0);
-                    ui.label(RichText::new(e).color(RED));
+                    ui.label(RichText::new(tl(&e)).color(RED));
                 }
             });
         });
@@ -347,7 +347,7 @@ impl VectorApp {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
                 ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
                 tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
-                ui.label(RichText::new(tool_name(self.tool)).font(semibold(12.5)).color(INK));
+                ui.label(RichText::new(tl(tool_name(self.tool))).font(semibold(12.5)).color(INK));
                 sep(ui);
                 let has = self.sel.is_some();
                 match self.tool {
@@ -397,7 +397,7 @@ impl VectorApp {
                     Tool::ConvPt => small(ui, tl("Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques")),
                     Tool::Curv => small(ui, tl("Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer")),
                     Tool::Text | Tool::AreaText | Tool::PathText | Tool::VText => {
-                        egui::ComboBox::from_id_salt("optfont").selected_text(FONTS[self.o.text_font]).width(140.0).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("optfont").selected_text(tl(FONTS[self.o.text_font])).width(140.0).show_ui(ui, |ui| {
                             for (k, f) in FONTS.iter().enumerate() {
                                 ui.selectable_value(&mut self.o.text_font, k, *f);
                             }
@@ -588,7 +588,7 @@ impl VectorApp {
     pub(crate) fn status_bar(&mut self, root: &mut Ui) {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                let s = |t: String| RichText::new(t).size(12.0).color(MUTED);
+                let s = |t: String| RichText::new(tl(&t)).size(12.0).color(MUTED);
                 ui.label(s(format!("{:.0} %", self.zoom * 100.0)));
                 if self.rot != 0.0 {
                     ui.label(s(format!("vue {:.0}°", self.rot)));
@@ -606,16 +606,16 @@ impl VectorApp {
                 }
                 for (flag, label) in [(self.smart, "Repères commentés"), (self.snap, "Magnétisme"), (self.outline_view, "Mode tracés")] {
                     if flag {
-                        ui.label(RichText::new(label).size(11.5).color(BLUE));
+                        ui.label(RichText::new(tl(&label)).size(11.5).color(BLUE));
                     }
                 }
                 if let Some(e) = self.error.clone() {
-                    ui.label(RichText::new(e).size(12.0).color(RED));
+                    ui.label(RichText::new(tl(&e)).size(12.0).color(RED));
                     if ui.small_button("×").clicked() {
                         self.error = None;
                     }
                 } else if let Some(m) = self.info.clone() {
-                    ui.label(RichText::new(m).size(12.0).color(INK));
+                    ui.label(RichText::new(tl(&m)).size(12.0).color(INK));
                     if ui.small_button("×").clicked() {
                         self.info = None;
                     }
@@ -1282,19 +1282,19 @@ impl VectorApp {
             }
         });
         let lib: Vec<[u8; 4]> = LIBRARIES[self.library].1.iter().map(|c| [c[0], c[1], c[2], 255]).collect();
-        self.swatch_row(ui, &lib, "lib");
+        self.swatch_row(ui, &lib, tl("lib"));
         small(ui, tl("Gris"));
         let grays: Vec<[u8; 4]> = (0..9).map(|k| {
             let v = (k * 255 / 8) as u8;
             [v, v, v, 255]
         }).collect();
-        self.swatch_row(ui, &grays, "gray");
+        self.swatch_row(ui, &grays, tl("gray"));
         small(ui, tl("Nuances du document"));
         let docs = self.doc.swatches.clone();
         if docs.is_empty() {
             hint(ui, tl("Ajoute ici les couleurs de ton projet."));
         } else {
-            self.swatch_row(ui, &docs, "docsw");
+            self.swatch_row(ui, &docs, tl("docsw"));
         }
         ui.horizontal_wrapped(|ui| {
             if pro::chip(ui, tl("+ Couleur du fond")).clicked() {

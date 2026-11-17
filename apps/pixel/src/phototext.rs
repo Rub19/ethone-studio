@@ -386,7 +386,7 @@ impl Pixel {
 
     pub fn pt_panel(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         let lab = |ui: &mut Ui, s: &str| {
-            ui.label(RichText::new(s).size(12.0).color(MUTED));
+            ui.label(RichText::new(tl(&s)).size(12.0).color(MUTED));
         };
         ui.horizontal_wrapped(|ui| {
             if ui.add_enabled(self.pt.job.is_none(), egui::Button::new(RichText::new(tl("Détecter le texte")).color(Color32::WHITE)).fill(studio_ui::pro::BLUE)).clicked() {
@@ -412,9 +412,9 @@ impl Pixel {
             ui.checkbox(&mut self.pt.selection_only, tl("Seulement dans la sélection"));
             ui.checkbox(&mut self.pt.boxes, tl("Afficher les cadres sur l'image"));
             ui.horizontal(|ui| {
-                lab(ui, "Ignorer les lignes de moins de");
+                lab(ui, tl("Ignorer les lignes de moins de"));
                 ui.add(egui::DragValue::new(&mut self.pt.min_conf).range(1..=10));
-                lab(ui, "caractère(s)");
+                lab(ui, tl("caractère(s)"));
             });
         });
         if self.pt.lines.is_empty() {
@@ -445,7 +445,7 @@ impl Pixel {
                 if sel == Some(i) {
                     ui.horizontal_wrapped(|ui| {
                         for (k, name) in [(0u8, "Remplacer"), (1, "Effacer"), (2, "Flouter"), (3, "Copier"), (4, "Sélectionner"), (5, "Rétablir")] {
-                            if ui.small_button(name).clicked() {
+                            if ui.small_button(tl(&name)).clicked() {
                                 act = Some((k, i));
                             }
                         }

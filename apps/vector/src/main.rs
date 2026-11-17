@@ -2593,7 +2593,7 @@ impl VectorApp {
         ui.add_enabled_ui(on, |ui| {
             ui.menu_button(tl("Exporter rapidement"), |ui| {
                 for (label, f, s, t) in [("PNG ×1", 0, 1.0, false), ("PNG ×2", 0, 2.0, false), ("PNG ×3", 0, 3.0, false), ("PNG ×4", 0, 4.0, false), ("PNG ×2 fond transparent", 0, 2.0, true), ("JPEG ×2", 1, 2.0, false), ("SVG", 2, 1.0, false), ("SVG optimisé", 4, 1.0, false), ("PDF (tous les plans de travail)", 3, 1.0, false)] {
-                    if ui.button(label).clicked() {
+                    if ui.button(tl(&label)).clicked() {
                         self.run_export(&ExportOpts { format: f.min(3), scale: s, transparent: t, quality: 90, scope: if f == 3 { 1 } else { 0 }, minify: f == 4 });
                         ui.close();
                     }
@@ -2753,7 +2753,7 @@ impl VectorApp {
             ui.menu_button(tl("Envoyer vers le calque"), |ui| {
                 let names: Vec<String> = self.doc.layers.iter().map(|l| l.name.clone()).collect();
                 for (k, n) in names.iter().enumerate() {
-                    if ui.button(n).clicked() {
+                    if ui.button(tl(&n)).clicked() {
                         self.sel_to_layer(k);
                     }
                 }
@@ -3130,7 +3130,7 @@ impl VectorApp {
 }
 
 fn mi(ui: &mut Ui, label: &str, sc: &str, enabled: bool) -> bool {
-    let b = if sc.is_empty() { egui::Button::new(label) } else { egui::Button::new(label).shortcut_text(sc) };
+    let b = if sc.is_empty() { egui::Button::new(label) } else { egui::Button::new(label).shortcut_text(studio_ui::i18n::keys(sc)) };
     let r = ui.add_enabled(enabled, b).clicked();
     if r {
         ui.close();

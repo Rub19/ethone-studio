@@ -216,10 +216,10 @@ impl Motion {
             ui.horizontal_centered(|ui| {
                 ui.spacing_mut().item_spacing.x = 6.0;
                 let name = TOOL_GROUPS.iter().flat_map(|g| g.iter()).find(|t| t.0 == self.tool).map_or("", |t| t.1);
-                ui.label(RichText::new(name).font(semibold(12.0)).color(INK));
+                ui.label(RichText::new(tl(&name)).font(semibold(12.0)).color(INK));
                 pro::toolbar_sep(ui);
                 let lab = |ui: &mut Ui, s: &str| {
-                    ui.add(egui::Label::new(RichText::new(s).size(12.0).color(MUTED)).truncate());
+                    ui.add(egui::Label::new(RichText::new(tl(&s)).size(12.0).color(MUTED)).truncate());
                 };
                 let o = &mut self.topts;
                 match self.tool {
@@ -227,7 +227,7 @@ impl Motion {
                     Tool::Hand | Tool::ZoomIn | Tool::ZoomOut => {
                         lab(ui, if self.tool == Tool::Hand { "Glisser pour déplacer la vue" } else { "Clic : zoom · Alt+clic : inverse" });
                         for (n, z) in [("Ajuster", None), ("50 %", Some(0.5)), ("100 %", Some(1.0)), ("200 %", Some(2.0))] {
-                            if ui.small_button(n).clicked() {
+                            if ui.small_button(tl(&n)).clicked() {
                                 self.zoom = z;
                                 self.pan = Vec2::ZERO;
                             }
@@ -237,7 +237,7 @@ impl Motion {
                     Tool::Anchor => {
                         lab(ui, tl("Glisser l'ancre sans bouger le calque · Placer :"));
                         for (n, k) in [("Centre", 4u8), ("Haut", 1), ("Bas", 7), ("Gauche", 3), ("Droite", 5)] {
-                            if ui.small_button(n).clicked() {
+                            if ui.small_button(tl(&n)).clicked() {
                                 self.anchor_to(k);
                             }
                         }
@@ -338,7 +338,7 @@ impl Motion {
                     }
                 }
                 pro::toolbar_sep(ui);
-                egui::ComboBox::from_id_salt("quality").width(78.0).selected_text(QUALITY[self.quality]).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("quality").width(78.0).selected_text(tl(QUALITY[self.quality])).show_ui(ui, |ui| {
                     for (k, q) in QUALITY.iter().enumerate() {
                         ui.selectable_value(&mut self.quality, k, *q);
                     }
@@ -1278,8 +1278,8 @@ impl Motion {
         let fps = self.comp.fps;
         ui.painter().text(tb.left_center(), Align2::LEFT_CENTER, tc(self.t, fps), FontId::monospace(16.0), BLUE);
         let info = match self.cursor {
-            Some((x, y)) => format!("image {} · x {x:.0} y {y:.0}", (self.t * fps as f32).round() as u32),
-            None => format!("image {}", (self.t * fps as f32).round() as u32),
+            Some((x, y)) => format!("{} {} · x {x:.0} y {y:.0}", tl("image"), (self.t * fps as f32).round() as u32),
+            None => format!("{} {}", tl("image"), (self.t * fps as f32).round() as u32),
         };
         let compact = tb.width() / 2.0 < 300.0;
         let span = if compact { 156.0 } else { 216.0 };

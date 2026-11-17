@@ -352,3 +352,202 @@ Sélectionner le ciel	Select sky
 Sélectionner le sujet	Select subject
 Pipette de balance des blancs	White balance eyedropper
 Main et zoom	Hand and zoom
+Lumière du jour	Daylight
+Tungstène	Tungsten
+Couleurs vives	Vivid colours
+Cinéma	Cinema
+Nuit et ville	City at night
+Linéaire	Linear
+Contraste moyen	Medium contrast
+Contraste fort	High contrast
+Film mat	Matte film
+Primaire rouge	Red primary
+Primaire verte	Green primary
+Primaire bleue	Blue primary
+Retenue   P	Picked   P
+Sans drapeau   U	Unflagged   U
+Rejetée   X	Rejected   X
+Très grandes	Very large
+Prise de vue	Shooting
+Correction d'expo	Exposure correction
+Taille d'origine	Original size
+4K · 3840 px	4K · 3840 px
+Web · 2048 px	Web · 2048 px
+Écran HD · 1920 px	HD screen · 1920 px
+Instagram carré · 1080	Instagram square · 1080
+Instagram portrait · 1080 × 1350	Instagram portrait · 1080 × 1350
+Story · 1080 × 1920	Story · 1080 × 1920
+Courriel · 1200 px	Email · 1200 px
+Miniature · 640 px	Thumbnail · 640 px
+Nom d'origine	Original name
+Nom + suffixe	Name + suffix
+Texte + numéro	Text + number
+Date + nom	Date + name
+Titre + numéro	Title + number
+Nom + note	Name + rating
+Personnalisé	Custom
+Chargement…	Loading…
+Avant	Before
+Après	After
+Aucune photo	No photos
+Heure dorée	Golden hour
+Heure bleue	Blue hour
+Brume chaude	Warm haze
+Hiver lumineux	Bright winter
+Rétro 70s	70s retro
+Sombre et intense	Dark and intense
+Portra doux	Soft Portra
+Ektar vif	Vivid Ektar
+Fuji vert	Fuji green
+Cinéma 500T	Cinema 500T
+Instantané pastel	Pastel instant
+Argentique N&B 400	B&W film 400
+Jetable 90s	90s disposable
+Saturé	Saturated
+Peau douce	Soft skin
+Portrait chaleureux	Warm portrait
+Portrait lumineux	Bright portrait
+Portrait contrasté	Contrasty portrait
+Portrait mat	Matte portrait
+Ciel dramatique	Dramatic sky
+Forêt	Forest
+Coucher de soleil	Sunset
+Mer et ciel	Sea and sky
+Brume matinale	Morning mist
+Noir et blanc doux	Soft black and white
+N&B contrasté	Contrasty B&W
+Filtre rouge	Red filter
+Filtre jaune	Yellow filter
+Filtre vert	Green filter
+Sélénium	Selenium
+Teal & Orange	
+Nuit américaine	Day for night
+Bleach bypass	
+Polaroïd	
+Diapo 70	Slide film 70
+Haute clé	High key
+Basse clé	Low key
+Néons de nuit	Night neons
+Déboucher les ombres	Lift the shadows
+Récupérer le ciel	Recover the sky
+Netteté écran	Screen sharpening
+Supprimer la brume	Remove haze
+cr2	
+cr3	
+nef	
+nrw	
+arw	
+srf	
+sr2	
+dng	
+raf	
+orf	
+rw2	
+pef	
+srw	
+3fr	
+jpg	
+jpeg	
+png	
+webp	
+tif	
+tiff	
+psd	
+Vif	Vivid
+Neutre	Neutral
+Paysage	Landscape
+Portrait	Portrait
+Monochrome	Monochrome
+Priorité couleur	Colour priority
+Priorité hautes lumières	Highlight priority
+Superposition de peinture	Paint overlay
+Réglages de base	Basic settings
+Courbe des tonalités	Tone curve
+Étalonnage des couleurs	Colour grading
+Recadrage et rotation	Crop and rotate
+Étalonnage de l'appareil	Camera calibration
+Red	
+Orange	Orange
+Yellow	
+Green	
+Aqua	Aqua
+Blue	
+Purple	
+Magenta	Magenta
+mettre en page	lay out
+placer l'image	place the image
+ajouter au montage	add to the edit
+animer la photo	animate the photo
+Date de modification	Date modified
+Taille du fichier	File size
+Type de fichier	File type
+Courbe paramétrique	Parametric curve
+Courbe RVB	RGB curve
+Courbe rouge	Red curve
+Courbe verte	Green curve
+Courbe bleue	Blue curve
+Étalonnage des ombres	Shadow grading
+Étalonnage des hautes lumières	Highlight grading
+Étalonnage des tons moyens	Midtone grading
+Étalonnage global	Global grading
+Luminance des ombres	Shadow luminance
+Luminance des tons moyens	Midtone luminance
+Luminance des hautes lumières	Highlight luminance
+Luminance globale	Global luminance
+Rayon de netteté	Sharpening radius
+Détail de netteté	Sharpening detail
+Masquage de netteté	Sharpening masking
+Détail du bruit	Noise detail
+Bruit de couleur	Colour noise
+Détail du bruit de couleur	Colour noise detail
+Lissage du bruit de couleur	Colour noise smoothing
+Point milieu du vignetage	Vignette midpoint
+Aberration rouge/cyan	Red/cyan aberration
+Aberration bleu/jaune	Blue/yellow aberration
+Perspective verticale	Vertical perspective
+Perspective horizontale	Horizontal perspective
+Rotation 90°	Rotate 90°
+Style de vignettage	Vignette style
+Hautes lumières du vignettage	Vignette highlights
+Taille du grain	Grain size
+Rugosité du grain	Grain roughness
+Intensité du LUT	LUT intensity
+Teinte des ombres (étalonnage)	Shadow tint (calibration)
+Effets créatifs	Creative effects
+Retouche des taches	Spot healing
+Profil et lumière	Profile and light
+TSL	HSL
+Étalonnage	Colour grading
+Optique	Optics
+Transformation	Transform
+Effets	Effects
+Masques	Masks
+JPEG	
+PNG	
+TIFF	
+WebP	
+Grand côté	Long side
+Petit côté	Short side
+Cadre L × H	Frame W × H
+Aucune	None
+Écran	Screen
+Papier mat	Matte paper
+Papier brillant	Glossy paper
+Faible	Low
+Standard	Standard
+Élevée	High
+Toutes sauf la localisation	All except location
+Copyright uniquement	Copyright only
+Nom unique	Unique name
+Écraser	Overwrite
+Ignorer	Ignore
+Haut gauche	Top left
+Haut droite	Top right
+Centre	Centre
+Bas droite	Bottom right
+Bas gauche	Bottom left
+Règle des tiers	Rule of thirds
+Grille	Grid
+Nombre d'or	Golden ratio
+Diagonales	Diagonals
+Courbe	Curve

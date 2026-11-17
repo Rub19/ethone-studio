@@ -1297,7 +1297,7 @@ impl Pixel {
     }
 
     fn mie(&mut self, ui: &mut Ui, enabled: bool, label: &str, shortcut: &str) -> bool {
-        let clicked = ui.add_enabled(enabled, egui::Button::new(label).shortcut_text(RichText::new(shortcut).color(FAINT))).clicked();
+        let clicked = ui.add_enabled(enabled, egui::Button::new(label).shortcut_text(RichText::new(studio_ui::i18n::keys(&shortcut)).color(FAINT))).clicked();
         if clicked {
             self.doc.next_label = Some(label.trim_end_matches('…').to_string());
         }
@@ -1934,7 +1934,7 @@ impl Pixel {
             });
             ui.menu_button(tl("Effets de calque"), |ui| {
                 for (k, label) in [(0u8, "Ombre portée…"), (4, "Ombre interne…"), (1, "Lueur externe…"), (5, "Lueur interne…"), (6, "Biseau et estampage…"), (2, "Contour…"), (7, "Incrustation couleur…"), (8, "Incrustation dégradé…")] {
-                    if ui.button(label).clicked() {
+                    if ui.button(tl(&label)).clicked() {
                         self.open_sheet_effect(k);
                         ui.close();
                     }
@@ -1981,7 +1981,7 @@ impl Pixel {
             ui.add_enabled_ui(has, |ui| {
                 ui.menu_button(tl("Modifier"), |ui| {
                     for (label, kind, sc) in [("Bordure…", 2u8, ""), ("Lisser…", 4, ""), ("Dilater…", 0, ""), ("Contracter…", 1, ""), ("Contour progressif…", 3, "Maj+F6")] {
-                        if ui.add(egui::Button::new(label).shortcut_text(RichText::new(sc).color(FAINT))).clicked() {
+                        if ui.add(egui::Button::new(label).shortcut_text(RichText::new(studio_ui::i18n::keys(&sc)).color(FAINT))).clicked() {
                             self.sheet = Some(Sheet::SelectBy { kind, px: 4.0 });
                             ui.close();
                         }
@@ -2004,7 +2004,7 @@ impl Pixel {
                     let mut del = None;
                     for (i, (name, _)) in self.saved_sel.iter().enumerate() {
                         ui.horizontal(|ui| {
-                            if ui.button(name).clicked() {
+                            if ui.button(tl(&name)).clicked() {
                                 load = Some(i);
                             }
                             if ui.small_button("×").on_hover_text(tl("Supprimer")).clicked() {
@@ -2039,7 +2039,7 @@ impl Pixel {
                 ui.menu_button(*group, |ui| {
                     for k in *kinds {
                         let label = if k.params().is_empty() { k.title().to_string() } else { format!("{}…", k.title()) };
-                        if ui.button(label).clicked() {
+                        if ui.button(tl(&label)).clicked() {
                             self.start_adjust(*k);
                             ui.close();
                         }
@@ -2145,7 +2145,7 @@ impl Pixel {
             });
             ui.horizontal(|ui| {
                 ui.label(tl("Couleur"));
-                tools::combo(ui, "gridcol", &mut self.grid_color, &GRID_COLORS.map(|c| c.0), 110.0);
+                tools::combo(ui, tl("gridcol"), &mut self.grid_color, &GRID_COLORS.map(|c| c.0), 110.0);
             });
             ui.separator();
             if ui.button(if self.hide_panels { "Afficher les panneaux (Tab)" } else { "Masquer les panneaux (Tab)" }).clicked() {
@@ -2175,7 +2175,7 @@ impl Pixel {
             ui.add_space(26.0);
             let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 34.0), Sense::hover());
             ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.22));
-            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, "Accueil", semibold(13.0), INK_STRONG);
+            ui.painter().text(r.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, tl("Accueil"), semibold(13.0), INK_STRONG);
         });
         egui::CentralPanel::default().frame(Frame::new().fill(PASTEBOARD).inner_margin(Margin { left: 40, right: 40, top: 34, bottom: 20 })).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
@@ -2211,8 +2211,8 @@ impl Pixel {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 120.0), Sense::hover());
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Dépose une image n'importe où pour l'ouvrir", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO", FontId::proportional(12.5), MUTED);
+                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, tl("Dépose une image n'importe où pour l'ouvrir"), semibold(15.0), INK);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, tl("PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO"), FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -2233,7 +2233,7 @@ impl Pixel {
                 }
                 if let Some(e) = self.error.clone() {
                     ui.add_space(12.0);
-                    ui.label(RichText::new(e).color(RED));
+                    ui.label(RichText::new(tl(&e)).color(RED));
                 }
             });
         });
@@ -2242,7 +2242,7 @@ impl Pixel {
     fn status_bar(&mut self, root: &mut Ui) {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
+                let small = |t: String| RichText::new(tl(&t)).size(12.0).color(MUTED);
                 ui.label(small(format!("{:.0} %", self.zoom * 100.0)));
                 if self.view_angle != 0.0 {
                     ui.label(small(format!("vue {:+.0}°", self.view_angle)));
@@ -2258,7 +2258,7 @@ impl Pixel {
                     ui.label(RichText::new(tl("Masque en cours de modification")).size(12.0).color(BLUE));
                 }
                 if let Some(e) = self.error.clone() {
-                    ui.label(RichText::new(e).size(12.0).color(RED));
+                    ui.label(RichText::new(tl(&e)).size(12.0).color(RED));
                     if ui.small_button("×").clicked() {
                         self.error = None;
                     }

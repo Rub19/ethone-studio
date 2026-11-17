@@ -106,7 +106,7 @@ impl Cut {
                 1 => glyph(p, r.shrink(6.0), G::Lock, if on { Color32::from_rgb(255, 196, 0) } else { ink }),
                 2 => speaker(p, r.center(), on, ink),
                 _ => {
-                    p.text(r.center(), Align2::CENTER_CENTER, "S", semibold(11.0), if on { Color32::BLACK } else { ink });
+                    p.text(r.center(), Align2::CENTER_CENTER, tl("S"), semibold(11.0), if on { Color32::BLACK } else { ink });
                 }
             }
             resp.clicked()
@@ -814,7 +814,7 @@ impl Cut {
 
     fn clip_menu(&self, ui: &mut Ui, s: Sel, menu: &mut Option<(Sel, u8)>) {
         let item = |ui: &mut Ui, label: &str, code: u8, menu: &mut Option<(Sel, u8)>| {
-            if ui.button(label).clicked() {
+            if ui.button(tl(&label)).clicked() {
                 *menu = Some((s, code));
                 ui.close();
             }
@@ -828,7 +828,7 @@ impl Cut {
         item(ui, tl("Activer / désactiver"), 10, menu);
         ui.menu_button(tl("Vitesse"), |ui| {
             for (k, v) in ["25 %", "50 %", "75 %", "100 %", "150 %", "200 %", "400 %"].iter().enumerate() {
-                if ui.button(*v).clicked() {
+                if ui.button(tl(*v)).clicked() {
                     *menu = Some((s, 100 + k as u8));
                     ui.close();
                 }
@@ -837,7 +837,7 @@ impl Cut {
         if matches!(s, Sel::Clip(i) if i > 0) {
             ui.menu_button(tl("Transition d'entrée"), |ui| {
                 for (k, n) in TRANSITIONS.iter().enumerate() {
-                    if ui.button(*n).clicked() {
+                    if ui.button(tl(*n)).clicked() {
                         *menu = Some((s, 120 + k as u8));
                         ui.close();
                     }
@@ -846,7 +846,7 @@ impl Cut {
         }
         ui.menu_button(tl("Look"), |ui| {
             for (k, name) in crate::model::LOOKS.iter().enumerate() {
-                if ui.button(*name).clicked() {
+                if ui.button(tl(*name)).clicked() {
                     *menu = Some((s, 160 + k as u8));
                     ui.close();
                 }
@@ -854,7 +854,7 @@ impl Cut {
         });
         ui.menu_button(tl("Effet prédéfini"), |ui| {
             for (k, name) in crate::inspect::EFFECT_PRESETS.iter().enumerate() {
-                if ui.button(*name).clicked() {
+                if ui.button(tl(*name)).clicked() {
                     *menu = Some((s, 190 + k as u8));
                     ui.close();
                 }
@@ -862,7 +862,7 @@ impl Cut {
         });
         ui.menu_button(tl("Étiquette"), |ui| {
             for (k, (name, _)) in LABELS.iter().enumerate() {
-                if ui.button(*name).clicked() {
+                if ui.button(tl(*name)).clicked() {
                     *menu = Some((s, 210 + k as u8));
                     ui.close();
                 }

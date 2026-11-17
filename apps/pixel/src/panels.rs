@@ -15,13 +15,13 @@ fn swatch(ui: &mut Ui, c: Color32, size: f32) -> egui::Response {
 }
 
 fn label(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&t)).size(12.0).color(MUTED));
 }
 
 fn fixed_label(ui: &mut Ui, w: f32, t: &str, size: f32, color: Color32) {
     ui.allocate_ui_with_layout(vec2(w, 18.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
         ui.set_min_width(w);
-        ui.add(egui::Label::new(RichText::new(t).size(size).color(color)).truncate());
+        ui.add(egui::Label::new(RichText::new(tl(&t)).size(size).color(color)).truncate());
     });
 }
 
@@ -92,9 +92,9 @@ impl Pixel {
                 let (h, s, l) = rgb_to_hsl(c.r() as f32 / 255.0, c.g() as f32 / 255.0, c.b() as f32 / 255.0);
                 let mut v = [h * 360.0, s * 100.0, l * 100.0];
                 let mut ch = false;
-                ch |= slider_row(ui, "Teinte", &mut v[0], 0.0..=360.0, "°");
-                ch |= slider_row(ui, "Saturation", &mut v[1], 0.0..=100.0, " %");
-                ch |= slider_row(ui, "Luminosité", &mut v[2], 0.0..=100.0, " %");
+                ch |= slider_row(ui, tl("Teinte"), &mut v[0], 0.0..=360.0, "°");
+                ch |= slider_row(ui, tl("Saturation"), &mut v[1], 0.0..=100.0, " %");
+                ch |= slider_row(ui, tl("Luminosité"), &mut v[2], 0.0..=100.0, " %");
                 if ch {
                     let (r, g, b) = crate::doc::hsl_to_rgb(v[0] / 360.0, v[1] / 100.0, v[2] / 100.0);
                     self.primary = Color32::from_rgb((r * 255.0).round() as u8, (g * 255.0).round() as u8, (b * 255.0).round() as u8);
@@ -117,7 +117,7 @@ impl Pixel {
             }
         }
         ui.horizontal(|ui| {
-            label(ui, "Hex");
+            label(ui, tl("Hex"));
             let id = ui.make_persistent_id("hex");
             let cur = format!("{:02X}{:02X}{:02X}", self.primary.r(), self.primary.g(), self.primary.b());
             let mut text = ui.ctx().data(|d| d.get_temp::<(String, String)>(id)).filter(|t| t.0 == cur).map(|t| t.1).unwrap_or(cur.clone());
@@ -140,9 +140,9 @@ impl Pixel {
     fn swatch_panel(&mut self, ui: &mut Ui) {
         ui.spacing_mut().item_spacing.y = 6.0;
         ui.horizontal(|ui| {
-            label(ui, "Bibliothèque");
+            label(ui, tl("Bibliothèque"));
             let mut k = self.swatch_set;
-            if tools::combo(ui, "swset", &mut k, &SWATCH_SETS.map(|s| s.0), 130.0) {
+            if tools::combo(ui, tl("swset"), &mut k, &SWATCH_SETS.map(|s| s.0), 130.0) {
                 self.swatch_set = k;
                 self.swatches = SWATCH_SETS[k].1.iter().map(|c| Color32::from_rgb(c[0], c[1], c[2])).collect();
                 self.save_swatches();
@@ -191,7 +191,7 @@ impl Pixel {
             ("Tétrade", vec![hsv_rgb(hsv.h + 0.25, hsv.s, hsv.v), hsv_rgb(hsv.h + 0.5, hsv.s, hsv.v), hsv_rgb(hsv.h + 0.75, hsv.s, hsv.v)]),
             ("Nuances", vec![hsv_rgb(hsv.h, hsv.s, hsv.v * 0.4), hsv_rgb(hsv.h, hsv.s, hsv.v * 0.7), hsv_rgb(hsv.h, hsv.s * 0.5, (hsv.v * 1.2).min(1.0)), hsv_rgb(hsv.h, hsv.s * 0.25, 1.0)]),
         ];
-        label(ui, "Harmonies");
+        label(ui, tl("Harmonies"));
         for (name, cols) in harmonies {
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 4.0;
@@ -204,7 +204,7 @@ impl Pixel {
             });
         }
         if !self.recent_colors.is_empty() {
-            label(ui, "Récentes");
+            label(ui, tl("Récentes"));
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                 for c in self.recent_colors.clone() {
@@ -251,13 +251,13 @@ impl Pixel {
             ui.painter().add(egui::epaint::EllipseShape { center: pos2(x, y), radius: vec2(rad, rad * b.roundness.max(0.05)), fill: Color32::from_white_alpha(a.max(20)), stroke: Stroke::NONE, angle: b.angle.to_radians() });
             x += (b.radius * 2.0 * b.spacing * k).max(1.5);
         }
-        slider_row(ui, "Espacement", &mut self.brush.spacing, 0.01..=2.0, "");
-        slider_row(ui, "Angle", &mut self.brush.angle, -180.0..=180.0, "°");
-        slider_row(ui, "Rondeur", &mut self.brush.roundness, 0.05..=1.0, "");
-        slider_row(ui, "Var. taille", &mut self.brush.size_jitter, 0.0..=1.0, "");
-        slider_row(ui, "Var. flux", &mut self.brush.flow_jitter, 0.0..=1.0, "");
-        slider_row(ui, "Dispersion", &mut self.brush.scatter, 0.0..=2.0, "");
-        slider_row(ui, "Lissage", &mut self.smoothing, 0.0..=0.95, "");
+        slider_row(ui, tl("Espacement"), &mut self.brush.spacing, 0.01..=2.0, "");
+        slider_row(ui, tl("Angle"), &mut self.brush.angle, -180.0..=180.0, "°");
+        slider_row(ui, tl("Rondeur"), &mut self.brush.roundness, 0.05..=1.0, "");
+        slider_row(ui, tl("Var. taille"), &mut self.brush.size_jitter, 0.0..=1.0, "");
+        slider_row(ui, tl("Var. flux"), &mut self.brush.flow_jitter, 0.0..=1.0, "");
+        slider_row(ui, tl("Dispersion"), &mut self.brush.scatter, 0.0..=2.0, "");
+        slider_row(ui, tl("Lissage"), &mut self.smoothing, 0.0..=0.95, "");
     }
 
     fn props_panel(&mut self, ui: &mut Ui) {
@@ -270,29 +270,29 @@ impl Pixel {
         ui.add_space(6.0);
         let a = self.doc.active;
         let mut op = self.doc.layers[a].opacity * 100.0;
-        if slider_row(ui, "Opacité", &mut op, 0.0..=100.0, " %") {
+        if slider_row(ui, tl("Opacité"), &mut op, 0.0..=100.0, " %") {
             self.doc.layers[a].opacity = op / 100.0;
             self.doc.touch_all();
             self.doc.modified = true;
         }
         ui.horizontal(|ui| {
-            fixed_label(ui, 72.0, "Fusion", 12.0, MUTED);
+            fixed_label(ui, 72.0, tl("Fusion"), 12.0, MUTED);
             let mut b = self.doc.layers[a].blend;
-            if tools::blend_combo(ui, "blend", &mut b, ui.available_width() - 12.0) {
+            if tools::blend_combo(ui, tl("blend"), &mut b, ui.available_width() - 12.0) {
                 self.doc.layers[a].blend = b;
                 self.doc.touch_all();
                 self.doc.modified = true;
             }
         });
         ui.horizontal_wrapped(|ui| {
-            label(ui, "Verrou");
+            label(ui, tl("Verrou"));
             let l = &mut self.doc.layers[a];
             ui.toggle_value(&mut l.lock_alpha, "Transparence").on_hover_text(tl("Peindre sans modifier la transparence"));
             ui.toggle_value(&mut l.lock_pos, "Position");
             ui.toggle_value(&mut l.locked, "Tout");
         });
         ui.horizontal(|ui| {
-            label(ui, "Étiquette");
+            label(ui, tl("Étiquette"));
             for (i, c) in TAGS.iter().enumerate().skip(1) {
                 let (r, resp) = ui.allocate_exact_size(Vec2::splat(16.0), Sense::click());
                 ui.painter().circle_filled(r.center(), 6.0, *c);
@@ -313,7 +313,7 @@ impl Pixel {
         }
         if self.doc.layers[a].mask.is_some() {
             ui.horizontal_wrapped(|ui| {
-                label(ui, "Masque");
+                label(ui, tl("Masque"));
                 if ui.selectable_label(self.doc.edit_mask, tl("Modifier")).clicked() {
                     self.doc.edit_mask = !self.doc.edit_mask;
                 }
@@ -599,7 +599,7 @@ impl Pixel {
                 }
                 ui.menu_button(tl("Couleur de l'étiquette"), |ui| {
                     for (k, n) in TAG_NAMES.iter().enumerate() {
-                        if ui.button(*n).clicked() {
+                        if ui.button(tl(*n)).clicked() {
                             self.doc.layers[i].tag = k as u8;
                             ui.close();
                         }
@@ -650,27 +650,27 @@ impl Pixel {
                 ui.painter().text(r.center(), Align2::CENTER_CENTER, glyph, FontId::proportional(13.0), INK);
                 resp.on_hover_text(tip)
             };
-            if b(ui, "Nouveau calque", "+").clicked() {
+            if b(ui, tl("Nouveau calque"), "+").clicked() {
                 self.doc.next_label = Some("Nouveau calque".into());
                 self.doc.add_layer(None, None);
             }
-            if b(ui, "Dupliquer", "⧉").clicked() {
+            if b(ui, tl("Dupliquer"), "⧉").clicked() {
                 self.doc.next_label = Some("Dupliquer le calque".into());
                 self.doc.duplicate_layer();
             }
-            if b(ui, "Ajouter un masque de fusion (depuis la sélection s'il y en a une)", "◐").clicked() && self.doc.layers[self.doc.active].mask.is_none() {
+            if b(ui, tl("Ajouter un masque de fusion (depuis la sélection s'il y en a une)"), "◐").clicked() && self.doc.layers[self.doc.active].mask.is_none() {
                 self.doc.next_label = Some("Masque de fusion".into());
                 self.doc.add_mask(if self.doc.selection.is_some() { 2 } else { 0 });
             }
-            let fx = b(ui, "Effets de calque", "fx");
+            let fx = b(ui, tl("Effets de calque"), "fx");
             egui::Popup::menu(&fx).show(|ui| {
                 for (k, label) in [(0u8, "Ombre portée…"), (4, "Ombre interne…"), (1, "Lueur externe…"), (5, "Lueur interne…"), (6, "Biseau et estampage…"), (2, "Contour…"), (7, "Incrustation couleur…"), (8, "Incrustation dégradé…")] {
-                    if ui.button(label).clicked() {
+                    if ui.button(tl(&label)).clicked() {
                         self.open_sheet_effect(k);
                     }
                 }
             });
-            let adj = b(ui, "Nouveau calque de réglage", "◑");
+            let adj = b(ui, tl("Nouveau calque de réglage"), "◑");
             egui::Popup::menu(&adj).show(|ui| {
                 for k in crate::filters::ADJUSTMENTS {
                     if ui.button(k.title()).clicked() {
@@ -678,17 +678,17 @@ impl Pixel {
                     }
                 }
             });
-            if b(ui, "Monter", "↑").clicked() {
+            if b(ui, tl("Monter"), "↑").clicked() {
                 self.doc.move_layer(true);
             }
-            if b(ui, "Descendre", "↓").clicked() {
+            if b(ui, tl("Descendre"), "↓").clicked() {
                 self.doc.move_layer(false);
             }
-            if b(ui, "Fusionner avec le dessous", "⤓").clicked() {
+            if b(ui, tl("Fusionner avec le dessous"), "⤓").clicked() {
                 self.doc.next_label = Some("Fusionner avec le dessous".into());
                 self.doc.merge_down();
             }
-            if b(ui, "Supprimer", "🗑").clicked() {
+            if b(ui, tl("Supprimer"), "🗑").clicked() {
                 self.doc.next_label = Some("Supprimer le calque".into());
                 self.doc.delete_layer();
             }

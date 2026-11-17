@@ -803,7 +803,7 @@ impl PageApp {
                 }
                 resp.context_menu(|ui| {
                     for (k, t) in [(3u8, "Monter"), (4, "Descendre"), (5, "Placer la sélection ici"), (6, "Sélectionner ses blocs"), (7, "Supprimer le calque")] {
-                        if ui.button(t).clicked() {
+                        if ui.button(tl(&t)).clicked() {
                             act = Some((l, k));
                             ui.close();
                         }
@@ -883,14 +883,14 @@ impl PageApp {
             for (k, s) in self.doc.char_styles.iter().enumerate() {
                 ui.horizontal(|ui| {
                     let c = s.color.unwrap_or([230, 230, 235, 255]);
-                    let mut t = RichText::new(&s.name).size(12.0).color(Color32::from_rgb(c[0], c[1], c[2]));
+                    let mut rt = RichText::new(&s.name).size(12.0).color(Color32::from_rgb(c[0], c[1], c[2]));
                     if s.bold {
-                        t = t.strong();
+                        rt = rt.strong();
                     }
                     if s.italic {
-                        t = t.italics();
+                        rt = rt.italics();
                     }
-                    ui.label(t);
+                    ui.add(egui::Label::new(rt));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if ui.small_button("×").clicked() {
                             del_c = Some(k);
@@ -1005,7 +1005,7 @@ impl PageApp {
                 });
                 ui.label(RichText::new(tl("Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.")).size(11.0).color(FAINT));
                 if let Some(r) = &st.result {
-                    ui.label(RichText::new(r).size(12.0).color(GREEN));
+                    ui.label(RichText::new(tl(&r)).size(12.0).color(GREEN));
                 }
                 ui.add_space(12.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -1135,7 +1135,7 @@ impl PageApp {
                         });
                         ui.horizontal(|ui| {
                             ui.add(egui::TextEdit::singleline(&mut s.prefix).hint_text(tl("Préfixe")).desired_width(60.0));
-                            egui::ComboBox::from_id_salt(("numst", k)).selected_text(NUMBERING[s.style as usize % NUMBERING.len()]).show_ui(ui, |ui| {
+                            egui::ComboBox::from_id_salt(("numst", k)).selected_text(tl(NUMBERING[s.style as usize % NUMBERING.len()])).show_ui(ui, |ui| {
                                 for (j, t) in NUMBERING.iter().enumerate() {
                                     ui.selectable_value(&mut s.style, j as u8, *t);
                                 }

@@ -167,7 +167,7 @@ impl Lumen {
                     }
                 }
                 for cat in cats {
-                    egui::CollapsingHeader::new(RichText::new(cat).size(12.0).color(INK)).id_salt(("cat", cat)).default_open(cat == "Couleur").show(ui, |ui| {
+                    egui::CollapsingHeader::new(RichText::new(tl(&cat)).size(12.0).color(INK)).id_salt(("cat", cat)).default_open(cat == "Couleur").show(ui, |ui| {
                         for (_, name, st) in catalog.iter().filter(|c| c.0 == cat) {
                             let on = current == *st;
                             let r = nav_row(ui, name, usize::MAX, on);
@@ -362,7 +362,7 @@ impl Lumen {
             ui.spacing_mut().item_spacing.x = 2.0;
             ui.spacing_mut().button_padding = egui::vec2(6.0, 2.0);
             for (n, z) in [ZOOMS[0], ZOOMS[2], ZOOMS[3], ZOOMS[4]] {
-                if ui.selectable_label(self.zoom == z, RichText::new(n).size(11.0)).clicked() {
+                if ui.selectable_label(self.zoom == z, RichText::new(tl(&n)).size(11.0)).clicked() {
                     self.zoom = z;
                     self.pan = Vec2::ZERO;
                 }
@@ -438,7 +438,7 @@ impl Lumen {
                                     (s.temperature, s.tint) = (0.0, 0.0);
                                 }
                                 for (name, t, ti) in develop::WB_PRESETS {
-                                    if ui.button(name).clicked() {
+                                    if ui.button(tl(&name)).clicked() {
                                         (s.temperature, s.tint) = (t, ti);
                                     }
                                 }
@@ -486,7 +486,7 @@ impl Lumen {
                             curve_editor(ui, pts, ink, None, lum.as_ref());
                             ui.horizontal_wrapped(|ui| {
                                 for (name, p) in [("Linéaire", vec![]), ("Contraste moyen", vec![[0.0, 0.0], [0.25, 0.21], [0.75, 0.8], [1.0, 1.0]]), ("Contraste fort", vec![[0.0, 0.0], [0.25, 0.17], [0.75, 0.85], [1.0, 1.0]]), ("Film mat", vec![[0.0, 0.08], [0.3, 0.3], [0.8, 0.82], [1.0, 0.95]]), ("Inversion", vec![[0.0, 1.0], [1.0, 0.0]])] {
-                                    if ui.small_button(name).clicked() {
+                                    if ui.small_button(tl(&name)).clicked() {
                                         *pts = p;
                                     }
                                 }
@@ -630,7 +630,7 @@ impl Lumen {
                     caption(ui, tl("Format"));
                     ui.horizontal_wrapped(|ui| {
                         for (k, (name, _)) in develop::RATIOS.iter().enumerate() {
-                            if ui.small_button(*name).clicked() {
+                            if ui.small_button(tl(*name)).clicked() {
                                 self.crop_ratio = k;
                                 let mut t = s.clone();
                                 self.apply_ratio(&mut t);
@@ -733,7 +733,7 @@ impl Lumen {
                     ui.add_space(4.0);
                     ui.menu_button(RichText::new(tl("Réinitialiser un groupe…")).size(12.0), |ui| {
                         for (k, g) in meta::GROUPS.iter().enumerate() {
-                            if ui.button(*g).clicked() {
+                            if ui.button(tl(*g)).clicked() {
                                 let mut only = vec![false; meta::GROUPS.len()];
                                 only[k] = true;
                                 s = meta::copy_groups(&s, &Settings::default(), &only);
@@ -863,7 +863,7 @@ impl Lumen {
         }
         ui.horizontal(|ui| {
             for (label, mode) in [("Ajouter", PartMode::Add), ("Soustraire", PartMode::Subtract), ("Intersecter", PartMode::Intersect)] {
-                ui.menu_button(RichText::new(label).size(12.0), |ui| {
+                ui.menu_button(RichText::new(tl(&label)).size(12.0), |ui| {
                     if let Some(k) = kind_menu(ui) {
                         m.parts.push(Part { mode, ..Part::new(k) });
                         self.sel_part = m.parts.len() - 1;
@@ -977,7 +977,7 @@ impl Lumen {
         let ready = self.preview.is_some() && self.source.as_ref().is_some_and(|(sp, _)| *sp == self.files[i]);
         if !ready {
             if self.loading {
-                p.text(area.center(), Align2::CENTER_CENTER, "Chargement…", FontId::proportional(15.0), MUTED);
+                p.text(area.center(), Align2::CENTER_CENTER, tl("Chargement…"), FontId::proportional(15.0), MUTED);
             }
             return;
         }
@@ -1016,8 +1016,8 @@ impl Lumen {
                     let bf = (left.width() / bw as f32).min(left.height() / bh as f32);
                     let br = Rect::from_center_size(left.center(), vec2(bw as f32, bh as f32) * bf);
                     p.image(bt.id(), br, uv, Color32::WHITE);
-                    p.text(br.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Avant", semibold(12.0), Color32::WHITE);
-                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Après", semibold(12.0), Color32::WHITE);
+                    p.text(br.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, tl("Avant"), semibold(12.0), Color32::WHITE);
+                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, tl("Après"), semibold(12.0), Color32::WHITE);
                 }
                 c => {
                     let vertical = c == 1;
@@ -1029,8 +1029,8 @@ impl Lumen {
                     let knob = if vertical { pos2(at, r.center().y) } else { pos2(r.center().x, at) };
                     painter.circle(knob, 12.0, Color32::from_black_alpha(160), Stroke::new(2.0, Color32::WHITE));
                     painter.text(knob, Align2::CENTER_CENTER, if vertical { "⇔" } else { "⇕" }, FontId::proportional(12.0), Color32::WHITE);
-                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, "Avant", semibold(12.0), Color32::WHITE);
-                    painter.text(r.right_bottom() - vec2(10.0, 10.0), Align2::RIGHT_BOTTOM, "Après", semibold(12.0), Color32::WHITE);
+                    painter.text(r.left_top() + vec2(10.0, 10.0), Align2::LEFT_TOP, tl("Avant"), semibold(12.0), Color32::WHITE);
+                    painter.text(r.right_bottom() - vec2(10.0, 10.0), Align2::RIGHT_BOTTOM, tl("Après"), semibold(12.0), Color32::WHITE);
                     let hr = if vertical { Rect::from_center_size(knob, vec2(28.0, r.height())) } else { Rect::from_center_size(knob, vec2(r.width(), 28.0)) };
                     let handle = ui.interact(hr, ui.make_persistent_id("split"), Sense::drag());
                     if handle.hovered() || handle.dragged() {
@@ -1053,7 +1053,7 @@ impl Lumen {
         if self.before {
             let tag = Rect::from_min_size(r.left_top() + vec2(12.0, r.height() - 38.0), vec2(80.0, 26.0));
             painter.rect_filled(tag, CornerRadius::same(13), Color32::from_black_alpha(170));
-            painter.text(tag.center(), Align2::CENTER_CENTER, "Original", FontId::proportional(12.0), Color32::WHITE);
+            painter.text(tag.center(), Align2::CENTER_CENTER, tl("Original"), FontId::proportional(12.0), Color32::WHITE);
         }
     }
 }

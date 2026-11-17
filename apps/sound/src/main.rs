@@ -1360,7 +1360,7 @@ impl Sound {
                 if k == 3 || k == 5 || k == 7 || k == 10 {
                     ui.separator();
                 }
-                if ui.button(label).clicked() {
+                if ui.button(tl(&label)).clicked() {
                     let shape = self.fx.fade_shape as u8;
                     self.edit(label, move |c, a, b| match k {
                         0 => c.normalize(a, b, -1.0),
@@ -1382,7 +1382,7 @@ impl Sound {
             ui.separator();
             ui.menu_button(tl("Préréglages"), |ui| {
                 for (k, (name, _)) in PRESETS.iter().enumerate() {
-                    if ui.button(*name).clicked() {
+                    if ui.button(tl(*name)).clicked() {
                         self.apply_preset(k);
                     }
                 }
@@ -1436,12 +1436,12 @@ impl Sound {
                     transport_glyph(ui.painter(), r.center(), kind, if on { INK_STRONG } else { INK });
                     resp.on_hover_text(tip).clicked()
                 };
-                if small(ui, 0, "Début (Origine)", false) {
+                if small(ui, 0, tl("Début (Origine)"), false) {
                     self.cursor = 0;
                     self.sel = None;
                     self.view_start = 0.0;
                 }
-                if small(ui, 1, "Marqueur précédent (↑)", false) {
+                if small(ui, 1, tl("Marqueur précédent (↑)"), false) {
                     self.jump(-1);
                 }
                 let (r, resp) = ui.allocate_exact_size(Vec2::splat(32.0), Sense::click());
@@ -1457,13 +1457,13 @@ impl Sound {
                 if resp.on_hover_text(tl("Lecture / pause (Espace)")).clicked() {
                     self.toggle_play();
                 }
-                if small(ui, 2, "Stop", false) {
+                if small(ui, 2, tl("Stop"), false) {
                     self.player.stop();
                 }
-                if small(ui, 3, "Marqueur suivant (↓)", false) {
+                if small(ui, 3, tl("Marqueur suivant (↓)"), false) {
                     self.jump(1);
                 }
-                if small(ui, 4, "Fin", false) {
+                if small(ui, 4, tl("Fin"), false) {
                     self.cursor = self.clip.len();
                     self.sel = None;
                     self.reveal(self.cursor);
@@ -1475,7 +1475,7 @@ impl Sound {
                 if resp.on_hover_text(tl("Enregistrer au micro au curseur (R)")).clicked() {
                     self.toggle_record();
                 }
-                if small(ui, 5, "Boucle sur la sélection (L)", self.looping) {
+                if small(ui, 5, tl("Boucle sur la sélection (L)"), self.looping) {
                     self.looping = !self.looping;
                 }
                 ui.add_space(12.0);
@@ -1525,7 +1525,7 @@ impl Sound {
             ui.horizontal_centered(|ui| {
                 match self.notice.clone() {
                     Some((n, ok)) => {
-                        ui.label(RichText::new(n).size(12.0).color(if ok { GREEN } else { RED }));
+                        ui.label(RichText::new(tl(&n)).size(12.0).color(if ok { GREEN } else { RED }));
                         if ui.small_button("×").clicked() {
                             self.notice = None;
                         }
@@ -1560,8 +1560,8 @@ impl Sound {
                         if let Some((p, r, l, c, tp)) = stats {
                             egui::Grid::new("stats").num_columns(4).spacing(vec2(6.0, 4.0)).show(ui, |ui| {
                                 for (k, v, col) in [("Crête", format!("{p:.1} dB"), if p > -0.1 { RED } else { INK }), ("RMS", format!("{r:.1} dB"), INK)] {
-                                    ui.label(RichText::new(k).size(11.5).color(MUTED));
-                                    ui.label(RichText::new(v).size(12.0).color(col).monospace());
+                                    ui.label(RichText::new(tl(&k)).size(11.5).color(MUTED));
+                                    ui.label(RichText::new(tl(&v)).size(12.0).color(col).monospace());
                                 }
                                 ui.end_row();
                                 ui.label(RichText::new(tl("Volume")).size(11.5).color(MUTED));
@@ -1605,8 +1605,8 @@ impl Sound {
                             ui.painter().rect_filled(r, CornerRadius::same(4), Color32::from_white_alpha(10));
                         }
                         ui.painter().circle_filled(r.left_center() + vec2(12.0, 0.0), 4.0, WAVE);
-                        ui.painter().text(r.left_top() + vec2(24.0, 3.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), INK);
-                        ui.painter().text(r.left_top() + vec2(24.0, 20.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
+                        ui.painter().text(r.left_top() + vec2(24.0, 3.0), Align2::LEFT_TOP, tl(*name), FontId::proportional(12.5), INK);
+                        ui.painter().text(r.left_top() + vec2(24.0, 20.0), Align2::LEFT_TOP, tl(*hint), FontId::proportional(11.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                             preset = Some(k);
                         }
@@ -1684,7 +1684,7 @@ impl Sound {
                     let eq = fx.eq;
                     ui.horizontal_wrapped(|ui| {
                         for (label, preset) in [("Plat", [0.0; 5]), ("Voix", [-6.0, -2.0, 1.0, 4.0, 2.0]), ("Basses", [6.0, 2.0, 0.0, 0.0, 0.0]), ("Brillant", [0.0, 0.0, 0.0, 3.0, 6.0])] {
-                            if ui.small_button(label).clicked() {
+                            if ui.small_button(tl(&label)).clicked() {
                                 fx.eq = preset;
                             }
                         }
@@ -2077,7 +2077,7 @@ impl Sound {
                 });
                 ui.add_space(14.0);
                 let row = |ui: &mut Ui, s: &str| {
-                    ui.label(RichText::new(s).size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl(&s)).size(12.0).color(MUTED));
                 };
                 row(ui, tl("Qualité"));
                 pro::segmented(ui, &mut o.bits, &[tl("16 bits (CD)"), tl("24 bits"), tl("32 flottant"), tl("8 bits")]);
@@ -2110,7 +2110,7 @@ impl Sound {
                 egui::CollapsingHeader::new(RichText::new(tl("Métadonnées")).size(12.0).color(MUTED)).id_salt("meta").show(ui, |ui| {
                     egui::Grid::new("meta-grid").num_columns(2).spacing(vec2(8.0, 4.0)).show(ui, |ui| {
                         for (k, (_, label)) in INFO_IDS.iter().enumerate() {
-                            ui.label(RichText::new(*label).size(12.0).color(MUTED));
+                            ui.label(RichText::new(tl(*label)).size(12.0).color(MUTED));
                             ui.add(egui::TextEdit::singleline(&mut self.meta[k]).desired_width(280.0));
                             ui.end_row();
                         }
@@ -2206,7 +2206,7 @@ impl Sound {
         ui.label(RichText::new(t.name()).font(semibold(12.0)).color(INK_STRONG));
         pro::toolbar_sep(ui);
         let small = |ui: &mut Ui, s: &str| {
-            ui.add(egui::Label::new(RichText::new(s).size(12.0).color(MUTED)).truncate());
+            ui.add(egui::Label::new(RichText::new(tl(&s)).size(12.0).color(MUTED)).truncate());
         };
         match t {
             Tool::Select | Tool::Hand | Tool::Zoom => {
@@ -2306,7 +2306,7 @@ impl Sound {
                 small(ui, &format!("{} point(s)", self.env.len()));
                 let n = self.clip.len();
                 for (label, pts) in [("Montée", vec![(0usize, -30.0f32), (n, 0.0)]), ("Descente", vec![(0, 0.0), (n, -30.0)]), ("Creux au centre", vec![(0, 0.0), (n / 3, -12.0), (n * 2 / 3, -12.0), (n, 0.0)])] {
-                    if ui.small_button(label).clicked() {
+                    if ui.small_button(tl(&label)).clicked() {
                         self.env = pts;
                     }
                 }
@@ -2937,7 +2937,7 @@ fn export_glyph(p: &Painter, r: Rect, c: Color32) {
 }
 
 fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
     ui.spacing_mut().slider_width = (ui.available_width() - 118.0).max(80.0);
     ui.add(egui::Slider::new(v, range).suffix(suffix).max_decimals(1));
 }

@@ -677,7 +677,7 @@ impl Folio {
         });
         ui.menu_button(tl("Outils"), |ui| {
             for (p, name) in panels::LIST {
-                if ui.button(name).clicked() {
+                if ui.button(tl(&name)).clicked() {
                     self.panel = p;
                 }
             }
@@ -728,7 +728,7 @@ impl Folio {
                 }
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     let tip = TOOLS.iter().find(|t| t.0 == self.tool).map_or("", |t| t.1);
-                    ui.label(RichText::new(tip).size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl(&tip)).size(12.0).color(MUTED));
                 });
             });
         });
@@ -815,9 +815,9 @@ impl Folio {
                     ui.label(RichText::new(format!("Page {} · {} commentaire(s)", self.page + 1, list.len())).size(12.0).color(MUTED));
                     egui::ScrollArea::vertical().show(ui, |ui| {
                         for (kind, text) in list {
-                            ui.label(RichText::new(kind).font(semibold(12.0)).color(INK));
+                            ui.label(RichText::new(tl(&kind)).font(semibold(12.0)).color(INK));
                             if !text.is_empty() {
-                                ui.label(RichText::new(text).size(12.0).color(MUTED));
+                                ui.label(RichText::new(tl(&text)).size(12.0).color(MUTED));
                             }
                             ui.add_space(4.0);
                         }
@@ -1374,7 +1374,7 @@ fn home_glyph(p: &Painter, r: Rect, k: u8, c: Color32) {
                 p.line_segment([at(x, y), at(x + dx, y)], s);
                 p.line_segment([at(x, y), at(x, y + dy)], s);
             }
-            p.text(at(0.5, 0.5), Align2::CENTER_CENTER, "Aa", FontId::proportional(r.height() * 0.45), c);
+            p.text(at(0.5, 0.5), Align2::CENTER_CENTER, tl("Aa"), FontId::proportional(r.height() * 0.45), c);
         }
         4 => glyph(p, r, Tool::Sign, c),
         _ => {

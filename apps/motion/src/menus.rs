@@ -3,7 +3,7 @@ use studio_ui::i18n::tl;
 use model::BEZ_PRESETS;
 
 fn item(ui: &mut Ui, enabled: bool, label: &str, key: &str) -> bool {
-    let b = egui::Button::new(label).shortcut_text(key);
+    let b = egui::Button::new(label).shortcut_text(studio_ui::i18n::keys(key));
     let r = ui.add_enabled(enabled, b).clicked();
     if r {
         ui.close();
@@ -31,10 +31,10 @@ impl Motion {
                 self.send_to(t, &ctx);
             }
             ui.separator();
-            if item(ui, true, "Nouvelle composition", "") {
+            if item(ui, true, tl("Nouvelle composition"), "") {
                 self.home = true;
             }
-            if item(ui, true, "Ouvrir…", "Ctrl+O") {
+            if item(ui, true, tl("Ouvrir…"), "Ctrl+O") {
                 self.open();
             }
             ui.menu_button(tl("Ouvrir un projet récent"), |ui| {
@@ -53,17 +53,17 @@ impl Motion {
             });
             let on = !self.home;
             ui.separator();
-            if item(ui, on, "Enregistrer", "Ctrl+S") {
+            if item(ui, on, tl("Enregistrer"), "Ctrl+S") {
                 self.save(false);
             }
-            if item(ui, on, "Enregistrer sous…", "Ctrl+Maj+S") {
+            if item(ui, on, tl("Enregistrer sous…"), "Ctrl+Maj+S") {
                 self.save(true);
             }
             ui.separator();
-            if item(ui, on, "Exporter…", "Ctrl+M") {
+            if item(ui, on, tl("Exporter…"), "Ctrl+M") {
                 self.export = Some(self.default_export());
             }
-            if item(ui, on, "File de rendu…", "Ctrl+Alt+M") {
+            if item(ui, on, tl("File de rendu…"), "Ctrl+Alt+M") {
                 self.queue_sheet = true;
             }
             ui.menu_button(tl("Exporter directement"), |ui| {
@@ -104,10 +104,10 @@ impl Motion {
                     self.push_layer(l);
                 }
             }
-            if item(ui, has, "Dupliquer", "Ctrl+D") {
+            if item(ui, has, tl("Dupliquer"), "Ctrl+D") {
                 self.duplicate();
             }
-            if item(ui, has, "Supprimer", "Suppr") {
+            if item(ui, has, tl("Supprimer"), "Suppr") {
                 if self.ksel.is_empty() {
                     self.delete();
                 } else {
@@ -115,14 +115,14 @@ impl Motion {
                 }
             }
             ui.separator();
-            if item(ui, has, "Copier l'animation", "") {
+            if item(ui, has, tl("Copier l'animation"), "") {
                 self.copy_anim();
             }
             if item(ui, has && self.clip_anim.is_some(), "Coller l'animation à la tête de lecture", "") {
                 self.paste_anim();
             }
             ui.separator();
-            if item(ui, has, "Sélectionner toutes les clés du calque", "Ctrl+A") {
+            if item(ui, has, tl("Sélectionner toutes les clés du calque"), "Ctrl+A") {
                 if let Some(i) = self.sel {
                     self.ksel = self.comp.layers[i].props.iter().enumerate().flat_map(|(pi, p)| p.keys.iter().map(move |k| (i, pi, k.t))).collect();
                 }
@@ -135,7 +135,7 @@ impl Motion {
         ui.menu_button(tl("Calque"), |ui| {
             ui.menu_button(tl("Nouveau"), |ui| {
                 for (label, kind) in KINDS {
-                    if ui.button(label).clicked() {
+                    if ui.button(tl(&label)).clicked() {
                         self.add_kind(kind);
                         ui.close();
                     }
@@ -143,66 +143,66 @@ impl Motion {
             });
             ui.menu_button(tl("Modèle"), |ui| {
                 for (k, (name, _)) in TEMPLATES.iter().enumerate() {
-                    if ui.button(*name).clicked() {
+                    if ui.button(tl(*name)).clicked() {
                         self.template(k);
                         ui.close();
                     }
                 }
             });
             ui.separator();
-            if item(ui, has, "Fractionner à la tête", "Ctrl+Maj+D") {
+            if item(ui, has, tl("Fractionner à la tête"), "Ctrl+Maj+D") {
                 self.split();
             }
-            if item(ui, has, "Monter", "Ctrl+]") {
+            if item(ui, has, tl("Monter"), "Ctrl+]") {
                 self.reorder(1);
             }
-            if item(ui, has, "Descendre", "Ctrl+[") {
+            if item(ui, has, tl("Descendre"), "Ctrl+[") {
                 self.reorder(-1);
             }
-            if item(ui, has, "Premier plan", "") && let Some(i) = self.sel {
+            if item(ui, has, tl("Premier plan"), "") && let Some(i) = self.sel {
                 self.move_layer(i, self.comp.layers.len() - 1);
             }
-            if item(ui, has, "Arrière-plan", "") && let Some(i) = self.sel {
+            if item(ui, has, tl("Arrière-plan"), "") && let Some(i) = self.sel {
                 self.move_layer(i, 0);
             }
             ui.separator();
             ui.add_enabled_ui(has, |ui| {
                 ui.menu_button(tl("Transformer"), |ui| {
-                    if item(ui, true, "Centrer le point d'ancrage", "Ctrl+Alt+Origine") {
+                    if item(ui, true, tl("Centrer le point d'ancrage"), "Ctrl+Alt+Origine") {
                         self.anchor_to(4);
                     }
-                    if item(ui, true, "Ajuster à la composition", "Ctrl+Alt+F") {
+                    if item(ui, true, tl("Ajuster à la composition"), "Ctrl+Alt+F") {
                         self.fit_to_comp(0);
                     }
-                    if item(ui, true, "Ajuster à la largeur", "") {
+                    if item(ui, true, tl("Ajuster à la largeur"), "") {
                         self.fit_to_comp(1);
                     }
-                    if item(ui, true, "Ajuster à la hauteur", "") {
+                    if item(ui, true, tl("Ajuster à la hauteur"), "") {
                         self.fit_to_comp(2);
                     }
-                    if item(ui, true, "Centrer dans la composition", "") {
+                    if item(ui, true, tl("Centrer dans la composition"), "") {
                         self.align(6);
                     }
                     if let Some(i) = self.sel {
                         let t = self.t;
                         let l = &mut self.comp.layers[i];
                         ui.separator();
-                        if item(ui, true, "Rotation +90°", "") {
+                        if item(ui, true, tl("Rotation +90°"), "") {
                             let v = l.props[3].at(t) + 90.0;
                             l.props[3].set(t, v);
                         }
-                        if item(ui, true, "Rotation −90°", "") {
+                        if item(ui, true, tl("Rotation −90°"), "") {
                             let v = l.props[3].at(t) - 90.0;
                             l.props[3].set(t, v);
                         }
-                        if item(ui, true, "Retourner horizontalement", "") {
+                        if item(ui, true, tl("Retourner horizontalement"), "") {
                             l.fx.flip_x = !l.fx.flip_x;
                         }
-                        if item(ui, true, "Retourner verticalement", "") {
+                        if item(ui, true, tl("Retourner verticalement"), "") {
                             l.fx.flip_y = !l.fx.flip_y;
                         }
                         ui.checkbox(&mut l.fx.auto_orient, tl("Orientation automatique"));
-                        if item(ui, true, "Réinitialiser la transformation", "") {
+                        if item(ui, true, tl("Réinitialiser la transformation"), "") {
                             for pi in [2, 3, 4, 5, 8, 9, 10, 11, 12, 13] {
                                 l.props[pi] = Prop::new(model::PROP_DEFAULT[pi]);
                             }
@@ -214,27 +214,27 @@ impl Motion {
                         let t = self.t;
                         let dur = self.comp.duration;
                         let l = &mut self.comp.layers[i];
-                        if item(ui, true, "Commencer à la tête de lecture", "Alt+[") {
+                        if item(ui, true, tl("Commencer à la tête de lecture"), "Alt+[") {
                             l.start = t.min(l.end - 0.05);
                         }
-                        if item(ui, true, "Finir à la tête de lecture", "Alt+]") {
+                        if item(ui, true, tl("Finir à la tête de lecture"), "Alt+]") {
                             l.end = t.max(l.start + 0.05);
                         }
-                        if item(ui, true, "Déplacer le début à la tête", "[") {
+                        if item(ui, true, tl("Déplacer le début à la tête"), "[") {
                             let d = t - l.start;
                             l.shift(d);
                         }
-                        if item(ui, true, "Déplacer la fin à la tête", "]") {
+                        if item(ui, true, tl("Déplacer la fin à la tête"), "]") {
                             let d = t - l.end;
                             l.shift(d);
                         }
-                        if item(ui, true, "Étendre à toute la composition", "") {
+                        if item(ui, true, tl("Étendre à toute la composition"), "") {
                             l.start = 0.0;
                             l.end = dur;
                         }
                         ui.separator();
                         ui.checkbox(&mut l.fx.reverse_time, tl("Lecture inversée"));
-                        if item(ui, true, "Figer l'image à la tête", "") {
+                        if item(ui, true, tl("Figer l'image à la tête"), "") {
                             l.fx.freeze = true;
                             l.fx.freeze_at = t;
                         }
@@ -260,7 +260,7 @@ impl Motion {
                     }
                 });
                 ui.separator();
-                if item(ui, true, "Créer un nul parent", "") {
+                if item(ui, true, tl("Créer un nul parent"), "") {
                     self.create_null_parent();
                 }
                 if item(ui, self.sel.is_some_and(|i| self.comp.layers[i].parent.is_some()), "Détacher du parent", "") && let Some(i) = self.sel {
@@ -278,19 +278,19 @@ impl Motion {
         });
         ui.menu_button(tl("Animation"), |ui| {
             let keys = has || !self.ksel.is_empty();
-            if item(ui, keys, "Courbe douce", "F9") {
+            if item(ui, keys, tl("Courbe douce"), "F9") {
                 self.easy_ease(0);
             }
-            if item(ui, keys, "Ralentir à l'arrivée", "Maj+F9") {
+            if item(ui, keys, tl("Ralentir à l'arrivée"), "Maj+F9") {
                 self.easy_ease(1);
             }
-            if item(ui, keys, "Démarrer en douceur", "Ctrl+Maj+F9") {
+            if item(ui, keys, tl("Démarrer en douceur"), "Ctrl+Maj+F9") {
                 self.easy_ease(2);
             }
-            if item(ui, keys, "Maintien (bascule)", "Ctrl+Alt+H") {
+            if item(ui, keys, tl("Maintien (bascule)"), "Ctrl+Alt+H") {
                 self.with_keys(|k| k.set_ease(if k.ease == Ease::Hold && k.ease2 == Ease2::None && k.bez.is_none() { Ease::Linear } else { Ease::Hold }));
             }
-            if item(ui, keys, "Linéaire", "") {
+            if item(ui, keys, tl("Linéaire"), "") {
                 self.with_keys(|k| k.set_ease(Ease::Linear));
             }
             ui.add_enabled_ui(keys, |ui| {
@@ -303,10 +303,10 @@ impl Motion {
                 });
             });
             ui.separator();
-            if item(ui, has, "Répartir les clés uniformément", "") {
+            if item(ui, has, tl("Répartir les clés uniformément"), "") {
                 self.spread_keys();
             }
-            if item(ui, has, "Inverser les images clés", "Ctrl+Alt+R") {
+            if item(ui, has, tl("Inverser les images clés"), "Ctrl+Alt+R") {
                 self.reverse_keys();
             }
             for (n, k) in [("Étirer les clés × 2", 2.0), ("Compresser les clés × ½", 0.5)] {
@@ -318,7 +318,7 @@ impl Motion {
                     }
                 }
             }
-            if item(ui, has, "Supprimer toutes les images clés", "") && let Some(i) = self.sel {
+            if item(ui, has, tl("Supprimer toutes les images clés"), "") && let Some(i) = self.sel {
                 let t = self.t;
                 for p in &mut self.comp.layers[i].props {
                     p.clear(t);
@@ -350,16 +350,16 @@ impl Motion {
                         }
                     }
                 }
-                if item(ui, true, "Propriétés animées", "U") {
+                if item(ui, true, tl("Propriétés animées"), "U") {
                     self.tl_filter = None;
                 }
             });
         });
         ui.menu_button(tl("Composition"), |ui| {
-            if item(ui, true, "Réglages de la composition…", "Ctrl+K") {
+            if item(ui, true, tl("Réglages de la composition…"), "Ctrl+K") {
                 self.comp_sheet = true;
             }
-            if item(ui, true, "Ajuster la durée à l'animation", "") {
+            if item(ui, true, tl("Ajuster la durée à l'animation"), "") {
                 self.fit_duration();
             }
             ui.menu_button(tl("Durée"), |ui| {
@@ -387,17 +387,17 @@ impl Motion {
                 }
             });
             ui.separator();
-            if item(ui, true, "Ajouter un repère", "M") {
+            if item(ui, true, tl("Ajouter un repère"), "M") {
                 self.add_marker();
             }
             if item(ui, !self.comp.markers.is_empty(), "Supprimer tous les repères", "") {
                 self.comp.markers.clear();
             }
             ui.separator();
-            if item(ui, true, "Début de la zone de travail", "B") {
+            if item(ui, true, tl("Début de la zone de travail"), "B") {
                 self.set_work(true);
             }
-            if item(ui, true, "Fin de la zone de travail", "N") {
+            if item(ui, true, tl("Fin de la zone de travail"), "N") {
                 self.set_work(false);
             }
             if item(ui, self.comp.work.is_some(), "Effacer la zone de travail", "") {
@@ -461,18 +461,18 @@ impl Motion {
                 }
             });
             ui.separator();
-            if item(ui, true, "Ajuster à la fenêtre", "Ctrl+0") {
+            if item(ui, true, tl("Ajuster à la fenêtre"), "Ctrl+0") {
                 self.zoom = None;
                 self.pan = Vec2::ZERO;
             }
-            if item(ui, true, "Taille réelle (100 %)", "Ctrl+1") {
+            if item(ui, true, tl("Taille réelle (100 %)"), "Ctrl+1") {
                 self.zoom = Some(1.0);
             }
-            if item(ui, true, "Zoom avant", ".") {
+            if item(ui, true, tl("Zoom avant"), ".") {
                 let z0 = self.zoom.unwrap_or(0.5);
                 self.zoom = Some(ZOOMS.iter().copied().find(|z| *z > z0 + 1e-3).unwrap_or(8.0));
             }
-            if item(ui, true, "Zoom arrière", ",") {
+            if item(ui, true, tl("Zoom arrière"), ",") {
                 let z0 = self.zoom.unwrap_or(0.5);
                 self.zoom = Some(ZOOMS.iter().rev().copied().find(|z| *z < z0 - 1e-3).unwrap_or(0.1));
             }

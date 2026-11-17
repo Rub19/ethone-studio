@@ -1727,7 +1727,7 @@ impl Motion {
                     ui.ctx().request_repaint_after(std::time::Duration::from_millis(150));
                 }
                 if let Some(e) = self.error.clone() {
-                    ui.label(RichText::new(e).size(12.0).color(RED));
+                    ui.label(RichText::new(tl(&e)).size(12.0).color(RED));
                     if ui.small_button("×").clicked() {
                         self.error = None;
                     }
@@ -1778,8 +1778,8 @@ impl Motion {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 100.0), Sense::hover());
                     let p = ui.painter();
                     p.rect(r, CornerRadius::same(6), Color32::from_white_alpha(4), Stroke::new(1.0, LINE), StrokeKind::Inside);
-                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, "Tes animations enregistrées apparaîtront ici", semibold(15.0), INK);
-                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, "Projets .emot", FontId::proportional(12.5), MUTED);
+                    p.text(r.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, tl("Tes animations enregistrées apparaîtront ici"), semibold(15.0), INK);
+                    p.text(r.center() + vec2(0.0, 14.0), Align2::CENTER_CENTER, tl("Projets .emot"), FontId::proportional(12.5), MUTED);
                 } else {
                     let mut open = None;
                     for p in &self.recents {
@@ -1817,7 +1817,7 @@ impl Motion {
                                 let p = ui.painter();
                                 if resp.hovered() { p.rect_filled(r, CornerRadius::same(3), FIELD); }
                                 layer_glyph(p, Rect::from_center_size(r.center() - vec2(0.0, 7.0), Vec2::splat(15.0)), *kind, if resp.hovered() { INK } else { MUTED });
-                                p.text(r.center() + vec2(0.0, 13.0), Align2::CENTER_CENTER, *label, FontId::proportional(10.5), MUTED);
+                                p.text(r.center() + vec2(0.0, 13.0), Align2::CENTER_CENTER, tl(*label), FontId::proportional(10.5), MUTED);
                                 if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                                     self.add_kind(*kind);
                                 }
@@ -1836,8 +1836,8 @@ impl Motion {
                         }
                         let ic = Rect::from_center_size(r.left_center() + vec2(14.0, 0.0), vec2(16.0, 11.0));
                         p.rect(ic, CornerRadius::same(2), LABELS[k % LABELS.len()].gamma_multiply(0.35), Stroke::new(1.2, LABELS[k % LABELS.len()]), StrokeKind::Inside);
-                        p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, *name, FontId::proportional(12.0), INK);
-                        p.text(r.left_top() + vec2(30.0, 20.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
+                        p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, tl(*name), FontId::proportional(12.0), INK);
+                        p.text(r.left_top() + vec2(30.0, 20.0), Align2::LEFT_TOP, tl(*hint), FontId::proportional(11.0), FAINT);
                         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text(tl("Ajouté à la tête de lecture")).clicked() {
                             pick = Some(k);
                         }
@@ -1870,8 +1870,8 @@ impl Motion {
                                 p.rect_filled(r, CornerRadius::same(4), Color32::from_white_alpha(10));
                             }
                             diamond(p, r.left_center() + vec2(12.0, 0.0), 4.5, if enabled { KEY } else { FAINT });
-                            p.text(r.left_top() + vec2(26.0, 4.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), if enabled { INK } else { FAINT });
-                            p.text(r.left_top() + vec2(26.0, 21.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
+                            p.text(r.left_top() + vec2(26.0, 4.0), Align2::LEFT_TOP, tl(*name), FontId::proportional(12.5), if enabled { INK } else { FAINT });
+                            p.text(r.left_top() + vec2(26.0, 21.0), Align2::LEFT_TOP, tl(*hint), FontId::proportional(11.0), FAINT);
                             if resp.on_hover_text(tl("Ajoutée à partir de la tête de lecture")).clicked() && enabled {
                                 pick = Some(*id);
                             }
@@ -2121,7 +2121,7 @@ impl Motion {
             if l.has_effects() {
                 let fr = Rect::from_center_size(pos2(x0 - 16.0, row.center().y), vec2(20.0, 14.0));
                 p.rect_filled(fr, CornerRadius::same(4), BLUE.gamma_multiply(0.35));
-                p.text(fr.center(), Align2::CENTER_CENTER, "fx", FontId::proportional(10.0), INK);
+                p.text(fr.center(), Align2::CENTER_CENTER, tl("fx"), FontId::proportional(10.0), INK);
             }
             let lab = ui.interact(Rect::from_min_max(pos2(rect.min.x + 90.0, row.min.y), pos2(x0, row.max.y)), ui.make_persistent_id(("label", li)), Sense::click());
             if lab.clicked() {
@@ -2379,7 +2379,7 @@ impl Motion {
         }
         ui.menu_button(tl("Couleur d'étiquette"), |ui| {
             for (k, n) in ["Bleu", "Rose", "Vert", "Orange", "Violet", "Cyan"].iter().enumerate() {
-                if ui.button(*n).clicked() {
+                if ui.button(tl(*n)).clicked() {
                     self.comp.layers[li].label = Some(k as u8);
                     ui.close();
                 }
@@ -2425,7 +2425,7 @@ fn secs(t: f32) -> String {
 }
 
 fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive<f32>, suffix: &str) {
-    ui.label(RichText::new(label).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
     ui.scope(|ui| {
         ui.spacing_mut().slider_width = (ui.available_width() - 112.0).max(60.0);
         ui.add(egui::Slider::new(v, range).suffix(suffix).max_decimals(2));
@@ -2495,7 +2495,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
             egui::ComboBox::from_id_salt("font").selected_text(family.as_str()).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for f in FONTS {
-                    ui.selectable_value(family, f.to_string(), RichText::new(f));
+                    ui.selectable_value(family, f.to_string(), RichText::new(tl(&f)));
                 }
             });
             ui.horizontal(|ui| {

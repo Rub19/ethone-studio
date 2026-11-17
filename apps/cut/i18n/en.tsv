@@ -273,3 +273,216 @@ Ellipse (masque)	Ellipse (mask)
 Polygone (masque)	Polygon (mask)
 Main	Hand
 Zoom	Zoom
+Ouvrir un projet…	Open project…
+Enregistrer	Save
+Enregistrer sous…	Save as…
+Exporter l'image affichée (PNG)…	Export displayed image (PNG)…
+Tout sélectionner	Select all
+Sélectionner la même étiquette	Select same label
+Changer de piste (V1 ↔ V2)	Switch track (V1 ↔ V2)
+Déplacer à gauche	Move left
+Déplacer à droite	Move right
+Scinder toutes les pistes	Split all tracks
+Rogner le début à la tête	Trim start to playhead
+Rogner la fin à la tête	Trim end to playhead
+Figer l'image (2 s)	Freeze frame (2 s)
+Insérer un titre	Insert title
+Désactiver tous les solos	Unsolo all
+Déverrouiller toutes les pistes	Unlock all tracks
+Afficher toutes les pistes	Show all tracks
+Ajouter / modifier un marqueur	Add / edit marker
+Supprimer le marqueur	Delete marker
+Marqueur précédent	Previous marker
+Marqueur suivant	Next marker
+Point d'entrée	In point
+Point de sortie	Out point
+Entrée/sortie sur le clip	In/out on clip
+Effacer entrée et sortie	Clear in and out
+Point de montage précédent	Previous edit point
+Point de montage suivant	Next edit point
+Ajuster la timeline	Fit timeline
+Zoom avant	Zoom in
+Zoom arrière	Zoom out
+Crête −1 dB	Peak −1 dB
+Crête −3 dB	Peak −3 dB
+Crête −6 dB	Peak −6 dB
+Normaliser −1 dB	Normalize −1 dB
+−12 dB (fond)	−12 dB (background)
+J K L	J K L
+S / Ctrl+K	S / Ctrl+K
+Q / W	Q / W
+I / O	I / O
+4K UHD	4K UHD
+Carré	Square
+Portrait 4:5	Portrait 4:5
+Cinéma	Cinema
+4K DCI	4K DCI
+Vertical 720	Vertical 720
+YouTube 1080p	YouTube 1080p
+YouTube 1440p	YouTube 1440p
+YouTube 4K	YouTube 4K
+YouTube 720p	YouTube 720p
+TikTok · Reels · Shorts	TikTok · Reels · Shorts
+Instagram carré	Instagram square
+Instagram portrait	Instagram portrait
+X / Twitter	X / Twitter
+Vimeo HD	Vimeo HD
+Master haute qualité	High-quality master
+Brouillon rapide	Quick draft
+GIF animé	Animated GIF
+Audio WAV	WAV audio
+Séquence PNG	PNG sequence
+Image PNG	PNG image
+Image JPEG	JPEG image
+Ralenti ×0,25	Slow motion ×0.25
+Accéléré ×4	Fast ×4
+Segoe UI	Segoe UI
+Times New Roman	Times New Roman
+Segoe UI Light	Segoe UI Light
+Comic Sans	Comic Sans
+Courier New	Courier New
+Segoe Script	Segoe Script
+Dépose des vidéos, des photos ou de la musique n'importe où	Drop videos, photos or music anywhere
+MP4, MOV, MKV, PNG, JPG, MP3, WAV, M4A…	
+Glisse tes fichiers ici	Drag your files here
+Vidéos, photos et musiques	Videos, photos and music
+Programme	Programme
+Importe une vidéo pour commencer	Import a video to start
+Glisse un fichier ici ou Ctrl+I	Drag a file here or Ctrl+I
+S	
+Navette arrière · pause · avant	Shuttle back · pause · forward
+Rogner début / fin	Trim start / end
+Entrée / sortie	In / out
+Nouveau titre	New title
+Vitesse/Durée	Speed/Duration
+Point de montage	Edit point
+Magnétisme	Snapping
+Mode visionneuse	Viewer mode
+Rêve	Dream
+VHS	
+Surveillance	Surveillance
+Pixel art	Pixel art
+Négatif	Negative
+Bande dessinée	Comic
+Film ancien	Old film
+Netteté +	Sharpen +
+Flou d'arrière-plan	Background blur
+Néon	Neon
+Haut gauche	Top left
+Haut droite	Top right
+Bas gauche	Bottom left
+Bas droite	Bottom right
+Plein écran	Full screen
+Moitié gauche	Left half
+Moitié droite	Right half
+Titre cinéma	Cinema title
+Sous-titre	Subtitle
+Tiers inférieur classique	Classic lower third
+Tiers inférieur moderne	Modern lower third
+Générique défilant	Rolling credits
+Bandeau d'info	News ticker
+Citation	Quote
+Chapitre	Chapter
+Gros titre YouTube	Big YouTube title
+Minimal	Minimal
+Titre vertical	Vertical title
+Paysage 16:9	Landscape 16:9
+Shorts, Reels, TikTok	Shorts, Reels, TikTok
+Publication 1:1	Post 1:1
+Format TV	TV format
+Cinéma 17:9	Cinema 17:9
+Stories légères	Light stories
+retoucher l'image	edit the image
+développer l'image	develop the image
+mettre en page	lay out
+placer l'image	place the image
+animer l'image	animate the image
+image de la vidéo	video frame
+mp4	
+mov	
+m4v	
+mkv	
+avi	
+wmv	
+webm	
+mp3	
+wav	
+m4a	
+aac	
+wma	
+png	
+jpg	
+jpeg	
+bmp	
+webp	
+gif	
+Vidéo MP4	MP4 video
+Cache couleur	Colour matte
+Dégradé	Gradient
+Mire de barres	Colour bars
+Fond vert	Green screen
+Noir et blanc	Black and white
+Sépia	Sepia
+Vintage	Vintage
+Vif	Vivid
+Teal & orange	
+Froid	Cool
+Chaud	Warm
+Délavé	Faded
+Nuit américaine	Day for night
+Sans blanchiment	Bleach bypass
+Rétro 70	70s retro
+Noir contrasté	Contrasty black
+Pastel	Pastel
+Matrice	Matrix
+Désaturé	Desaturated
+Coucher de soleil	Sunset
+Infrarouge	Infrared
+Polaroïd	
+Fondu enchaîné	Cross dissolve
+Fondu au noir	Fade to black
+Fondu au blanc	Fade to white
+Volet vers la droite	Wipe right
+Volet vers la gauche	Wipe left
+Volet vers le bas	Wipe down
+Volet vers le haut	Wipe up
+Glissement depuis la droite	Slide from right
+Glissement depuis la gauche	Slide from left
+Glissement depuis le bas	Slide from bottom
+Glissement depuis le haut	Slide from top
+Poussée vers la gauche	Push left
+Poussée vers la droite	Push right
+Poussée vers le haut	Push up
+Poussée vers le bas	Push down
+Iris rond	Round iris
+Iris carré	Square iris
+Zoom croisé	Cross zoom
+Flou croisé	Cross blur
+Volet horloge	Clock wipe
+Volet diagonal	Diagonal wipe
+Store vénitien	Venetian blinds
+Damier	Checkerboard
+Portes	Doors
+Fondu additif	Additive dissolve
+Centrée sur la coupe	Centred on the cut
+Début à la coupe	Start at the cut
+Fin à la coupe	End at the cut
+Échelle	Scale
+Position X	
+Position Y	
+Rotation	Rotation
+Opacité	Opacity
+Flou	Blur
+Luminosité	Brightness
+Saturation	Saturation
+Exposition	Exposure
+Fondu	Fade
+Glisse vers le haut	Slides up
+Machine à écrire	Typewriter
+Depuis la gauche	From the left
+Depuis la droite	From the right
+Descente	Fall
+Lettres espacées	Spaced letters
+Pop	Pop
+Fixe	Fixed
+Défilement horizontal	Horizontal scroll

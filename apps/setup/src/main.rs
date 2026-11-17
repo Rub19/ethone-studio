@@ -13,7 +13,7 @@ use studio_ui::pro;
 
 /// The main call to action, at installer scale: wider and taller than the in-app buttons.
 fn cta(ui: &mut egui::Ui, label: &str, primary: bool) -> bool {
-    let text = RichText::new(label).font(pro::semibold(13.5)).color(if primary { Color32::WHITE } else { pro::INK_STRONG });
+    let text = RichText::new(tl(&label)).font(pro::semibold(13.5)).color(if primary { Color32::WHITE } else { pro::INK_STRONG });
     let b = egui::Button::new(text).fill(if primary { pro::BLUE } else { pro::FIELD }).corner_radius(4).min_size([150.0, 34.0].into());
     ui.add(b).clicked()
 }
@@ -144,14 +144,14 @@ impl eframe::App for Setup {
                     ui.add_space(10.0);
                     ui.label(RichText::new(system::name(&id)).font(pro::semibold(26.0)).color(pro::INK_STRONG));
                     let desc = system::APPS.iter().find(|a| a.0 == id).map_or("", |a| a.2);
-                    ui.label(RichText::new(desc).size(13.5).color(pro::MUTED));
+                    ui.label(RichText::new(tl(&desc)).size(13.5).color(pro::MUTED));
                     if !removing {
                         let line = match &self.previous {
                             Some(v) if *v == version => format!("Version {version} · déjà installée, elle sera réparée"),
                             Some(v) => format!("Version {version} · remplace la {v}"),
                             None => format!("Version {version}"),
                         };
-                        ui.label(RichText::new(line).size(12.0).color(pro::FAINT));
+                        ui.label(RichText::new(tl(&line)).size(12.0).color(pro::FAINT));
                     }
                 });
             });
@@ -182,7 +182,7 @@ impl eframe::App for Setup {
                         }
                         Step::Working(p, label) => {
                             ui.horizontal(|ui| {
-                                ui.label(RichText::new(label).size(13.0).color(pro::INK));
+                                ui.label(RichText::new(tl(&label)).size(13.0).color(pro::INK));
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                                     ui.label(RichText::new(format!("{:.0} %", p * 100.0)).size(12.0).color(pro::MUTED));
                                 });
@@ -214,8 +214,8 @@ impl eframe::App for Setup {
             });
             let foot = egui::Rect::from_min_max(egui::pos2(ui.max_rect().left(), ui.max_rect().bottom() - 34.0), ui.max_rect().max);
             ui.painter().hline(foot.x_range(), foot.top(), egui::Stroke::new(1.0, pro::LINE));
-            ui.painter().text(foot.left_center() + egui::vec2(28.0, 0.0), egui::Align2::LEFT_CENTER, "Ethone Studio", pro::semibold(11.5), pro::MUTED);
-            ui.painter().text(foot.right_center() - egui::vec2(28.0, 0.0), egui::Align2::RIGHT_CENTER, "Sans compte · sans droits administrateur", egui::FontId::proportional(11.0), pro::FAINT);
+            ui.painter().text(foot.left_center() + egui::vec2(28.0, 0.0), egui::Align2::LEFT_CENTER, tl("Ethone Studio"), pro::semibold(11.5), pro::MUTED);
+            ui.painter().text(foot.right_center() - egui::vec2(28.0, 0.0), egui::Align2::RIGHT_CENTER, tl("Sans compte · sans droits administrateur"), egui::FontId::proportional(11.0), pro::FAINT);
         });
     }
 }

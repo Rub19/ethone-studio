@@ -337,3 +337,285 @@ Gomme	Eraser
 Masque rectangulaire	Rectangle mask
 Masque elliptique	Ellipse mask
 Marionnette	Puppet
+Enregistrer	Save
+Enregistrer sous…	Save as…
+File de rendu…	Render queue…
+Sélectionner toutes les clés du calque	Select all layer keys
+Monter	Move up
+Descendre	Move down
+Centrer le point d'ancrage	Centre anchor point
+Ajuster à la composition	Fit to composition
+Ajuster à la largeur	Fit to width
+Ajuster à la hauteur	Fit to height
+Centrer dans la composition	Centre in composition
+Rotation +90°	Rotate +90°
+Rotation −90°	Rotate −90°
+Retourner horizontalement	Flip horizontal
+Retourner verticalement	Flip vertical
+Réinitialiser la transformation	Reset transform
+Commencer à la tête de lecture	Start at playhead
+Finir à la tête de lecture	End at playhead
+Déplacer le début à la tête	Move start to playhead
+Déplacer la fin à la tête	Move end to playhead
+Étendre à toute la composition	Extend to whole composition
+Figer l'image à la tête	Freeze frame at playhead
+Créer un nul parent	Create null parent
+Courbe douce	Soft curve
+Ralentir à l'arrivée	Slow down on arrival
+Démarrer en douceur	Start gently
+Maintien (bascule)	Hold (toggle)
+Répartir les clés uniformément	Distribute keys evenly
+Inverser les images clés	Reverse keyframes
+Supprimer toutes les images clés	Delete all keyframes
+Propriétés animées	Animated properties
+Réglages de la composition…	Composition settings…
+Ajuster la durée à l'animation	Fit duration to animation
+Ajouter un repère	Add guide
+Début de la zone de travail	Work area start
+Fin de la zone de travail	Work area end
+Ajuster à la fenêtre	Fit to window
+Taille réelle (100 %)	Actual size (100 %)
+PNG séquence	PNG sequence
+PNG image	PNG image
+SVG séquence	SVG sequence
+Lottie JSON	Lottie JSON
+Légère	Light
+4K UHD	4K UHD
+2K DCI	2K DCI
+Cinémascope	CinemaScope
+Carré	Square
+Bannière GIF	GIF banner
+En-tête X	X header
+Retournement 3D	3D flip
+Bascule 3D	3D flip
+Carte qui tourne	Spinning card
+Tracé dessiné	Path drawn
+Tracé effacé	Path erased
+Tracé qui court	Running path
+Lettres qui montent	Rising letters
+Lettres qui tombent	Falling letters
+Lettres en vrac	Scattered letters
+Lettres qui s'envolent	Flying letters
+Étirement élastique	Elastic stretch
+Zoom flou	Blur zoom
+Tremblement de rotation	Rotation wiggle
+Apparition colorée	Colour reveal
+Fondu entrant	Fade in
+Glisser depuis la gauche	Slide from left
+Glisser depuis la droite	Slide from right
+Monter depuis le bas	Rise from bottom
+Descendre depuis le haut	Drop from top
+Zoom pop	Pop zoom
+Fondu et montée	Fade and rise
+Tourbillon entrant	Swirl in
+Révélation	Reveal
+Flou entrant	Blur in
+Machine à écrire	Typewriter
+Fondu sortant	Fade out
+Sortie à droite	Exit right
+Sortie vers le bas	Exit down
+Battement de cœur	Heartbeat
+Rotation continue	Continuous spin
+Zoom lent	Slow zoom
+Bandeau titre	Title banner
+Titre cinéma	Cinema title
+Bouton S'abonner	Subscribe button
+Compte à rebours	Countdown
+Barre de progression	Progress bar
+Coche validée	Checkmark
+Titre lettre par lettre	Letter-by-letter title
+Classique 90/80 %	Classic 90/80 %
+Moderne 93/90 %	Modern 93/90 %
+Réseaux sociaux 85/75 %	Social media 85/75 %
+Flèche	Arrow
+Cœur	Heart
+Vitesse 50 %	Speed 50 %
+Vitesse 100 %	Speed 100 %
+Vitesse 200 %	Speed 200 %
+Étirer les clés × 2	Stretch keys × 2
+Compresser les clés × ½	Compress keys × ½
+Tracé	Path
+Sans vignettage	No vignette
+Vignettage léger	Light vignette
+Vignettage fort	Strong vignette
+Sans grain	No grain
+Grain léger	Light grain
+Grain marqué	Heavy grain
+Sans bandes	No bars
+Bandes 2,39:1	2.39:1 bars
+Bandes 1,85:1	1.85:1 bars
+Entrée douce	Ease in
+Sortie douce	Ease out
+Entrée-sortie	Ease in-out
+Décélération	Ease out
+Accélération	Ease in
+Expo sortie	Expo out
+Expo entrée	Expo in
+Dépasse en sortie	Overshoot out
+Recul en entrée	Back in
+Fluide Apple	Apple fluid
+Centre ↔	Centre ↔
+Centre ↕	Centre ↕
+Tes animations enregistrées apparaîtront ici	Your saved animations will appear here
+Projets .emot	.emot projects
+fx	
+image	frame
+Vidéo H.264, lisible partout	H.264 video, plays everywhere
+Animation légère pour le web et les messages	Lightweight animation for the web and messaging
+Une image par frame, idéal pour le montage	One image per frame, ideal for editing
+L'image affichée à la tête de lecture	The frame at the playhead
+Vectoriel, l'image affichée, modifiable	Vector, the displayed image, editable
+Un fichier vectoriel par image	One vector file per frame
+Grille d'images pour présenter l'animation	Frame grid to present the animation
+Animation vectorielle pour le web et les apps	Vector animation for the web and apps
+Infinie	Infinite
+Une fois	Once
+3 fois	3 times
+5 fois	5 times
+Vidéo 16:9	Video 16:9
+Vidéo HD légère	Light HD video
+Cinéma	Cinema
+Large 2,39:1	Wide 2.39:1
+Shorts, Reels, TikTok	Shorts, Reels, TikTok
+Publication 1:1	Post 1:1
+Publication 4:5	Post 4:5
+Bannière 3:1	Banner 3:1
+Bannière 4:1	Banner 4:1
+Emoji animé	Animated emoji
+Pivote sur l'axe vertical	Spins on the vertical axis
+Bascule vers l'avant	Tips forward
+Rotation Y continue	Continuous Y rotation
+Le contour se dessine	The stroke draws itself
+Le contour s'efface	The stroke erases
+Un segment fait le tour	A segment runs around
+Une lettre après l'autre	One letter after another
+Arrivent du haut en tournant	Spin in from the top
+Ordre aléatoire, zoom	Random order, zoom
+Sortie lettre par lettre	Letter-by-letter exit
+S'étire en largeur	Stretches wide
+Squash and stretch	
+La teinte tourne sans fin	The hue cycles endlessly
+Tranches décalées et RVB	Shifted slices and RGB
+Arrive avec un flou radial	Arrives with a radial blur
+Balance sans fin	Endless swing
+Tourne nerveusement	Spins nervously
+Du blanc vers sa couleur	From white to its colour
+Opacité 0 → 100 %	Opacity 0 → 100 %
+Entre par le côté	Enters from the side
+Entre par l'autre côté	Enters from the other side
+Entre par le bas	Enters from the bottom
+Tombe du haut	Drops from the top
+Grossit avec un rebond	Grows with a bounce
+Arrive de très près	Arrives from very close
+Doux et élégant	Soft and elegant
+Tourne et grandit	Spins and grows
+Apparaît en vibrant	Appears with a shake
+Tombe et rebondit	Drops and bounces
+Se dévoile de gauche à droite	Reveals from left to right
+Sort du flou	Comes out of a blur
+Arrive penché puis se redresse	Arrives tilted then straightens
+Texte lettre par lettre	Letter-by-letter text
+Opacité 100 → 0 %	Opacity 100 → 0 %
+Quitte l'écran	Leaves the screen
+S'efface en descendant	Fades out going down
+Respire en boucle	Breathes in a loop
+Double pulsation	Double pulse
+Oscille de gauche à droite	Swings left and right
+Monte et descend en douceur	Rises and falls gently
+Un tour complet	One full turn
+Apparaît et disparaît	Appears and disappears
+Caméra à l'épaule	Handheld camera
+Effet Ken Burns	Ken Burns effect
+Révélation sur toute la durée	Reveal over the whole duration
+Nom et fonction en bas d'écran	Name and role at the bottom of the screen
+Grand titre espacé qui sort du flou	Wide-spaced headline coming out of a blur
+Bouton rouge qui rebondit	Bouncing red button
+10 → 0 avec anneau	10 → 0 with a ring
+Se remplit de 0 à 100 %	Fills from 0 to 100 %
+Texte en italique et auteur	Italic text and author
+Cercle puis coche qui se dessine	Circle, then a checkmark draws itself
+Entrée et sortie animées	Animated in and out
+ajouter au montage	add to the edit
+retoucher l'image	edit the image
+mettre en page	lay out
+placer l'image	place the image
+développer	develop
+image de l'animation	animation frame
+Segoe UI	
+Segoe UI Black	
+Arial	
+Arial Black	
+Impact	
+Bahnschrift	
+Calibri	
+Cambria	
+Georgia	
+Times New Roman	
+Consolas	
+Verdana	
+Trebuchet MS	
+Comic Sans MS	
+Entrées	Intros
+Sorties	Outros
+Boucles	Loops
+Effets	Effects
+3D	
+Tracés	Paths
+Texte	Text
+Complète	Full
+Demie	Half
+Quart	Quarter
+Différence	Difference
+Densité couleur −	Colour density −
+Lumière tamisée	Dim light
+Lumière crue	Harsh light
+Densité couleur +	Colour density +
+Aucune	None
+Cycle	Cycle
+Décalage	Offset
+Continuer	Continue
+Alpha du calque du dessus	Alpha of the layer above
+Luminance du calque du dessus	Luminance of the layer above
+Alpha inversé	Inverted alpha
+Luminance inversée	Inverted luminance
+Gauche → droite	Left → right
+Droite → gauche	Right → left
+Centre → bords	Centre → edges
+Aléatoire	Random
+Bords → centre	
+butt	
+round	
+square	
+miter	
+bevel	
+Position X	
+Position Y	
+Échelle %	Scale %
+Rotation °	Rotation °
+Opacité %	Opacity %
+Inclinaison °	Skew °
+Flou px	Blur px
+Révélation %	Reveal %
+Ancre X	Anchor X
+Ancre Y	Anchor Y
+Échelle X %	Scale X %
+Échelle Y %	Scale Y %
+Rotation X °	Rotation X °
+Rotation Y °	Rotation Y °
+Début du tracé %	Path start %
+Fin du tracé %	Path end %
+Décalage du tracé %	Path offset %
+Épaisseur du contour	Stroke weight
+Teinte °	Hue °
+Apparition en fondu	Fade in
+Zoom d'entrée avec rebond	Bounce zoom in
+Chute avec rebond	Drop with bounce
+Entrée en tournant	Spin in
+Sortie en fondu	Fade out
+Secousse continue	Continuous shake
+Pulsation continue	Continuous pulse
+Balancement	Swing
+Clignotement	Blink
+Flottement	Float
+Zoom de sortie	Zoom out
+Sortie vers la droite	Exit right

@@ -176,7 +176,7 @@ impl Lumen {
                     self.query.clear();
                 }
                 pro::toolbar_sep(ui);
-                egui::ComboBox::from_id_salt("sort").selected_text(SORTS[self.sort]).width(110.0).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("sort").selected_text(tl(SORTS[self.sort])).width(110.0).show_ui(ui, |ui| {
                     for (k, s) in SORTS.iter().enumerate() {
                         ui.selectable_value(&mut self.sort, k, *s);
                     }
@@ -216,15 +216,15 @@ impl Lumen {
                     for (c, name, st) in develop::preset_catalog() {
                         if c != cat {
                             cat = c;
-                            ui.label(RichText::new(c).size(11.0).color(FAINT));
+                            ui.label(RichText::new(tl(&c)).size(11.0).color(FAINT));
                         }
-                        if ui.button(name).clicked() {
+                        if ui.button(tl(&name)).clicked() {
                             self.apply_preset(&st);
                             ui.close();
                         }
                     }
                     for (name, st) in self.catalog.user_presets.clone() {
-                        if ui.button(name).clicked() {
+                        if ui.button(tl(&name)).clicked() {
                             self.apply_preset(&st);
                             ui.close();
                         }
@@ -282,10 +282,10 @@ impl Lumen {
                     ];
                     for (label, f, steps) in rows {
                         ui.horizontal(|ui| {
-                            ui.add_sized([96.0, 22.0], egui::Label::new(RichText::new(label).size(12.0).color(MUTED)));
+                            ui.add_sized([96.0, 22.0], egui::Label::new(RichText::new(tl(&label)).size(12.0).color(MUTED)));
                             for (k, d) in steps.iter().enumerate() {
                                 let txt = ["◀◀", "◀", "▶", "▶▶"][k];
-                                if ui.add_sized([36.0, 22.0], egui::Button::new(RichText::new(txt).size(10.0))).on_hover_text(format!("{d:+}")).clicked() {
+                                if ui.add_sized([36.0, 22.0], egui::Button::new(RichText::new(tl(&txt)).size(10.0))).on_hover_text(format!("{d:+}")).clicked() {
                                     for &t in &targets {
                                         let mut s = self.settings(t);
                                         f(&mut s, *d);
@@ -298,7 +298,7 @@ impl Lumen {
                     ui.horizontal_wrapped(|ui| {
                         ui.menu_button(tl("Balance des blancs"), |ui| {
                             for (name, t, ti) in develop::WB_PRESETS {
-                                if ui.button(name).clicked() {
+                                if ui.button(tl(&name)).clicked() {
                                     for &k in &targets {
                                         let mut s = self.settings(k);
                                         (s.temperature, s.tint) = (t, ti);
@@ -660,7 +660,7 @@ impl Lumen {
 
     fn big_photo(&mut self, ui: &mut Ui, r: Rect, idx: Option<usize>, active: bool, ctx: &egui::Context) -> Option<egui::Response> {
         let Some(i) = idx else {
-            ui.painter().text(r.center(), Align2::CENTER_CENTER, "Aucune photo", FontId::proportional(13.0), MUTED);
+            ui.painter().text(r.center(), Align2::CENTER_CENTER, tl("Aucune photo"), FontId::proportional(13.0), MUTED);
             return None;
         };
         let path = self.files[i].clone();

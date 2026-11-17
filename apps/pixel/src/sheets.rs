@@ -43,7 +43,7 @@ const SHORTCUTS: &[(&str, &str)] = &[
 ];
 
 fn label(ui: &mut Ui, t: &str) {
-    ui.label(RichText::new(t).size(12.0).color(MUTED));
+    ui.label(RichText::new(tl(&t)).size(12.0).color(MUTED));
 }
 
 fn color_row(ui: &mut Ui, name: &str, color: &mut [u8; 4]) {
@@ -116,7 +116,7 @@ impl Pixel {
                         *h = rh.max(1) as u32;
                     }
                     ui.add_space(8.0);
-                    label(ui, "Position de l'image actuelle");
+                    label(ui, tl("Position de l'image actuelle"));
                     for row in 0..3 {
                         ui.horizontal(|ui| {
                             for col in 0..3 {
@@ -130,8 +130,8 @@ impl Pixel {
                         });
                     }
                     ui.horizontal(|ui| {
-                        label(ui, "Couleur d'extension");
-                        tools::combo(ui, "ext", ext, &EXT_COLORS, 160.0);
+                        label(ui, tl("Couleur d'extension"));
+                        tools::combo(ui, tl("ext"), ext, &EXT_COLORS, 160.0);
                     });
                 }
                 Sheet::ImageSize { w, h, keep, percent, resample, dpi } => {
@@ -143,14 +143,14 @@ impl Pixel {
                     if *percent {
                         let mut px = *w as f32 / dw as f32 * 100.0;
                         let mut py = *h as f32 / dh as f32 * 100.0;
-                        label(ui, "Largeur");
+                        label(ui, tl("Largeur"));
                         if ui.add(egui::DragValue::new(&mut px).range(1.0..=1000.0).suffix(" %")).changed() {
                             *w = ((dw as f32 * px / 100.0).round() as u32).max(1);
                             if *keep {
                                 *h = ((*w as f32 / ratio).round() as u32).max(1);
                             }
                         }
-                        label(ui, "Hauteur");
+                        label(ui, tl("Hauteur"));
                         if ui.add(egui::DragValue::new(&mut py).range(1.0..=1000.0).suffix(" %")).changed() {
                             *h = ((dh as f32 * py / 100.0).round() as u32).max(1);
                             if *keep {
@@ -158,27 +158,27 @@ impl Pixel {
                             }
                         }
                     } else {
-                        label(ui, "Largeur");
+                        label(ui, tl("Largeur"));
                         if ui.add(egui::DragValue::new(w).range(1..=16384).suffix(" px")).changed() && *keep {
                             *h = ((*w as f32 / ratio).round() as u32).max(1);
                         }
-                        label(ui, "Hauteur");
+                        label(ui, tl("Hauteur"));
                         if ui.add(egui::DragValue::new(h).range(1..=16384).suffix(" px")).changed() && *keep {
                             *w = ((*h as f32 * ratio).round() as u32).max(1);
                         }
                     }
                     ui.checkbox(keep, tl("Conserver les proportions"));
                     ui.horizontal(|ui| {
-                        label(ui, "Rééchantillonnage");
-                        tools::combo(ui, "resample", resample, &RESAMPLE, 170.0);
+                        label(ui, tl("Rééchantillonnage"));
+                        tools::combo(ui, tl("resample"), resample, &RESAMPLE, 170.0);
                     });
                     ui.horizontal(|ui| {
-                        label(ui, "Résolution");
+                        label(ui, tl("Résolution"));
                         ui.add(egui::DragValue::new(dpi).range(1.0..=2400.0).suffix(" ppp"));
                     });
                     ui.horizontal(|ui| {
                         for (name, k) in [("50 %", 0.5), ("200 %", 2.0), ("1920 px", -1920.0), ("1080 px", -1080.0)] {
-                            if ui.small_button(name).clicked() {
+                            if ui.small_button(tl(&name)).clicked() {
                                 if k > 0.0 {
                                     *w = ((dw as f32 * k) as u32).max(1);
                                     *h = ((dh as f32 * k) as u32).max(1);
@@ -197,7 +197,7 @@ impl Pixel {
                     let mut sy = t.sy * 100.0;
                     let mut linked = (sx - sy).abs() < 0.01;
                     ui.horizontal(|ui| {
-                        label(ui, "Échelle");
+                        label(ui, tl("Échelle"));
                         ui.add(egui::DragValue::new(&mut sx).range(1.0..=1000.0).suffix(" %").prefix("L "));
                         ui.add(egui::DragValue::new(&mut sy).range(1.0..=1000.0).suffix(" %").prefix("H "));
                         ui.checkbox(&mut linked, tl("Lier"));
@@ -209,7 +209,7 @@ impl Pixel {
                     }
                     t.sx = sx / 100.0;
                     t.sy = sy / 100.0;
-                    label(ui, "Rotation");
+                    label(ui, tl("Rotation"));
                     ui.add(egui::Slider::new(&mut t.angle, -180.0..=180.0).suffix("°"));
                     ui.horizontal(|ui| {
                         for a in [-90.0, -45.0, 0.0, 45.0, 90.0, 180.0] {
@@ -218,14 +218,14 @@ impl Pixel {
                             }
                         }
                     });
-                    label(ui, "Inclinaison horizontale / verticale");
+                    label(ui, tl("Inclinaison horizontale / verticale"));
                     ui.add(egui::Slider::new(&mut t.skew_x, -60.0..=60.0).suffix("°"));
                     ui.add(egui::Slider::new(&mut t.skew_y, -60.0..=60.0).suffix("°"));
-                    label(ui, "Perspective horizontale / verticale");
+                    label(ui, tl("Perspective horizontale / verticale"));
                     ui.add(egui::Slider::new(&mut t.persp_x, -90.0..=90.0).suffix(" %"));
                     ui.add(egui::Slider::new(&mut t.persp_y, -90.0..=90.0).suffix(" %"));
                     ui.horizontal(|ui| {
-                        label(ui, "Déplacement");
+                        label(ui, tl("Déplacement"));
                         ui.add(egui::DragValue::new(&mut t.tx).prefix("X ").suffix(" px"));
                         ui.add(egui::DragValue::new(&mut t.ty).prefix("Y ").suffix(" px"));
                     });
@@ -253,20 +253,20 @@ impl Pixel {
                         ui.add(egui::Slider::new(size, 0.0..=80.0).suffix(" px"));
                     }
                     if matches!(k, 0 | 4) {
-                        label(ui, "Distance");
+                        label(ui, tl("Distance"));
                         ui.add(egui::Slider::new(dist, 0.0..=200.0).suffix(" px"));
                     }
                     if matches!(k, 0 | 4 | 6 | 8) {
-                        label(ui, "Angle");
+                        label(ui, tl("Angle"));
                         ui.add(egui::Slider::new(angle, -180.0..=180.0).suffix("°"));
                     }
                     if k == 6 {
-                        label(ui, "Profondeur");
+                        label(ui, tl("Profondeur"));
                         ui.add(egui::Slider::new(depth, 0.1..=5.0));
                     }
                     if matches!(k, 2 | 3) {
                         ui.horizontal(|ui| {
-                            label(ui, "Position");
+                            label(ui, tl("Position"));
                             let mut p = *position as usize;
                             if pro::segmented(ui, &mut p, &[tl("Intérieur"), tl("Centre"), tl("Extérieur")]) {
                                 *position = p as u8;
@@ -279,9 +279,9 @@ impl Pixel {
                     }
                     if matches!(k, 7 | 8) {
                         ui.horizontal(|ui| {
-                            label(ui, "Mode");
+                            label(ui, tl("Mode"));
                             let mut b = BLENDS[*blend].0;
-                            if tools::blend_combo(ui, "fxblend", &mut b, 170.0) {
+                            if tools::blend_combo(ui, tl("fxblend"), &mut b, 170.0) {
                                 *blend = blend_index(b);
                             }
                         });
@@ -296,50 +296,50 @@ impl Pixel {
                 }
                 Sheet::ColorRange { mode, fuzz } => {
                     ui.horizontal(|ui| {
-                        label(ui, "Sélectionner");
-                        tools::combo(ui, "crange", mode, &COLOR_RANGE, 180.0);
+                        label(ui, tl("Sélectionner"));
+                        tools::combo(ui, tl("crange"), mode, &COLOR_RANGE, 180.0);
                     });
                     if *mode == 0 {
                         ui.horizontal(|ui| {
                             let (r, _) = ui.allocate_exact_size(Vec2::splat(18.0), Sense::hover());
                             ui.painter().rect(r, CornerRadius::same(4), self.primary, Stroke::new(1.0, LINE), StrokeKind::Inside);
-                            label(ui, "Prends la couleur avec la pipette (I)");
+                            label(ui, tl("Prends la couleur avec la pipette (I)"));
                         });
-                        label(ui, "Tolérance");
+                        label(ui, tl("Tolérance"));
                         ui.add(egui::Slider::new(fuzz, 1.0..=200.0));
                     }
                     ui.label(RichText::new(tl("La sélection obtenue est progressive : les pixels proches sont pris en partie.")).size(12.0).color(FAINT));
                 }
                 Sheet::Fill { content, opacity, blend } => {
                     ui.horizontal(|ui| {
-                        label(ui, "Contenu");
-                        tools::combo(ui, "fillc", content, &FILL_CONTENT, 180.0);
+                        label(ui, tl("Contenu"));
+                        tools::combo(ui, tl("fillc"), content, &FILL_CONTENT, 180.0);
                     });
                     if *content < 5 {
                         ui.horizontal(|ui| {
-                            label(ui, "Mode");
+                            label(ui, tl("Mode"));
                             let mut b = BLENDS[*blend].0;
-                            if tools::blend_combo(ui, "fillb", &mut b, 180.0) {
+                            if tools::blend_combo(ui, tl("fillb"), &mut b, 180.0) {
                                 *blend = blend_index(b);
                             }
                         });
-                        label(ui, "Opacité");
+                        label(ui, tl("Opacité"));
                         ui.add(egui::Slider::new(opacity, 1.0..=100.0).suffix(" %"));
                     }
                 }
                 Sheet::Export { format, quality, scale, bg, level, ico, selection } => {
-                    label(ui, "Format");
+                    label(ui, tl("Format"));
                     pro::segmented(ui, format, &[tl("PNG"), tl("JPEG"), tl("WebP"), tl("BMP"), tl("TIFF"), tl("GIF"), tl("ICO")]);
                     ui.add_space(6.0);
                     match *format {
                         0 => {
                             ui.horizontal(|ui| {
-                                label(ui, "Compression");
+                                label(ui, tl("Compression"));
                                 pro::segmented(ui, level, &[tl("Rapide"), tl("Normale"), tl("Maximale")]);
                             });
                         }
                         1 => {
-                            label(ui, "Qualité");
+                            label(ui, tl("Qualité"));
                             ui.add(egui::Slider::new(quality, 10..=100));
                             ui.horizontal(|ui| {
                                 for (n, q) in [("Basse", 50u8), ("Moyenne", 70), ("Haute", 85), ("Maximale", 100)] {
@@ -350,7 +350,7 @@ impl Pixel {
                             });
                         }
                         6 => {
-                            label(ui, "Tailles de l'icône");
+                            label(ui, tl("Tailles de l'icône"));
                             ui.horizontal_wrapped(|ui| {
                                 for (i, s) in [16, 24, 32, 48, 64, 128, 256].iter().enumerate() {
                                     ui.checkbox(&mut ico[i], format!("{s}"));
@@ -361,12 +361,12 @@ impl Pixel {
                     }
                     if matches!(*format, 1 | 3) {
                         ui.horizontal(|ui| {
-                            label(ui, "Fond des zones transparentes");
-                            tools::combo(ui, "expbg", bg, &["Blanc", "Noir", "Couleur secondaire"], 150.0);
+                            label(ui, tl("Fond des zones transparentes"));
+                            tools::combo(ui, tl("expbg"), bg, &["Blanc", "Noir", "Couleur secondaire"], 150.0);
                         });
                     }
                     if *format != 6 {
-                        label(ui, "Échelle");
+                        label(ui, tl("Échelle"));
                         ui.add(egui::Slider::new(scale, 10.0..=400.0).suffix(" %"));
                         ui.horizontal(|ui| {
                             for s in [25.0, 50.0, 100.0, 200.0] {
@@ -405,15 +405,15 @@ impl Pixel {
                     ui.add(egui::TextEdit::singleline(name).desired_width(f32::INFINITY));
                 }
                 Sheet::Prefs => {
-                    label(ui, "États d'historique");
+                    label(ui, tl("États d'historique"));
                     ui.add(egui::Slider::new(&mut self.doc.undo_limit, 5..=200));
                     ui.horizontal(|ui| {
-                        label(ui, "Plan de travail");
-                        tools::combo(ui, "pboard", &mut self.pasteboard, &PASTEBOARDS.map(|p| p.0), 140.0);
+                        label(ui, tl("Plan de travail"));
+                        tools::combo(ui, tl("pboard"), &mut self.pasteboard, &PASTEBOARDS.map(|p| p.0), 140.0);
                     });
                     ui.horizontal(|ui| {
-                        label(ui, "Curseur de peinture");
-                        tools::combo(ui, "cmode", &mut self.cursor_mode, &["Forme", "Forme et réticule", "Précis"], 160.0);
+                        label(ui, tl("Curseur de peinture"));
+                        tools::combo(ui, tl("cmode"), &mut self.cursor_mode, &["Forme", "Forme et réticule", "Précis"], 160.0);
                     });
                     ui.checkbox(&mut self.pixel_grid, tl("Grille de pixels aux forts zooms"));
                     ui.checkbox(&mut self.snap, tl("Magnétisme"));
@@ -422,8 +422,8 @@ impl Pixel {
                     egui::ScrollArea::vertical().max_height(420.0).show(ui, |ui| {
                         egui::Grid::new("sc").num_columns(2).spacing([16.0, 6.0]).show(ui, |ui| {
                             for (k, d) in SHORTCUTS {
-                                ui.label(RichText::new(*k).monospace().size(12.0).color(INK_STRONG));
-                                ui.label(RichText::new(*d).size(12.0).color(MUTED));
+                                ui.label(RichText::new(tl(*k)).monospace().size(12.0).color(INK_STRONG));
+                                ui.label(RichText::new(tl(*d)).size(12.0).color(MUTED));
                                 ui.end_row();
                             }
                         });
@@ -576,13 +576,13 @@ impl Pixel {
                     ui.add_space(6.0);
                     ui.add(egui::TextEdit::singleline(&mut nd.name).desired_width(f32::INFINITY));
                     ui.add_space(10.0);
-                    label(ui, "Largeur");
+                    label(ui, tl("Largeur"));
                     ui.add(egui::DragValue::new(&mut nd.w).range(1..=16384).suffix(" px"));
-                    label(ui, "Hauteur");
+                    label(ui, tl("Hauteur"));
                     ui.add(egui::DragValue::new(&mut nd.h).range(1..=16384).suffix(" px"));
                     ui.add_space(6.0);
                     ui.horizontal(|ui| {
-                        label(ui, "Orientation");
+                        label(ui, tl("Orientation"));
                         if ui.selectable_label(nd.w >= nd.h, tl("Paysage")).clicked() && nd.w < nd.h {
                             std::mem::swap(&mut nd.w, &mut nd.h);
                         }
@@ -591,8 +591,8 @@ impl Pixel {
                         }
                     });
                     ui.add_space(6.0);
-                    label(ui, "Arrière-plan");
-                    tools::combo(ui, "bg", &mut nd.background, &BACKGROUNDS, 200.0);
+                    label(ui, tl("Arrière-plan"));
+                    tools::combo(ui, tl("bg"), &mut nd.background, &BACKGROUNDS, 200.0);
                 });
             });
             ui.add_space(16.0);
@@ -642,12 +642,12 @@ impl Pixel {
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = egui::vec2(4.0, 4.0);
                     for (name, vals) in kind.presets() {
-                        if ui.add(egui::Button::new(RichText::new(*name).size(11.5)).fill(FIELD).corner_radius(6)).clicked() {
+                        if ui.add(egui::Button::new(RichText::new(tl(*name)).size(11.5)).fill(FIELD).corner_radius(6)).clicked() {
                             adj.vals = vals.to_vec();
                         }
                     }
                     for (i, name, vals) in &user {
-                        let r = ui.add(egui::Button::new(RichText::new(name).size(11.5).color(BLUE)).fill(FIELD).corner_radius(6));
+                        let r = ui.add(egui::Button::new(RichText::new(tl(&name)).size(11.5).color(BLUE)).fill(FIELD).corner_radius(6));
                         if r.clicked() {
                             adj.vals = vals.clone();
                         }
@@ -697,14 +697,14 @@ impl Pixel {
             if adj.layer.is_none() {
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    label(ui, "Estomper");
+                    label(ui, tl("Estomper"));
                     ui.spacing_mut().slider_width = 130.0;
                     let mut o = adj.opacity * 100.0;
                     if ui.add(egui::Slider::new(&mut o, 0.0..=100.0).suffix(" %")).changed() {
                         adj.opacity = o / 100.0;
                     }
                     let mut b = BLENDS[adj.blend].0;
-                    if tools::blend_combo(ui, "adjb", &mut b, 110.0) {
+                    if tools::blend_combo(ui, tl("adjb"), &mut b, 110.0) {
                         adj.blend = blend_index(b);
                     }
                 });
@@ -724,7 +724,7 @@ impl Pixel {
             } else {
                 "Aperçu en direct sur le calque actif"
             };
-            ui.label(RichText::new(scope).size(12.0).color(FAINT));
+            ui.label(RichText::new(tl(&scope)).size(12.0).color(FAINT));
             buttons(ui, if adj.layer.is_some() { "OK" } else { "Appliquer" }, &mut apply, &mut cancel);
         });
         if let Some(i) = delete {
@@ -803,19 +803,19 @@ impl Pixel {
             }
             ui.add_space(8.0);
             ui.horizontal(|ui| {
-                label(ui, "Police");
-                tools::combo(ui, "tfont", &mut self.text_font, &shapes::FONTS.map(|f| f.0), 150.0);
+                label(ui, tl("Police"));
+                tools::combo(ui, tl("tfont"), &mut self.text_font, &shapes::FONTS.map(|f| f.0), 150.0);
                 ui.toggle_value(&mut self.text_bold, RichText::new(tl("G")).strong());
                 ui.toggle_value(&mut self.text_italic, RichText::new(tl("I")).italics());
                 ui.toggle_value(&mut self.text_underline, RichText::new(tl("S")).underline());
             });
-            label(ui, "Taille");
+            label(ui, tl("Taille"));
             ui.spacing_mut().slider_width = 280.0;
             ui.add(egui::Slider::new(&mut self.text_size, 6.0..=800.0).suffix(" px").logarithmic(true));
             ui.horizontal(|ui| {
-                label(ui, "Approche");
+                label(ui, tl("Approche"));
                 ui.add(egui::DragValue::new(&mut self.tracking).range(-50.0..=200.0).suffix(" ‰"));
-                label(ui, "Interligne");
+                label(ui, tl("Interligne"));
                 ui.add(egui::DragValue::new(&mut self.leading).range(0.5..=3.0).speed(0.01).suffix(" ×"));
             });
             if !draft.vertical {
@@ -826,7 +826,7 @@ impl Pixel {
                 ui.painter().rect(r, CornerRadius::same(4), self.primary, Stroke::new(1.0, LINE), StrokeKind::Inside);
                 ui.label(RichText::new(tl("Couleur principale · nouveau calque de texte")).size(12.0).color(FAINT));
             });
-            buttons(ui, "Ajouter", &mut add, &mut cancel);
+            buttons(ui, tl("Ajouter"), &mut add, &mut cancel);
         });
         if add && !draft.text.trim().is_empty() {
             let st = TextStyle { font: self.text_font, size: self.text_size, bold: self.text_bold, italic: self.text_italic, underline: self.text_underline, align: self.text_align, tracking: self.tracking, leading: self.leading, vertical: draft.vertical, color: self.primary.to_array() };

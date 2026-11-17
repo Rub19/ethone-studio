@@ -44,13 +44,13 @@ F1	F1
 Préférences…	Preferences…
 Interface, outils, performances · Ctrl+,	Interface, tools, performance · Ctrl+,
 Synchroniser les réglages	Sync settings
-Photos choisies	
-Look Portra · 40 %	
-Pellicule	
-Palette Corail	
-Triade	
-Zébulon magique	
-essai	
+Photos choisies	Chosen photos
+Look Portra · 40 %	Portra look · 40 %
+Pellicule	Film
+Palette Corail	Coral palette
+Triade	Triad
+Zébulon magique	Magic bounce
+essai	essay
 Raccourcis	Shortcuts
 Transferts récents	Recent transfers
 entre les apps et depuis l'Assistant	between apps and from the Assistant
@@ -90,3 +90,15 @@ Créer un raccourci sur le Bureau	Create a desktop shortcut
 Ouvrir l'application à la fin	Open the app when done
 Installer	Install
 Réessayer	Try again
+effets, empilés dans l'ordre, chacun avec son intensité	effects, stacked in order, each with its own strength
+Instantanées	Instant
+Crème	Cream
+Pêche	Peach
+Forêt	Forest
+Bleu roi	Royal blue
+Rose poudré	Powder pink
+Français	Français
+English	English
+Carrés	Squares
+Arrondis	Rounded
+Très arrondis	Very rounded

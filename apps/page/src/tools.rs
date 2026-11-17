@@ -894,7 +894,7 @@ impl PageApp {
 
     pub fn tool_options(&mut self, ui: &mut Ui) {
         let lbl = |ui: &mut Ui, t: &str| {
-            ui.label(RichText::new(t).size(12.0).color(MUTED));
+            ui.label(RichText::new(tl(&t)).size(12.0).color(MUTED));
         };
         match self.tool {
             Polygon | FramePolygon => {

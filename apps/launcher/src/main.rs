@@ -287,13 +287,13 @@ impl Launcher {
         egui::ScrollArea::vertical().id_salt("sidebar-list").max_height(list_h).auto_shrink([false, true]).show(ui, |ui| {
         nav_row(ui, &mut self.view, View::Auto, tl("Assistant"), Some(P.blue), None);
         ui.add_space(14.0);
-        heading(ui, "BIBLIOTHÈQUE");
+        heading(ui, tl("BIBLIOTHÈQUE"));
         nav_row(ui, &mut self.view, View::All, tl("Toutes les apps"), None, Some(apps.len()));
         nav_row(ui, &mut self.view, View::Installed, tl("Installées"), None, Some(installed));
         nav_row(ui, &mut self.view, View::Updates, tl("Mises à jour"), None, (updates > 0).then_some(updates));
 
         ui.add_space(18.0);
-        heading(ui, "CATÉGORIES");
+        heading(ui, tl("CATÉGORIES"));
         for (key, label) in CATEGORIES {
             let n = apps.iter().filter(|a| a.category == key).count();
             if n == 0 {
@@ -311,7 +311,7 @@ impl Launcher {
                 ui.label(RichText::new(&source.1).size(12.0).color(P.muted));
             });
             ui.add_space(6.0);
-            if plain_row(ui, "Paramètres") {
+            if plain_row(ui, tl("Paramètres")) {
                 self.settings_open = true;
             }
         });
@@ -342,7 +342,7 @@ impl Launcher {
         };
         let visible: Vec<AppEntry> = apps.iter().filter(|a| self.matches(a)).cloned().collect();
         ui.horizontal(|ui| {
-            ui.label(RichText::new(title).font(semibold(30.0)).color(P.ink_strong));
+            ui.label(RichText::new(tl(&title)).font(semibold(30.0)).color(P.ink_strong));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 let pending: Vec<AppEntry> = visible.iter().filter(|a| a.published() && !self.installed.apps.contains_key(&a.id)).cloned().collect();
                 if pending.len() > 1 && pill(ui, &format!("Tout installer ({})", pending.len()), P.line, P.ink_strong, true).clicked() {
@@ -357,7 +357,7 @@ impl Launcher {
             1 => "1 app".to_string(),
             n => format!("{n} apps"),
         };
-        ui.label(RichText::new(subtitle).size(12.5).color(P.muted));
+        ui.label(RichText::new(tl(&subtitle)).size(12.5).color(P.muted));
         ui.add_space(18.0);
 
         egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
@@ -372,12 +372,12 @@ impl Launcher {
             let (mine, others): (Vec<_>, Vec<_>) = visible.into_iter().partition(|a| self.installed.apps.contains_key(&a.id));
             let split = !mine.is_empty() && !others.is_empty();
             if split {
-                section_title(ui, "Installées");
+                section_title(ui, tl("Installées"));
             }
             self.grid(ui, ctx, &mine);
             if split {
                 ui.add_space(8.0);
-                section_title(ui, "Disponibles");
+                section_title(ui, tl("Disponibles"));
             }
             self.grid(ui, ctx, &others);
             ui.add_space(24.0);
@@ -504,11 +504,11 @@ impl Launcher {
             .show(ctx, |ui| {
                 Frame::popup(ui.style()).inner_margin(Margin::same(6)).show(ui, |ui| {
                     ui.set_min_width(220.0);
-                    if menu_item(ui, "Afficher dans l'explorateur", P.ink) {
+                    if menu_item(ui, tl("Afficher dans l'explorateur"), P.ink) {
                         let _ = std::process::Command::new("explorer").arg(studio_core::app_dir(&app.id)).spawn();
                         close = true;
                     }
-                    if app.published() && menu_item(ui, "Réinstaller", P.ink) {
+                    if app.published() && menu_item(ui, tl("Réinstaller"), P.ink) {
                         self.install(ctx, app.clone());
                         close = true;
                     }
@@ -599,12 +599,12 @@ fn short(s: &str, n: usize) -> String {
 
 fn heading(ui: &mut Ui, text: &str) {
     ui.add_space(2.0);
-    ui.label(RichText::new(text).font(semibold(11.0)).color(P.faint));
+    ui.label(RichText::new(tl(&text)).font(semibold(11.0)).color(P.faint));
     ui.add_space(4.0);
 }
 
 fn section_title(ui: &mut Ui, text: &str) {
-    ui.label(RichText::new(text).font(semibold(15.0)).color(P.ink));
+    ui.label(RichText::new(tl(&text)).font(semibold(15.0)).color(P.ink));
     ui.add_space(10.0);
 }
 

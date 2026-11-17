@@ -1294,10 +1294,10 @@ impl PageApp {
                 self.send_to(t, &ctx);
             }
             ui.separator();
-            if mi(ui, true, "Nouveau…", "Ctrl+N") {
+            if mi(ui, true, tl("Nouveau…"), "Ctrl+N") {
                 self.home = true;
             }
-            if mi(ui, true, "Ouvrir…", "Ctrl+O") {
+            if mi(ui, true, tl("Ouvrir…"), "Ctrl+O") {
                 self.open();
             }
             ui.menu_button(tl("Ouvrir un document récent"), |ui| {
@@ -1316,10 +1316,10 @@ impl PageApp {
             });
             ui.add_enabled_ui(!self.home, |ui| {
                 ui.separator();
-                if mi(ui, true, "Enregistrer", "Ctrl+S") {
+                if mi(ui, true, tl("Enregistrer"), "Ctrl+S") {
                     self.save(false);
                 }
-                if mi(ui, true, "Enregistrer sous…", "Ctrl+Maj+S") {
+                if mi(ui, true, tl("Enregistrer sous…"), "Ctrl+Maj+S") {
                     self.save(true);
                 }
                 if mi(ui, self.file.is_some() && self.doc != self.saved, "Revenir à la version enregistrée", "") {
@@ -1327,14 +1327,14 @@ impl PageApp {
                     self.sel = None;
                 }
                 ui.separator();
-                if mi(ui, true, "Placer une image…", "Ctrl+Maj+I") {
+                if mi(ui, true, tl("Placer une image…"), "Ctrl+Maj+I") {
                     self.place_image();
                 }
-                if mi(ui, true, "Assembler…", "") {
+                if mi(ui, true, tl("Assembler…"), "") {
                     self.package();
                 }
                 ui.separator();
-                if mi(ui, true, "Exporter…", "Ctrl+E") {
+                if mi(ui, true, tl("Exporter…"), "Ctrl+E") {
                     self.export = Some(self.default_export());
                 }
                 ui.menu_button(tl("Exporter avec un préréglage"), |ui| {
@@ -1347,7 +1347,7 @@ impl PageApp {
                         }
                     }
                     for (k, name) in [(1usize, "PNG 300 ppp"), (2, "JPEG 150 ppp"), (3, "SVG")] {
-                        if ui.button(name).clicked() {
+                        if ui.button(tl(&name)).clicked() {
                             let mut o = self.default_export();
                             o.format = k;
                             o.dpi = if k == 2 { 2 } else { 3 };
@@ -1355,10 +1355,10 @@ impl PageApp {
                         }
                     }
                 });
-                if mi(ui, true, "Format du document…", "Ctrl+K") {
+                if mi(ui, true, tl("Format du document…"), "Ctrl+K") {
                     self.doc_sheet = true;
                 }
-                if mi(ui, true, "Fermer", "") {
+                if mi(ui, true, tl("Fermer"), "") {
                     self.home = true;
                 }
             });
@@ -1377,11 +1377,11 @@ impl PageApp {
                 self.redo_step();
             }
             ui.separator();
-            if mi(ui, has, "Couper", "Ctrl+X") {
+            if mi(ui, has, tl("Couper"), "Ctrl+X") {
                 self.copy_sel();
                 self.delete_selection();
             }
-            if mi(ui, has, "Copier", "Ctrl+C") {
+            if mi(ui, has, tl("Copier"), "Ctrl+C") {
                 self.copy_sel();
             }
             if mi(ui, !self.clip.is_empty(), "Coller", "Ctrl+V") {
@@ -1390,30 +1390,30 @@ impl PageApp {
             if mi(ui, !self.clip.is_empty(), "Coller sur place", "Ctrl+Maj+V") {
                 self.paste(true);
             }
-            if mi(ui, has, "Dupliquer", "Ctrl+D") {
+            if mi(ui, has, tl("Dupliquer"), "Ctrl+D") {
                 self.duplicate();
             }
-            if mi(ui, has, "Dupliquer et décaler…", "Ctrl+Alt+U") {
+            if mi(ui, has, tl("Dupliquer et décaler…"), "Ctrl+Alt+U") {
                 self.step = Some(panels::StepOpts { count: 3, dx: 20.0, dy: 20.0, rot: 0.0, grid: false, rows: 2, cols: 2 });
             }
-            if mi(ui, has, "Supprimer", "Suppr") {
+            if mi(ui, has, tl("Supprimer"), "Suppr") {
                 self.delete_selection();
             }
             ui.separator();
-            if mi(ui, true, "Tout sélectionner", "Ctrl+A") {
+            if mi(ui, true, tl("Tout sélectionner"), "Ctrl+A") {
                 self.select_all();
             }
-            if mi(ui, has, "Tout désélectionner", "Ctrl+Maj+A") {
+            if mi(ui, has, tl("Tout désélectionner"), "Ctrl+Maj+A") {
                 self.sel = None;
                 self.picks.clear();
             }
             ui.separator();
-            if mi(ui, true, "Rechercher et remplacer…", "Ctrl+F") {
+            if mi(ui, true, tl("Rechercher et remplacer…"), "Ctrl+F") {
                 self.find = Some(panels::FindState::new(String::new()));
             }
             ui.menu_button(tl("Corrections typographiques"), |ui| {
                 for (k, t) in panels::TYPO.iter().enumerate() {
-                    if ui.button(*t).clicked() {
+                    if ui.button(tl(*t)).clicked() {
                         let n = self.typo_all(&[k]);
                         self.notice = Some((format!("{t} : {n} bloc(s) corrigé(s)"), true));
                     }
@@ -1434,15 +1434,15 @@ impl PageApp {
                         }
                     }
                 });
-                if mi(ui, multi, "Grouper", "Ctrl+G") {
+                if mi(ui, multi, tl("Grouper"), "Ctrl+G") {
                     self.group(true);
                 }
-                if mi(ui, true, "Dissocier", "Ctrl+Maj+G") {
+                if mi(ui, true, tl("Dissocier"), "Ctrl+Maj+G") {
                     self.group(false);
                 }
                 ui.menu_button(tl("Transformation"), |ui| {
                     for (label, a) in [("Rotation de 90° horaire", 90.0), ("Rotation de 90° antihoraire", -90.0), ("Rotation de 180°", 180.0)] {
-                        if ui.button(label).clicked() {
+                        if ui.button(tl(&label)).clicked() {
                             self.rotate_by(a);
                         }
                     }
@@ -1461,7 +1461,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Aligner"), |ui| {
                     for (label, axis, to) in [("Gauche", 0, 0.0), ("Centre horizontal", 0, 0.5), ("Droite", 0, 1.0), ("Haut", 1, 0.0), ("Centre vertical", 1, 0.5), ("Bas", 1, 1.0)] {
-                        if ui.button(label).clicked() {
+                        if ui.button(tl(&label)).clicked() {
                             self.align_to(axis, to, if multi { 0 } else { 1 });
                         }
                     }
@@ -1495,7 +1495,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Options d'angle"), |ui| {
                     for (k, t) in CORNERS.iter().enumerate() {
-                        if ui.button(*t).clicked() {
+                        if ui.button(tl(*t)).clicked() {
                             for i in self.selection() {
                                 self.frames()[i].fx.corner = k as u8;
                             }
@@ -1504,7 +1504,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Habillage"), |ui| {
                     for (k, t) in WRAPS.iter().enumerate() {
-                        if ui.button(*t).clicked() {
+                        if ui.button(tl(*t)).clicked() {
                             for i in self.selection() {
                                 self.frames()[i].fx.wrap = k as u8;
                             }
@@ -1513,7 +1513,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Effets"), |ui| {
                     for (k, t) in ["Ombre portée", "Lueur externe", "Contour progressif", "Contour progressif directionnel"].iter().enumerate() {
-                        if ui.button(*t).clicked() {
+                        if ui.button(tl(*t)).clicked() {
                             for i in self.selection() {
                                 let f = &mut self.frames()[i];
                                 match k {
@@ -1527,7 +1527,7 @@ impl PageApp {
                     }
                     ui.menu_button(tl("Mode de fusion"), |ui| {
                         for (k, (t, _)) in BLENDS.iter().enumerate() {
-                            if ui.button(*t).clicked() {
+                            if ui.button(tl(*t)).clicked() {
                                 for i in self.selection() {
                                     self.frames()[i].fx.blend = k as u8;
                                 }
@@ -1545,7 +1545,7 @@ impl PageApp {
                 ui.menu_button(tl("Styles d'objet"), |ui| {
                     let names: Vec<String> = self.doc.obj_styles.iter().map(|s| s.name.clone()).collect();
                     for (k, n) in names.iter().enumerate() {
-                        if ui.button(n).clicked() {
+                        if ui.button(tl(&n)).clicked() {
                             self.apply_obj_style(k);
                         }
                     }
@@ -1561,30 +1561,30 @@ impl PageApp {
                         self.as_path(i);
                     }
                 }
-                if mi(ui, true, "Note…", "") {
+                if mi(ui, true, tl("Note…"), "") {
                     self.note_edit = self.sel;
                 }
             });
             ui.separator();
-            if mi(ui, has, "Verrouiller", "Ctrl+L") {
+            if mi(ui, has, tl("Verrouiller"), "Ctrl+L") {
                 for i in self.selection() {
                     self.frames()[i].locked = true;
                 }
                 self.sel = None;
             }
-            if mi(ui, true, "Tout déverrouiller", "") {
+            if mi(ui, true, tl("Tout déverrouiller"), "") {
                 self.frames().iter_mut().for_each(|f| f.locked = false);
             }
-            if mi(ui, has, "Masquer", "Ctrl+3") {
+            if mi(ui, has, tl("Masquer"), "Ctrl+3") {
                 for i in self.selection() {
                     self.frames()[i].hidden = true;
                 }
                 self.sel = None;
             }
-            if mi(ui, true, "Tout afficher", "Ctrl+Alt+3") {
+            if mi(ui, true, tl("Tout afficher"), "Ctrl+Alt+3") {
                 self.frames().iter_mut().for_each(|f| f.hidden = false);
             }
-            if mi(ui, has, "Non imprimable", "") {
+            if mi(ui, has, tl("Non imprimable"), "") {
                 for i in self.selection() {
                     let f = &mut self.frames()[i];
                     f.fx.nonprint = !f.fx.nonprint;
@@ -1597,7 +1597,7 @@ impl PageApp {
                 ui.menu_button(tl("Police"), |ui| {
                     egui::ScrollArea::vertical().max_height(360.0).show(ui, |ui| {
                         for name in FONTS {
-                            if ui.button(RichText::new(name)).clicked() {
+                            if ui.button(RichText::new(tl(&name))).clicked() {
                                 self.text_sel(|k| {
                                     if let Kind::Text { family, .. } | Kind::TextPath { family, .. } = k {
                                         *family = name.into();
@@ -1620,7 +1620,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Style de paragraphe"), |ui| {
                     for (k, (name, ..)) in STYLES.iter().enumerate() {
-                        if ui.button(*name).clicked() {
+                        if ui.button(tl(*name)).clicked() {
                             self.apply_style(k);
                         }
                     }
@@ -1629,21 +1629,21 @@ impl PageApp {
                         ui.separator();
                     }
                     for (k, n) in user.iter().enumerate() {
-                        if ui.button(n).clicked() {
+                        if ui.button(tl(&n)).clicked() {
                             self.apply_style(STYLES.len() + k);
                         }
                     }
                 });
                 ui.menu_button(tl("Casse"), |ui| {
                     for (k, t) in panels::CASES.iter().enumerate() {
-                        if ui.button(*t).clicked() {
+                        if ui.button(tl(*t)).clicked() {
                             self.case_sel(k);
                         }
                     }
                 });
                 ui.menu_button(tl("Listes"), |ui| {
                     for (k, t) in LISTS.iter().enumerate() {
-                        if ui.button(*t).clicked() {
+                        if ui.button(tl(*t)).clicked() {
                             self.text_sel(|kind| {
                                 if let Kind::Text { list, .. } = kind {
                                     *list = k as u8;
@@ -1654,7 +1654,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Lettrine"), |ui| {
                     for (n, t) in [(0u32, "Aucune"), (2, "Sur 2 lignes"), (3, "Sur 3 lignes"), (4, "Sur 4 lignes")] {
-                        if ui.button(t).clicked() {
+                        if ui.button(tl(&t)).clicked() {
                             self.text_sel(|kind| {
                                 if let Kind::Text { opts, .. } = kind {
                                     opts.drop_lines = n;
@@ -1665,7 +1665,7 @@ impl PageApp {
                 });
                 ui.menu_button(tl("Insérer une variable"), |ui| {
                     for (v, t) in [("{page}", "Numéro de page"), ("{pages}", "Nombre de pages"), ("{title}", "Titre du document"), ("{date}", "Date du jour"), ("{section}", "Nom de section")] {
-                        if ui.button(t).clicked() {
+                        if ui.button(tl(&t)).clicked() {
                             self.text_sel(|k| {
                                 if let Kind::Text { text, .. } | Kind::TextPath { text, .. } = k {
                                     text.push_str(v);
@@ -1674,26 +1674,26 @@ impl PageApp {
                         }
                     }
                 });
-                if mi(ui, true, "Modifier le texte", "Entrée") {
+                if mi(ui, true, tl("Modifier le texte"), "Entrée") {
                     self.edit_text = self.sel;
                 }
-                if mi(ui, true, "Ajuster la hauteur au texte", "") {
+                if mi(ui, true, tl("Ajuster la hauteur au texte"), "") {
                     self.fit_text();
                 }
-                if mi(ui, true, "Remplir avec du faux texte", "") {
+                if mi(ui, true, tl("Remplir avec du faux texte"), "") {
                     self.lorem();
                 }
             });
             ui.separator();
-            if mi(ui, true, "Créer la table des matières…", "") {
+            if mi(ui, true, tl("Créer la table des matières…"), "") {
                 self.open_toc();
             }
-            if mi(ui, true, "Nouveau style de caractère…", "") {
+            if mi(ui, true, tl("Nouveau style de caractère…"), "") {
                 self.char_sheet = Some(CharStyle { name: format!("Caractère {}", self.doc.char_styles.len() + 1), bold: true, italic: false, underline: false, strike: false, caps: false, color: None, scale: 1.0 });
             }
             ui.separator();
             ui.label(RichText::new(tl("Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>")).size(11.5).color(FAINT));
-            ui.label(RichText::new("Variables : {page} {pages} {title} {date} {section}").size(11.5).color(FAINT));
+            ui.label(RichText::new(tl("Variables : {page} {pages} {title} {date} {section}")).size(11.5).color(FAINT));
         });
         ui.menu_button(tl("Page"), |ui| {
             let cur = if self.page == MASTER { 0 } else { self.page };
@@ -1716,17 +1716,17 @@ impl PageApp {
                 self.delete_page(self.page);
             }
             ui.separator();
-            if mi(ui, true, "Première page", "Début") {
+            if mi(ui, true, tl("Première page"), "Début") {
                 self.page = 0;
             }
-            if mi(ui, true, "Dernière page", "Fin") {
+            if mi(ui, true, tl("Dernière page"), "Fin") {
                 self.page = self.doc.pages.len() - 1;
             }
             ui.separator();
-            if mi(ui, self.page != MASTER, "Format de cette page…", "Maj+P") {
+            if mi(ui, self.page != MASTER, tl("Format de cette page…"), "Maj+P") {
                 self.tool = Tool::PageTool;
             }
-            if mi(ui, true, "Numérotation et sections…", "") {
+            if mi(ui, true, tl("Numérotation et sections…"), "") {
                 self.sections_sheet = true;
             }
             ui.checkbox(&mut self.doc.facing, tl("Pages en vis-à-vis"));
@@ -1745,10 +1745,10 @@ impl PageApp {
         ui.menu_button(tl("Affichage"), |ui| {
             ui.menu_button(tl("Espace de travail"), studio_ui::dock::menu);
             ui.separator();
-            if mi(ui, true, "Ajuster à la fenêtre", "Ctrl+0") {
+            if mi(ui, true, tl("Ajuster à la fenêtre"), "Ctrl+0") {
                 self.fit_pending = true;
             }
-            if mi(ui, true, "Taille réelle", "Ctrl+1") {
+            if mi(ui, true, tl("Taille réelle"), "Ctrl+1") {
                 self.zoom = 1.0;
             }
             ui.menu_button(tl("Zoom"), |ui| {
@@ -1863,7 +1863,7 @@ impl PageApp {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::hover());
                 ui.painter().rect_filled(r, CornerRadius::same(7), FIELD);
                 tool_icon(ui.painter(), r.shrink(7.0), self.tool, INK);
-                ui.label(RichText::new(tool_name(self.tool)).font(semibold(12.5)).color(INK));
+                ui.label(RichText::new(tl(tool_name(self.tool))).font(semibold(12.5)).color(INK));
                 pro::toolbar_sep(ui);
                 let swatches = self.doc.swatches.clone();
                 let sel = self.sel.filter(|i| *i < self.frames_ref().len());
@@ -1873,7 +1873,7 @@ impl PageApp {
                     (true, Some(_)) if n_sel > 1 => {
                         ui.label(RichText::new(format!("{n_sel} blocs")).size(12.0).color(MUTED));
                         for (t, axis, to) in [("⇤", 0, 0.0), ("↔", 0, 0.5), ("⇥", 0, 1.0), ("⤒", 1, 0.0), ("↕", 1, 0.5), ("⤓", 1, 1.0)] {
-                            if ui.button(t).on_hover_text(tl("Aligner sur la sélection")).clicked() {
+                            if ui.button(tl(&t)).on_hover_text(tl("Aligner sur la sélection")).clicked() {
                                 self.align_to(axis, to, 0);
                             }
                         }
@@ -1914,7 +1914,7 @@ impl PageApp {
                                 swatch_button(ui, color, &swatches);
                                 ui.menu_button(tl("Styles"), |ui| {
                                     for (k, (name, ..)) in STYLES.iter().enumerate() {
-                                        if ui.button(*name).clicked() {
+                                        if ui.button(tl(*name)).clicked() {
                                             style = Some(k);
                                         }
                                     }
@@ -1958,7 +1958,7 @@ impl PageApp {
                                     (*cover, *stretch) = (c == 0, c == 2);
                                 }
                                 ui.add(egui::DragValue::new(zoom).range(0.05..=20.0).speed(0.01).prefix("Échelle ").max_decimals(2));
-                                egui::ComboBox::from_id_salt("ofilter").selected_text(FILTERS[(*filter as usize).min(FILTERS.len() - 1)]).show_ui(ui, |ui| {
+                                egui::ComboBox::from_id_salt("ofilter").selected_text(tl(FILTERS[(*filter as usize).min(FILTERS.len() - 1)])).show_ui(ui, |ui| {
                                     for (k, n) in FILTERS.iter().enumerate() {
                                         ui.selectable_value(filter, k as u8, *n);
                                     }
@@ -1984,15 +1984,15 @@ impl PageApp {
         let errors = if busy { self.preflight.as_ref().map_or(0, |p| p.1.iter().filter(|i| i.error).count()) } else { self.issues().iter().filter(|i| i.error).count() };
         egui::Panel::bottom("status").exact_size(22.0).frame(EFrame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                let small = |t: String| RichText::new(t).size(12.0).color(MUTED);
+                let small = |t: String| RichText::new(tl(&t)).size(12.0).color(MUTED);
                 let (dot, resp) = ui.allocate_exact_size(vec2(14.0, 14.0), Sense::click());
                 ui.painter().circle_filled(dot.center(), 5.0, if errors > 0 { RED } else { GREEN });
                 if resp.on_hover_text(if errors > 0 { format!("{errors} erreur(s) de contrôle en amont") } else { "Aucune erreur de contrôle en amont".into() }).clicked() {
                     self.tab = 3;
                 }
                 let (w, h) = self.cur_size();
-                let where_ = if self.page == MASTER { "Gabarit".to_string() } else { format!("Page {} sur {}", self.doc.page_label(self.page), self.doc.pages.len()) };
-                ui.label(small(format!("{where_} · {:.0} × {:.0} mm · {} mots", w / MM, h / MM, self.word_count())));
+                let where_ = if self.page == MASTER { tl("Gabarit").to_string() } else { format!("{} {} {} {}", tl("Page"), self.doc.page_label(self.page), tl("sur"), self.doc.pages.len()) };
+                ui.label(small(format!("{where_} · {:.0} × {:.0} mm · {} {}", w / MM, h / MM, self.word_count(), tl("mots"))));
                 let n = self.selection().len();
                 if n > 1 {
                     ui.label(small(format!("· {n} blocs sélectionnés")));
@@ -2001,7 +2001,7 @@ impl PageApp {
                     ui.label(RichText::new(tl("· texte en excès sur cette page")).size(12.0).color(RED));
                 }
                 if let Some((n, ok)) = self.notice.clone() {
-                    ui.label(RichText::new(n).size(12.0).color(if ok { GREEN } else { RED }));
+                    ui.label(RichText::new(tl(&n)).size(12.0).color(if ok { GREEN } else { RED }));
                     if ui.small_button("×").clicked() {
                         self.notice = None;
                     }
@@ -2144,7 +2144,7 @@ impl PageApp {
                 let mut act: Option<(usize, u8)> = None;
                 for i in 0..self.doc.pages.len() {
                     let pg = self.doc.pages[i].clone();
-                    let label = format!("{}{}", self.doc.page_label(i), if pg.no_master { " · sans gabarit" } else { "" });
+                    let label = format!("{}{}", self.doc.page_label(i), if pg.no_master { format!(" · {}", tl("sans gabarit")) } else { String::new() });
                     let r = self.thumb(ui, i, Some(&pg), &pg.frames, self.page == i, &label);
                     if r.clicked() {
                         self.page = i;
@@ -2152,7 +2152,7 @@ impl PageApp {
                     }
                     r.context_menu(|ui| {
                         for (k, l) in ["Insérer une page avant", "Insérer une page après", "Dupliquer", "Monter", "Descendre", "Utiliser / retirer le gabarit", "Supprimer"].iter().enumerate() {
-                            if ui.button(*l).clicked() {
+                            if ui.button(tl(*l)).clicked() {
                                 act = Some((i, k as u8));
                                 ui.close();
                             }
@@ -2328,7 +2328,7 @@ impl PageApp {
                     ui.add(egui::Slider::new(indent, 0.0..=60.0).suffix(" pt"));
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Liste")).size(12.0).color(MUTED));
-                        egui::ComboBox::from_id_salt("list").selected_text(LISTS[(*list as usize).min(LISTS.len() - 1)]).width(90.0).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("list").selected_text(tl(LISTS[(*list as usize).min(LISTS.len() - 1)])).width(90.0).show_ui(ui, |ui| {
                             for (k, n) in LISTS.iter().enumerate() {
                                 ui.selectable_value(list, k as u8, *n);
                             }
@@ -2350,12 +2350,12 @@ impl PageApp {
                         ui.label(RichText::new(tl("Style")).size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("pstyle").selected_text("Appliquer…").width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                             for (k, (n, ..)) in STYLES.iter().enumerate() {
-                                if ui.button(*n).clicked() {
+                                if ui.button(tl(*n)).clicked() {
                                     style = Some(k);
                                 }
                             }
                             for (k, n) in user_styles.iter().enumerate() {
-                                if ui.button(n).clicked() {
+                                if ui.button(tl(&n)).clicked() {
                                     style = Some(STYLES.len() + k);
                                 }
                             }
@@ -2491,7 +2491,7 @@ impl PageApp {
                     }
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Filtre")).size(12.0).color(MUTED));
-                        egui::ComboBox::from_id_salt("ifilter").selected_text(FILTERS[(*filter as usize).min(FILTERS.len() - 1)]).width(150.0).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("ifilter").selected_text(tl(FILTERS[(*filter as usize).min(FILTERS.len() - 1)])).width(150.0).show_ui(ui, |ui| {
                             for (k, n) in FILTERS.iter().enumerate() {
                                 ui.selectable_value(filter, k as u8, *n);
                             }
@@ -2739,7 +2739,7 @@ impl PageApp {
             }
             ui.horizontal(|ui| {
                 ui.label(RichText::new(tl("Angles")).size(12.0).color(MUTED));
-                egui::ComboBox::from_id_salt("corner").selected_text(CORNERS[(f.fx.corner as usize).min(CORNERS.len() - 1)]).width(120.0).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("corner").selected_text(tl(CORNERS[(f.fx.corner as usize).min(CORNERS.len() - 1)])).width(120.0).show_ui(ui, |ui| {
                     for (k, n) in CORNERS.iter().enumerate() {
                         ui.selectable_value(&mut f.fx.corner, k as u8, *n);
                     }
@@ -2781,7 +2781,7 @@ impl PageApp {
             for row in [[("Gauche", 0, 0.0), ("Centre ↔", 0, 0.5), ("Droite", 0, 1.0)], [("Haut", 1, 0.0), ("Milieu ↕", 1, 0.5), ("Bas", 1, 1.0)]] {
                 ui.horizontal(|ui| {
                     for (label, axis, to) in row {
-                        if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(label).size(12.0))).clicked() {
+                        if ui.add_sized([w, 26.0], egui::Button::new(RichText::new(tl(&label)).size(12.0))).clicked() {
                             align = Some((axis, to));
                         }
                     }
@@ -2792,7 +2792,7 @@ impl PageApp {
             let w4 = (ui.available_width() - 12.0) / 4.0;
             ui.horizontal(|ui| {
                 for (label, to) in [("Devant", i32::MAX), ("Avancer", 1), ("Reculer", -1), ("Derrière", i32::MIN)] {
-                    if ui.add_sized([w4, 26.0], egui::Button::new(RichText::new(label).size(11.5))).clicked() {
+                    if ui.add_sized([w4, 26.0], egui::Button::new(RichText::new(tl(&label)).size(11.5))).clicked() {
                         order = Some(to);
                     }
                 }
@@ -3263,7 +3263,7 @@ impl PageApp {
             }
             k += 1;
         }
-        p.text(corner.center(), Align2::CENTER_CENTER, "mm", FontId::proportional(8.0), FAINT);
+        p.text(corner.center(), Align2::CENTER_CENTER, tl("mm"), FontId::proportional(8.0), FAINT);
         for (rect, vertical) in [(top, false), (left, true)] {
             let r = ui.interact(rect, ui.make_persistent_id(("ruler", vertical)), Sense::drag()).on_hover_text(tl("Glisse vers la page pour poser un repère"));
             if r.drag_started() {
@@ -3306,7 +3306,7 @@ impl PageApp {
         let mut map: Option<u8> = None;
         let mut track: Option<f32> = None;
         let mut cursor = self.edit_cursor;
-        egui::Window::new("Modifier le texte")
+        egui::Window::new(tl("Modifier le texte"))
             .id(egui::Id::NULL.with("text-editor"))
             .collapsible(false)
             .resizable(true)
@@ -3327,18 +3327,18 @@ impl PageApp {
                         ("x₂", "Indice", "<sub>", "</sub>"),
                         ("Pc", "Petites capitales", "<sc>", "</sc>"),
                     ] {
-                        if ui.small_button(label).on_hover_text(format!("{tip} sur la sélection")).clicked() {
+                        if ui.small_button(tl(&label)).on_hover_text(format!("{tip} sur la sélection")).clicked() {
                             wrap = Some((open.into(), close.into()));
                         }
                     }
                     for (k, label, tip) in [(0u8, "AA", "Majuscules"), (1, "aa", "Minuscules"), (2, "Aa", "Majuscule à chaque mot"), (3, "Aa.", "Majuscule en début de phrase"), (4, "«»", "Guillemets français autour"), (5, "⎵", "Espaces multiples réduits")] {
-                        if ui.small_button(label).on_hover_text(tip).clicked() {
+                        if ui.small_button(tl(&label)).on_hover_text(tip).clicked() {
                             map = Some(k);
                         }
                     }
                     ui.menu_button(tl("Couleur"), |ui| {
                         for (name, hex) in [("Rouge", "#e5383b"), ("Bleu", "#2f6fed"), ("Vert", "#2a9d4b"), ("Orange", "#f08c00"), ("Violet", "#7b4ddb"), ("Gris", "#777777"), ("Noir", "#000000"), ("Blanc", "#ffffff")] {
-                            if ui.button(name).clicked() {
+                            if ui.button(tl(&name)).clicked() {
                                 wrap = Some((format!("<c={hex}>"), "</c>".into()));
                                 ui.close();
                             }
@@ -3347,7 +3347,7 @@ impl PageApp {
                     if !styles.is_empty() {
                         ui.menu_button(tl("Style de caractère"), |ui| {
                             for n in &styles {
-                                if ui.button(n).clicked() {
+                                if ui.button(tl(&n)).clicked() {
                                     wrap = Some((format!("<st={}>", n.replace(' ', "_")), "</st>".into()));
                                     ui.close();
                                 }
@@ -3439,7 +3439,7 @@ impl PageApp {
                 });
                 ui.add_space(14.0);
                 let row = |ui: &mut Ui, s: &str| {
-                    ui.label(RichText::new(s).size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl(&s)).size(12.0).color(MUTED));
                 };
                 row(ui, tl("Format"));
                 pro::segmented(ui, &mut o.format, &FORMATS);
@@ -3595,7 +3595,7 @@ impl PageApp {
 const HANDLES: [(f32, f32); 8] = [(0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (1.0, 0.5), (1.0, 1.0), (0.5, 1.0), (0.0, 1.0), (0.0, 0.5)];
 
 fn mi(ui: &mut Ui, enabled: bool, label: &str, key: &str) -> bool {
-    ui.add_enabled(enabled, egui::Button::new(label).shortcut_text(key)).clicked()
+    ui.add_enabled(enabled, egui::Button::new(label).shortcut_text(studio_ui::i18n::keys(key))).clicked()
 }
 
 fn swatch_button(ui: &mut Ui, c: &mut [u8; 4], swatches: &[[u8; 4]]) {
@@ -3615,7 +3615,7 @@ fn swatch_button(ui: &mut Ui, c: &mut [u8; 4], swatches: &[[u8; 4]]) {
 fn color_row(ui: &mut Ui, label: &str, c: &mut [u8; 4], swatches: &[[u8; 4]]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
     ui.horizontal(|ui| {
-        ui.label(RichText::new(label).size(12.0).color(MUTED));
+        ui.label(RichText::new(tl(&label)).size(12.0).color(MUTED));
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.color_edit_button_srgba(&mut col);
             for s in swatches.iter().rev().take(7) {

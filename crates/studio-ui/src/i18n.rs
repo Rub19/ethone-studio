@@ -54,9 +54,54 @@ pub fn tl<'a>(fr: &'a str) -> &'a str {
     dict().read().ok().and_then(|m| m.get(fr).copied()).unwrap_or(fr)
 }
 
+/// A shortcut label ("Ctrl+Maj+Suppr") with its key names in the interface language.
+pub fn keys(fr: &str) -> String {
+    if lang() == 0 {
+        return fr.to_owned();
+    }
+    let mut out = String::with_capacity(fr.len());
+    let mut word = String::new();
+    let flush = |w: &mut String, out: &mut String| {
+        out.push_str(match w.as_str() {
+            "Maj" => "Shift",
+            "Suppr" => "Del",
+            "Entrée" => "Enter",
+            "Début" => "Home",
+            "Fin" => "End",
+            "Échap" => "Esc",
+            "Espace" => "Space",
+            "Retour" => "Backspace",
+            "Flèches" => "Arrows",
+            "Inser" => "Ins",
+            w => w,
+        });
+        w.clear();
+    };
+    for c in fr.chars() {
+        if c.is_alphanumeric() {
+            word.push(c);
+        } else {
+            flush(&mut word, &mut out);
+            out.push(c);
+        }
+    }
+    flush(&mut word, &mut out);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn key_names_follow_the_language() {
+        set_lang(1);
+        assert_eq!(keys("Ctrl+Maj+Suppr"), "Ctrl+Shift+Del");
+        assert_eq!(keys("Entrée"), "Enter");
+        assert_eq!(keys("Final"), "Final");
+        set_lang(0);
+        assert_eq!(keys("Ctrl+Maj+S"), "Ctrl+Maj+S");
+    }
 
     #[test]
     fn english_when_known_french_otherwise() {

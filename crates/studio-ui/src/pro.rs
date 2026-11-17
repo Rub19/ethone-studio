@@ -234,7 +234,7 @@ pub fn tip(ui: &mut Ui, text: &str) -> Response {
 /// A quiet "Raccourcis" label whose tooltip lists the shortcuts, one per line, for status bars.
 pub fn shortcuts(ui: &mut Ui, list: &str) -> Response {
     let resp = ui.add(egui::Label::new(RichText::new(tl("Raccourcis")).size(11.0).color(FAINT)).sense(Sense::hover()));
-    resp.on_hover_text(list.replace(" · ", "\n"))
+    resp.on_hover_text(crate::i18n::keys(&list.replace(" · ", "\n")))
 }
 
 /// Thin vertical divider for toolbars.
