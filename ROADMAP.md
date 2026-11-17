@@ -90,6 +90,13 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - IA retirée sauf le filigrane automatique de Pixel.
 - Audit visuel des 9 apps : chevauchements corrigés.
 
+### Vague 9 (livrée, 0.9.x) — identité et interface pro
+
+- Icônes plates par app et logo Ethone Studio (E modulaire), générés par `cargo run -p studio-ui --example gen_icons`.
+- Thème partagé façon outils pro : gris neutres, champs plus sombres que les panneaux, accent vermillon, contrôles de 24 px, coins de 3 px, barres de menus 34 px et d'état 22 px. Le lanceur et l'installateur suivent le même thème.
+- Page : miniatures rendues des pages. Lumen, Motion, Sound : curseurs, palette de calques et transport compacts.
+- Site studio.ethone.dev : scènes au défilement, vraies captures, thèmes sombre et clair, aucun cookie ni service tiers, page Confidentialité.
+
 ### Corrections incluses
 
 - Folio : une action visant les pages sélectionnées agit désormais sur la page courante quand aucune vignette n'est sélectionnée, au lieu de modifier toutes les pages.

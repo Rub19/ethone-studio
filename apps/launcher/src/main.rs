@@ -283,7 +283,7 @@ impl Launcher {
         let updates = apps.iter().filter(|a| self.has_update(a)).count();
         let list_h = (ui.available_height() - 64.0).max(80.0);
         egui::ScrollArea::vertical().id_salt("sidebar-list").max_height(list_h).auto_shrink([false, true]).show(ui, |ui| {
-        nav_row(ui, &mut self.view, View::Auto, "Assistant", Some(Color32::from_rgb(0x8b, 0x6c, 0xff)), None);
+        nav_row(ui, &mut self.view, View::Auto, "Assistant", Some(P.blue), None);
         ui.add_space(14.0);
         heading(ui, "BIBLIOTHÈQUE");
         nav_row(ui, &mut self.view, View::All, "Toutes les apps", None, Some(apps.len()));

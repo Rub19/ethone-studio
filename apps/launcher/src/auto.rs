@@ -6,7 +6,7 @@ use studio_auto::plan::{Kind, kind_of, plan};
 use studio_auto::run::{Msg, Outcome, run};
 use studio_ui::semibold;
 
-const VIOLET: Color32 = Color32::from_rgb(0x8b, 0x6c, 0xff);
+const ACCENT: Color32 = Color32::from_rgb(0xf2, 0x55, 0x2c);
 
 #[derive(Default)]
 pub struct Auto {
@@ -82,7 +82,7 @@ impl Auto {
                     let exists = t.file.is_file();
                     let name = t.file.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
                     let from = if t.from == "launcher" { "Assistant" } else { studio_core::handoff::name(&t.from) };
-                    ui.label(RichText::new(format!("{from} → {}", studio_core::handoff::name(&t.to))).font(semibold(12.0)).color(VIOLET));
+                    ui.label(RichText::new(format!("{from} → {}", studio_core::handoff::name(&t.to))).font(semibold(12.0)).color(ACCENT));
                     ui.add(egui::Label::new(RichText::new(&name).size(12.0).color(if exists { P.ink } else { P.faint })).truncate()).on_hover_text(t.file.display().to_string());
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(RichText::new(studio_core::handoff::ago(t.at, now)).size(11.5).color(P.faint));
@@ -173,9 +173,9 @@ impl Auto {
             let w = ui.available_width().min(860.0);
             ui.horizontal(|ui| {
                 let (r, _) = ui.allocate_exact_size(vec2(40.0, 40.0), Sense::hover());
-                ui.painter().rect_filled(r, CornerRadius::same(5), VIOLET.gamma_multiply(0.25));
-                sparkle(ui.painter(), r.center() + vec2(-3.0, 3.0), 12.0, VIOLET);
-                sparkle(ui.painter(), r.center() + vec2(9.0, -9.0), 5.0, VIOLET);
+                ui.painter().rect_filled(r, CornerRadius::same(5), ACCENT.gamma_multiply(0.25));
+                sparkle(ui.painter(), r.center() + vec2(-3.0, 3.0), 12.0, ACCENT);
+                sparkle(ui.painter(), r.center() + vec2(9.0, -9.0), 5.0, ACCENT);
                 ui.add_space(6.0);
                 ui.vertical(|ui| {
                     ui.label(RichText::new("Assistant").font(semibold(26.0)).color(P.ink_strong));
@@ -186,7 +186,7 @@ impl Auto {
             let thumb = self.thumb(ctx);
             let (drop, resp) = ui.allocate_exact_size(vec2(w, 120.0), Sense::click());
             let hovering = ctx.input(|i| !i.raw.hovered_files.is_empty());
-            ui.painter().rect(drop, CornerRadius::same(6), if hovering || resp.hovered() { P.tile_hover } else { P.tile }, Stroke::new(1.0, if hovering { VIOLET } else { P.line }), StrokeKind::Inside);
+            ui.painter().rect(drop, CornerRadius::same(6), if hovering || resp.hovered() { P.tile_hover } else { P.tile }, Stroke::new(1.0, if hovering { ACCENT } else { P.line }), StrokeKind::Inside);
             match &self.file {
                 Some(f) => {
                     let mut x = drop.left() + 18.0;
@@ -254,7 +254,7 @@ impl Auto {
                     Some(Ok(p)) => {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new("Ce que je vais faire").font(semibold(12.5)).color(P.ink_strong));
-                            ui.label(RichText::new(format!("→ {}", studio_core::handoff::name(p.app))).font(semibold(12.5)).color(VIOLET));
+                            ui.label(RichText::new(format!("→ {}", studio_core::handoff::name(p.app))).font(semibold(12.5)).color(ACCENT));
                         });
                         ui.add_space(4.0);
                         for (k, s) in p.summary.iter().enumerate() {
@@ -266,13 +266,13 @@ impl Auto {
             ui.add_space(12.0);
             ui.horizontal(|ui| {
                 let can = matches!(preview, Some(Ok(_))) && self.running.is_none();
-                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(13.0)).color(Color32::WHITE)).fill(if can { VIOLET } else { P.field }).corner_radius(CornerRadius::same(8)).min_size(vec2(120.0, 36.0));
+                let b = egui::Button::new(RichText::new("  Lancer  ").font(semibold(13.0)).color(Color32::WHITE)).fill(if can { ACCENT } else { P.field }).corner_radius(CornerRadius::same(4)).min_size(vec2(110.0, 30.0));
                 if (ui.add_enabled(can, b).on_hover_text("Ctrl+Entrée").clicked() || (go_key && can)) && can {
                     self.start(ctx);
                 }
                 ui.checkbox(&mut self.open, "Ouvrir le résultat dans l'app");
                 if self.running.is_some() {
-                    ui.add(egui::Spinner::new().color(VIOLET));
+                    ui.add(egui::Spinner::new().color(ACCENT));
                     if let Some(t) = self.started {
                         ui.label(RichText::new(format!("{} s", t.elapsed().as_secs())).size(12.0).color(P.muted));
                     }
