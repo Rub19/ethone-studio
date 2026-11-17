@@ -1,5 +1,7 @@
 # Nouveautés Ethone Studio
 
+Version **0.8.0**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur la page des versions GitHub du projet.
+
 Toutes les nouvelles options se trouvent dans la palette **Ctrl+K** de chaque app : tape un mot (« look », « palette », « duotone », « écho », « filigrane »…) et choisis. Rien n'encombre l'interface tant que tu ne cherches pas.
 
 ## Préférences (Ctrl+,)
@@ -123,6 +125,8 @@ Chaque option est une vraie combinaison des réglages de l'app, nommée en fran�
 - Lumen : ambiances heure dorée, heure bleue, brume chaude, hiver lumineux, désert, cyberpunk, rétro 70s, sombre et intense.
 
 ## Rappel des versions précédentes
+
+- v0.8.0 : tout ce qui précède sur cette page.
 
 - v0.7.0 : détachant de filigrane (sélection ou IA), 3 000 variantes d'effets, palette intelligente, actions sensibles confirmées.
 - v0.6.0 / v0.5.0 : Folio (PDF), Assistant automatique, barre de titre intégrée, texte de la photo (OCR).

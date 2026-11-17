@@ -37,6 +37,25 @@ jobs:
           }
           $catalog | ConvertTo-Json -Depth 6 | Set-Content dist/manifest.json -Encoding utf8NoBOM
           Get-Content dist/manifest.json
+      - name: Installers
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $stub = (Resolve-Path target/release/ethone-setup.exe).Path
+          $apps = @("pixel", "lumen", "vector", "cut", "motion", "page", "folio", "sound", "ethone-studio")
+          foreach ($id in $apps) {
+            $name = if ($id -eq "ethone-studio") { "Ethone-Studio" } else { (Get-Culture).TextInfo.ToTitleCase($id) }
+            $exe = (Resolve-Path "target/release/$id.exe").Path
+            $out = Join-Path (Resolve-Path dist).Path "$name-Setup.exe"
+            $p = Start-Process -FilePath $stub -ArgumentList @("--pack", "`"$exe`"", $id, $version, "`"$out`"") -Wait -PassThru -NoNewWindow
+            if ($p.ExitCode -ne 0) { throw "installateur $id" }
+            if ($id -ne "ethone-studio") {
+              $web = Join-Path (Resolve-Path dist).Path "$name-Web-Setup.exe"
+              $p = Start-Process -FilePath $stub -ArgumentList @("--web", $id, "`"$web`"") -Wait -PassThru -NoNewWindow
+              if ($p.ExitCode -ne 0) { throw "installateur web $id" }
+            }
+          }
+          Get-ChildItem dist | Format-Table Name, Length
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
