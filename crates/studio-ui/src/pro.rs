@@ -286,32 +286,7 @@ pub fn icon_button(ui: &mut Ui, size: f32, on: bool, tip: &str, paint: impl FnOn
 
 /// A collapsible dock panel with a header; returns whether it is open.
 pub fn dock_panel(ui: &mut Ui, id: &str, title: &str, add: impl FnOnce(&mut Ui)) {
-    let key = ui.make_persistent_id(("dock", id));
-    let mut open = ui.ctx().data_mut(|d| *d.get_persisted_mut_or(key, true));
-    let (head, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 24.0), Sense::click());
-    ui.painter().rect_filled(head, CornerRadius::ZERO, PANEL_HEAD);
-    let c = pos2(head.left() + 11.0, head.center().y);
-    let pts = if open {
-        vec![c + vec2(-3.0, -1.5), c + vec2(3.0, -1.5), c + vec2(0.0, 2.5)]
-    } else {
-        vec![c + vec2(-1.5, -3.0), c + vec2(2.5, 0.0), c + vec2(-1.5, 3.0)]
-    };
-    ui.painter().add(egui::Shape::convex_polygon(pts, FAINT, Stroke::NONE));
-    ui.painter().text(pos2(head.left() + 20.0, head.center().y), Align2::LEFT_CENTER, title, semibold(11.5), INK);
-    if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
-        open = !open;
-        ui.ctx().data_mut(|d| d.insert_persisted(key, open));
-    }
-    if open {
-        let inner = ui.available_width() - 24.0;
-        Frame::new().inner_margin(Margin { left: 10, right: 10, top: 8, bottom: 10 }).show(ui, |ui| {
-            ui.set_width(inner);
-            ui.set_max_width(inner);
-            add(ui);
-        });
-    }
-    let line = ui.allocate_exact_size(vec2(ui.available_width(), 1.0), Sense::hover()).0;
-    ui.painter().rect_filled(line, CornerRadius::ZERO, LINE);
+    crate::dock::panel(ui, id, title, add);
 }
 
 /// A compact colour picker: saturation/value square, hue bar and a hex field. Returns whether it changed.

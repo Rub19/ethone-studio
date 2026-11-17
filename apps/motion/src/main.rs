@@ -1804,6 +1804,7 @@ impl Motion {
         egui::Panel::left("library").resizable(false).exact_size(256.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                studio_ui::dock::begin(ui, "motion");
                 pro::dock_panel(ui, "add", "Ajouter un calque", |ui| {
                     ui.spacing_mut().item_spacing = vec2(2.0, 2.0);
                     let w = (ui.available_width() - 6.0) / 4.0;
@@ -1878,6 +1879,7 @@ impl Motion {
                         self.preset(id);
                     }
                 });
+                studio_ui::dock::end(ui);
             });
         });
     }
@@ -1886,10 +1888,12 @@ impl Motion {
         egui::Panel::right("props").resizable(false).exact_size(304.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                studio_ui::dock::begin(ui, "motion");
                 match self.sel.filter(|i| *i < self.comp.layers.len()) {
                     None => self.comp_panels(ui),
                     Some(i) => self.layer_panels(ui, i),
                 }
+                studio_ui::dock::end(ui);
             });
         });
     }

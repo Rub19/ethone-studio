@@ -1,4 +1,5 @@
 pub mod chrome;
+pub mod dock;
 pub mod fxpanel;
 pub mod handoff;
 pub mod help;

@@ -1741,6 +1741,8 @@ impl PageApp {
             }
         });
         ui.menu_button("Affichage", |ui| {
+            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+            ui.separator();
             if mi(ui, true, "Ajuster à la fenêtre", "Ctrl+0") {
                 self.fit_pending = true;
             }
@@ -2194,11 +2196,13 @@ impl PageApp {
                     2 => self.links_panel(ui),
                     3 => self.preflight_panel(ui),
                     _ => {
+                        studio_ui::dock::begin(ui, "page");
                         match self.sel.filter(|i| *i < self.frames_ref().len()) {
                             Some(i) => self.frame_panels(ui, i),
                             None => self.doc_panel(ui),
                         }
                         self.styles_panels(ui);
+                        studio_ui::dock::end(ui);
                     }
                 }
             });

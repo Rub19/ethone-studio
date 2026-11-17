@@ -3110,6 +3110,8 @@ impl VectorApp {
     }
 
     fn menu_window(&mut self, ui: &mut Ui) {
+        ui.menu_button("Espace de travail", studio_ui::dock::menu);
+        ui.separator();
         for (k, label) in ["Propriétés", "Calques et plans de travail", "Bibliothèques (nuancier, styles, symboles)"].iter().enumerate() {
             if ui.radio(self.dock_tab == k, *label).clicked() {
                 self.dock_tab = k;

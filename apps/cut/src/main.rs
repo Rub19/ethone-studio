@@ -2332,6 +2332,8 @@ impl Cut {
                 }
             });
             ui.menu_button("Affichage", |ui| {
+                ui.menu_button("Espace de travail", studio_ui::dock::menu);
+                ui.separator();
                 ui.checkbox(&mut self.snap, "Magnétisme (Maj+S)");
                 ui.checkbox(&mut self.looping, "Lecture en boucle");
                 ui.checkbox(&mut self.focus, "Mode visionneuse (F)");

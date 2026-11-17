@@ -424,6 +424,8 @@ impl Motion {
             });
         });
         ui.menu_button("Affichage", |ui| {
+            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+            ui.separator();
             ui.checkbox(&mut self.grid, "Grille et tiers                  Ctrl+'");
             ui.menu_button("Divisions de la grille", |ui| {
                 for n in [4u32, 6, 8, 10, 12, 16, 20] {

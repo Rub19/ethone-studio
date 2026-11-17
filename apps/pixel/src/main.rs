@@ -1991,6 +1991,8 @@ impl Pixel {
 
     fn menu_view(&mut self, ui: &mut Ui) {
         ui.menu_button("Affichage", |ui| {
+            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+            ui.separator();
             if self.mi(ui, "Zoom avant", "Ctrl++") {
                 self.zoom = (self.zoom * 1.25).min(64.0);
             }

@@ -676,6 +676,7 @@ impl VectorApp {
             ui.painter().rect_filled(line, CornerRadius::ZERO, LINE);
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                studio_ui::dock::begin(ui, "vector");
                 match self.dock_tab {
                     1 => {
                         pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
@@ -692,6 +693,7 @@ impl VectorApp {
                     }
                     _ => self.properties(ui),
                 }
+                studio_ui::dock::end(ui);
             });
         });
     }

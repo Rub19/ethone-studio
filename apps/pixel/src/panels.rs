@@ -50,6 +50,7 @@ impl Pixel {
             let ui = &mut inner;
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                studio_ui::dock::begin(ui, "pixel");
                 if self.tool == crate::tools::Tool::PhotoText || !self.pt.lines.is_empty() {
                     pro::dock_panel(ui, "phototext", "Texte de la photo", |ui| self.pt_panel(ui, ctx));
                 }
@@ -63,6 +64,7 @@ impl Pixel {
                 pro::dock_panel(ui, "info", "Infos", |ui| self.info_panel(ui));
                 pro::dock_panel(ui, "history", "Historique", |ui| self.history_panel(ui));
                 pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
+                studio_ui::dock::end(ui);
             });
         });
     }

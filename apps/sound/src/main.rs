@@ -1399,6 +1399,8 @@ impl Sound {
             ui.label(RichText::new("Plus de sons dans le panneau Générer").size(11.5).color(FAINT));
         });
         ui.menu_button("Affichage", |ui| {
+            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+            ui.separator();
             if ui.button("Tout afficher               Ctrl+0").clicked() {
                 self.fit_pending = true;
             }
@@ -1538,6 +1540,7 @@ impl Sound {
         egui::Panel::right("fx").resizable(false).exact_size(304.0).frame(Frame::new().fill(PANEL)).show(root, |ui| {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
+                studio_ui::dock::begin(ui, "sound");
                 let scope = if self.sel.is_some() { "à la sélection" } else { "à tout le fichier" };
                 let at = if playing { pos } else { self.sel.map_or(self.cursor, |s| s.0) };
                 if self.spectrum.as_ref().is_none_or(|s| s.0.abs_diff(at) > (self.clip.rate / 10) as usize || s.1 != self.version) {
@@ -1852,6 +1855,7 @@ impl Sound {
                         }
                     }
                 }
+                studio_ui::dock::end(ui);
             });
         });
     }

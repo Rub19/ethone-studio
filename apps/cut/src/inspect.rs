@@ -296,6 +296,7 @@ impl Cut {
         let tab = self.tab;
         let sides_id = egui::Id::NULL.with("cut-poly-sides");
         let Some(c) = self.clip_mut(s) else { return };
+        studio_ui::dock::begin(ui, "cut");
         match tab {
             0 => {
                 pro::dock_panel(ui, "clip-name", "Clip", |ui| {
@@ -640,6 +641,7 @@ impl Cut {
                 });
             }
         }
+        studio_ui::dock::end(ui);
         self.color_ch = ch;
         match act {
             Some(Act::Seek(t)) => self.seek(t),
@@ -659,6 +661,7 @@ impl Cut {
     }
 
     fn music_inspector(&mut self, ui: &mut Ui, i: usize) {
+        studio_ui::dock::begin(ui, "cut");
         let src = self.proj.sources[self.proj.music[i].src].clone();
         let t = self.t;
         let mut norm = None;
@@ -709,9 +712,11 @@ impl Cut {
         if let Some(db) = norm {
             self.normalize(Sel::Music(i), db);
         }
+        studio_ui::dock::end(ui);
     }
 
     fn title_inspector(&mut self, ui: &mut Ui, i: usize) {
+        studio_ui::dock::begin(ui, "cut");
         let t = &mut self.proj.titles[i];
         pro::dock_panel(ui, "title-presets", "Styles prédéfinis", |ui| {
             if let Some(k) = chips(ui, &TITLE_PRESETS, None) {
@@ -788,9 +793,11 @@ impl Cut {
                 t.anim = k as u8;
             }
         });
+        studio_ui::dock::end(ui);
     }
 
     fn sequence_inspector(&mut self, ui: &mut Ui) {
+        studio_ui::dock::begin(ui, "cut");
         pro::dock_panel(ui, "sequence", "Séquence", |ui| {
             ui.spacing_mut().item_spacing.y = 5.0;
             pro::label_value(ui, "Format", &format!("{} × {}", self.proj.width, self.proj.height));
@@ -899,6 +906,7 @@ impl Cut {
                 self.help.learn("Lecture et navigation");
             }
         });
+        studio_ui::dock::end(ui);
     }
 }
 
