@@ -1,6 +1,13 @@
 # Nouveautés Ethone Studio
 
-Version **0.8.0**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur la page des versions GitHub du projet.
+Version **0.9.0**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur [studio.ethone.dev](https://studio.ethone.dev) et sur la page des versions GitHub du projet.
+
+## Nouvelle identité (0.9.0)
+
+- **Icônes et logo** : icônes plates aux couleurs de chaque app, nouveau logo Ethone Studio (un E modulaire vermillon et crème).
+- **Interface pro** : gris neutres, champs plus sombres que les panneaux, accent vermillon, contrôles et barres plus compacts (menus 34 px, barre d'état 22 px), coins de 3 px, curseurs fins. Les 9 apps et le lanceur partagent le même thème.
+- **Préférences** : le vermillon devient la couleur d'accent par défaut (le bleu reste disponible) ; les coins vont de carrés à 8 px.
+- **Site** : studio.ethone.dev, avec une scène par app et de vraies captures.
 
 Toutes les nouvelles options se trouvent dans la palette **Ctrl+K** de chaque app : tape un mot (« look », « palette », « duotone », « écho », « filigrane »…) et choisis. Rien n'encombre l'interface tant que tu ne cherches pas.
 
@@ -126,7 +133,8 @@ Chaque option est une vraie combinaison des réglages de l'app, nommée en fran�
 
 ## Rappel des versions précédentes
 
-- v0.8.0 : tout ce qui précède sur cette page.
+- v0.9.0 : nouvelle identité et interface pro (section du haut).
+- v0.8.0 : préférences, installateurs, ressources et outils décrits sur cette page.
 
 - v0.7.0 : détachant de filigrane (sélection ou IA), 3 000 variantes d'effets, palette intelligente, actions sensibles confirmées.
 - v0.6.0 / v0.5.0 : Folio (PDF), Assistant automatique, barre de titre intégrée, texte de la photo (OCR).
