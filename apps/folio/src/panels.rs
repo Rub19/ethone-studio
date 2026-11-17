@@ -1,6 +1,6 @@
 use crate::{Folio, Job, Opened, STAMPS, Tool, engine, render, toast};
 use studio_ocr as ocr;
-use eframe::egui::{self, Color32, CornerRadius, Rect, RichText, Sense, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, pos2, vec2};
+use eframe::egui::{self, Color32, CornerRadius, Rect, RichText, Sense, Stroke, TextureHandle, TextureOptions, Ui, vec2};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, mpsc};
@@ -1236,101 +1236,30 @@ fn measure(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     }
 }
 
-pub fn panel_glyph(p: &egui::Painter, r: Rect, k: Panel, c: Color32) {
-    use egui::Shape;
-    let s = Stroke::new(1.6, c);
-    let at = |x: f32, y: f32| pos2(r.left() + x * r.width(), r.top() + y * r.height());
-    let doc = |p: &egui::Painter| {
-        p.add(Shape::closed_line(vec![at(0.18, 0.0), at(0.62, 0.0), at(0.85, 0.24), at(0.85, 1.0), at(0.18, 1.0)], s));
-    };
-    let lines = |p: &egui::Painter, ys: &[f32]| {
-        for y in ys {
-            p.line_segment([at(0.32, *y), at(0.72, *y)], Stroke::new(1.3, c));
-        }
-    };
+/// Lucide icon names, so this app's icons match the rest of the suite.
+fn panel_glyph_lucide(k: Panel) -> &'static str {
+    use Panel::*;
     match k {
-        Panel::All => doc(p),
-        Panel::Comment => crate::glyph(p, r, Tool::Note, c),
-        Panel::FillSign => {
-            let pts: Vec<egui::Pos2> = (0..=30).map(|i| {
-                let t = i as f32 / 30.0;
-                at(0.05 + t * 0.9, 0.45 - (t * 12.0).sin() * 0.22)
-            }).collect();
-            p.add(Shape::line(pts, s));
-            p.line_segment([at(0.0, 0.88), at(1.0, 0.88)], s);
-        }
-        Panel::Organize => {
-            for (x, y) in [(0.0, 0.0), (0.55, 0.0), (0.0, 0.55), (0.55, 0.55)] {
-                p.rect_stroke(Rect::from_min_size(at(x, y), r.size() * 0.42), CornerRadius::same(2), s, StrokeKind::Middle);
-            }
-        }
-        Panel::Combine => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.0), at(0.5, 0.62)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.rect_stroke(Rect::from_min_max(at(0.5, 0.38), at(1.0, 1.0)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.line_segment([at(0.3, 0.75), at(0.42, 0.75)], s);
-            p.line_segment([at(0.3, 0.75), at(0.3, 0.62)], s);
-        }
-        Panel::Create => {
-            doc(p);
-            p.line_segment([at(0.52, 0.38), at(0.52, 0.8)], s);
-            p.line_segment([at(0.31, 0.59), at(0.73, 0.59)], s);
-        }
-        Panel::Ocr => {
-            for (x, y) in [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)] {
-                let (dx, dy) = (if x > 0.5 { -0.28 } else { 0.28 }, if y > 0.5 { -0.28 } else { 0.28 });
-                p.line_segment([at(x, y), at(x + dx, y)], s);
-                p.line_segment([at(x, y), at(x, y + dy)], s);
-            }
-            p.text(at(0.5, 0.52), egui::Align2::CENTER_CENTER, "Aa", egui::FontId::proportional(r.height() * 0.5), c);
-        }
-        Panel::Redact => {
-            lines(p, &[0.15, 0.85]);
-            p.rect_filled(Rect::from_min_max(at(0.1, 0.36), at(0.9, 0.64)), CornerRadius::same(1), c);
-        }
-        Panel::Protect => {
-            p.rect_stroke(Rect::from_min_max(at(0.12, 0.45), at(0.88, 1.0)), CornerRadius::same(3), s, StrokeKind::Middle);
-            let arc: Vec<egui::Pos2> = (0..=16).map(|i| {
-                let a = std::f32::consts::PI * (1.0 + i as f32 / 16.0);
-                at(0.5 + a.cos() * 0.24, 0.45 + a.sin() * 0.32)
-            }).collect();
-            p.add(Shape::line(arc, s));
-            p.circle_filled(at(0.5, 0.7), 2.0, c);
-        }
-        Panel::Compress => {
-            for (y, d) in [(0.0, 1.0), (1.0, -1.0)] {
-                p.line_segment([at(0.5, y), at(0.5, y + 0.38 * d)], s);
-                p.line_segment([at(0.32, y + 0.2 * d), at(0.5, y + 0.38 * d)], s);
-                p.line_segment([at(0.68, y + 0.2 * d), at(0.5, y + 0.38 * d)], s);
-            }
-            p.line_segment([at(0.05, 0.5), at(0.95, 0.5)], s);
-        }
-        Panel::Stamp => {
-            doc(p);
-            p.text(at(0.52, 0.6), egui::Align2::CENTER_CENTER, "#", egui::FontId::proportional(r.height() * 0.5), c);
-        }
-        Panel::Export => {
-            p.rect_stroke(Rect::from_min_max(at(0.05, 0.4), at(0.95, 1.0)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.line_segment([at(0.5, 0.0), at(0.5, 0.65)], s);
-            p.line_segment([at(0.32, 0.18), at(0.5, 0.0)], s);
-            p.line_segment([at(0.68, 0.18), at(0.5, 0.0)], s);
-        }
-        Panel::Compare => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.1), at(0.42, 0.9)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.rect_stroke(Rect::from_min_max(at(0.58, 0.1), at(1.0, 0.9)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.line_segment([at(0.5, 0.0), at(0.5, 1.0)], Stroke::new(1.0, c));
-        }
-        Panel::Search => {
-            p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
-            p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.2, c));
-        }
-        Panel::Bookmarks => {
-            p.add(Shape::closed_line(vec![at(0.22, 0.0), at(0.78, 0.0), at(0.78, 1.0), at(0.5, 0.72), at(0.22, 1.0)], s));
-        }
-        Panel::Props => {
-            p.circle_stroke(r.center(), r.width() * 0.47, s);
-            p.circle_filled(at(0.5, 0.28), 1.8, c);
-            p.line_segment([at(0.5, 0.45), at(0.5, 0.78)], Stroke::new(2.0, c));
-        }
-        Panel::Measure => crate::glyph(p, r, Tool::Measure, c),
+        All => "layout-grid",
+        Comment => "message-square",
+        FillSign => "signature",
+        Organize => "files",
+        Combine => "combine",
+        Create => "file-plus",
+        Ocr => "scan-text",
+        Redact => "eye-off",
+        Protect => "lock",
+        Compress => "file-archive",
+        Stamp => "stamp",
+        Export => "file-output",
+        Compare => "git-compare",
+        Search => "search",
+        Bookmarks => "bookmark",
+        Props => "info",
+        Measure => "ruler",
     }
+}
+
+pub fn panel_glyph(p: &egui::Painter, r: Rect, k: Panel, c: Color32) {
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), panel_glyph_lucide(k), c);
 }

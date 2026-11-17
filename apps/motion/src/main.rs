@@ -127,9 +127,6 @@ enum G {
     Checker,
     Ruler,
     Ruler2,
-    Select,
-    Rotate,
-    Hand,
     Grid,
     Safe,
     Guides,
@@ -2700,10 +2697,7 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
             p.line_segment([pos2(r.left(), cen.y + u * 0.3), pos2(r.right(), cen.y + u * 0.3)], Stroke::new(1.4, c));
             p.rect_stroke(r, CornerRadius::same(2), Stroke::new(1.0, c.gamma_multiply(0.5)), StrokeKind::Middle);
         }
-        G::Select => {
-            p.add(Shape::convex_polygon(vec![r.left_top() + vec2(u * 0.3, 0.0), r.left_top() + vec2(u * 0.3, u * 1.7), cen + vec2(-u * 0.05, u * 0.35), cen + vec2(u * 0.75, u * 0.35)], c, Stroke::NONE));
-        }
-        G::Rotate | G::Loop => {
+        G::Loop => {
             let pts: Vec<Pos2> = (0..=20).map(|k| {
                 let a = (-40.0 + k as f32 * 13.0f32).to_radians();
                 cen + vec2(a.cos(), a.sin()) * u * 0.8
@@ -2711,13 +2705,6 @@ fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
             let end = *pts.last().unwrap();
             p.add(Shape::line(pts, s));
             p.add(Shape::convex_polygon(vec![end + vec2(-u * 0.45, -u * 0.05), end + vec2(u * 0.15, -u * 0.35), end + vec2(u * 0.05, u * 0.3)], c, Stroke::NONE));
-        }
-        G::Hand => {
-            for k in 0..4 {
-                let x = r.left() + u * (0.45 + k as f32 * 0.38);
-                p.line_segment([pos2(x, r.top() + u * (0.25 + (k as f32 - 1.5).abs() * 0.15)), pos2(x, cen.y + u * 0.2)], Stroke::new(2.0, c));
-            }
-            p.rect_filled(Rect::from_min_max(pos2(r.left() + u * 0.3, cen.y), pos2(r.right() - u * 0.25, r.bottom())), CornerRadius::same(4), c);
         }
         G::Grid => {
             p.rect_stroke(r, CornerRadius::same(2), s, StrokeKind::Middle);

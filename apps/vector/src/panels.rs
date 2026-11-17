@@ -1984,323 +1984,73 @@ pub fn export_glyph(p: &Painter, r: Rect, c: Color32) {
     p.add(Shape::line(vec![at(0.12, 0.55), at(0.12, 0.95), at(0.88, 0.95), at(0.88, 0.55)], Stroke::new(2.0, c)));
 }
 
-fn curve(p: &Painter, r: Rect, nodes: &[model::Node], closed: bool, s: Stroke) {
-    let pts: Vec<Pos2> = model::flatten(nodes, closed, 10).iter().map(|q| r.min + vec2(q[0], q[1]) * r.width()).collect();
-    if closed {
-        p.add(Shape::closed_line(pts, s));
-    } else {
-        p.add(Shape::line(pts, s));
+/// Lucide icon for each tool, so the tool bar matches the rest of the suite.
+pub fn tool_lucide(tool: Tool) -> &'static str {
+    use Tool::*;
+    match tool {
+        Select => "mouse-pointer-2",
+        Direct => "mouse-pointer",
+        GroupSel => "mouse-pointer-click",
+        Wand => "wand-sparkles",
+        Lasso => "lasso",
+        Pen => "pen-tool",
+        AddPt => "circle-plus",
+        DelPt => "circle-minus",
+        ConvPt => "spline-pointer",
+        Curv => "spline",
+        Text => "type",
+        AreaText => "text-select",
+        PathText => "text-cursor-input",
+        VText => "text-cursor",
+        Line => "slash",
+        Arc => "chart-spline",
+        Spiral => "loader",
+        RectGrid => "grid-3x3",
+        PolarGrid => "radar",
+        Arrow => "move-up-right",
+        Rect => "square",
+        RRect => "squircle",
+        Ellipse => "circle",
+        Polygon => "hexagon",
+        Star => "star",
+        Flare => "sparkle",
+        Heart => "heart",
+        Brush => "paintbrush",
+        Blob => "brush",
+        Pencil => "pencil",
+        Smooth => "waves",
+        PathErase => "eraser",
+        Rotate => "rotate-cw",
+        Reflect => "flip-horizontal-2",
+        Scale => "scaling",
+        Distort => "move-3d",
+        Reshape => "shell",
+        Width => "move-horizontal",
+        Warp => "tornado",
+        Twirl => "orbit",
+        Pucker => "shrink",
+        Bloat => "expand",
+        Scallop => "flower",
+        Crystallize => "gem",
+        Wrinkle => "activity",
+        Builder => "combine",
+        BlendTool => "blend",
+        SymSpray => "spray-can",
+        Bucket => "paint-bucket",
+        Gradient => "sunset",
+        Mesh => "grid-2x2",
+        Picker => "pipette",
+        Measure => "ruler",
+        Scissors => "scissors",
+        Knife => "slice",
+        Eraser => "eraser",
+        Hand => "hand",
+        RotView => "rotate-ccw",
+        Zoom => "zoom-in",
+        Board => "frame",
     }
 }
 
 pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
-    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
-    let s = Stroke::new(1.7, c);
-    let thin = Stroke::new(1.2, c);
-    let arrow_cursor = |fill: bool, dx: f32| {
-        let pts = vec![at(0.2 + dx, 0.0), at(0.85 + dx, 0.6), at(0.52 + dx, 0.62), at(0.33 + dx, 1.0)];
-        p.add(Shape::convex_polygon(pts, if fill { c } else { Color32::TRANSPARENT }, if fill { Stroke::NONE } else { s }));
-    };
-    let pen = |p: &Painter| {
-        p.add(Shape::convex_polygon(vec![at(0.5, 0.05), at(0.82, 0.55), at(0.5, 0.95), at(0.18, 0.55)], Color32::TRANSPARENT, s));
-        p.line_segment([at(0.5, 0.35), at(0.5, 0.9)], thin);
-    };
-    let badge = |p: &Painter, plus: Option<bool>| {
-        let b = at(0.82, 0.18);
-        p.line_segment([b - vec2(4.0, 0.0), b + vec2(4.0, 0.0)], thin);
-        if plus == Some(true) {
-            p.line_segment([b - vec2(0.0, 4.0), b + vec2(0.0, 4.0)], thin);
-        }
-    };
-    let ring = |p: &Painter, rr: f32| {
-        p.circle_stroke(r.center(), r.width() * rr, s);
-    };
-    let brush_tip = |p: &Painter| {
-        p.line_segment([at(0.9, 0.1), at(0.4, 0.6)], Stroke::new(2.4, c));
-        p.add(Shape::convex_polygon(vec![at(0.3, 0.55), at(0.45, 0.7), at(0.2, 0.92), at(0.08, 0.95)], c, Stroke::NONE));
-    };
-    match tool {
-        Tool::Select => arrow_cursor(true, 0.0),
-        Tool::Direct => arrow_cursor(false, 0.0),
-        Tool::GroupSel => {
-            arrow_cursor(false, -0.1);
-            p.line_segment([at(0.78, 0.82), at(1.0, 0.82)], thin);
-            p.line_segment([at(0.89, 0.71), at(0.89, 0.93)], thin);
-        }
-        Tool::Wand => {
-            p.line_segment([at(0.1, 0.95), at(0.6, 0.45)], Stroke::new(2.2, c));
-            for (x, y) in [(0.75, 0.1), (0.9, 0.3), (0.55, 0.2)] {
-                p.circle_filled(at(x, y), 1.6, c);
-            }
-        }
-        Tool::Lasso => {
-            p.add(Shape::closed_line((0..24).map(|k| {
-                let a = k as f32 / 24.0 * std::f32::consts::TAU;
-                at(0.55 + a.cos() * 0.4, 0.4 + a.sin() * 0.28)
-            }).collect(), s));
-            p.line_segment([at(0.25, 0.6), at(0.2, 0.95)], s);
-        }
-        Tool::Pen => pen(p),
-        Tool::AddPt => {
-            pen(p);
-            badge(p, Some(true));
-        }
-        Tool::DelPt => {
-            pen(p);
-            badge(p, Some(false));
-        }
-        Tool::ConvPt => {
-            p.add(Shape::line(vec![at(0.1, 0.9), at(0.5, 0.3), at(0.9, 0.9)], s));
-            p.line_segment([at(0.2, 0.3), at(0.8, 0.3)], thin);
-            p.circle_filled(at(0.5, 0.3), 2.2, c);
-        }
-        Tool::Curv => {
-            curve(p, r, &[model::Node { p: [0.05, 0.8], cin: [0.05, 0.8], cout: [0.3, 0.0] }, model::Node { p: [0.95, 0.5], cin: [0.6, 1.1], cout: [0.95, 0.5] }], false, s);
-            p.circle_filled(at(0.05, 0.8), 2.0, c);
-            p.circle_filled(at(0.95, 0.5), 2.0, c);
-        }
-        Tool::Text | Tool::AreaText | Tool::PathText | Tool::VText => {
-            if tool == Tool::VText {
-                p.line_segment([at(0.1, 0.1), at(0.9, 0.1)], Stroke::new(2.2, c));
-                p.line_segment([at(0.9, 0.1), at(0.9, 0.95)], Stroke::new(2.2, c));
-            } else {
-                p.line_segment([at(0.15, 0.1), at(0.85, 0.1)], Stroke::new(2.2, c));
-                p.line_segment([at(0.5, 0.1), at(0.5, 0.9)], Stroke::new(2.2, c));
-            }
-            if tool == Tool::AreaText {
-                p.rect_stroke(Rect::from_min_max(at(0.0, 0.0), at(1.0, 1.0)), CornerRadius::ZERO, Stroke::new(1.0, c.gamma_multiply(0.6)), StrokeKind::Middle);
-            }
-            if tool == Tool::PathText {
-                curve(p, r, &[model::Node { p: [0.0, 0.95], cin: [0.0, 0.95], cout: [0.4, 0.6] }, model::Node { p: [1.0, 0.95], cin: [0.6, 0.6], cout: [1.0, 0.95] }], false, thin);
-            }
-        }
-        Tool::Line => {
-            p.line_segment([at(0.05, 0.95), at(0.95, 0.05)], Stroke::new(2.0, c));
-        }
-        Tool::Arc => curve(p, r, &model::arc([0.05, 0.05], [0.95, 0.95], 0.55, true), false, s),
-        Tool::Spiral => {
-            let pts: Vec<Pos2> = (0..=60).map(|k| {
-                let t = k as f32 / 60.0;
-                let a = t * 2.6 * std::f32::consts::TAU;
-                r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.48 * t
-            }).collect();
-            p.add(Shape::line(pts, s));
-        }
-        Tool::RectGrid => {
-            p.rect_stroke(r, CornerRadius::ZERO, thin, StrokeKind::Middle);
-            for k in 1..3 {
-                let f = k as f32 / 3.0;
-                p.line_segment([at(f, 0.0), at(f, 1.0)], thin);
-                p.line_segment([at(0.0, f), at(1.0, f)], thin);
-            }
-        }
-        Tool::PolarGrid => {
-            ring(p, 0.48);
-            ring(p, 0.28);
-            p.line_segment([at(0.5, 0.0), at(0.5, 1.0)], thin);
-            p.line_segment([at(0.0, 0.5), at(1.0, 0.5)], thin);
-        }
-        Tool::Arrow => {
-            let pts: Vec<Pos2> = model::arrow([0.05, 0.5], [0.95, 0.5], 0.2).iter().map(|n| at(n.p[0], n.p[1])).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Rect => {
-            p.rect_stroke(Rect::from_min_max(at(0.05, 0.15), at(0.95, 0.85)), CornerRadius::same(1), s, StrokeKind::Middle);
-        }
-        Tool::RRect => {
-            p.rect_stroke(Rect::from_min_max(at(0.05, 0.15), at(0.95, 0.85)), CornerRadius::same(5), s, StrokeKind::Middle);
-        }
-        Tool::Ellipse => ring(p, 0.45),
-        Tool::Polygon => {
-            let pts: Vec<Pos2> = model::polygon(0.0, 0.0, 1.0, 6, None).iter().map(|n| r.center() + vec2(n.p[0], n.p[1]) * r.width() * 0.5).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Star => {
-            let pts: Vec<Pos2> = model::polygon(0.0, 0.0, 1.0, 5, Some(0.45)).iter().map(|n| r.center() + vec2(n.p[0], n.p[1]) * r.width() * 0.52).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Flare => {
-            p.circle_filled(r.center(), r.width() * 0.16, c);
-            for k in 0..8 {
-                let a = k as f32 / 8.0 * std::f32::consts::TAU;
-                p.line_segment([r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.25, r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.5], thin);
-            }
-        }
-        Tool::Heart => curve(p, r, &model::heart(0.05, 0.1, 0.9, 0.85), true, s),
-        Tool::Brush => brush_tip(p),
-        Tool::Blob => {
-            brush_tip(p);
-            p.circle_filled(at(0.85, 0.85), r.width() * 0.13, c);
-        }
-        Tool::Pencil => {
-            p.line_segment([at(0.85, 0.15), at(0.25, 0.75)], Stroke::new(4.0, c));
-            p.add(Shape::convex_polygon(vec![at(0.18, 0.68), at(0.32, 0.82), at(0.05, 0.95)], c, Stroke::NONE));
-        }
-        Tool::Smooth => {
-            p.line_segment([at(0.85, 0.15), at(0.35, 0.65)], Stroke::new(4.0, c));
-            curve(p, r, &[model::Node { p: [0.0, 0.9], cin: [0.0, 0.9], cout: [0.3, 0.75] }, model::Node { p: [0.6, 0.95], cin: [0.4, 1.0], cout: [0.6, 0.95] }], false, thin);
-        }
-        Tool::PathErase => {
-            p.line_segment([at(0.85, 0.15), at(0.4, 0.6)], Stroke::new(4.0, c));
-            p.line_segment([at(0.0, 0.9), at(0.3, 0.9)], thin);
-            p.line_segment([at(0.55, 0.9), at(1.0, 0.9)], thin);
-        }
-        Tool::Rotate | Tool::RotView => {
-            let pts: Vec<Pos2> = (0..=18).map(|k| {
-                let a = (k as f32 / 18.0) * 4.8 - 0.9;
-                r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.42
-            }).collect();
-            let tip = pts[pts.len() - 1];
-            p.add(Shape::line(pts, s));
-            p.add(Shape::convex_polygon(vec![tip + vec2(-5.0, -1.0), tip + vec2(3.0, -5.0), tip + vec2(3.0, 3.0)], c, Stroke::NONE));
-            if tool == Tool::RotView {
-                p.rect_stroke(Rect::from_center_size(r.center(), r.size() * 0.35), CornerRadius::ZERO, thin, StrokeKind::Middle);
-            }
-        }
-        Tool::Reflect => {
-            p.line_segment([at(0.5, 0.0), at(0.5, 1.0)], Stroke::new(1.0, c));
-            p.add(Shape::convex_polygon(vec![at(0.4, 0.2), at(0.4, 0.85), at(0.0, 0.85)], c, Stroke::NONE));
-            p.add(Shape::convex_polygon(vec![at(0.6, 0.2), at(1.0, 0.85), at(0.6, 0.85)], Color32::TRANSPARENT, s));
-        }
-        Tool::Scale => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.35), at(0.65, 1.0)), CornerRadius::ZERO, s, StrokeKind::Middle);
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.0), at(1.0, 1.0)), CornerRadius::ZERO, Stroke::new(1.0, c.gamma_multiply(0.6)), StrokeKind::Middle);
-            p.line_segment([at(0.45, 0.55), at(0.9, 0.1)], thin);
-        }
-        Tool::Distort => {
-            p.add(Shape::closed_line(vec![at(0.15, 0.1), at(0.95, 0.25), at(0.8, 0.9), at(0.0, 0.8)], s));
-            p.circle_filled(at(0.95, 0.25), 2.4, c);
-        }
-        Tool::Reshape => {
-            curve(p, r, &[model::Node { p: [0.0, 0.85], cin: [0.0, 0.85], cout: [0.35, 0.85] }, model::Node { p: [0.5, 0.2], cin: [0.3, 0.2], cout: [0.7, 0.2] }, model::Node { p: [1.0, 0.85], cin: [0.65, 0.85], cout: [1.0, 0.85] }], false, s);
-            p.rect_filled(Rect::from_center_size(at(0.5, 0.2), Vec2::splat(5.0)), CornerRadius::ZERO, c);
-        }
-        Tool::Width => {
-            p.add(Shape::convex_polygon(vec![at(0.0, 0.5), at(0.5, 0.2), at(1.0, 0.5), at(0.5, 0.8)], c.gamma_multiply(0.5), s));
-            p.line_segment([at(0.5, 0.0), at(0.5, 1.0)], thin);
-        }
-        Tool::Warp => {
-            p.circle_stroke(r.center(), r.width() * 0.45, thin);
-            p.line_segment([at(0.25, 0.5), at(0.75, 0.5)], s);
-            p.add(Shape::convex_polygon(vec![at(0.8, 0.5), at(0.62, 0.38), at(0.62, 0.62)], c, Stroke::NONE));
-        }
-        Tool::Twirl => {
-            let pts: Vec<Pos2> = (0..=40).map(|k| {
-                let t = k as f32 / 40.0;
-                let a = t * 1.6 * std::f32::consts::TAU;
-                r.center() + vec2(a.cos(), a.sin()) * r.width() * (0.12 + 0.36 * t)
-            }).collect();
-            p.add(Shape::line(pts, s));
-        }
-        Tool::Pucker | Tool::Bloat => {
-            p.circle_stroke(r.center(), r.width() * 0.45, thin);
-            for k in 0..4 {
-                let a = k as f32 / 4.0 * std::f32::consts::TAU + 0.785;
-                let (o, i) = (r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.4, r.center() + vec2(a.cos(), a.sin()) * r.width() * 0.12);
-                let (from, to) = if tool == Tool::Pucker { (o, i) } else { (i, o) };
-                p.line_segment([from, to], s);
-                p.circle_filled(to, 2.0, c);
-            }
-        }
-        Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => {
-            p.circle_stroke(r.center(), r.width() * 0.45, thin);
-            let k = match tool {
-                Tool::Scallop => 0,
-                Tool::Crystallize => 1,
-                _ => 2,
-            };
-            let pts: Vec<Pos2> = (0..=24).map(|i| {
-                let a = i as f32 / 24.0 * std::f32::consts::TAU;
-                let rr = match k {
-                    0 => 0.3 - 0.08 * (a * 6.0).cos().abs(),
-                    1 => if i % 2 == 0 { 0.38 } else { 0.18 },
-                    _ => 0.28 + 0.05 * (a * 9.0).sin(),
-                };
-                r.center() + vec2(a.cos(), a.sin()) * r.width() * rr
-            }).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::BlendTool => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.55), at(0.35, 0.95)), CornerRadius::ZERO, s, StrokeKind::Middle);
-            p.circle_stroke(at(0.78, 0.25), r.width() * 0.2, s);
-            for t in [0.33, 0.5, 0.66] {
-                p.circle_stroke(at(0.18 + 0.6 * t, 0.75 - 0.5 * t), r.width() * 0.1, thin);
-            }
-        }
-        Tool::SymSpray => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.5), at(0.3, 1.0)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.line_segment([at(0.15, 0.5), at(0.15, 0.35)], s);
-            for (x, y) in [(0.55, 0.2), (0.8, 0.1), (0.7, 0.45), (0.95, 0.35), (0.55, 0.65), (0.85, 0.7)] {
-                p.circle_filled(at(x, y), 1.8, c);
-            }
-        }
-        Tool::Builder => {
-            p.circle_stroke(at(0.38, 0.5), r.width() * 0.32, thin);
-            p.circle_stroke(at(0.62, 0.5), r.width() * 0.32, thin);
-            p.line_segment([at(0.85, 0.1), at(0.85, 0.35)], s);
-            p.line_segment([at(0.72, 0.22), at(0.98, 0.22)], s);
-        }
-        Tool::Bucket => {
-            p.add(Shape::convex_polygon(vec![at(0.15, 0.45), at(0.5, 0.1), at(0.85, 0.45), at(0.5, 0.8)], Color32::TRANSPARENT, s));
-            p.circle_filled(at(0.88, 0.75), r.width() * 0.1, c);
-        }
-        Tool::Gradient => {
-            let mut mesh = egui::Mesh::default();
-            let rr = Rect::from_min_max(at(0.0, 0.15), at(1.0, 0.85));
-            for (pt, col) in [(rr.left_top(), Color32::TRANSPARENT), (rr.right_top(), c), (rr.right_bottom(), c), (rr.left_bottom(), Color32::TRANSPARENT)] {
-                mesh.colored_vertex(pt, col);
-            }
-            mesh.add_triangle(0, 1, 2);
-            mesh.add_triangle(0, 2, 3);
-            p.add(mesh);
-            p.rect_stroke(rr, CornerRadius::ZERO, thin, StrokeKind::Middle);
-        }
-        Tool::Mesh => {
-            p.rect_stroke(r, CornerRadius::same(2), thin, StrokeKind::Middle);
-            curve(p, r, &[model::Node { p: [0.0, 0.45], cin: [0.0, 0.45], cout: [0.4, 0.2] }, model::Node { p: [1.0, 0.55], cin: [0.6, 0.8], cout: [1.0, 0.55] }], false, thin);
-            curve(p, r, &[model::Node { p: [0.5, 0.0], cin: [0.5, 0.0], cout: [0.7, 0.4] }, model::Node { p: [0.45, 1.0], cin: [0.3, 0.6], cout: [0.45, 1.0] }], false, thin);
-            p.circle_filled(at(0.52, 0.5), 2.4, c);
-        }
-        Tool::Picker => {
-            p.line_segment([at(0.08, 0.92), at(0.62, 0.38)], Stroke::new(2.3, c));
-            p.circle_filled(at(0.75, 0.25), r.width() * 0.2, c);
-        }
-        Tool::Measure => {
-            p.add(Shape::closed_line(vec![at(0.0, 0.7), at(0.7, 0.0), at(1.0, 0.3), at(0.3, 1.0)], s));
-            for k in 1..5 {
-                let f = k as f32 / 5.0;
-                p.line_segment([at(0.0 + 0.7 * f, 0.7 - 0.7 * f), at(0.1 + 0.7 * f, 0.8 - 0.7 * f)], thin);
-            }
-        }
-        Tool::Scissors => {
-            p.circle_stroke(at(0.25, 0.78), r.width() * 0.16, s);
-            p.circle_stroke(at(0.75, 0.78), r.width() * 0.16, s);
-            p.line_segment([at(0.35, 0.65), at(0.8, 0.0)], s);
-            p.line_segment([at(0.65, 0.65), at(0.2, 0.0)], s);
-        }
-        Tool::Knife => {
-            p.add(Shape::convex_polygon(vec![at(0.1, 0.9), at(0.85, 0.05), at(0.95, 0.15), at(0.3, 0.95)], Color32::TRANSPARENT, s));
-        }
-        Tool::Eraser => {
-            p.add(Shape::convex_polygon(vec![at(0.05, 0.6), at(0.5, 0.15), at(0.95, 0.5), at(0.5, 0.95)], Color32::TRANSPARENT, s));
-            p.line_segment([at(0.28, 0.38), at(0.72, 0.72)], thin);
-        }
-        Tool::Hand => {
-            for (k, h) in [0.55, 0.75, 0.8, 0.7].iter().enumerate() {
-                let x = 0.22 + k as f32 * 0.19;
-                p.line_segment([at(x, 0.62), at(x, 0.62 - h * 0.6)], Stroke::new(2.4, c));
-            }
-            p.add(Shape::convex_polygon(vec![at(0.12, 0.6), at(0.85, 0.6), at(0.75, 1.0), at(0.25, 1.0)], c, Stroke::NONE));
-        }
-        Tool::Zoom => {
-            p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
-            p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.4, c));
-        }
-        Tool::Board => {
-            p.rect_stroke(Rect::from_min_max(at(0.2, 0.2), at(0.8, 0.8)), CornerRadius::ZERO, s, StrokeKind::Middle);
-            for (a, b) in [((0.2, 0.0), (0.2, 0.12)), ((0.0, 0.2), (0.12, 0.2)), ((0.8, 0.88), (0.8, 1.0)), ((0.88, 0.8), (1.0, 0.8))] {
-                p.line_segment([at(a.0, a.1), at(b.0, b.1)], thin);
-            }
-        }
-    }
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), tool_lucide(tool), c);
 }

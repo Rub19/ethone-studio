@@ -1320,85 +1320,31 @@ impl eframe::App for Folio {
     }
 }
 
-pub fn glyph(p: &Painter, r: Rect, t: Tool, c: Color32) {
-    let s = Stroke::new(1.6, c);
-    let at = |x: f32, y: f32| pos2(r.left() + x * r.width(), r.top() + y * r.height());
+/// Lucide icon names, so this app's icons match the rest of the suite.
+fn glyph_lucide(t: Tool) -> &'static str {
+    use Tool::*;
     match t {
-        Tool::Hand => {
-            p.rect_stroke(Rect::from_min_max(at(0.25, 0.35), at(0.8, 0.95)), CornerRadius::same(4), s, StrokeKind::Middle);
-            for x in [0.32, 0.47, 0.62, 0.77] {
-                p.line_segment([at(x, 0.1), at(x, 0.45)], s);
-            }
-        }
-        Tool::Highlight => {
-            p.rect_filled(Rect::from_min_max(at(0.0, 0.55), at(1.0, 0.85)), CornerRadius::same(2), Color32::from_rgb(255, 214, 10).gamma_multiply(0.7));
-            p.line_segment([at(0.3, 0.5), at(0.75, 0.05)], Stroke::new(3.0, c));
-        }
-        Tool::Underline | Tool::Strike => {
-            p.text(at(0.5, 0.42), Align2::CENTER_CENTER, "ab", FontId::proportional(r.height() * 0.75), c);
-            let y = if t == Tool::Underline { 0.92 } else { 0.48 };
-            p.line_segment([at(0.05, y), at(0.95, y)], Stroke::new(1.8, if t == Tool::Strike { Color32::from_rgb(255, 80, 80) } else { c }));
-        }
-        Tool::Note => {
-            p.add(Shape::closed_line(vec![at(0.05, 0.1), at(0.95, 0.1), at(0.95, 0.7), at(0.45, 0.7), at(0.2, 0.95), at(0.25, 0.7), at(0.05, 0.7)], s));
-        }
-        Tool::TextBox => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.1), at(1.0, 0.9)), CornerRadius::same(2), Stroke::new(1.0, c.gamma_multiply(0.6)), StrokeKind::Middle);
-            p.text(at(0.5, 0.5), Align2::CENTER_CENTER, "T", FontId::proportional(r.height() * 0.75), c);
-        }
-        Tool::Rect => {
-            p.rect_stroke(Rect::from_min_max(at(0.05, 0.2), at(0.95, 0.8)), CornerRadius::ZERO, s, StrokeKind::Middle);
-        }
-        Tool::Ellipse => {
-            let pts: Vec<egui::Pos2> = (0..32).map(|k| {
-                let a = k as f32 / 32.0 * std::f32::consts::TAU;
-                at(0.5 + a.cos() * 0.47, 0.5 + a.sin() * 0.33)
-            }).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Line => {
-            p.line_segment([at(0.05, 0.95), at(0.95, 0.05)], s);
-        }
-        Tool::Arrow => {
-            p.line_segment([at(0.05, 0.95), at(0.9, 0.1)], s);
-            p.add(Shape::convex_polygon(vec![at(0.95, 0.05), at(0.55, 0.15), at(0.85, 0.45)], c, Stroke::NONE));
-        }
-        Tool::Ink => {
-            let pts: Vec<egui::Pos2> = (0..=24).map(|k| {
-                let t = k as f32 / 24.0;
-                at(0.05 + t * 0.9, 0.55 + (t * 9.0).sin() * 0.3 * (1.0 - t * 0.5))
-            }).collect();
-            p.add(Shape::line(pts, s));
-        }
-        Tool::Stamp => {
-            p.rect_stroke(Rect::from_min_max(at(0.1, 0.55), at(0.9, 0.95)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.rect_filled(Rect::from_min_max(at(0.38, 0.1), at(0.62, 0.55)), CornerRadius::same(3), c);
-        }
-        Tool::Sign => {
-            let pts: Vec<egui::Pos2> = (0..=30).map(|k| {
-                let t = k as f32 / 30.0;
-                at(0.05 + t * 0.9, 0.5 - (t * 12.0).sin() * 0.22)
-            }).collect();
-            p.add(Shape::line(pts, s));
-            p.line_segment([at(0.0, 0.88), at(1.0, 0.88)], Stroke::new(1.0, c.gamma_multiply(0.6)));
-        }
-        Tool::Date => {
-            p.rect_stroke(Rect::from_min_max(at(0.08, 0.18), at(0.92, 0.95)), CornerRadius::same(3), s, StrokeKind::Middle);
-            p.line_segment([at(0.08, 0.4), at(0.92, 0.4)], s);
-            p.line_segment([at(0.3, 0.05), at(0.3, 0.28)], s);
-            p.line_segment([at(0.7, 0.05), at(0.7, 0.28)], s);
-        }
-        Tool::Redact => {
-            p.rect_filled(Rect::from_min_max(at(0.0, 0.3), at(1.0, 0.7)), CornerRadius::same(2), c);
-        }
-        Tool::Measure => {
-            p.line_segment([at(0.0, 0.85), at(1.0, 0.15)], s);
-            for k in 1..5 {
-                let q = at(k as f32 * 0.2, 0.85 - k as f32 * 0.14);
-                p.line_segment([q, q + vec2(-2.5, -3.5)], Stroke::new(1.0, c));
-            }
-        }
+        Hand => "hand",
+        Highlight => "highlighter",
+        Underline => "underline",
+        Strike => "strikethrough",
+        Note => "sticky-note",
+        TextBox => "type",
+        Rect => "square",
+        Ellipse => "circle",
+        Line => "slash",
+        Arrow => "move-up-right",
+        Ink => "pen-line",
+        Stamp => "stamp",
+        Sign => "signature",
+        Date => "calendar",
+        Redact => "eye-off",
+        Measure => "ruler",
     }
+}
+
+pub fn glyph(p: &Painter, r: Rect, t: Tool, c: Color32) {
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), glyph_lucide(t), c);
 }
 
 fn home_glyph(p: &Painter, r: Rect, k: u8, c: Color32) {

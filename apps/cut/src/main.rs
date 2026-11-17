@@ -3454,12 +3454,6 @@ fn transport_glyph(p: &Painter, c: Pos2, kind: u8, playing: bool, color: Color32
 
 #[derive(Clone, Copy)]
 enum G {
-    Select,
-    Blade,
-    Slip,
-    Rate,
-    Hand,
-    Zoom,
     Split,
     Trash,
     Freeze,
@@ -3483,122 +3477,39 @@ enum G {
     Lock,
 }
 
-fn tool_glyph(p: &Painter, r: Rect, c: Color32, t: Tool) {
-    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
-    let s = Stroke::new(1.6, c);
-    let arrow = |p: &Painter, tip: Pos2, dir: f32| {
-        p.line_segment([tip, tip + vec2(-dir * 3.5, -3.0)], s);
-        p.line_segment([tip, tip + vec2(-dir * 3.5, 3.0)], s);
-    };
+/// Lucide icon names, so this app's icons match the rest of the suite.
+fn tool_glyph_lucide(t: Tool) -> &'static str {
+    use Tool::*;
     match t {
-        Tool::Select => glyph(p, r, G::Select, c),
-        Tool::TrackFwd | Tool::TrackBack => {
-            let d = if t == Tool::TrackFwd { 1.0 } else { -1.0 };
-            let x0 = if d > 0.0 { 0.15 } else { 0.85 };
-            p.line_segment([at(x0, 0.5), at(1.0 - x0, 0.5)], s);
-            arrow(p, at(1.0 - x0, 0.5), d);
-            arrow(p, at(1.0 - x0 - 0.25 * d, 0.5), d);
-            p.line_segment([at(x0, 0.15), at(x0, 0.85)], Stroke::new(2.0, c));
-        }
-        Tool::Ripple => {
-            p.add(Shape::line(vec![at(0.3, 0.1), at(0.5, 0.1), at(0.5, 0.9), at(0.3, 0.9)], s));
-            p.line_segment([at(0.6, 0.5), at(1.0, 0.5)], s);
-            arrow(p, at(1.0, 0.5), 1.0);
-        }
-        Tool::Rolling => {
-            p.line_segment([at(0.5, 0.05), at(0.5, 0.95)], Stroke::new(2.0, c));
-            p.line_segment([at(0.0, 0.5), at(0.35, 0.5)], s);
-            p.line_segment([at(0.65, 0.5), at(1.0, 0.5)], s);
-            arrow(p, at(0.0, 0.5), -1.0);
-            arrow(p, at(1.0, 0.5), 1.0);
-        }
-        Tool::Rate => glyph(p, r, G::Rate, c),
-        Tool::Blade => glyph(p, r, G::Blade, c),
-        Tool::BladeAll => {
-            glyph(p, Rect::from_min_size(r.min, r.size() * 0.8), G::Blade, c);
-            p.line_segment([at(0.75, 0.95), at(1.0, 0.95)], s);
-            p.line_segment([at(0.75, 0.75), at(1.0, 0.75)], s);
-        }
-        Tool::Slip => glyph(p, r, G::Slip, c),
-        Tool::Slide => {
-            p.rect_filled(Rect::from_min_max(at(0.3, 0.25), at(0.7, 0.75)), CornerRadius::same(2), c);
-            p.line_segment([at(0.0, 0.25), at(0.0, 0.75)], s);
-            p.line_segment([at(1.0, 0.25), at(1.0, 0.75)], s);
-            arrow(p, at(0.15, 0.5), -1.0);
-            arrow(p, at(0.85, 0.5), 1.0);
-        }
-        Tool::Pen => {
-            p.add(Shape::convex_polygon(vec![at(0.5, 0.0), at(0.85, 0.55), at(0.5, 1.0), at(0.15, 0.55)], Color32::TRANSPARENT, s));
-            p.circle_filled(at(0.5, 0.55), 1.8, c);
-            p.line_segment([at(0.5, 0.0), at(0.5, 0.45)], Stroke::new(1.0, c));
-        }
-        Tool::Poly => {
-            let pts: Vec<Pos2> = (0..6).map(|k| {
-                let a = k as f32 / 6.0 * std::f32::consts::TAU - std::f32::consts::FRAC_PI_2;
-                at(0.5 + a.cos() * 0.45, 0.5 + a.sin() * 0.45)
-            }).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Rect => {
-            p.rect_stroke(Rect::from_min_max(at(0.08, 0.2), at(0.92, 0.8)), CornerRadius::ZERO, s, StrokeKind::Middle);
-        }
-        Tool::Ellipse => {
-            let pts: Vec<Pos2> = (0..32).map(|k| {
-                let a = k as f32 / 32.0 * std::f32::consts::TAU;
-                at(0.5 + a.cos() * 0.45, 0.5 + a.sin() * 0.33)
-            }).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Hand => glyph(p, r, G::Hand, c),
-        Tool::Zoom => glyph(p, r, G::Zoom, c),
-        Tool::Text => {
-            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(r.height() * 1.25), c);
-        }
-        Tool::TextV => {
-            p.text(at(0.38, 0.5), Align2::CENTER_CENTER, "T", semibold(r.height() * 1.05), c);
-            p.line_segment([at(0.85, 0.05), at(0.85, 0.95)], s);
-            arrow(p, at(0.85, 0.95), 0.0);
-            p.line_segment([at(0.85, 0.95), at(0.72, 0.8)], s);
-            p.line_segment([at(0.85, 0.95), at(0.98, 0.8)], s);
-        }
+        Select => "mouse-pointer-2",
+        TrackFwd => "chevrons-right",
+        TrackBack => "chevrons-left",
+        Ripple => "between-horizontal-start",
+        Rolling => "arrow-left-right",
+        Rate => "gauge",
+        Blade => "scissors",
+        BladeAll => "scissors-line-dashed",
+        Slip => "move-horizontal",
+        Slide => "fold-horizontal",
+        Pen => "pen-tool",
+        Rect => "square",
+        Ellipse => "circle",
+        Poly => "hexagon",
+        Hand => "hand",
+        Zoom => "zoom-in",
+        Text => "type",
+        TextV => "text-cursor",
     }
+}
+
+fn tool_glyph(p: &Painter, r: Rect, c: Color32, t: Tool) {
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), tool_glyph_lucide(t), c);
 }
 
 fn glyph(p: &Painter, r: Rect, g: G, c: Color32) {
     let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
     let s = Stroke::new(1.7, c);
     match g {
-        G::Select => {
-            p.add(Shape::convex_polygon(vec![at(0.22, 0.0), at(0.85, 0.6), at(0.52, 0.62), at(0.33, 1.0)], c, Stroke::NONE));
-        }
-        G::Blade => {
-            p.add(Shape::convex_polygon(vec![at(0.12, 1.0), at(0.72, 0.0), at(1.0, 0.22), at(0.38, 1.0)], c, Stroke::NONE));
-        }
-        G::Slip => {
-            p.rect_stroke(Rect::from_min_max(at(0.18, 0.15), at(0.82, 0.85)), CornerRadius::same(2), s, StrokeKind::Middle);
-            p.line_segment([at(0.0, 0.5), at(1.0, 0.5)], s);
-            for d in [-1.0, 1.0] {
-                let tip = if d < 0.0 { at(0.0, 0.5) } else { at(1.0, 0.5) };
-                p.line_segment([tip, tip + vec2(-d * 4.0, -3.5)], s);
-                p.line_segment([tip, tip + vec2(-d * 4.0, 3.5)], s);
-            }
-        }
-        G::Rate => {
-            p.circle_stroke(at(0.5, 0.5), r.width() * 0.45, s);
-            p.line_segment([at(0.5, 0.5), at(0.5, 0.18)], s);
-            p.line_segment([at(0.5, 0.5), at(0.75, 0.62)], s);
-        }
-        G::Hand => {
-            for (k, hh) in [0.55, 0.75, 0.8, 0.7].iter().enumerate() {
-                let x = 0.22 + k as f32 * 0.19;
-                p.line_segment([at(x, 0.62), at(x, 0.62 - hh * 0.6)], Stroke::new(2.2, c));
-            }
-            p.add(Shape::convex_polygon(vec![at(0.12, 0.6), at(0.85, 0.6), at(0.75, 1.0), at(0.25, 1.0)], c, Stroke::NONE));
-        }
-        G::Zoom => {
-            p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
-            p.line_segment([at(0.66, 0.66), at(0.98, 0.98)], Stroke::new(2.4, c));
-        }
         G::Split => {
             p.circle_stroke(at(0.25, 0.78), r.width() * 0.16, s);
             p.circle_stroke(at(0.75, 0.78), r.width() * 0.16, s);

@@ -112,120 +112,37 @@ pub enum VDrag {
     PathKey { li: usize, kt: f32 },
 }
 
-pub fn tool_glyph(p: &Painter, r: Rect, tool: Tool, c: Color32) {
-    let s = Stroke::new(1.6, c);
-    let cen = r.center();
-    let u = r.width() / 2.0;
-    let poly = |n: usize, inner: f32, rad: f32| -> Vec<Pos2> {
-        let count = if inner < 0.99 { n * 2 } else { n };
-        (0..count)
-            .map(|k| {
-                let a = -std::f32::consts::FRAC_PI_2 + k as f32 * std::f32::consts::TAU / count as f32;
-                let rr = if inner < 0.99 && k % 2 == 1 { inner } else { 1.0 };
-                cen + vec2(a.cos(), a.sin()) * rad * rr
-            })
-            .collect()
-    };
-    let pen = |p: &Painter, at: Pos2, k: f32| {
-        p.add(Shape::convex_polygon(vec![at + vec2(0.0, -u * 0.95 * k), at + vec2(u * 0.55 * k, u * 0.1 * k), at + vec2(0.0, u * 0.75 * k), at + vec2(-u * 0.55 * k, u * 0.1 * k)], c, Stroke::NONE));
-        p.circle_filled(at + vec2(0.0, u * 0.05 * k), u * 0.14 * k, Color32::from_black_alpha(200));
-    };
+/// Lucide icon names, so this app's icons match the rest of the suite.
+fn tool_glyph_lucide(tool: Tool) -> &'static str {
+    use Tool::*;
     match tool {
-        Tool::Select => glyph(p, r, G::Select, c),
-        Tool::Hand => glyph(p, r, G::Hand, c),
-        Tool::Rotate => glyph(p, r, G::Rotate, c),
-        Tool::ZoomIn | Tool::ZoomOut => {
-            let lc = cen - vec2(u * 0.2, u * 0.2);
-            p.circle_stroke(lc, u * 0.62, s);
-            p.line_segment([lc + vec2(u * 0.45, u * 0.45), cen + vec2(u * 0.95, u * 0.95)], Stroke::new(2.4, c));
-            p.line_segment([lc - vec2(u * 0.3, 0.0), lc + vec2(u * 0.3, 0.0)], s);
-            if tool == Tool::ZoomIn {
-                p.line_segment([lc - vec2(0.0, u * 0.3), lc + vec2(0.0, u * 0.3)], s);
-            }
-        }
-        Tool::Anchor => {
-            p.circle_stroke(cen, u * 0.45, s);
-            for d in [vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0)] {
-                p.line_segment([cen + d * u * 0.2, cen + d * u], s);
-            }
-        }
-        Tool::Rect => {
-            p.rect_stroke(r.shrink2(vec2(0.0, u * 0.25)), CornerRadius::ZERO, s, StrokeKind::Middle);
-        }
-        Tool::RoundRect => {
-            p.rect_stroke(r.shrink2(vec2(0.0, u * 0.25)), CornerRadius::same((u * 0.5) as u8), s, StrokeKind::Middle);
-        }
-        Tool::Ellipse => {
-            let pts: Vec<Pos2> = (0..24).map(|k| {
-                let a = k as f32 / 24.0 * std::f32::consts::TAU;
-                cen + vec2(a.cos() * u, a.sin() * u * 0.75)
-            }).collect();
-            p.add(Shape::closed_line(pts, s));
-        }
-        Tool::Polygon => {
-            p.add(Shape::closed_line(poly(6, 1.0, u), s));
-        }
-        Tool::Star => {
-            p.add(Shape::closed_line(poly(5, 0.45, u), s));
-        }
-        Tool::Pen => pen(p, cen, 1.0),
-        Tool::PenAdd | Tool::PenDel => {
-            pen(p, cen - vec2(u * 0.25, 0.0), 0.8);
-            let m = cen + vec2(u * 0.6, u * 0.55);
-            p.line_segment([m - vec2(u * 0.35, 0.0), m + vec2(u * 0.35, 0.0)], Stroke::new(1.8, c));
-            if tool == Tool::PenAdd {
-                p.line_segment([m - vec2(0.0, u * 0.35), m + vec2(0.0, u * 0.35)], Stroke::new(1.8, c));
-            }
-        }
-        Tool::PenConv => {
-            p.add(Shape::line(vec![cen + vec2(-u * 0.9, u * 0.7), cen + vec2(0.0, -u * 0.6), cen + vec2(u * 0.9, u * 0.7)], s));
-            p.circle_filled(cen + vec2(0.0, -u * 0.6), u * 0.22, c);
-        }
-        Tool::TextH | Tool::TextV => {
-            let k = if tool == Tool::TextV { 0.75 } else { 1.0 };
-            let o = if tool == Tool::TextV { vec2(-u * 0.25, 0.0) } else { Vec2::ZERO };
-            p.line_segment([cen + o + vec2(-u * 0.8 * k, -u * 0.8), cen + o + vec2(u * 0.8 * k, -u * 0.8)], Stroke::new(2.2, c));
-            p.line_segment([cen + o + vec2(0.0, -u * 0.8), cen + o + vec2(0.0, u * 0.85)], Stroke::new(2.2, c));
-            if tool == Tool::TextV {
-                let x = cen.x + u * 0.85;
-                p.line_segment([pos2(x, cen.y - u * 0.6), pos2(x, cen.y + u * 0.8)], Stroke::new(1.2, c));
-                p.add(Shape::convex_polygon(vec![pos2(x, cen.y + u), pos2(x - u * 0.25, cen.y + u * 0.6), pos2(x + u * 0.25, cen.y + u * 0.6)], c, Stroke::NONE));
-            }
-        }
-        Tool::Brush => {
-            p.line_segment([cen + vec2(u * 0.9, -u * 0.9), cen + vec2(-u * 0.2, u * 0.2)], Stroke::new(2.6, c));
-            p.circle_filled(cen + vec2(-u * 0.45, u * 0.45), u * 0.38, c);
-        }
-        Tool::MaskRect | Tool::MaskEllipse => {
-            let b = Rect::from_center_size(cen, vec2(u * 1.8, u * 1.5));
-            p.rect_filled(b, CornerRadius::same(2), c.gamma_multiply(0.25));
-            if tool == Tool::MaskRect {
-                p.rect_stroke(b.shrink(u * 0.3), CornerRadius::ZERO, Stroke::new(1.6, c), StrokeKind::Middle);
-            } else {
-                let pts: Vec<Pos2> = (0..24).map(|k| {
-                    let a = k as f32 / 24.0 * std::f32::consts::TAU;
-                    cen + vec2(a.cos() * u * 0.6, a.sin() * u * 0.45)
-                }).collect();
-                p.add(Shape::closed_line(pts, s));
-            }
-        }
-        Tool::Puppet => {
-            p.circle_stroke(cen + vec2(0.0, -u * 0.6), u * 0.25, s);
-            p.line_segment([cen + vec2(0.0, -u * 0.35), cen + vec2(0.0, u * 0.3)], s);
-            p.line_segment([cen + vec2(-u * 0.6, -u * 0.1), cen + vec2(u * 0.6, -u * 0.1)], s);
-            p.line_segment([cen + vec2(0.0, u * 0.3), cen + vec2(-u * 0.45, u * 0.9)], s);
-            p.line_segment([cen + vec2(0.0, u * 0.3), cen + vec2(u * 0.45, u * 0.9)], s);
-            p.circle_filled(cen + vec2(u * 0.6, -u * 0.1), u * 0.18, Color32::from_rgb(255, 214, 10));
-        }
-        Tool::Eraser => {
-            let d = vec2(0.7, -0.7);
-            let n = vec2(0.7, 0.7);
-            let a = cen - d * u * 0.9;
-            let b = cen + d * u * 0.9;
-            p.add(Shape::convex_polygon(vec![a - n * u * 0.4, b - n * u * 0.4, b + n * u * 0.4, a + n * u * 0.4], Color32::TRANSPARENT, s));
-            p.add(Shape::convex_polygon(vec![a - n * u * 0.4, cen - n * u * 0.4, cen + n * u * 0.4, a + n * u * 0.4], c, Stroke::NONE));
-        }
+        Select => "mouse-pointer-2",
+        Hand => "hand",
+        ZoomIn => "zoom-in",
+        ZoomOut => "zoom-out",
+        Rotate => "rotate-cw",
+        Anchor => "anchor",
+        Rect => "square",
+        RoundRect => "squircle",
+        Ellipse => "circle",
+        Polygon => "hexagon",
+        Star => "star",
+        Pen => "pen-tool",
+        PenAdd => "circle-plus",
+        PenDel => "circle-minus",
+        PenConv => "spline-pointer",
+        TextH => "type",
+        TextV => "text-cursor",
+        Brush => "paintbrush",
+        Eraser => "eraser",
+        MaskRect => "square-dashed",
+        MaskEllipse => "circle-dashed",
+        Puppet => "person-standing",
     }
+}
+
+pub fn tool_glyph(p: &Painter, r: Rect, tool: Tool, c: Color32) {
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), tool_glyph_lucide(tool), c);
 }
 
 fn group_of(tool: Tool) -> usize {

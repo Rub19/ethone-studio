@@ -1,7 +1,7 @@
 use crate::model::{self, Frame, Kind, MASTER, Node};
 use crate::{HANDLES, MM, PageApp};
-use eframe::egui::{self, Align2, Color32, CornerRadius, Key, Modifiers, Painter, Pos2, Rect, RichText, Shape, Stroke, StrokeKind, Ui, pos2, vec2};
-use studio_ui::pro::{FAINT, MUTED, semibold};
+use eframe::egui::{self, Color32, CornerRadius, Key, Modifiers, Painter, Pos2, Rect, RichText, Shape, Stroke, StrokeKind, Ui, vec2};
+use studio_ui::pro::MUTED;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Tool {
@@ -1023,189 +1023,48 @@ pub fn cursor(t: Tool) -> egui::CursorIcon {
     }
 }
 
-pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
-    let at = |x: f32, y: f32| r.min + vec2(x, y) * r.width();
-    let s = Stroke::new(1.6, c);
-    let thin = Stroke::new(1.2, c);
-    let arrow = |filled: bool| {
-        let pts = vec![at(0.2, 0.0), at(0.85, 0.6), at(0.52, 0.62), at(0.33, 1.0)];
-        if filled {
-            p.add(Shape::convex_polygon(pts, c, Stroke::NONE));
-        } else {
-            p.add(Shape::closed_line(pts, Stroke::new(1.4, c)));
-        }
-    };
-    let nib = |dx: f32| {
-        p.add(Shape::closed_line(vec![at(0.5 + dx, 0.0), at(0.82 + dx, 0.45), at(0.5 + dx, 0.95), at(0.18 + dx, 0.45)], thin));
-        p.line_segment([at(0.5 + dx, 0.3), at(0.5 + dx, 0.95)], thin);
-    };
-    let badge = |t: &str| {
-        p.text(at(0.95, 0.15), Align2::CENTER_CENTER, t, semibold(r.width() * 0.55), c);
-    };
-    let star = |pts: usize, inner: f32, fill: bool| {
-        let v: Vec<Pos2> = (0..pts * 2)
-            .map(|k| {
-                let a = -std::f32::consts::FRAC_PI_2 + k as f32 * std::f32::consts::PI / pts as f32;
-                let rr = if k % 2 == 1 { inner } else { 0.5 };
-                r.center() + vec2(a.cos(), a.sin()) * r.width() * rr
-            })
-            .collect();
-        if fill {
-            p.add(Shape::closed_line(v, Stroke::new(1.5, c)));
-        } else {
-            p.add(Shape::closed_line(v, thin));
-        }
-    };
-    let cross = || {
-        p.line_segment([at(0.0, 0.0), at(1.0, 1.0)], Stroke::new(0.9, c));
-        p.line_segment([at(1.0, 0.0), at(0.0, 1.0)], Stroke::new(0.9, c));
-    };
+/// Lucide icon for each tool, so the tool bar matches the rest of the suite.
+pub fn tool_lucide(tool: Tool) -> &'static str {
+    use Tool::*;
     match tool {
-        Select => arrow(true),
-        Direct => arrow(false),
-        PageTool => {
-            p.rect_stroke(Rect::from_min_max(at(0.1, 0.0), at(0.8, 0.85)), CornerRadius::same(1), thin, StrokeKind::Middle);
-            p.add(Shape::convex_polygon(vec![at(0.55, 0.6), at(1.0, 1.0), at(0.55, 1.0)], c, Stroke::NONE));
-        }
-        Gap => {
-            p.rect_filled(Rect::from_min_max(at(0.0, 0.1), at(0.3, 0.9)), CornerRadius::same(1), c);
-            p.rect_filled(Rect::from_min_max(at(0.7, 0.1), at(1.0, 0.9)), CornerRadius::same(1), c);
-            p.line_segment([at(0.38, 0.5), at(0.62, 0.5)], thin);
-        }
-        Text => {
-            p.text(r.center(), Align2::CENTER_CENTER, "T", semibold(r.width() * 1.05), c);
-        }
-        TextPath => {
-            p.text(at(0.38, 0.38), Align2::CENTER_CENTER, "T", semibold(r.width() * 0.8), c);
-            p.add(Shape::line((0..=10).map(|k| at(k as f32 / 10.0, 0.95 - (k as f32 / 10.0 * std::f32::consts::PI).sin() * 0.25)).collect(), thin));
-        }
-        Table => {
-            let b = Rect::from_min_max(at(0.0, 0.1), at(1.0, 0.9));
-            p.rect_stroke(b, CornerRadius::same(2), Stroke::new(1.4, c), StrokeKind::Middle);
-            p.rect_filled(Rect::from_min_max(b.min, pos2(b.right(), b.top() + b.height() / 3.0)), CornerRadius::same(2), c);
-            p.line_segment([pos2(b.left(), b.top() + b.height() * 2.0 / 3.0), pos2(b.right(), b.top() + b.height() * 2.0 / 3.0)], Stroke::new(1.0, c));
-            p.line_segment([pos2(b.center().x, b.top()), pos2(b.center().x, b.bottom())], Stroke::new(1.0, c));
-        }
-        Pen => nib(0.0),
-        AddPoint => {
-            nib(-0.12);
-            badge("+");
-        }
-        DelPoint => {
-            nib(-0.12);
-            badge("−");
-        }
-        ConvPoint => {
-            p.add(Shape::line(vec![at(0.1, 0.9), at(0.5, 0.2), at(0.9, 0.9)], s));
-            p.rect_filled(Rect::from_center_size(at(0.5, 0.2), vec2(4.0, 4.0)), CornerRadius::ZERO, c);
-        }
-        Pencil => {
-            p.line_segment([at(0.15, 0.85), at(0.8, 0.2)], Stroke::new(3.0, c));
-            p.add(Shape::convex_polygon(vec![at(0.05, 0.95), at(0.1, 0.75), at(0.25, 0.9)], c, Stroke::NONE));
-        }
-        Line => {
-            p.line_segment([at(0.05, 0.95), at(0.95, 0.05)], Stroke::new(1.8, c));
-        }
-        FrameRect => {
-            p.rect_stroke(r.shrink(1.0), CornerRadius::ZERO, thin, StrokeKind::Middle);
-            cross();
-        }
-        FrameEllipse => {
-            p.circle_stroke(r.center(), r.width() * 0.48, thin);
-            let k = 0.34;
-            p.line_segment([at(0.5 - k, 0.5 - k), at(0.5 + k, 0.5 + k)], Stroke::new(0.9, c));
-            p.line_segment([at(0.5 + k, 0.5 - k), at(0.5 - k, 0.5 + k)], Stroke::new(0.9, c));
-        }
-        FramePolygon => {
-            let v: Vec<Pos2> = (0..6).map(|k| r.center() + vec2((k as f32 * 1.047 - 1.57).cos(), (k as f32 * 1.047 - 1.57).sin()) * r.width() * 0.5).collect();
-            p.add(Shape::closed_line(v.clone(), thin));
-            p.line_segment([v[0], v[3]], Stroke::new(0.9, c));
-            p.line_segment([v[1], v[4]], Stroke::new(0.9, c));
-        }
-        Rect => {
-            p.rect_stroke(Rect::from_min_max(at(0.05, 0.15), at(0.95, 0.85)), CornerRadius::same(1), s, StrokeKind::Middle);
-        }
-        Ellipse => {
-            p.circle_stroke(r.center(), r.width() * 0.45, s);
-        }
-        Polygon => {
-            let v: Vec<Pos2> = (0..6).map(|k| r.center() + vec2((k as f32 * 1.047 - 1.57).cos(), (k as f32 * 1.047 - 1.57).sin()) * r.width() * 0.5).collect();
-            p.add(Shape::closed_line(v, s));
-        }
-        Star => star(5, 0.22, true),
-        Scissors => {
-            p.circle_stroke(at(0.22, 0.78), r.width() * 0.16, thin);
-            p.circle_stroke(at(0.78, 0.78), r.width() * 0.16, thin);
-            p.line_segment([at(0.32, 0.66), at(0.85, 0.0)], thin);
-            p.line_segment([at(0.68, 0.66), at(0.15, 0.0)], thin);
-        }
-        FreeTransform => {
-            p.rect_stroke(Rect::from_min_max(at(0.1, 0.1), at(0.9, 0.9)), CornerRadius::ZERO, Stroke::new(1.0, c), StrokeKind::Middle);
-            for q in [at(0.1, 0.1), at(0.9, 0.1), at(0.9, 0.9), at(0.1, 0.9)] {
-                p.rect_filled(Rect::from_center_size(q, vec2(4.0, 4.0)), CornerRadius::ZERO, c);
-            }
-            arrow(true);
-        }
-        Rotate => {
-            p.add(Shape::line((0..=14).map(|k| r.center() + vec2((k as f32 * 0.35 - 1.0).cos(), (k as f32 * 0.35 - 1.0).sin()) * r.width() * 0.42).collect(), s));
-            p.add(Shape::convex_polygon(vec![at(0.62, 0.0), at(0.98, 0.1), at(0.72, 0.36)], c, Stroke::NONE));
-        }
-        Scale => {
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.4), at(0.6, 1.0)), CornerRadius::ZERO, thin, StrokeKind::Middle);
-            p.rect_stroke(Rect::from_min_max(at(0.0, 0.0), at(1.0, 1.0)), CornerRadius::ZERO, Stroke::new(0.8, c), StrokeKind::Middle);
-            p.line_segment([at(0.35, 0.65), at(0.9, 0.1)], thin);
-        }
-        Shear => {
-            p.add(Shape::closed_line(vec![at(0.3, 0.1), at(1.0, 0.1), at(0.7, 0.9), at(0.0, 0.9)], s));
-        }
-        Gradient => {
-            let b = Rect::from_min_max(at(0.0, 0.15), at(1.0, 0.85));
-            for k in 0..6 {
-                let x = b.left() + b.width() * k as f32 / 6.0;
-                p.rect_filled(Rect::from_min_max(pos2(x, b.top()), pos2(x + b.width() / 6.0 + 0.5, b.bottom())), CornerRadius::ZERO, c.gamma_multiply(1.0 - k as f32 / 7.0));
-            }
-        }
-        GradFeather => {
-            for k in 0..6 {
-                p.circle_filled(r.center(), r.width() * (0.5 - k as f32 * 0.07), c.gamma_multiply(0.15 + k as f32 * 0.15));
-            }
-        }
-        Note => {
-            p.add(Shape::closed_line(vec![at(0.0, 0.05), at(1.0, 0.05), at(1.0, 0.7), at(0.4, 0.7), at(0.15, 0.95), at(0.2, 0.7), at(0.0, 0.7)], thin));
-            for y in [0.25, 0.45] {
-                p.line_segment([at(0.2, y), at(0.8, y)], Stroke::new(1.0, c));
-            }
-        }
-        Pipette => {
-            p.line_segment([at(0.15, 0.85), at(0.62, 0.38)], Stroke::new(2.4, c));
-            p.circle_filled(at(0.72, 0.28), r.width() * 0.2, c);
-            p.circle_filled(at(0.12, 0.88), r.width() * 0.07, c);
-        }
-        ColorTheme => {
-            p.line_segment([at(0.1, 0.9), at(0.5, 0.5)], Stroke::new(2.2, c));
-            for (k, col) in [(0, Color32::from_rgb(255, 107, 53)), (1, Color32::from_rgb(255, 204, 0)), (2, Color32::from_rgb(10, 132, 255))] {
-                p.rect_filled(Rect::from_min_size(at(0.5 + k as f32 * 0.17, 0.05), vec2(r.width() * 0.15, r.height() * 0.4)), CornerRadius::same(1), col);
-            }
-        }
-        Measure => {
-            p.line_segment([at(0.0, 0.85), at(1.0, 0.15)], Stroke::new(1.6, c));
-            for k in 1..5 {
-                let q = at(k as f32 * 0.2, 0.85 - k as f32 * 0.14);
-                p.line_segment([q, q + vec2(-2.5, -3.5)], Stroke::new(1.0, c));
-            }
-        }
-        Hand => {
-            p.rect_filled(Rect::from_min_max(at(0.2, 0.45), at(0.85, 1.0)), CornerRadius::same(3), c);
-            for (k, x) in [0.25, 0.42, 0.59, 0.76].iter().enumerate() {
-                p.rect_filled(Rect::from_min_max(at(*x, [0.15, 0.0, 0.05, 0.2][k]), at(x + 0.1, 0.6)), CornerRadius::same(2), c);
-            }
-        }
-        Zoom => {
-            p.circle_stroke(at(0.42, 0.42), r.width() * 0.32, s);
-            p.line_segment([at(0.65, 0.65), at(0.98, 0.98)], Stroke::new(2.4, c));
-        }
+        Select => "mouse-pointer-2",
+        Direct => "mouse-pointer",
+        PageTool => "file",
+        Gap => "separator-vertical",
+        Text => "type",
+        TextPath => "text-cursor-input",
+        Table => "table",
+        Pen => "pen-tool",
+        AddPoint => "circle-plus",
+        DelPoint => "circle-minus",
+        ConvPoint => "spline-pointer",
+        Pencil => "pencil",
+        Line => "slash",
+        FrameRect => "square-x",
+        FrameEllipse => "circle-x",
+        FramePolygon => "hexagon",
+        Rect => "square",
+        Ellipse => "circle",
+        Polygon => "pentagon",
+        Star => "star",
+        Scissors => "scissors",
+        FreeTransform => "scaling",
+        Rotate => "rotate-cw",
+        Scale => "expand",
+        Shear => "move-diagonal",
+        Gradient => "sunset",
+        GradFeather => "sunrise",
+        Note => "sticky-note",
+        Pipette => "pipette",
+        ColorTheme => "palette",
+        Measure => "ruler",
+        Hand => "hand",
+        Zoom => "zoom-in",
     }
-    let _ = FAINT;
+}
+
+pub fn tool_icon(p: &Painter, r: Rect, tool: Tool, c: Color32) {
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), tool_lucide(tool), c);
 }
 
 pub fn theme_colors(img: &image::RgbaImage, n: usize) -> Vec<[u8; 4]> {

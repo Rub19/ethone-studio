@@ -1,4 +1,4 @@
-use eframe::egui::{Color32, Key, Painter, Pos2, Rect, Shape, Stroke, vec2};
+use eframe::egui::{Color32, Key, Painter, Rect};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Tool {
@@ -112,83 +112,26 @@ impl SpecSel {
     }
 }
 
-pub fn draw_icon(p: &Painter, r: Rect, c: Color32, t: Tool) {
-    let s = Stroke::new(1.6, c);
-    let cen = r.center();
-    let u = r.width() / 2.0;
-    let at = |x: f32, y: f32| cen + vec2(x * u, y * u);
+/// Lucide icon names, so this app's icons match the rest of the suite.
+fn draw_icon_lucide(t: Tool) -> &'static str {
+    use Tool::*;
     match t {
-        Tool::Select => {
-            p.line_segment([at(0.0, -1.0), at(0.0, 1.0)], s);
-            p.line_segment([at(-0.35, -1.0), at(0.35, -1.0)], s);
-            p.line_segment([at(-0.35, 1.0), at(0.35, 1.0)], s);
-            p.rect_filled(Rect::from_min_max(at(0.25, -0.45), at(0.95, 0.45)), 2.0, c.gamma_multiply(0.45));
-        }
-        Tool::Hand => {
-            p.rect_stroke(Rect::from_min_max(at(-0.6, -0.1), at(0.6, 1.0)), 4.0, s, eframe::egui::StrokeKind::Middle);
-            for (k, h) in [(-0.45, 0.75), (-0.15, 1.0), (0.15, 0.95), (0.45, 0.7)] {
-                p.line_segment([at(k, -0.1), at(k, -0.1 - h)], s);
-            }
-        }
-        Tool::Zoom => {
-            p.circle_stroke(at(-0.2, -0.2), u * 0.62, s);
-            p.line_segment([at(0.25, 0.25), at(0.95, 0.95)], Stroke::new(2.2, c));
-        }
-        Tool::SpecRect => {
-            let rr = Rect::from_min_max(at(-0.9, -0.7), at(0.9, 0.7));
-            for (a, b) in [(rr.left_top(), rr.right_top()), (rr.right_top(), rr.right_bottom()), (rr.right_bottom(), rr.left_bottom()), (rr.left_bottom(), rr.left_top())] {
-                p.add(Shape::dashed_line(&[a, b], s, 3.0, 2.0));
-            }
-            for k in 0..3 {
-                let y = -0.35 + k as f32 * 0.35;
-                p.line_segment([at(-0.55, y), at(0.55, y)], Stroke::new(1.0, c.gamma_multiply(0.6)));
-            }
-        }
-        Tool::Lasso => {
-            let pts: Vec<Pos2> = (0..=24).map(|k| {
-                let a = k as f32 / 24.0 * std::f32::consts::TAU;
-                at(a.cos() * 0.9, a.sin() * 0.5 - 0.3)
-            }).collect();
-            p.add(Shape::line(pts, s));
-            p.add(Shape::line(vec![at(-0.2, 0.18), at(-0.35, 0.6), at(-0.1, 0.95)], s));
-        }
-        Tool::Brush => {
-            p.line_segment([at(0.9, -0.9), at(-0.1, 0.1)], Stroke::new(2.0, c));
-            p.circle_filled(at(-0.4, 0.45), u * 0.38, c);
-            p.add(Shape::line(vec![at(-0.75, 0.75), at(-0.95, 0.95)], s));
-        }
-        Tool::Heal => {
-            let pts = |a: f32| {
-                let (sn, cs) = a.sin_cos();
-                let m = |x: f32, y: f32| cen + vec2(x * cs - y * sn, x * sn + y * cs) * u;
-                vec![m(-1.0, -0.35), m(1.0, -0.35), m(1.0, 0.35), m(-1.0, 0.35)]
-            };
-            p.add(Shape::closed_line(pts(-0.785), s));
-            p.circle_filled(cen, 1.6, c);
-            p.circle_filled(cen + vec2(-0.25, -0.25) * u, 1.2, c);
-            p.circle_filled(cen + vec2(0.25, 0.25) * u, 1.2, c);
-        }
-        Tool::Pencil => {
-            p.add(Shape::closed_line(vec![at(0.95, -0.6), at(0.6, -0.95), at(-0.55, 0.2), at(-0.2, 0.55)], s));
-            p.add(Shape::convex_polygon(vec![at(-0.55, 0.2), at(-0.2, 0.55), at(-0.85, 0.85)], c, Stroke::NONE));
-        }
-        Tool::Razor => {
-            p.line_segment([at(0.0, -1.0), at(0.0, 1.0)], Stroke::new(1.0, c.gamma_multiply(0.6)));
-            p.add(Shape::convex_polygon(vec![at(-0.55, -0.65), at(0.55, -0.65), at(0.55, 0.05), at(0.0, 0.5), at(-0.55, 0.05)], c, Stroke::NONE));
-        }
-        Tool::Fade => {
-            p.add(Shape::line(vec![at(-0.95, 0.85), at(-0.3, 0.1), at(0.3, -0.45), at(0.95, -0.7)], s));
-            p.line_segment([at(-0.95, 0.85), at(0.95, 0.85)], Stroke::new(1.0, c.gamma_multiply(0.5)));
-            p.rect_filled(Rect::from_center_size(at(0.75, -0.75), vec2(u * 0.45, u * 0.45)), 1.0, c);
-        }
-        Tool::Envelope => {
-            let pts = [at(-0.95, 0.3), at(-0.35, -0.5), at(0.25, 0.4), at(0.95, -0.2)];
-            p.add(Shape::line(pts.to_vec(), s));
-            for q in pts {
-                p.circle_filled(q, 2.2, c);
-            }
-        }
+        Select => "text-cursor",
+        Hand => "hand",
+        Zoom => "zoom-in",
+        SpecRect => "square-dashed",
+        Lasso => "lasso",
+        Brush => "paintbrush",
+        Heal => "bandage",
+        Pencil => "pencil",
+        Razor => "scissors",
+        Fade => "trending-down",
+        Envelope => "activity",
     }
+}
+
+pub fn draw_icon(p: &Painter, r: Rect, c: Color32, t: Tool) {
+    studio_ui::pro::lucide(p, r.expand(r.width() * 0.12), draw_icon_lucide(t), c);
 }
 
 #[cfg(test)]
