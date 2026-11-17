@@ -1,12 +1,12 @@
 {
   "apps": [
-    { "id": "pixel", "name": "Pixel", "tagline": "Retouche photo et compositing par calques", "category": "Image", "accent": [255, 59, 107] },
-    { "id": "cut", "name": "Cut", "tagline": "Montage vidéo multipiste", "category": "Vidéo", "accent": [168, 85, 247] },
-    { "id": "vector", "name": "Vector", "tagline": "Dessin vectoriel, logos et typographie", "category": "Image", "accent": [255, 149, 10] },
-    { "id": "motion", "name": "Motion", "tagline": "Animation, titres et effets visuels", "category": "Vidéo", "accent": [30, 170, 240] },
-    { "id": "lumen", "name": "Lumen", "tagline": "Développement RAW et catalogue photo", "category": "Photo", "accent": [30, 200, 140] },
-    { "id": "page", "name": "Page", "tagline": "Mise en page, magazines et PDF", "category": "Publication", "accent": [250, 100, 50] },
-    { "id": "sound", "name": "Sound", "tagline": "Édition et nettoyage audio", "category": "Audio", "accent": [100, 95, 240] },
+    { "id": "pixel", "name": "Pixel", "tagline": "Retouche photo et compositing par calques", "category": "Image", "accent": [255, 77, 109] },
+    { "id": "cut", "name": "Cut", "tagline": "Montage vidéo multipiste", "category": "Vidéo", "accent": [184, 107, 255] },
+    { "id": "vector", "name": "Vector", "tagline": "Dessin vectoriel, logos et typographie", "category": "Image", "accent": [255, 176, 0] },
+    { "id": "motion", "name": "Motion", "tagline": "Animation, titres et effets visuels", "category": "Vidéo", "accent": [61, 190, 245] },
+    { "id": "lumen", "name": "Lumen", "tagline": "Développement RAW et catalogue photo", "category": "Photo", "accent": [47, 214, 154] },
+    { "id": "page", "name": "Page", "tagline": "Mise en page, magazines et PDF", "category": "Publication", "accent": [255, 122, 61] },
+    { "id": "sound", "name": "Sound", "tagline": "Édition et nettoyage audio", "category": "Audio", "accent": [140, 140, 255] },
     { "id": "folio", "name": "Folio", "tagline": "PDF : lecture, annotation, OCR, signature et organisation", "category": "Document", "accent": [235, 50, 60] }
   ]
 }

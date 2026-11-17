@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Page introuvable · Ethone Studio</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0e0e0e">
+  <link rel="icon" href="/icons/studio.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .lost { min-height: 100svh; display: grid; place-content: center; gap: 28px; padding: 120px var(--gutter); text-align: center; }
+    .lost .code { font-family: var(--display); font-weight: 800; font-size: clamp(5rem, 18vw, 11rem); line-height: 0.9; letter-spacing: -0.06em; color: var(--signal); margin: 0; }
+    .lost p { margin: 0 auto; max-width: 440px; color: var(--on-dark-muted); font-size: 1.1rem; }
+    .lost .cta { justify-content: center; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="nav scrolled">
+    <a class="brand" href="/" aria-label="Ethone Studio, accueil">
+      <img src="/icons/studio.svg" alt="" width="30" height="30">
+      <span>Ethone <i>Studio</i></span>
+    </a>
+    <a class="pill" href="/#telecharger" style="margin-left: auto">Télécharger</a>
+  </header>
+  <main class="lost">
+    <p class="code">404</p>
+    <h1 style="font-size: clamp(2rem, 5vw, 3.4rem)">Cette page s'est <i>perdue.</i></h1>
+    <p>L'adresse n'existe pas ou a changé. Les apps, elles, sont toujours là.</p>
+    <div class="cta">
+      <a class="button primary" href="/">Retour à l'accueil</a>
+      <a class="button ghost" href="/#apps">Voir les apps</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -8,14 +8,14 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const U = (id, w = 1400) => `https://images.unsplash.com/${id}?w=${w}&q=72&auto=format&fit=crop`;
 
 const APPS = [
-  { id: 'pixel', name: 'Pixel', what: 'Retouche photo', c: '255 77 109', t: '214 30 70', head: ['Il n\'y a qu\'un', 'Pixel.'], text: 'Retouche, montage photo et compositing par calques. Tes PSD s\'ouvrent calque par calque, et tes réflexes Photoshop marchent ici.', tags: ['Calques et masques', '38 outils', 'Fichiers PSD'], photo: 'photo-1516575150278-77136aed6920', size: '23 Mo' },
-  { id: 'lumen', name: 'Lumen', what: 'Photo RAW', c: '47 214 154', t: '10 140 95', head: ['Tes photos,', 'développées.'], text: 'Développement RAW, catalogue et looks pellicule. Tes préréglages Lightroom et tes LUT fonctionnent tels quels.', tags: ['RAW', 'Looks pellicule', 'Préréglages XMP'], photo: 'photo-1604223190546-a43e4c7f29d7', size: '23 Mo' },
-  { id: 'vector', name: 'Vector', what: 'Dessin vectoriel', c: '255 176 0', t: '190 110 0', head: ['Net à toutes', 'les tailles.'], text: 'Logos, affiches, illustrations et typographie en vectoriel, avec 2 359 icônes prêtes à l\'emploi.', tags: ['2 359 icônes', 'Nuanciers ASE', 'SVG optimisé'], photo: 'photo-1767706508363-b2a729df06fb', size: '23 Mo' },
-  { id: 'cut', name: 'Cut', what: 'Montage vidéo', c: '184 107 255', t: '120 50 210', head: ['Le montage,', 'sans détour.'], text: 'Montage multipiste, transitions et titres. Tu récupères les médias de tes projets Premiere en un clic.', tags: ['Multipiste', 'Transitions', 'Médias Premiere'], photo: 'photo-1515634928627-2a4e0dae3ddf', size: '22 Mo' },
-  { id: 'motion', name: 'Motion', what: 'Animation', c: '61 190 245', t: '0 120 190', head: ['Fais bouger', 'tes idées.'], text: 'Images clés, courbes et titres animés, dans tous les formats, du 16:9 au 9:16.', tags: ['Images clés', 'Courbes', 'Formats 9:16'], photo: 'photo-1490049350474-498de43bc885', size: '23 Mo' },
-  { id: 'page', name: 'Page', what: 'Mise en page', c: '255 122 61', t: '210 80 20', head: ['Mets tes idées', 'en page.'], text: 'Magazines, affiches et documents avec gabarits. Tes fichiers InDesign IDML s\'ouvrent, l\'export PDF est prêt pour l\'imprimeur.', tags: ['Gabarits', 'InDesign IDML', 'Export PDF'], photo: 'photo-1588775161074-a5a92eaa9a37', size: '24 Mo' },
-  { id: 'folio', name: 'Folio', what: 'PDF', c: '242 242 242', t: '14 14 14', head: ['Tous tes PDF,', 'en ordre.'], text: 'Lis, annote, signe et réorganise tes PDF. La reconnaissance de texte rend les scans consultables.', tags: ['OCR', 'Signature', 'Organisation'], photo: 'photo-1695388474402-ed805a890d8d', size: '25 Mo' },
-  { id: 'sound', name: 'Sound', what: 'Audio', c: '140 140 255', t: '80 70 220', head: ['Un son propre,', 'en trois clics.'], text: 'Coupe, nettoie et transforme l\'audio avec le spectrogramme et 311 bruitages libres de droits.', tags: ['311 bruitages', 'Spectrogramme', 'Effets voix'], photo: 'photo-1541592553160-82008b127ccb', size: '24 Mo' },
+  { id: 'pixel', name: 'Pixel', what: 'Retouche photo', c: '255 77 109', t: '214 30 70', head: ['Il n\'y a qu\'un', 'Pixel.'], text: 'Retouche, montage photo et compositing par calques. Tes PSD s\'ouvrent calque par calque, et tes réflexes Photoshop marchent ici.', tags: ['Calques et masques', '38 outils', 'Fichiers PSD'], photo: 'photo-1516575150278-77136aed6920', size: '22 Mo' },
+  { id: 'lumen', name: 'Lumen', what: 'Photo RAW', c: '47 214 154', t: '10 140 95', head: ['Tes photos,', 'développées.'], text: 'Développement RAW, catalogue et looks pellicule. Tes préréglages Lightroom et tes LUT fonctionnent tels quels.', tags: ['RAW', 'Looks pellicule', 'Préréglages XMP'], photo: 'photo-1604223190546-a43e4c7f29d7', size: '22 Mo' },
+  { id: 'vector', name: 'Vector', what: 'Dessin vectoriel', c: '255 176 0', t: '190 110 0', head: ['Net à toutes', 'les tailles.'], text: 'Logos, affiches, illustrations et typographie en vectoriel, avec 2 359 icônes prêtes à l\'emploi.', tags: ['2 359 icônes', 'Nuanciers ASE', 'SVG optimisé'], photo: 'photo-1767706508363-b2a729df06fb', size: '22 Mo' },
+  { id: 'cut', name: 'Cut', what: 'Montage vidéo', c: '184 107 255', t: '120 50 210', head: ['Le montage,', 'sans détour.'], text: 'Montage multipiste, transitions et titres. Tu récupères les médias de tes projets Premiere en un clic.', tags: ['Multipiste', 'Transitions', 'Médias Premiere'], photo: 'photo-1515634928627-2a4e0dae3ddf', size: '21 Mo' },
+  { id: 'motion', name: 'Motion', what: 'Animation', c: '61 190 245', t: '0 120 190', head: ['Fais bouger', 'tes idées.'], text: 'Images clés, courbes et titres animés, dans tous les formats, du 16:9 au 9:16.', tags: ['Images clés', 'Courbes', 'Formats 9:16'], photo: 'photo-1490049350474-498de43bc885', size: '22 Mo' },
+  { id: 'page', name: 'Page', what: 'Mise en page', c: '255 122 61', t: '210 80 20', head: ['Mets tes idées', 'en page.'], text: 'Magazines, affiches et documents avec gabarits. Tes fichiers InDesign IDML s\'ouvrent, l\'export PDF est prêt pour l\'imprimeur.', tags: ['Gabarits', 'InDesign IDML', 'Export PDF'], photo: 'photo-1588775161074-a5a92eaa9a37', size: '23 Mo' },
+  { id: 'folio', name: 'Folio', what: 'PDF', c: '242 242 242', t: '14 14 14', head: ['Tous tes PDF,', 'en ordre.'], text: 'Lis, annote, signe et réorganise tes PDF. La reconnaissance de texte rend les scans consultables.', tags: ['OCR', 'Signature', 'Organisation'], photo: 'photo-1695388474402-ed805a890d8d', size: '24 Mo' },
+  { id: 'sound', name: 'Sound', what: 'Audio', c: '140 140 255', t: '80 70 220', head: ['Un son propre,', 'en trois clics.'], text: 'Coupe, nettoie et transforme l\'audio avec le spectrogramme et 311 bruitages libres de droits.', tags: ['311 bruitages', 'Spectrogramme', 'Effets voix'], photo: 'photo-1541592553160-82008b127ccb', size: '23 Mo' },
 ];
 
 const FORMATS = [
@@ -78,7 +78,7 @@ function buildStory() {
       </div>
       <div class="panel-art">
         <div class="panel-photo"><img src="${U(a.photo)}" alt="" loading="lazy"></div>
-        <div class="panel-shot"><img src="/shots/${a.id}.webp" alt="${a.name} en cours d'utilisation" loading="lazy"></div>
+        <div class="panel-shot"><img src="/shots/${a.id}.jpg" alt="${a.name} en cours d'utilisation" loading="lazy"></div>
       </div>`;
     panels.append(el);
     const b = document.createElement('button');
