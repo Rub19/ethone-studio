@@ -1907,7 +1907,7 @@ impl PageApp {
                                 ui.toggle_value(upper, RichText::new(tl("AA"))).on_hover_text(tl("Majuscules · Ctrl+Maj+K"));
                                 pro::toolbar_sep(ui);
                                 let mut a = (*align as usize).min(3);
-                                if pro::segmented(ui, &mut a, &[tl("≡ Gtl("), tl(")≡ Ctl("), tl(")≡ Dtl("), tl(")≡ J")]) {
+                                if pro::segmented(ui, &mut a, &[tl("≡ G"), tl("≡ C"), tl("≡ D"), tl("≡ J")]) {
                                     *align = a as u8;
                                 }
                                 pro::toolbar_sep(ui);
@@ -1954,7 +1954,7 @@ impl PageApp {
                             }
                             Kind::Image { cover, filter, zoom, stretch, .. } => {
                                 let mut c = if *stretch { 2 } else if *cover { 0 } else { 1 };
-                                if pro::segmented(ui, &mut c, &[tl("Remplirtl("), tl(")Ajustertl("), tl(")Déformer")]) {
+                                if pro::segmented(ui, &mut c, &[tl("Remplir"), tl("Ajuster"), tl("Déformer")]) {
                                     (*cover, *stretch) = (c == 0, c == 2);
                                 }
                                 ui.add(egui::DragValue::new(zoom).range(0.05..=20.0).speed(0.01).prefix("Échelle ").max_decimals(2));
@@ -2187,7 +2187,7 @@ impl PageApp {
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
                     ui.add_space(10.0);
-                    pro::segmented(ui, &mut self.tab, &[tl("Propriétéstl("), tl(")Calquestl("), tl(")Lienstl("), tl(")Contrôle")]);
+                    pro::segmented(ui, &mut self.tab, &[tl("Propriétés"), tl("Calques"), tl("Liens"), tl("Contrôle")]);
                 });
                 ui.add_space(8.0);
                 match self.tab {
@@ -2317,7 +2317,7 @@ impl PageApp {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.spacing_mut().slider_width = (ui.available_width() - 90.0).max(80.0);
                     let mut a = *al as usize;
-                    if pro::segmented(ui, &mut a, &[tl("Gauchetl("), tl(")Centretl("), tl(")Droitetl("), tl(")Justifié")]) {
+                    if pro::segmented(ui, &mut a, &[tl("Gauche"), tl("Centre"), tl("Droite"), tl("Justifié")]) {
                         *al = a as u8;
                     }
                     ui.label(RichText::new(tl("Interligne")).size(12.0).color(MUTED));
@@ -2424,7 +2424,7 @@ impl PageApp {
                     });
                     ui.label(RichText::new(tl("Alignement vertical")).size(12.0).color(MUTED));
                     let mut v = *valign as usize;
-                    if pro::segmented(ui, &mut v, &[tl("Hauttl("), tl(")Milieutl("), tl(")Bas")]) {
+                    if pro::segmented(ui, &mut v, &[tl("Haut"), tl("Milieu"), tl("Bas")]) {
                         *valign = v as u8;
                     }
                     ui.label(RichText::new(tl("Marge intérieure")).size(12.0).color(MUTED));
@@ -2463,7 +2463,7 @@ impl PageApp {
                         }
                     });
                     let mut c = if *cover { 0 } else { 1 };
-                    if pro::segmented(ui, &mut c, &[tl("Remplir le cadretl("), tl(")Ajuster dans le cadre")]) {
+                    if pro::segmented(ui, &mut c, &[tl("Remplir le cadre"), tl("Ajuster dans le cadre")]) {
                         *cover = c == 0;
                     }
                     ui.checkbox(stretch, tl("Étirer sans garder les proportions"));
@@ -2483,7 +2483,7 @@ impl PageApp {
                     });
                     ui.label(RichText::new(tl("Forme du cadre")).size(12.0).color(MUTED));
                     let mut sh = *shape as usize;
-                    if pro::segmented(ui, &mut sh, &[tl("Rectangletl("), tl(")Ellipsetl("), tl(")Polygone")]) {
+                    if pro::segmented(ui, &mut sh, &[tl("Rectangle"), tl("Ellipse"), tl("Polygone")]) {
                         *shape = sh as u8;
                     }
                     if *shape == 2 {
@@ -2549,7 +2549,7 @@ impl PageApp {
                     });
                     ui.label(RichText::new(tl("Extrémités")).size(12.0).color(MUTED));
                     let mut c = *cap as usize;
-                    if pro::segmented(ui, &mut c, &[tl("Rondestl("), tl(")Carréestl("), tl(")Droites")]) {
+                    if pro::segmented(ui, &mut c, &[tl("Rondes"), tl("Carrées"), tl("Droites")]) {
                         *cap = c as u8;
                     }
                     ui.label(RichText::new(tl("Direction")).size(12.0).color(MUTED));
@@ -2647,7 +2647,7 @@ impl PageApp {
                     color_row(ui, tl("Texte"), color, &swatches);
                     color_row(ui, tl("Traits"), line, &swatches);
                     let mut a = *talign as usize;
-                    if pro::segmented(ui, &mut a, &[tl("Gauchetl("), tl(")Centretl("), tl(")Droite")]) {
+                    if pro::segmented(ui, &mut a, &[tl("Gauche"), tl("Centre"), tl("Droite")]) {
                         *talign = a as u8;
                     }
                     ui.checkbox(first_col, tl("Première colonne en gras"));
@@ -3446,7 +3446,7 @@ impl PageApp {
                 ui.add_space(8.0);
                 row(ui, tl("Pages"));
                 ui.horizontal(|ui| {
-                    pro::segmented(ui, &mut o.pages, &[tl("Toutestl("), tl(")Page affichéetl("), tl(")Plage")]);
+                    pro::segmented(ui, &mut o.pages, &[tl("Toutes"), tl("Page affichée"), tl("Plage")]);
                     if o.pages == 2 {
                         ui.add(egui::TextEdit::singleline(&mut o.range).hint_text(format!("ex. 1-3, 5 (sur {n})")).desired_width(120.0));
                     }

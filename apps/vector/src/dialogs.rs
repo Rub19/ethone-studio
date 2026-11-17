@@ -256,7 +256,7 @@ impl VectorApp {
                     });
                 }
                 Dlg::Reflect { axis, angle } => {
-                    pro::segmented(ui, axis, &[tl("Horizontaltl("), tl(")Verticaltl("), tl(")Angle")]);
+                    pro::segmented(ui, axis, &[tl("Horizontal"), tl("Vertical"), tl("Angle")]);
                     if *axis == 2 {
                         num(ui, tl("Angle de l'axe"), angle, -180.0..=180.0, "°");
                     }
@@ -264,7 +264,7 @@ impl VectorApp {
                 Dlg::Shear { deg, vertical } => {
                     num(ui, tl("Angle d'inclinaison"), deg, -80.0..=80.0, "°");
                     let mut v = *vertical as usize;
-                    if pro::segmented(ui, &mut v, &[tl("Axe horizontaltl("), tl(")Axe vertical")]) {
+                    if pro::segmented(ui, &mut v, &[tl("Axe horizontal"), tl("Axe vertical")]) {
                         *vertical = v == 1;
                     }
                 }
@@ -295,7 +295,7 @@ impl VectorApp {
                     ui.label(RichText::new(tl("Nombre d'ondes")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(ridges, 2..=300));
                     let mut s = *smooth as usize;
-                    if pro::segmented(ui, &mut s, &[tl("Pointestl("), tl(")Arrondis")]) {
+                    if pro::segmented(ui, &mut s, &[tl("Pointes"), tl("Arrondis")]) {
                         *smooth = s == 1;
                     }
                 }
@@ -303,7 +303,7 @@ impl VectorApp {
                     slide(ui, tl("Amplitude"), size, 0.2..=100.0, " px");
                     slide(ui, tl("Détail (points par 100 px)"), detail, 1.0..=100.0, "");
                     let mut s = *smooth as usize;
-                    if pro::segmented(ui, &mut s, &[tl("Anglestl("), tl(")Arrondis")]) {
+                    if pro::segmented(ui, &mut s, &[tl("Angles"), tl("Arrondis")]) {
                         *smooth = s == 1;
                     }
                 }
@@ -396,10 +396,10 @@ impl VectorApp {
         let keep = pro::sheet(ctx, "export", 440.0, |ui| {
             title(ui, tl("Exporter"), "Formats web, impression et fichiers vectoriels");
             ui.spacing_mut().item_spacing.y = 10.0;
-            pro::segmented(ui, &mut o.format, &[tl("PNGtl("), tl(")JPEGtl("), tl(")SVGtl("), tl(")PDF")]);
+            pro::segmented(ui, &mut o.format, &[tl("PNG"), tl("JPEG"), tl("SVG"), tl("PDF")]);
             ui.horizontal(|ui| {
                 row_label(ui, tl("Contenu"), 90.0);
-                pro::segmented(ui, &mut o.scope, &[tl("Plan actiftl("), tl(")Tous les planstl("), tl(")Sélection")]);
+                pro::segmented(ui, &mut o.scope, &[tl("Plan actif"), tl("Tous les plans"), tl("Sélection")]);
             });
             if o.format <= 1 {
                 ui.horizontal(|ui| {
@@ -470,7 +470,7 @@ impl VectorApp {
                     }
                 }
             });
-            pro::segmented(ui, &mut t.opts.mode, &[tl("Noir et blanctl("), tl(")Niveaux de gristl("), tl(")Couleurs")]);
+            pro::segmented(ui, &mut t.opts.mode, &[tl("Noir et blanc"), tl("Niveaux de gris"), tl("Couleurs")]);
             if t.opts.mode == 0 {
                 slide(ui, tl("Seuil"), &mut t.opts.threshold, 1.0..=254.0, "");
             } else {

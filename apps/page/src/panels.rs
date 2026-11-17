@@ -992,7 +992,7 @@ impl PageApp {
                 });
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Dans")).size(12.0).color(MUTED));
-                    pro::segmented(ui, &mut st.scope, &[tl("Documenttl("), tl(")Pagetl("), tl(")Bloc sélectionné")]);
+                    pro::segmented(ui, &mut st.scope, &[tl("Document"), tl("Page"), tl("Bloc sélectionné")]);
                 });
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(tl("Style de paragraphe")).size(12.0).color(MUTED));

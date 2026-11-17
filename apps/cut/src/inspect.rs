@@ -286,7 +286,7 @@ impl Cut {
             });
             ui.add_space(8.0);
             let mut tab = self.tab;
-            if pro::segmented(ui, &mut tab, &[tl("Cliptl("), tl(")Imagetl("), tl(")Effetstl("), tl(")Couleurtl("), tl(")Audio")]) {
+            if pro::segmented(ui, &mut tab, &[tl("Clip"), tl("Image"), tl("Effets"), tl("Couleur"), tl("Audio")]) {
                 self.tab = tab;
             }
         });
@@ -369,7 +369,7 @@ impl Cut {
                     let mut white = c.fade_white as usize;
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Fondu vers")).size(12.0).color(MUTED));
-                        if pro::segmented(ui, &mut white, &[tl("Noirtl("), tl(")Blanc")]) {
+                        if pro::segmented(ui, &mut white, &[tl("Noir"), tl("Blanc")]) {
                             c.fade_white = white == 1;
                         }
                     });
@@ -512,7 +512,7 @@ impl Cut {
                 pro::dock_panel(ui, "fx-mask", tl("Masque"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let mut kind = c.mask.as_ref().map_or(0, |m| m.kind as usize + 1);
-                    if pro::segmented(ui, &mut kind, &[tl("Aucuntl("), tl(")Rectangletl("), tl(")Ellipsetl("), tl(")Plume")]) {
+                    if pro::segmented(ui, &mut kind, &[tl("Aucun"), tl("Rectangle"), tl("Ellipse"), tl("Plume")]) {
                         c.mask = match kind {
                             0 => None,
                             3 => Some(Mask { kind: 2, pts: vec![[0.3, 0.25], [0.7, 0.25], [0.75, 0.75], [0.25, 0.75]], feather: 5.0, invert: false }),
@@ -569,7 +569,7 @@ impl Cut {
                 });
                 pro::dock_panel(ui, "color-curves", tl("Courbes"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    pro::segmented(ui, &mut ch, &[tl("Maîtretl("), tl(")Rougetl("), tl(")Verttl("), tl(")Bleu")]);
+                    pro::segmented(ui, &mut ch, &[tl("Maître"), tl("Rouge"), tl("Vert"), tl("Bleu")]);
                     ui.add_space(4.0);
                     let col = [Color32::WHITE, Color32::from_rgb(255, 90, 80), Color32::from_rgb(80, 220, 110), Color32::from_rgb(90, 150, 255)][ch.min(3)];
                     curve(ui, &mut c.curves[ch.min(3)], col);
@@ -741,7 +741,7 @@ impl Cut {
             let mut al = t.align as usize;
             ui.horizontal(|ui| {
                 ui.label(RichText::new(tl("Alignement")).size(12.0).color(MUTED));
-                if pro::segmented(ui, &mut al, &[tl("Autotl("), tl(")Gauchetl("), tl(")Centretl("), tl(")Droite")]) {
+                if pro::segmented(ui, &mut al, &[tl("Auto"), tl("Gauche"), tl("Centre"), tl("Droite")]) {
                     t.align = al as u8;
                 }
             });
@@ -776,7 +776,7 @@ impl Cut {
         pro::dock_panel(ui, "title-place", tl("Position et durée"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let mut place = t.place as usize;
-            if pro::segmented(ui, &mut place, &[tl("Hauttl("), tl(")Centretl("), tl(")Bastl("), tl(")Tiers")]) {
+            if pro::segmented(ui, &mut place, &[tl("Haut"), tl("Centre"), tl("Bas"), tl("Tiers")]) {
                 t.place = place as u8;
             }
             row_slider(ui, tl("Décalage X"), &mut t.dx, -0.5..=0.5, "", false);

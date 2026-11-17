@@ -2544,7 +2544,7 @@ impl Cut {
             });
             ui.add_space(6.0);
             ui.horizontal(|ui| {
-                pro::segmented(ui, &mut self.bin_filter, &[tl("Touttl("), tl(")Vidéotl("), tl(")Sontl("), tl(")Image")]);
+                pro::segmented(ui, &mut self.bin_filter, &[tl("Tout"), tl("Vidéo"), tl("Son"), tl("Image")]);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.menu_button(RichText::new("⇅").color(MUTED), |ui| {
                         ui.label(RichText::new(tl("Trier par")).size(12.0).color(FAINT));
@@ -3073,7 +3073,7 @@ impl Cut {
                         ui.end_row();
                         label(ui, tl("Cadrage"));
                         let mut f = opts.fill as usize;
-                        if pro::segmented(ui, &mut f, &[tl("Ajuster (bandes)tl("), tl(")Remplir (recadrer)")]) {
+                        if pro::segmented(ui, &mut f, &[tl("Ajuster (bandes)"), tl("Remplir (recadrer)")]) {
                             opts.fill = f == 1;
                         }
                         ui.end_row();

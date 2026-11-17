@@ -841,7 +841,7 @@ fn compress(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     }
     ui.add_space(10.0);
     label(ui, tl("Compression forte (pages en images)"));
-    pro::segmented(ui, &mut app.st.comp_dpi, &[tl("72 ppptl("), tl(")110 ppptl("), tl(")150 ppp")]);
+    pro::segmented(ui, &mut app.st.comp_dpi, &[tl("72 ppp"), tl("110 ppp"), tl("150 ppp")]);
     ui.horizontal(|ui| {
         ui.label(RichText::new(tl("Qualité JPEG")).size(12.0).color(MUTED));
         ui.add(egui::Slider::new(&mut app.st.comp_q, 30..=95));
@@ -866,7 +866,7 @@ fn compress(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 fn stamp(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Filigrane et numérotation");
     let mut mode = app.st.st_mode;
-    if pro::segmented(ui, &mut mode, &[tl("Filigranetl("), tl(")En-têtetl("), tl(")Piedtl("), tl(")Numérostl("), tl(")Bates")]) {
+    if pro::segmented(ui, &mut mode, &[tl("Filigrane"), tl("En-tête"), tl("Pied"), tl("Numéros"), tl("Bates")]) {
         app.st.st_mode = mode;
         app.st.st = stamp_preset(mode);
     }
@@ -919,10 +919,10 @@ fn stamp(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
 
 fn export(app: &mut Folio, ui: &mut Ui, ctx: &egui::Context) {
     title(ui, app, "Exporter");
-    pro::segmented(ui, &mut app.st.exp_fmt, &[tl("PNGtl("), tl(")JPEGtl("), tl(")Textetl("), tl(")Word")]);
+    pro::segmented(ui, &mut app.st.exp_fmt, &[tl("PNG"), tl("JPEG"), tl("Texte"), tl("Word")]);
     if app.st.exp_fmt < 2 {
         label(ui, tl("Résolution"));
-        pro::segmented(ui, &mut app.st.exp_dpi, &[tl("72 ppptl("), tl(")150 ppptl("), tl(")300 ppp")]);
+        pro::segmented(ui, &mut app.st.exp_dpi, &[tl("72 ppp"), tl("150 ppp"), tl("300 ppp")]);
     }
     label(ui, tl("Pages"));
     scope_pick(ui, &mut app.st.exp_scope, !app.sel.is_empty());

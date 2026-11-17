@@ -23,7 +23,7 @@ for my $f (@ARGV) {
   $n += $s =~ s/\b(?!(?:dock_panel|begin|effects_panel|panel)\()([a-z_][a-z0-9_]*)\(ui, $L/$1(ui, tl("$2")/g;
   $n += $s =~ s/pref_title\(ui, $L\)/pref_title(ui, tl("$1"))/g;
   $n += $s =~ s/Cmd::new\($L, $L/Cmd::new(tl("$1"), tl("$2")/g;
-  $n += $s =~ s{(segmented\([^;\n]*?&\[)([^\]\n]*)(\])}{ my ($a, $b, $c) = ($1, $2, $3); my $k = ($b =~ s/(?<!tl\()$L/tl("$1")/g) || 0; $a . $b . $c }ge;
+  $n += $s =~ s{(segmented\([^;\n]*?&\[)([^\]\n]*)(\])}{ my ($a, $b, $c) = ($1, $2, $3); $b =~ s/$L/tl("$1")/g unless $b =~ /\btl\(/; $a . $b . $c }ge;
   next unless $n;
   unless ($s =~ /use \Q$import\E;/) {
     $s =~ s/^(use [^\n]*;\n)/$1use $import;\n/m or $s = "use $import;\n" . $s;

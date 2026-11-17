@@ -525,7 +525,7 @@ impl VectorApp {
                     }
                     Tool::Gradient => {
                         let mut k = self.o.grad_radial as usize;
-                        if pro::segmented(ui, &mut k, &[tl("Linéairetl("), tl(")Radial")]) {
+                        if pro::segmented(ui, &mut k, &[tl("Linéaire"), tl("Radial")]) {
                             self.o.grad_radial = k == 1;
                         }
                         small(ui, tl("Glisse sur l'objet sélectionné pour placer le dégradé"));
@@ -670,7 +670,7 @@ impl VectorApp {
             ui.add_space(8.0);
             ui.horizontal(|ui| {
                 ui.add_space(12.0);
-                pro::segmented(ui, &mut self.dock_tab, &[tl("Propriétéstl("), tl(")Calquestl("), tl(")Bibliothèques")]);
+                pro::segmented(ui, &mut self.dock_tab, &[tl("Propriétés"), tl("Calques"), tl("Bibliothèques")]);
             });
             ui.add_space(8.0);
             let line = ui.allocate_exact_size(vec2(ui.available_width(), 1.0), Sense::hover()).0;
@@ -928,7 +928,7 @@ impl VectorApp {
         ui.spacing_mut().item_spacing.y = 6.0;
         ui.horizontal(|ui| {
             row_label(ui, tl("Aligner sur"), 76.0);
-            pro::segmented(ui, &mut self.align_to, &[tl("Sélectiontl("), tl(")Plantl("), tl(")Clé")]);
+            pro::segmented(ui, &mut self.align_to, &[tl("Sélection"), tl("Plan"), tl("Clé")]);
         });
         if self.align_to == 2 {
             hint(ui, tl("Objet clé : le premier sélectionné (contour bleu épais)."));
@@ -1489,21 +1489,21 @@ fn stroke_panel(ui: &mut Ui, it: &mut Item) {
     if closed {
         small(ui, tl("Position du contour"));
         let mut a = it.stroke_align as usize;
-        if pro::segmented(ui, &mut a, &[tl("Centretl("), tl(")Intérieurtl("), tl(")Extérieur")]) {
+        if pro::segmented(ui, &mut a, &[tl("Centre"), tl("Intérieur"), tl("Extérieur")]) {
             it.stroke_align = a as u8;
         }
     }
     ui.horizontal(|ui| {
         row_label(ui, tl("Bouts"), 64.0);
         let mut cap = it.cap as usize;
-        if pro::segmented(ui, &mut cap, &[tl("Rondstl("), tl(")Platstl("), tl(")Carrés")]) {
+        if pro::segmented(ui, &mut cap, &[tl("Ronds"), tl("Plats"), tl("Carrés")]) {
             it.cap = cap as u8;
         }
     });
     ui.horizontal(|ui| {
         row_label(ui, tl("Angles"), 64.0);
         let mut join = it.join as usize;
-        if pro::segmented(ui, &mut join, &[tl("Rondstl("), tl(")Pointustl("), tl(")Biseaux")]) {
+        if pro::segmented(ui, &mut join, &[tl("Ronds"), tl("Pointus"), tl("Biseaux")]) {
             it.join = join as u8;
         }
     });
@@ -1594,7 +1594,7 @@ fn gradient_panel(ui: &mut Ui, it: &mut Item) {
     ui.spacing_mut().item_spacing.y = 6.0;
     let has = it.fill2.is_some() || !it.stops.is_empty();
     let mut kind = if !has { 0 } else if it.radial { 2 } else { 1 };
-    if pro::segmented(ui, &mut kind, &[tl("Aucuntl("), tl(")Linéairetl("), tl(")Radial")]) {
+    if pro::segmented(ui, &mut kind, &[tl("Aucun"), tl("Linéaire"), tl("Radial")]) {
         match kind {
             0 => {
                 it.fill2 = None;
@@ -1787,12 +1787,12 @@ fn shape_props(ui: &mut Ui, it: &mut Item) -> bool {
                 }
                 ui.add_space(6.0);
                 let mut cs = it.case as usize;
-                if pro::segmented(ui, &mut cs, &[tl("Aatl("), tl(")AAtl("), tl(")aatl("), tl(")Titre")]) {
+                if pro::segmented(ui, &mut cs, &[tl("Aa"), tl("AA"), tl("aa"), tl("Titre")]) {
                     it.case = cs as u8;
                 }
             });
             let mut al = it.align as usize;
-            if pro::segmented(ui, &mut al, &[tl("Gauchetl("), tl(")Centretl("), tl(")Droite")]) {
+            if pro::segmented(ui, &mut al, &[tl("Gauche"), tl("Centre"), tl("Droite")]) {
                 it.align = al as u8;
             }
             ui.horizontal(|ui| {

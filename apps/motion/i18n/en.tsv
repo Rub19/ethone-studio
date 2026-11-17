@@ -244,21 +244,13 @@ Depuis le centre
 Terminer (Entrée)	
 Inversé	
 Plage	
-Toute la compositiontl(	
-)Zone de travailtl(	
-)Personnalisée	
 Qualité (débit)	
 Lecture en boucle	
 Palette	
 Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	
-Centretl(	
-)Gauchetl(	
-)Droite	
 Vignettage	
 Grain film	
 Couper le tracé	
-Simultanétl(	
-)Un par un	
 Opérateurs de forme	
 Arrondir les angles	
 Fronce et dilatation	
@@ -269,14 +261,6 @@ Vitesse d'agitation
 Torsion	
 Pointillés (0 = plein)	
 Espace entre tirets	
-Platestl(	
-)Rondestl(	
-)Carrées	
-Arrondistl(	
-)Pointustl(	
-)Biseautés	
-Linéairetl(	
-)Radial	
 Angle du dégradé	
 Centre X	
 Centre Y	
@@ -311,9 +295,6 @@ Taille des ondes
 Évolution	
 Scintillement	
 Machine à écrire (0 = non)	
-Entréetl(	
-)Sortietl(	
-)Les deux	
 Décalage entre lettres	
 Durée par lettre	
 Valeurs de départ	
@@ -321,9 +302,6 @@ Valeurs de départ
 Rotation	
 Tremblement de position	
 Fréquence	
-Nontl(	
-)Boucletl(	
-)Aller-retour	
 Écho (traînée)	
 Délai entre échos	
 Répéteur	

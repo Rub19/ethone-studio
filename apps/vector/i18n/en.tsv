@@ -249,13 +249,8 @@ Détacher du tracé
 Vectorisation dynamique…	
 Distance	
 Verticale	
-Horizontaltl(	
-)Verticaltl(	
-)Angle	
 Angle de l'axe	
 Angle d'inclinaison	
-Axe horizontaltl(	
-)Axe vertical	
 Échelle horizontale	
 Échelle verticale	
 Déplacement horizontal	
@@ -265,10 +260,7 @@ Décalage (négatif = vers l'intérieur)
 Précision (plus haut = moins de points)	
 Rayon	
 Amplitude	
-Pointestl(	
-)Arrondis	
 Détail (points par 100 px)	
-Anglestl(	
 Contraction ← → Dilatation	
 Angle des hachures	
 Espacement	
@@ -281,19 +273,9 @@ Décalage X
 Décalage Y	
 Rotation par copie	
 OK	
-PNGtl(	
-)JPEGtl(	
-)SVGtl(	
-)PDF	
 Contenu	
-Plan actiftl(	
-)Tous les planstl(	
-)Sélection	
 Échelle	
 Vectorisation dynamique	
-Noir et blanctl(	
-)Niveaux de gristl(	
-)Couleurs	
 Seuil	
 Bruit ignoré	
 Courbes (plus haut = plus arrondi)	
@@ -381,8 +363,6 @@ Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles �
 Glisse pour pulvériser des occurrences du symbole	
 Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	
 Clique une zone fermée pour la peindre avec le fond	
-Linéairetl(	
-)Radial	
 Glisse sur l'objet sélectionné pour placer le dégradé	
 Rayon du point	
 Clic : point de couleur · Alt+clic : le retirer	
@@ -391,9 +371,6 @@ Clique sur un tracé pour le couper à cet endroit
 Trace un trait à main levée à travers les formes pour les découper	
 Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	
 Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	
-Propriétéstl(	
-)Calquestl(	
-)Bibliothèques	
 Pas	
 Déplacement clavier	
 Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	
@@ -403,9 +380,6 @@ Fond du document
 X	
 Y	
 Aligner sur	
-Sélectiontl(	
-)Plantl(	
-)Clé	
 Objet clé : le premier sélectionné (contour bleu épais).	
 Répartir les objets	
 Répartir l'espacement	
@@ -418,15 +392,7 @@ Sans sélection, le style devient celui des nouveaux objets.
 Opacité	
 Mode de fusion	
 Position du contour	
-Centretl(	
-)Intérieurtl(	
-)Extérieur	
 Bouts	
-Rondstl(	
-)Platstl(	
-)Carrés	
-)Pointustl(	
-)Biseaux	
 Limite de pointe	
 Pointillés	
 Tiret	
@@ -436,19 +402,10 @@ Espace 2
 Pointes de flèche (début · fin)	
 Taille des pointes	
 Profil de largeur	
-Aucuntl(	
-)Linéairetl(	
 Flou	
 Distorsion	
 Finesse	
 Arrondi des coins	
-Aatl(	
-)AAtl(	
-)aatl(	
-)Titre	
-Gauchetl(	
-)Centretl(	
-)Droite	
 Approche	
 Interlignage	
 Ligne de base	

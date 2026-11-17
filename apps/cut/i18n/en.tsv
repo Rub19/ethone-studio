@@ -198,18 +198,11 @@ Couper / réactiver le son
 Normaliser (crête −1 dB)	
 Look	
 Effet prédéfini	
-Cliptl(	
-)Imagetl(	
-)Effetstl(	
-)Couleurtl(	
-)Audio	
 Entrée	
 Sortie	
 Durée figée	
 Fondu d'entrée	
 Fondu de sortie	
-Noirtl(	
-)Blanc	
 Échelle finale	
 Netteté	
 Mosaïque	
@@ -218,10 +211,6 @@ Grain
 Vignettage	
 Tolérance	
 Douceur	
-Aucuntl(	
-)Rectangletl(	
-)Ellipsetl(	
-)Plume	
 Contour progressif	
 Contraste	
 Hautes lumières	
@@ -233,39 +222,22 @@ Teinte
 Vibrance	
 Intensité du look	
 Rotation de teinte	
-Maîtretl(	
-)Rougetl(	
-)Verttl(	
-)Bleu	
 Balance	
 Début	
 Volume	
 Taille	
 Espacement des lettres	
 Interligne	
-Autotl(	
-)Gauchetl(	
-)Centretl(	
-)Droite	
 Couleur du texte	
 Contour	
 Couleur du contour	
 Couleur du bandeau	
-Hauttl(	
-)Bastl(	
-)Tiers	
 Décalage X	
 Décalage Y	
 Volume général	
 Atténuation musique sous les voix	
-Touttl(	
-)Vidéotl(	
-)Sontl(	
-)Image	
 Préréglage	
 Cadrage	
-Ajuster (bandes)tl(	
-)Remplir (recadrer)	
 Débit vidéo	
 Audio AAC	
 Plage	

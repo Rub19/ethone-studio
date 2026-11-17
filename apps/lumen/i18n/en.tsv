@@ -254,20 +254,9 @@ Chaque réglage apparaît ici.
 Importation (original)	
 NAVIGATEUR	
 Survole la photo pour lire les valeurs RVB	
-Couleurtl(	
-)Noir et blanc	
 Tonalité	
 Présence	
 Vibrance	
-Param.tl(	
-)RVBtl(	
-)Rtl(	
-)Vtl(	
-)B	
-Teintetl(	
-)Saturationtl(	
-)Luminancetl(	
-)Tout	
 En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).	
 Lum. ombres	
 Lum. tons moyens	
@@ -340,12 +329,6 @@ Aucune donnée EXIF lisible dans ce fichier.
 À gauche : la référence (photo active). À droite : le candidat.	
 Coller (Ctrl+V) n'appliquera que les groupes cochés.	
 Les photos qui remplissent toutes les règles y apparaissent automatiquement.	
-Toutestl(	
-)Modifiéestl(	
-)Intactes	
-Toustl(	
-)RAWtl(	
-)JPEG, PNG…	
 EMPLACEMENT	
 NOM DES FICHIERS	
 FORMAT	

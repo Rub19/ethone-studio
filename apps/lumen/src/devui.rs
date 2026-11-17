@@ -418,7 +418,7 @@ impl Lumen {
                         });
                     });
                     let mut bw = s.mono as usize;
-                    if pro::segmented(ui, &mut bw, &[tl("Couleurtl("), tl(")Noir et blanc")]) {
+                    if pro::segmented(ui, &mut bw, &[tl("Couleur"), tl("Noir et blanc")]) {
                         s.mono = bw == 1;
                     }
                     ui.add_space(6.0);
@@ -465,7 +465,7 @@ impl Lumen {
                 });
                 let mut channel = self.curve_channel;
                 solo_dock(solo, ui, &mut opened, "curve", "Courbe des tonalités", |ui| {
-                    pro::segmented(ui, &mut channel, &[tl("Param.tl("), tl(")RVBtl("), tl(")Rtl("), tl(")Vtl("), tl(")B")]);
+                    pro::segmented(ui, &mut channel, &[tl("Param."), tl("RVB"), tl("R"), tl("V"), tl("B")]);
                     ui.add_space(6.0);
                     let lum = hist.as_ref().map(|h| h[3]);
                     match channel {
@@ -505,7 +505,7 @@ impl Lumen {
                 self.curve_channel = channel;
                 let mut tab = self.hsl_tab;
                 solo_dock(solo, ui, &mut opened, "hsl", "TSL / Couleur", |ui| {
-                    pro::segmented(ui, &mut tab, &[tl("Teintetl("), tl(")Saturationtl("), tl(")Luminancetl("), tl(")Tout")]);
+                    pro::segmented(ui, &mut tab, &[tl("Teinte"), tl("Saturation"), tl("Luminance"), tl("Tout")]);
                     ui.add_space(6.0);
                     let tabs: Vec<usize> = if tab == 3 { vec![0, 1, 2] } else { vec![tab] };
                     for t in tabs {

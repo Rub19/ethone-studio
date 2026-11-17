@@ -155,9 +155,6 @@ Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défi
 Gain	
 Normaliser la crête à	
 Limiteur (plafond)	
-Linéairetl(	
-)Logtl(	
-)En S	
 Intensité	
 Porte de bruit	
 Coupe-bas	
@@ -186,43 +183,18 @@ Balance
 Largeur stéréo	
 Durée	
 Fréquence	
-Blanctl(	
-)Rosetl(	
-)Brun	
 Jusqu'à	
 Tempo	
 Seuil du silence	
 Silence minimum	
 Son minimum	
 Qualité	
-16 bits (CD)tl(	
-)24 bitstl(	
-)32 flottanttl(	
-)8 bits	
 Dither (adoucit la réduction de bits)	
-Aucuntl(	
-)Triangulairetl(	
-)Mise en forme	
-Originaletl(	
-)44,1 ktl(	
-)48 ktl(	
-)22 ktl(	
-)96 k	
 Canaux	
-Originauxtl(	
-)Monotl(	
-)Stéréo	
 Plage	
-Touttl(	
-)Sélectiontl(	
-)Un fichier par marqueur	
 Échelle	
-Logtl(	
-)Linéaire	
 FFT	
 Taille	
-Forme d'ondetl(	
-)Spectrogramme	
 Sélection temporelle	
 Main (défilement)	
 Rectangle de fréquences	

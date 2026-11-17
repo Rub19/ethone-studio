@@ -2504,7 +2504,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             });
             ui.label(RichText::new(tl("Alignement sur le point")).size(12.0).color(MUTED));
             let mut a = *align as usize;
-            if pro::segmented(ui, &mut a, &[tl("Centretl("), tl(")Gauchetl("), tl(")Droite")]) {
+            if pro::segmented(ui, &mut a, &[tl("Centre"), tl("Gauche"), tl("Droite")]) {
                 *align = a as u8;
             }
             ui.label(RichText::new(tl("Espacement des lettres")).size(12.0).color(MUTED));

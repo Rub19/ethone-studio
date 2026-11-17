@@ -366,7 +366,7 @@ impl Motion {
                     prop_row(ui, l, pi, t, &mut go, label);
                 }
                 let mut m = l.fx.trim_mode as usize;
-                if pro::segmented(ui, &mut m, &[tl("Simultanétl("), tl(")Un par un")]) {
+                if pro::segmented(ui, &mut m, &[tl("Simultané"), tl("Un par un")]) {
                     l.fx.trim_mode = m as u8;
                 }
                 let fx = &mut l.fx;
@@ -422,11 +422,11 @@ impl Motion {
                 }
                 ui.label(RichText::new(tl("Extrémités et angles")).size(12.0).color(MUTED));
                 let mut c = fx.cap as usize;
-                if pro::segmented(ui, &mut c, &[tl("Platestl("), tl(")Rondestl("), tl(")Carrées")]) {
+                if pro::segmented(ui, &mut c, &[tl("Plates"), tl("Rondes"), tl("Carrées")]) {
                     fx.cap = c as u8;
                 }
                 let mut j = fx.join as usize;
-                if pro::segmented(ui, &mut j, &[tl("Arrondistl("), tl(")Pointustl("), tl(")Biseautés")]) {
+                if pro::segmented(ui, &mut j, &[tl("Arrondis"), tl("Pointus"), tl("Biseautés")]) {
                     fx.join = j as u8;
                 }
             }
@@ -442,7 +442,7 @@ impl Motion {
             });
             if fx.gradient.is_some() {
                 let mut k = fx.gradient_kind as usize;
-                if pro::segmented(ui, &mut k, &[tl("Linéairetl("), tl(")Radial")]) {
+                if pro::segmented(ui, &mut k, &[tl("Linéaire"), tl("Radial")]) {
                     fx.gradient_kind = k as u8;
                 }
                 if fx.gradient_kind == 0 {
@@ -567,7 +567,7 @@ impl Motion {
                 ui.checkbox(&mut ta.on, tl("Animer lettre par lettre"));
                 if ta.on {
                     let mut m = ta.mode as usize;
-                    if pro::segmented(ui, &mut m, &[tl("Entréetl("), tl(")Sortietl("), tl(")Les deux")]) {
+                    if pro::segmented(ui, &mut m, &[tl("Entrée"), tl("Sortie"), tl("Les deux")]) {
                         ta.mode = m as u8;
                     }
                     ui.label(RichText::new(tl("Ordre")).size(12.0).color(MUTED));
@@ -608,7 +608,7 @@ impl Motion {
             }
             ui.label(RichText::new(tl("Répéter toutes les clés")).size(12.0).color(MUTED));
             let mut mode = if fx.pingpong { 2 } else if fx.loop_keys { 1 } else { 0 };
-            if pro::segmented(ui, &mut mode, &[tl("Nontl("), tl(")Boucletl("), tl(")Aller-retour")]) {
+            if pro::segmented(ui, &mut mode, &[tl("Non"), tl("Boucle"), tl("Aller-retour")]) {
                 fx.loop_keys = mode == 1;
                 fx.pingpong = mode == 2;
             }

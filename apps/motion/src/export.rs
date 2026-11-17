@@ -415,7 +415,7 @@ impl Motion {
             if matches!(o.format, 0 | 1 | 2 | 5 | 6) {
                 row(ui, tl("Plage"));
                 let has_work = self.comp.work.is_some();
-                pro::segmented(ui, &mut o.range, &[tl("Toute la compositiontl("), tl(")Zone de travailtl("), tl(")Personnalisée")]);
+                pro::segmented(ui, &mut o.range, &[tl("Toute la composition"), tl("Zone de travail"), tl("Personnalisée")]);
                 if o.range == 1 && !has_work {
                     o.range = 0;
                 }

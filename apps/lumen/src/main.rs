@@ -1906,13 +1906,13 @@ impl Lumen {
                         ui.end_row();
                         ui.label(tl("Retouche"));
                         let mut ed = sm.edited as usize;
-                        if pro::segmented(ui, &mut ed, &[tl("Toutestl("), tl(")Modifiéestl("), tl(")Intactes")]) {
+                        if pro::segmented(ui, &mut ed, &[tl("Toutes"), tl("Modifiées"), tl("Intactes")]) {
                             sm.edited = ed as u8;
                         }
                         ui.end_row();
                         ui.label(tl("Type"));
                         let mut kd = sm.kind as usize;
-                        if pro::segmented(ui, &mut kd, &[tl("Toustl("), tl(")RAWtl("), tl(")JPEG, PNG…")]) {
+                        if pro::segmented(ui, &mut kd, &[tl("Tous"), tl("RAW"), tl("JPEG, PNG…")]) {
                             sm.kind = kd as u8;
                         }
                         ui.end_row();

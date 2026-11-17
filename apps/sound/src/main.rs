@@ -1631,7 +1631,7 @@ impl Sound {
                     let ce = fx.ceiling;
                     act!(ui, "Limiteur", move |c: &mut Clip, a, b| c.limiter(a, b, ce));
                     ui.label(RichText::new(tl("Courbe des fondus")).size(12.0).color(MUTED));
-                    pro::segmented(ui, &mut fx.fade_shape, &[tl("Linéairetl("), tl(")Logtl("), tl(")En S")]);
+                    pro::segmented(ui, &mut fx.fade_shape, &[tl("Linéaire"), tl("Log"), tl("En S")]);
                     let shape = fx.fade_shape as u8;
                     ui.horizontal(|ui| {
                         if pro::secondary(ui, tl("Fondu entrant")).clicked() {
@@ -1796,7 +1796,7 @@ impl Sound {
                         generated = Some((Clip::synth(rate, nch, fx.secs, fx.wave as u8, fx.freq, 0.0, fx.amp), WAVES[fx.wave].to_string()));
                     }
                     ui.label(RichText::new(tl("Bruit")).size(12.0).color(INK));
-                    pro::segmented(ui, &mut fx.noise_kind, &[tl("Blanctl("), tl(")Rosetl("), tl(")Brun")]);
+                    pro::segmented(ui, &mut fx.noise_kind, &[tl("Blanc"), tl("Rose"), tl("Brun")]);
                     if pro::secondary(ui, tl("Insérer le bruit")).clicked() {
                         let c = if fx.noise_kind == 0 {
                             let mut c = Clip { rate, ch: vec![Vec::new(); nch] };
@@ -2080,24 +2080,24 @@ impl Sound {
                     ui.label(RichText::new(s).size(12.0).color(MUTED));
                 };
                 row(ui, tl("Qualité"));
-                pro::segmented(ui, &mut o.bits, &[tl("16 bits (CD)tl("), tl(")24 bitstl("), tl(")32 flottanttl("), tl(")8 bits")]);
+                pro::segmented(ui, &mut o.bits, &[tl("16 bits (CD)"), tl("24 bits"), tl("32 flottant"), tl("8 bits")]);
                 if o.bits != 2 {
                     row(ui, tl("Dither (adoucit la réduction de bits)"));
-                    pro::segmented(ui, &mut o.dither, &[tl("Aucuntl("), tl(")Triangulairetl("), tl(")Mise en forme")]);
+                    pro::segmented(ui, &mut o.dither, &[tl("Aucun"), tl("Triangulaire"), tl("Mise en forme")]);
                 }
                 ui.add_space(8.0);
                 row(ui, tl("Fréquence"));
-                pro::segmented(ui, &mut o.rate, &[tl("Originaletl("), tl(")44,1 ktl("), tl(")48 ktl("), tl(")22 ktl("), tl(")96 k")]);
+                pro::segmented(ui, &mut o.rate, &[tl("Originale"), tl("44,1 k"), tl("48 k"), tl("22 k"), tl("96 k")]);
                 if o.rate > 0 {
                     ui.checkbox(&mut o.hq, tl("Conversion haute qualité (filtre sinc)"));
                 }
                 ui.add_space(8.0);
                 row(ui, tl("Canaux"));
-                pro::segmented(ui, &mut o.channels, &[tl("Originauxtl("), tl(")Monotl("), tl(")Stéréo")]);
+                pro::segmented(ui, &mut o.channels, &[tl("Originaux"), tl("Mono"), tl("Stéréo")]);
                 ui.add_space(8.0);
                 row(ui, tl("Plage"));
                 let mut r = o.range;
-                pro::segmented(ui, &mut r, &[tl("Touttl("), tl(")Sélectiontl("), tl(")Un fichier par marqueur")]);
+                pro::segmented(ui, &mut r, &[tl("Tout"), tl("Sélection"), tl("Un fichier par marqueur")]);
                 if (r == 1 && has_sel) || (r == 2 && has_marks) || r == 0 {
                     o.range = r;
                 }
@@ -2226,7 +2226,7 @@ impl Sound {
             Tool::SpecRect | Tool::Lasso | Tool::Brush | Tool::Heal => {
                 small(ui, tl("Échelle"));
                 let mut l = !self.spec_log as usize;
-                if pro::segmented(ui, &mut l, &[tl("Logtl("), tl(")Linéaire")]) {
+                if pro::segmented(ui, &mut l, &[tl("Log"), tl("Linéaire")]) {
                     self.spec_log = l == 0;
                 }
                 small(ui, tl("FFT"));
@@ -2505,7 +2505,7 @@ impl Sound {
         let head = Rect::from_min_size(full.min, vec2(full.width(), head_h));
         ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(full.min, vec2(full.width(), 30.0))), |ui| {
             ui.horizontal_centered(|ui| {
-                pro::segmented(ui, &mut self.view_mode, &[tl("Forme d'ondetl("), tl(")Spectrogramme")]);
+                pro::segmented(ui, &mut self.view_mode, &[tl("Forme d'onde"), tl("Spectrogramme")]);
                 pro::toolbar_sep(ui);
                 ui.label(RichText::new(tl("Hauteur")).size(12.0).color(MUTED));
                 ui.spacing_mut().slider_width = 64.0;

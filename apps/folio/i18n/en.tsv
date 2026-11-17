@@ -130,9 +130,6 @@ Version PDF
 Format (page courante)	
 Emplacement	
 Ajouter comme annotation	
-Pagestl(	
-)Signetstl(	
-)Notes	
 Couleur	
 Tampon	
 Glisse sur la page pour poser le tampon, ou clique pour une taille standard.	
@@ -154,23 +151,9 @@ Mot de passe d'ouverture
 Mot de passe des autorisations (facultatif)	
 Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus.	
 Compression forte (pages en images)	
-72 ppptl(	
-)110 ppptl(	
-)150 ppp	
 Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite.	
-Filigranetl(	
-)En-têtetl(	
-)Piedtl(	
-)Numérostl(	
-)Bates	
 Arrière-plan	
-PNGtl(	
-)JPEGtl(	
-)Textetl(	
-)Word	
 Résolution	
-)150 ppptl(	
-)300 ppp	
 Envoyer la page courante	
 Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge.	
 Un scan doit d'abord passer par Numériser et OCR.	
