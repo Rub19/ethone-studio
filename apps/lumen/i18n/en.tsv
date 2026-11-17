@@ -1,354 +1,354 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Note	
-Filtre	
-Quantité	
-★ Favoris	
-Mes préréglages	
-Clic droit : options	
-Mettre à jour avec les réglages actuels	
-Supprimer ce préréglage	
-Nom du préréglage	
-+ Enregistrer les réglages actuels	
-Nouvel instantané (Ctrl+N)	
-Clic : appliquer · clic droit : options	
-Remplacer par les réglages actuels	
-Supprimer	
-Effacer	
-Revenir à l'état avant cette étape	
-Écrêtage	
-J	
-Profil	
-Auto	
-Ctrl+U	
-Couleur	
-Noir et blanc	
-Pipette	
-W	
-Préréglage	
-Tel quel	
-Param.	
-RVB	
-R	
-V	
-B	
-Réglage ciblé	
-T : glisse sur la photo	
-Réinitialiser la courbe	
-Teinte	
-Saturation	
-Luminance	
-Tout	
-Réinitialiser	
-Supprimer l'aberration (auto)	
-Applique une correction de frange standard	
-Niveau auto	
-Règle	
-Trace une ligne sur l'horizon	
-Miroir vertical	
-Outil Recadrage	
-Redressement automatique	
-Miroir horizontal	
-⟲ 90°	
-⟳ 90°	
-Corrections de taches	
-Yeux rouges corrigés	
-Suppression (Q)	
-Correcteur	
-Clonage	
-Yeux rouges (E)	
-Effacer les taches	
-Effacer les yeux	
-?  Tutoriels	
-Copier…	
-Ctrl+Maj+C : choisir les groupes	
-Coller	
-Réinitialiser un groupe…	
-Mode solo : un seul panneau ouvert	
-+ Nouveau masque	
-Superposition	
-O	
-Activer ou masquer	
-Supprimer le masque	
-Dupliquer	
-Nom	
-Inverser	
-Ajouter	
-Soustraire	
-Intersecter	
-Inverser ce composant	
-Peindre	
-Effacer le tracé	
-Réinitialiser les réglages du masque	
-Original	
-Maintenir pour voir l'original (ou \\)	
-Rouge : blancs brûlés · bleu : noirs bouchés (J)	
-Infos	
-I	
-Plein écran	
-Tab : masquer les panneaux	
-Nouvelle collection dynamique	
-Modifier les règles…	
-Inclure les sous-dossiers	
-Ouvrir un dossier…	
-Rechercher	
-Tri · inverser l'ordre	
-Taille des vignettes	
-Synchroniser	
-Copie les réglages de la photo active (groupes cochés dans Copier les réglages)	
-Empiler	
-Ctrl+G	
-Comparer	
-Tout désélectionner	
-Développement rapide	
-Balance des blancs	
-Mots-clés	
-Ajouter (virgules acceptées)	
-Retirer ce mot-clé	
-Métadonnées	
-Fichier	
-Taille	
-Dimensions	
-Type	
-Afficher dans l'Explorateur	
-Aucune photo ne correspond à ce filtre	
-Ouvrir en Développement	
-Créer une copie virtuelle	
-Supprimer la copie virtuelle	
-Empiler la sélection	
-Réduire / déplier la pile	
-Désempiler	
-Exporter…	
-◀ Candidat précédent	
-Candidat suivant ▶	
-Le candidat devient la référence	
-Trouver les photos floues (les sélectionner)	
-Tri	
-Rejeter les photos floues	
-Tri · drapeau X	
-Ton auto sur les photos choisies	
-Lot	
-Redresser l'horizon sur les photos choisies	
-Remettre à zéro les photos choisies	
-Synchroniser les réglages vers les photos choisies	
-Lot · copie la photo courante	
-Attribuer 5 étoiles aux photos choisies	
-Lot · classement	
-Marquer les photos choisies comme retenues	
-Lot · drapeau P	
-Rejeter les photos choisies	
-Lot · drapeau X	
-Effacer les drapeaux des photos choisies	
-Lot · neutre	
-Ctrl+Maj+E	
-Dossiers récents	
-Actualiser le dossier	
-Enregistrer le catalogue	
-Ouvrir le dossier du catalogue	
-Édition	
-Tout sélectionner      Ctrl+A	
-Désélectionner         Ctrl+D	
-Sélectionner les retenues	
-Sélectionner les modifiées	
-Inverser la sélection	
-Mode solo des panneaux	
-Copier les réglages…   Ctrl+Maj+C	
-Photo	
-Réglage automatique      Ctrl+U	
-Copier les réglages      Ctrl+C	
-Réinitialiser               Ctrl+Maj+R	
-Créer une copie virtuelle   Ctrl+'	
-Nouvel instantané             Ctrl+N	
-Empiler la sélection          Ctrl+G	
-Désempiler                      Ctrl+Maj+G	
-Réduire / déplier la pile     S	
-Noir et blanc                   V	
-Rotation 90° horaire	
-Rotation 90° antihoraire	
-Drapeau	
-Étiquette de couleur	
-Copier le chemin du fichier	
-Affichage	
-Masquer les panneaux       Tab	
-Écrêtage                        J	
-Zoom 100 %                   Z	
-Avant / après	
-Infos sur la photo	
-Bienvenue dans Lumen	
-Ouvre un dossier de photos : JPEG, PNG, TIFF, WebP et RAW (CR2, NEF, ARW, DNG, RAF…)	
-Ouvrir un dossier	
-Réglages à copier	
-Tout cocher	
-Tout décocher	
-Copier	
-Collection dynamique	
-Note minimale	
-Étiquette	
-Toutes	
-Mot-clé	
-Texte contenu	
-Retouche	
-Modifiées	
-Intactes	
-Tous	
-RAW	
-JPEG, PNG…	
-Enregistrer	
-Même dossier que l'original	
-Choisir…	
-Sous-dossier	
-facultatif	
-Si le fichier existe	
-Texte	
-ex. mariage	
-Suffixe	
-ex. -web	
-Début	
-Qualité	
-Ne pas agrandir	
-Auteur	
-Copyright	
-© 2026 …	
-Ajouter un filigrane texte	
-© ton nom	
-Utiliser le copyright	
-Opacité	
-Texte sombre	
-Ouvrir le dossier dans l'Explorateur	
-Réglages par défaut	
-Exporter	
-Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom	
-Format	
-Verrouiller	
-Inverser l'orientation du format	
-Angle	
-Redresse l'horizon automatiquement	
-Terminé	
-Nouvelle source	
-Cherche une autre zone de remplacement	
-Tout effacer	
-Ou maintiens Alt	
-Nouveau masque	
-Superposition (O)	
-Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro	
-Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer	
-Température	
-Exposition	
-Contraste	
-Hautes lumières	
-Ombres	
-Blancs	
-Noirs	
-Texture	
-Clarté	
-Correction du voile	
-Décalage de teinte	
-Netteté	
-Bruit	
-Intensité couleur	
-PRÉRÉGLAGES	
-INSTANTANÉS	
-Mémorise une version pour y revenir.	
-HISTORIQUE	
-Chaque réglage apparaît ici.	
-État actuel	
-Importation (original)	
-NAVIGATEUR	
-Survole la photo pour lire les valeurs RVB	
-Tonalité	
-Présence	
-Vibrance	
-En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).	
-Lum. ombres	
-Lum. tons moyens	
-Lum. hautes lum.	
-Global	
-Lum. globale	
-Fusion	
-Équilibre	
-Gain	
-Rayon	
-Détail	
-Masquage	
-Réduction du bruit	
-Détail lum.	
-Détail couleur	
-Lissage	
-Vignetage de l'objectif	
-Point milieu	
-Distorsion	
-Aberration chromatique	
-Rouge / cyan	
-Bleu / jaune	
-Frange violette	
-Frange verte	
-Verticale	
-Horizontale	
-Rotation	
-Aspect	
-Échelle	
-Décalage X	
-Décalage Y	
-Redresser	
-Vignettage après recadrage	
-Arrondi	
-Contour progressif	
-Grain	
-Quantité 	
-Rugosité	
-Style	
-Halo lumineux	
-Délavé	
-Teinte des ombres	
-Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages.	
-Composants	
-Glisse les poignées sur la photo (outil M ou Main).	
-Largeur	
-Hauteur	
-Minimum	
-Maximum	
-Teinte ciblée	
-Tolérance	
-Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image).	
-Détection automatique du sujet (ce qui se distingue du fond, au centre).	
-Couvre toute l'image : combine avec Soustraire pour exclure une zone.	
-Réglages du masque	
-CATALOGUE	
-COLLECTIONS DYNAMIQUES	
-Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…	
-ÉTIQUETTES	
-MOTS-CLÉS	
-Ajoute des mots-clés dans le panneau de droite.	
-DOSSIERS	
-↑ Dossier parent	
-Récents	
-Sélectionne une photo pour voir ses informations.	
-Suggestions	
-Titre	
-Légende	
-Aucune donnée EXIF lisible dans ce fichier.	
-À gauche : la référence (photo active). À droite : le candidat.	
-Coller (Ctrl+V) n'appliquera que les groupes cochés.	
-Les photos qui remplissent toutes les règles y apparaissent automatiquement.	
-EMPLACEMENT	
-NOM DES FICHIERS	
-FORMAT	
-TAILLE	
-ACCENTUATION DE SORTIE	
-MÉTADONNÉES	
-FILIGRANE	
-APRÈS L'EXPORT	
-Trace une ligne le long de l'horizon ou d'une verticale	
-Clique sur l'œil ou glisse pour tracer le cercle	
-Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.	
-Glisse vers le haut ou le bas sur une couleur ou un ton de la photo	
-Recadrage	
-Redressement (règle)	
-Suppression de taches	
-Yeux rouges	
-Filtre gradué	
-Filtre radial	
-Pinceau de réglage	
-Sélectionner le ciel	
-Sélectionner le sujet	
-Pipette de balance des blancs	
-Main et zoom	
+Note	Rating
+Filtre	Filter
+Quantité	Amount
+★ Favoris	★ Favorites
+Mes préréglages	My presets
+Clic droit : options	Right-click: options
+Mettre à jour avec les réglages actuels	Update with current settings
+Supprimer ce préréglage	Delete this preset
+Nom du préréglage	Preset name
++ Enregistrer les réglages actuels	+ Save current settings
+Nouvel instantané (Ctrl+N)	New snapshot (Ctrl+N)
+Clic : appliquer · clic droit : options	Click: apply · right-click: options
+Remplacer par les réglages actuels	Replace with current settings
+Supprimer	Delete
+Effacer	Clear
+Revenir à l'état avant cette étape	Go back to before this step
+Écrêtage	Clipping
+J	J
+Profil	Profile
+Auto	Auto
+Ctrl+U	Ctrl+U
+Couleur	Color
+Noir et blanc	Black & white
+Pipette	Eyedropper
+W	W
+Préréglage	Preset
+Tel quel	As shot
+Param.	Parametric
+RVB	RGB
+R	R
+V	G
+B	B
+Réglage ciblé	Targeted adjustment
+T : glisse sur la photo	T: drag on the photo
+Réinitialiser la courbe	Reset curve
+Teinte	Hue
+Saturation	Saturation
+Luminance	Luminance
+Tout	All
+Réinitialiser	Reset
+Supprimer l'aberration (auto)	Remove aberration (auto)
+Applique une correction de frange standard	Applies a standard fringe correction
+Niveau auto	Auto level
+Règle	Ruler
+Trace une ligne sur l'horizon	Draw a line along the horizon
+Miroir vertical	Flip vertical
+Outil Recadrage	Crop tool
+Redressement automatique	Auto straighten
+Miroir horizontal	Flip horizontal
+⟲ 90°	⟲ 90°
+⟳ 90°	⟳ 90°
+Corrections de taches	Spot corrections
+Yeux rouges corrigés	Red eyes corrected
+Suppression (Q)	Remove (Q)
+Correcteur	Heal
+Clonage	Clone
+Yeux rouges (E)	Red eye (E)
+Effacer les taches	Clear spots
+Effacer les yeux	Clear eyes
+?  Tutoriels	?  Tutorials
+Copier…	Copy…
+Ctrl+Maj+C : choisir les groupes	Ctrl+Shift+C: choose groups
+Coller	Paste
+Réinitialiser un groupe…	Reset a group…
+Mode solo : un seul panneau ouvert	Solo mode: one panel open at a time
++ Nouveau masque	+ New mask
+Superposition	Overlay
+O	O
+Activer ou masquer	Enable or hide
+Supprimer le masque	Delete mask
+Dupliquer	Duplicate
+Nom	Name
+Inverser	Invert
+Ajouter	Add
+Soustraire	Subtract
+Intersecter	Intersect
+Inverser ce composant	Invert this component
+Peindre	Paint
+Effacer le tracé	Clear the stroke
+Réinitialiser les réglages du masque	Reset mask settings
+Original	Original
+Maintenir pour voir l'original (ou \\)	Hold to see the original (or \\)
+Rouge : blancs brûlés · bleu : noirs bouchés (J)	Red: clipped highlights · blue: clipped shadows (J)
+Infos	Info
+I	I
+Plein écran	Full screen
+Tab : masquer les panneaux	Tab: hide panels
+Nouvelle collection dynamique	New smart collection
+Modifier les règles…	Edit rules…
+Inclure les sous-dossiers	Include subfolders
+Ouvrir un dossier…	Open a folder…
+Rechercher	Search
+Tri · inverser l'ordre	Sort · reverse order
+Taille des vignettes	Thumbnail size
+Synchroniser	Sync
+Copie les réglages de la photo active (groupes cochés dans Copier les réglages)	Copies the active photo's settings (groups checked in Copy settings)
+Empiler	Stack
+Ctrl+G	Ctrl+G
+Comparer	Compare
+Tout désélectionner	Deselect all
+Développement rapide	Quick develop
+Balance des blancs	White balance
+Mots-clés	Keywords
+Ajouter (virgules acceptées)	Add (commas accepted)
+Retirer ce mot-clé	Remove this keyword
+Métadonnées	Metadata
+Fichier	File
+Taille	Size
+Dimensions	Dimensions
+Type	Type
+Afficher dans l'Explorateur	Show in Explorer
+Aucune photo ne correspond à ce filtre	No photo matches this filter
+Ouvrir en Développement	Open in Develop
+Créer une copie virtuelle	Create virtual copy
+Supprimer la copie virtuelle	Delete virtual copy
+Empiler la sélection	Stack selection
+Réduire / déplier la pile	Collapse / expand stack
+Désempiler	Unstack
+Exporter…	Export…
+◀ Candidat précédent	◀ Previous candidate
+Candidat suivant ▶	Next candidate ▶
+Le candidat devient la référence	Make candidate the select
+Trouver les photos floues (les sélectionner)	Find blurry photos (select them)
+Tri	Culling
+Rejeter les photos floues	Reject blurry photos
+Tri · drapeau X	Culling · flag X
+Ton auto sur les photos choisies	Auto tone on chosen photos
+Lot	Batch
+Redresser l'horizon sur les photos choisies	Straighten the horizon on chosen photos
+Remettre à zéro les photos choisies	Reset chosen photos
+Synchroniser les réglages vers les photos choisies	Sync settings to chosen photos
+Lot · copie la photo courante	Batch · copies the current photo
+Attribuer 5 étoiles aux photos choisies	Give chosen photos 5 stars
+Lot · classement	Batch · rating
+Marquer les photos choisies comme retenues	Flag chosen photos as picks
+Lot · drapeau P	Batch · flag P
+Rejeter les photos choisies	Reject chosen photos
+Lot · drapeau X	Batch · flag X
+Effacer les drapeaux des photos choisies	Clear flags on chosen photos
+Lot · neutre	Batch · unflagged
+Ctrl+Maj+E	Ctrl+Shift+E
+Dossiers récents	Recent folders
+Actualiser le dossier	Refresh folder
+Enregistrer le catalogue	Save catalog
+Ouvrir le dossier du catalogue	Open catalog folder
+Édition	Edit
+Tout sélectionner      Ctrl+A	Select all             Ctrl+A
+Désélectionner         Ctrl+D	Deselect               Ctrl+D
+Sélectionner les retenues	Select picks
+Sélectionner les modifiées	Select edited
+Inverser la sélection	Invert selection
+Mode solo des panneaux	Solo panel mode
+Copier les réglages…   Ctrl+Maj+C	Copy settings…         Ctrl+Shift+C
+Photo	Photo
+Réglage automatique      Ctrl+U	Auto settings            Ctrl+U
+Copier les réglages      Ctrl+C	Copy settings            Ctrl+C
+Réinitialiser               Ctrl+Maj+R	Reset                       Ctrl+Shift+R
+Créer une copie virtuelle   Ctrl+'	Create virtual copy         Ctrl+'
+Nouvel instantané             Ctrl+N	New snapshot                  Ctrl+N
+Empiler la sélection          Ctrl+G	Stack selection               Ctrl+G
+Désempiler                      Ctrl+Maj+G	Unstack                         Ctrl+Shift+G
+Réduire / déplier la pile     S	Collapse / expand stack       S
+Noir et blanc                   V	Black & white                   V
+Rotation 90° horaire	Rotate 90° clockwise
+Rotation 90° antihoraire	Rotate 90° counter clockwise
+Drapeau	Flag
+Étiquette de couleur	Color label
+Copier le chemin du fichier	Copy file path
+Affichage	View
+Masquer les panneaux       Tab	Hide panels                Tab
+Écrêtage                        J	Clipping                        J
+Zoom 100 %                   Z	Zoom 100%                    Z
+Avant / après	Before / after
+Infos sur la photo	Photo info
+Bienvenue dans Lumen	Welcome to Lumen
+Ouvre un dossier de photos : JPEG, PNG, TIFF, WebP et RAW (CR2, NEF, ARW, DNG, RAF…)	Open a folder of photos: JPEG, PNG, TIFF, WebP and RAW (CR2, NEF, ARW, DNG, RAF…)
+Ouvrir un dossier	Open a folder
+Réglages à copier	Settings to copy
+Tout cocher	Check all
+Tout décocher	Uncheck all
+Copier	Copy
+Collection dynamique	Smart collection
+Note minimale	Minimum rating
+Étiquette	Label
+Toutes	All
+Mot-clé	Keyword
+Texte contenu	Contains text
+Retouche	Editing
+Modifiées	Edited
+Intactes	Unedited
+Tous	All
+RAW	RAW
+JPEG, PNG…	JPEG, PNG…
+Enregistrer	Save
+Même dossier que l'original	Same folder as original
+Choisir…	Choose…
+Sous-dossier	Subfolder
+facultatif	optional
+Si le fichier existe	If the file exists
+Texte	Text
+ex. mariage	e.g. wedding
+Suffixe	Suffix
+ex. -web	e.g. -web
+Début	Start
+Qualité	Quality
+Ne pas agrandir	Don't enlarge
+Auteur	Author
+Copyright	Copyright
+© 2026 …	© 2026 …
+Ajouter un filigrane texte	Add a text watermark
+© ton nom	© your name
+Utiliser le copyright	Use the copyright
+Opacité	Opacity
+Texte sombre	Dark text
+Ouvrir le dossier dans l'Explorateur	Open the folder in Explorer
+Réglages par défaut	Defaults
+Exporter	Export
+Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom	Drag to move when zoomed in · double-click to toggle zoom
+Format	Aspect
+Verrouiller	Lock
+Inverser l'orientation du format	Swap aspect orientation
+Angle	Angle
+Redresse l'horizon automatiquement	Straightens the horizon automatically
+Terminé	Done
+Nouvelle source	New source
+Cherche une autre zone de remplacement	Looks for another source area
+Tout effacer	Clear all
+Ou maintiens Alt	Or hold Alt
+Nouveau masque	New mask
+Superposition (O)	Overlay (O)
+Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro	Drag to choose hue and amount · double-click to reset
+Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer	Click: add a point · drag: move · double-click or right-click: delete
+Température	Temp
+Exposition	Exposure
+Contraste	Contrast
+Hautes lumières	Highlights
+Ombres	Shadows
+Blancs	Whites
+Noirs	Blacks
+Texture	Texture
+Clarté	Clarity
+Correction du voile	Dehaze
+Décalage de teinte	Hue shift
+Netteté	Sharpness
+Bruit	Noise
+Intensité couleur	Color intensity
+PRÉRÉGLAGES	PRESETS
+INSTANTANÉS	SNAPSHOTS
+Mémorise une version pour y revenir.	Saves a version to come back to.
+HISTORIQUE	HISTORY
+Chaque réglage apparaît ici.	Every adjustment appears here.
+État actuel	Current state
+Importation (original)	Import (original)
+NAVIGATEUR	NAVIGATOR
+Survole la photo pour lire les valeurs RVB	Hover over the photo to read RGB values
+Tonalité	Tone
+Présence	Presence
+Vibrance	Vibrance
+En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).	In black & white, each color's luminance sets its gray (B&W mix).
+Lum. ombres	Shadow lum.
+Lum. tons moyens	Midtone lum.
+Lum. hautes lum.	Highlight lum.
+Global	Global
+Lum. globale	Global lum.
+Fusion	Blending
+Équilibre	Balance
+Gain	Amount
+Rayon	Radius
+Détail	Detail
+Masquage	Masking
+Réduction du bruit	Noise reduction
+Détail lum.	Luminance detail
+Détail couleur	Color detail
+Lissage	Smoothness
+Vignetage de l'objectif	Lens vignetting
+Point milieu	Midpoint
+Distorsion	Distortion
+Aberration chromatique	Chromatic aberration
+Rouge / cyan	Red / cyan
+Bleu / jaune	Blue / yellow
+Frange violette	Purple fringe
+Frange verte	Green fringe
+Verticale	Vertical
+Horizontale	Horizontal
+Rotation	Rotate
+Aspect	Aspect
+Échelle	Scale
+Décalage X	Offset X
+Décalage Y	Offset Y
+Redresser	Straighten
+Vignettage après recadrage	Post-crop vignetting
+Arrondi	Roundness
+Contour progressif	Feather
+Grain	Grain
+Quantité 	Amount
+Rugosité	Roughness
+Style	Style
+Halo lumineux	Glow
+Délavé	Faded
+Teinte des ombres	Shadow tint
+Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages.	Linear gradient (M), radial (Shift+M), brush (K), sky or subject: each mask has all its own settings.
+Composants	Components
+Glisse les poignées sur la photo (outil M ou Main).	Drag the handles on the photo (M tool or Hand).
+Largeur	Width
+Hauteur	Height
+Minimum	Minimum
+Maximum	Maximum
+Teinte ciblée	Target hue
+Tolérance	Range
+Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image).	Automatic sky detection (blue or bright areas connected to the top of the image).
+Détection automatique du sujet (ce qui se distingue du fond, au centre).	Automatic subject detection (what stands out from the background, near the center).
+Couvre toute l'image : combine avec Soustraire pour exclure une zone.	Covers the whole image: combine with Subtract to exclude an area.
+Réglages du masque	Mask settings
+CATALOGUE	CATALOG
+COLLECTIONS DYNAMIQUES	SMART COLLECTIONS
+Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…	Create saved filters: 5★ picks, unedited RAW…
+ÉTIQUETTES	LABELS
+MOTS-CLÉS	KEYWORDS
+Ajoute des mots-clés dans le panneau de droite.	Add keywords in the right panel.
+DOSSIERS	FOLDERS
+↑ Dossier parent	↑ Parent folder
+Récents	Recent
+Sélectionne une photo pour voir ses informations.	Select a photo to see its information.
+Suggestions	Suggestions
+Titre	Title
+Légende	Caption
+Aucune donnée EXIF lisible dans ce fichier.	No readable EXIF data in this file.
+À gauche : la référence (photo active). À droite : le candidat.	Left: the select (active photo). Right: the candidate.
+Coller (Ctrl+V) n'appliquera que les groupes cochés.	Paste (Ctrl+V) will only apply the checked groups.
+Les photos qui remplissent toutes les règles y apparaissent automatiquement.	Photos that meet every rule appear here automatically.
+EMPLACEMENT	LOCATION
+NOM DES FICHIERS	FILE NAMING
+FORMAT	FORMAT
+TAILLE	SIZE
+ACCENTUATION DE SORTIE	OUTPUT SHARPENING
+MÉTADONNÉES	METADATA
+FILIGRANE	WATERMARK
+APRÈS L'EXPORT	AFTER EXPORT
+Trace une ligne le long de l'horizon ou d'une verticale	Draw a line along the horizon or a vertical
+Clique sur l'œil ou glisse pour tracer le cercle	Click the eye or drag to draw the circle
+Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.	Click an area that should be neutral (gray, white). Shift+click to keep the tool.
+Glisse vers le haut ou le bas sur une couleur ou un ton de la photo	Drag up or down on a color or tone in the photo
+Recadrage	Crop
+Redressement (règle)	Straighten (ruler)
+Suppression de taches	Spot removal
+Yeux rouges	Red eye
+Filtre gradué	Linear gradient
+Filtre radial	Radial gradient
+Pinceau de réglage	Adjustment brush
+Sélectionner le ciel	Select sky
+Sélectionner le sujet	Select subject
+Pipette de balance des blancs	White balance eyedropper
+Main et zoom	Hand and zoom

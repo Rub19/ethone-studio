@@ -1,464 +1,464 @@
 # French text<TAB>English text. One line per text; an empty English column keeps the French.
-Annuler	
-Proportionnelle	
-Mettre à l'échelle les contours et effets	
-Horizontal	
-Vertical	
-Angle	
-Axe horizontal	
-Axe vertical	
-Les angles du résultat sont arrondis.	
-Courbes lisses	
-Nombre d'ondes	
-Pointes	
-Arrondis	
-Angles	
-Étapes intermédiaires	
-Formes et couleurs se fondent progressivement.	
-Rosace : 12 copies en cercle	
-Aperçu	
-Appliquer sur une copie	
-PNG	
-JPEG	
-SVG	
-PDF	
-Plan actif	
-Tous les plans	
-Sélection	
-Fond transparent	
-Qualité	
-SVG optimisé (nombres arrondis, attributs inutiles retirés)	
-Texte, dégradés, effets et images intégrés restent modifiables.	
-Un PDF vectoriel, une page par plan de travail, texte réel.	
-Noir et blanc	
-Niveaux de gris	
-Couleurs	
-Précision	
-Ignorer le blanc	
-Conserver l'image d'origine	
-Réinitialiser	
-Largeur	
-Hauteur	
-⇄ Orientation	
-QR code vectoriel du texte sélectionné	
-Objet · groupé, net à toutes les tailles	
-Exporter un pack d'icônes (16 à 1024 px)…	
-Plan de travail actif · PNG	
-Tout sélectionner	
-Document · Ctrl+A	
-Inverser la sélection	
-Document	
-Dupliquer la sélection	
-Objets · Ctrl+Alt+D	
-Grouper la sélection	
-Objets · Ctrl+G	
-Dégrouper la sélection	
-Objets · Ctrl+Maj+G	
-Exporter	
-Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E	
-Plan de travail actif : clic pour l'ajuster à l'écran	
-Fichier	
-Édition	
-Objet	
-Texte	
-Effet	
-Affichage	
-Fenêtre	
-Ouvrir un fichier récent	
-Aucun fichier récent	
-Exporter rapidement	
-Modifier les couleurs	
-Recolorer l'illustration…	
-Régler la teinte, saturation, luminosité…	
-Convertir en niveaux de gris	
-Inverser les couleurs	
-Sépia	
-Saturer +20 %	
-Désaturer −20 %	
-Éclaircir +10 %	
-Assombrir −10 %	
-Teinte +30°	
-Couleurs complémentaires	
-Mélange horizontal	
-Mélange vertical	
-Mélange avant-arrière	
-Échanger fond et contour	
-Transformation	
-Disposition	
-Envoyer vers le calque	
-Tracé	
-Pathfinder	
-Fusion	
-Masque d'écrêtage	
-Masque d'opacité	
-Tracé transparent composé	
-Plans de travail	
-Nouveau plan de travail	
-Ajuster à l'illustration	
-Réorganiser en grille	
-Police	
-Taille	
-Casse	
-Insérer un caractère spécial	
-Même	
-Effets dynamiques (modifiables dans Propriétés)	
-Distorsion et transformation	
-Styliser	
-Mode tracés (Ctrl+Maj+Y)	
-Contours de sélection (Ctrl+H)	
-Cadre de sélection (Ctrl+Maj+B)	
-Règles (Ctrl+R)	
-Repères (Ctrl+;)	
-Verrouiller les repères (Ctrl+Alt+;)	
-Repères commentés (Ctrl+U)	
-Repères de composition (centre et tiers)	
-Grille (Ctrl+')	
-Magnétisme de la grille (Ctrl+Alt+')	
-Pas de la grille	
-Espace de travail	
-Exporter…	
-Modifier la couleur	
-Fond	
-Contour	
-Nouveau fichier	
-Ouvrir…	
-Bienvenue dans Vector	
-Logos, icônes et illustrations nets à toutes les tailles	
-Créer un plan de travail	
-Récents	
-Grouper	
-Dissocier	
-Dupliquer	
-Tolérance	
-Pente	
-Concave	
-Fermé	
-Tours	
-Sens antihoraire	
-Cadre extérieur	
-Épaisseur	
-Creux	
-Lissage	
-Fusionner avec la même couleur	
-Contours et effets	
-Dispersion	
-Intensité	
-Linéaire	
-Radial	
-Ajuster	
-Tout	
-Nouveau	
-Réorganiser	
-Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond	
-Propriétés	
-Calques	
-Bibliothèques	
-Nuancier	
-Styles graphiques	
-Effets bitmap (export PNG et JPEG)	
-Symboles	
-Formes prêtes	
-Style des nouveaux objets	
-Grille et repères	
-Afficher la grille	
-Magnétisme de la grille	
-Règles	
-Repères commentés	
-Afficher les repères	
-Centre et tiers	
-Aligner et répartir	
-Apparence	
-Dégradé	
-Effets	
-Actions rapides	
-Ajuster au contenu	
-Point de référence	
-Conserver les proportions	
-↔ Miroir	
-↕ Miroir	
-Inclinaison…	
-Mettre à l'échelle contours et effets	
-Plan	
-Clé	
-Écart	
-Libérer le masque	
-Tracé composé	
-Décalage…	
-Vectoriser le contour	
-Simplifier…	
-Fusion…	
-Recolorer…	
-Nouveau symbole	
-Rompre le lien	
-Verrouiller	
-Masquer	
-+ Calque	
-Supprimer	
-Monter le calque	
-Descendre le calque	
-Placer la sélection sur le calque actif	
-+ Nouveau	
-Tout voir	
-+ Couleur du fond	
-Ajouter la bibliothèque	
-Couleurs utilisées	
-Vider	
-Nouveau style	
-Retirer le dernier	
-Placer	
-Redéfinir	
-Remplace le symbole par la sélection et met à jour ses occurrences	
-Nom du symbole	
-Créer	
-Fait de la sélection un symbole réutilisable	
-Centre	
-Intérieur	
-Extérieur	
-Ronds	
-Plats	
-Carrés	
-Pointus	
-Biseaux	
-Aucun	
-+ Arrêt	
-Inverser	
-Recentrer	
-Effacer	
-Ombre portée	
-Tracé fermé	
-Lisser	
-Simplifier	
-+ Points	
-G	
-Gras	
-I	
-Italique	
-S	
-Souligné	
-B	
-Barré	
-Aa	
-AA	
-aa	
-Titre	
-Gauche	
-Droite	
-Crénage	
-Texte vertical	
-Détacher du tracé	
-Vectorisation dynamique…	
-Distance	
-Verticale	
-Angle de l'axe	
-Angle d'inclinaison	
-Échelle horizontale	
-Échelle verticale	
-Déplacement horizontal	
-Déplacement vertical	
-Rotation	
-Décalage (négatif = vers l'intérieur)	
-Précision (plus haut = moins de points)	
-Rayon	
-Amplitude	
-Détail (points par 100 px)	
-Contraction ← → Dilatation	
-Angle des hachures	
-Espacement	
-Variation	
-Teinte	
-Saturation	
-Luminosité	
-Copies	
-Décalage X	
-Décalage Y	
-Rotation par copie	
-OK	
-Contenu	
-Échelle	
-Vectorisation dynamique	
-Seuil	
-Bruit ignoré	
-Courbes (plus haut = plus arrondi)	
-Vectoriser	
-Recolorer l'illustration	
-Nouveau document	
-Nouveau…	
-Enregistrer	
-Enregistrer sous…	
-Importer une image…	
-Importer un SVG…	
-Fermer	
-Rétablir	
-Couper	
-Copier	
-Coller	
-Coller devant	
-Coller derrière	
-Coller en place	
-Transformer à nouveau	
-Symétrie horizontale	
-Symétrie verticale	
-Verrouiller la sélection	
-Tout déverrouiller	
-Masquer la sélection	
-Tout afficher	
-Décomposer	
-Joindre	
-Convertir les points en sommets	
-Décalage du tracé…	
-Convertir en tracé	
-Nettoyer les objets vides	
-Créer une fusion…	
-Convertir en texte captif	
-Convertir en texte de point	
-Orientation horizontale / verticale	
-Désélectionner	
-Sélection inverse	
-Objets du calque actif	
-Objets du plan de travail actif	
-Tous les textes	
-Tracés ouverts	
-Images	
-Masques d'écrêtage	
-Lueur externe	
-Lueur interne	
-Contour progressif	
-Flou gaussien	
-Distorsion dynamique	
-Grain	
-Retirer tous les effets	
-Zoom avant	
-Zoom arrière	
-Ajuster le plan de travail	
-Tout ajuster	
-Taille réelle	
-Zoom sur la sélection	
-Réinitialiser la rotation de la vue	
-Opacité de la couleur	
-Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.	
-Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone	
-Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit	
-Critères	
-Entoure les objets à sélectionner · Maj ajoute à la sélection	
-Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer	
-Clique sur un tracé pour ajouter un point sans changer sa forme	
-Clique un point d'ancrage pour le supprimer	
-Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques	
-Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer	
-Maj : proportions fixes	
-Rangées	
-Colonnes	
-Cercles	
-Rayons	
-Anneaux	
-Glisse depuis le centre du halo	
-Frotte le tracé sélectionné	
-Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint	
-Pas Maj	
-Tire un coin du cadre pour déformer en perspective libre	
-Tire une partie du tracé sélectionné : les points voisins suivent en douceur	
-Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur	
-Étapes	
-Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole	
-Glisse pour pulvériser des occurrences du symbole	
-Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	
-Clique une zone fermée pour la peindre avec le fond	
-Glisse sur l'objet sélectionné pour placer le dégradé	
-Rayon du point	
-Clic : point de couleur · Alt+clic : le retirer	
-Glisse pour mesurer une distance et un angle	
-Clique sur un tracé pour le couper à cet endroit	
-Trace un trait à main levée à travers les formes pour les découper	
-Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	
-Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	
-Pas	
-Déplacement clavier	
-Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	
-L	
-H	
-Fond du document	
-X	
-Y	
-Aligner sur	
-Objet clé : le premier sélectionné (contour bleu épais).	
-Répartir les objets	
-Répartir l'espacement	
-Modes de forme	
-Pathfinders	
-Gris	
-Nuances du document	
-Ajoute ici les couleurs de ton projet.	
-Sans sélection, le style devient celui des nouveaux objets.	
-Opacité	
-Mode de fusion	
-Position du contour	
-Bouts	
-Limite de pointe	
-Pointillés	
-Tiret	
-Espace	
-Tiret 2	
-Espace 2	
-Pointes de flèche (début · fin)	
-Taille des pointes	
-Profil de largeur	
-Flou	
-Distorsion	
-Finesse	
-Arrondi des coins	
-Approche	
-Interlignage	
-Ligne de base	
-Largeur du cadre	
-Départ sur le tracé	
-Sélection directe	
-Sélection de groupe	
-Baguette magique	
-Lasso	
-Plume	
-Ajout de point d'ancrage	
-Suppression de point d'ancrage	
-Conversion de point d'ancrage	
-Courbure	
-Texte captif	
-Texte curviligne	
-Segment	
-Arc	
-Spirale	
-Grille rectangulaire	
-Grille polaire	
-Flèche	
-Rectangle	
-Rectangle arrondi	
-Ellipse	
-Polygone	
-Étoile	
-Halo	
-Cœur	
-Pinceau	
-Pinceau goutte	
-Crayon	
-Gomme de tracé	
-Miroir	
-Remodelage	
-Déformation	
-Torsion	
-Contraction	
-Dilatation	
-Festons	
-Cristallisation	
-Fronces	
-Concepteur de forme	
-Pot de peinture dynamique	
-Dégradé de formes	
-Pulvérisation de symboles	
-Filet	
-Pipette	
-Mesure	
-Ciseaux	
-Cutter	
-Gomme	
-Main	
-Rotation de la vue	
-Zoom	
-Plan de travail	
+Annuler	Cancel
+Proportionnelle	Uniform
+Mettre à l'échelle les contours et effets	Scale strokes and effects
+Horizontal	Horizontal
+Vertical	Vertical
+Angle	Angle
+Axe horizontal	Horizontal axis
+Axe vertical	Vertical axis
+Les angles du résultat sont arrondis.	The result's corners are rounded.
+Courbes lisses	Smooth curves
+Nombre d'ondes	Ridges per segment
+Pointes	Corner
+Arrondis	Smooth
+Angles	Corners
+Étapes intermédiaires	Specified steps
+Formes et couleurs se fondent progressivement.	Shapes and colors blend progressively.
+Rosace : 12 copies en cercle	Rosette: 12 copies in a circle
+Aperçu	Preview
+Appliquer sur une copie	Apply to a copy
+PNG	PNG
+JPEG	JPEG
+SVG	SVG
+PDF	PDF
+Plan actif	Active artboard
+Tous les plans	All artboards
+Sélection	Selection
+Fond transparent	Transparent background
+Qualité	Quality
+SVG optimisé (nombres arrondis, attributs inutiles retirés)	Optimized SVG (rounded numbers, unused attributes removed)
+Texte, dégradés, effets et images intégrés restent modifiables.	Text, gradients, effects and embedded images stay editable.
+Un PDF vectoriel, une page par plan de travail, texte réel.	A vector PDF, one page per artboard, real text.
+Noir et blanc	Black and white
+Niveaux de gris	Grayscale
+Couleurs	Colors
+Précision	Precision
+Ignorer le blanc	Ignore white
+Conserver l'image d'origine	Keep the original image
+Réinitialiser	Reset
+Largeur	Width
+Hauteur	Height
+⇄ Orientation	⇄ Orientation
+QR code vectoriel du texte sélectionné	Vector QR code from selected text
+Objet · groupé, net à toutes les tailles	Object · grouped, sharp at any size
+Exporter un pack d'icônes (16 à 1024 px)…	Export an icon pack (16 to 1024 px)…
+Plan de travail actif · PNG	Active artboard · PNG
+Tout sélectionner	Select all
+Document · Ctrl+A	Document · Ctrl+A
+Inverser la sélection	Inverse selection
+Document	Document
+Dupliquer la sélection	Duplicate selection
+Objets · Ctrl+Alt+D	Objects · Ctrl+Alt+D
+Grouper la sélection	Group selection
+Objets · Ctrl+G	Objects · Ctrl+G
+Dégrouper la sélection	Ungroup selection
+Objets · Ctrl+Maj+G	Objects · Ctrl+Shift+G
+Exporter	Export
+Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E	Export options: Ctrl+Alt+E · quick PNG ×2: Ctrl+E
+Plan de travail actif : clic pour l'ajuster à l'écran	Active artboard: click to fit it on screen
+Fichier	File
+Édition	Edit
+Objet	Object
+Texte	Type
+Effet	Effect
+Affichage	View
+Fenêtre	Window
+Ouvrir un fichier récent	Open recent
+Aucun fichier récent	No recent files
+Exporter rapidement	Quick export
+Modifier les couleurs	Edit colors
+Recolorer l'illustration…	Recolor artwork…
+Régler la teinte, saturation, luminosité…	Adjust hue, saturation, brightness…
+Convertir en niveaux de gris	Convert to grayscale
+Inverser les couleurs	Invert colors
+Sépia	Sepia
+Saturer +20 %	Saturate +20%
+Désaturer −20 %	Desaturate −20%
+Éclaircir +10 %	Lighten +10%
+Assombrir −10 %	Darken −10%
+Teinte +30°	Hue +30°
+Couleurs complémentaires	Complementary colors
+Mélange horizontal	Blend horizontally
+Mélange vertical	Blend vertically
+Mélange avant-arrière	Blend front to back
+Échanger fond et contour	Swap fill and stroke
+Transformation	Transform
+Disposition	Arrange
+Envoyer vers le calque	Send to layer
+Tracé	Path
+Pathfinder	Pathfinder
+Fusion	Blend
+Masque d'écrêtage	Clipping mask
+Masque d'opacité	Opacity mask
+Tracé transparent composé	Compound path
+Plans de travail	Artboards
+Nouveau plan de travail	New artboard
+Ajuster à l'illustration	Fit to artwork
+Réorganiser en grille	Rearrange in a grid
+Police	Font
+Taille	Size
+Casse	Change case
+Insérer un caractère spécial	Insert special character
+Même	Same
+Effets dynamiques (modifiables dans Propriétés)	Live effects (editable in Properties)
+Distorsion et transformation	Distort & transform
+Styliser	Stylize
+Mode tracés (Ctrl+Maj+Y)	Outline mode (Ctrl+Shift+Y)
+Contours de sélection (Ctrl+H)	Selection edges (Ctrl+H)
+Cadre de sélection (Ctrl+Maj+B)	Bounding box (Ctrl+Shift+B)
+Règles (Ctrl+R)	Rulers (Ctrl+R)
+Repères (Ctrl+;)	Guides (Ctrl+;)
+Verrouiller les repères (Ctrl+Alt+;)	Lock guides (Ctrl+Alt+;)
+Repères commentés (Ctrl+U)	Smart guides (Ctrl+U)
+Repères de composition (centre et tiers)	Composition guides (center and thirds)
+Grille (Ctrl+')	Grid (Ctrl+')
+Magnétisme de la grille (Ctrl+Alt+')	Snap to grid (Ctrl+Alt+')
+Pas de la grille	Grid spacing
+Espace de travail	Workspace
+Exporter…	Export…
+Modifier la couleur	Edit color
+Fond	Fill
+Contour	Stroke
+Nouveau fichier	New file
+Ouvrir…	Open…
+Bienvenue dans Vector	Welcome to Vector
+Logos, icônes et illustrations nets à toutes les tailles	Logos, icons and illustrations, sharp at any size
+Créer un plan de travail	Create an artboard
+Récents	Recent
+Grouper	Group
+Dissocier	Ungroup
+Dupliquer	Duplicate
+Tolérance	Tolerance
+Pente	Slope
+Concave	Concave
+Fermé	Closed
+Tours	Turns
+Sens antihoraire	Counter clockwise
+Cadre extérieur	Outer frame
+Épaisseur	Thickness
+Creux	Inset
+Lissage	Smoothing
+Fusionner avec la même couleur	Merge with same color
+Contours et effets	Strokes and effects
+Dispersion	Scatter
+Intensité	Intensity
+Linéaire	Linear
+Radial	Radial
+Ajuster	Fit
+Tout	All
+Nouveau	New
+Réorganiser	Rearrange
+Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond	Fill and stroke · click: swap (Shift+X) · D: default · /: no fill
+Propriétés	Properties
+Calques	Layers
+Bibliothèques	Libraries
+Nuancier	Swatches
+Styles graphiques	Graphic styles
+Effets bitmap (export PNG et JPEG)	Raster effects (PNG and JPEG export)
+Symboles	Symbols
+Formes prêtes	Ready-made shapes
+Style des nouveaux objets	New object style
+Grille et repères	Grid and guides
+Afficher la grille	Show grid
+Magnétisme de la grille	Snap to grid
+Règles	Rulers
+Repères commentés	Smart guides
+Afficher les repères	Show guides
+Centre et tiers	Center and thirds
+Aligner et répartir	Align and distribute
+Apparence	Appearance
+Dégradé	Gradient
+Effets	Effects
+Actions rapides	Quick actions
+Ajuster au contenu	Fit to content
+Point de référence	Reference point
+Conserver les proportions	Constrain proportions
+↔ Miroir	↔ Flip
+↕ Miroir	↕ Flip
+Inclinaison…	Shear…
+Mettre à l'échelle contours et effets	Scale strokes and effects
+Plan	Artboard
+Clé	Key object
+Écart	Spacing
+Libérer le masque	Release mask
+Tracé composé	Compound path
+Décalage…	Offset…
+Vectoriser le contour	Outline stroke
+Simplifier…	Simplify…
+Fusion…	Blend…
+Recolorer…	Recolor…
+Nouveau symbole	New symbol
+Rompre le lien	Break link
+Verrouiller	Lock
+Masquer	Hide
++ Calque	+ Layer
+Supprimer	Delete
+Monter le calque	Move layer up
+Descendre le calque	Move layer down
+Placer la sélection sur le calque actif	Move selection to active layer
++ Nouveau	+ New
+Tout voir	Show all
++ Couleur du fond	+ Fill color
+Ajouter la bibliothèque	Add library
+Couleurs utilisées	Colors in use
+Vider	Empty
+Nouveau style	New style
+Retirer le dernier	Remove last
+Placer	Place
+Redéfinir	Redefine
+Remplace le symbole par la sélection et met à jour ses occurrences	Replaces the symbol with the selection and updates its instances
+Nom du symbole	Symbol name
+Créer	Create
+Fait de la sélection un symbole réutilisable	Turns the selection into a reusable symbol
+Centre	Center
+Intérieur	Inside
+Extérieur	Outside
+Ronds	Round
+Plats	Butt
+Carrés	Projecting
+Pointus	Miter
+Biseaux	Bevel
+Aucun	None
++ Arrêt	+ Stop
+Inverser	Reverse
+Recentrer	Recenter
+Effacer	Clear
+Ombre portée	Drop shadow
+Tracé fermé	Closed path
+Lisser	Smooth
+Simplifier	Simplify
++ Points	+ Points
+G	B
+Gras	Bold
+I	I
+Italique	Italic
+S	U
+Souligné	Underline
+B	S
+Barré	Strikethrough
+Aa	Aa
+AA	AA
+aa	aa
+Titre	Title Case
+Gauche	Left
+Droite	Right
+Crénage	Kerning
+Texte vertical	Vertical type
+Détacher du tracé	Detach from path
+Vectorisation dynamique…	Image trace…
+Distance	Distance
+Verticale	Vertical
+Angle de l'axe	Axis angle
+Angle d'inclinaison	Shear angle
+Échelle horizontale	Horizontal scale
+Échelle verticale	Vertical scale
+Déplacement horizontal	Horizontal move
+Déplacement vertical	Vertical move
+Rotation	Rotate
+Décalage (négatif = vers l'intérieur)	Offset (negative = inward)
+Précision (plus haut = moins de points)	Precision (higher = fewer points)
+Rayon	Radius
+Amplitude	Amplitude
+Détail (points par 100 px)	Detail (points per 100 px)
+Contraction ← → Dilatation	Pucker ← → Bloat
+Angle des hachures	Hatching angle
+Espacement	Spacing
+Variation	Variation
+Teinte	Hue
+Saturation	Saturation
+Luminosité	Brightness
+Copies	Copies
+Décalage X	Offset X
+Décalage Y	Offset Y
+Rotation par copie	Rotation per copy
+OK	OK
+Contenu	Content
+Échelle	Scale
+Vectorisation dynamique	Image trace
+Seuil	Threshold
+Bruit ignoré	Noise ignored
+Courbes (plus haut = plus arrondi)	Curves (higher = rounder)
+Vectoriser	Trace
+Recolorer l'illustration	Recolor artwork
+Nouveau document	New document
+Nouveau…	New…
+Enregistrer	Save
+Enregistrer sous…	Save as…
+Importer une image…	Place an image…
+Importer un SVG…	Place an SVG…
+Fermer	Close
+Rétablir	Redo
+Couper	Cut
+Copier	Copy
+Coller	Paste
+Coller devant	Paste in front
+Coller derrière	Paste in back
+Coller en place	Paste in place
+Transformer à nouveau	Transform again
+Symétrie horizontale	Flip horizontal
+Symétrie verticale	Flip vertical
+Verrouiller la sélection	Lock selection
+Tout déverrouiller	Unlock all
+Masquer la sélection	Hide selection
+Tout afficher	Show all
+Décomposer	Expand
+Joindre	Join
+Convertir les points en sommets	Convert points to corners
+Décalage du tracé…	Offset path…
+Convertir en tracé	Create outlines
+Nettoyer les objets vides	Clean up empty objects
+Créer une fusion…	Make blend…
+Convertir en texte captif	Convert to area type
+Convertir en texte de point	Convert to point type
+Orientation horizontale / verticale	Horizontal / vertical orientation
+Désélectionner	Deselect
+Sélection inverse	Inverse
+Objets du calque actif	Objects on active layer
+Objets du plan de travail actif	Objects on active artboard
+Tous les textes	All text objects
+Tracés ouverts	Open paths
+Images	Images
+Masques d'écrêtage	Clipping masks
+Lueur externe	Outer glow
+Lueur interne	Inner glow
+Contour progressif	Feather
+Flou gaussien	Gaussian blur
+Distorsion dynamique	Warp
+Grain	Grain
+Retirer tous les effets	Remove all effects
+Zoom avant	Zoom in
+Zoom arrière	Zoom out
+Ajuster le plan de travail	Fit artboard in window
+Tout ajuster	Fit all in window
+Taille réelle	Actual size
+Zoom sur la sélection	Zoom to selection
+Réinitialiser la rotation de la vue	Reset view rotation
+Opacité de la couleur	Color opacity
+Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.	Also opens SVG, PNG and JPEG files: drop them into the window.
+Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone	Click: select · Shift: add · Alt+drag: duplicate · drag on empty space: marquee
+Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit	Click a point to edit it, Delete removes it, arrows nudge it · Alt+click deletes, Ctrl+click converts
+Critères	Criteria
+Entoure les objets à sélectionner · Maj ajoute à la sélection	Draw around objects to select them · Shift adds to the selection
+Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer	Click: point · drag: curve · click the first point: close · Enter: finish
+Clique sur un tracé pour ajouter un point sans changer sa forme	Click a path to add a point without changing its shape
+Clique un point d'ancrage pour le supprimer	Click an anchor point to delete it
+Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques	Click a smooth point: corner · drag from a corner: symmetric handles
+Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer	Each click adds a point and the curve smooths itself · click the first point: close
+Maj : proportions fixes	Shift: constrain proportions
+Rangées	Rows
+Colonnes	Columns
+Cercles	Circles
+Rayons	Rays
+Anneaux	Rings
+Glisse depuis le centre du halo	Drag from the flare's center
+Frotte le tracé sélectionné	Rub over the selected path
+Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint	Drag on the artboard · Alt+click: exact values · Shift: constrain
+Pas Maj	Shift step
+Tire un coin du cadre pour déformer en perspective libre	Drag a corner of the box to free-distort in perspective
+Tire une partie du tracé sélectionné : les points voisins suivent en douceur	Drag part of the selected path: nearby points follow smoothly
+Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur	Drag from a stroke to widen or narrow it there · Alt+click: removes the width point
+Étapes	Steps
+Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole	No symbols: select artwork, then Libraries › Symbols › New symbol
+Glisse pour pulvériser des occurrences du symbole	Drag to spray symbol instances
+Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	Select overlapping shapes · click or drag: merge regions · Alt: delete a region
+Clique une zone fermée pour la peindre avec le fond	Click a closed region to paint it with the fill
+Glisse sur l'objet sélectionné pour placer le dégradé	Drag over the selected object to place the gradient
+Rayon du point	Point radius
+Clic : point de couleur · Alt+clic : le retirer	Click: color point · Alt+click: remove it
+Glisse pour mesurer une distance et un angle	Drag to measure a distance and an angle
+Clique sur un tracé pour le couper à cet endroit	Click a path to cut it there
+Trace un trait à main levée à travers les formes pour les découper	Draw freehand across shapes to cut them
+Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	Erases on the selection, or on everything when nothing is selected
+Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	Drag to create · click to activate · move a secondary artboard · Delete
+Pas	Step
+Déplacement clavier	Keyboard increment
+Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	Drag from a ruler to place a guide; drag it back into the ruler to delete it.
+L	W
+H	H
+Fond du document	Document background
+X	X
+Y	Y
+Aligner sur	Align to
+Objet clé : le premier sélectionné (contour bleu épais).	Key object: the first one selected (thick outline).
+Répartir les objets	Distribute objects
+Répartir l'espacement	Distribute spacing
+Modes de forme	Shape modes
+Pathfinders	Pathfinders
+Gris	Gray
+Nuances du document	Document swatches
+Ajoute ici les couleurs de ton projet.	Add your project's colors here.
+Sans sélection, le style devient celui des nouveaux objets.	With nothing selected, the style applies to new objects.
+Opacité	Opacity
+Mode de fusion	Blend mode
+Position du contour	Align stroke
+Bouts	Caps
+Limite de pointe	Miter limit
+Pointillés	Dashed line
+Tiret	Dash
+Espace	Gap
+Tiret 2	Dash 2
+Espace 2	Gap 2
+Pointes de flèche (début · fin)	Arrowheads (start · end)
+Taille des pointes	Arrowhead size
+Profil de largeur	Width profile
+Flou	Blur
+Distorsion	Distort
+Finesse	Thinness
+Arrondi des coins	Corner rounding
+Approche	Tracking
+Interlignage	Leading
+Ligne de base	Baseline
+Largeur du cadre	Frame width
+Départ sur le tracé	Start on path
+Sélection directe	Direct selection
+Sélection de groupe	Group selection
+Baguette magique	Magic wand
+Lasso	Lasso
+Plume	Pen
+Ajout de point d'ancrage	Add anchor point
+Suppression de point d'ancrage	Delete anchor point
+Conversion de point d'ancrage	Anchor point
+Courbure	Curvature
+Texte captif	Area type
+Texte curviligne	Type on a path
+Segment	Line segment
+Arc	Arc
+Spirale	Spiral
+Grille rectangulaire	Rectangular grid
+Grille polaire	Polar grid
+Flèche	Arrow
+Rectangle	Rectangle
+Rectangle arrondi	Rounded rectangle
+Ellipse	Ellipse
+Polygone	Polygon
+Étoile	Star
+Halo	Flare
+Cœur	Heart
+Pinceau	Paintbrush
+Pinceau goutte	Blob brush
+Crayon	Pencil
+Gomme de tracé	Path eraser
+Miroir	Reflect
+Remodelage	Reshape
+Déformation	Warp
+Torsion	Twirl
+Contraction	Pucker
+Dilatation	Bloat
+Festons	Scallop
+Cristallisation	Crystallize
+Fronces	Wrinkle
+Concepteur de forme	Shape builder
+Pot de peinture dynamique	Live paint bucket
+Dégradé de formes	Blend
+Pulvérisation de symboles	Symbol sprayer
+Filet	Mesh
+Pipette	Eyedropper
+Mesure	Measure
+Ciseaux	Scissors
+Cutter	Knife
+Gomme	Eraser
+Main	Hand
+Rotation de la vue	Rotate view
+Zoom	Zoom
+Plan de travail	Artboard
