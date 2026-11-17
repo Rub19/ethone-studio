@@ -102,7 +102,7 @@ pub fn custom(kind: usize, x0: f32, y0: f32, x1: f32, y1: f32) -> Vec<P> {
     unit.into_iter().map(|(x, y)| (x0 + x * w, y0 + y * h)).collect()
 }
 
-pub const FONTS: [(&str, [&str; 4]); 11] = [
+pub const FONTS: [(&str, [&str; 4]); 30] = [
     ("Segoe UI", ["segoeui.ttf", "segoeuib.ttf", "segoeuii.ttf", "segoeuiz.ttf"]),
     ("Arial", ["arial.ttf", "arialbd.ttf", "ariali.ttf", "arialbi.ttf"]),
     ("Calibri", ["calibri.ttf", "calibrib.ttf", "calibrii.ttf", "calibriz.ttf"]),
@@ -114,6 +114,25 @@ pub const FONTS: [(&str, [&str; 4]); 11] = [
     ("Courier New", ["cour.ttf", "courbd.ttf", "couri.ttf", "courbi.ttf"]),
     ("Impact", ["impact.ttf", "impact.ttf", "impact.ttf", "impact.ttf"]),
     ("Comic Sans MS", ["comic.ttf", "comicbd.ttf", "comici.ttf", "comicz.ttf"]),
+    ("Arial Black", ["ariblk.ttf", "ariblk.ttf", "ariblk.ttf", "ariblk.ttf"]),
+    ("Bahnschrift", ["bahnschrift.ttf", "bahnschrift.ttf", "bahnschrift.ttf", "bahnschrift.ttf"]),
+    ("Franklin Gothic", ["framd.ttf", "FRAHV.ttf", "framd.ttf", "FRAHV.ttf"]),
+    ("Garamond", ["GARA.ttf", "GARABD.ttf", "GARAIT.ttf", "GARABD.ttf"]),
+    ("Book Antiqua", ["BKANT.ttf", "ANTQUAB.ttf", "ANTQUAI.ttf", "ANTQUABI.ttf"]),
+    ("Palatino Linotype", ["pala.ttf", "palab.ttf", "palai.ttf", "palabi.ttf"]),
+    ("Century Gothic", ["GOTHIC.ttf", "GOTHICB.ttf", "GOTHICI.ttf", "GOTHICBI.ttf"]),
+    ("Tahoma", ["tahoma.ttf", "tahomabd.ttf", "tahoma.ttf", "tahomabd.ttf"]),
+    ("Constantia", ["constan.ttf", "constanb.ttf", "constani.ttf", "constanz.ttf"]),
+    ("Corbel", ["corbel.ttf", "corbelb.ttf", "corbeli.ttf", "corbelz.ttf"]),
+    ("Candara", ["candara.ttf", "candarab.ttf", "candarai.ttf", "candaraz.ttf"]),
+    ("Lucida Console", ["lucon.ttf", "lucon.ttf", "lucon.ttf", "lucon.ttf"]),
+    ("Segoe Print", ["segoepr.ttf", "segoeprb.ttf", "segoepr.ttf", "segoeprb.ttf"]),
+    ("Segoe Script", ["segoesc.ttf", "segoescb.ttf", "segoesc.ttf", "segoescb.ttf"]),
+    ("Ink Free", ["Inkfree.ttf", "Inkfree.ttf", "Inkfree.ttf", "Inkfree.ttf"]),
+    ("Lucida Handwriting", ["LHANDW.ttf", "LHANDW.ttf", "LHANDW.ttf", "LHANDW.ttf"]),
+    ("Gabriola", ["gabriola.ttf", "gabriola.ttf", "gabriola.ttf", "gabriola.ttf"]),
+    ("Bradley Hand", ["BRADHITC.ttf", "BRADHITC.ttf", "BRADHITC.ttf", "BRADHITC.ttf"]),
+    ("Mistral", ["MISTRAL.ttf", "MISTRAL.ttf", "MISTRAL.ttf", "MISTRAL.ttf"]),
 ];
 
 pub struct TextStyle {

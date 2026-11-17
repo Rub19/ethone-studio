@@ -4,6 +4,7 @@
 use crate::Pixel;
 use studio_ui::i18n::tl;
 use crate::doc::Area;
+use crate::lookalike::{self, Hand, Look};
 use crate::shapes::{FONTS, TextStyle, render_text};
 use eframe::egui::{self, Color32, RichText, Ui};
 use image::{Rgba, RgbaImage, imageops};
@@ -19,11 +20,22 @@ pub struct Line {
     pub color: [u8; 4],
     pub bg: [u8; 4],
     pub on: bool,
+    /// Font, grain and softness found for the original text.
+    pub look: Option<Look>,
 }
 
 pub enum Job {
     Ocr(Result<Vec<Line>, String>),
-    Erased(usize, RgbaImage, Vec<Line>, &'static str),
+    Erased(usize, RgbaImage, Vec<Drawn>, &'static str),
+}
+
+/// New text already drawn, ready to lay on the erased photo.
+pub struct Drawn {
+    pub rect: [f32; 4],
+    pub text: String,
+    pub img: RgbaImage,
+    pub x: i64,
+    pub y: i64,
 }
 
 pub struct State {
@@ -52,9 +64,13 @@ pub struct State {
     pub repl: String,
     pub case: bool,
     pub blur_px: f32,
+    pub auto_font: bool,
+    pub hand: usize,
+    pub blend: bool,
 }
 
 const METHODS: [&str; 3] = ["Reconstruction", "Couleur du fond", "Flou du fond"];
+const HAND: [&str; 3] = ["Auto", "Lettres d'origine", "Police"];
 
 impl Default for State {
     fn default() -> Self {
@@ -86,6 +102,9 @@ impl Default for State {
             repl: String::new(),
             case: false,
             blur_px: 0.0,
+            auto_font: true,
+            hand: 0,
+            blend: true,
         }
     }
 }
@@ -196,7 +215,7 @@ impl Pixel {
             None => ((0.0, 0.0), img.clone()),
         };
         let lang = self.pt.langs.get(self.pt.lang).map(|l| l.0.clone()).unwrap_or_default();
-        let (up, min) = (self.pt.upscale, self.pt.min_conf);
+        let (up, min, auto) = (self.pt.upscale, self.pt.min_conf, self.pt.auto_font);
         self.pt.layer = self.doc.active;
         let (tx, rx) = channel();
         self.pt.job = Some(rx);
@@ -210,7 +229,13 @@ impl Pixel {
                     .map(|l| {
                         let rect = [l.rect[0] + off.0, l.rect[1] + off.1, l.rect[2], l.rect[3]];
                         let (color, bg) = studio_ocr::colors(&img, rect);
-                        Line { text: l.text.clone(), orig: l.text, rect, color, bg, on: true }
+                        let look = auto.then(|| {
+                            let (mask, _, _) = lookalike::ink(&img, rect, color, bg);
+                            let (font, bold, italic, score) = lookalike::match_font(&mask, &l.text)?;
+                            let (grain, soft) = lookalike::texture(&img, rect, &mask);
+                            Some(Look { font, bold, italic, score, grain, soft })
+                        });
+                        Line { text: l.text.clone(), orig: l.text, rect, color, bg, on: true, look: look.flatten() }
                     })
                     .collect()
             });
@@ -246,11 +271,15 @@ impl Pixel {
     }
 
     fn pt_style(&self, l: &Line) -> TextStyle {
+        let (font, bold, italic) = match l.look.filter(|_| self.pt.auto_font) {
+            Some(k) => (k.font, k.bold, k.italic),
+            None => (self.pt.font, self.pt.bold, self.pt.italic),
+        };
         TextStyle {
-            font: self.pt.font,
+            font,
             size: 32.0,
-            bold: self.pt.bold,
-            italic: self.pt.italic,
+            bold,
+            italic,
             underline: false,
             align: 0,
             tracking: 0.0,
@@ -260,21 +289,56 @@ impl Pixel {
         }
     }
 
-    fn pt_write(&mut self, lines: &[Line], layer: usize) {
+    /// Whether `l` is rewritten with the writer's own letters rather than a font.
+    fn pt_handwritten(&self, l: &Line) -> bool {
+        match self.pt.hand {
+            1 => true,
+            2 => false,
+            _ => l.look.is_some_and(|k| lookalike::is_handwriting(k.font)),
+        }
+    }
+
+    /// Draws the new text of `l` so it looks like the original in `src` (the photo before erasing).
+    fn pt_draw(&self, l: &Line, src: &RgbaImage) -> Option<Drawn> {
+        let text = l.text.trim();
+        if text.is_empty() {
+            return None;
+        }
+        let st = self.pt_style(l);
+        let (mut img, x, y) = if self.pt_handwritten(l) {
+            let (mask, x0, y0) = lookalike::ink(src, l.rect, l.color, l.bg);
+            let hand = Hand::from_line(src, &mask, x0, y0, &l.orig);
+            let mut img = hand.write(text, (st.font, st.bold, st.italic), st.color)?;
+            if self.pt.fit && img.width() as f32 > l.rect[2] * 1.15 {
+                img = imageops::resize(&img, l.rect[2].max(1.0) as u32, img.height(), imageops::FilterType::Triangle);
+            }
+            (img, x0 as i64, y0 as i64)
+        } else {
+            let img = line_image(text, l.rect, &st, self.pt.fit, self.pt.size_k)?;
+            (img, l.rect[0].round() as i64, (l.rect[1] + l.rect[3] * (1.0 - self.pt.size_k) / 2.0).round() as i64)
+        };
+        if self.pt.blend
+            && let Some(k) = l.look
+        {
+            lookalike::blend(&mut img, &k, st.color);
+        }
+        Some(Drawn { rect: l.rect, text: text.to_owned(), img, x, y })
+    }
+
+    fn pt_write(&mut self, drawn: &[Drawn], layer: usize) {
         let (w, h) = (self.doc.width(), self.doc.height());
         let mut flat: Option<RgbaImage> = None;
-        for l in lines.iter().filter(|l| !l.text.trim().is_empty()) {
-            let Some(img) = line_image(l.text.trim(), l.rect, &self.pt_style(l), self.pt.fit, self.pt.size_k) else { continue };
-            let (x, y) = (l.rect[0].round() as i64, (l.rect[1] + l.rect[3] * (1.0 - self.pt.size_k) / 2.0).round() as i64);
+        for d in drawn {
+            let (img, x, y) = (&d.img, d.x, d.y);
             if self.pt.own_layer {
                 let mut canvas = RgbaImage::new(w, h);
-                imageops::overlay(&mut canvas, &img, x, y);
-                let name: String = format!("Texte : {}", l.text.trim()).chars().take(30).collect();
+                imageops::overlay(&mut canvas, img, x, y);
+                let name: String = format!("Texte : {}", d.text).chars().take(30).collect();
                 self.doc.next_label = Some("Texte de la photo".into());
                 self.doc.add_layer(Some(name), Some(canvas));
             } else {
                 let base = flat.get_or_insert_with(|| self.doc.layers[layer].img.clone());
-                imageops::overlay(base, &img, x, y);
+                imageops::overlay(base, img, x, y);
             }
         }
         if let Some(img) = flat {
@@ -282,7 +346,7 @@ impl Pixel {
             self.doc.touch_all();
         }
         for l in self.pt.lines.iter_mut() {
-            if lines.iter().any(|x| x.rect == l.rect) {
+            if drawn.iter().any(|x| x.rect == l.rect) {
                 l.orig = l.text.clone();
             }
         }
@@ -299,7 +363,7 @@ impl Pixel {
         let mut img = self.doc.layers[layer].img.clone();
         let (w, h) = img.dimensions();
         let label = if write { "Remplacement du texte" } else { "Texte effacé" };
-        let todo = if write { lines.clone() } else { Vec::new() };
+        let todo: Vec<Drawn> = if write { lines.iter().filter_map(|l| self.pt_draw(l, &self.composite)).collect() } else { Vec::new() };
         match self.pt.method {
             0 => {
                 let mask = mask_of(&refs, self.pt.pad, w, h);
@@ -356,6 +420,21 @@ impl Pixel {
         self.doc.set_selection(Some(area), Some(m));
     }
 
+    /// Adds the selected area as a text line the OCR missed; the user types what it says.
+    fn pt_add_selection(&mut self) {
+        let Some(a) = self.doc.selection else { return };
+        let img = &self.composite;
+        let rect = [a.x0 as f32, a.y0 as f32, (a.x1 - a.x0) as f32, (a.y1 - a.y0) as f32];
+        let (color, bg) = studio_ocr::colors(img, rect);
+        let (mask, _, _) = lookalike::ink(img, rect, color, bg);
+        let (grain, soft) = lookalike::texture(img, rect, &mask);
+        let hand = FONTS.iter().position(|f| f.0 == "Segoe Print").unwrap_or(0);
+        let look = Some(Look { font: hand, bold: false, italic: false, score: 0.0, grain, soft });
+        self.pt.layer = self.doc.active;
+        self.pt.lines.push(Line { text: String::new(), orig: String::new(), rect, color, bg, on: true, look });
+        self.pt.sel = Some(self.pt.lines.len() - 1);
+    }
+
     pub fn pt_hit(&self, x: f32, y: f32) -> Option<usize> {
         self.pt.lines.iter().position(|l| x >= l.rect[0] - 3.0 && x <= l.rect[0] + l.rect[2] + 3.0 && y >= l.rect[1] - 3.0 && y <= l.rect[1] + l.rect[3] + 3.0)
     }
@@ -399,6 +478,13 @@ impl Pixel {
         if !self.pt.busy.is_empty() {
             lab(ui, &self.pt.busy);
         }
+        if ui
+            .add_enabled(self.doc.selection.is_some(), egui::Button::new(tl("Sélection → ligne")))
+            .on_hover_text(tl("Texte non détecté (écriture difficile à lire) : sélectionne-le au rectangle, puis ajoute-le comme ligne et tape ce qui est écrit"))
+            .clicked()
+        {
+            self.pt_add_selection();
+        }
         egui::CollapsingHeader::new(RichText::new(tl("Options de lecture")).size(12.0)).id_salt("pt-read").show(ui, |ui| {
             if !self.pt.langs.is_empty() {
                 let cur = self.pt.langs.get(self.pt.lang).map(|l| l.1.clone()).unwrap_or_default();
@@ -440,7 +526,8 @@ impl Pixel {
                     if resp.gained_focus() {
                         act = Some((9, i));
                     }
-                    resp.on_hover_text(format!("Original : {}\nCouleur {} sur fond {}", l.orig, hex(l.color), hex(l.bg)));
+                    let font = l.look.map(|k| format!("\n{} : {}{}{}", tl("Police"), FONTS[k.font].0, if k.bold { " · Bold" } else { "" }, if k.italic { " · Italic" } else { "" })).unwrap_or_default();
+                    resp.on_hover_text(format!("Original : {}\nCouleur {} sur fond {}{font}", l.orig, hex(l.color), hex(l.bg)));
                 });
                 if sel == Some(i) {
                     ui.horizontal_wrapped(|ui| {
@@ -449,6 +536,11 @@ impl Pixel {
                                 act = Some((k, i));
                             }
                         }
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new(tl("Ce qui est écrit")).size(11.5).color(FAINT));
+                        ui.add(egui::TextEdit::singleline(&mut l.orig).desired_width(ui.available_width() - 4.0))
+                            .on_hover_text(tl("Corrige la lecture si l'OCR s'est trompé : l'écriture manuscrite est recomposée lettre par lettre à partir de ce texte"));
                     });
                 }
             }
@@ -519,12 +611,17 @@ impl Pixel {
                 studio_ui::handoff::toast(ctx, format!("{n} ligne(s) modifiée(s) : « Appliquer » pour les écrire dans l'image"), n > 0);
             }
         });
-        egui::CollapsingHeader::new(RichText::new(tl("Rendu du nouveau texte")).size(12.0)).id_salt("pt-style").show(ui, |ui| {
-            egui::ComboBox::from_id_salt("pt-font").selected_text(FONTS[self.pt.font].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
+        egui::CollapsingHeader::new(RichText::new(tl("Rendu du nouveau texte")).size(12.0)).id_salt("pt-style").default_open(true).show(ui, |ui| {
+            ui.checkbox(&mut self.pt.auto_font, tl("Police détectée sur chaque ligne"));
+            lab(ui, tl("Écriture manuscrite"));
+            pro::segmented(ui, &mut self.pt.hand, &HAND.map(tl));
+            ui.label(RichText::new(tl("Lettres d'origine : réécrit avec les lettres découpées dans la photo, les lettres absentes viennent de la police la plus proche. Auto : seulement quand la ligne ressemble à de l'écriture à la main.")).size(11.0).color(FAINT));
+            ui.checkbox(&mut self.pt.blend, tl("Imiter le grain et la netteté de la photo"));
+            ui.add_enabled_ui(!self.pt.auto_font, |ui| egui::ComboBox::from_id_salt("pt-font").selected_text(FONTS[self.pt.font].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for (k, f) in FONTS.iter().enumerate() {
                     ui.selectable_value(&mut self.pt.font, k, f.0);
                 }
-            });
+            }));
             ui.horizontal(|ui| {
                 ui.toggle_value(&mut self.pt.bold, RichText::new(tl("G")).strong()).on_hover_text(tl("Gras"));
                 ui.toggle_value(&mut self.pt.italic, RichText::new(tl("I")).italics()).on_hover_text(tl("Italique"));
@@ -573,7 +670,7 @@ mod tests {
 
     #[test]
     fn mask_text_and_replace() {
-        let l = Line { text: "x".into(), orig: "x".into(), rect: [2.0, 2.0, 4.0, 3.0], color: [0; 4], bg: [255; 4], on: true };
+        let l = Line { text: "x".into(), orig: "x".into(), rect: [2.0, 2.0, 4.0, 3.0], color: [0; 4], bg: [255; 4], on: true, look: None };
         let m = mask_of(&[&l], 1.0, 10, 10);
         assert_eq!(m.iter().filter(|b| **b).count(), 6 * 5);
         assert_eq!(replace_ci("Prix PROMO promo", "promo", "SOLDES"), "Prix SOLDES SOLDES");
@@ -606,7 +703,7 @@ mod e2e {
         let l = p.lines.iter().find(|l| l.text.contains("SOLDES")).expect(&p.text);
         let (color, _) = studio_ocr::colors(&img, l.rect);
         assert!(color[0] > 180 && color[2] < 140, "{color:?}");
-        let refs = Line { text: "PROMO -70%".into(), orig: l.text.clone(), rect: l.rect, color, bg: [0; 4], on: true };
+        let refs = Line { text: "PROMO -70%".into(), orig: l.text.clone(), rect: l.rect, color, bg: [0; 4], on: true, look: None };
         let mask = mask_of(&[&refs], 4.0, img.width(), img.height());
         let mut erased = crate::inpaint::content_aware_fill(&img, &mask, 3);
         let st = TextStyle { color, ..sign };
@@ -618,5 +715,67 @@ mod e2e {
         }
         let back = studio_ocr::recognize_with(&erased, "fr-FR", true).unwrap();
         assert!(back.text.contains("PROMO") && !back.text.contains("SOLDES"), "{}", back.text);
+    }
+
+
+    /// A note in `font` on paper, rewritten from "Rendez-vous lundi" to `new` the way the panel does it.
+    /// `ocr` reads the line like "Détecter le texte"; otherwise the line is added by hand like "Sélection → ligne".
+    fn rewrite_note(font: &str, ocr: bool, new: &str) -> (RgbaImage, RgbaImage, Look) {
+        let paper = |x: u32, y: u32| {
+            let n = ((x.wrapping_mul(7919) ^ y.wrapping_mul(104_729)) % 13) as u8;
+            Rgba([236 - n, 228 - n, 210 - n, 255])
+        };
+        let mut img = RgbaImage::from_fn(900, 240, paper);
+        let fi = FONTS.iter().position(|f| f.0 == font).unwrap();
+        let pen = TextStyle { font: fi, size: 84.0, bold: false, italic: false, underline: false, align: 0, tracking: 0.0, leading: 1.2, vertical: false, color: [25, 40, 110, 255] };
+        let t = render_text("Rendez-vous lundi", &pen).unwrap();
+        imageops::overlay(&mut img, &t, 60, 60);
+        let (rect, orig) = if ocr {
+            let p = studio_ocr::recognize_with(&img, "fr-FR", true).unwrap();
+            let l = p.lines.iter().find(|l| l.text.contains("lundi")).unwrap_or_else(|| panic!("OCR read: {:?}", p.text));
+            (l.rect, l.text.clone())
+        } else {
+            let mut b = (u32::MAX, u32::MAX, 0, 0);
+            for (x, y, p) in t.enumerate_pixels().filter(|q| q.2.0[3] > 96) {
+                b = (b.0.min(x), b.1.min(y), b.2.max(x), b.3.max(y));
+                let _ = p;
+            }
+            ([60.0 + b.0 as f32 - 4.0, 60.0 + b.1 as f32 - 4.0, (b.2 - b.0) as f32 + 8.0, (b.3 - b.1) as f32 + 8.0], "Rendez-vous lundi".to_string())
+        };
+        let (color, bg) = studio_ocr::colors(&img, rect);
+        let (mask, x0, y0) = lookalike::ink(&img, rect, color, bg);
+        let (f, bold, italic, score) = lookalike::match_font(&mask, &orig).unwrap();
+        let (grain, soft) = lookalike::texture(&img, rect, &mask);
+        let look = Look { font: f, bold, italic, score, grain, soft };
+        let hand = Hand::from_line(&img, &mask, x0, y0, &orig);
+        let mut drawn = hand.write(new, (f, bold, italic), color).unwrap();
+        lookalike::blend(&mut drawn, &look, color);
+        let line = Line { text: String::new(), orig, rect, color, bg, on: true, look: None };
+        let mut after = crate::inpaint::content_aware_fill(&img, &mask_of(&[&line], 4.0, img.width(), img.height()), 3);
+        imageops::overlay(&mut after, &drawn, x0 as i64, y0 as i64);
+        if let Ok(out) = std::env::var("PT_OUT") {
+            let tag = font.replace(' ', "-").to_lowercase();
+            img.save(format!("{out}/hand-{tag}-before.png")).unwrap();
+            after.save(format!("{out}/hand-{tag}-after.png")).unwrap();
+        }
+        (img, after, look)
+    }
+
+    #[test]
+    #[ignore]
+    fn rewrites_a_handwritten_note() {
+        let (_, after, look) = rewrite_note("Segoe Print", true, "Rendez-vous mardi");
+        assert!(lookalike::is_handwriting(look.font), "matched {}", FONTS[look.font].0);
+        let back = studio_ocr::recognize_with(&after, "fr-FR", true).unwrap();
+        assert!(back.text.contains("mardi") && !back.text.contains("lundi"), "read back: {}", back.text);
+    }
+
+    #[test]
+    #[ignore]
+    fn rewrites_handwriting_the_ocr_cannot_read() {
+        let (before, after, look) = rewrite_note("Ink Free", false, "Rendez-vous dimanche");
+        assert_eq!(FONTS[look.font].0, "Ink Free");
+        let ink = |img: &RgbaImage| img.pixels().filter(|p| p.0[2] as u16 > p.0[0] as u16 + 40).count();
+        assert!(ink(&after) > ink(&before) / 2, "new ink {} vs {}", ink(&after), ink(&before));
     }
 }

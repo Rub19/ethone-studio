@@ -639,3 +639,26 @@ Moyenne 3 × 3	Average 3 × 3
 Moyenne 5 × 5	Average 5 × 5
 Moyenne 11 × 11	Average 11 × 11
 Moyenne 31 × 31	Average 31 × 31
+Sélection → ligne	Selection → line
+Texte non détecté (écriture difficile à lire) : sélectionne-le au rectangle, puis ajoute-le comme ligne et tape ce qui est écrit	Text not detected (hard-to-read writing): select it with the rectangle, add it as a line, then type what it says
+Ce qui est écrit	What it says
+Corrige la lecture si l'OCR s'est trompé : l'écriture manuscrite est recomposée lettre par lettre à partir de ce texte	Fix the reading if the OCR got it wrong: handwriting is rebuilt letter by letter from this text
+Police détectée sur chaque ligne	Font detected on each line
+Écriture manuscrite	Handwriting
+Lettres d'origine : réécrit avec les lettres découpées dans la photo, les lettres absentes viennent de la police la plus proche. Auto : seulement quand la ligne ressemble à de l'écriture à la main.	Original letters: rewrites with letters cut out of the photo; missing letters come from the closest font. Auto: only when the line looks handwritten.
+Imiter le grain et la netteté de la photo	Match the photo's grain and sharpness
+Arial Black	
+Franklin Gothic	
+Book Antiqua	
+Palatino Linotype	
+Century Gothic	
+Lucida Console	
+Segoe Print	
+Segoe Script	
+Ink Free	
+Lucida Handwriting	
+Bradley Hand	
+Gabriola	
+Mistral	
+Auto	Auto
+Lettres d'origine	Original letters

@@ -10,6 +10,7 @@ use studio_fx::{filters, fx};
 use studio_ui::i18n::tl;
 mod extras;
 mod inpaint;
+mod lookalike;
 mod newtools;
 mod panels;
 mod project;

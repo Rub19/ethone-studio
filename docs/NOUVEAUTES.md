@@ -8,6 +8,7 @@ Version **0.9.1**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables
 - **Couleurs** : les profils ICC des photos (AdobeRGB, Display P3…) sont respectés à l'ouverture, sRGB est intégré aux exports ; Pixel ajoute l'épreuvage CMJN et l'export TIFF CMJN pour l'impression.
 - **Récupération après plantage** : Pixel, Vector, Page, Motion et Cut enregistrent le travail non sauvegardé chaque minute et le rouvrent au démarrage.
 - **Pixel** : format de projet .epix avec calques, masques et calques de réglage (Ctrl+S).
+- **Pixel › Texte de la photo** : la police de chaque ligne est reconnue parmi 30 polices Windows ; l'écriture manuscrite est réécrite avec les lettres de la photo elle-même (les lettres absentes viennent de la police manuscrite la plus proche) ; grain et netteté de la photo sont imités. Texte illisible pour l'OCR : « Sélection → ligne » puis taper ce qui est écrit.
 - **Panneaux déplaçables** : glisser l'en-tête, clic droit pour masquer, menu Espace de travail (Pixel, Vector, Page, Motion, Cut, Sound).
 - **Icônes uniformes** dans les 9 apps, aides en info-bulles (i), raccourcis regroupés dans la barre d'état.
 
