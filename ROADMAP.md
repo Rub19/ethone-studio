@@ -80,6 +80,16 @@ Faire d'Ethone Studio une suite créative cohérente où chaque application rest
 - Motion : 7 préréglages d'animation de plus (pulsation, balancement, clignotement, flottement, rotation continue, zoom de sortie, sortie vers la droite) ; les effets continus utilisent les cycles d'images clés existants.
 - Lumen : catégorie « Ambiances » de 8 rendus (heure dorée, heure bleue, brume chaude, hiver lumineux, désert, cyberpunk, rétro 70s, sombre et intense).
 
+### Vague 8 (livrée) — formats, outils, installateurs, préférences
+
+- Formats Adobe : PSD (calques), AI compatible PDF, préréglages Lightroom, nuanciers ASE/ACO, LUT .cube, médias Premiere, InDesign IDML.
+- Banques libres : icônes Lucide, couleurs nommées, bruitages CC0, looks pellicule.
+- 300 outils en un clic (« Outil : … » dans Ctrl+K), chacun testé ; bibliothèques d'options exécutées depuis la palette.
+- Installateurs par app (hors ligne et web), associations de fichiers, désinstallation propre.
+- Préférences Ctrl+, communes et propres à chaque app.
+- IA retirée sauf le filigrane automatique de Pixel.
+- Audit visuel des 9 apps : chevauchements corrigés.
+
 ### Corrections incluses
 
 - Folio : une action visant les pages sélectionnées agit désormais sur la page courante quand aucune vignette n'est sélectionnée, au lieu de modifier toutes les pages.

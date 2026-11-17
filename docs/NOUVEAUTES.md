@@ -2,6 +2,39 @@
 
 Toutes les nouvelles options se trouvent dans la palette **Ctrl+K** de chaque app : tape un mot (« look », « palette », « duotone », « écho », « filigrane »…) et choisis. Rien n'encombre l'interface tant que tu ne cherches pas.
 
+## Préférences (Ctrl+,)
+
+Comme Édition > Préférences dans Photoshop, dans les 9 apps : **Ctrl+,** ou Ctrl+K « Préférences… ». Tout est enregistré dès qu'on le change.
+
+- **Communes à la suite** : taille de l'interface (85 à 150 %), couleur d'accentuation, coins carrés ou arrondis, animations, info-bulles, nombre d'étapes d'annulation (pris en compte par les 8 apps), dossier des préférences, valeurs par défaut.
+- **Propres à chaque app** :
+
+| App | Onglets | Réglages |
+|---|---|---|
+| Pixel | Curseurs, Repères et grille, Affichage | Curseur de peinture, grille de pixels, grille et subdivisions, magnétisme, plan de travail, cadre des calques, lissage |
+| Vector | Repères et grille, Unités et règles | Grille et pas, magnétisme, repères, règles, pas d'angle avec Maj |
+| Page | Repères et grille, Affichage | Marges, colonnes et grille, magnétisme, règles, notes |
+| Lumen | Bibliothèque, Développement | Taille des vignettes, superposition de recadrage |
+| Cut | Lecture, Montage, Repères | Qualité de l'aperçu, magnétisme, formes d'onde, vignettes, zones de sécurité, grille, repères |
+| Motion | Lecture, Repères et grille, Transparence et pelure | Qualité, règles, grille, zones de sécurité, damier, pelure d'oignon |
+| Sound | Affichage, Lecture | Vue au démarrage, échelle des fréquences, suivi de la lecture |
+| Folio | Affichage, Annotations | Zoom à l'ouverture, panneau de gauche, couleur, épaisseur et taille du texte des annotations |
+
+## Moins d'IA
+
+L'IA est retirée partout, sauf pour le retrait automatique des filigranes dans Pixel (le mode sans IA reste disponible). Plus d'assistant IA dans l'aide (F1 ouvre les tutoriels), plus de résumé de PDF dans Folio, plus de traduction dans Pixel. L'Assistant du lanceur reste : il comprend les demandes avec des règles, sans IA.
+
+## Interface revue
+
+Audit des 9 apps avec un vrai document ouvert, corrigé et vérifié à l'écran :
+
+- Cut et Motion : la barre de lecture et la barre d'options s'adaptent à la largeur, plus rien ne se superpose.
+- Lumen : barres d'outils et d'état sans chevauchement, noms longs raccourcis avec « … ».
+- Sound : barre de zoom remise en ordre. Lanceur : la liste des catégories ne passe plus sous « Paramètres ».
+- Pixel : le panneau de droite ne passe plus sous l'image ; « Lissage » n'est plus coupé.
+- Page : un document InDesign garde ses retours à la ligne, son alignement et sa police.
+- Correction importante : choisir une option des bibliothèques Ctrl+K ne faisait rien, elles s'exécutent maintenant.
+
 ## 300 nouveaux outils
 
 Dans Ctrl+K, tape « Outil » (ou « Outil PDF » dans Folio). Chaque outil fait une vraie action en un clic et est testé automatiquement.
@@ -19,7 +52,12 @@ Dans Ctrl+K, tape « Outil » (ou « Outil PDF » dans Folio). Chaque outil fait
 
 ## Installateurs autonomes
 
-Chaque app peut s'installer seule, sans le lanceur, comme Photoshop : Pixel-Setup.exe, Lumen-Setup.exe… Installation pour ton compte Windows (sans droits administrateur), raccourcis Démarrer et Bureau, entrée dans « Applications installées » avec désinstallation. Les apps installées ainsi restent reconnues par le lanceur et par « Envoyer vers ».
+Chaque app peut s'installer seule, sans le lanceur, comme Photoshop, en deux versions :
+
+- **Hors ligne** (Pixel-Setup.exe…, 20 à 25 Mo) : l'app est dans l'installateur.
+- **Web** (Pixel-Web-Setup.exe…, 13,7 Mo) : télécharge la dernière version publiée et vérifie qu'elle est intacte, comme le Set-up.exe d'Adobe.
+
+Installation pour ton compte Windows sans droits administrateur, raccourcis Démarrer et Bureau, entrée dans « Applications installées ». Tes projets (.evec, .ecut, .emot, .epage) s'ouvrent dans leur app ; images, sons, vidéos, PDF et PSD proposent les apps dans « Ouvrir avec » sans changer l'app par défaut. La désinstallation propose de supprimer aussi les préférences, et `--silent` installe sans fenêtre. Testé en vrai : installation et désinstallation silencieuses de Sound, tout est nettoyé.
 
 Fabrication : `scripts\package-setups.ps1` (compile toute la suite en version finale, à lancer quand le PC est libre).
 

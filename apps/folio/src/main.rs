@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod optlib;
+mod reglages;
 mod outils;
 mod engine;
 mod panels;
@@ -302,7 +303,7 @@ impl Folio {
                 self.sel.clear();
                 self.redactions.clear();
                 self.measure = None;
-                self.fit = Some(1);
+                self.fit = Some(self.open_fit().into());
                 self.st.loaded(&o);
                 self.od = Some(o);
                 self.goto = Some(0);
@@ -1272,6 +1273,12 @@ impl eframe::App for Folio {
         }
         self.palette.set_library(optlib::lib);
         self.palette.keys(ctx);
+        if !self.palette.prefs_declared() {
+            self.palette.declare_prefs("folio", reglages::PREFS);
+        }
+        if self.palette.take_prefs_changed() {
+            self.apply_prefs();
+        }
         if self.palette.open {
             let cmds = self.commands();
             if let Some(id) = self.palette.show(ctx, &mut self.help, cmds) {
