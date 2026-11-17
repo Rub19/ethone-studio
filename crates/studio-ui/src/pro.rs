@@ -172,6 +172,40 @@ pub fn kbd(ui: &mut Ui, key: &str) {
     ui.painter().galley(rect.center() - galley.size() / 2.0, galley, MUTED);
 }
 
+/// Draws a Lucide icon, so every app shares one grid and one stroke weight. Rendered once per size
+/// as a white texture and tinted at draw time. Unknown names draw nothing.
+pub fn lucide(p: &egui::Painter, r: Rect, name: &str, color: Color32) {
+    let side = r.width().min(r.height());
+    let px = (side * p.ctx().pixels_per_point()).ceil().clamp(8.0, 256.0) as u32;
+    let id = egui::Id::NULL.with(("lucide", name, px));
+    let tex = match p.ctx().data(|d| d.get_temp::<Option<egui::TextureHandle>>(id)) {
+        Some(t) => t,
+        None => {
+            let t = render_lucide(p.ctx(), name, px);
+            p.ctx().data_mut(|d| d.insert_temp(id, t.clone()));
+            t
+        }
+    };
+    if let Some(t) = tex {
+        p.image(t.id(), Rect::from_center_size(r.center(), Vec2::splat(side)), Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), color);
+    }
+}
+
+fn render_lucide(ctx: &Context, name: &str, px: u32) -> Option<egui::TextureHandle> {
+    let inner = crate::palette::icon_bank().iter().find(|(n, _, _)| *n == name)?.2;
+    let svg = format!(r##"<svg xmlns="http://www.w3.org/2000/svg" width="{px}" height="{px}" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">{inner}</svg>"##);
+    let tree = resvg::usvg::Tree::from_str(&svg, &resvg::usvg::Options::default()).ok()?;
+    let mut pix = resvg::tiny_skia::Pixmap::new(px, px)?;
+    resvg::render(&tree, resvg::tiny_skia::Transform::identity(), &mut pix.as_mut());
+    let img = egui::ColorImage::from_rgba_premultiplied([px as usize, px as usize], pix.data());
+    Some(ctx.load_texture(format!("lucide-{name}-{px}"), img, egui::TextureOptions::LINEAR))
+}
+
+/// True when the suite's icon set has this name (used by tests that check every tool has an icon).
+pub fn has_lucide(name: &str) -> bool {
+    crate::palette::icon_bank().iter().any(|(n, _, _)| *n == name)
+}
+
 /// A colour swatch that opens the suite's picker in a popup, instead of a picker always taking space.
 pub fn color_swatch(ui: &mut Ui, color: &mut Color32) -> bool {
     let (r, resp) = ui.allocate_exact_size(vec2(44.0, 22.0), Sense::click());
