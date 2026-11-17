@@ -1,4 +1,5 @@
 use crate::inspect::draw_keys;
+use studio_ui::i18n::tl;
 use crate::model::{Clip, LABELS, MARKER_COLORS, Project, TRANSITIONS};
 use crate::{Cut, Drag, G, GROUPS, MARK, MUSIC, PLAYHEAD, Sel, TITLE, Tool, glyph, speaker, tc, tool_glyph, waveform};
 use eframe::egui::{self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Painter, Rect, Sense, Shape, Stroke, StrokeKind, Ui, Vec2, pos2, vec2};
@@ -487,15 +488,15 @@ impl Cut {
                 clicked_sel = Some(Sel::Title(i));
             }
             resp.context_menu(|ui| {
-                if ui.button("Dupliquer").clicked() {
+                if ui.button(tl("Dupliquer")).clicked() {
                     menu = Some((Sel::Title(i), 1));
                     ui.close();
                 }
-                if ui.button("Placer à la tête de lecture").clicked() {
+                if ui.button(tl("Placer à la tête de lecture")).clicked() {
                     menu = Some((Sel::Title(i), 4));
                     ui.close();
                 }
-                if ui.button("Supprimer").clicked() {
+                if ui.button(tl("Supprimer")).clicked() {
                     menu = Some((Sel::Title(i), 0));
                     ui.close();
                 }
@@ -651,24 +652,24 @@ impl Cut {
                 ui.ctx().set_cursor_icon(egui::CursorIcon::ResizeHorizontal);
             }
             resp.context_menu(|ui| {
-                if ui.button("Placer à la tête de lecture").clicked() {
+                if ui.button(tl("Placer à la tête de lecture")).clicked() {
                     menu = Some((Sel::Music(i), 4));
                     ui.close();
                 }
-                if ui.button("Couper / réactiver le son").clicked() {
+                if ui.button(tl("Couper / réactiver le son")).clicked() {
                     menu = Some((Sel::Music(i), 5));
                     ui.close();
                 }
-                if ui.button("Normaliser (crête −1 dB)").clicked() {
+                if ui.button(tl("Normaliser (crête −1 dB)")).clicked() {
                     menu = Some((Sel::Music(i), 6));
                     ui.close();
                 }
-                if ui.button("Dupliquer").clicked() {
+                if ui.button(tl("Dupliquer")).clicked() {
                     menu = Some((Sel::Music(i), 1));
                     ui.close();
                 }
                 ui.separator();
-                if ui.button("Supprimer").clicked() {
+                if ui.button(tl("Supprimer")).clicked() {
                     menu = Some((Sel::Music(i), 0));
                     ui.close();
                 }
@@ -825,7 +826,7 @@ impl Cut {
         item(ui, "Vitesse/Durée…", 8, menu);
         item(ui, "Inverser la lecture", 9, menu);
         item(ui, "Activer / désactiver", 10, menu);
-        ui.menu_button("Vitesse", |ui| {
+        ui.menu_button(tl("Vitesse"), |ui| {
             for (k, v) in ["25 %", "50 %", "75 %", "100 %", "150 %", "200 %", "400 %"].iter().enumerate() {
                 if ui.button(*v).clicked() {
                     *menu = Some((s, 100 + k as u8));
@@ -834,7 +835,7 @@ impl Cut {
             }
         });
         if matches!(s, Sel::Clip(i) if i > 0) {
-            ui.menu_button("Transition d'entrée", |ui| {
+            ui.menu_button(tl("Transition d'entrée"), |ui| {
                 for (k, n) in TRANSITIONS.iter().enumerate() {
                     if ui.button(*n).clicked() {
                         *menu = Some((s, 120 + k as u8));
@@ -843,7 +844,7 @@ impl Cut {
                 }
             });
         }
-        ui.menu_button("Look", |ui| {
+        ui.menu_button(tl("Look"), |ui| {
             for (k, name) in crate::model::LOOKS.iter().enumerate() {
                 if ui.button(*name).clicked() {
                     *menu = Some((s, 160 + k as u8));
@@ -851,7 +852,7 @@ impl Cut {
                 }
             }
         });
-        ui.menu_button("Effet prédéfini", |ui| {
+        ui.menu_button(tl("Effet prédéfini"), |ui| {
             for (k, name) in crate::inspect::EFFECT_PRESETS.iter().enumerate() {
                 if ui.button(*name).clicked() {
                     *menu = Some((s, 190 + k as u8));
@@ -859,7 +860,7 @@ impl Cut {
                 }
             }
         });
-        ui.menu_button("Étiquette", |ui| {
+        ui.menu_button(tl("Étiquette"), |ui| {
             for (k, (name, _)) in LABELS.iter().enumerate() {
                 if ui.button(*name).clicked() {
                     *menu = Some((s, 210 + k as u8));

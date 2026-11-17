@@ -1,4 +1,5 @@
 use super::*;
+use studio_ui::i18n::tl;
 use model::{BEZ_PRESETS, Key, ease_to_bez};
 
 impl Motion {
@@ -137,7 +138,7 @@ impl Motion {
     pub(crate) fn graph_panel(&mut self, ui: &mut Ui) {
         let Some((li, pi, ki)) = self.graph_target() else { return };
         let speed = self.graph_speed;
-        pro::dock_panel(ui, "graph", "Éditeur de courbe", |ui| {
+        pro::dock_panel(ui, "graph", tl("Éditeur de courbe"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let (k, next) = {
                 let p = &self.comp.layers[li].props[pi];
@@ -197,7 +198,7 @@ impl Motion {
                 }
             }
             ui.horizontal(|ui| {
-                ui.checkbox(&mut self.graph_speed, "Vitesse");
+                ui.checkbox(&mut self.graph_speed, tl("Vitesse"));
                 ui.label(RichText::new(if live { "Bézier personnalisée" } else { k.ease_name() }).size(11.5).color(FAINT));
             });
             let mut b = bez;
@@ -212,7 +213,7 @@ impl Motion {
                     nb = Some(Some(b));
                 }
             });
-            ui.label(RichText::new("Préréglages").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Préréglages")).size(12.0).color(MUTED));
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                 for (name, pb) in BEZ_PRESETS {
@@ -222,10 +223,10 @@ impl Motion {
                 }
             });
             ui.horizontal(|ui| {
-                if ui.add_enabled(live, egui::Button::new("Revenir").small()).on_hover_text("Revenir à la courbe choisie dans la liste").clicked() {
+                if ui.add_enabled(live, egui::Button::new("Revenir").small()).on_hover_text(tl("Revenir à la courbe choisie dans la liste")).clicked() {
                     nb = Some(None);
                 }
-                if ui.small_button("Copier sur la sélection").on_hover_text("Même courbe pour toutes les clés sélectionnées (ou tout le calque)").clicked() {
+                if ui.small_button(tl("Copier sur la sélection")).on_hover_text(tl("Même courbe pour toutes les clés sélectionnées (ou tout le calque)")).clicked() {
                     let bb = k.bez;
                     let (e, e2) = (k.ease, k.ease2);
                     self.with_keys(|kk| {
@@ -239,7 +240,7 @@ impl Motion {
                 self.comp.layers[li].props[pi].keys[ki].bez = b;
             }
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Valeur").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Valeur")).size(12.0).color(MUTED));
                 let mut v = self.comp.layers[li].props[pi].keys[ki].v;
                 if ui.add(egui::DragValue::new(&mut v).speed(0.5).max_decimals(2)).changed() {
                     self.comp.layers[li].props[pi].keys[ki].v = v;

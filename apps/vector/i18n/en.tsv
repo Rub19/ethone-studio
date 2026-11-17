@@ -1,0 +1,249 @@
+# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+Annuler	
+Proportionnelle	
+Mettre à l'échelle les contours et effets	
+Horizontal	
+Vertical	
+Angle	
+Axe horizontal	
+Axe vertical	
+Les angles du résultat sont arrondis.	
+Courbes lisses	
+Nombre d'ondes	
+Pointes	
+Arrondis	
+Angles	
+Étapes intermédiaires	
+Formes et couleurs se fondent progressivement.	
+Rosace : 12 copies en cercle	
+Aperçu	
+Appliquer sur une copie	
+PNG	
+JPEG	
+SVG	
+PDF	
+Plan actif	
+Tous les plans	
+Sélection	
+Fond transparent	
+Qualité	
+SVG optimisé (nombres arrondis, attributs inutiles retirés)	
+Texte, dégradés, effets et images intégrés restent modifiables.	
+Un PDF vectoriel, une page par plan de travail, texte réel.	
+Noir et blanc	
+Niveaux de gris	
+Couleurs	
+Précision	
+Ignorer le blanc	
+Conserver l'image d'origine	
+Réinitialiser	
+Largeur	
+Hauteur	
+⇄ Orientation	
+QR code vectoriel du texte sélectionné	
+Objet · groupé, net à toutes les tailles	
+Exporter un pack d'icônes (16 à 1024 px)…	
+Plan de travail actif · PNG	
+Tout sélectionner	
+Document · Ctrl+A	
+Inverser la sélection	
+Document	
+Dupliquer la sélection	
+Objets · Ctrl+Alt+D	
+Grouper la sélection	
+Objets · Ctrl+G	
+Dégrouper la sélection	
+Objets · Ctrl+Maj+G	
+Exporter	
+Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E	
+Plan de travail actif : clic pour l'ajuster à l'écran	
+Fichier	
+Édition	
+Objet	
+Texte	
+Effet	
+Affichage	
+Fenêtre	
+Ouvrir un fichier récent	
+Aucun fichier récent	
+Exporter rapidement	
+Modifier les couleurs	
+Recolorer l'illustration…	
+Régler la teinte, saturation, luminosité…	
+Convertir en niveaux de gris	
+Inverser les couleurs	
+Sépia	
+Saturer +20 %	
+Désaturer −20 %	
+Éclaircir +10 %	
+Assombrir −10 %	
+Teinte +30°	
+Couleurs complémentaires	
+Mélange horizontal	
+Mélange vertical	
+Mélange avant-arrière	
+Échanger fond et contour	
+Transformation	
+Disposition	
+Envoyer vers le calque	
+Tracé	
+Pathfinder	
+Fusion	
+Masque d'écrêtage	
+Masque d'opacité	
+Tracé transparent composé	
+Plans de travail	
+Nouveau plan de travail	
+Ajuster à l'illustration	
+Réorganiser en grille	
+Police	
+Taille	
+Casse	
+Insérer un caractère spécial	
+Même	
+Effets dynamiques (modifiables dans Propriétés)	
+Distorsion et transformation	
+Styliser	
+Mode tracés (Ctrl+Maj+Y)	
+Contours de sélection (Ctrl+H)	
+Cadre de sélection (Ctrl+Maj+B)	
+Règles (Ctrl+R)	
+Repères (Ctrl+;)	
+Verrouiller les repères (Ctrl+Alt+;)	
+Repères commentés (Ctrl+U)	
+Repères de composition (centre et tiers)	
+Grille (Ctrl+')	
+Magnétisme de la grille (Ctrl+Alt+')	
+Pas de la grille	
+Espace de travail	
+Exporter…	
+Modifier la couleur	
+Fond	
+Contour	
+Nouveau fichier	
+Ouvrir…	
+Bienvenue dans Vector	
+Logos, icônes et illustrations nets à toutes les tailles	
+Créer un plan de travail	
+Récents	
+Grouper	
+Dissocier	
+Dupliquer	
+Tolérance	
+Pente	
+Concave	
+Fermé	
+Tours	
+Sens antihoraire	
+Cadre extérieur	
+Épaisseur	
+Creux	
+Lissage	
+Fusionner avec la même couleur	
+Contours et effets	
+Dispersion	
+Intensité	
+Linéaire	
+Radial	
+Ajuster	
+Tout	
+Nouveau	
+Réorganiser	
+Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond	
+Propriétés	
+Calques	
+Bibliothèques	
+Nuancier	
+Styles graphiques	
+Effets bitmap (export PNG et JPEG)	
+Symboles	
+Formes prêtes	
+Style des nouveaux objets	
+Grille et repères	
+Afficher la grille	
+Magnétisme de la grille	
+Règles	
+Repères commentés	
+Afficher les repères	
+Centre et tiers	
+Aligner et répartir	
+Apparence	
+Dégradé	
+Effets	
+Actions rapides	
+Ajuster au contenu	
+Point de référence	
+Conserver les proportions	
+↔ Miroir	
+↕ Miroir	
+Inclinaison…	
+Mettre à l'échelle contours et effets	
+Plan	
+Clé	
+Écart	
+Libérer le masque	
+Tracé composé	
+Décalage…	
+Vectoriser le contour	
+Simplifier…	
+Fusion…	
+Recolorer…	
+Nouveau symbole	
+Rompre le lien	
+Verrouiller	
+Masquer	
++ Calque	
+Supprimer	
+Monter le calque	
+Descendre le calque	
+Placer la sélection sur le calque actif	
++ Nouveau	
+Tout voir	
++ Couleur du fond	
+Ajouter la bibliothèque	
+Couleurs utilisées	
+Vider	
+Nouveau style	
+Retirer le dernier	
+Placer	
+Redéfinir	
+Remplace le symbole par la sélection et met à jour ses occurrences	
+Nom du symbole	
+Créer	
+Fait de la sélection un symbole réutilisable	
+Centre	
+Intérieur	
+Extérieur	
+Ronds	
+Plats	
+Carrés	
+Pointus	
+Biseaux	
+Aucun	
++ Arrêt	
+Inverser	
+Recentrer	
+Effacer	
+Ombre portée	
+Tracé fermé	
+Lisser	
+Simplifier	
++ Points	
+G	
+Gras	
+I	
+Italique	
+S	
+Souligné	
+B	
+Barré	
+Aa	
+AA	
+aa	
+Titre	
+Gauche	
+Droite	
+Crénage	
+Texte vertical	
+Détacher du tracé	
+Vectorisation dynamique…	

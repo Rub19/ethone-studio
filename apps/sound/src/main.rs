@@ -11,6 +11,7 @@ mod tools;
 mod tutos;
 
 use audio::Clip;
+use studio_ui::i18n::tl;
 use tools::{SpecSel, SpecShape, Tool};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use eframe::egui::{
@@ -303,6 +304,7 @@ struct Sound {
 impl Sound {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         let clip = Clip { rate: 44_100, ch: vec![vec![0.0; 44_100 * 5], vec![0.0; 44_100 * 5]] };
         let player = Player::new(Arc::new(clip.clone()));
         let mut me = Self {
@@ -1062,21 +1064,21 @@ impl Sound {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
-            studio_ui::palette::Cmd::new("Ouvrir un son…", "Ctrl+O", "open"),
-            studio_ui::palette::Cmd::new("Exporter…", "Ctrl+E", "export"),
-            studio_ui::palette::Cmd::new("Tout sélectionner", "Ctrl+A", "select-all"),
-            studio_ui::palette::Cmd::new("Lecture / pause", "Espace", "play"),
-            studio_ui::palette::Cmd::new("Ajouter un marqueur", "M", "marker"),
-            studio_ui::palette::Cmd::new("Supprimer les silences (plus de 0,8 s)", "Édition", "silences").confirm_if(self.sel.is_none()),
-            studio_ui::palette::Cmd::new("Supprimer les silences courts (plus de 0,4 s)", "Édition", "silences-short").confirm_if(self.sel.is_none()),
-            studio_ui::palette::Cmd::new("Rogner les silences au début et à la fin", "Nettoyage · conserve les pauses internes", "trim-edges").confirm(),
-            studio_ui::palette::Cmd::new("Normaliser la crête à −1 dB", "Volume · sélection ou fichier entier", "normalize-peak"),
-            studio_ui::palette::Cmd::new("Normaliser le volume perçu à −16 LUFS", "Podcast et voix · sélection ou fichier entier", "normalize-lufs"),
-            studio_ui::palette::Cmd::new("Ajouter des micro-fondus aux bords", "20 ms · évite les clics", "micro-fades"),
-            studio_ui::palette::Cmd::new("Découper aux silences en fichiers WAV…", "Prises, samples, chapitres", "split-files"),
-            studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 0,5 s)", "Musique de jeu, ambiance", "loop:500").confirm(),
-            studio_ui::palette::Cmd::new("Boucle parfaite (fondu de 2 s)", "Musique de jeu, ambiance", "loop:2000").confirm(),
-            studio_ui::palette::Cmd::new("Annuler", "Ctrl+Z", "undo"),
+            studio_ui::palette::Cmd::new(tl("Ouvrir un son…"), tl("Ctrl+O"), "open"),
+            studio_ui::palette::Cmd::new(tl("Exporter…"), tl("Ctrl+E"), "export"),
+            studio_ui::palette::Cmd::new(tl("Tout sélectionner"), tl("Ctrl+A"), "select-all"),
+            studio_ui::palette::Cmd::new(tl("Lecture / pause"), tl("Espace"), "play"),
+            studio_ui::palette::Cmd::new(tl("Ajouter un marqueur"), tl("M"), "marker"),
+            studio_ui::palette::Cmd::new(tl("Supprimer les silences (plus de 0,8 s)"), tl("Édition"), "silences").confirm_if(self.sel.is_none()),
+            studio_ui::palette::Cmd::new(tl("Supprimer les silences courts (plus de 0,4 s)"), tl("Édition"), "silences-short").confirm_if(self.sel.is_none()),
+            studio_ui::palette::Cmd::new(tl("Rogner les silences au début et à la fin"), tl("Nettoyage · conserve les pauses internes"), "trim-edges").confirm(),
+            studio_ui::palette::Cmd::new(tl("Normaliser la crête à −1 dB"), tl("Volume · sélection ou fichier entier"), "normalize-peak"),
+            studio_ui::palette::Cmd::new(tl("Normaliser le volume perçu à −16 LUFS"), tl("Podcast et voix · sélection ou fichier entier"), "normalize-lufs"),
+            studio_ui::palette::Cmd::new(tl("Ajouter des micro-fondus aux bords"), tl("20 ms · évite les clics"), "micro-fades"),
+            studio_ui::palette::Cmd::new(tl("Découper aux silences en fichiers WAV…"), tl("Prises, samples, chapitres"), "split-files"),
+            studio_ui::palette::Cmd::new(tl("Boucle parfaite (fondu de 0,5 s)"), tl("Musique de jeu, ambiance"), "loop:500").confirm(),
+            studio_ui::palette::Cmd::new(tl("Boucle parfaite (fondu de 2 s)"), tl("Musique de jeu, ambiance"), "loop:2000").confirm(),
+            studio_ui::palette::Cmd::new(tl("Annuler"), tl("Ctrl+Z"), "undo"),
         ];
         let has_audio = self.clip.len() > 0;
         let can_undo = !self.undo.is_empty();
@@ -1266,12 +1268,12 @@ impl Sound {
             let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
             ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary_icon(ui, "Exporter", export_glyph).on_hover_text("WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E").clicked() {
+                    if pro::primary_icon(ui, tl("Exporter"), export_glyph).on_hover_text(tl("WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E")).clicked() {
                         self.export = Some(self.export_opts());
                     }
                     ui.add_space(4.0);
                     let chip = format!("{} Hz · {} · {}", self.clip.rate, if self.clip.ch.len() > 1 { "stéréo" } else { "mono" }, fmt_time(self.clip.secs(self.clip.len())));
-                    if pro::chip(ui, &chip).on_hover_text("Fréquence d'échantillonnage et canaux").clicked() {
+                    if pro::chip(ui, &chip).on_hover_text(tl("Fréquence d'échantillonnage et canaux")).clicked() {
                         self.props_sheet = true;
                     }
                 });
@@ -1280,13 +1282,13 @@ impl Sound {
     }
 
     fn menus(&mut self, ui: &mut Ui) {
-        ui.menu_button("Fichier", |ui| {
+        ui.menu_button(tl("Fichier"), |ui| {
             if let Some(t) = studio_ui::handoff::menu(ui, &[("cut", "ajouter au montage (sélection ou tout)")]) {
                 let ctx = ui.ctx().clone();
                 self.send_to(t, &ctx);
             }
             ui.separator();
-            if ui.button("Nouveau (5 s de silence)").clicked() {
+            if ui.button(tl("Nouveau (5 s de silence)")).clicked() {
                 self.clip = Clip { rate: 44_100, ch: vec![vec![0.0; 44_100 * 5]; 2] };
                 self.file = None;
                 self.modified = false;
@@ -1295,18 +1297,18 @@ impl Sound {
                 self.fit_pending = true;
                 self.changed();
             }
-            if ui.button("Ouvrir…                         Ctrl+O").clicked() {
+            if ui.button(tl("Ouvrir…                         Ctrl+O")).clicked() {
                 self.open_dialog();
             }
             ui.separator();
-            if ui.button("Exporter…                       Ctrl+E").clicked() {
+            if ui.button(tl("Exporter…                       Ctrl+E")).clicked() {
                 self.export = Some(self.export_opts());
             }
-            if ui.button("Propriétés du son…").clicked() {
+            if ui.button(tl("Propriétés du son…")).clicked() {
                 self.props_sheet = true;
             }
         });
-        ui.menu_button("Édition", |ui| {
+        ui.menu_button(tl("Édition"), |ui| {
             let has = self.sel.is_some();
             let ul = self.undo.last().map(|u| u.1.clone()).unwrap_or_default();
             let rl = self.redo.last().map(|u| u.1.clone()).unwrap_or_default();
@@ -1336,24 +1338,24 @@ impl Sound {
                 self.paste();
             }
             ui.separator();
-            if ui.button("Tout sélectionner         Ctrl+A").clicked() {
+            if ui.button(tl("Tout sélectionner         Ctrl+A")).clicked() {
                 self.sel = Some((0, self.clip.len()));
             }
-            if ui.button("Du curseur au début     Maj+Origine").clicked() {
+            if ui.button(tl("Du curseur au début     Maj+Origine")).clicked() {
                 self.sel = Some((0, self.cursor.max(1)));
             }
-            if ui.button("Du curseur à la fin       Maj+Fin").clicked() {
+            if ui.button(tl("Du curseur à la fin       Maj+Fin")).clicked() {
                 self.sel = Some((self.cursor, self.clip.len()));
             }
             ui.separator();
-            if ui.button("Ajouter / retirer un marqueur   M").clicked() {
+            if ui.button(tl("Ajouter / retirer un marqueur   M")).clicked() {
                 self.add_marker();
             }
             if ui.add_enabled(!self.markers.is_empty(), egui::Button::new("Supprimer tous les marqueurs")).clicked() {
                 self.markers.clear();
             }
         });
-        ui.menu_button("Effets", |ui| {
+        ui.menu_button(tl("Effets"), |ui| {
             for (label, k) in [("Normaliser (−1 dB)", 0), ("Volume perçu −16 LUFS", 1), ("Limiteur −1 dB", 2), ("Volume moyen (RMS −18 dB)", 12), ("Fondu entrant", 3), ("Fondu sortant", 4), ("Coupe-bas 80 Hz", 5), ("Supprimer le décalage (DC)", 6), ("À l'envers", 7), ("Inverser la polarité", 8), ("Rendre silencieux", 9), ("Convertir en mono", 10), ("Échanger gauche et droite", 11)] {
                 if k == 3 || k == 5 || k == 7 || k == 10 {
                     ui.separator();
@@ -1378,7 +1380,7 @@ impl Sound {
                 }
             }
             ui.separator();
-            ui.menu_button("Préréglages", |ui| {
+            ui.menu_button(tl("Préréglages"), |ui| {
                 for (k, (name, _)) in PRESETS.iter().enumerate() {
                     if ui.button(*name).clicked() {
                         self.apply_preset(k);
@@ -1386,7 +1388,7 @@ impl Sound {
                 }
             });
         });
-        ui.menu_button("Générer", |ui| {
+        ui.menu_button(tl("Générer"), |ui| {
             let secs = self.fx.secs;
             for (label, k) in [("Silence", 0u8), ("Tonalité 440 Hz", 1), ("Bruit blanc", 2)] {
                 if ui.button(format!("{label} ({secs:.1} s) au curseur")).clicked() {
@@ -1396,30 +1398,30 @@ impl Sound {
                 }
             }
             ui.add(egui::Slider::new(&mut self.fx.secs, 0.1..=120.0).logarithmic(true).suffix(" s"));
-            ui.label(RichText::new("Plus de sons dans le panneau Générer").size(11.5).color(FAINT));
+            ui.label(RichText::new(tl("Plus de sons dans le panneau Générer")).size(11.5).color(FAINT));
         });
-        ui.menu_button("Affichage", |ui| {
-            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+        ui.menu_button(tl("Affichage"), |ui| {
+            ui.menu_button(tl("Espace de travail"), studio_ui::dock::menu);
             ui.separator();
-            if ui.button("Tout afficher               Ctrl+0").clicked() {
+            if ui.button(tl("Tout afficher               Ctrl+0")).clicked() {
                 self.fit_pending = true;
             }
             if ui.add_enabled(self.sel.is_some(), egui::Button::new("Zoom sur la sélection    Z")).clicked() {
                 self.zoom_sel();
             }
-            if ui.button("Zoom avant                   Ctrl++").clicked() {
+            if ui.button(tl("Zoom avant                   Ctrl++")).clicked() {
                 self.zoom_by(0.5);
             }
-            if ui.button("Zoom arrière                Ctrl+−").clicked() {
+            if ui.button(tl("Zoom arrière                Ctrl+−")).clicked() {
                 self.zoom_by(2.0);
             }
             ui.separator();
             let mut spec = self.view_mode == 1;
-            if ui.checkbox(&mut spec, "Spectrogramme                S").changed() {
+            if ui.checkbox(&mut spec, tl("Spectrogramme                S")).changed() {
                 self.view_mode = spec as usize;
             }
-            ui.checkbox(&mut self.follow, "Suivre la lecture              F");
-            ui.checkbox(&mut self.looping, "Lecture en boucle            L");
+            ui.checkbox(&mut self.follow, tl("Suivre la lecture              F"));
+            ui.checkbox(&mut self.looping, tl("Lecture en boucle            L"));
         });
         self.help.menu(ui);
     }
@@ -1452,7 +1454,7 @@ impl Sound {
                 } else {
                     ui.painter().add(Shape::convex_polygon(vec![c + vec2(-3.5, -6.5), c + vec2(6.5, 0.0), c + vec2(-3.5, 6.5)], Color32::WHITE, Stroke::NONE));
                 }
-                if resp.on_hover_text("Lecture / pause (Espace)").clicked() {
+                if resp.on_hover_text(tl("Lecture / pause (Espace)")).clicked() {
                     self.toggle_play();
                 }
                 if small(ui, 2, "Stop", false) {
@@ -1470,7 +1472,7 @@ impl Sound {
                 let (r, resp) = ui.allocate_exact_size(Vec2::splat(28.0), Sense::click());
                 ui.painter().rect_filled(r, CornerRadius::same(3), if rec { RED.gamma_multiply(0.3) } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });
                 ui.painter().circle_filled(r.center(), if rec { 4.5 + (ui.input(|i| i.time) * 4.0).sin().abs() as f32 * 1.5 } else { 5.0 }, RED);
-                if resp.on_hover_text("Enregistrer au micro au curseur (R)").clicked() {
+                if resp.on_hover_text(tl("Enregistrer au micro au curseur (R)")).clicked() {
                     self.toggle_record();
                 }
                 if small(ui, 5, "Boucle sur la sélection (L)", self.looping) {
@@ -1490,7 +1492,7 @@ impl Sound {
                     let rate = self.clip.rate as f64;
                     let n = self.clip.len();
                     let (mut a, mut b) = self.sel.map_or((self.cursor as f64 / rate, self.cursor as f64 / rate), |(a, b)| (a as f64 / rate, b as f64 / rate));
-                    ui.label(RichText::new("Sélection").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Sélection")).size(12.0).color(MUTED));
                     let ra = ui.add(egui::DragValue::new(&mut a).range(0.0..=n as f64 / rate).speed(0.01).max_decimals(3).suffix(" s"));
                     let rb = ui.add(egui::DragValue::new(&mut b).range(0.0..=n as f64 / rate).speed(0.01).max_decimals(3).suffix(" s"));
                     if ra.changed() || rb.changed() {
@@ -1553,7 +1555,7 @@ impl Sound {
                 if let Some((_, _, spec)) = &self.spectrum {
                     let spec = spec.clone();
                     let stats = self.stats.as_ref().map(|s| (s.peak, s.rms, s.lufs, s.clipped, s.true_peak));
-                    pro::dock_panel(ui, "analysis", "Analyse", |ui| {
+                    pro::dock_panel(ui, "analysis", tl("Analyse"), |ui| {
                         draw_spectrum(ui, &spec);
                         if let Some((p, r, l, c, tp)) = stats {
                             egui::Grid::new("stats").num_columns(4).spacing(vec2(6.0, 4.0)).show(ui, |ui| {
@@ -1562,12 +1564,12 @@ impl Sound {
                                     ui.label(RichText::new(v).size(12.0).color(col).monospace());
                                 }
                                 ui.end_row();
-                                ui.label(RichText::new("Volume").size(11.5).color(MUTED));
+                                ui.label(RichText::new(tl("Volume")).size(11.5).color(MUTED));
                                 ui.label(RichText::new(format!("{l:.1} LUFS")).size(12.0).color(INK).monospace());
-                                ui.label(RichText::new("Écrêtés").size(11.5).color(MUTED));
+                                ui.label(RichText::new(tl("Écrêtés")).size(11.5).color(MUTED));
                                 ui.label(RichText::new(c.to_string()).size(12.0).color(if c > 0 { RED } else { GREEN }).monospace());
                                 ui.end_row();
-                                ui.label(RichText::new("Crête réelle").size(11.5).color(MUTED));
+                                ui.label(RichText::new(tl("Crête réelle")).size(11.5).color(MUTED));
                                 ui.label(RichText::new(format!("{tp:.1} dBTP")).size(12.0).color(if tp > -1.0 { RED } else { INK }).monospace());
                                 ui.end_row();
                             });
@@ -1593,7 +1595,7 @@ impl Sound {
                         }
                     };
                 }
-                pro::dock_panel(ui, "presets", "Préréglages", |ui| {
+                pro::dock_panel(ui, "presets", tl("Préréglages"), |ui| {
                     ui.spacing_mut().item_spacing.y = 2.0;
                     ui.label(RichText::new(format!("Un clic, appliqué {scope}")).size(11.5).color(FAINT));
                     ui.add_space(4.0);
@@ -1610,7 +1612,7 @@ impl Sound {
                         }
                     }
                 });
-                pro::dock_panel(ui, "amp", "Volume", |ui| {
+                pro::dock_panel(ui, "amp", tl("Volume"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.label(RichText::new(format!("Appliqué {scope}")).size(11.5).color(FAINT));
                     slider(ui, "Gain", &mut fx.gain, -24.0..=24.0, " dB");
@@ -1619,7 +1621,7 @@ impl Sound {
                     slider(ui, "Normaliser la crête à", &mut fx.peak, -12.0..=0.0, " dB");
                     let pk = fx.peak;
                     act!(ui, "Normalisation", move |c: &mut Clip, a, b| c.normalize(a, b, pk));
-                    ui.label(RichText::new("Volume perçu (LUFS)").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Volume perçu (LUFS)")).size(12.0).color(MUTED));
                     let labels: Vec<&str> = LUFS.iter().map(|l| l.0).collect();
                     pro::segmented(ui, &mut fx.lufs, &labels);
                     ui.label(RichText::new(["Spotify, YouTube, réseaux", "Podcasts", "Voix posée, livres audio", "Télévision (EBU R128)"][fx.lufs]).size(11.5).color(FAINT));
@@ -1628,22 +1630,22 @@ impl Sound {
                     slider(ui, "Limiteur (plafond)", &mut fx.ceiling, -12.0..=0.0, " dB");
                     let ce = fx.ceiling;
                     act!(ui, "Limiteur", move |c: &mut Clip, a, b| c.limiter(a, b, ce));
-                    ui.label(RichText::new("Courbe des fondus").size(12.0).color(MUTED));
-                    pro::segmented(ui, &mut fx.fade_shape, &["Linéaire", "Log", "En S"]);
+                    ui.label(RichText::new(tl("Courbe des fondus")).size(12.0).color(MUTED));
+                    pro::segmented(ui, &mut fx.fade_shape, &[tl("Linéaire"), tl("Log"), tl("En S")]);
                     let shape = fx.fade_shape as u8;
                     ui.horizontal(|ui| {
-                        if pro::secondary(ui, "Fondu entrant").clicked() {
+                        if pro::secondary(ui, tl("Fondu entrant")).clicked() {
                             action = Some((false, "Fondu entrant".into(), Box::new(move |c: &mut Clip, a, b| c.fade_shape(a, b, true, shape))));
                         }
-                        if pro::secondary(ui, "Fondu sortant").clicked() {
+                        if pro::secondary(ui, tl("Fondu sortant")).clicked() {
                             action = Some((false, "Fondu sortant".into(), Box::new(move |c: &mut Clip, a, b| c.fade_shape(a, b, false, shape))));
                         }
                     });
                 });
-                pro::dock_panel(ui, "clean", "Nettoyage", |ui| {
+                pro::dock_panel(ui, "clean", tl("Nettoyage"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.label(RichText::new("Réduction de bruit").size(12.0).color(INK));
-                    ui.label(RichText::new("1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.").size(11.5).color(FAINT));
+                    ui.label(RichText::new(tl("Réduction de bruit")).size(12.0).color(INK));
+                    ui.label(RichText::new(tl("1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.")).size(11.5).color(FAINT));
                     if pro::secondary(ui, if has_noise { "✓ Profil capturé · recapturer" } else { "Capturer le profil de bruit" }).clicked() {
                         capture = true;
                     }
@@ -1665,15 +1667,15 @@ impl Sound {
                         c.filter(a, b, 3, hi, 0.0, 0.707);
                     });
                     ui.add_space(4.0);
-                    ui.label(RichText::new("Supprimer les silences").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Supprimer les silences")).size(12.0).color(INK));
                     slider(ui, "Seuil", &mut fx.silence[0], -70.0..=-20.0, " dB");
                     slider(ui, "Pauses de plus de", &mut fx.silence[1], 100.0..=3000.0, " ms");
                     slider(ui, "Garder", &mut fx.silence[2], 0.0..=1000.0, " ms");
-                    if pro::secondary(ui, "Raccourcir les blancs").clicked() {
+                    if pro::secondary(ui, tl("Raccourcir les blancs")).clicked() {
                         truncate = true;
                     }
                 });
-                pro::dock_panel(ui, "eq", "Égaliseur 5 bandes", |ui| {
+                pro::dock_panel(ui, "eq", tl("Égaliseur 5 bandes"), |ui| {
                     ui.spacing_mut().item_spacing.y = 4.0;
                     eq_curve(ui, &fx.eq);
                     for (k, (_, name)) in EQ_BANDS.iter().enumerate() {
@@ -1700,7 +1702,7 @@ impl Sound {
                         }
                     });
                 });
-                pro::dock_panel(ui, "dyn", "Dynamique", |ui| {
+                pro::dock_panel(ui, "dyn", tl("Dynamique"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     slider(ui, "Seuil", &mut fx.comp[0], -60.0..=0.0, " dB");
                     slider(ui, "Ratio", &mut fx.comp[1], 1.0..=20.0, ":1");
@@ -1715,26 +1717,26 @@ impl Sound {
                     let cr = fx.crush;
                     act!(ui, "Bitcrusher", move |c: &mut Clip, a, b| c.bitcrush(a, b, cr[0], cr[1] as usize));
                 });
-                pro::dock_panel(ui, "mod", "Modulation", |ui| {
+                pro::dock_panel(ui, "mod", tl("Modulation"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.label(RichText::new("Chorus").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Chorus")).size(12.0).color(INK));
                     slider(ui, "Profondeur", &mut fx.chorus[0], 1.0..=20.0, " ms");
                     slider(ui, "Vitesse", &mut fx.chorus[1], 0.1..=5.0, " Hz");
                     slider(ui, "Mélange", &mut fx.chorus[2], 0.0..=1.0, "");
                     let ch = fx.chorus;
                     act!(ui, "Chorus", move |c: &mut Clip, a, b| c.mod_delay(a, b, 20.0, ch[0], ch[1], 0.0, ch[2]));
-                    ui.label(RichText::new("Flanger").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Flanger")).size(12.0).color(INK));
                     slider(ui, "Vitesse", &mut fx.flanger[0], 0.05..=3.0, " Hz");
                     slider(ui, "Profondeur", &mut fx.flanger[1], 0.5..=8.0, " ms");
                     slider(ui, "Réinjection", &mut fx.flanger[2], 0.0..=0.9, "");
                     let fl = fx.flanger;
                     act!(ui, "Flanger", move |c: &mut Clip, a, b| c.mod_delay(a, b, 1.5, fl[1], fl[0], fl[2], 0.7));
-                    ui.label(RichText::new("Trémolo").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Trémolo")).size(12.0).color(INK));
                     slider(ui, "Vitesse", &mut fx.trem[0], 0.5..=20.0, " Hz");
                     slider(ui, "Profondeur", &mut fx.trem[1], 0.0..=1.0, "");
                     let tr = fx.trem;
                     act!(ui, "Trémolo", move |c: &mut Clip, a, b| c.tremolo(a, b, tr[0], tr[1]));
-                    ui.label(RichText::new("Panoramique automatique").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Panoramique automatique")).size(12.0).color(INK));
                     slider(ui, "Vitesse", &mut fx.autopan[0], 0.05..=8.0, " Hz");
                     slider(ui, "Amplitude", &mut fx.autopan[1], 0.0..=1.0, "");
                     let ap = fx.autopan;
@@ -1743,7 +1745,7 @@ impl Sound {
                     let rf = fx.ring;
                     act!(ui, "Modulation en anneau", move |c: &mut Clip, a, b| c.ring(a, b, rf));
                 });
-                pro::dock_panel(ui, "space", "Espace", |ui| {
+                pro::dock_panel(ui, "space", tl("Espace"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     slider(ui, "Délai d'écho", &mut fx.echo[0], 20.0..=1500.0, " ms");
                     slider(ui, "Réinjection", &mut fx.echo[1], 0.0..=0.9, "");
@@ -1755,7 +1757,7 @@ impl Sound {
                     let v = fx.verb;
                     act!(ui, "Réverbération", move |c: &mut Clip, a, b| c.reverb(a, b, v[0], v[1]));
                 });
-                pro::dock_panel(ui, "time", "Temps et hauteur", |ui| {
+                pro::dock_panel(ui, "time", tl("Temps et hauteur"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     slider(ui, "Vitesse (comme une bande)", &mut fx.speed, 25.0..=400.0, " %");
                     let sp = fx.speed;
@@ -1767,35 +1769,35 @@ impl Sound {
                     let st = fx.semis;
                     act!(ui, "Hauteur", move |c: &mut Clip, a, b| c.pitch(a, b, st));
                 });
-                pro::dock_panel(ui, "stereo", "Stéréo", |ui| {
+                pro::dock_panel(ui, "stereo", tl("Stéréo"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     slider(ui, "Balance", &mut fx.pan, -1.0..=1.0, "");
                     slider(ui, "Largeur stéréo", &mut fx.width, 0.0..=200.0, " %");
                     let (pn, wd) = (fx.pan, fx.width);
                     act!(ui, "Stéréo", move |c: &mut Clip, a, b| c.stereo(a, b, pn, wd / 100.0));
                     ui.horizontal(|ui| {
-                        if pro::ghost(ui, "Mono").clicked() {
+                        if pro::ghost(ui, tl("Mono")).clicked() {
                             action = Some((false, "Mono".into(), Box::new(|c: &mut Clip, _, _| c.to_mono())));
                         }
-                        if pro::ghost(ui, "Échanger G/D").clicked() {
+                        if pro::ghost(ui, tl("Échanger G/D")).clicked() {
                             action = Some((false, "Échange gauche/droite".into(), Box::new(|c: &mut Clip, _, _| c.swap())));
                         }
                     });
                 });
-                pro::dock_panel(ui, "gen", "Générer", |ui| {
+                pro::dock_panel(ui, "gen", tl("Générer"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.label(RichText::new("Inséré au curseur").size(11.5).color(FAINT));
+                    ui.label(RichText::new(tl("Inséré au curseur")).size(11.5).color(FAINT));
                     slider(ui, "Durée", &mut fx.secs, 0.1..=120.0, " s");
                     slider(ui, "Volume", &mut fx.amp, 0.0..=1.0, "");
-                    ui.label(RichText::new("Tonalité").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Tonalité")).size(12.0).color(INK));
                     pro::segmented(ui, &mut fx.wave, &WAVES);
                     slider(ui, "Fréquence", &mut fx.freq, 20.0..=10_000.0, " Hz");
-                    if pro::secondary(ui, "Insérer la tonalité").clicked() {
+                    if pro::secondary(ui, tl("Insérer la tonalité")).clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, fx.wave as u8, fx.freq, 0.0, fx.amp), WAVES[fx.wave].to_string()));
                     }
-                    ui.label(RichText::new("Bruit").size(12.0).color(INK));
-                    pro::segmented(ui, &mut fx.noise_kind, &["Blanc", "Rose", "Brun"]);
-                    if pro::secondary(ui, "Insérer le bruit").clicked() {
+                    ui.label(RichText::new(tl("Bruit")).size(12.0).color(INK));
+                    pro::segmented(ui, &mut fx.noise_kind, &[tl("Blanc"), tl("Rose"), tl("Brun")]);
+                    if pro::secondary(ui, tl("Insérer le bruit")).clicked() {
                         let c = if fx.noise_kind == 0 {
                             let mut c = Clip { rate, ch: vec![Vec::new(); nch] };
                             c.generate(0, fx.secs, 2);
@@ -1807,14 +1809,14 @@ impl Sound {
                         };
                         generated = Some((c, "Bruit".into()));
                     }
-                    ui.label(RichText::new("Balayage").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Balayage")).size(12.0).color(INK));
                     slider(ui, "Jusqu'à", &mut fx.freq2, 20.0..=20_000.0, " Hz");
-                    if pro::secondary(ui, "Insérer un balayage").clicked() {
+                    if pro::secondary(ui, tl("Insérer un balayage")).clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, 6, fx.freq, fx.freq2, fx.amp), "Balayage".into()));
                     }
-                    ui.label(RichText::new("Métronome").size(12.0).color(INK));
+                    ui.label(RichText::new(tl("Métronome")).size(12.0).color(INK));
                     slider(ui, "Tempo", &mut fx.bpm, 30.0..=240.0, " BPM");
-                    if pro::secondary(ui, "Insérer le métronome").clicked() {
+                    if pro::secondary(ui, tl("Insérer le métronome")).clicked() {
                         generated = Some((Clip::synth(rate, nch, fx.secs, 7, fx.bpm, 0.0, fx.amp), "Métronome".into()));
                     }
                 });
@@ -1864,25 +1866,25 @@ impl Sound {
         let mut bpm = false;
         let mut regions = false;
         let mut beats = false;
-        pro::dock_panel(ui, "detect", "Détection", |ui| {
+        pro::dock_panel(ui, "detect", tl("Détection"), |ui| {
             ui.spacing_mut().item_spacing.y = 5.0;
             ui.horizontal(|ui| {
-                if pro::secondary(ui, "Détecter le tempo").on_hover_text("Analyse la sélection ou tout le fichier").clicked() {
+                if pro::secondary(ui, tl("Détecter le tempo")).on_hover_text(tl("Analyse la sélection ou tout le fichier")).clicked() {
                     bpm = true;
                 }
                 if let Some((b, _)) = self.bpm {
                     ui.label(RichText::new(format!("{b:.1} BPM")).font(semibold(12.5)).color(WAVE));
                 }
             });
-            if self.bpm.is_some() && pro::ghost(ui, "Marqueur sur chaque mesure").clicked() {
+            if self.bpm.is_some() && pro::ghost(ui, tl("Marqueur sur chaque mesure")).clicked() {
                 beats = true;
             }
             ui.add_space(4.0);
-            ui.label(RichText::new("Repérer les sons (un marqueur par prise)").size(12.0).color(INK));
+            ui.label(RichText::new(tl("Repérer les sons (un marqueur par prise)")).size(12.0).color(INK));
             slider(ui, "Seuil du silence", &mut self.regions[0], -70.0..=-10.0, " dB");
             slider(ui, "Silence minimum", &mut self.regions[1], 50.0..=3000.0, " ms");
             slider(ui, "Son minimum", &mut self.regions[2], 10.0..=2000.0, " ms");
-            if pro::secondary(ui, "Poser les marqueurs").clicked() {
+            if pro::secondary(ui, tl("Poser les marqueurs")).clicked() {
                 regions = true;
             }
         });
@@ -1944,7 +1946,7 @@ impl Sound {
         let mut run = None;
         pro::dock_panel(ui, "rack", &format!("Effets · {}", effects::DEFS.len()), |ui| {
             ui.spacing_mut().item_spacing.y = 5.0;
-            ui.add(egui::TextEdit::singleline(&mut self.rack_search).hint_text("Rechercher un effet…").desired_width(f32::INFINITY));
+            ui.add(egui::TextEdit::singleline(&mut self.rack_search).hint_text(tl("Rechercher un effet…")).desired_width(f32::INFINITY));
             let q = self.rack_search.to_lowercase();
             if q.is_empty() {
                 egui::ComboBox::from_id_salt("rack-cat").width(ui.available_width()).selected_text(effects::CATS[self.rack_cat]).show_ui(ui, |ui| {
@@ -2011,7 +2013,7 @@ impl Sound {
                 }
             }
             ui.horizontal(|ui| {
-                if ui.small_button("Valeurs par défaut").clicked() {
+                if ui.small_button(tl("Valeurs par défaut")).clicked() {
                     *vals = effects::defaults(k);
                 }
                 ui.label(RichText::new(format!("appliqué {scope}")).size(11.0).color(FAINT));
@@ -2025,16 +2027,16 @@ impl Sound {
 
     fn markers_panel(&mut self, ui: &mut Ui) {
         let rate = self.clip.rate as f64;
-        pro::dock_panel(ui, "markers", "Marqueurs", |ui| {
+        pro::dock_panel(ui, "markers", tl("Marqueurs"), |ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
             if self.markers.is_empty() {
-                studio_ui::pro::tip(ui, "M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.");
+                studio_ui::pro::tip(ui, tl("M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux."));
             }
             let mut go = None;
             let mut remove = None;
             for (k, (pos, name)) in self.markers.iter_mut().enumerate() {
                 ui.horizontal(|ui| {
-                    if ui.add(egui::Button::new(RichText::new(fmt_time(*pos as f64 / rate)).monospace().size(11.0)).frame(false)).on_hover_text("Aller au marqueur").clicked() {
+                    if ui.add(egui::Button::new(RichText::new(fmt_time(*pos as f64 / rate)).monospace().size(11.0)).frame(false)).on_hover_text(tl("Aller au marqueur")).clicked() {
                         go = Some(*pos);
                     }
                     ui.add(egui::TextEdit::singleline(name).desired_width(120.0));
@@ -2051,7 +2053,7 @@ impl Sound {
                 self.sel = None;
                 self.reveal(p);
             }
-            if pro::ghost(ui, "+ Marqueur au curseur").clicked() {
+            if pro::ghost(ui, tl("+ Marqueur au curseur")).clicked() {
                 self.add_marker();
             }
         });
@@ -2069,8 +2071,8 @@ impl Sound {
                     ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                     export_glyph(ui.painter(), r.shrink(9.0), BLUE);
                     ui.vertical(|ui| {
-                        ui.label(RichText::new("Exporter le son").font(semibold(18.0)).color(INK_STRONG));
-                        ui.label(RichText::new("WAV sans perte, lisible partout").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Exporter le son")).font(semibold(18.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("WAV sans perte, lisible partout")).size(12.0).color(MUTED));
                     });
                 });
                 ui.add_space(14.0);
@@ -2078,34 +2080,34 @@ impl Sound {
                     ui.label(RichText::new(s).size(12.0).color(MUTED));
                 };
                 row(ui, "Qualité");
-                pro::segmented(ui, &mut o.bits, &["16 bits (CD)", "24 bits", "32 flottant", "8 bits"]);
+                pro::segmented(ui, &mut o.bits, &[tl("16 bits (CD)"), tl("24 bits"), tl("32 flottant"), tl("8 bits")]);
                 if o.bits != 2 {
                     row(ui, "Dither (adoucit la réduction de bits)");
-                    pro::segmented(ui, &mut o.dither, &["Aucun", "Triangulaire", "Mise en forme"]);
+                    pro::segmented(ui, &mut o.dither, &[tl("Aucun"), tl("Triangulaire"), tl("Mise en forme")]);
                 }
                 ui.add_space(8.0);
                 row(ui, "Fréquence");
-                pro::segmented(ui, &mut o.rate, &["Originale", "44,1 k", "48 k", "22 k", "96 k"]);
+                pro::segmented(ui, &mut o.rate, &[tl("Originale"), tl("44,1 k"), tl("48 k"), tl("22 k"), tl("96 k")]);
                 if o.rate > 0 {
-                    ui.checkbox(&mut o.hq, "Conversion haute qualité (filtre sinc)");
+                    ui.checkbox(&mut o.hq, tl("Conversion haute qualité (filtre sinc)"));
                 }
                 ui.add_space(8.0);
                 row(ui, "Canaux");
-                pro::segmented(ui, &mut o.channels, &["Originaux", "Mono", "Stéréo"]);
+                pro::segmented(ui, &mut o.channels, &[tl("Originaux"), tl("Mono"), tl("Stéréo")]);
                 ui.add_space(8.0);
                 row(ui, "Plage");
                 let mut r = o.range;
-                pro::segmented(ui, &mut r, &["Tout", "Sélection", "Un fichier par marqueur"]);
+                pro::segmented(ui, &mut r, &[tl("Tout"), tl("Sélection"), tl("Un fichier par marqueur")]);
                 if (r == 1 && has_sel) || (r == 2 && has_marks) || r == 0 {
                     o.range = r;
                 }
                 if !has_marks {
-                    studio_ui::pro::tip(ui, "Pose des marqueurs (M) pour découper en plusieurs fichiers.");
+                    studio_ui::pro::tip(ui, tl("Pose des marqueurs (M) pour découper en plusieurs fichiers."));
                 }
                 ui.add_space(8.0);
-                ui.checkbox(&mut o.normalize, "Normaliser à −1 dB avant l'export");
-                ui.checkbox(&mut o.cues, "Inclure les marqueurs (repères lus par les éditeurs audio)");
-                egui::CollapsingHeader::new(RichText::new("Métadonnées").size(12.0).color(MUTED)).id_salt("meta").show(ui, |ui| {
+                ui.checkbox(&mut o.normalize, tl("Normaliser à −1 dB avant l'export"));
+                ui.checkbox(&mut o.cues, tl("Inclure les marqueurs (repères lus par les éditeurs audio)"));
+                egui::CollapsingHeader::new(RichText::new(tl("Métadonnées")).size(12.0).color(MUTED)).id_salt("meta").show(ui, |ui| {
                     egui::Grid::new("meta-grid").num_columns(2).spacing(vec2(8.0, 4.0)).show(ui, |ui| {
                         for (k, (_, label)) in INFO_IDS.iter().enumerate() {
                             ui.label(RichText::new(*label).size(12.0).color(MUTED));
@@ -2115,14 +2117,14 @@ impl Sound {
                     });
                 });
                 if self.stats.as_ref().is_some_and(|s| s.clipped > 0) {
-                    ui.label(RichText::new("Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.").size(12.0).color(RED));
+                    ui.label(RichText::new(tl("Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.")).size(12.0).color(RED));
                 }
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Exporter…").clicked() {
+                    if pro::primary(ui, tl("Exporter…")).clicked() {
                         go = true;
                     }
-                    if pro::secondary(ui, "Annuler").clicked() {
+                    if pro::secondary(ui, tl("Annuler")).clicked() {
                         cancel = true;
                     }
                 });
@@ -2139,11 +2141,11 @@ impl Sound {
             let mut mono = false;
             let mut stereo = false;
             let keep = pro::sheet(ctx, "props", 420.0, |ui| {
-                ui.label(RichText::new("Propriétés du son").font(semibold(18.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Propriétés du son")).font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(10.0);
                 ui.label(RichText::new(format!("{} Hz · {} canal(aux) · {} · {} échantillons", self.clip.rate, self.clip.ch.len(), fmt_time(self.clip.secs(self.clip.len())), self.clip.len())).size(12.0).color(MUTED));
                 ui.add_space(10.0);
-                ui.label(RichText::new("Convertir la fréquence d'échantillonnage").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Convertir la fréquence d'échantillonnage")).size(12.0).color(MUTED));
                 ui.horizontal(|ui| {
                     for r in [22_050u32, 32_000, 44_100, 48_000, 96_000] {
                         if ui.selectable_label(self.clip.rate == r, format!("{r} Hz")).clicked() && self.clip.rate != r {
@@ -2162,7 +2164,7 @@ impl Sound {
                 });
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Terminé").clicked() {
+                    if pro::primary(ui, tl("Terminé")).clicked() {
                         done = true;
                     }
                 });
@@ -2208,13 +2210,13 @@ impl Sound {
         };
         match t {
             Tool::Select | Tool::Hand | Tool::Zoom => {
-                if ui.small_button("Tout sélectionner").clicked() {
+                if ui.small_button(tl("Tout sélectionner")).clicked() {
                     self.sel = Some((0, self.clip.len()));
                 }
                 if ui.add_enabled(self.sel.is_some(), egui::Button::new("Désélectionner").small()).clicked() {
                     self.sel = None;
                 }
-                if ui.small_button("Zoom 1:1 (échantillons)").clicked() {
+                if ui.small_button(tl("Zoom 1:1 (échantillons)")).clicked() {
                     let c = self.view_start + 500.0 * self.spp;
                     self.spp = 0.1;
                     self.view_start = c - 50.0;
@@ -2224,7 +2226,7 @@ impl Sound {
             Tool::SpecRect | Tool::Lasso | Tool::Brush | Tool::Heal => {
                 small(ui, "Échelle");
                 let mut l = !self.spec_log as usize;
-                if pro::segmented(ui, &mut l, &["Log", "Linéaire"]) {
+                if pro::segmented(ui, &mut l, &[tl("Log"), tl("Linéaire")]) {
                     self.spec_log = l == 0;
                 }
                 small(ui, "FFT");
@@ -2242,16 +2244,16 @@ impl Sound {
                     let has = self.spec_sel.is_some();
                     ui.add(egui::DragValue::new(&mut self.spec_db).range(-60.0..=24.0).suffix(" dB").speed(0.2));
                     let g = self.spec_db;
-                    if ui.add_enabled(has, egui::Button::new("Appliquer le gain").small()).on_hover_text("Entrée").clicked() {
+                    if ui.add_enabled(has, egui::Button::new("Appliquer le gain").small()).on_hover_text(tl("Entrée")).clicked() {
                         self.spectral_apply(dsp::SpecMode::Gain(g), "Gain spectral");
                     }
                     if ui.add_enabled(has, egui::Button::new("Supprimer").small()).clicked() {
                         self.spectral_apply(dsp::SpecMode::Gain(-90.0), "Suppression spectrale");
                     }
-                    if ui.add_enabled(has, egui::Button::new("Réparer").small()).on_hover_text("Reconstruit la zone à partir de ce qui l'entoure").clicked() {
+                    if ui.add_enabled(has, egui::Button::new("Réparer").small()).on_hover_text(tl("Reconstruit la zone à partir de ce qui l'entoure")).clicked() {
                         self.spectral_apply(dsp::SpecMode::Heal, "Réparation spectrale");
                     }
-                    if ui.add_enabled(has, egui::Button::new("Isoler").small()).on_hover_text("Garde seulement la zone (le reste devient silencieux)").clicked()
+                    if ui.add_enabled(has, egui::Button::new("Isoler").small()).on_hover_text(tl("Garde seulement la zone (le reste devient silencieux)")).clicked()
                         && let Some(sel) = self.spec_sel.clone()
                     {
                         let nyq = self.clip.rate as f32 / 2.0;
@@ -2263,7 +2265,7 @@ impl Sound {
                         self.modified = true;
                         self.changed();
                     }
-                    if ui.add_enabled(has, egui::Button::new("×").small()).on_hover_text("Effacer la zone (Échap)").clicked() {
+                    if ui.add_enabled(has, egui::Button::new("×").small()).on_hover_text(tl("Effacer la zone (Échap)")).clicked() {
                         self.spec_sel = None;
                     }
                 }
@@ -2271,7 +2273,7 @@ impl Sound {
             Tool::Pencil => {
                 let ok = self.spp <= 8.0;
                 small(ui, if ok { "Dessine la forme d'onde, un canal à la fois." } else { "Zoome davantage pour dessiner les échantillons." });
-                if ui.small_button("Zoom aux échantillons").clicked() {
+                if ui.small_button(tl("Zoom aux échantillons")).clicked() {
                     let c = self.view_start + 500.0 * self.spp;
                     self.spp = 0.25;
                     self.view_start = c - 125.0;
@@ -2293,10 +2295,10 @@ impl Sound {
                     small(ui, label);
                     ui.add(egui::Slider::new(&mut self.fades[k].1, -1.0..=1.0).show_value(false));
                 }
-                if ui.add_enabled(self.fades[0].0 + self.fades[1].0 > 0, egui::Button::new("Appliquer").small()).on_hover_text("Entrée").clicked() {
+                if ui.add_enabled(self.fades[0].0 + self.fades[1].0 > 0, egui::Button::new("Appliquer").small()).on_hover_text(tl("Entrée")).clicked() {
                     self.apply_fades();
                 }
-                if ui.small_button("Réinitialiser").clicked() {
+                if ui.small_button(tl("Réinitialiser")).clicked() {
                     self.fades = [(0, 0.0); 2];
                 }
             }
@@ -2308,7 +2310,7 @@ impl Sound {
                         self.env = pts;
                     }
                 }
-                if ui.add_enabled(!self.env.is_empty(), egui::Button::new("Appliquer").small()).on_hover_text("Entrée").clicked() {
+                if ui.add_enabled(!self.env.is_empty(), egui::Button::new("Appliquer").small()).on_hover_text(tl("Entrée")).clicked() {
                     self.apply_env();
                 }
                 if ui.add_enabled(!self.env.is_empty(), egui::Button::new("Effacer").small()).clicked() {
@@ -2503,24 +2505,24 @@ impl Sound {
         let head = Rect::from_min_size(full.min, vec2(full.width(), head_h));
         ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_size(full.min, vec2(full.width(), 30.0))), |ui| {
             ui.horizontal_centered(|ui| {
-                pro::segmented(ui, &mut self.view_mode, &["Forme d'onde", "Spectrogramme"]);
+                pro::segmented(ui, &mut self.view_mode, &[tl("Forme d'onde"), tl("Spectrogramme")]);
                 pro::toolbar_sep(ui);
-                ui.label(RichText::new("Hauteur").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Hauteur")).size(12.0).color(MUTED));
                 ui.spacing_mut().slider_width = 64.0;
                 ui.add(egui::Slider::new(&mut self.amp_zoom, 1.0..=10.0).logarithmic(true).show_value(false));
-                ui.toggle_value(&mut self.follow, RichText::new("Suivre").size(12.0)).on_hover_text("La vue suit la lecture (F)");
+                ui.toggle_value(&mut self.follow, RichText::new(tl("Suivre")).size(12.0)).on_hover_text(tl("La vue suit la lecture (F)"));
                 pro::toolbar_sep(ui);
-                ui.label(RichText::new("Zoom").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Zoom")).size(12.0).color(MUTED));
                 if ui.small_button("−").clicked() {
                     self.zoom_by(2.0);
                 }
                 if ui.small_button("+").clicked() {
                     self.zoom_by(0.5);
                 }
-                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Sélection").small()).on_hover_text("Z").clicked() {
+                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Sélection").small()).on_hover_text(tl("Z")).clicked() {
                     self.zoom_sel();
                 }
-                if ui.small_button("Tout").on_hover_text("Ctrl+0").clicked() {
+                if ui.small_button(tl("Tout")).on_hover_text(tl("Ctrl+0")).clicked() {
                     self.fit_pending = true;
                 }
             });
@@ -2853,7 +2855,7 @@ impl Sound {
         let win = Rect::from_x_y_ranges(ox(start)..=ox(start + visible).max(ox(start) + 3.0), overview.y_range());
         painter.rect_stroke(win, CornerRadius::same(3), Stroke::new(1.5, Color32::from_white_alpha(170)), egui::StrokeKind::Inside);
         painter.rect_filled(win, CornerRadius::same(3), Color32::from_white_alpha(14));
-        let or = ui.interact(overview, ui.make_persistent_id("overview"), Sense::click_and_drag()).on_hover_text("Vue d'ensemble : clique ou glisse pour te déplacer");
+        let or = ui.interact(overview, ui.make_persistent_id("overview"), Sense::click_and_drag()).on_hover_text(tl("Vue d'ensemble : clique ou glisse pour te déplacer"));
         if let Some(p) = or.interact_pointer_pos()
             && (or.clicked() || or.dragged())
         {
@@ -2893,7 +2895,7 @@ fn meters(ui: &mut Ui, levels: &[f32]) {
             p.rect_filled(Rect::from_min_size(pos2(x + 0.5, bar.top()), vec2(bar.width() / segs as f32 - 1.0, bar.height())), CornerRadius::ZERO, c);
         }
     }
-    ui.label(RichText::new("G\nD").size(9.0).color(FAINT));
+    ui.label(RichText::new(tl("G\nD")).size(9.0).color(FAINT));
 }
 
 fn transport_glyph(p: &Painter, c: Pos2, kind: u8, color: Color32) {
@@ -2943,10 +2945,10 @@ fn slider(ui: &mut Ui, label: &str, v: &mut f32, range: std::ops::RangeInclusive
 fn fx_buttons(ui: &mut Ui) -> Option<bool> {
     let mut out = None;
     ui.horizontal(|ui| {
-        if pro::ghost(ui, "▶ Écouter").on_hover_text("Essaie l'effet sur 15 s sans rien modifier").clicked() {
+        if pro::ghost(ui, tl("▶ Écouter")).on_hover_text(tl("Essaie l'effet sur 15 s sans rien modifier")).clicked() {
             out = Some(true);
         }
-        if pro::secondary(ui, "Appliquer").clicked() {
+        if pro::secondary(ui, tl("Appliquer")).clicked() {
             out = Some(false);
         }
     });

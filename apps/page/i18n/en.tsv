@@ -1,0 +1,359 @@
+# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+Fusion de données (CSV)…	
+Publipostage : «Nom» dans les textes	
+QR code du texte sélectionné	
+Lien, Wi-Fi, contact… · image nette	
+Répéter le bloc en grille (remplir la page)	
+Étiquettes, cartes, badges · écart 10 pt	
+Répéter le bloc en grille sans écart (traits de coupe communs)	
+Objet	
+Centrer les blocs sur la page	
+Disposition · sélection	
+Distribuer les blocs horizontalement	
+Disposition · 3 blocs minimum	
+Distribuer les blocs verticalement	
+Dupliquer les blocs	
+Disposition · Ctrl+D	
+Grouper les blocs	
+Disposition · Ctrl+G	
+Dégrouper les blocs	
+Disposition · Ctrl+Maj+G	
+Pivoter les blocs de 90°	
+Retourner les blocs horizontalement	
+Retourner les blocs verticalement	
+Exporter	
+PDF, PNG, JPEG ou SVG · Ctrl+E	
+Format du document · Ctrl+K	
+Fichier	
+Ouvrir un document récent	
+Aucun document récent	
+Exporter avec un préréglage	
+Édition	
+Corrections typographiques	
+Tout corriger	
+Disposition	
+Transformation	
+Symétrie horizontale	
+Symétrie verticale	
+Effacer les transformations	
+Aligner	
+Centrer sur la page	
+Remplir la page (fond perdu compris)	
+Ajustement	
+Options d'angle	
+Habillage	
+Effets	
+Mode de fusion	
+Effacer les effets	
+Styles d'objet	
+Nouveau à partir de la sélection…	
+Convertir en tracé	
+Rectangle, ellipse, polygone ou trait deviennent des tracés modifiables à la Plume	
+Texte	
+Police	
+Corps	
+Style de paragraphe	
+Casse	
+Listes	
+Lettrine	
+Insérer une variable	
+Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>	
+Page	
+Ajouter une page après	
+Ajouter une page avant	
+Dupliquer la page	
+Pages en vis-à-vis	
+Modifier le gabarit	
+Appliquer le gabarit à toutes les pages	
+Retirer le gabarit de toutes les pages	
+Affichage	
+Espace de travail	
+Zoom	
+Aperçu (masquer les repères)   W	
+Marges, colonnes et grille   Ctrl+;	
+Bords des blocs   Ctrl+H	
+Règles   Ctrl+R	
+Magnétisme	
+Notes	
+Fenêtre	
+Bienvenue dans Page	
+Mise en page de documents, magazines, affiches et PDF	
+Ouvrir…	
+Nouveau document	
+Modèles	
+Documents récents	
+Tes documents .epage apparaîtront ici	
+Aligner sur la sélection	
+Répartir ↔	
+Répartir ↕	
+Grouper	
+Ctrl+G	
+Corps · Ctrl+Maj+< / >	
+Interligne · Alt+↑ / ↓	
+Approche · Alt+← / →	
+G	
+Gras · Ctrl+Maj+B	
+I	
+Italique	
+S	
+Souligné · Ctrl+Maj+U	
+AA	
+Majuscules · Ctrl+Maj+K	
+≡ G	
+≡ C	
+≡ D	
+≡ J	
+Styles	
+Fond	
+Contour	
+Trait	
+Début	
+Flèche	
+Remplir	
+Ajuster	
+Déformer	
+Taille du texte	
+· texte en excès sur cette page	
+Ctrl+0	
+Aperçu	
+Masque cadres et repères (W)	
+PAGES	
+Ajouter une page à la fin	
+Ses blocs apparaissent sur toutes les pages	
++ Page	
+Propriétés	
+Calques	
+Liens	
+Contrôle	
+Bloc	
+X	
+Y	
+L	
+H	
+Rotation	
+Effets de l'image	
+Le texte dépasse du bloc.	
+Ajuster la hauteur	
+Écrire sur la page (Entrée)	
+Caractère	
+Taille	
+Approche	
+ G 	
+ I 	
+ S 	
+ AA 	
+Petites capitales	
+Barré	
+Décalage de la ligne de base	
+Échelle H	
+V	
+Contour des lettres	
+Paragraphe	
+Gauche	
+Centre	
+Droite	
+Justifié	
+Interligne	
+Espace après paragraphe	
+Retrait de première ligne	
+Liste	
+Retrait négatif (texte aligné après la puce)	
+Style	
++ Créer un style à partir de ce texte	
+Paragraphe avancé	
+Espace avant paragraphe	
+Retrait gauche	
+droit	
+Lettrine sur	
+Césure des mots longs	
+Éviter les lignes veuves et orphelines	
+Aligner sur la grille de base	
+Tabulation tous les	
+Points de conduite	
+Caler à droite	
+Filet au-dessus	
+en dessous	
+Épaisseur	
+Écart	
+Bloc de texte	
+Colonnes	
+Gouttière	
+Équilibrer	
+Filet entre colonnes	
+Hauteur auto	
+Ignorer l'habillage	
+Alignement vertical	
+Haut	
+Milieu	
+Bas	
+Marge intérieure	
+Fond coloré	
+Suite du texte dans	
+Aucun bloc	
+Le texte qui ne tient pas continue dans ce bloc (texte chaîné).	
+Image	
+Choisir…	
+Cadre aux proportions	
+Remplir le cadre	
+Ajuster dans le cadre	
+Étirer sans garder les proportions	
+Zoom de l'image dans le cadre	
+Décalage X	
+Centrer	
+Forme du cadre	
+Rectangle	
+Ellipse	
+Polygone	
+Filtre	
+Arrondi des coins	
+Miroir horizontal	
+Forme	
+Arrondi	
+Côtés / branches	
+Creux (1 = polygone)	
+Ligne	
+Pointillés (0 = plein)	
+Flèche à la fin	
+au début	
+Extrémités	
+Rondes	
+Carrées	
+Droites	
+Direction	
+Tracé	
+Tracé fermé	
+Sélection directe (A) pour déplacer les points et leurs poignées.	
+Texte sur tracé	
+Départ le long du tracé	
+Voir le tracé	
+Fermé	
+Tableau	
+Première colonne en gras	
+Ligne d'en-tête	
+Lignes alternées	
+Aspect	
+Opacité	
+Pointillés	
+Verrouillé	
+Masqué	
+Non imprimable (visible à l'écran seulement)	
++ Ajouter la couleur au nuancier	
+Ombre portée	
+Flou	
+Lueur externe	
+Contour progressif	
+Contour progressif dégradé	
+De	
+Angles	
+Dégradé radial (si un dégradé est actif)	
+Inclinaison	
+Miroir ↔	
+Habillage du texte	
+Distance	
+Les textes voisins contournent ce bloc.	
+Note	
+Remarque pour toi ou un relecteur (non imprimée)	
+Aligner sur les marges	
+Ordre	
+Document	
+Format…	
+Titre	
+Marges	
+Grille	
+Grille de base (0 = masquée)	
+Fond perdu	
+3 mm = 8,5 pt pour un imprimeur	
+1re page n°	
+Utiliser le gabarit sur cette page	
+Tu modifies le gabarit : ses blocs apparaissent sur toutes les pages.	
+?  Tutoriels	
+Nuancier	
+Les couleurs du document, réutilisables partout d'un clic.	
+Supprimer cette couleur	
+Ajouter une couleur	
+Styles de paragraphe	
+Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.	
+Repères	
+Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.	
++ Repère vertical au centre	
++ Repère horizontal au centre	
+Objets de la page	
+Aucun bloc sur cette page.	
+Glisse vers la page pour poser un repère	
+Le rendu se met à jour sur la page en direct	
+Couleur	
+Style de caractère	
+Terminé	
+Exporter le document	
+Toutes	
+Page affichée	
+Plage	
+Fond perdu et traits de coupe (impression)	
+Règle un fond perdu dans le format du document pour l'activer.	
+Afficher le fichier après l'export	
+Attention : du texte dépasse d'un bloc sur la page affichée.	
+Exporter…	
+Annuler	
+Format du document	
+Largeur	
+Hauteur	
+Portrait	
+Paysage	
+3 mm	
+Valeur standard des imprimeurs	
+Grille de base	
+Nouveau style de paragraphe	
+Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.	
+Créer	
+Couleur du nuancier	
+Dégradé	
+Angle	
+Contrôle en amont	
+Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.	
+Afficher dans l'explorateur	
+Remplacer le lien…	
+Atteindre	
+Rechercher les liens manquants dans un dossier…	
++ Nouveau calque	
+Placer la sélection	
+Déplace les blocs sélectionnés sur le calque actif	
+Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.	
+Styles de caractère	
+Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.	
++ Nouveau style de caractère	
+Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.	
+Appliquer à la sélection	
+Rechercher et remplacer	
+Rechercher	
+Remplacer par	
+Respecter la casse	
+Mot entier	
+Dans	
+Bloc sélectionné	
+Tous	
+Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.	
+Tout remplacer	
+Suivant	
+Fermer	
+Dupliquer et décaler	
+Créer une grille	
+Lignes	
+Gouttière horizontale	
+Nombre de copies	
+Décalage horizontal	
+Rotation par copie	
+Table des matières	
+Liste les blocs portant ces styles de paragraphe, avec leur numéro de page et des points de conduite.	
+Sur une nouvelle page au début du document	
+Numérotation et sections	
+Dès la page	
+Nom	
+Préfixe	
+ B 	
+Taille relative	
+Enregistrer	
+Nouveau style d'objet	
+Couleurs, contour, opacité, angles et effets du bloc sélectionné.	
+Supprimer la note	
+Terminer (Entrée)	
+Fermer le tracé	

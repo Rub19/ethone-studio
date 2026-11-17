@@ -1,4 +1,5 @@
 use super::*;
+use studio_ui::i18n::tl;
 use model::{Guide, Mat, Vtx, apply, invert};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -244,7 +245,7 @@ impl Motion {
                     Tool::Rect | Tool::RoundRect | Tool::Ellipse | Tool::Polygon | Tool::Star => {
                         lab(ui, "Fond");
                         color_button(ui, &mut o.fill);
-                        ui.checkbox(&mut o.stroke_on, "Contour");
+                        ui.checkbox(&mut o.stroke_on, tl("Contour"));
                         if o.stroke_on {
                             color_button(ui, &mut o.stroke);
                             ui.add(egui::DragValue::new(&mut o.stroke_w).range(0.5..=80.0).speed(0.2).suffix(" px"));
@@ -262,17 +263,17 @@ impl Motion {
                             }
                             _ => {}
                         }
-                        ui.checkbox(&mut o.from_center, "Depuis le centre");
+                        ui.checkbox(&mut o.from_center, tl("Depuis le centre"));
                     }
                     Tool::Pen | Tool::PenAdd | Tool::PenDel | Tool::PenConv => {
-                        ui.checkbox(&mut o.pen_fill, "Remplir");
+                        ui.checkbox(&mut o.pen_fill, tl("Remplir"));
                         if o.pen_fill {
                             color_button(ui, &mut o.pen_color);
                         }
                         lab(ui, "Contour");
                         color_button(ui, &mut o.pen_stroke);
                         ui.add(egui::DragValue::new(&mut o.pen_w).range(0.0..=80.0).speed(0.2).suffix(" px"));
-                        if self.pen.is_some() && ui.small_button("Terminer (Entrée)").clicked() {
+                        if self.pen.is_some() && ui.small_button(tl("Terminer (Entrée)")).clicked() {
                             self.pen = None;
                         }
                         if self.pen.is_none() {
@@ -301,7 +302,7 @@ impl Motion {
                         lab(ui, "Peint sur le calque Peinture sélectionné");
                     }
                     Tool::MaskRect | Tool::MaskEllipse => {
-                        ui.checkbox(&mut o.mask_invert, "Inversé");
+                        ui.checkbox(&mut o.mask_invert, tl("Inversé"));
                         lab(ui, "Sélectionne un calque puis trace : seule la zone dessinée reste visible");
                     }
                     Tool::Puppet => {
@@ -344,7 +345,7 @@ impl Motion {
                 });
                 let zl = self.zoom.map_or("Ajuster".to_string(), |z| format!("{:.0} %", z * 100.0));
                 egui::ComboBox::from_id_salt("zoom").width(78.0).selected_text(zl).show_ui(ui, |ui| {
-                    if ui.selectable_label(self.zoom.is_none(), "Ajuster").clicked() {
+                    if ui.selectable_label(self.zoom.is_none(), tl("Ajuster")).clicked() {
                         self.zoom = None;
                         self.pan = Vec2::ZERO;
                     }

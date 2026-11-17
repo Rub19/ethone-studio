@@ -9,6 +9,7 @@ mod render;
 mod tutos;
 
 use eframe::egui::{self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2, pos2, vec2};
+use studio_ui::i18n::tl;
 use engine::{Mark, MarkKind};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -182,6 +183,7 @@ pub fn toast(ctx: &egui::Context, s: impl Into<String>, ok: bool) {
 impl Folio {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         let recent = recent_file().and_then(|p| std::fs::read_to_string(p).ok()).and_then(|s| serde_json::from_str::<Vec<PathBuf>>(&s).ok()).unwrap_or_default();
         let mut me = Self {
             od: None,
@@ -578,11 +580,11 @@ impl Folio {
             ui.scope_builder(egui::UiBuilder::new().max_rect(Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max)), |ui| {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     if self.od.is_some() {
-                        if pro::primary(ui, "Enregistrer").on_hover_text("Ctrl+S").clicked() {
+                        if pro::primary(ui, tl("Enregistrer")).on_hover_text(tl("Ctrl+S")).clicked() {
                             let ctx = ui.ctx().clone();
                             self.save(&ctx, false);
                         }
-                        if pro::secondary(ui, "Tous les outils").clicked() {
+                        if pro::secondary(ui, tl("Tous les outils")).clicked() {
                             self.panel = panels::Panel::All;
                         }
                     }
@@ -597,22 +599,22 @@ impl Folio {
 
     fn menus(&mut self, ui: &mut Ui) {
         let ctx = ui.ctx().clone();
-        ui.menu_button("Fichier", |ui| {
-            if ui.button("Ouvrir…                         Ctrl+O").clicked() {
+        ui.menu_button(tl("Fichier"), |ui| {
+            if ui.button(tl("Ouvrir…                         Ctrl+O")).clicked() {
                 self.open_dialog(&ctx);
             }
-            if ui.button("Créer un PDF depuis des images…").clicked() {
+            if ui.button(tl("Créer un PDF depuis des images…")).clicked() {
                 self.panel = panels::Panel::Create;
                 panels::create_from_images(self, &ctx, Some((595.0, 842.0)));
             }
-            if ui.button("Combiner des fichiers…").clicked() {
+            if ui.button(tl("Combiner des fichiers…")).clicked() {
                 self.panel = panels::Panel::Combine;
             }
-            if ui.button("Nouveau PDF vierge (A4)").clicked() {
+            if ui.button(tl("Nouveau PDF vierge (A4)")).clicked() {
                 panels::blank(self, &ctx);
             }
             if !self.recent.is_empty() {
-                ui.menu_button("Récents", |ui| {
+                ui.menu_button(tl("Récents"), |ui| {
                     for p in self.recent.clone() {
                         if ui.button(p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()).on_hover_text(p.display().to_string()).clicked() {
                             self.open_path(&p, &ctx);
@@ -639,7 +641,7 @@ impl Folio {
                 self.od = None;
             }
         });
-        ui.menu_button("Édition", |ui| {
+        ui.menu_button(tl("Édition"), |ui| {
             let (u, r) = self.od.as_ref().map_or((false, false), |o| (!o.undo.is_empty(), !o.redo.is_empty()));
             if ui.add_enabled(u, egui::Button::new("Annuler                 Ctrl+Z")).clicked() {
                 self.undo(false);
@@ -648,22 +650,22 @@ impl Folio {
                 self.undo(true);
             }
             ui.separator();
-            if ui.button("Rechercher               Ctrl+F").clicked() {
+            if ui.button(tl("Rechercher               Ctrl+F")).clicked() {
                 self.panel = panels::Panel::Search;
             }
-            if ui.button("Supprimer tous les commentaires").clicked() {
+            if ui.button(tl("Supprimer tous les commentaires")).clicked() {
                 let all = self.scope(1);
                 self.edit(&ctx, "Commentaires supprimés", |d| engine::remove_comments(d, &all).map(|_| ()));
             }
         });
-        ui.menu_button("Affichage", |ui| {
-            if ui.button("Page entière             Ctrl+0").clicked() {
+        ui.menu_button(tl("Affichage"), |ui| {
+            if ui.button(tl("Page entière             Ctrl+0")).clicked() {
                 self.fit = Some(0);
             }
-            if ui.button("Largeur de la page     Ctrl+2").clicked() {
+            if ui.button(tl("Largeur de la page     Ctrl+2")).clicked() {
                 self.fit = Some(1);
             }
-            if ui.button("Taille réelle              Ctrl+1").clicked() {
+            if ui.button(tl("Taille réelle              Ctrl+1")).clicked() {
                 self.zoom_to(1.0);
             }
             ui.separator();
@@ -673,7 +675,7 @@ impl Folio {
                 }
             }
         });
-        ui.menu_button("Outils", |ui| {
+        ui.menu_button(tl("Outils"), |ui| {
             for (p, name) in panels::LIST {
                 if ui.button(name).clicked() {
                     self.panel = p;
@@ -687,10 +689,10 @@ impl Folio {
         egui::Panel::bottom("status").exact_size(22.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(12, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
                 let Some(n) = self.od.as_ref().map(|o| o.n()) else {
-                    ui.label(RichText::new("Glisse un PDF ou une image dans la fenêtre").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("Glisse un PDF ou une image dans la fenêtre")).size(12.0).color(FAINT));
                     return;
                 };
-                if ui.small_button("◀").on_hover_text("Page précédente").clicked() && self.page > 0 {
+                if ui.small_button("◀").on_hover_text(tl("Page précédente")).clicked() && self.page > 0 {
                     self.goto = Some(self.page - 1);
                 }
                 let mut p = self.page as u32 + 1;
@@ -698,7 +700,7 @@ impl Folio {
                     self.goto = Some(p as usize - 1);
                 }
                 ui.label(RichText::new(format!("/ {n}")).size(12.0).color(MUTED));
-                if ui.small_button("▶").on_hover_text("Page suivante").clicked() && self.page + 1 < n {
+                if ui.small_button("▶").on_hover_text(tl("Page suivante")).clicked() && self.page + 1 < n {
                     self.goto = Some(self.page + 1);
                 }
                 pro::toolbar_sep(ui);
@@ -709,10 +711,10 @@ impl Folio {
                 if ui.small_button("+").clicked() {
                     self.zoom_to(self.zoom * 1.25);
                 }
-                if ui.small_button("Page").on_hover_text("Ctrl+0").clicked() {
+                if ui.small_button(tl("Page")).on_hover_text(tl("Ctrl+0")).clicked() {
                     self.fit = Some(0);
                 }
-                if ui.small_button("Largeur").on_hover_text("Ctrl+2").clicked() {
+                if ui.small_button(tl("Largeur")).on_hover_text(tl("Ctrl+2")).clicked() {
                     self.fit = Some(1);
                 }
                 if let Some((w, h)) = self.od.as_ref().and_then(|o| o.sizes.get(self.page).copied()) {
@@ -763,7 +765,7 @@ impl Folio {
     fn left_panel(&mut self, root: &mut Ui) {
         let ctx = root.ctx().clone();
         egui::Panel::left("pages").resizable(false).exact_size(190.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(10, 10))).show(root, |ui| {
-            pro::segmented(ui, &mut self.left_tab, &["Pages", "Signets", "Notes"]);
+            pro::segmented(ui, &mut self.left_tab, &[tl("Pages"), tl("Signets"), tl("Notes")]);
             ui.add_space(8.0);
             match self.left_tab {
                 0 => {
@@ -802,7 +804,7 @@ impl Folio {
                                     self.goto = Some(i);
                                 }
                             }
-                            resp.on_hover_text("Clic : aller à la page · Ctrl+clic / Maj+clic : sélectionner");
+                            resp.on_hover_text(tl("Clic : aller à la page · Ctrl+clic / Maj+clic : sélectionner"));
                         }
                     });
                 }
@@ -833,8 +835,8 @@ impl Folio {
                 ui.add_space(40.0);
                 ui.add(egui::Image::new((self.icon.id(), Vec2::splat(40.0))));
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Bienvenue dans Folio").font(semibold(28.0)).color(INK_STRONG));
-                    ui.label(RichText::new("Lis, annote, signe, organise et numérise tes PDF").size(12.5).color(MUTED));
+                    ui.label(RichText::new(tl("Bienvenue dans Folio")).font(semibold(28.0)).color(INK_STRONG));
+                    ui.label(RichText::new(tl("Lis, annote, signe, organise et numérise tes PDF")).size(12.5).color(MUTED));
                 });
             });
             ui.add_space(26.0);
@@ -881,7 +883,7 @@ impl Folio {
                 ui.add_space(26.0);
                 ui.horizontal(|ui| {
                     ui.add_space(40.0);
-                    ui.label(RichText::new("Récents").font(semibold(16.0)).color(INK_STRONG));
+                    ui.label(RichText::new(tl("Récents")).font(semibold(16.0)).color(INK_STRONG));
                 });
                 ui.add_space(6.0);
                 for p in self.recent.clone() {
@@ -1055,13 +1057,13 @@ impl Folio {
                 egui::Area::new(egui::Id::NULL.with("folio-typing")).order(egui::Order::Foreground).fixed_pos(a).show(&ctx, |ui| {
                     Frame::new().fill(CHROME).stroke(Stroke::new(1.0, BLUE)).corner_radius(CornerRadius::same(4)).inner_margin(Margin::same(8)).show(ui, |ui| {
                         ui.label(RichText::new(if kind == MarkKind::Note { "Note" } else { "Texte" }).size(12.0).color(MUTED));
-                        let te = ui.add(egui::TextEdit::multiline(&mut text).desired_width(240.0).desired_rows(3).hint_text("Écris ici…"));
+                        let te = ui.add(egui::TextEdit::multiline(&mut text).desired_width(240.0).desired_rows(3).hint_text(tl("Écris ici…")));
                         te.request_focus();
                         ui.horizontal(|ui| {
-                            if pro::primary(ui, "OK").clicked() {
+                            if pro::primary(ui, tl("OK")).clicked() {
                                 commit = true;
                             }
-                            if ui.button("Annuler").clicked() {
+                            if ui.button(tl("Annuler")).clicked() {
                                 keep = false;
                             }
                         });
@@ -1083,20 +1085,20 @@ impl Folio {
             let mut go = false;
             let mut cancel = false;
             pro::sheet(ctx, "pw", 380.0, |ui| {
-                ui.label(RichText::new("Document protégé").font(semibold(17.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Document protégé")).font(semibold(17.0)).color(INK_STRONG));
                 ui.label(RichText::new(path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()).size(12.0).color(MUTED));
                 ui.add_space(10.0);
-                let r = ui.add(egui::TextEdit::singleline(&mut pw).password(true).hint_text("Mot de passe").desired_width(f32::INFINITY));
+                let r = ui.add(egui::TextEdit::singleline(&mut pw).password(true).hint_text(tl("Mot de passe")).desired_width(f32::INFINITY));
                 r.request_focus();
                 if r.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
                     go = true;
                 }
                 ui.add_space(10.0);
                 ui.horizontal(|ui| {
-                    if pro::primary(ui, "Ouvrir").clicked() {
+                    if pro::primary(ui, tl("Ouvrir")).clicked() {
                         go = true;
                     }
-                    if ui.button("Annuler").clicked() {
+                    if ui.button(tl("Annuler")).clicked() {
                         cancel = true;
                     }
                 });
@@ -1121,8 +1123,8 @@ impl Folio {
         if let Some(mut pad) = self.sign_pad.take() {
             let mut keep = true;
             pro::sheet(ctx, "sign", 460.0, |ui| {
-                ui.label(RichText::new("Créer ma signature").font(semibold(17.0)).color(INK_STRONG));
-                ui.label(RichText::new("Dessine à la souris dans le cadre").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Créer ma signature")).font(semibold(17.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Dessine à la souris dans le cadre")).size(12.0).color(MUTED));
                 ui.add_space(8.0);
                 let (r, resp) = ui.allocate_exact_size(vec2(420.0, 140.0), Sense::drag());
                 ui.painter().rect(r, CornerRadius::same(4), Color32::WHITE, Stroke::new(1.0, LINE), StrokeKind::Inside);
@@ -1143,16 +1145,16 @@ impl Folio {
                 }
                 ui.add_space(10.0);
                 ui.horizontal(|ui| {
-                    if pro::primary(ui, "Utiliser").clicked() && !pad.is_empty() {
+                    if pro::primary(ui, tl("Utiliser")).clicked() && !pad.is_empty() {
                         self.signature = pad.clone();
                         self.tool = Tool::Sign;
                         keep = false;
                         toast(ui.ctx(), "Clique sur la page pour poser ta signature", true);
                     }
-                    if ui.button("Effacer").clicked() {
+                    if ui.button(tl("Effacer")).clicked() {
                         pad.clear();
                     }
-                    if ui.button("Annuler").clicked() {
+                    if ui.button(tl("Annuler")).clicked() {
                         keep = false;
                     }
                 });
@@ -1195,7 +1197,7 @@ impl Folio {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         use studio_ui::palette::Cmd;
-        let mut v = vec![Cmd::new("Ouvrir…", "Ctrl+O", "open"), Cmd::new("Enregistrer", "Ctrl+S", "save"), Cmd::new("Enregistrer sous…", "Ctrl+Maj+S", "saveas"), Cmd::new("Exporter la page courante en PNG…", "Page · rendu 200 ppp", "export-page"), Cmd::new("Pivoter les pages à gauche", "Page courante ou sélection", "rotate-left"), Cmd::new("Pivoter les pages à droite", "Page courante ou sélection", "rotate-right")];
+        let mut v = vec![Cmd::new(tl("Ouvrir…"), tl("Ctrl+O"), "open"), Cmd::new(tl("Enregistrer"), tl("Ctrl+S"), "save"), Cmd::new(tl("Enregistrer sous…"), tl("Ctrl+Maj+S"), "saveas"), Cmd::new(tl("Exporter la page courante en PNG…"), tl("Page · rendu 200 ppp"), "export-page"), Cmd::new(tl("Pivoter les pages à gauche"), tl("Page courante ou sélection"), "rotate-left"), Cmd::new(tl("Pivoter les pages à droite"), tl("Page courante ou sélection"), "rotate-right")];
         let has_doc = self.od.is_some();
         v = v
             .into_iter()

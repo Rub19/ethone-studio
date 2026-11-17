@@ -1,4 +1,5 @@
 use crate::model::{self, Geom, Item, Node};
+use studio_ui::i18n::tl;
 use crate::panels::{preset_card, row_label};
 use crate::{Dlg, Doc, PRESETS, RecolorSt, TraceSt, VectorApp, apply_affine, c32, geom, hsl_adjust, map_colors};
 use eframe::egui::{self, Align, Layout, RichText, Ui};
@@ -17,7 +18,7 @@ fn buttons(ui: &mut Ui, ok: &str) -> (bool, bool) {
     ui.add_space(14.0);
     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
         a = pro::primary(ui, ok).clicked();
-        c = pro::secondary(ui, "Annuler").clicked();
+        c = pro::secondary(ui, tl("Annuler")).clicked();
     });
     (a, c)
 }
@@ -229,12 +230,12 @@ impl VectorApp {
                     }
                 }
                 Dlg::Scale { sx, sy, uniform } => {
-                    ui.checkbox(uniform, "Proportionnelle");
+                    ui.checkbox(uniform, tl("Proportionnelle"));
                     num(ui, if *uniform { "Échelle" } else { "Horizontale" }, sx, 1.0..=5000.0, " %");
                     if !*uniform {
                         num(ui, "Verticale", sy, 1.0..=5000.0, " %");
                     }
-                    ui.checkbox(&mut self.o.scale_strokes, "Mettre à l'échelle les contours et effets");
+                    ui.checkbox(&mut self.o.scale_strokes, tl("Mettre à l'échelle les contours et effets"));
                     ui.horizontal(|ui| {
                         for p in [25.0, 50.0, 150.0, 200.0] {
                             if pro::chip(ui, &format!("{p} %")).clicked() {
@@ -255,7 +256,7 @@ impl VectorApp {
                     });
                 }
                 Dlg::Reflect { axis, angle } => {
-                    pro::segmented(ui, axis, &["Horizontal", "Vertical", "Angle"]);
+                    pro::segmented(ui, axis, &[tl("Horizontal"), tl("Vertical"), tl("Angle")]);
                     if *axis == 2 {
                         num(ui, "Angle de l'axe", angle, -180.0..=180.0, "°");
                     }
@@ -263,7 +264,7 @@ impl VectorApp {
                 Dlg::Shear { deg, vertical } => {
                     num(ui, "Angle d'inclinaison", deg, -80.0..=80.0, "°");
                     let mut v = *vertical as usize;
-                    if pro::segmented(ui, &mut v, &["Axe horizontal", "Axe vertical"]) {
+                    if pro::segmented(ui, &mut v, &[tl("Axe horizontal"), tl("Axe vertical")]) {
                         *vertical = v == 1;
                     }
                 }
@@ -276,11 +277,11 @@ impl VectorApp {
                 }
                 Dlg::Offset { d } => {
                     slide(ui, "Décalage (négatif = vers l'intérieur)", d, -200.0..=200.0, " px");
-                    ui.label(RichText::new("Les angles du résultat sont arrondis.").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("Les angles du résultat sont arrondis.")).size(12.0).color(FAINT));
                 }
                 Dlg::Simplify { tol, smooth } => {
                     slide(ui, "Précision (plus haut = moins de points)", tol, 0.1..=40.0, " px");
-                    ui.checkbox(smooth, "Courbes lisses");
+                    ui.checkbox(smooth, tl("Courbes lisses"));
                     let pts: usize = self.dlg_points(&st.sel, &st.base);
                     let now: usize = st.sel.iter().filter_map(|i| self.doc.items.get(*i)).map(|it| match &it.geom {
                         Geom::Path { nodes, .. } => nodes.len() + it.sub.iter().map(|s| s.len()).sum::<usize>(),
@@ -291,10 +292,10 @@ impl VectorApp {
                 Dlg::Round { r } => slide(ui, "Rayon", r, 0.5..=300.0, " px"),
                 Dlg::Zigzag { size, ridges, smooth } => {
                     slide(ui, "Amplitude", size, 0.5..=200.0, " px");
-                    ui.label(RichText::new("Nombre d'ondes").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Nombre d'ondes")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(ridges, 2..=300));
                     let mut s = *smooth as usize;
-                    if pro::segmented(ui, &mut s, &["Pointes", "Arrondis"]) {
+                    if pro::segmented(ui, &mut s, &[tl("Pointes"), tl("Arrondis")]) {
                         *smooth = s == 1;
                     }
                 }
@@ -302,7 +303,7 @@ impl VectorApp {
                     slide(ui, "Amplitude", size, 0.2..=100.0, " px");
                     slide(ui, "Détail (points par 100 px)", detail, 1.0..=100.0, "");
                     let mut s = *smooth as usize;
-                    if pro::segmented(ui, &mut s, &["Angles", "Arrondis"]) {
+                    if pro::segmented(ui, &mut s, &[tl("Angles"), tl("Arrondis")]) {
                         *smooth = s == 1;
                     }
                 }
@@ -321,9 +322,9 @@ impl VectorApp {
                     });
                 }
                 Dlg::Blend { steps } => {
-                    ui.label(RichText::new("Étapes intermédiaires").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Étapes intermédiaires")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(steps, 1..=100));
-                    ui.label(RichText::new("Formes et couleurs se fondent progressivement.").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("Formes et couleurs se fondent progressivement.")).size(12.0).color(FAINT));
                 }
                 Dlg::Adjust { hue, sat, light } => {
                     slide(ui, "Teinte", hue, -180.0..=180.0, "°");
@@ -338,16 +339,16 @@ impl VectorApp {
                     num(ui, "Décalage X", dx, -5000.0..=5000.0, " px");
                     num(ui, "Décalage Y", dy, -5000.0..=5000.0, " px");
                     num(ui, "Rotation par copie", rot, -360.0..=360.0, "°");
-                    if pro::chip(ui, "Rosace : 12 copies en cercle").clicked() {
+                    if pro::chip(ui, tl("Rosace : 12 copies en cercle")).clicked() {
                         (*n, *dx, *dy, *rot) = (11, 0.0, 0.0, 30.0);
                     }
                 }
             }
             ui.add_space(6.0);
             ui.horizontal(|ui| {
-                ui.checkbox(&mut st.preview, "Aperçu");
+                ui.checkbox(&mut st.preview, tl("Aperçu"));
                 if transform || matches!(st.kind, Dlg::Simplify { .. } | Dlg::Round { .. } | Dlg::Zigzag { .. } | Dlg::Roughen { .. } | Dlg::Pucker { .. } | Dlg::Twist { .. }) {
-                    ui.checkbox(&mut st.copy, "Appliquer sur une copie");
+                    ui.checkbox(&mut st.copy, tl("Appliquer sur une copie"));
                 }
             });
             (ok, cancel) = buttons(ui, "OK");
@@ -395,10 +396,10 @@ impl VectorApp {
         let keep = pro::sheet(ctx, "export", 440.0, |ui| {
             title(ui, "Exporter", "Formats web, impression et fichiers vectoriels");
             ui.spacing_mut().item_spacing.y = 10.0;
-            pro::segmented(ui, &mut o.format, &["PNG", "JPEG", "SVG", "PDF"]);
+            pro::segmented(ui, &mut o.format, &[tl("PNG"), tl("JPEG"), tl("SVG"), tl("PDF")]);
             ui.horizontal(|ui| {
                 row_label(ui, "Contenu", 90.0);
-                pro::segmented(ui, &mut o.scope, &["Plan actif", "Tous les plans", "Sélection"]);
+                pro::segmented(ui, &mut o.scope, &[tl("Plan actif"), tl("Tous les plans"), tl("Sélection")]);
             });
             if o.format <= 1 {
                 ui.horizontal(|ui| {
@@ -419,18 +420,18 @@ impl VectorApp {
             }
             match o.format {
                 0 => {
-                    ui.checkbox(&mut o.transparent, "Fond transparent");
+                    ui.checkbox(&mut o.transparent, tl("Fond transparent"));
                 }
                 1 => {
-                    ui.label(RichText::new("Qualité").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Qualité")).size(12.0).color(MUTED));
                     ui.add(egui::Slider::new(&mut o.quality, 10..=100).suffix(" %"));
                 }
                 2 => {
-                    ui.checkbox(&mut o.minify, "SVG optimisé (nombres arrondis, attributs inutiles retirés)");
-                    ui.label(RichText::new("Texte, dégradés, effets et images intégrés restent modifiables.").size(12.0).color(FAINT));
+                    ui.checkbox(&mut o.minify, tl("SVG optimisé (nombres arrondis, attributs inutiles retirés)"));
+                    ui.label(RichText::new(tl("Texte, dégradés, effets et images intégrés restent modifiables.")).size(12.0).color(FAINT));
                 }
                 _ => {
-                    ui.label(RichText::new("Un PDF vectoriel, une page par plan de travail, texte réel.").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("Un PDF vectoriel, une page par plan de travail, texte réel.")).size(12.0).color(FAINT));
                 }
             }
             (go, cancel) = buttons(ui, "Exporter…");
@@ -469,19 +470,19 @@ impl VectorApp {
                     }
                 }
             });
-            pro::segmented(ui, &mut t.opts.mode, &["Noir et blanc", "Niveaux de gris", "Couleurs"]);
+            pro::segmented(ui, &mut t.opts.mode, &[tl("Noir et blanc"), tl("Niveaux de gris"), tl("Couleurs")]);
             if t.opts.mode == 0 {
                 slide(ui, "Seuil", &mut t.opts.threshold, 1.0..=254.0, "");
             } else {
                 ui.label(RichText::new(if t.opts.mode == 1 { "Niveaux" } else { "Couleurs" }).size(12.0).color(MUTED));
                 ui.add(egui::Slider::new(&mut t.opts.colors, 2..=16));
             }
-            ui.label(RichText::new("Précision").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Précision")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(&mut t.opts.precision, 100..=1200).suffix(" px"));
             slide(ui, "Bruit ignoré", &mut t.opts.noise, 0.0..=200.0, " px²");
             slide(ui, "Courbes (plus haut = plus arrondi)", &mut t.opts.corners, 0.0..=90.0, "°");
-            ui.checkbox(&mut t.opts.ignore_white, "Ignorer le blanc");
-            ui.checkbox(&mut t.keep_image, "Conserver l'image d'origine");
+            ui.checkbox(&mut t.opts.ignore_white, tl("Ignorer le blanc"));
+            ui.checkbox(&mut t.keep_image, tl("Conserver l'image d'origine"));
             (go, cancel) = buttons(ui, "Vectoriser");
         });
         if go {
@@ -550,7 +551,7 @@ impl VectorApp {
                         shift = h;
                     }
                 }
-                if pro::chip(ui, "Réinitialiser").clicked() {
+                if pro::chip(ui, tl("Réinitialiser")).clicked() {
                     for p in &mut st.pairs {
                         p.1 = p.0;
                     }
@@ -625,15 +626,15 @@ impl VectorApp {
                 });
                 ui.add_space(16.0);
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Largeur").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Largeur")).size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut nd.w).range(1.0..=20000.0).suffix(" px"));
-                    ui.label(RichText::new("Hauteur").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Hauteur")).size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut nd.h).range(1.0..=20000.0).suffix(" px"));
-                    if ui.button("⇄ Orientation").clicked() {
+                    if ui.button(tl("⇄ Orientation")).clicked() {
                         std::mem::swap(&mut nd.w, &mut nd.h);
                     }
                     ui.add_space(8.0);
-                    ui.checkbox(&mut nd.transparent, "Fond transparent");
+                    ui.checkbox(&mut nd.transparent, tl("Fond transparent"));
                 });
             });
             let (a, c) = buttons(ui, "Créer");

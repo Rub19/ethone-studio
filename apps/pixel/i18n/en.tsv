@@ -1,0 +1,289 @@
+# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+Avant	
+Après	
+Ouvrir une image…	
+Ctrl+O	
+Exporter…	
+Ctrl+E	
+Comparaison rapide avant / après	
+Affichage	
+Créer un timelapse GIF	
+Fichier	
+Agrandir ×2 (super-résolution)	
+Image	
+Agrandir ×4 (super-résolution)	
+Appliquer des LUT .cube	
+Répéter le dernier filtre	
+Ctrl+Alt+F	
+Répéter la dernière suppression	
+Édition	
+Harmoniser le calque avec le fond	
+Calque	
+Harmoniser à moitié (doux)	
+Retirer le filigrane de la sélection (sans IA)	
+Entoure le filigrane puis lance	
+Retirer le filigrane automatiquement (IA)	
+Vision locale, sinon OCR	
+Filigrane : sensibilité normale	
+Filigranes nets	
+Filigrane : sensibilité haute	
+Filigranes très transparents	
+Supprimer l'arrière-plan (masque de calque)	
+Action rapide	
+Étendre l'image de 10 % (fond reconstruit)	
+Étendre l'image de 25 % (fond reconstruit)	
+Étendre au format carré 1:1	
+Étendre au format paysage 16:9	
+Étendre au format story 9:16	
+Étendre au format 4:5 (Instagram)	
+Inverser la sélection	
+Sélection	
+Désélectionner	
+Ctrl+D	
+Barre de tâches contextuelle (afficher / masquer)	
+Recadrer aux pixels visibles	
+Image · retire les marges transparentes	
+Dupliquer le calque actif	
+Calque · Ctrl+J	
+Fusionner les calques visibles	
+Calques · conserve les calques masqués	
+Aplatir toute l'image	
+Calques · résultat unique	
+Exporter	
+Taille de la zone de travail	
+Ouvrir les fichiers récents	
+Aucun fichier récent	
+Transformation	
+Inclinaison…	
+Perspective…	
+Raccourcis clavier…	
+Préférences…	
+Agrandir (super-résolution)	
+Réglages	
+Rotation de l'image	
+Paramétrée…	
+Nouveau calque de remplissage	
+Nouveau calque de réglage	
+Masque de fusion	
+Disposition	
+Verrouillage	
+Pixels transparents	
+Position	
+Tout	
+Effets de calque	
+Plage de couleurs…	
+Modifier	
+Récupérer la sélection	
+Supprimer	
+Filtre	
+Espace de travail	
+Épreuvage CMJN (aperçu impression)	
+Profil d'épreuvage	
+Autre profil (.icc)…	
+Zoom prédéfini	
+Rotation de la vue	
+Règles (Ctrl+R)	
+Grille (Ctrl+')	
+Grille de pixels (à partir de 1000 %)	
+Repères (Ctrl+;)	
+Verrouiller les repères (Ctrl+Alt+;)	
+Magnétisme (Ctrl+Maj+;)	
+Nouveau repère…	
+Repères au centre	
+Repères aux tiers	
+Pas de la grille	
+Subdivisions	
+Couleur	
+Barre de tâches contextuelle	
+Nouveau fichier	
+Ouvrir…	
+Depuis le presse-papiers	
+Bienvenue dans Pixel	
+Retouche photo et compositing par calques	
+Créer un document	
+Récents	
+Masque en cours de modification	
+Texte de la photo	
+Nuancier	
+Pinceaux	
+Propriétés	
+Infos	
+Historique	
+Calques	
+RVB	
+TSL	
+CMJN	
+Web	
+Arrondit à la couleur sûre pour le Web la plus proche	
+Clic : principale · Ctrl+clic : secondaire · clic droit : options	
+Définir comme couleur principale	
+Définir comme couleur secondaire	
+Supprimer la nuance	
+Ajouter la couleur principale	
+Prendre cette couleur	
+Document	
+Peindre sans modifier la transparence	
+Désactivé	
+Inverser	
+Navigateur	
+Luminosité	
+Rouge	
+Vert	
+Bleu	
+Survole l'image pour lire la couleur	
+Instantané	
+Source de la forme d'historique	
+Vider l'historique	
+Clic : modifier le masque	
+Afficher ou masquer (Alt : isoler)	
+Verrouiller le calque	
+Renommer	
+Dupliquer	
+Sélectionner les pixels	
+Couleur de l'étiquette	
+Mode de fusion	
+Aucune langue OCR installée dans Windows	
+Dans la sélection	
+Cadres	
+Détecter le texte	
+Options de lecture	
+Agrandir les petites images (petits caractères)	
+Seulement dans la sélection	
+Afficher les cadres sur l'image	
+Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.	
+Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place	
+Supprime le texte des lignes cochées	
+Mosaïque sur les lignes cochées (plaques, adresses, noms…)	
+Sélectionner	
+Crée une sélection autour des lignes cochées	
+Tout cocher	
+Rien	
+Copier le texte	
+Enregistrer .txt…	
+Oublier	
+Rechercher et remplacer	
+Rechercher	
+Remplacer par	
+Respecter la casse	
+Rendu du nouveau texte	
+G	
+Gras	
+I	
+Italique	
+Couleur d'origine	
+Taille	
+Tenir dans la largeur d'origine	
+Un calque par ligne (déplaçable)	
+Effacement	
+Marge	
+Mosaïque	
+Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	
+Annuler	
+Relative (ajoute à la taille actuelle)	
+Pixels	
+Pourcentage	
+Conserver les proportions	
+Lier	
+Pixels nets (plus proche voisin)	
+Symétrie H	
+Symétrie V	
+Réinitialiser	
+Intérieur	
+Centre	
+Extérieur	
+L'effet est créé sur un calque séparé, modifiable et masquable.	
+La sélection obtenue est progressive : les pixels proches sont pris en partie.	
+PNG	
+JPEG	
+WebP	
+BMP	
+TIFF	
+GIF	
+ICO	
+Rapide	
+Normale	
+Maximale	
+La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.	
+Horizontal	
+Vertical	
+Note pour plus tard (non exportée)	
+Grille de pixels aux forts zooms	
+Magnétisme	
+Nouveau document	
+Préréglages	
+Détails	
+Paysage	
+Portrait	
+Créer	
+Supprimer le préréglage	
+Aperçu	
+Nom du préréglage	
+Ton texte	
+S	
+Gauche	
+Droite	
+Couleur principale · nouveau calque de texte	
+Couleurs principale et secondaire Clic : inverser (X) · D : noir et blanc	
+Nouvelle	
+Ajouter	
+Soustraire	
+Intersection	
+Dureté	
+Lissage	
+Symétrie	
+Répète chaque trait en miroir vertical	
+Miroir H	
+Répète chaque trait en miroir horizontal	
+Humidité	
+Effacer vers l'historique	
+Restaure l'état de l'instantané au lieu de rendre transparent	
+Tolérance	
+Échantillonnage continu	
+Mémorise le calque actif comme source	
+Désaturer	
+Saturer	
+Tons foncés	
+Tons moyens	
+Tons clairs	
+Peinture au doigt	
+Commence chaque trait avec la couleur principale	
+Aligné	
+Tous les calques	
+Contiguë	
+Contour progressif	
+Largeur	
+Valider	
+Fond	
+Contour	
+Contour avec la couleur secondaire quand le fond est actif	
+Épaisseur	
+Arrondi	
+Côtés	
+Étoile	
+Retrait	
+Flèche au début	
+Flèche à la fin	
+Nouveau calque	
+Souligné	
+Linéaire	
+Radial	
+Angulaire	
+Réfléchi	
+Losange	
+Opacité	
+Tramage	
+Contigu	
+Sélection automatique	
+Le clic choisit le calque visible sous le pointeur	
+Cadre de sélection	
+Zoom avant	
+Zoom arrière	
+Réinitialiser la vue	
+Ajuster à l'écran	
+Effacer	
+Redresser le calque	
+Tout effacer	
+Diffusion	
+Taille de la pupille	
+Assombrir	
+Remettre à zéro	

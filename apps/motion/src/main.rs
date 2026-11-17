@@ -20,6 +20,7 @@ use eframe::egui::{
     pos2, vec2,
 };
 use export::ExportOpts;
+use studio_ui::i18n::tl;
 use model::{BLENDS, Comp, Content, Ease, Ease2, Layer, MATTES, Marker, PROPS, Prop};
 use viewer::{Tool, ToolOpts, VDrag};
 use resvg::{tiny_skia, usvg};
@@ -266,6 +267,7 @@ fn demo_comp(w: u32, h: u32) -> Comp {
 impl Motion {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         let mut db = usvg::fontdb::Database::new();
         db.load_system_fonts();
         let comp = demo_comp(1920, 1080);
@@ -1468,13 +1470,13 @@ impl Motion {
         for (step, name) in [(0.1, "0,1 s"), (0.25, "0,25 s"), (0.5, "0,5 s"), (1.0, "1 s")] {
             v.push(studio_ui::palette::Cmd::new(format!("Calques en cascade : {name} d'écart"), "Composition", format!("cascade:{step}")));
         }
-        v.push(studio_ui::palette::Cmd::new("Aligner tous les calques au même départ", "Composition", "cascade:0"));
-        v.push(studio_ui::palette::Cmd::new("Inverser les images clés du calque", "Animation · plage des clés", "keys-reverse").enabled_if(has_layer, "Sélectionne d'abord un calque"));
-        v.push(studio_ui::palette::Cmd::new("Répartir régulièrement les images clés", "Animation · calque sélectionné", "keys-spread").enabled_if(has_layer, "Sélectionne d'abord un calque"));
-        v.push(studio_ui::palette::Cmd::new("Ajuster le calque à la composition", "Calque sélectionné · contenir", "fit-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
-        v.push(studio_ui::palette::Cmd::new("Adapter la durée aux calques", "Composition · fin du dernier calque", "duration-layers"));
-        v.push(studio_ui::palette::Cmd::new("Fractionner le calque à la tête", "Calque sélectionné · Ctrl+Maj+D", "split-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
-        v.push(studio_ui::palette::Cmd::new("Dupliquer le calque", "Calque sélectionné · Ctrl+D", "duplicate-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new(tl("Aligner tous les calques au même départ"), tl("Composition"), "cascade:0"));
+        v.push(studio_ui::palette::Cmd::new(tl("Inverser les images clés du calque"), tl("Animation · plage des clés"), "keys-reverse").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new(tl("Répartir régulièrement les images clés"), tl("Animation · calque sélectionné"), "keys-spread").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new(tl("Ajuster le calque à la composition"), tl("Calque sélectionné · contenir"), "fit-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new(tl("Adapter la durée aux calques"), tl("Composition · fin du dernier calque"), "duration-layers"));
+        v.push(studio_ui::palette::Cmd::new(tl("Fractionner le calque à la tête"), tl("Calque sélectionné · Ctrl+Maj+D"), "split-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
+        v.push(studio_ui::palette::Cmd::new(tl("Dupliquer le calque"), tl("Calque sélectionné · Ctrl+D"), "duplicate-layer").enabled_if(has_layer, "Sélectionne d'abord un calque"));
         for (k, name) in model::ANIM_PRESETS.iter().enumerate() {
             v.push(studio_ui::palette::Cmd::new(format!("Animer : {name}"), "Calque sélectionné", format!("anim:{k}")).enabled_if(has_layer, "Sélectionne d'abord un calque"));
         }
@@ -1693,12 +1695,12 @@ impl Motion {
                                 let d = j.done.load(Ordering::Relaxed);
                                 ui.add(egui::ProgressBar::new(d as f32 / j.total.max(1) as f32).desired_width(150.0).corner_radius(CornerRadius::same(6)).text(format!("{} {}%", j.label, d * 100 / j.total.max(1))));
                             }
-                        } else if pro::primary_icon(ui, "Exporter", |p, r, c| glyph(p, r, G::Export, c)).on_hover_text("MP4, GIF, PNG ou SVG · Ctrl+M").clicked() {
+                        } else if pro::primary_icon(ui, tl("Exporter"), |p, r, c| glyph(p, r, G::Export, c)).on_hover_text(tl("MP4, GIF, PNG ou SVG · Ctrl+M")).clicked() {
                             self.export = Some(self.default_export());
                         }
                         ui.add_space(4.0);
                         let fps = self.comp.fps;
-                        if pro::chip(ui, &format!("{} × {} · {} i/s · {}", self.comp.width, self.comp.height, fps, secs(self.comp.duration))).on_hover_text("Réglages de la composition · Ctrl+K").clicked() {
+                        if pro::chip(ui, &format!("{} × {} · {} i/s · {}", self.comp.width, self.comp.height, fps, secs(self.comp.duration))).on_hover_text(tl("Réglages de la composition · Ctrl+K")).clicked() {
                             self.comp_sheet = true;
                         }
                     });
@@ -1736,11 +1738,11 @@ impl Motion {
 
     fn home_screen(&mut self, root: &mut Ui) {
         egui::Panel::left("home-nav").exact_size(230.0).resizable(false).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(18, 26))).show(root, |ui| {
-            if pro::primary(ui, "Nouvelle composition").clicked() {
+            if pro::primary(ui, tl("Nouvelle composition")).clicked() {
                 self.set_comp(demo_comp(1920, 1080), None);
             }
             ui.add_space(8.0);
-            if pro::secondary(ui, "Ouvrir…").clicked() {
+            if pro::secondary(ui, tl("Ouvrir…")).clicked() {
                 self.open();
             }
         });
@@ -1750,12 +1752,12 @@ impl Motion {
                     ui.add(egui::Image::new((self.icon.id(), Vec2::splat(40.0))));
                     ui.add_space(8.0);
                     ui.vertical(|ui| {
-                        ui.label(RichText::new("Bienvenue dans Motion").font(semibold(28.0)).color(INK_STRONG));
-                        ui.label(RichText::new("Titres animés, logos et graphismes en mouvement").color(MUTED));
+                        ui.label(RichText::new(tl("Bienvenue dans Motion")).font(semibold(28.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("Titres animés, logos et graphismes en mouvement")).color(MUTED));
                     });
                 });
                 ui.add_space(28.0);
-                ui.label(RichText::new("Nouvelle composition").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Nouvelle composition")).font(semibold(16.0)).color(INK));
                 ui.add_space(12.0);
                 let mut chosen = None;
                 ui.horizontal_wrapped(|ui| {
@@ -1770,7 +1772,7 @@ impl Motion {
                     self.set_comp(demo_comp(w, h), None);
                 }
                 ui.add_space(26.0);
-                ui.label(RichText::new("Projets récents").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Projets récents")).font(semibold(16.0)).color(INK));
                 ui.add_space(10.0);
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 100.0), Sense::hover());
@@ -1805,7 +1807,7 @@ impl Motion {
             egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 ui.spacing_mut().item_spacing.y = 0.0;
                 studio_ui::dock::begin(ui, "motion");
-                pro::dock_panel(ui, "add", "Ajouter un calque", |ui| {
+                pro::dock_panel(ui, "add", tl("Ajouter un calque"), |ui| {
                     ui.spacing_mut().item_spacing = vec2(2.0, 2.0);
                     let w = (ui.available_width() - 6.0) / 4.0;
                     for row in KINDS.chunks(4) {
@@ -1823,7 +1825,7 @@ impl Motion {
                         });
                     }
                 });
-                pro::dock_panel(ui, "templates", "Modèles", |ui| {
+                pro::dock_panel(ui, "templates", tl("Modèles"), |ui| {
                     ui.spacing_mut().item_spacing.y = 4.0;
                     let mut pick = None;
                     for (k, (name, hint)) in TEMPLATES.iter().enumerate() {
@@ -1836,7 +1838,7 @@ impl Motion {
                         p.rect(ic, CornerRadius::same(2), LABELS[k % LABELS.len()].gamma_multiply(0.35), Stroke::new(1.2, LABELS[k % LABELS.len()]), StrokeKind::Inside);
                         p.text(r.left_top() + vec2(30.0, 5.0), Align2::LEFT_TOP, *name, FontId::proportional(12.0), INK);
                         p.text(r.left_top() + vec2(30.0, 20.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
-                        if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text("Ajouté à la tête de lecture").clicked() {
+                        if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text(tl("Ajouté à la tête de lecture")).clicked() {
                             pick = Some(k);
                         }
                     }
@@ -1844,13 +1846,13 @@ impl Motion {
                         self.template(k);
                     }
                 });
-                pro::dock_panel(ui, "anims", "Animations prêtes", |ui| {
+                pro::dock_panel(ui, "anims", tl("Animations prêtes"), |ui| {
                     ui.spacing_mut().item_spacing.y = 4.0;
-                    ui.add(egui::TextEdit::singleline(&mut self.anim_query).hint_text("Rechercher une animation").desired_width(f32::INFINITY));
+                    ui.add(egui::TextEdit::singleline(&mut self.anim_query).hint_text(tl("Rechercher une animation")).desired_width(f32::INFINITY));
                     ui.add_space(4.0);
                     let enabled = self.sel.is_some();
                     if !enabled {
-                        ui.label(RichText::new("Sélectionne un calque pour lui appliquer une animation.").size(12.0).color(FAINT));
+                        ui.label(RichText::new(tl("Sélectionne un calque pour lui appliquer une animation.")).size(12.0).color(FAINT));
                     }
                     let q = self.anim_query.to_lowercase();
                     let mut pick = None;
@@ -1870,7 +1872,7 @@ impl Motion {
                             diamond(p, r.left_center() + vec2(12.0, 0.0), 4.5, if enabled { KEY } else { FAINT });
                             p.text(r.left_top() + vec2(26.0, 4.0), Align2::LEFT_TOP, *name, FontId::proportional(12.5), if enabled { INK } else { FAINT });
                             p.text(r.left_top() + vec2(26.0, 21.0), Align2::LEFT_TOP, *hint, FontId::proportional(11.0), FAINT);
-                            if resp.on_hover_text("Ajoutée à partir de la tête de lecture").clicked() && enabled {
+                            if resp.on_hover_text(tl("Ajoutée à partir de la tête de lecture")).clicked() && enabled {
                                 pick = Some(*id);
                             }
                         }
@@ -1904,9 +1906,9 @@ impl Motion {
         if self.comp_sheet {
             let mut done = false;
             let keep = pro::sheet(ctx, "comp", 470.0, |ui| {
-                ui.label(RichText::new("Réglages de la composition").font(semibold(18.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Réglages de la composition")).font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
-                ui.label(RichText::new("Format").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Format")).size(12.0).color(MUTED));
                 ui.horizontal_wrapped(|ui| {
                     for (name, _, w, h) in PRESETS {
                         let on = self.comp.width == w && self.comp.height == h;
@@ -1920,12 +1922,12 @@ impl Motion {
                     ui.add(egui::DragValue::new(&mut self.comp.width).range(16..=7680).prefix("L ").suffix(" px"));
                     ui.label(RichText::new("×").color(MUTED));
                     ui.add(egui::DragValue::new(&mut self.comp.height).range(16..=4320).prefix("H ").suffix(" px"));
-                    if ui.small_button("⇄").on_hover_text("Inverser largeur et hauteur").clicked() {
+                    if ui.small_button("⇄").on_hover_text(tl("Inverser largeur et hauteur")).clicked() {
                         std::mem::swap(&mut self.comp.width, &mut self.comp.height);
                     }
                 });
                 ui.add_space(8.0);
-                ui.label(RichText::new("Images par seconde").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Images par seconde")).size(12.0).color(MUTED));
                 ui.horizontal(|ui| {
                     for f in FPS_CHOICES {
                         if ui.selectable_label(self.comp.fps == f, f.to_string()).clicked() {
@@ -1936,9 +1938,9 @@ impl Motion {
                 });
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Durée").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Durée")).size(12.0).color(MUTED));
                     ui.add(egui::DragValue::new(&mut self.comp.duration).range(0.1..=600.0).speed(0.1).suffix(" s"));
-                    if ui.button("Ajuster à l'animation").clicked() {
+                    if ui.button(tl("Ajuster à l'animation")).clicked() {
                         self.fit_duration();
                     }
                 });
@@ -1946,7 +1948,7 @@ impl Motion {
                 bg_editor(ui, &mut self.comp);
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Terminé").clicked() {
+                    if pro::primary(ui, tl("Terminé")).clicked() {
                         done = true;
                     }
                 });
@@ -1963,7 +1965,7 @@ impl Motion {
             let head = Rect::from_min_size(full.min, vec2(full.width(), 38.0));
             ui.scope_builder(egui::UiBuilder::new().max_rect(head.shrink2(vec2(12.0, 4.0))), |ui| {
                 ui.horizontal_centered(|ui| {
-                    ui.label(RichText::new("Timeline").font(semibold(12.5)).color(INK));
+                    ui.label(RichText::new(tl("Timeline")).font(semibold(12.5)).color(INK));
                     ui.add_space(10.0);
                     if pro::icon_button(ui, 28.0, false, "Ajouter un repère (M)", |p, r, c| glyph(p, r, G::Marker, c)).clicked() {
                         self.add_marker();
@@ -1972,22 +1974,22 @@ impl Motion {
                         self.snap = !self.snap;
                     }
                     pro::toolbar_sep(ui);
-                    if ui.small_button("[ Début zone").on_hover_text("B").clicked() {
+                    if ui.small_button(tl("[ Début zone")).on_hover_text(tl("B")).clicked() {
                         self.set_work(true);
                     }
-                    if ui.small_button("Fin zone ]").on_hover_text("N").clicked() {
+                    if ui.small_button(tl("Fin zone ]")).on_hover_text(tl("N")).clicked() {
                         self.set_work(false);
                     }
-                    if self.comp.work.is_some() && ui.small_button("×").on_hover_text("Effacer la zone de travail").clicked() {
+                    if self.comp.work.is_some() && ui.small_button("×").on_hover_text(tl("Effacer la zone de travail")).clicked() {
                         self.comp.work = None;
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.small_button("Ajuster").on_hover_text("Toute la durée visible").clicked() {
+                        if ui.small_button(tl("Ajuster")).on_hover_text(tl("Toute la durée visible")).clicked() {
                             self.pps = ((ui.max_rect().width() + 300.0) / self.comp.duration.max(0.1)).clamp(30.0, 800.0);
                         }
                         ui.spacing_mut().slider_width = 130.0;
                         ui.add(egui::Slider::new(&mut self.pps, 30.0..=800.0).logarithmic(true).show_value(false));
-                        ui.label(RichText::new("Zoom").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Zoom")).size(12.0).color(MUTED));
                     });
                 });
             });
@@ -2041,18 +2043,18 @@ impl Motion {
         }
         let ruler_t = r.hover_pos().map(|pp| t_of(pp.x));
         r.context_menu(|ui| {
-            if ui.button("Ajouter un repère ici").clicked() {
+            if ui.button(tl("Ajouter un repère ici")).clicked() {
                 if let Some(t) = ruler_t {
                     self.t = self.snap_frame(t);
                 }
                 self.add_marker();
                 ui.close();
             }
-            if ui.button("Début de zone à la tête").clicked() {
+            if ui.button(tl("Début de zone à la tête")).clicked() {
                 self.set_work(true);
                 ui.close();
             }
-            if ui.button("Fin de zone à la tête").clicked() {
+            if ui.button(tl("Fin de zone à la tête")).clicked() {
                 self.set_work(false);
                 ui.close();
             }
@@ -2071,7 +2073,7 @@ impl Motion {
                 self.t = m.t;
             }
             mr.context_menu(|ui| {
-                if ui.button("Supprimer ce repère").clicked() {
+                if ui.button(tl("Supprimer ce repère")).clicked() {
                     drop_marker = Some(mi);
                     ui.close();
                 }
@@ -2243,7 +2245,7 @@ impl Motion {
                                     ui.close();
                                 }
                             }
-                            ui.menu_button("Autres courbes", |ui| {
+                            ui.menu_button(tl("Autres courbes"), |ui| {
                                 for (e, n) in Ease2::ALL {
                                     if ui.selectable_label(key.ease2 == e && key.bez.is_none(), n).clicked() {
                                         self.with_keys(|k| k.set_ease2(e));
@@ -2259,24 +2261,24 @@ impl Motion {
                                 }
                             });
                             ui.separator();
-                            if ui.button("Courbe douce (F9)").clicked() {
+                            if ui.button(tl("Courbe douce (F9)")).clicked() {
                                 self.easy_ease(0);
                                 ui.close();
                             }
-                            if ui.button("Éditer la courbe…").clicked() {
+                            if ui.button(tl("Éditer la courbe…")).clicked() {
                                 self.gkey = Some((li, pi, ki));
                                 self.sel = Some(li);
                                 ui.close();
                             }
-                            if ui.button("Copier (Ctrl+C)").clicked() {
+                            if ui.button(tl("Copier (Ctrl+C)")).clicked() {
                                 self.copy_keys();
                                 ui.close();
                             }
-                            if ui.button("Sélectionner toute la propriété").clicked() {
+                            if ui.button(tl("Sélectionner toute la propriété")).clicked() {
                                 self.ksel = keys.iter().map(|k| (li, pi, k.t)).collect();
                                 ui.close();
                             }
-                            if ui.button("Supprimer (Suppr)").clicked() {
+                            if ui.button(tl("Supprimer (Suppr)")).clicked() {
                                 self.delete_keys();
                                 ui.close();
                             }
@@ -2350,15 +2352,15 @@ impl Motion {
     }
 
     fn layer_menu(&mut self, ui: &mut Ui, li: usize) {
-        if ui.button("Dupliquer").clicked() {
+        if ui.button(tl("Dupliquer")).clicked() {
             self.duplicate();
             ui.close();
         }
-        if ui.button("Fractionner à la tête").clicked() {
+        if ui.button(tl("Fractionner à la tête")).clicked() {
             self.split();
             ui.close();
         }
-        if ui.button("Copier l'animation").clicked() {
+        if ui.button(tl("Copier l'animation")).clicked() {
             self.copy_anim();
             ui.close();
         }
@@ -2367,15 +2369,15 @@ impl Motion {
             ui.close();
         }
         ui.separator();
-        if ui.button("Premier plan").clicked() {
+        if ui.button(tl("Premier plan")).clicked() {
             self.move_layer(li, self.comp.layers.len() - 1);
             ui.close();
         }
-        if ui.button("Arrière-plan").clicked() {
+        if ui.button(tl("Arrière-plan")).clicked() {
             self.move_layer(li, 0);
             ui.close();
         }
-        ui.menu_button("Couleur d'étiquette", |ui| {
+        ui.menu_button(tl("Couleur d'étiquette"), |ui| {
             for (k, n) in ["Bleu", "Rose", "Vert", "Orange", "Violet", "Cyan"].iter().enumerate() {
                 if ui.button(*n).clicked() {
                     self.comp.layers[li].label = Some(k as u8);
@@ -2384,7 +2386,7 @@ impl Motion {
             }
         });
         ui.separator();
-        if ui.button("Supprimer").clicked() {
+        if ui.button(tl("Supprimer")).clicked() {
             self.sel = Some(li);
             self.delete();
             ui.close();
@@ -2456,13 +2458,13 @@ fn ease_combo(ui: &mut Ui, id: (&str, usize), k: &mut model::Key) {
 fn bg_editor(ui: &mut Ui, comp: &mut Comp) {
     let mut bg = Color32::from_rgba_unmultiplied(comp.background[0], comp.background[1], comp.background[2], comp.background[3]);
     ui.horizontal(|ui| {
-        ui.label(RichText::new("Fond").size(12.0).color(MUTED));
+        ui.label(RichText::new(tl("Fond")).size(12.0).color(MUTED));
         pro::color_swatch(ui, &mut bg);
     });
     comp.background = bg.to_srgba_unmultiplied();
     let mut grad = comp.background2.is_some();
     ui.horizontal(|ui| {
-        if ui.checkbox(&mut grad, "Dégradé vers le bas").changed() {
+        if ui.checkbox(&mut grad, tl("Dégradé vers le bas")).changed() {
             comp.background2 = grad.then_some([60, 20, 90, 255]);
         }
         if let Some(c) = &mut comp.background2 {
@@ -2475,7 +2477,7 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
     match content {
         Content::Rect { w, h, r, color } => {
             size_row(ui, w, h);
-            ui.label(RichText::new("Arrondi").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Arrondi")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(r, 0.0..=w.min(*h) / 2.0));
             color_row(ui, color);
         }
@@ -2488,8 +2490,8 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             if focus {
                 te.request_focus();
             }
-            ui.checkbox(vertical, "Texte vertical");
-            ui.label(RichText::new("Taille").size(12.0).color(MUTED));
+            ui.checkbox(vertical, tl("Texte vertical"));
+            ui.label(RichText::new(tl("Taille")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
             egui::ComboBox::from_id_salt("font").selected_text(family.as_str()).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for f in FONTS {
@@ -2497,15 +2499,15 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
                 }
             });
             ui.horizontal(|ui| {
-                ui.checkbox(bold, "Gras");
-                ui.checkbox(italic, "Italique");
+                ui.checkbox(bold, tl("Gras"));
+                ui.checkbox(italic, tl("Italique"));
             });
-            ui.label(RichText::new("Alignement sur le point").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Alignement sur le point")).size(12.0).color(MUTED));
             let mut a = *align as usize;
-            if pro::segmented(ui, &mut a, &["Centre", "Gauche", "Droite"]) {
+            if pro::segmented(ui, &mut a, &[tl("Centre"), tl("Gauche"), tl("Droite")]) {
                 *align = a as u8;
             }
-            ui.label(RichText::new("Espacement des lettres").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Espacement des lettres")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(tracking, -20.0..=120.0).suffix(" px"));
             color_row(ui, color);
         }
@@ -2515,63 +2517,63 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
         }
         Content::Star { points, radius, inner, color } => {
             ui.add(egui::DragValue::new(points).range(3..=24).prefix("Branches "));
-            ui.label(RichText::new("Rayon").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Rayon")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(radius, 4.0..=2000.0).logarithmic(true));
-            ui.label(RichText::new("Creux (1 = polygone)").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Creux (1 = polygone)")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(inner, 0.1..=1.0));
             color_row(ui, color);
         }
         Content::Line { w, thickness, color } | Content::Arrow { w, thickness, color } => {
-            ui.label(RichText::new("Longueur").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Longueur")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(w, 4.0..=4000.0).logarithmic(true));
-            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Épaisseur")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(thickness, 1.0..=200.0));
             color_row(ui, color);
         }
         Content::Ring { radius, thickness, color } => {
-            ui.label(RichText::new("Rayon").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Rayon")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(radius, 4.0..=2000.0).logarithmic(true));
-            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Épaisseur")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(thickness, 1.0..=300.0));
-            studio_ui::pro::tip(ui, "Révélation % = longueur de l'arc : anime-la pour une jauge.");
+            studio_ui::pro::tip(ui, tl("Révélation % = longueur de l'arc : anime-la pour une jauge."));
             color_row(ui, color);
         }
         Content::Counter { from, to, decimals, size, color, prefix, suffix } => {
             ui.horizontal(|ui| {
-                ui.label(RichText::new("De").color(MUTED));
+                ui.label(RichText::new(tl("De")).color(MUTED));
                 ui.add(egui::DragValue::new(from).speed(1.0));
                 ui.label(RichText::new("à").color(MUTED));
                 ui.add(egui::DragValue::new(to).speed(1.0));
             });
             ui.add(egui::DragValue::new(decimals).range(0..=3).prefix("Décimales "));
-            ui.label(RichText::new("Taille").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Taille")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(size, 8.0..=600.0).logarithmic(true));
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Avant").color(MUTED));
+                ui.label(RichText::new(tl("Avant")).color(MUTED));
                 ui.add(egui::TextEdit::singleline(prefix).desired_width(60.0));
-                ui.label(RichText::new("Après").color(MUTED));
+                ui.label(RichText::new(tl("Après")).color(MUTED));
                 ui.add(egui::TextEdit::singleline(suffix).desired_width(60.0));
             });
             color_row(ui, color);
-            ui.label(RichText::new("Compte pendant 80 % de la durée du calque").size(12.0).color(FAINT));
+            ui.label(RichText::new(tl("Compte pendant 80 % de la durée du calque")).size(12.0).color(FAINT));
         }
         Content::Path { pts, closed, color, fill } => {
             ui.label(RichText::new(format!("{} sommets · outil Plume (G) pour éditer", pts.len())).size(12.0).color(FAINT));
             ui.horizontal(|ui| {
-                ui.checkbox(closed, "Tracé fermé");
-                ui.checkbox(fill, "Remplir");
+                ui.checkbox(closed, tl("Tracé fermé"));
+                ui.checkbox(fill, tl("Remplir"));
             });
             ui.horizontal(|ui| {
-                if ui.small_button("Tout lisser").clicked() {
+                if ui.small_button(tl("Tout lisser")).clicked() {
                     smooth_all(pts, *closed);
                 }
-                if ui.small_button("Tout en angles").clicked() {
+                if ui.small_button(tl("Tout en angles")).clicked() {
                     for v in pts.iter_mut() {
                         v.i = [0.0; 2];
                         v.o = [0.0; 2];
                     }
                 }
-                if ui.small_button("Inverser").clicked() {
+                if ui.small_button(tl("Inverser")).clicked() {
                     pts.reverse();
                     for v in pts.iter_mut() {
                         std::mem::swap(&mut v.i, &mut v.o);
@@ -2581,12 +2583,12 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             if *fill {
                 color_row(ui, color);
             } else {
-                ui.label(RichText::new("Sans remplissage : règle le contour dans Apparence.").size(11.5).color(FAINT));
+                ui.label(RichText::new(tl("Sans remplissage : règle le contour dans Apparence.")).size(11.5).color(FAINT));
             }
         }
         Content::Strokes { strokes, width, color } => {
             ui.label(RichText::new(format!("{} traits · Pinceau (Ctrl+B) pour peindre, Gomme pour effacer", strokes.len())).size(12.0).color(FAINT));
-            ui.label(RichText::new("Épaisseur").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Épaisseur")).size(12.0).color(MUTED));
             ui.add(egui::Slider::new(width, 0.5..=200.0).logarithmic(true).suffix(" px"));
             ui.horizontal(|ui| {
                 if ui.add_enabled(!strokes.is_empty(), egui::Button::new("Annuler le dernier trait").small()).clicked() {
@@ -2599,11 +2601,11 @@ fn content_editor(ui: &mut Ui, content: &mut Content, focus: bool) {
             color_row(ui, color);
         }
         Content::Null => {
-            ui.label(RichText::new("Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.").size(12.0).color(FAINT));
+            ui.label(RichText::new(tl("Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.")).size(12.0).color(FAINT));
         }
         Content::Adjust { w, h } => {
             size_row(ui, w, h);
-            ui.label(RichText::new("Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.").size(12.0).color(FAINT));
+            ui.label(RichText::new(tl("Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.")).size(12.0).color(FAINT));
         }
     }
 }
@@ -2898,9 +2900,9 @@ fn transport_glyph(p: &Painter, c: Pos2, kind: u8, playing: bool, color: Color32
 
 fn size_row(ui: &mut Ui, w: &mut f32, h: &mut f32) {
     ui.horizontal(|ui| {
-        ui.label(RichText::new("L").color(MUTED));
+        ui.label(RichText::new(tl("L")).color(MUTED));
         ui.add(egui::DragValue::new(w).range(1.0..=10000.0).suffix(" px"));
-        ui.label(RichText::new("H").color(MUTED));
+        ui.label(RichText::new(tl("H")).color(MUTED));
         ui.add(egui::DragValue::new(h).range(1.0..=10000.0).suffix(" px"));
     });
 }
@@ -2908,7 +2910,7 @@ fn size_row(ui: &mut Ui, w: &mut f32, h: &mut f32) {
 fn color_row(ui: &mut Ui, c: &mut [u8; 4]) {
     let mut col = Color32::from_rgba_unmultiplied(c[0], c[1], c[2], c[3]);
     ui.horizontal(|ui| {
-        ui.label(RichText::new("Couleur").size(12.0).color(MUTED));
+        ui.label(RichText::new(tl("Couleur")).size(12.0).color(MUTED));
         pro::color_swatch(ui, &mut col);
     });
     *c = col.to_srgba_unmultiplied();

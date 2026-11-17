@@ -1,4 +1,5 @@
 use super::*;
+use studio_ui::i18n::tl;
 use serde_json::{Value, json};
 
 pub const FORMATS: [(&str, &str); 8] = [
@@ -377,7 +378,7 @@ impl Motion {
                 ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                 glyph(ui.painter(), r.shrink(9.0), G::Export, BLUE);
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Exporter l'animation").font(semibold(18.0)).color(INK_STRONG));
+                    ui.label(RichText::new(tl("Exporter l'animation")).font(semibold(18.0)).color(INK_STRONG));
                     ui.label(RichText::new(FORMATS[o.format].1).size(12.0).color(MUTED));
                 });
             });
@@ -414,7 +415,7 @@ impl Motion {
             if matches!(o.format, 0 | 1 | 2 | 5 | 6) {
                 row(ui, "Plage");
                 let has_work = self.comp.work.is_some();
-                pro::segmented(ui, &mut o.range, &["Toute la composition", "Zone de travail", "Personnalisée"]);
+                pro::segmented(ui, &mut o.range, &[tl("Toute la composition"), tl("Zone de travail"), tl("Personnalisée")]);
                 if o.range == 1 && !has_work {
                     o.range = 0;
                 }
@@ -423,10 +424,10 @@ impl Motion {
                     ui.horizontal(|ui| {
                         ui.add(egui::DragValue::new(&mut o.from_f).range(0..=max).prefix("De l'image "));
                         ui.add(egui::DragValue::new(&mut o.to_f).range(0..=max).prefix("à "));
-                        if ui.small_button("Tête → début").clicked() {
+                        if ui.small_button(tl("Tête → début")).clicked() {
                             o.from_f = (self.t * self.comp.fps as f32).round() as u32;
                         }
-                        if ui.small_button("Tête → fin").clicked() {
+                        if ui.small_button(tl("Tête → fin")).clicked() {
                             o.to_f = (self.t * self.comp.fps as f32).round() as u32;
                         }
                     });
@@ -456,7 +457,7 @@ impl Motion {
                 }
                 2 | 5 => {
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Préfixe").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Préfixe")).size(12.0).color(MUTED));
                         ui.add(egui::TextEdit::singleline(&mut o.prefix).desired_width(110.0));
                         ui.add(egui::DragValue::new(&mut o.start_no).range(0..=99999).prefix("Premier n° "));
                         ui.add(egui::DragValue::new(&mut o.step).range(1..=30).prefix("Une image sur "));
@@ -470,13 +471,13 @@ impl Motion {
                     });
                 }
                 7 => {
-                    ui.label(RichText::new("Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.").size(11.5).color(FAINT));
+                    ui.label(RichText::new(tl("Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.")).size(11.5).color(FAINT));
                 }
                 _ => {}
             }
             ui.add_space(6.0);
             if matches!(o.format, 1 | 2 | 3 | 4 | 5 | 6) {
-                ui.checkbox(&mut o.transparent, "Fond transparent");
+                ui.checkbox(&mut o.transparent, tl("Fond transparent"));
             } else {
                 o.transparent = false;
             }
@@ -487,13 +488,13 @@ impl Motion {
             }
             ui.add_space(14.0);
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if pro::primary(ui, "Exporter…").clicked() {
+                if pro::primary(ui, tl("Exporter…")).clicked() {
                     go = true;
                 }
-                if pro::secondary(ui, "Ajouter à la file").on_hover_text("Ctrl+Alt+M ouvre la file de rendu").clicked() {
+                if pro::secondary(ui, tl("Ajouter à la file")).on_hover_text(tl("Ctrl+Alt+M ouvre la file de rendu")).clicked() {
                     enqueue = true;
                 }
-                if pro::secondary(ui, "Annuler").clicked() {
+                if pro::secondary(ui, tl("Annuler")).clicked() {
                     cancel = true;
                 }
             });
@@ -520,11 +521,11 @@ impl Motion {
         let mut remove = None;
         let mut add = false;
         let keep = pro::sheet(ctx, "queue", 520.0, |ui| {
-            ui.label(RichText::new("File de rendu").font(semibold(18.0)).color(INK_STRONG));
-            ui.label(RichText::new("Plusieurs exports à la suite, en une seule fois.").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("File de rendu")).font(semibold(18.0)).color(INK_STRONG));
+            ui.label(RichText::new(tl("Plusieurs exports à la suite, en une seule fois.")).size(12.0).color(MUTED));
             ui.add_space(12.0);
             if self.queue.is_empty() {
-                ui.label(RichText::new("La file est vide : dans Exporter, choisis « Ajouter à la file ».").size(12.0).color(FAINT));
+                ui.label(RichText::new(tl("La file est vide : dans Exporter, choisis « Ajouter à la file ».")).size(12.0).color(FAINT));
             }
             for (k, q) in self.queue.iter().enumerate() {
                 let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 42.0), Sense::hover());
@@ -533,7 +534,7 @@ impl Motion {
                 p.text(r.left_top() + vec2(12.0, 6.0), Align2::LEFT_TOP, format!("{}. {} · {}", k + 1, FORMATS[q.o.format].0, SCALES[q.o.scale].0), semibold(12.0), INK);
                 p.text(r.left_top() + vec2(12.0, 24.0), Align2::LEFT_TOP, short(&q.path.display().to_string(), 70), FontId::proportional(11.0), FAINT);
                 let xr = Rect::from_center_size(r.right_center() - vec2(18.0, 0.0), Vec2::splat(22.0));
-                if ui.put(xr, egui::Button::new("×").small()).on_hover_text("Retirer").clicked() {
+                if ui.put(xr, egui::Button::new("×").small()).on_hover_text(tl("Retirer")).clicked() {
                     remove = Some(k);
                 }
                 ui.add_space(4.0);
@@ -543,13 +544,13 @@ impl Motion {
                 if ui.add_enabled(!self.queue.is_empty() && !self.busy(), egui::Button::new(RichText::new(format!("Lancer le rendu ({})", self.queue.len())).color(Color32::WHITE)).fill(BLUE).corner_radius(CornerRadius::same(7))).clicked() {
                     run = true;
                 }
-                if pro::secondary(ui, "Ajouter…").clicked() {
+                if pro::secondary(ui, tl("Ajouter…")).clicked() {
                     add = true;
                 }
-                if pro::secondary(ui, "Vider").clicked() {
+                if pro::secondary(ui, tl("Vider")).clicked() {
                     self.queue.clear();
                 }
-                if pro::secondary(ui, "Fermer").clicked() {
+                if pro::secondary(ui, tl("Fermer")).clicked() {
                     close = true;
                 }
             });

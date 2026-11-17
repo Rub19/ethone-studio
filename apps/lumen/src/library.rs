@@ -1,4 +1,5 @@
 use crate::widgets::{caption, heading, nav_row, rgb, short};
+use studio_ui::i18n::tl;
 use crate::{Collection, LABELS, Lumen, SORTS, STAR, Smart, View, copy_index, display_name, real};
 use crate::{develop, meta};
 use eframe::egui::{self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Rect, RichText, Sense, Stroke, StrokeKind, Ui, Vec2, pos2, vec2};
@@ -32,7 +33,7 @@ impl Lumen {
                 ui.horizontal(|ui| {
                     heading(ui, "COLLECTIONS DYNAMIQUES");
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.small_button("+").on_hover_text("Nouvelle collection dynamique").clicked() {
+                        if ui.small_button("+").on_hover_text(tl("Nouvelle collection dynamique")).clicked() {
                             self.smart_edit = Some((None, Smart { min_rating: 0, ..Default::default() }));
                         }
                     });
@@ -46,11 +47,11 @@ impl Lumen {
                         self.collection = Collection::Smart(k);
                     }
                     r.context_menu(|ui| {
-                        if ui.button("Modifier les règles…").clicked() {
+                        if ui.button(tl("Modifier les règles…")).clicked() {
                             self.smart_edit = Some((Some(k), sm.clone()));
                             ui.close();
                         }
-                        if ui.button("Supprimer").clicked() {
+                        if ui.button(tl("Supprimer")).clicked() {
                             remove = Some(k);
                             ui.close();
                         }
@@ -103,7 +104,7 @@ impl Lumen {
                 ui.add_space(12.0);
                 heading(ui, "DOSSIERS");
                 let current = self.catalog.folder.clone();
-                if ui.checkbox(&mut self.catalog.recursive, "Inclure les sous-dossiers").changed()
+                if ui.checkbox(&mut self.catalog.recursive, tl("Inclure les sous-dossiers")).changed()
                     && let Some(f) = current.clone()
                 {
                     self.open_folder(f, ctx);
@@ -136,7 +137,7 @@ impl Lumen {
                     }
                 }
                 ui.add_space(8.0);
-                if pro::secondary(ui, "Ouvrir un dossier…").clicked() {
+                if pro::secondary(ui, tl("Ouvrir un dossier…")).clicked() {
                     self.pick_folder(ctx);
                 }
             });
@@ -170,7 +171,7 @@ impl Lumen {
                     }
                 }
                 pro::toolbar_sep(ui);
-                ui.add(egui::TextEdit::singleline(&mut self.query).hint_text("Rechercher").desired_width(100.0));
+                ui.add(egui::TextEdit::singleline(&mut self.query).hint_text(tl("Rechercher")).desired_width(100.0));
                 if !self.query.is_empty() && ui.small_button("×").clicked() {
                     self.query.clear();
                 }
@@ -180,12 +181,12 @@ impl Lumen {
                         ui.selectable_value(&mut self.sort, k, *s);
                     }
                 });
-                if ui.selectable_label(self.sort_desc, if self.sort_desc { "↓" } else { "↑" }).on_hover_text("Tri · inverser l'ordre").clicked() {
+                if ui.selectable_label(self.sort_desc, if self.sort_desc { "↓" } else { "↑" }).on_hover_text(tl("Tri · inverser l'ordre")).clicked() {
                     self.sort_desc = !self.sort_desc;
                 }
                 pro::toolbar_sep(ui);
                 ui.spacing_mut().slider_width = 80.0;
-                ui.add(egui::Slider::new(&mut self.thumb_size, 120.0..=340.0).show_value(false)).on_hover_text("Taille des vignettes");
+                ui.add(egui::Slider::new(&mut self.thumb_size, 120.0..=340.0).show_value(false)).on_hover_text(tl("Taille des vignettes"));
             });
             });
         });
@@ -200,7 +201,7 @@ impl Lumen {
                 ui.label(RichText::new(format!("{} photos sélectionnées", self.picked.len())).font(semibold(12.5)).color(INK_STRONG));
                 pro::toolbar_sep(ui);
                 let picked = self.picked.clone();
-                if pro::secondary(ui, "Synchroniser").on_hover_text("Copie les réglages de la photo active (groupes cochés dans Copier les réglages)").clicked()
+                if pro::secondary(ui, tl("Synchroniser")).on_hover_text(tl("Copie les réglages de la photo active (groupes cochés dans Copier les réglages)")).clicked()
                     && let Some(c) = self.current
                 {
                     let st = self.settings(c);
@@ -210,7 +211,7 @@ impl Lumen {
                     }
                     self.notify("Réglages synchronisés", ctx);
                 }
-                ui.menu_button("Préréglage", |ui| {
+                ui.menu_button(tl("Préréglage"), |ui| {
                     let mut cat = "";
                     for (c, name, st) in develop::preset_catalog() {
                         if c != cat {
@@ -229,7 +230,7 @@ impl Lumen {
                         }
                     }
                 });
-                if pro::ghost(ui, "Empiler").on_hover_text("Ctrl+G").clicked() {
+                if pro::ghost(ui, tl("Empiler")).on_hover_text(tl("Ctrl+G")).clicked() {
                     self.stack_selection();
                 }
                 for (label, flag) in [("Retenir", 1i8), ("Rejeter", -1)] {
@@ -240,16 +241,16 @@ impl Lumen {
                         self.dirty_catalog = true;
                     }
                 }
-                if pro::ghost(ui, "Comparer").clicked() {
+                if pro::ghost(ui, tl("Comparer")).clicked() {
                     self.view = View::Survey;
                 }
-                if pro::ghost(ui, "Réinitialiser").clicked() {
+                if pro::ghost(ui, tl("Réinitialiser")).clicked() {
                     for &p in &picked {
                         self.set_settings(p, develop::Settings::default());
                     }
                 }
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::ghost(ui, "Tout désélectionner").clicked() {
+                    if pro::ghost(ui, tl("Tout désélectionner")).clicked() {
                         self.picked.clear();
                     }
                 });
@@ -266,7 +267,7 @@ impl Lumen {
                     return;
                 };
                 let targets = self.targets();
-                pro::dock_panel(ui, "quick", "Développement rapide", |ui| {
+                pro::dock_panel(ui, "quick", tl("Développement rapide"), |ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 6.0);
                     caption(ui, &format!("S'applique à {} photo{}", targets.len(), if targets.len() > 1 { "s" } else { "" }));
                     let rows: [(&str, fn(&mut develop::Settings, f32), [f32; 4]); 8] = [
@@ -295,7 +296,7 @@ impl Lumen {
                         });
                     }
                     ui.horizontal_wrapped(|ui| {
-                        ui.menu_button("Balance des blancs", |ui| {
+                        ui.menu_button(tl("Balance des blancs"), |ui| {
                             for (name, t, ti) in develop::WB_PRESETS {
                                 if ui.button(name).clicked() {
                                     for &k in &targets {
@@ -306,24 +307,24 @@ impl Lumen {
                                 }
                             }
                         });
-                        if pro::ghost(ui, "Noir et blanc").clicked() {
+                        if pro::ghost(ui, tl("Noir et blanc")).clicked() {
                             for &k in &targets {
                                 let mut s = self.settings(k);
                                 s.mono = !s.mono;
                                 self.set_settings(k, s);
                             }
                         }
-                        if pro::ghost(ui, "Réinitialiser").clicked() {
+                        if pro::ghost(ui, tl("Réinitialiser")).clicked() {
                             for &k in &targets {
                                 self.set_settings(k, develop::Settings::default());
                             }
                         }
                     });
                 });
-                pro::dock_panel(ui, "keywords", "Mots-clés", |ui| {
+                pro::dock_panel(ui, "keywords", tl("Mots-clés"), |ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 6.0);
                     let e = self.get(i);
-                    let r = ui.add(egui::TextEdit::singleline(&mut self.keyword_input).hint_text("Ajouter (virgules acceptées)").desired_width(f32::INFINITY));
+                    let r = ui.add(egui::TextEdit::singleline(&mut self.keyword_input).hint_text(tl("Ajouter (virgules acceptées)")).desired_width(f32::INFINITY));
                     if r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                         let words: Vec<String> = self.keyword_input.split(',').map(|w| w.trim().to_string()).filter(|w| !w.is_empty()).collect();
                         for &t in &targets {
@@ -341,7 +342,7 @@ impl Lumen {
                     let mut remove = None;
                     ui.horizontal_wrapped(|ui| {
                         for k in &e.keywords {
-                            if pro::chip(ui, &format!("{k}  ×")).on_hover_text("Retirer ce mot-clé").clicked() {
+                            if pro::chip(ui, &format!("{k}  ×")).on_hover_text(tl("Retirer ce mot-clé")).clicked() {
                                 remove = Some(k.clone());
                             }
                         }
@@ -374,7 +375,7 @@ impl Lumen {
                     }
                 });
                 let exif = self.exif_for(i);
-                pro::dock_panel(ui, "metadata", "Métadonnées", |ui| {
+                pro::dock_panel(ui, "metadata", tl("Métadonnées"), |ui| {
                     ui.spacing_mut().item_spacing.y = 4.0;
                     let mut e = self.get(i);
                     let before = (e.title.clone(), e.caption.clone(), e.rating, e.label, e.flag);
@@ -408,14 +409,14 @@ impl Lumen {
                     }
                     ui.add_space(6.0);
                     let p = real(&self.files[i]);
-                    pro::label_value(ui, "Fichier", &short(&display_name(&self.files[i]), 28));
+                    pro::label_value(ui, tl("Fichier"), &short(&display_name(&self.files[i]), 28));
                     if let Some(info) = self.info.get(&p) {
-                        pro::label_value(ui, "Taille", &format!("{:.1} Mo", info.size as f64 / 1_048_576.0));
+                        pro::label_value(ui, tl("Taille"), &format!("{:.1} Mo", info.size as f64 / 1_048_576.0));
                     }
                     if let Ok((w, h)) = image::image_dimensions(&p) {
-                        pro::label_value(ui, "Dimensions", &format!("{w} × {h} px ({:.1} Mpx)", (w * h) as f32 / 1e6));
+                        pro::label_value(ui, tl("Dimensions"), &format!("{w} × {h} px ({:.1} Mpx)", (w * h) as f32 / 1e6));
                     }
-                    pro::label_value(ui, "Type", &p.extension().map(|e| e.to_string_lossy().to_uppercase()).unwrap_or_default());
+                    pro::label_value(ui, tl("Type"), &p.extension().map(|e| e.to_string_lossy().to_uppercase()).unwrap_or_default());
                     for (k, v) in &exif {
                         pro::label_value(ui, k, &short(v, 30));
                     }
@@ -423,7 +424,7 @@ impl Lumen {
                         caption(ui, "Aucune donnée EXIF lisible dans ce fichier.");
                     }
                     ui.add_space(4.0);
-                    if pro::ghost(ui, "Afficher dans l'Explorateur").clicked() {
+                    if pro::ghost(ui, tl("Afficher dans l'Explorateur")).clicked() {
                         let _ = std::process::Command::new("explorer").arg(format!("/select,{}", p.display())).spawn();
                     }
                 });
@@ -444,7 +445,7 @@ impl Lumen {
                 let vis = self.visible();
                 if vis.is_empty() {
                     ui.add_space(60.0);
-                    ui.vertical_centered(|ui| ui.label(RichText::new("Aucune photo ne correspond à ce filtre").color(MUTED)));
+                    ui.vertical_centered(|ui| ui.label(RichText::new(tl("Aucune photo ne correspond à ce filtre")).color(MUTED)));
                     return;
                 }
                 let cell = self.thumb_size;
@@ -502,43 +503,43 @@ impl Lumen {
                 self.picked.clear();
                 self.select(i, ctx);
             }
-            if ui.button("Ouvrir en Développement").clicked() {
+            if ui.button(tl("Ouvrir en Développement")).clicked() {
                 self.select(i, ctx);
                 self.view = View::Develop;
                 ui.close();
             }
-            if ui.button("Créer une copie virtuelle").clicked() {
+            if ui.button(tl("Créer une copie virtuelle")).clicked() {
                 self.current = Some(i);
                 self.virtual_copy(ctx);
                 ui.close();
             }
-            if copy_index(&self.files[i]).is_some() && ui.button("Supprimer la copie virtuelle").clicked() {
+            if copy_index(&self.files[i]).is_some() && ui.button(tl("Supprimer la copie virtuelle")).clicked() {
                 self.remove_virtual(i);
                 ui.close();
                 return;
             }
             ui.separator();
-            if ui.button("Empiler la sélection").clicked() {
+            if ui.button(tl("Empiler la sélection")).clicked() {
                 self.stack_selection();
                 ui.close();
             }
             if self.get(i).stack > 0 {
-                if ui.button("Réduire / déplier la pile").clicked() {
+                if ui.button(tl("Réduire / déplier la pile")).clicked() {
                     self.current = Some(i);
                     self.toggle_stack();
                     ui.close();
                 }
-                if ui.button("Désempiler").clicked() {
+                if ui.button(tl("Désempiler")).clicked() {
                     self.unstack();
                     ui.close();
                 }
             }
             ui.separator();
-            if ui.button("Exporter…").clicked() {
+            if ui.button(tl("Exporter…")).clicked() {
                 self.open_export(self.picked.len() < 2);
                 ui.close();
             }
-            if ui.button("Afficher dans l'Explorateur").clicked() {
+            if ui.button(tl("Afficher dans l'Explorateur")).clicked() {
                 let _ = std::process::Command::new("explorer").arg(format!("/select,{}", real(&self.files[i]).display())).spawn();
                 ui.close();
             }
@@ -621,7 +622,7 @@ impl Lumen {
         });
         egui::Panel::bottom("cmp-bar").exact_size(46.0).frame(Frame::new().fill(CHROME).inner_margin(Margin::symmetric(18, 0))).show(root, |ui| {
             ui.horizontal_centered(|ui| {
-                if pro::ghost(ui, "◀ Candidat précédent").clicked()
+                if pro::ghost(ui, tl("◀ Candidat précédent")).clicked()
                     && let Some(b) = b
                     && let Some(pos) = vis.iter().position(|v| *v == b)
                 {
@@ -630,7 +631,7 @@ impl Lumen {
                         self.picked = vec![a.unwrap_or(p), p];
                     }
                 }
-                if pro::ghost(ui, "Candidat suivant ▶").clicked()
+                if pro::ghost(ui, tl("Candidat suivant ▶")).clicked()
                     && let Some(b) = b
                     && let Some(pos) = vis.iter().position(|v| *v == b)
                 {
@@ -638,7 +639,7 @@ impl Lumen {
                         self.picked = vec![a.unwrap_or(n), n];
                     }
                 }
-                if pro::secondary(ui, "Le candidat devient la référence").clicked()
+                if pro::secondary(ui, tl("Le candidat devient la référence")).clicked()
                     && let Some(b) = b
                 {
                     self.picked.clear();

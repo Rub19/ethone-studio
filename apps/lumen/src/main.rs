@@ -13,6 +13,7 @@ mod tutos;
 mod widgets;
 
 use develop::Settings;
+use studio_ui::i18n::tl;
 use eframe::egui::{self, Align, Color32, CornerRadius, Frame, Key, Layout, Margin, Rect, RichText, Stroke, TextureHandle, TextureOptions, Ui, Vec2, vec2};
 use image::RgbImage;
 use meta::ExportOpts;
@@ -275,6 +276,7 @@ struct Lumen {
 impl Lumen {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         let (tx, rx) = channel();
         let mut me = Self {
             catalog: Catalog::load(),
@@ -1233,16 +1235,16 @@ impl Lumen {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
-            studio_ui::palette::Cmd::new("Trouver les photos floues (les sélectionner)", "Tri", "blurry:pick"),
-            studio_ui::palette::Cmd::new("Rejeter les photos floues", "Tri · drapeau X", "blurry:reject").confirm(),
-            studio_ui::palette::Cmd::new("Ton auto sur les photos choisies", "Lot", "batch-auto"),
-            studio_ui::palette::Cmd::new("Redresser l'horizon sur les photos choisies", "Lot", "batch-straighten"),
-            studio_ui::palette::Cmd::new("Remettre à zéro les photos choisies", "Lot", "batch-reset").confirm(),
-            studio_ui::palette::Cmd::new("Synchroniser les réglages vers les photos choisies", "Lot · copie la photo courante", "batch-sync"),
-            studio_ui::palette::Cmd::new("Attribuer 5 étoiles aux photos choisies", "Lot · classement", "batch-rate:5"),
-            studio_ui::palette::Cmd::new("Marquer les photos choisies comme retenues", "Lot · drapeau P", "batch-flag:1"),
-            studio_ui::palette::Cmd::new("Rejeter les photos choisies", "Lot · drapeau X", "batch-flag:-1").confirm(),
-            studio_ui::palette::Cmd::new("Effacer les drapeaux des photos choisies", "Lot · neutre", "batch-flag:0"),
+            studio_ui::palette::Cmd::new(tl("Trouver les photos floues (les sélectionner)"), tl("Tri"), "blurry:pick"),
+            studio_ui::palette::Cmd::new(tl("Rejeter les photos floues"), tl("Tri · drapeau X"), "blurry:reject").confirm(),
+            studio_ui::palette::Cmd::new(tl("Ton auto sur les photos choisies"), tl("Lot"), "batch-auto"),
+            studio_ui::palette::Cmd::new(tl("Redresser l'horizon sur les photos choisies"), tl("Lot"), "batch-straighten"),
+            studio_ui::palette::Cmd::new(tl("Remettre à zéro les photos choisies"), tl("Lot"), "batch-reset").confirm(),
+            studio_ui::palette::Cmd::new(tl("Synchroniser les réglages vers les photos choisies"), tl("Lot · copie la photo courante"), "batch-sync"),
+            studio_ui::palette::Cmd::new(tl("Attribuer 5 étoiles aux photos choisies"), tl("Lot · classement"), "batch-rate:5"),
+            studio_ui::palette::Cmd::new(tl("Marquer les photos choisies comme retenues"), tl("Lot · drapeau P"), "batch-flag:1"),
+            studio_ui::palette::Cmd::new(tl("Rejeter les photos choisies"), tl("Lot · drapeau X"), "batch-flag:-1").confirm(),
+            studio_ui::palette::Cmd::new(tl("Effacer les drapeaux des photos choisies"), tl("Lot · neutre"), "batch-flag:0"),
 
         ];
         v.extend(outils::TOOLS.iter().map(|(id, label, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Lumen · nouvel outil · photo courante ou choisies", format!("tool:{id}"))));
@@ -1488,7 +1490,7 @@ impl Lumen {
                         if !self.files.is_empty() {
                             let label = if self.picked.len() > 1 { format!("Exporter {}", self.picked.len()) } else if self.view == View::Develop { "Exporter".to_string() } else { format!("Exporter {}", self.visible().len()) };
                             let dev = self.view == View::Develop && self.picked.len() < 2;
-                            if pro::primary_icon(ui, &label, export_glyph).on_hover_text("Ctrl+Maj+E").clicked() {
+                            if pro::primary_icon(ui, &label, export_glyph).on_hover_text(tl("Ctrl+Maj+E")).clicked() {
                                 self.open_export(dev);
                             }
                             ui.add_space(8.0);
@@ -1501,18 +1503,18 @@ impl Lumen {
     }
 
     fn file_menu(&mut self, ui: &mut Ui, ctx: &egui::Context) {
-        ui.menu_button("Fichier", |ui| {
+        ui.menu_button(tl("Fichier"), |ui| {
             if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher"), ("page", "mettre en page"), ("vector", "placer l'image"), ("cut", "ajouter au montage"), ("motion", "animer la photo")]) {
                 let ctx = ui.ctx().clone();
                 self.send_to(t, &ctx);
             }
             ui.separator();
-            if ui.button("Ouvrir un dossier…").clicked() {
+            if ui.button(tl("Ouvrir un dossier…")).clicked() {
                 self.pick_folder(ctx);
             }
             let recents = self.catalog.recent_folders.clone();
             ui.add_enabled_ui(!recents.is_empty(), |ui| {
-                ui.menu_button("Dossiers récents", |ui| {
+                ui.menu_button(tl("Dossiers récents"), |ui| {
                     for f in recents {
                         if ui.button(f.display().to_string()).clicked() {
                             self.open_folder(f, ctx);
@@ -1520,12 +1522,12 @@ impl Lumen {
                     }
                 });
             });
-            if ui.checkbox(&mut self.catalog.recursive, "Inclure les sous-dossiers").changed()
+            if ui.checkbox(&mut self.catalog.recursive, tl("Inclure les sous-dossiers")).changed()
                 && let Some(f) = self.catalog.folder.clone()
             {
                 self.open_folder(f, ctx);
             }
-            if ui.button("Actualiser le dossier").clicked()
+            if ui.button(tl("Actualiser le dossier")).clicked()
                 && let Some(f) = self.catalog.folder.clone()
             {
                 self.open_folder(f, ctx);
@@ -1542,11 +1544,11 @@ impl Lumen {
                 self.run_export(ctx);
             }
             ui.separator();
-            if ui.button("Enregistrer le catalogue").clicked() {
+            if ui.button(tl("Enregistrer le catalogue")).clicked() {
                 self.catalog.save();
                 self.notify("Catalogue enregistré", ctx);
             }
-            if ui.button("Ouvrir le dossier du catalogue").clicked()
+            if ui.button(tl("Ouvrir le dossier du catalogue")).clicked()
                 && let Some(d) = Catalog::path().parent()
             {
                 let _ = std::process::Command::new("explorer").arg(d).spawn();
@@ -1555,7 +1557,7 @@ impl Lumen {
     }
 
     fn edit_menu(&mut self, ui: &mut Ui, ctx: &egui::Context) {
-        ui.menu_button("Édition", |ui| {
+        ui.menu_button(tl("Édition"), |ui| {
             if ui.add_enabled(!self.history.is_empty(), egui::Button::new("Annuler                Ctrl+Z")).clicked() {
                 self.undo();
             }
@@ -1563,25 +1565,25 @@ impl Lumen {
                 self.redo();
             }
             ui.separator();
-            if ui.button("Tout sélectionner      Ctrl+A").clicked() {
+            if ui.button(tl("Tout sélectionner      Ctrl+A")).clicked() {
                 self.picked = self.visible();
             }
-            if ui.button("Désélectionner         Ctrl+D").clicked() {
+            if ui.button(tl("Désélectionner         Ctrl+D")).clicked() {
                 self.picked.clear();
             }
-            if ui.button("Sélectionner les retenues").clicked() {
+            if ui.button(tl("Sélectionner les retenues")).clicked() {
                 self.picked = self.visible().into_iter().filter(|&i| self.get(i).flag > 0).collect();
             }
-            if ui.button("Sélectionner les modifiées").clicked() {
+            if ui.button(tl("Sélectionner les modifiées")).clicked() {
                 self.picked = self.visible().into_iter().filter(|&i| !self.get(i).settings.is_default()).collect();
             }
-            if ui.button("Inverser la sélection").clicked() {
+            if ui.button(tl("Inverser la sélection")).clicked() {
                 let p = self.picked.clone();
                 self.picked = self.visible().into_iter().filter(|i| !p.contains(i)).collect();
             }
             ui.separator();
-            ui.checkbox(&mut self.catalog.solo, "Mode solo des panneaux");
-            if ui.button("Copier les réglages…   Ctrl+Maj+C").clicked()
+            ui.checkbox(&mut self.catalog.solo, tl("Mode solo des panneaux"));
+            if ui.button(tl("Copier les réglages…   Ctrl+Maj+C")).clicked()
                 && let Some(i) = self.current
             {
                 self.clipboard = Some(self.settings(i));
@@ -1593,15 +1595,15 @@ impl Lumen {
 
     fn photo_menu(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         ui.add_enabled_ui(self.current.is_some(), |ui| {
-            ui.menu_button("Photo", |ui| {
+            ui.menu_button(tl("Photo"), |ui| {
                 let i = self.current.unwrap_or(0);
-                if ui.button("Réglage automatique      Ctrl+U").clicked()
+                if ui.button(tl("Réglage automatique      Ctrl+U")).clicked()
                     && let Some((_, src)) = &self.source
                 {
                     let s = develop::auto(src);
                     self.set_settings(i, s);
                 }
-                if ui.button("Copier les réglages      Ctrl+C").clicked() {
+                if ui.button(tl("Copier les réglages      Ctrl+C")).clicked() {
                     self.clipboard = Some(self.settings(i));
                 }
                 if ui.add_enabled(self.clipboard.is_some(), egui::Button::new("Coller les réglages       Ctrl+V")).clicked()
@@ -1620,41 +1622,41 @@ impl Lumen {
                         self.set_settings(v, s);
                     }
                 }
-                if ui.button("Réinitialiser               Ctrl+Maj+R").clicked() {
+                if ui.button(tl("Réinitialiser               Ctrl+Maj+R")).clicked() {
                     for t in self.targets() {
                         self.set_settings(t, Settings::default());
                     }
                 }
                 ui.separator();
-                if ui.button("Créer une copie virtuelle   Ctrl+'").clicked() {
+                if ui.button(tl("Créer une copie virtuelle   Ctrl+'")).clicked() {
                     self.virtual_copy(ctx);
                 }
                 if ui.add_enabled(self.files.get(i).is_some_and(|p| copy_index(p).is_some()), egui::Button::new("Supprimer la copie virtuelle")).clicked() {
                     self.remove_virtual(i);
                 }
-                if ui.button("Nouvel instantané             Ctrl+N").clicked() {
+                if ui.button(tl("Nouvel instantané             Ctrl+N")).clicked() {
                     self.add_snapshot(i, None);
                 }
                 ui.separator();
-                if ui.button("Empiler la sélection          Ctrl+G").clicked() {
+                if ui.button(tl("Empiler la sélection          Ctrl+G")).clicked() {
                     self.stack_selection();
                 }
-                if ui.button("Désempiler                      Ctrl+Maj+G").clicked() {
+                if ui.button(tl("Désempiler                      Ctrl+Maj+G")).clicked() {
                     self.unstack();
                 }
-                if ui.button("Réduire / déplier la pile     S").clicked() {
+                if ui.button(tl("Réduire / déplier la pile     S")).clicked() {
                     self.toggle_stack();
                 }
                 ui.separator();
                 let mut cur = self.settings(i);
                 let before = cur.clone();
-                ui.checkbox(&mut cur.mono, "Noir et blanc                   V");
-                ui.checkbox(&mut cur.flip, "Miroir horizontal");
-                ui.checkbox(&mut cur.flip_v, "Miroir vertical");
-                if ui.button("Rotation 90° horaire").clicked() {
+                ui.checkbox(&mut cur.mono, tl("Noir et blanc                   V"));
+                ui.checkbox(&mut cur.flip, tl("Miroir horizontal"));
+                ui.checkbox(&mut cur.flip_v, tl("Miroir vertical"));
+                if ui.button(tl("Rotation 90° horaire")).clicked() {
                     cur.rotate = (cur.rotate + 1) % 4;
                 }
-                if ui.button("Rotation 90° antihoraire").clicked() {
+                if ui.button(tl("Rotation 90° antihoraire")).clicked() {
                     cur.rotate = (cur.rotate + 3) % 4;
                 }
                 if cur != before {
@@ -1665,7 +1667,7 @@ impl Lumen {
                     }
                 }
                 ui.separator();
-                ui.menu_button("Note", |ui| {
+                ui.menu_button(tl("Note"), |ui| {
                     for r in 0..=5u8 {
                         let label = if r == 0 { "Sans note   0".to_string() } else { format!("{}   {r}", "★".repeat(r as usize)) };
                         if ui.button(label).clicked() {
@@ -1676,7 +1678,7 @@ impl Lumen {
                         }
                     }
                 });
-                ui.menu_button("Drapeau", |ui| {
+                ui.menu_button(tl("Drapeau"), |ui| {
                     for (label, f) in [("Retenue   P", 1i8), ("Sans drapeau   U", 0), ("Rejetée   X", -1)] {
                         if ui.button(label).clicked() {
                             for t in self.targets() {
@@ -1686,7 +1688,7 @@ impl Lumen {
                         }
                     }
                 });
-                ui.menu_button("Étiquette de couleur", |ui| {
+                ui.menu_button(tl("Étiquette de couleur"), |ui| {
                     for (k, (name, _)) in std::iter::once(("Aucune", [0u8; 3])).chain(LABELS.iter().copied()).enumerate() {
                         let key = if (1..=4).contains(&k) { format!("   {}", k + 5) } else { String::new() };
                         if ui.button(format!("{name}{key}")).clicked() {
@@ -1698,10 +1700,10 @@ impl Lumen {
                     }
                 });
                 ui.separator();
-                if ui.button("Afficher dans l'Explorateur").clicked() {
+                if ui.button(tl("Afficher dans l'Explorateur")).clicked() {
                     let _ = std::process::Command::new("explorer").arg(format!("/select,{}", real(&self.files[i]).display())).spawn();
                 }
-                if ui.button("Copier le chemin du fichier").clicked() {
+                if ui.button(tl("Copier le chemin du fichier")).clicked() {
                     ui.ctx().copy_text(real(&self.files[i]).display().to_string());
                 }
             });
@@ -1709,7 +1711,7 @@ impl Lumen {
     }
 
     fn view_menu(&mut self, ui: &mut Ui) {
-        ui.menu_button("Affichage", |ui| {
+        ui.menu_button(tl("Affichage"), |ui| {
             for (v, label) in [(View::Library, "Grille                         G"), (View::Develop, "Développement              D"), (View::Compare, "Comparaison                 C"), (View::Survey, "Ensemble                     N")] {
                 let enabled = v == View::Library || self.current.is_some() || v == View::Survey;
                 if ui.add_enabled(enabled, egui::Button::selectable(self.view == v, label)).clicked() {
@@ -1718,22 +1720,22 @@ impl Lumen {
                 }
             }
             ui.separator();
-            ui.checkbox(&mut self.hide_panels, "Masquer les panneaux       Tab");
-            ui.checkbox(&mut self.clipping, "Écrêtage                        J");
-            if ui.selectable_label(self.zoom > 0.0, "Zoom 100 %                   Z").clicked() {
+            ui.checkbox(&mut self.hide_panels, tl("Masquer les panneaux       Tab"));
+            ui.checkbox(&mut self.clipping, tl("Écrêtage                        J"));
+            if ui.selectable_label(self.zoom > 0.0, tl("Zoom 100 %                   Z")).clicked() {
                 self.zoom = if self.zoom > 0.0 { 0.0 } else { 1.0 };
             }
-            ui.menu_button("Avant / après", |ui| {
+            ui.menu_button(tl("Avant / après"), |ui| {
                 for (k, l) in ["Désactivé", "Rideau vertical", "Côte à côte", "Rideau horizontal"].iter().enumerate() {
                     ui.radio_value(&mut self.compare, k, *l);
                 }
             });
-            ui.menu_button("Infos sur la photo", |ui| {
+            ui.menu_button(tl("Infos sur la photo"), |ui| {
                 for (k, l) in ["Aucune", "Nom et réglages", "Données de prise de vue"].iter().enumerate() {
                     ui.radio_value(&mut self.info_overlay, k, *l);
                 }
             });
-            ui.menu_button("Taille des vignettes", |ui| {
+            ui.menu_button(tl("Taille des vignettes"), |ui| {
                 for (l, v) in [("Petites", 140.0), ("Moyennes", 200.0), ("Grandes", 280.0), ("Très grandes", 340.0)] {
                     if ui.button(l).clicked() {
                         self.thumb_size = v;
@@ -1798,19 +1800,19 @@ impl Lumen {
                     ui.vertical_centered(|ui| {
                         ui.add(egui::Image::new((self.icon.id(), Vec2::splat(64.0))));
                         ui.add_space(14.0);
-                        ui.label(RichText::new("Bienvenue dans Lumen").font(semibold(24.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("Bienvenue dans Lumen")).font(semibold(24.0)).color(INK_STRONG));
                         ui.add_space(4.0);
-                        ui.label(RichText::new("Ouvre un dossier de photos : JPEG, PNG, TIFF, WebP et RAW (CR2, NEF, ARW, DNG, RAF…)").color(MUTED));
+                        ui.label(RichText::new(tl("Ouvre un dossier de photos : JPEG, PNG, TIFF, WebP et RAW (CR2, NEF, ARW, DNG, RAF…)")).color(MUTED));
                         ui.add_space(18.0);
-                        if pro::primary(ui, "Ouvrir un dossier").clicked() {
+                        if pro::primary(ui, tl("Ouvrir un dossier")).clicked() {
                             self.pick_folder(ctx);
                         }
                         ui.add_space(6.0);
-                        ui.checkbox(&mut self.catalog.recursive, "Inclure les sous-dossiers");
+                        ui.checkbox(&mut self.catalog.recursive, tl("Inclure les sous-dossiers"));
                         let recents: Vec<PathBuf> = self.catalog.recent_folders.iter().filter(|f| f.is_dir()).cloned().collect();
                         if !recents.is_empty() {
                             ui.add_space(16.0);
-                            ui.label(RichText::new("Dossiers récents").font(semibold(12.5)).color(INK));
+                            ui.label(RichText::new(tl("Dossiers récents")).font(semibold(12.5)).color(INK));
                             for f in recents.into_iter().take(4) {
                                 if ui.link(RichText::new(f.display().to_string()).color(BLUE)).clicked() {
                                     self.open_folder(f, ctx);
@@ -1838,7 +1840,7 @@ impl Lumen {
         if self.copy_sheet {
             let mut close = false;
             let keep = pro::sheet(ctx, "copy", 420.0, |ui| {
-                ui.label(RichText::new("Réglages à copier").font(semibold(18.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Réglages à copier")).font(semibold(18.0)).color(INK_STRONG));
                 widgets::caption(ui, "Coller (Ctrl+V) n'appliquera que les groupes cochés.");
                 ui.add_space(8.0);
                 egui::Grid::new("copy-groups").num_columns(2).spacing([24.0, 6.0]).show(ui, |ui| {
@@ -1851,14 +1853,14 @@ impl Lumen {
                 });
                 ui.add_space(10.0);
                 ui.horizontal(|ui| {
-                    if pro::ghost(ui, "Tout cocher").clicked() {
+                    if pro::ghost(ui, tl("Tout cocher")).clicked() {
                         self.copy_groups.iter_mut().for_each(|g| *g = true);
                     }
-                    if pro::ghost(ui, "Tout décocher").clicked() {
+                    if pro::ghost(ui, tl("Tout décocher")).clicked() {
                         self.copy_groups.iter_mut().for_each(|g| *g = false);
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if pro::primary(ui, "Copier").clicked() {
+                        if pro::primary(ui, tl("Copier")).clicked() {
                             close = true;
                         }
                     });
@@ -1871,53 +1873,53 @@ impl Lumen {
             let mut keep = true;
             if let Some((_, sm)) = &mut self.smart_edit {
                 keep = pro::sheet(ctx, "smart", 420.0, |ui| {
-                    ui.label(RichText::new("Collection dynamique").font(semibold(18.0)).color(INK_STRONG));
+                    ui.label(RichText::new(tl("Collection dynamique")).font(semibold(18.0)).color(INK_STRONG));
                     widgets::caption(ui, "Les photos qui remplissent toutes les règles y apparaissent automatiquement.");
                     ui.add_space(8.0);
                     egui::Grid::new("smart").num_columns(2).spacing([14.0, 8.0]).show(ui, |ui| {
-                        ui.label("Nom");
+                        ui.label(tl("Nom"));
                         ui.text_edit_singleline(&mut sm.name);
                         ui.end_row();
-                        ui.label("Note minimale");
+                        ui.label(tl("Note minimale"));
                         ui.add(egui::Slider::new(&mut sm.min_rating, 0..=5).suffix(" ★"));
                         ui.end_row();
-                        ui.label("Drapeau");
+                        ui.label(tl("Drapeau"));
                         egui::ComboBox::from_id_salt("sm-flag").selected_text(["Tous", "Retenues", "Non rejetées", "Rejetées"][match sm.flag { 1 => 1, 2 => 2, -1 => 3, _ => 0 }]).show_ui(ui, |ui| {
                             for (v, l) in [(0i8, "Tous"), (1, "Retenues"), (2, "Non rejetées"), (-1, "Rejetées")] {
                                 ui.selectable_value(&mut sm.flag, v, l);
                             }
                         });
                         ui.end_row();
-                        ui.label("Étiquette");
+                        ui.label(tl("Étiquette"));
                         egui::ComboBox::from_id_salt("sm-label").selected_text(if sm.label == 0 { "Toutes" } else { LABELS[(sm.label - 1) as usize].0 }).show_ui(ui, |ui| {
-                            ui.selectable_value(&mut sm.label, 0, "Toutes");
+                            ui.selectable_value(&mut sm.label, 0, tl("Toutes"));
                             for (k, (n, _)) in LABELS.iter().enumerate() {
                                 ui.selectable_value(&mut sm.label, k as u8 + 1, *n);
                             }
                         });
                         ui.end_row();
-                        ui.label("Mot-clé");
+                        ui.label(tl("Mot-clé"));
                         ui.text_edit_singleline(&mut sm.keyword);
                         ui.end_row();
-                        ui.label("Texte contenu");
+                        ui.label(tl("Texte contenu"));
                         ui.text_edit_singleline(&mut sm.text);
                         ui.end_row();
-                        ui.label("Retouche");
+                        ui.label(tl("Retouche"));
                         let mut ed = sm.edited as usize;
-                        if pro::segmented(ui, &mut ed, &["Toutes", "Modifiées", "Intactes"]) {
+                        if pro::segmented(ui, &mut ed, &[tl("Toutes"), tl("Modifiées"), tl("Intactes")]) {
                             sm.edited = ed as u8;
                         }
                         ui.end_row();
-                        ui.label("Type");
+                        ui.label(tl("Type"));
                         let mut kd = sm.kind as usize;
-                        if pro::segmented(ui, &mut kd, &["Tous", "RAW", "JPEG, PNG…"]) {
+                        if pro::segmented(ui, &mut kd, &[tl("Tous"), tl("RAW"), tl("JPEG, PNG…")]) {
                             sm.kind = kd as u8;
                         }
                         ui.end_row();
                     });
                     ui.add_space(10.0);
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if pro::primary(ui, "Enregistrer").clicked() {
+                        if pro::primary(ui, tl("Enregistrer")).clicked() {
                             save = true;
                         }
                     });
@@ -1949,24 +1951,24 @@ impl Lumen {
         ui.add_space(8.0);
         egui::ScrollArea::vertical().max_height(ui.ctx().content_rect().height() * 0.68).show(ui, |ui| {
             heading(ui, "EMPLACEMENT");
-            ui.checkbox(&mut o.same_folder, "Même dossier que l'original");
+            ui.checkbox(&mut o.same_folder, tl("Même dossier que l'original"));
             if !o.same_folder {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(o.folder.as_ref().map(|f| widgets::short(&f.display().to_string(), 46)).unwrap_or_else(|| "Choisi au moment d'exporter".into())).color(MUTED));
-                    if pro::ghost(ui, "Choisir…").clicked()
+                    if pro::ghost(ui, tl("Choisir…")).clicked()
                         && let Some(d) = rfd::FileDialog::new().set_title("Dossier d'export").pick_folder()
                     {
                         o.folder = Some(d);
                     }
-                    if o.folder.is_some() && pro::ghost(ui, "Effacer").clicked() {
+                    if o.folder.is_some() && pro::ghost(ui, tl("Effacer")).clicked() {
                         o.folder = None;
                     }
                 });
             }
             ui.horizontal(|ui| {
-                ui.label("Sous-dossier");
-                ui.add(egui::TextEdit::singleline(&mut o.subfolder).hint_text("facultatif").desired_width(160.0));
-                ui.label("Si le fichier existe");
+                ui.label(tl("Sous-dossier"));
+                ui.add(egui::TextEdit::singleline(&mut o.subfolder).hint_text(tl("facultatif")).desired_width(160.0));
+                ui.label(tl("Si le fichier existe"));
                 egui::ComboBox::from_id_salt("collision").selected_text(meta::COLLISION[o.collision.min(2)]).show_ui(ui, |ui| {
                     for (k, c) in meta::COLLISION.iter().enumerate() {
                         ui.selectable_value(&mut o.collision, k, *c);
@@ -1988,11 +1990,11 @@ impl Lumen {
             });
             widgets::caption(ui, "Balises : {nom} {n} {n3} {date} {titre} {note} {texte} {suffixe}");
             ui.horizontal(|ui| {
-                ui.label("Texte");
-                ui.add(egui::TextEdit::singleline(&mut o.custom).hint_text("ex. mariage").desired_width(120.0));
-                ui.label("Suffixe");
-                ui.add(egui::TextEdit::singleline(&mut o.suffix).hint_text("ex. -web").desired_width(80.0));
-                ui.label("Début");
+                ui.label(tl("Texte"));
+                ui.add(egui::TextEdit::singleline(&mut o.custom).hint_text(tl("ex. mariage")).desired_width(120.0));
+                ui.label(tl("Suffixe"));
+                ui.add(egui::TextEdit::singleline(&mut o.suffix).hint_text(tl("ex. -web")).desired_width(80.0));
+                ui.label(tl("Début"));
                 ui.add(egui::DragValue::new(&mut o.start).range(0..=99999));
             });
             ui.add_space(10.0);
@@ -2000,7 +2002,7 @@ impl Lumen {
             ui.horizontal(|ui| {
                 pro::segmented(ui, &mut o.format, &meta::FORMATS);
                 if o.format == 0 {
-                    ui.label("Qualité");
+                    ui.label(tl("Qualité"));
                     ui.add(egui::Slider::new(&mut o.quality, 40..=100));
                 }
             });
@@ -2031,7 +2033,7 @@ impl Lumen {
                     ui.label("×");
                     ui.add(egui::DragValue::new(&mut o.size_h).range(0..=20000).suffix(" px"));
                 }
-                ui.checkbox(&mut o.no_enlarge, "Ne pas agrandir");
+                ui.checkbox(&mut o.no_enlarge, tl("Ne pas agrandir"));
             });
             ui.add_space(10.0);
             heading(ui, "ACCENTUATION DE SORTIE");
@@ -2049,25 +2051,25 @@ impl Lumen {
                 }
             });
             ui.horizontal(|ui| {
-                ui.label("Auteur");
+                ui.label(tl("Auteur"));
                 ui.add(egui::TextEdit::singleline(&mut o.creator).desired_width(150.0));
-                ui.label("Copyright");
-                ui.add(egui::TextEdit::singleline(&mut o.copyright).hint_text("© 2026 …").desired_width(150.0));
+                ui.label(tl("Copyright"));
+                ui.add(egui::TextEdit::singleline(&mut o.copyright).hint_text(tl("© 2026 …")).desired_width(150.0));
             });
             ui.add_space(10.0);
             heading(ui, "FILIGRANE");
-            ui.checkbox(&mut o.watermark, "Ajouter un filigrane texte");
+            ui.checkbox(&mut o.watermark, tl("Ajouter un filigrane texte"));
             if o.watermark {
                 ui.horizontal(|ui| {
-                    ui.add(egui::TextEdit::singleline(&mut o.watermark_text).hint_text("© ton nom").desired_width(200.0));
-                    if o.watermark_text.is_empty() && !o.copyright.is_empty() && pro::ghost(ui, "Utiliser le copyright").clicked() {
+                    ui.add(egui::TextEdit::singleline(&mut o.watermark_text).hint_text(tl("© ton nom")).desired_width(200.0));
+                    if o.watermark_text.is_empty() && !o.copyright.is_empty() && pro::ghost(ui, tl("Utiliser le copyright")).clicked() {
                         o.watermark_text = o.copyright.clone();
                     }
                 });
                 ui.horizontal(|ui| {
-                    ui.label("Taille");
+                    ui.label(tl("Taille"));
                     ui.add(egui::Slider::new(&mut o.watermark_size, 1.0..=20.0).suffix(" %"));
-                    ui.label("Opacité");
+                    ui.label(tl("Opacité"));
                     ui.add(egui::Slider::new(&mut o.watermark_opacity, 5.0..=100.0).suffix(" %"));
                 });
                 ui.horizontal(|ui| {
@@ -2076,20 +2078,20 @@ impl Lumen {
                             ui.selectable_value(&mut o.watermark_pos, k, *p);
                         }
                     });
-                    ui.checkbox(&mut o.watermark_dark, "Texte sombre");
+                    ui.checkbox(&mut o.watermark_dark, tl("Texte sombre"));
                 });
             }
             ui.add_space(10.0);
             heading(ui, "APRÈS L'EXPORT");
-            ui.checkbox(&mut o.open_after, "Ouvrir le dossier dans l'Explorateur");
+            ui.checkbox(&mut o.open_after, tl("Ouvrir le dossier dans l'Explorateur"));
         });
         ui.add_space(12.0);
         ui.horizontal(|ui| {
-            if pro::ghost(ui, "Réglages par défaut").clicked() {
+            if pro::ghost(ui, tl("Réglages par défaut")).clicked() {
                 *o = ExportOpts::default();
             }
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if pro::primary(ui, "Exporter").clicked() {
+                if pro::primary(ui, tl("Exporter")).clicked() {
                     go = true;
                 }
             });

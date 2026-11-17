@@ -1,4 +1,5 @@
 use crate::model::{ALIGNS, ANIMS, Clip, FONTS, KPROPS, LABELS, LOOKS, MARKER_COLORS, Mask, ROLLS, TRANSITIONS, Title};
+use studio_ui::i18n::tl;
 use crate::{Cut, G, Sel, glyph, short, tc};
 use eframe::egui::{self, Align, Color32, CornerRadius, Frame, Layout, Margin, Pos2, Rect, RichText, Sense, Shape, Stroke, Ui, Vec2, pos2, vec2};
 use studio_ui::pro::{self, BLUE, FAINT, INK, INK_STRONG, LINE, MUTED, WELL, semibold};
@@ -59,7 +60,7 @@ pub fn title_preset(t: &mut Title, k: usize) {
 pub fn row_slider<N: egui::emath::Numeric>(ui: &mut Ui, label: &str, v: &mut N, range: std::ops::RangeInclusive<N>, suffix: &str, log: bool) -> bool {
     let reset = ui.horizontal(|ui| {
         let r = ui.add(egui::Label::new(RichText::new(label).size(12.0).color(MUTED)).sense(Sense::click()));
-        r.on_hover_text("Double-clic pour réinitialiser").double_clicked()
+        r.on_hover_text(tl("Double-clic pour réinitialiser")).double_clicked()
     });
     ui.spacing_mut().slider_width = (ui.available_width() - 80.0).max(80.0);
     let mut changed = ui.add(egui::Slider::new(v, range.clone()).suffix(suffix).logarithmic(log).max_decimals(2)).changed();
@@ -116,12 +117,12 @@ fn kf_row(ui: &mut Ui, c: &mut Clip, local: f64, prop: u8, range: std::ops::Rang
     let mut reset = false;
     ui.horizontal(|ui| {
         let r = ui.add(egui::Label::new(RichText::new(KPROPS[prop as usize]).size(12.0).color(if keyed { BLUE } else { MUTED })).sense(Sense::click()));
-        reset = r.on_hover_text("Double-clic pour réinitialiser").double_clicked();
+        reset = r.on_hover_text(tl("Double-clic pour réinitialiser")).double_clicked();
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             ui.spacing_mut().item_spacing.x = 2.0;
             if keyed {
                 let ts: Vec<f64> = c.keys.iter().filter(|k| k.prop == prop).map(|k| k.t).collect();
-                if ui.small_button("›").on_hover_text("Image clé suivante").clicked() {
+                if ui.small_button("›").on_hover_text(tl("Image clé suivante")).clicked() {
                     seek = ts.iter().copied().filter(|t| *t > local + 0.02).fold(None, |m: Option<f64>, t| Some(m.map_or(t, |m| m.min(t))));
                 }
             }
@@ -140,7 +141,7 @@ fn kf_row(ui: &mut Ui, c: &mut Clip, local: f64, prop: u8, range: std::ops::Rang
             }
             if keyed {
                 let ts: Vec<f64> = c.keys.iter().filter(|k| k.prop == prop).map(|k| k.t).collect();
-                if ui.small_button("‹").on_hover_text("Image clé précédente").clicked() {
+                if ui.small_button("‹").on_hover_text(tl("Image clé précédente")).clicked() {
                     seek = ts.iter().copied().filter(|t| *t < local - 0.02).fold(None, |m: Option<f64>, t| Some(m.map_or(t, |m| m.max(t))));
                 }
             }
@@ -285,7 +286,7 @@ impl Cut {
             });
             ui.add_space(8.0);
             let mut tab = self.tab;
-            if pro::segmented(ui, &mut tab, &["Clip", "Image", "Effets", "Couleur", "Audio"]) {
+            if pro::segmented(ui, &mut tab, &[tl("Clip"), tl("Image"), tl("Effets"), tl("Couleur"), tl("Audio")]) {
                 self.tab = tab;
             }
         });
@@ -299,20 +300,20 @@ impl Cut {
         studio_ui::dock::begin(ui, "cut");
         match tab {
             0 => {
-                pro::dock_panel(ui, "clip-name", "Clip", |ui| {
+                pro::dock_panel(ui, "clip-name", tl("Clip"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.add(egui::TextEdit::singleline(&mut c.name).hint_text("Nom du clip").desired_width(f32::INFINITY));
+                    ui.add(egui::TextEdit::singleline(&mut c.name).hint_text(tl("Nom du clip")).desired_width(f32::INFINITY));
                     ui.horizontal(|ui| {
                         let mut on = !c.disabled;
-                        if ui.checkbox(&mut on, "Activé").on_hover_text("Maj+E").changed() {
+                        if ui.checkbox(&mut on, tl("Activé")).on_hover_text(tl("Maj+E")).changed() {
                             c.disabled = !on;
                         }
-                        if ui.checkbox(&mut c.reverse, "Lecture inversée").changed() {
+                        if ui.checkbox(&mut c.reverse, tl("Lecture inversée")).changed() {
                             c.keys.clear();
                         }
                     });
                 });
-                pro::dock_panel(ui, "clip-time", "Durée et vitesse", |ui| {
+                pro::dock_panel(ui, "clip-time", tl("Durée et vitesse"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     field_time(ui, "Entrée", &mut c.inp, 0.0, c.out - 0.05);
                     field_time(ui, "Sortie", &mut c.out, c.inp + 0.05, max);
@@ -321,7 +322,7 @@ impl Cut {
                         c.speed = [0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0, 8.0][k];
                     }
                     let mut frozen = c.hold > 0.0;
-                    if ui.checkbox(&mut frozen, "Image figée").changed() {
+                    if ui.checkbox(&mut frozen, tl("Image figée")).changed() {
                         c.hold = if frozen { 2.0 } else { 0.0 };
                         if frozen {
                             c.out = (c.inp + 1.0 / fps).min(max);
@@ -330,12 +331,12 @@ impl Cut {
                     if c.hold > 0.0 {
                         field_time(ui, "Durée figée", &mut c.hold, 0.1, 600.0);
                     }
-                    if pro::secondary(ui, "Vitesse/Durée…").on_hover_text("Ctrl+R").clicked() {
+                    if pro::secondary(ui, tl("Vitesse/Durée…")).on_hover_text(tl("Ctrl+R")).clicked() {
                         act = Some(Act::Speed);
                     }
                 });
                 if matches!(s, Sel::Clip(_)) && !first_v1 {
-                    pro::dock_panel(ui, "clip-trans", "Transition d'entrée", |ui| {
+                    pro::dock_panel(ui, "clip-trans", tl("Transition d'entrée"), |ui| {
                         ui.spacing_mut().item_spacing.y = 6.0;
                         egui::ComboBox::from_id_salt("trans-kind").selected_text(TRANSITIONS[c.trans as usize % TRANSITIONS.len()]).width(ui.available_width() - 4.0).height(420.0).show_ui(ui, |ui| {
                             for (k, n) in TRANSITIONS.iter().enumerate() {
@@ -355,25 +356,25 @@ impl Cut {
                             });
                             c.trans_align = al as u8;
                             if c.gap > 0.0 {
-                                ui.label(RichText::new("Un espace vide précède le clip : la transition est ignorée.").size(11.5).color(FAINT));
+                                ui.label(RichText::new(tl("Un espace vide précède le clip : la transition est ignorée.")).size(11.5).color(FAINT));
                             }
                         }
                     });
                 }
-                pro::dock_panel(ui, "clip-fades", "Fondus", |ui| {
+                pro::dock_panel(ui, "clip-fades", tl("Fondus"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let len = c.len();
                     row_slider(ui, "Fondu d'entrée", &mut c.fade_in, 0.0..=len.min(10.0), " s", false);
                     row_slider(ui, "Fondu de sortie", &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
                     let mut white = c.fade_white as usize;
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Fondu vers").size(12.0).color(MUTED));
-                        if pro::segmented(ui, &mut white, &["Noir", "Blanc"]) {
+                        ui.label(RichText::new(tl("Fondu vers")).size(12.0).color(MUTED));
+                        if pro::segmented(ui, &mut white, &[tl("Noir"), tl("Blanc")]) {
                             c.fade_white = white == 1;
                         }
                     });
                 });
-                pro::dock_panel(ui, "clip-label", "Étiquette", |ui| {
+                pro::dock_panel(ui, "clip-label", tl("Étiquette"), |ui| {
                     ui.horizontal_wrapped(|ui| {
                         for (k, (name, rgb)) in LABELS.iter().enumerate() {
                             let (r, resp) = ui.allocate_exact_size(Vec2::splat(24.0), Sense::click());
@@ -387,19 +388,19 @@ impl Cut {
                         }
                     });
                 });
-                pro::dock_panel(ui, "clip-actions", "Actions", |ui| {
+                pro::dock_panel(ui, "clip-actions", tl("Actions"), |ui| {
                     ui.horizontal_wrapped(|ui| {
                         if pro::secondary(ui, if matches!(s, Sel::Over(_)) { "Ramener sur V1" } else { "Monter sur V2" }).clicked() {
                             act = Some(Act::ToTrack);
                         }
-                        if src.has_audio && pro::secondary(ui, "Détacher l'audio").on_hover_text("Ctrl+L").clicked() {
+                        if src.has_audio && pro::secondary(ui, tl("Détacher l'audio")).on_hover_text(tl("Ctrl+L")).clicked() {
                             act = Some(Act::Detach);
                         }
                     });
                 });
             }
             1 => {
-                pro::dock_panel(ui, "clip-motion", "Trajectoire", |ui| {
+                pro::dock_panel(ui, "clip-motion", tl("Trajectoire"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let rows: [(u8, std::ops::RangeInclusive<f32>, f32, &str); 5] = [(0, 0.05..=5.0, 100.0, " %"), (1, -2.0..=2.0, 1.0, ""), (2, -2.0..=2.0, 1.0, ""), (3, -360.0..=360.0, 1.0, "°"), (4, 0.0..=1.0, 100.0, " %")];
                     for (prop, range, scale, suf) in rows {
@@ -408,31 +409,31 @@ impl Cut {
                         }
                     }
                     let mut kb = c.zoom_end > 0.0;
-                    if ui.checkbox(&mut kb, "Zoom progressif (Ken Burns)").changed() {
+                    if ui.checkbox(&mut kb, tl("Zoom progressif (Ken Burns)")).changed() {
                         c.zoom_end = if kb { c.zoom * 1.15 } else { 0.0 };
                     }
                     if c.zoom_end > 0.0 {
                         pct_slider(ui, "Échelle finale", &mut c.zoom_end, 0.1..=4.0);
                     }
                     ui.horizontal_wrapped(|ui| {
-                        if ui.small_button("↺ 90°").clicked() {
+                        if ui.small_button(tl("↺ 90°")).clicked() {
                             c.rotation = (c.rotation - 90.0 + 540.0) % 360.0 - 180.0;
                         }
-                        if ui.small_button("↻ 90°").clicked() {
+                        if ui.small_button(tl("↻ 90°")).clicked() {
                             c.rotation = (c.rotation + 90.0 + 540.0) % 360.0 - 180.0;
                         }
-                        ui.checkbox(&mut c.flip, "Miroir");
-                        ui.checkbox(&mut c.flip_v, "Retourner");
+                        ui.checkbox(&mut c.flip, tl("Miroir"));
+                        ui.checkbox(&mut c.flip_v, tl("Retourner"));
                     });
                 });
-                pro::dock_panel(ui, "clip-pip", "Incrustation d'image", |ui| {
+                pro::dock_panel(ui, "clip-pip", tl("Incrustation d'image"), |ui| {
                     if let Some(k) = chips(ui, &PIP, None) {
                         pip(c, k);
                     }
                     ui.add_space(4.0);
-                    studio_ui::pro::tip(ui, "Idéal sur la piste V2, au-dessus de la vidéo principale.");
+                    studio_ui::pro::tip(ui, tl("Idéal sur la piste V2, au-dessus de la vidéo principale."));
                 });
-                pro::dock_panel(ui, "clip-crop", "Recadrage", |ui| {
+                pro::dock_panel(ui, "clip-crop", tl("Recadrage"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     for (k, label) in ["Gauche", "Haut", "Droite", "Bas"].into_iter().enumerate() {
                         pct_slider(ui, label, &mut c.crop[k], 0.0..=0.49);
@@ -446,7 +447,7 @@ impl Cut {
                         };
                     }
                 });
-                pro::dock_panel(ui, "clip-keys", "Images clés", |ui| {
+                pro::dock_panel(ui, "clip-keys", tl("Images clés"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.label(RichText::new(format!("{} image(s) clé(s) sur ce clip", c.keys.len())).size(12.0).color(MUTED));
                     ui.horizontal_wrapped(|ui| {
@@ -467,51 +468,51 @@ impl Cut {
                 });
             }
             2 => {
-                pro::dock_panel(ui, "fx-stack", "Bibliothèque d'effets", |ui| {
+                pro::dock_panel(ui, "fx-stack", tl("Bibliothèque d'effets"), |ui| {
                     studio_ui::fxpanel::effects_panel(ui, "cut", &mut c.effects);
                 });
-                pro::dock_panel(ui, "fx-presets", "Préréglages d'effets", |ui| {
+                pro::dock_panel(ui, "fx-presets", tl("Préréglages d'effets"), |ui| {
                     if let Some(k) = chips(ui, &EFFECT_PRESETS, None) {
                         effect_preset(c, k);
                     }
                 });
-                pro::dock_panel(ui, "fx-blur", "Flou et netteté", |ui| {
+                pro::dock_panel(ui, "fx-blur", tl("Flou et netteté"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     if let Some(t) = kf_row(ui, c, local, 5, 0.0..=100.0, 1.0, "") {
                         act = Some(Act::Seek(start + t));
                     }
                     row_slider(ui, "Netteté", &mut c.sharpen, 0.0..=100.0, "", false);
                 });
-                pro::dock_panel(ui, "fx-style", "Stylisation", |ui| {
+                pro::dock_panel(ui, "fx-style", tl("Stylisation"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     row_slider(ui, "Mosaïque", &mut c.pixelate, 0.0..=100.0, "", false);
                     row_slider(ui, "Postérisation", &mut c.posterize, 0.0..=16.0, " niveaux", false);
                     row_slider(ui, "Grain", &mut c.grain, 0.0..=100.0, "", false);
                     row_slider(ui, "Vignettage", &mut c.vignette, -100.0..=100.0, "", false);
-                    ui.checkbox(&mut c.invert, "Négatif (inverser les couleurs)");
+                    ui.checkbox(&mut c.invert, tl("Négatif (inverser les couleurs)"));
                 });
-                pro::dock_panel(ui, "fx-key", "Incrustation (fond vert)", |ui| {
+                pro::dock_panel(ui, "fx-key", tl("Incrustation (fond vert)"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     ui.horizontal(|ui| {
-                        ui.checkbox(&mut c.key_on, "Activer");
+                        ui.checkbox(&mut c.key_on, tl("Activer"));
                         let mut col = Color32::from_rgb(c.key_color[0], c.key_color[1], c.key_color[2]);
                         if ui.color_edit_button_srgba(&mut col).changed() {
                             c.key_color = [col.r(), col.g(), col.b()];
                         }
-                        if ui.small_button("Vert").clicked() {
+                        if ui.small_button(tl("Vert")).clicked() {
                             (c.key_color, c.key_on) = ([0, 177, 64], true);
                         }
-                        if ui.small_button("Bleu").clicked() {
+                        if ui.small_button(tl("Bleu")).clicked() {
                             (c.key_color, c.key_on) = ([0, 71, 187], true);
                         }
                     });
                     row_slider(ui, "Tolérance", &mut c.key_tol, 0.0..=100.0, "", false);
                     row_slider(ui, "Douceur", &mut c.key_soft, 0.0..=100.0, "", false);
                 });
-                pro::dock_panel(ui, "fx-mask", "Masque", |ui| {
+                pro::dock_panel(ui, "fx-mask", tl("Masque"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let mut kind = c.mask.as_ref().map_or(0, |m| m.kind as usize + 1);
-                    if pro::segmented(ui, &mut kind, &["Aucun", "Rectangle", "Ellipse", "Plume"]) {
+                    if pro::segmented(ui, &mut kind, &[tl("Aucun"), tl("Rectangle"), tl("Ellipse"), tl("Plume")]) {
                         c.mask = match kind {
                             0 => None,
                             3 => Some(Mask { kind: 2, pts: vec![[0.3, 0.25], [0.7, 0.25], [0.75, 0.75], [0.25, 0.75]], feather: 5.0, invert: false }),
@@ -520,25 +521,25 @@ impl Cut {
                     }
                     if let Some(m) = &mut c.mask {
                         row_slider(ui, "Contour progressif", &mut m.feather, 0.0..=100.0, "", false);
-                        ui.checkbox(&mut m.invert, "Inverser le masque");
+                        ui.checkbox(&mut m.invert, tl("Inverser le masque"));
                     }
                     let mut sides = ui.ctx().data(|d| d.get_temp::<u32>(sides_id)).unwrap_or(6);
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Côtés du polygone").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Côtés du polygone")).size(12.0).color(MUTED));
                         if ui.add(egui::DragValue::new(&mut sides).range(3..=24)).changed() {
                             ui.ctx().data_mut(|d| d.insert_temp(sides_id, sides));
                         }
                     });
-                    studio_ui::pro::tip(ui, "Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.");
+                    studio_ui::pro::tip(ui, tl("Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection."));
                 });
-                pro::dock_panel(ui, "fx-reset", "Réinitialiser", |ui| {
-                    if pro::secondary(ui, "Réinitialiser tous les effets").clicked() {
+                pro::dock_panel(ui, "fx-reset", tl("Réinitialiser"), |ui| {
+                    if pro::secondary(ui, tl("Réinitialiser tous les effets")).clicked() {
                         c.reset_look();
                     }
                 });
             }
             3 => {
-                pro::dock_panel(ui, "color-basic", "Correction de base", |ui| {
+                pro::dock_panel(ui, "color-basic", tl("Correction de base"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     if let Some(t) = kf_row(ui, c, local, 8, -100.0..=100.0, 1.0, "") {
                         act = Some(Act::Seek(start + t));
@@ -558,7 +559,7 @@ impl Cut {
                     }
                     row_slider(ui, "Vibrance", &mut c.vibrance, -100.0..=100.0, "", false);
                 });
-                pro::dock_panel(ui, "color-look", "Créatif", |ui| {
+                pro::dock_panel(ui, "color-look", tl("Créatif"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     if let Some(k) = chips(ui, &LOOKS, Some(c.look as usize)) {
                         c.look = k as u8;
@@ -566,9 +567,9 @@ impl Cut {
                     pct_slider(ui, "Intensité du look", &mut c.look_amt, 0.0..=1.0);
                     row_slider(ui, "Rotation de teinte", &mut c.hue, -180.0..=180.0, "°", false);
                 });
-                pro::dock_panel(ui, "color-curves", "Courbes", |ui| {
+                pro::dock_panel(ui, "color-curves", tl("Courbes"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    pro::segmented(ui, &mut ch, &["Maître", "Rouge", "Vert", "Bleu"]);
+                    pro::segmented(ui, &mut ch, &[tl("Maître"), tl("Rouge"), tl("Vert"), tl("Bleu")]);
                     ui.add_space(4.0);
                     let col = [Color32::WHITE, Color32::from_rgb(255, 90, 80), Color32::from_rgb(80, 220, 110), Color32::from_rgb(90, 150, 255)][ch.min(3)];
                     curve(ui, &mut c.curves[ch.min(3)], col);
@@ -583,45 +584,45 @@ impl Cut {
                         };
                     }
                 });
-                pro::dock_panel(ui, "color-wheels", "Roues chromatiques", |ui| {
+                pro::dock_panel(ui, "color-wheels", tl("Roues chromatiques"), |ui| {
                     ui.horizontal(|ui| {
                         let size = ((ui.available_width() - 16.0) / 3.0).min(86.0);
                         for (k, label) in ["Ombres", "Tons moyens", "Hautes lum."].into_iter().enumerate() {
                             wheel(ui, label, &mut c.wheels[k], size);
                         }
                     });
-                    studio_ui::pro::tip(ui, "Double-clic sur une roue pour la remettre au centre.");
+                    studio_ui::pro::tip(ui, tl("Double-clic sur une roue pour la remettre au centre."));
                 });
-                pro::dock_panel(ui, "color-tools", "Étalonnage", |ui| {
+                pro::dock_panel(ui, "color-tools", tl("Étalonnage"), |ui| {
                     ui.horizontal_wrapped(|ui| {
-                        if pro::secondary(ui, "Copier").clicked() {
+                        if pro::secondary(ui, tl("Copier")).clicked() {
                             act = Some(Act::CopyGrade);
                         }
                         if ui.add_enabled(has_clipboard, egui::Button::new("Coller")).clicked() {
                             act = Some(Act::PasteGrade);
                         }
-                        if pro::secondary(ui, "Appliquer à tous").on_hover_text("Copie cet étalonnage sur tous les clips V1 et V2").clicked() {
+                        if pro::secondary(ui, tl("Appliquer à tous")).on_hover_text(tl("Copie cet étalonnage sur tous les clips V1 et V2")).clicked() {
                             act = Some(Act::GradeAll);
                         }
-                        if pro::secondary(ui, "Réinitialiser").clicked() {
+                        if pro::secondary(ui, tl("Réinitialiser")).clicked() {
                             c.reset_color();
                         }
                     });
                 });
             }
             _ => {
-                pro::dock_panel(ui, "clip-audio", "Son du clip", |ui| {
+                pro::dock_panel(ui, "clip-audio", tl("Son du clip"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
-                    ui.checkbox(&mut c.mute, "Couper le son du clip");
+                    ui.checkbox(&mut c.mute, tl("Couper le son du clip"));
                     if let Some(t) = kf_row(ui, c, local, 9, -40.0..=12.0, 1.0, " dB") {
                         act = Some(Act::Seek(start + t));
                     }
                     row_slider(ui, "Balance", &mut c.pan, -1.0..=1.0, "", false);
                     if c.hold > 0.0 {
-                        ui.label(RichText::new("Une image figée n'a pas de son.").size(12.0).color(FAINT));
+                        ui.label(RichText::new(tl("Une image figée n'a pas de son.")).size(12.0).color(FAINT));
                     }
                 });
-                pro::dock_panel(ui, "clip-norm", "Normalisation", |ui| {
+                pro::dock_panel(ui, "clip-norm", tl("Normalisation"), |ui| {
                     ui.horizontal_wrapped(|ui| {
                         for (label, db) in [("Crête −1 dB", -1.0), ("Crête −3 dB", -3.0), ("Crête −6 dB", -6.0)] {
                             if pro::secondary(ui, label).clicked() {
@@ -630,12 +631,12 @@ impl Cut {
                         }
                     });
                 });
-                pro::dock_panel(ui, "clip-afade", "Fondus audio", |ui| {
+                pro::dock_panel(ui, "clip-afade", tl("Fondus audio"), |ui| {
                     ui.spacing_mut().item_spacing.y = 6.0;
                     let len = c.len();
                     row_slider(ui, "Fondu d'entrée", &mut c.fade_in, 0.0..=len.min(10.0), " s", false);
                     row_slider(ui, "Fondu de sortie", &mut c.fade_out, 0.0..=len.min(10.0), " s", false);
-                    if src.has_audio && pro::secondary(ui, "Détacher l'audio sur A2").clicked() {
+                    if src.has_audio && pro::secondary(ui, tl("Détacher l'audio sur A2")).clicked() {
                         act = Some(Act::Detach);
                     }
                 });
@@ -666,19 +667,19 @@ impl Cut {
         let t = self.t;
         let mut norm = None;
         let m = &mut self.proj.music[i];
-        pro::dock_panel(ui, "music", "Musique", |ui| {
+        pro::dock_panel(ui, "music", tl("Musique"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.label(RichText::new(short(&src.name(), 30)).font(semibold(12.5)).color(INK));
             field_time(ui, "Début", &mut m.start, 0.0, 36000.0);
             field_time(ui, "Entrée", &mut m.inp, 0.0, m.out - 0.05);
             field_time(ui, "Sortie", &mut m.out, m.inp + 0.05, src.duration);
-            if pro::secondary(ui, "Placer à la tête de lecture").clicked() {
+            if pro::secondary(ui, tl("Placer à la tête de lecture")).clicked() {
                 m.start = t;
             }
         });
-        pro::dock_panel(ui, "music-mix", "Mixage", |ui| {
+        pro::dock_panel(ui, "music-mix", tl("Mixage"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
-            ui.checkbox(&mut m.mute, "Couper");
+            ui.checkbox(&mut m.mute, tl("Couper"));
             let mut db = 20.0 * m.volume.max(1e-4).log10();
             if row_slider(ui, "Volume", &mut db, -40.0..=12.0, " dB", false) {
                 m.volume = 10f32.powf(db / 20.0);
@@ -695,7 +696,7 @@ impl Cut {
                 }
             });
         });
-        pro::dock_panel(ui, "music-label", "Étiquette", |ui| {
+        pro::dock_panel(ui, "music-label", tl("Étiquette"), |ui| {
             ui.horizontal_wrapped(|ui| {
                 for (k, (name, rgb)) in LABELS.iter().enumerate() {
                     let (r, resp) = ui.allocate_exact_size(Vec2::splat(24.0), Sense::click());
@@ -718,16 +719,16 @@ impl Cut {
     fn title_inspector(&mut self, ui: &mut Ui, i: usize) {
         studio_ui::dock::begin(ui, "cut");
         let t = &mut self.proj.titles[i];
-        pro::dock_panel(ui, "title-presets", "Styles prédéfinis", |ui| {
+        pro::dock_panel(ui, "title-presets", tl("Styles prédéfinis"), |ui| {
             if let Some(k) = chips(ui, &TITLE_PRESETS, None) {
                 title_preset(t, k);
             }
         });
-        pro::dock_panel(ui, "title-text", "Texte", |ui| {
+        pro::dock_panel(ui, "title-text", tl("Texte"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             ui.add(egui::TextEdit::multiline(&mut t.text).desired_rows(3).desired_width(f32::INFINITY));
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Police").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Police")).size(12.0).color(MUTED));
                 egui::ComboBox::from_id_salt("font").selected_text(FONTS[t.font as usize % FONTS.len()].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                     for (k, (name, _)) in FONTS.iter().enumerate() {
                         ui.selectable_value(&mut t.font, k as u8, *name);
@@ -739,14 +740,14 @@ impl Cut {
             row_slider(ui, "Interligne", &mut t.leading, -0.5..=2.0, "", false);
             let mut al = t.align as usize;
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Alignement").size(12.0).color(MUTED));
-                if pro::segmented(ui, &mut al, &["Auto", "Gauche", "Centre", "Droite"]) {
+                ui.label(RichText::new(tl("Alignement")).size(12.0).color(MUTED));
+                if pro::segmented(ui, &mut al, &[tl("Auto"), tl("Gauche"), tl("Centre"), tl("Droite")]) {
                     t.align = al as u8;
                 }
             });
-            ui.checkbox(&mut t.vertical, "Texte vertical");
+            ui.checkbox(&mut t.vertical, tl("Texte vertical"));
         });
-        pro::dock_panel(ui, "title-look", "Apparence", |ui| {
+        pro::dock_panel(ui, "title-look", tl("Apparence"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let color_row = |ui: &mut Ui, label: &str, c: &mut [u8; 4]| {
                 ui.horizontal(|ui| {
@@ -765,17 +766,17 @@ impl Cut {
                 color_row(ui, "Couleur du contour", &mut t.outline_color);
             }
             ui.horizontal(|ui| {
-                ui.checkbox(&mut t.shadow, "Ombre portée");
-                ui.checkbox(&mut t.band, "Bandeau");
+                ui.checkbox(&mut t.shadow, tl("Ombre portée"));
+                ui.checkbox(&mut t.band, tl("Bandeau"));
             });
             if t.band || t.place == 3 {
                 color_row(ui, "Couleur du bandeau", &mut t.band_color);
             }
         });
-        pro::dock_panel(ui, "title-place", "Position et durée", |ui| {
+        pro::dock_panel(ui, "title-place", tl("Position et durée"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let mut place = t.place as usize;
-            if pro::segmented(ui, &mut place, &["Haut", "Centre", "Bas", "Tiers"]) {
+            if pro::segmented(ui, &mut place, &[tl("Haut"), tl("Centre"), tl("Bas"), tl("Tiers")]) {
                 t.place = place as u8;
             }
             row_slider(ui, "Décalage X", &mut t.dx, -0.5..=0.5, "", false);
@@ -783,12 +784,12 @@ impl Cut {
             field_time(ui, "Début", &mut t.start, 0.0, 36000.0);
             field_time(ui, "Durée", &mut t.dur, 0.2, 600.0);
             let mut roll = t.roll as usize;
-            ui.label(RichText::new("Défilement").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Défilement")).size(12.0).color(MUTED));
             if pro::segmented(ui, &mut roll, &ROLLS) {
                 t.roll = roll as u8;
             }
         });
-        pro::dock_panel(ui, "title-anim", "Animation d'entrée et de sortie", |ui| {
+        pro::dock_panel(ui, "title-anim", tl("Animation d'entrée et de sortie"), |ui| {
             if let Some(k) = chips(ui, &ANIMS, Some(t.anim as usize)) {
                 t.anim = k as u8;
             }
@@ -798,23 +799,23 @@ impl Cut {
 
     fn sequence_inspector(&mut self, ui: &mut Ui) {
         studio_ui::dock::begin(ui, "cut");
-        pro::dock_panel(ui, "sequence", "Séquence", |ui| {
+        pro::dock_panel(ui, "sequence", tl("Séquence"), |ui| {
             ui.spacing_mut().item_spacing.y = 5.0;
-            pro::label_value(ui, "Format", &format!("{} × {}", self.proj.width, self.proj.height));
-            pro::label_value(ui, "Images/s", &self.proj.fps.to_string());
-            pro::label_value(ui, "Durée", &tc(self.proj.duration(), self.proj.fps));
-            pro::label_value(ui, "V1 · V2 · titres · A2", &format!("{} · {} · {} · {}", self.proj.clips.len(), self.proj.overlays.len(), self.proj.titles.len(), self.proj.music.len()));
+            pro::label_value(ui, tl("Format"), &format!("{} × {}", self.proj.width, self.proj.height));
+            pro::label_value(ui, tl("Images/s"), &self.proj.fps.to_string());
+            pro::label_value(ui, tl("Durée"), &tc(self.proj.duration(), self.proj.fps));
+            pro::label_value(ui, tl("V1 · V2 · titres · A2"), &format!("{} · {} · {} · {}", self.proj.clips.len(), self.proj.overlays.len(), self.proj.titles.len(), self.proj.music.len()));
             ui.add_space(6.0);
-            if pro::secondary(ui, "Réglages de la séquence…").clicked() {
+            if pro::secondary(ui, tl("Réglages de la séquence…")).clicked() {
                 self.seq_sheet = true;
             }
         });
-        pro::dock_panel(ui, "quick", "Ajouter", |ui| {
+        pro::dock_panel(ui, "quick", tl("Ajouter"), |ui| {
             ui.horizontal_wrapped(|ui| {
-                if pro::secondary_icon(ui, "Titre", |p, r, c| glyph(p, r, G::Title, c)).clicked() {
+                if pro::secondary_icon(ui, tl("Titre"), |p, r, c| glyph(p, r, G::Title, c)).clicked() {
                     self.add_title_at(0.0, 0.0, false);
                 }
-                if pro::secondary_icon(ui, "Marqueur", |p, r, c| glyph(p, r, G::Marker, c)).clicked() {
+                if pro::secondary_icon(ui, tl("Marqueur"), |p, r, c| glyph(p, r, G::Marker, c)).clicked() {
                     self.add_marker();
                 }
             });
@@ -823,17 +824,17 @@ impl Cut {
                 self.add_generator(k);
             }
         });
-        pro::dock_panel(ui, "mixer", "Mixage", |ui| {
+        pro::dock_panel(ui, "mixer", tl("Mixage"), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             row_slider(ui, "Volume général", &mut self.proj.master_db, -24.0..=12.0, " dB", false);
             row_slider(ui, "Atténuation musique sous les voix", &mut self.proj.duck_db, -30.0..=0.0, " dB", false);
-            studio_ui::pro::tip(ui, "La musique (A2) baisse automatiquement quand un clip V1 a du son.");
+            studio_ui::pro::tip(ui, tl("La musique (A2) baisse automatiquement quand un clip V1 a du son."));
         });
         if !self.proj.markers.is_empty() {
             let fps = self.proj.fps;
             let mut go = None;
             let mut edit = None;
-            pro::dock_panel(ui, "markers", "Marqueurs", |ui| {
+            pro::dock_panel(ui, "markers", tl("Marqueurs"), |ui| {
                 for (k, m) in self.proj.markers.iter().enumerate() {
                     let col = MARKER_COLORS[m.color as usize % MARKER_COLORS.len()].1;
                     ui.horizontal(|ui| {
@@ -844,14 +845,14 @@ impl Cut {
                             go = Some(m.t);
                         }
                         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            if ui.small_button("✎").on_hover_text("Modifier").clicked() {
+                            if ui.small_button("✎").on_hover_text(tl("Modifier")).clicked() {
                                 edit = Some(k);
                             }
                         });
                     });
                 }
                 ui.add_space(4.0);
-                if pro::ghost(ui, "Copier comme chapitres YouTube").clicked() {
+                if pro::ghost(ui, tl("Copier comme chapitres YouTube")).clicked() {
                     ui.ctx().copy_text(crate::chapters(&self.proj));
                 }
             });
@@ -864,13 +865,13 @@ impl Cut {
         }
         if !self.undo.is_empty() {
             let mut back = None;
-            pro::dock_panel(ui, "history", "Historique", |ui| {
+            pro::dock_panel(ui, "history", tl("Historique"), |ui| {
                 let n = self.undo.len();
                 let from = n.saturating_sub(12);
                 for k in (from..n).rev() {
                     let next = if k + 1 < n { &self.undo[k + 1] } else { &self.proj };
                     let label = crate::describe(&self.undo[k], next);
-                    if pro::ghost(ui, &format!("{}  {label}", k + 1)).on_hover_text("Revenir juste avant cette étape").clicked() {
+                    if pro::ghost(ui, &format!("{}  {label}", k + 1)).on_hover_text(tl("Revenir juste avant cette étape")).clicked() {
                         back = Some(k);
                     }
                 }
@@ -879,7 +880,7 @@ impl Cut {
                 self.history_to(k);
             }
         }
-        pro::dock_panel(ui, "shortcuts", "Raccourcis", |ui| {
+        pro::dock_panel(ui, "shortcuts", tl("Raccourcis"), |ui| {
             for (k, d) in [
                 ("Espace", "Lecture"),
                 ("J K L", "Navette arrière · pause · avant"),
@@ -902,7 +903,7 @@ impl Cut {
                 });
             }
             ui.add_space(4.0);
-            if pro::ghost(ui, "Tous les tutoriels  →").clicked() {
+            if pro::ghost(ui, tl("Tous les tutoriels  →")).clicked() {
                 self.help.learn("Lecture et navigation");
             }
         });

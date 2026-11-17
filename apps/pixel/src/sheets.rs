@@ -1,4 +1,5 @@
 use crate::doc::{BLENDS, Document, Xform, fade};
+use studio_ui::i18n::tl;
 use crate::shapes::{self, TextStyle};
 use crate::tools::{self, blend_index};
 use crate::{BACKGROUNDS, PASTEBOARDS, PRESETS, Pixel, Sheet, preset_card};
@@ -61,7 +62,7 @@ fn buttons(ui: &mut Ui, ok: &str, apply: &mut bool, cancel: &mut bool) {
         if pro::primary(ui, ok).clicked() {
             *apply = true;
         }
-        if pro::secondary(ui, "Annuler").clicked() {
+        if pro::secondary(ui, tl("Annuler")).clicked() {
             *cancel = true;
         }
     });
@@ -101,7 +102,7 @@ impl Pixel {
             ui.spacing_mut().slider_width = 250.0;
             match &mut sheet {
                 Sheet::Canvas { w, h, anchor, relative, ext } => {
-                    ui.checkbox(relative, "Relative (ajoute à la taille actuelle)");
+                    ui.checkbox(relative, tl("Relative (ajoute à la taille actuelle)"));
                     let (mut rw, mut rh) = if *relative { (*w as i64 - dw as i64, *h as i64 - dh as i64) } else { (*w as i64, *h as i64) };
                     ui.horizontal(|ui| {
                         ui.add(egui::DragValue::new(&mut rw).range(if *relative { -(dw as i64 - 1)..=16384 } else { 1..=16384 }).prefix("L ").suffix(" px"));
@@ -136,7 +137,7 @@ impl Pixel {
                 Sheet::ImageSize { w, h, keep, percent, resample, dpi } => {
                     let ratio = dw as f32 / dh as f32;
                     let mut unit = *percent as usize;
-                    if pro::segmented(ui, &mut unit, &["Pixels", "Pourcentage"]) {
+                    if pro::segmented(ui, &mut unit, &[tl("Pixels"), tl("Pourcentage")]) {
                         *percent = unit == 1;
                     }
                     if *percent {
@@ -166,7 +167,7 @@ impl Pixel {
                             *w = ((*h as f32 * ratio).round() as u32).max(1);
                         }
                     }
-                    ui.checkbox(keep, "Conserver les proportions");
+                    ui.checkbox(keep, tl("Conserver les proportions"));
                     ui.horizontal(|ui| {
                         label(ui, "Rééchantillonnage");
                         tools::combo(ui, "resample", resample, &RESAMPLE, 170.0);
@@ -199,7 +200,7 @@ impl Pixel {
                         label(ui, "Échelle");
                         ui.add(egui::DragValue::new(&mut sx).range(1.0..=1000.0).suffix(" %").prefix("L "));
                         ui.add(egui::DragValue::new(&mut sy).range(1.0..=1000.0).suffix(" %").prefix("H "));
-                        ui.checkbox(&mut linked, "Lier");
+                        ui.checkbox(&mut linked, tl("Lier"));
                     });
                     if linked && (sx / 100.0 - t.sx).abs() > 1e-4 {
                         sy = sx;
@@ -229,14 +230,14 @@ impl Pixel {
                         ui.add(egui::DragValue::new(&mut t.ty).prefix("Y ").suffix(" px"));
                     });
                     ui.horizontal(|ui| {
-                        ui.checkbox(&mut t.nearest, "Pixels nets (plus proche voisin)");
-                        if ui.small_button("Symétrie H").clicked() {
+                        ui.checkbox(&mut t.nearest, tl("Pixels nets (plus proche voisin)"));
+                        if ui.small_button(tl("Symétrie H")).clicked() {
                             t.sx = -t.sx;
                         }
-                        if ui.small_button("Symétrie V").clicked() {
+                        if ui.small_button(tl("Symétrie V")).clicked() {
                             t.sy = -t.sy;
                         }
-                        if ui.small_button("Réinitialiser").clicked() {
+                        if ui.small_button(tl("Réinitialiser")).clicked() {
                             *t = Xform::identity();
                         }
                     });
@@ -267,7 +268,7 @@ impl Pixel {
                         ui.horizontal(|ui| {
                             label(ui, "Position");
                             let mut p = *position as usize;
-                            if pro::segmented(ui, &mut p, &["Intérieur", "Centre", "Extérieur"]) {
+                            if pro::segmented(ui, &mut p, &[tl("Intérieur"), tl("Centre"), tl("Extérieur")]) {
                                 *position = p as u8;
                             }
                         });
@@ -286,7 +287,7 @@ impl Pixel {
                         });
                     }
                     if k != 3 {
-                        ui.label(RichText::new("L'effet est créé sur un calque séparé, modifiable et masquable.").size(12.0).color(FAINT));
+                        ui.label(RichText::new(tl("L'effet est créé sur un calque séparé, modifiable et masquable.")).size(12.0).color(FAINT));
                     }
                 }
                 Sheet::SelectBy { kind, px } => {
@@ -307,7 +308,7 @@ impl Pixel {
                         label(ui, "Tolérance");
                         ui.add(egui::Slider::new(fuzz, 1.0..=200.0));
                     }
-                    ui.label(RichText::new("La sélection obtenue est progressive : les pixels proches sont pris en partie.").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("La sélection obtenue est progressive : les pixels proches sont pris en partie.")).size(12.0).color(FAINT));
                 }
                 Sheet::Fill { content, opacity, blend } => {
                     ui.horizontal(|ui| {
@@ -328,13 +329,13 @@ impl Pixel {
                 }
                 Sheet::Export { format, quality, scale, bg, level, ico, selection } => {
                     label(ui, "Format");
-                    pro::segmented(ui, format, &["PNG", "JPEG", "WebP", "BMP", "TIFF", "GIF", "ICO"]);
+                    pro::segmented(ui, format, &[tl("PNG"), tl("JPEG"), tl("WebP"), tl("BMP"), tl("TIFF"), tl("GIF"), tl("ICO")]);
                     ui.add_space(6.0);
                     match *format {
                         0 => {
                             ui.horizontal(|ui| {
                                 label(ui, "Compression");
-                                pro::segmented(ui, level, &["Rapide", "Normale", "Maximale"]);
+                                pro::segmented(ui, level, &[tl("Rapide"), tl("Normale"), tl("Maximale")]);
                             });
                         }
                         1 => {
@@ -385,17 +386,17 @@ impl Pixel {
                 }
                 Sheet::RotateCanvas { angle } => {
                     ui.add(egui::Slider::new(angle, -180.0..=180.0).suffix("°"));
-                    ui.label(RichText::new("La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.")).size(12.0).color(FAINT));
                 }
                 Sheet::Guide { vertical, pos } => {
                     let mut v = *vertical as usize;
-                    if pro::segmented(ui, &mut v, &["Horizontal", "Vertical"]) {
+                    if pro::segmented(ui, &mut v, &[tl("Horizontal"), tl("Vertical")]) {
                         *vertical = v == 1;
                     }
                     ui.add(egui::DragValue::new(pos).range(0.0..=16384.0).suffix(" px").prefix("Position "));
                 }
                 Sheet::Note { text, .. } => {
-                    let r = ui.add(egui::TextEdit::multiline(text).hint_text("Note pour plus tard (non exportée)").desired_rows(4).desired_width(f32::INFINITY));
+                    let r = ui.add(egui::TextEdit::multiline(text).hint_text(tl("Note pour plus tard (non exportée)")).desired_rows(4).desired_width(f32::INFINITY));
                     if text.is_empty() {
                         r.request_focus();
                     }
@@ -414,8 +415,8 @@ impl Pixel {
                         label(ui, "Curseur de peinture");
                         tools::combo(ui, "cmode", &mut self.cursor_mode, &["Forme", "Forme et réticule", "Précis"], 160.0);
                     });
-                    ui.checkbox(&mut self.pixel_grid, "Grille de pixels aux forts zooms");
-                    ui.checkbox(&mut self.snap, "Magnétisme");
+                    ui.checkbox(&mut self.pixel_grid, tl("Grille de pixels aux forts zooms"));
+                    ui.checkbox(&mut self.snap, tl("Magnétisme"));
                 }
                 Sheet::Shortcuts => {
                     egui::ScrollArea::vertical().max_height(420.0).show(ui, |ui| {
@@ -545,12 +546,12 @@ impl Pixel {
         let Some(mut nd) = self.new_doc.take() else { return };
         let mut create = false;
         let keep = pro::sheet(ctx, "new", 760.0, |ui| {
-            ui.label(RichText::new("Nouveau document").font(semibold(20.0)).color(INK_STRONG));
+            ui.label(RichText::new(tl("Nouveau document")).font(semibold(20.0)).color(INK_STRONG));
             ui.add_space(14.0);
             ui.horizontal_top(|ui| {
                 ui.vertical(|ui| {
                     ui.set_width(450.0);
-                    ui.label(RichText::new("Préréglages").font(semibold(12.5)).color(MUTED));
+                    ui.label(RichText::new(tl("Préréglages")).font(semibold(12.5)).color(MUTED));
                     ui.add_space(6.0);
                     egui::ScrollArea::vertical().max_height(430.0).show(ui, |ui| {
                         for (ri, row) in PRESETS.chunks(3).enumerate() {
@@ -571,7 +572,7 @@ impl Pixel {
                 });
                 ui.add_space(16.0);
                 ui.vertical(|ui| {
-                    ui.label(RichText::new("Détails").font(semibold(12.5)).color(MUTED));
+                    ui.label(RichText::new(tl("Détails")).font(semibold(12.5)).color(MUTED));
                     ui.add_space(6.0);
                     ui.add(egui::TextEdit::singleline(&mut nd.name).desired_width(f32::INFINITY));
                     ui.add_space(10.0);
@@ -582,10 +583,10 @@ impl Pixel {
                     ui.add_space(6.0);
                     ui.horizontal(|ui| {
                         label(ui, "Orientation");
-                        if ui.selectable_label(nd.w >= nd.h, "Paysage").clicked() && nd.w < nd.h {
+                        if ui.selectable_label(nd.w >= nd.h, tl("Paysage")).clicked() && nd.w < nd.h {
                             std::mem::swap(&mut nd.w, &mut nd.h);
                         }
-                        if ui.selectable_label(nd.h > nd.w, "Portrait").clicked() && nd.w >= nd.h {
+                        if ui.selectable_label(nd.h > nd.w, tl("Portrait")).clicked() && nd.w >= nd.h {
                             std::mem::swap(&mut nd.w, &mut nd.h);
                         }
                     });
@@ -596,10 +597,10 @@ impl Pixel {
             });
             ui.add_space(16.0);
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if pro::primary(ui, "Créer").clicked() {
+                if pro::primary(ui, tl("Créer")).clicked() {
                     create = true;
                 }
-                if pro::secondary(ui, "Annuler").clicked() {
+                if pro::secondary(ui, tl("Annuler")).clicked() {
                     nd.preset = usize::MAX;
                 }
             });
@@ -631,7 +632,7 @@ impl Pixel {
             ui.horizontal(|ui| {
                 ui.label(RichText::new(kind.title()).font(semibold(18.0)).color(INK_STRONG));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if ui.add(egui::Button::new(RichText::new("Réinitialiser").color(BLUE)).frame(false)).clicked() {
+                    if ui.add(egui::Button::new(RichText::new(tl("Réinitialiser")).color(BLUE)).frame(false)).clicked() {
                         reset = true;
                     }
                 });
@@ -651,7 +652,7 @@ impl Pixel {
                             adj.vals = vals.clone();
                         }
                         r.context_menu(|ui| {
-                            if ui.button("Supprimer le préréglage").clicked() {
+                            if ui.button(tl("Supprimer le préréglage")).clicked() {
                                 delete = Some(*i);
                                 ui.close();
                             }
@@ -710,8 +711,8 @@ impl Pixel {
             }
             ui.add_space(6.0);
             ui.horizontal(|ui| {
-                ui.checkbox(&mut adj.preview, "Aperçu");
-                ui.add(egui::TextEdit::singleline(&mut adj.preset_name).hint_text("Nom du préréglage").desired_width(140.0));
+                ui.checkbox(&mut adj.preview, tl("Aperçu"));
+                ui.add(egui::TextEdit::singleline(&mut adj.preset_name).hint_text(tl("Nom du préréglage")).desired_width(140.0));
                 if ui.add_enabled(!adj.preset_name.trim().is_empty(), egui::Button::new("Enregistrer")).clicked() {
                     save = true;
                 }
@@ -796,7 +797,7 @@ impl Pixel {
         let keep = pro::sheet(ctx, "text", 460.0, |ui| {
             ui.label(RichText::new(if draft.vertical { "Texte vertical" } else { "Texte" }).font(semibold(18.0)).color(INK_STRONG));
             ui.add_space(10.0);
-            let r = ui.add(egui::TextEdit::multiline(&mut draft.text).hint_text("Ton texte").desired_rows(3).desired_width(f32::INFINITY));
+            let r = ui.add(egui::TextEdit::multiline(&mut draft.text).hint_text(tl("Ton texte")).desired_rows(3).desired_width(f32::INFINITY));
             if draft.text.is_empty() {
                 r.request_focus();
             }
@@ -804,9 +805,9 @@ impl Pixel {
             ui.horizontal(|ui| {
                 label(ui, "Police");
                 tools::combo(ui, "tfont", &mut self.text_font, &shapes::FONTS.map(|f| f.0), 150.0);
-                ui.toggle_value(&mut self.text_bold, RichText::new("G").strong());
-                ui.toggle_value(&mut self.text_italic, RichText::new("I").italics());
-                ui.toggle_value(&mut self.text_underline, RichText::new("S").underline());
+                ui.toggle_value(&mut self.text_bold, RichText::new(tl("G")).strong());
+                ui.toggle_value(&mut self.text_italic, RichText::new(tl("I")).italics());
+                ui.toggle_value(&mut self.text_underline, RichText::new(tl("S")).underline());
             });
             label(ui, "Taille");
             ui.spacing_mut().slider_width = 280.0;
@@ -818,12 +819,12 @@ impl Pixel {
                 ui.add(egui::DragValue::new(&mut self.leading).range(0.5..=3.0).speed(0.01).suffix(" ×"));
             });
             if !draft.vertical {
-                pro::segmented(ui, &mut self.text_align, &["Gauche", "Centre", "Droite"]);
+                pro::segmented(ui, &mut self.text_align, &[tl("Gauche"), tl("Centre"), tl("Droite")]);
             }
             ui.horizontal(|ui| {
                 let (r, _) = ui.allocate_exact_size(Vec2::splat(16.0), Sense::hover());
                 ui.painter().rect(r, CornerRadius::same(4), self.primary, Stroke::new(1.0, LINE), StrokeKind::Inside);
-                ui.label(RichText::new("Couleur principale · nouveau calque de texte").size(12.0).color(FAINT));
+                ui.label(RichText::new(tl("Couleur principale · nouveau calque de texte")).size(12.0).color(FAINT));
             });
             buttons(ui, "Ajouter", &mut add, &mut cancel);
         });

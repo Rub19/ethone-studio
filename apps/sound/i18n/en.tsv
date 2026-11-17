@@ -1,0 +1,153 @@
+# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+Ouvrir un son…	
+Ctrl+O	
+Exporter…	
+Ctrl+E	
+Tout sélectionner	
+Ctrl+A	
+Lecture / pause	
+Espace	
+Ajouter un marqueur	
+M	
+Supprimer les silences (plus de 0,8 s)	
+Édition	
+Supprimer les silences courts (plus de 0,4 s)	
+Rogner les silences au début et à la fin	
+Nettoyage · conserve les pauses internes	
+Normaliser la crête à −1 dB	
+Volume · sélection ou fichier entier	
+Normaliser le volume perçu à −16 LUFS	
+Podcast et voix · sélection ou fichier entier	
+Ajouter des micro-fondus aux bords	
+20 ms · évite les clics	
+Découper aux silences en fichiers WAV…	
+Prises, samples, chapitres	
+Boucle parfaite (fondu de 0,5 s)	
+Musique de jeu, ambiance	
+Boucle parfaite (fondu de 2 s)	
+Annuler	
+Ctrl+Z	
+Exporter	
+WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E	
+Fréquence d'échantillonnage et canaux	
+Fichier	
+Nouveau (5 s de silence)	
+Ouvrir…                         Ctrl+O	
+Exporter…                       Ctrl+E	
+Propriétés du son…	
+Tout sélectionner         Ctrl+A	
+Du curseur au début     Maj+Origine	
+Du curseur à la fin       Maj+Fin	
+Ajouter / retirer un marqueur   M	
+Effets	
+Préréglages	
+Générer	
+Plus de sons dans le panneau Générer	
+Affichage	
+Espace de travail	
+Tout afficher               Ctrl+0	
+Zoom avant                   Ctrl++	
+Zoom arrière                Ctrl+−	
+Spectrogramme                S	
+Suivre la lecture              F	
+Lecture en boucle            L	
+Lecture / pause (Espace)	
+Enregistrer au micro au curseur (R)	
+Sélection	
+Analyse	
+Volume	
+Écrêtés	
+Crête réelle	
+Volume perçu (LUFS)	
+Courbe des fondus	
+Linéaire	
+Log	
+En S	
+Fondu entrant	
+Fondu sortant	
+Nettoyage	
+Réduction de bruit	
+1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.	
+Supprimer les silences	
+Raccourcir les blancs	
+Égaliseur 5 bandes	
+Dynamique	
+Modulation	
+Chorus	
+Flanger	
+Trémolo	
+Panoramique automatique	
+Temps et hauteur	
+Stéréo	
+Mono	
+Échanger G/D	
+Inséré au curseur	
+Tonalité	
+Insérer la tonalité	
+Bruit	
+Blanc	
+Rose	
+Brun	
+Insérer le bruit	
+Balayage	
+Insérer un balayage	
+Métronome	
+Insérer le métronome	
+Détection	
+Détecter le tempo	
+Analyse la sélection ou tout le fichier	
+Marqueur sur chaque mesure	
+Repérer les sons (un marqueur par prise)	
+Poser les marqueurs	
+Rechercher un effet…	
+Valeurs par défaut	
+Marqueurs	
+M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.	
+Aller au marqueur	
++ Marqueur au curseur	
+Exporter le son	
+WAV sans perte, lisible partout	
+16 bits (CD)	
+24 bits	
+32 flottant	
+8 bits	
+Aucun	
+Triangulaire	
+Mise en forme	
+Originale	
+44,1 k	
+48 k	
+22 k	
+96 k	
+Conversion haute qualité (filtre sinc)	
+Originaux	
+Tout	
+Un fichier par marqueur	
+Pose des marqueurs (M) pour découper en plusieurs fichiers.	
+Normaliser à −1 dB avant l'export	
+Inclure les marqueurs (repères lus par les éditeurs audio)	
+Métadonnées	
+Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.	
+Propriétés du son	
+Convertir la fréquence d'échantillonnage	
+Terminé	
+Zoom 1:1 (échantillons)	
+Entrée	
+Reconstruit la zone à partir de ce qui l'entoure	
+Garde seulement la zone (le reste devient silencieux)	
+Effacer la zone (Échap)	
+Zoom aux échantillons	
+Réinitialiser	
+Forme d'onde	
+Spectrogramme	
+Hauteur	
+Suivre	
+La vue suit la lecture (F)	
+Zoom	
+Z	
+Ctrl+0	
+Vue d'ensemble : clique ou glisse pour te déplacer	
+G D	
+▶ Écouter	
+Essaie l'effet sur 15 s sans rien modifier	
+Appliquer	

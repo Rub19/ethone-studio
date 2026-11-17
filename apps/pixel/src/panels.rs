@@ -1,4 +1,5 @@
 use crate::doc::{BLENDS, rgb_to_hsl};
+use studio_ui::i18n::tl;
 use crate::tools::{self, BRUSH_PRESETS, brushy};
 use crate::{Pixel, SWATCH_SETS, lock_glyph};
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Rect, RichText, Sense, Shape, Stroke, StrokeKind, Ui, Vec2, pos2, vec2};
@@ -52,18 +53,18 @@ impl Pixel {
                 ui.spacing_mut().item_spacing.y = 0.0;
                 studio_ui::dock::begin(ui, "pixel");
                 if self.tool == crate::tools::Tool::PhotoText || !self.pt.lines.is_empty() {
-                    pro::dock_panel(ui, "phototext", "Texte de la photo", |ui| self.pt_panel(ui, ctx));
+                    pro::dock_panel(ui, "phototext", tl("Texte de la photo"), |ui| self.pt_panel(ui, ctx));
                 }
-                pro::dock_panel(ui, "color", "Couleur", |ui| self.color_panel(ui));
-                pro::dock_panel(ui, "swatches", "Nuancier", |ui| self.swatch_panel(ui));
+                pro::dock_panel(ui, "color", tl("Couleur"), |ui| self.color_panel(ui));
+                pro::dock_panel(ui, "swatches", tl("Nuancier"), |ui| self.swatch_panel(ui));
                 if brushy(self.tool) {
-                    pro::dock_panel(ui, "brushes", "Pinceaux", |ui| self.brush_panel(ui));
+                    pro::dock_panel(ui, "brushes", tl("Pinceaux"), |ui| self.brush_panel(ui));
                 }
-                pro::dock_panel(ui, "props", "Propriétés", |ui| self.props_panel(ui));
+                pro::dock_panel(ui, "props", tl("Propriétés"), |ui| self.props_panel(ui));
                 self.navigator(ui);
-                pro::dock_panel(ui, "info", "Infos", |ui| self.info_panel(ui));
-                pro::dock_panel(ui, "history", "Historique", |ui| self.history_panel(ui));
-                pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
+                pro::dock_panel(ui, "info", tl("Infos"), |ui| self.info_panel(ui));
+                pro::dock_panel(ui, "history", tl("Historique"), |ui| self.history_panel(ui));
+                pro::dock_panel(ui, "layers", tl("Calques"), |ui| self.layers_panel(ui));
                 studio_ui::dock::end(ui);
             });
         });
@@ -74,7 +75,7 @@ impl Pixel {
         let w = ui.available_width();
         pro::color_picker(ui, &mut self.primary, w);
         ui.add_space(2.0);
-        pro::segmented(ui, &mut self.color_mode, &["RVB", "TSL", "CMJN"]);
+        pro::segmented(ui, &mut self.color_mode, &[tl("RVB"), tl("TSL"), tl("CMJN")]);
         let c = self.primary;
         match self.color_mode {
             0 => {
@@ -129,7 +130,7 @@ impl Pixel {
             }
             let now = format!("{:02X}{:02X}{:02X}", self.primary.r(), self.primary.g(), self.primary.b());
             ui.ctx().data_mut(|d| d.insert_temp(id, (now, text)));
-            if ui.small_button("Web").on_hover_text("Arrondit à la couleur sûre pour le Web la plus proche").clicked() {
+            if ui.small_button(tl("Web")).on_hover_text(tl("Arrondit à la couleur sûre pour le Web la plus proche")).clicked() {
                 let q = |v: u8| ((v as f32 / 51.0).round() * 51.0) as u8;
                 self.primary = Color32::from_rgb(q(self.primary.r()), q(self.primary.g()), q(self.primary.b()));
             }
@@ -151,20 +152,20 @@ impl Pixel {
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing = vec2(5.0, 5.0);
             for (i, c) in self.swatches.clone().into_iter().enumerate() {
-                let r = swatch(ui, c, 22.0).on_hover_text("Clic : principale · Ctrl+clic : secondaire · clic droit : options");
+                let r = swatch(ui, c, 22.0).on_hover_text(tl("Clic : principale · Ctrl+clic : secondaire · clic droit : options"));
                 if r.clicked() {
                     if ui.input(|i| i.modifiers.command) { self.secondary = c } else { self.primary = c }
                 }
                 r.context_menu(|ui| {
-                    if ui.button("Définir comme couleur principale").clicked() {
+                    if ui.button(tl("Définir comme couleur principale")).clicked() {
                         self.primary = c;
                         ui.close();
                     }
-                    if ui.button("Définir comme couleur secondaire").clicked() {
+                    if ui.button(tl("Définir comme couleur secondaire")).clicked() {
                         self.secondary = c;
                         ui.close();
                     }
-                    if ui.button("Supprimer la nuance").clicked() {
+                    if ui.button(tl("Supprimer la nuance")).clicked() {
                         remove = Some(i);
                         ui.close();
                     }
@@ -173,7 +174,7 @@ impl Pixel {
             let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
             ui.painter().rect(r, CornerRadius::same(5), FIELD, Stroke::NONE, StrokeKind::Inside);
             ui.painter().text(r.center(), Align2::CENTER_CENTER, "+", FontId::proportional(16.0), INK);
-            if resp.on_hover_text("Ajouter la couleur principale").clicked() && !self.swatches.contains(&self.primary) {
+            if resp.on_hover_text(tl("Ajouter la couleur principale")).clicked() && !self.swatches.contains(&self.primary) {
                 self.swatches.push(self.primary);
                 self.save_swatches();
             }
@@ -196,7 +197,7 @@ impl Pixel {
                 ui.spacing_mut().item_spacing.x = 4.0;
                 fixed_label(ui, 100.0, name, 11.5, FAINT);
                 for c in cols {
-                    if swatch(ui, c, 18.0).on_hover_text("Prendre cette couleur").clicked() {
+                    if swatch(ui, c, 18.0).on_hover_text(tl("Prendre cette couleur")).clicked() {
                         self.primary = c;
                     }
                 }
@@ -261,10 +262,10 @@ impl Pixel {
 
     fn props_panel(&mut self, ui: &mut Ui) {
         ui.spacing_mut().item_spacing.y = 4.0;
-        pro::label_value(ui, "Document", &format!("{} × {} px", self.doc.width(), self.doc.height()));
-        pro::label_value(ui, "Calques", &self.doc.layers.len().to_string());
+        pro::label_value(ui, tl("Document"), &format!("{} × {} px", self.doc.width(), self.doc.height()));
+        pro::label_value(ui, tl("Calques"), &self.doc.layers.len().to_string());
         if let Some(s) = self.doc.selection {
-            pro::label_value(ui, "Sélection", &format!("{} × {} à ({}, {})", s.width(), s.height(), s.x0, s.y0));
+            pro::label_value(ui, tl("Sélection"), &format!("{} × {} à ({}, {})", s.width(), s.height(), s.x0, s.y0));
         }
         ui.add_space(6.0);
         let a = self.doc.active;
@@ -286,7 +287,7 @@ impl Pixel {
         ui.horizontal_wrapped(|ui| {
             label(ui, "Verrou");
             let l = &mut self.doc.layers[a];
-            ui.toggle_value(&mut l.lock_alpha, "Transparence").on_hover_text("Peindre sans modifier la transparence");
+            ui.toggle_value(&mut l.lock_alpha, "Transparence").on_hover_text(tl("Peindre sans modifier la transparence"));
             ui.toggle_value(&mut l.lock_pos, "Position");
             ui.toggle_value(&mut l.locked, "Tout");
         });
@@ -313,15 +314,15 @@ impl Pixel {
         if self.doc.layers[a].mask.is_some() {
             ui.horizontal_wrapped(|ui| {
                 label(ui, "Masque");
-                if ui.selectable_label(self.doc.edit_mask, "Modifier").clicked() {
+                if ui.selectable_label(self.doc.edit_mask, tl("Modifier")).clicked() {
                     self.doc.edit_mask = !self.doc.edit_mask;
                 }
                 let on = &mut self.doc.layers[a].mask_on;
-                if ui.selectable_label(!*on, "Désactivé").clicked() {
+                if ui.selectable_label(!*on, tl("Désactivé")).clicked() {
                     *on = !*on;
                     self.doc.touch_all();
                 }
-                if ui.small_button("Inverser").clicked() {
+                if ui.small_button(tl("Inverser")).clicked() {
                     self.doc.invert_mask();
                 }
             });
@@ -335,7 +336,7 @@ impl Pixel {
         let checker = self.checker.id();
         let mut jump = None;
         let mut zoom = self.zoom;
-        pro::dock_panel(ui, "navigator", "Navigateur", |ui| {
+        pro::dock_panel(ui, "navigator", tl("Navigateur"), |ui| {
             let wv = ui.available_width();
             let k = (wv / dw).min(150.0 / dh);
             let (r, resp) = ui.allocate_exact_size(vec2(wv, dh * k), Sense::click_and_drag());
@@ -377,7 +378,7 @@ impl Pixel {
             }
             self.hist = Some((self.doc.version, hst));
         }
-        pro::segmented(ui, &mut self.hist_channel, &["Luminosité", "Rouge", "Vert", "Bleu"]);
+        pro::segmented(ui, &mut self.hist_channel, &[tl("Luminosité"), tl("Rouge"), tl("Vert"), tl("Bleu")]);
         ui.add_space(4.0);
         if let Some((_, h)) = &self.hist {
             let h = &h[self.hist_channel.min(3)];
@@ -406,7 +407,7 @@ impl Pixel {
                 ui.label(RichText::new(format!("T {:.0}°  S {:.0} %  L {:.0} %   x {x}  y {y}", h * 360.0, s * 100.0, l * 100.0)).size(11.5).color(MUTED));
             }
             None => {
-                ui.label(RichText::new("Survole l'image pour lire la couleur").size(12.0).color(FAINT));
+                ui.label(RichText::new(tl("Survole l'image pour lire la couleur")).size(12.0).color(FAINT));
             }
         }
         for (i, (x, y)) in self.samplers.clone().iter().enumerate() {
@@ -447,10 +448,10 @@ impl Pixel {
         }
         ui.add_space(6.0);
         ui.horizontal(|ui| {
-            if ui.small_button("Instantané").on_hover_text("Source de la forme d'historique").clicked() {
+            if ui.small_button(tl("Instantané")).on_hover_text(tl("Source de la forme d'historique")).clicked() {
                 self.snapshot_history();
             }
-            if ui.small_button("Vider l'historique").clicked() {
+            if ui.small_button(tl("Vider l'historique")).clicked() {
                 self.doc.clear_history();
             }
             ui.label(RichText::new(format!("{} états max", self.doc.undo_limit)).size(11.0).color(FAINT));
@@ -516,7 +517,7 @@ impl Pixel {
                 }
                 let on = selected && self.doc.edit_mask;
                 p.rect_stroke(mr, CornerRadius::same(3), Stroke::new(if on { 1.5 } else { 1.0 }, if on { BLUE } else { LINE }), StrokeKind::Outside);
-                if ui.interact(mr, ui.make_persistent_id(("mthumb", i)), Sense::click()).on_hover_text("Clic : modifier le masque").clicked() {
+                if ui.interact(mr, ui.make_persistent_id(("mthumb", i)), Sense::click()).on_hover_text(tl("Clic : modifier le masque")).clicked() {
                     mask_click = Some((i, true));
                 }
                 if ui.interact(thumb, ui.make_persistent_id(("lthumb", i)), Sense::click()).clicked() {
@@ -525,7 +526,7 @@ impl Pixel {
                 name_x = mr.right() + 10.0;
             }
             let eye_resp = ui.interact(eye.expand(4.0), ui.make_persistent_id(("eye", i)), Sense::click());
-            if eye_resp.on_hover_text("Afficher ou masquer (Alt : isoler)").clicked() {
+            if eye_resp.on_hover_text(tl("Afficher ou masquer (Alt : isoler)")).clicked() {
                 visibility = Some((i, ui.input(|x| x.modifiers.alt)));
             }
             let name_pos = pos2(name_x, row.center().y);
@@ -556,7 +557,7 @@ impl Pixel {
             if locked || resp.hovered() {
                 lock_glyph(ui.painter(), lock_r, locked, if locked { INK } else { FAINT });
             }
-            if ui.interact(lock_r.expand(3.0), ui.make_persistent_id(("lock", i)), Sense::click()).on_hover_text("Verrouiller le calque").clicked() {
+            if ui.interact(lock_r.expand(3.0), ui.make_persistent_id(("lock", i)), Sense::click()).on_hover_text(tl("Verrouiller le calque")).clicked() {
                 self.doc.layers[i].locked = !locked;
             } else if resp.double_clicked() {
                 if self.doc.layers[i].adjust.is_some() {
@@ -569,19 +570,19 @@ impl Pixel {
             }
             resp.context_menu(|ui| {
                 self.doc.active = i;
-                if ui.button("Renommer").clicked() {
+                if ui.button(tl("Renommer")).clicked() {
                     self.renaming = Some((i, self.doc.layers[i].name.clone()));
                     ui.close();
                 }
-                if ui.button("Dupliquer").clicked() {
+                if ui.button(tl("Dupliquer")).clicked() {
                     self.doc.duplicate_layer();
                     ui.close();
                 }
-                if ui.button("Supprimer").clicked() {
+                if ui.button(tl("Supprimer")).clicked() {
                     self.doc.delete_layer();
                     ui.close();
                 }
-                if ui.button("Sélectionner les pixels").clicked() {
+                if ui.button(tl("Sélectionner les pixels")).clicked() {
                     self.doc.select_layer_alpha();
                     ui.close();
                 }
@@ -596,7 +597,7 @@ impl Pixel {
                     self.doc.merge_down();
                     ui.close();
                 }
-                ui.menu_button("Couleur de l'étiquette", |ui| {
+                ui.menu_button(tl("Couleur de l'étiquette"), |ui| {
                     for (k, n) in TAG_NAMES.iter().enumerate() {
                         if ui.button(*n).clicked() {
                             self.doc.layers[i].tag = k as u8;
@@ -604,7 +605,7 @@ impl Pixel {
                         }
                     }
                 });
-                ui.menu_button("Mode de fusion", |ui| {
+                ui.menu_button(tl("Mode de fusion"), |ui| {
                     for (b, n) in BLENDS {
                         if ui.selectable_label(self.doc.layers[i].blend == b, n).clicked() {
                             self.doc.layers[i].blend = b;

@@ -1,4 +1,5 @@
 use crate::develop::{self, Dab, Mask, Part, PartKind, RedEye, Settings, Spot, SpotMode, View as Geo};
+use studio_ui::i18n::tl;
 use crate::widgets::{caption, short};
 use crate::{Lumen, display_name};
 use eframe::egui::{self, Align, Align2, Color32, CornerRadius, FontId, Layout, Painter, Pos2, Rect, RichText, Sense, Stroke, Ui, Vec2, pos2, vec2};
@@ -270,10 +271,10 @@ impl Lumen {
         let before = s.clone();
         match self.tool {
             Tool::None => {
-                studio_ui::pro::tip(ui, "Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom");
+                studio_ui::pro::tip(ui, tl("Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom"));
             }
             Tool::Crop => {
-                ui.label(RichText::new("Format").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Format")).size(12.0).color(MUTED));
                 egui::ComboBox::from_id_salt("crop-ratio").width(72.0).selected_text(develop::RATIOS[self.crop_ratio].0).show_ui(ui, |ui| {
                     for (k, (n, _)) in develop::RATIOS.iter().enumerate() {
                         if ui.selectable_value(&mut self.crop_ratio, k, *n).clicked() {
@@ -281,43 +282,43 @@ impl Lumen {
                         }
                     }
                 });
-                ui.checkbox(&mut self.crop_lock, "Verrouiller");
-                if ui.small_button("⇄").on_hover_text("Inverser l'orientation du format").clicked() {
+                ui.checkbox(&mut self.crop_lock, tl("Verrouiller"));
+                if ui.small_button("⇄").on_hover_text(tl("Inverser l'orientation du format")).clicked() {
                     let r = develop::RATIOS[self.crop_ratio].1;
                     if let Some(k) = develop::RATIOS.iter().position(|x| r > 0.0 && (x.1 - 1.0 / r).abs() < 0.01) {
                         self.crop_ratio = k;
                         self.apply_ratio(&mut s);
                     }
                 }
-                ui.label(RichText::new("Superposition").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Superposition")).size(12.0).color(MUTED));
                 egui::ComboBox::from_id_salt("crop-ov").width(110.0).selected_text(OVERLAYS[self.crop_overlay]).show_ui(ui, |ui| {
                     for (k, n) in OVERLAYS.iter().enumerate() {
                         ui.selectable_value(&mut self.crop_overlay, k, *n);
                     }
                 });
-                ui.label(RichText::new("Angle").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Angle")).size(12.0).color(MUTED));
                 ui.add(egui::Slider::new(&mut s.straighten, -45.0..=45.0).step_by(0.1).suffix("°"));
-                if pro::ghost(ui, "Auto").on_hover_text("Redresse l'horizon automatiquement").clicked()
+                if pro::ghost(ui, tl("Auto")).on_hover_text(tl("Redresse l'horizon automatiquement")).clicked()
                     && let Some((_, src)) = &self.source
                 {
                     s.straighten = develop::auto_straighten(src);
                 }
-                if pro::ghost(ui, "Réinitialiser").clicked() {
+                if pro::ghost(ui, tl("Réinitialiser")).clicked() {
                     (s.crop, s.straighten) = ([0.0; 4], 0.0);
                 }
-                if pro::primary(ui, "Terminé").clicked() {
+                if pro::primary(ui, tl("Terminé")).clicked() {
                     self.tool = Tool::None;
                 }
             }
             Tool::Straighten => {
                 caption(ui, "Trace une ligne le long de l'horizon ou d'une verticale");
                 ui.add(egui::Slider::new(&mut s.straighten, -45.0..=45.0).step_by(0.1).suffix("°"));
-                if pro::ghost(ui, "Auto").clicked()
+                if pro::ghost(ui, tl("Auto")).clicked()
                     && let Some((_, src)) = &self.source
                 {
                     s.straighten = develop::auto_straighten(src);
                 }
-                if pro::ghost(ui, "Réinitialiser").clicked() {
+                if pro::ghost(ui, tl("Réinitialiser")).clicked() {
                     s.straighten = 0.0;
                 }
             }
@@ -337,7 +338,7 @@ impl Lumen {
                     if ui.add(egui::DragValue::new(&mut size).range(3.0..=200.0).prefix("⌀ ")).changed() {
                         sp.r = size / 1000.0;
                     }
-                    if pro::ghost(ui, "Nouvelle source").on_hover_text("Cherche une autre zone de remplacement").clicked()
+                    if pro::ghost(ui, tl("Nouvelle source")).on_hover_text(tl("Cherche une autre zone de remplacement")).clicked()
                         && let Some((_, src)) = &self.source
                     {
                         let (dx, dy) = (sp.sx - sp.x, sp.sy - sp.y);
@@ -345,7 +346,7 @@ impl Lumen {
                         let (sx, sy) = if (sx - sp.sx).abs() + (sy - sp.sy).abs() < 1e-3 { (sp.x - dx, sp.y - dy) } else { (sx + sp.x - (sp.x + dy * 0.5), sy + sp.y - (sp.y - dx * 0.5)) };
                         (sp.sx, sp.sy) = (sx.clamp(0.0, 1.0), sy.clamp(0.0, 1.0));
                     }
-                    if pro::ghost(ui, "Supprimer").clicked() {
+                    if pro::ghost(ui, tl("Supprimer")).clicked() {
                         s.spots.remove(k);
                         self.sel_spot = None;
                     }
@@ -362,13 +363,13 @@ impl Lumen {
                 ui.add(egui::Slider::new(&mut self.eye_darken, 0.0..=100.0).text("Assombrir"));
                 if let Some(k) = self.sel_eye.filter(|k| *k < s.red_eyes.len()) {
                     (s.red_eyes[k].pupil, s.red_eyes[k].darken) = (self.eye_pupil / 100.0, self.eye_darken / 100.0);
-                    if pro::ghost(ui, "Supprimer").clicked() {
+                    if pro::ghost(ui, tl("Supprimer")).clicked() {
                         s.red_eyes.remove(k);
                         self.sel_eye = None;
                     }
                 }
                 caption(ui, "Clique sur l'œil ou glisse pour tracer le cercle");
-                if !s.red_eyes.is_empty() && pro::ghost(ui, "Tout effacer").clicked() {
+                if !s.red_eyes.is_empty() && pro::ghost(ui, tl("Tout effacer")).clicked() {
                     s.red_eyes.clear();
                     self.sel_eye = None;
                 }
@@ -377,18 +378,18 @@ impl Lumen {
                 ui.add(egui::Slider::new(&mut self.brush_size, 3.0..=300.0).text("Taille"));
                 ui.add(egui::Slider::new(&mut self.brush_feather, 0.0..=100.0).text("Contour"));
                 ui.add(egui::Slider::new(&mut self.brush_flow, 1.0..=100.0).text("Débit"));
-                ui.toggle_value(&mut self.brush_erase, "Gomme").on_hover_text("Ou maintiens Alt");
-                if pro::ghost(ui, "Nouveau masque").clicked() {
+                ui.toggle_value(&mut self.brush_erase, "Gomme").on_hover_text(tl("Ou maintiens Alt"));
+                if pro::ghost(ui, tl("Nouveau masque")).clicked() {
                     self.sel_mask = None;
                     self.set_settings(i, s.clone());
                     self.ensure_brush_target(i);
                     s = self.settings(i);
                 }
-                ui.checkbox(&mut self.show_overlay, "Superposition (O)");
+                ui.checkbox(&mut self.show_overlay, tl("Superposition (O)"));
             }
             Tool::Linear | Tool::Radial => {
                 caption(ui, if self.tool == Tool::Linear { "Glisse sur la photo pour tracer un filtre gradué" } else { "Glisse depuis le centre pour tracer un filtre radial" });
-                ui.checkbox(&mut self.show_overlay, "Superposition (O)");
+                ui.checkbox(&mut self.show_overlay, tl("Superposition (O)"));
             }
             Tool::WbPicker => {
                 caption(ui, "Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.");

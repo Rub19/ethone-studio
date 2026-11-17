@@ -1,4 +1,5 @@
 use super::*;
+use studio_ui::i18n::tl;
 use model::BEZ_PRESETS;
 
 fn item(ui: &mut Ui, enabled: bool, label: &str, key: &str) -> bool {
@@ -24,7 +25,7 @@ impl Motion {
 
     pub(crate) fn menus(&mut self, ui: &mut Ui) {
         let has = self.sel.is_some();
-        ui.menu_button("Fichier", |ui| {
+        ui.menu_button(tl("Fichier"), |ui| {
             if let Some(t) = studio_ui::handoff::menu(ui, &[("cut", "ajouter au montage"), ("pixel", "retoucher l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("lumen", "développer")]) {
                 let ctx = ui.ctx().clone();
                 self.send_to(t, &ctx);
@@ -36,7 +37,7 @@ impl Motion {
             if item(ui, true, "Ouvrir…", "Ctrl+O") {
                 self.open();
             }
-            ui.menu_button("Ouvrir un projet récent", |ui| {
+            ui.menu_button(tl("Ouvrir un projet récent"), |ui| {
                 let mut open = None;
                 for p in &self.recents {
                     if ui.button(p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()).clicked() {
@@ -44,7 +45,7 @@ impl Motion {
                     }
                 }
                 if self.recents.is_empty() {
-                    ui.label(RichText::new("Aucun projet récent").color(FAINT));
+                    ui.label(RichText::new(tl("Aucun projet récent")).color(FAINT));
                 }
                 if let Some(p) = open {
                     self.open_path(&p);
@@ -65,7 +66,7 @@ impl Motion {
             if item(ui, on, "File de rendu…", "Ctrl+Alt+M") {
                 self.queue_sheet = true;
             }
-            ui.menu_button("Exporter directement", |ui| {
+            ui.menu_button(tl("Exporter directement"), |ui| {
                 for (f, label) in [(3, "Image courante en PNG…"), (4, "Image courante en SVG…"), (6, "Planche contact PNG…"), (7, "Animation Lottie JSON…"), (1, "GIF animé…")] {
                     if item(ui, on, label, "") {
                         let mut o = self.default_export();
@@ -79,7 +80,7 @@ impl Motion {
             self.help.menu(ui);
             return;
         }
-        ui.menu_button("Édition", |ui| {
+        ui.menu_button(tl("Édition"), |ui| {
             if item(ui, !self.undo.is_empty(), "Annuler", "Ctrl+Z") {
                 self.undo_step();
             }
@@ -131,8 +132,8 @@ impl Motion {
                 self.ksel.clear();
             }
         });
-        ui.menu_button("Calque", |ui| {
-            ui.menu_button("Nouveau", |ui| {
+        ui.menu_button(tl("Calque"), |ui| {
+            ui.menu_button(tl("Nouveau"), |ui| {
                 for (label, kind) in KINDS {
                     if ui.button(label).clicked() {
                         self.add_kind(kind);
@@ -140,7 +141,7 @@ impl Motion {
                     }
                 }
             });
-            ui.menu_button("Modèle", |ui| {
+            ui.menu_button(tl("Modèle"), |ui| {
                 for (k, (name, _)) in TEMPLATES.iter().enumerate() {
                     if ui.button(*name).clicked() {
                         self.template(k);
@@ -166,7 +167,7 @@ impl Motion {
             }
             ui.separator();
             ui.add_enabled_ui(has, |ui| {
-                ui.menu_button("Transformer", |ui| {
+                ui.menu_button(tl("Transformer"), |ui| {
                     if item(ui, true, "Centrer le point d'ancrage", "Ctrl+Alt+Origine") {
                         self.anchor_to(4);
                     }
@@ -200,7 +201,7 @@ impl Motion {
                         if item(ui, true, "Retourner verticalement", "") {
                             l.fx.flip_y = !l.fx.flip_y;
                         }
-                        ui.checkbox(&mut l.fx.auto_orient, "Orientation automatique");
+                        ui.checkbox(&mut l.fx.auto_orient, tl("Orientation automatique"));
                         if item(ui, true, "Réinitialiser la transformation", "") {
                             for pi in [2, 3, 4, 5, 8, 9, 10, 11, 12, 13] {
                                 l.props[pi] = Prop::new(model::PROP_DEFAULT[pi]);
@@ -208,7 +209,7 @@ impl Motion {
                         }
                     }
                 });
-                ui.menu_button("Temps", |ui| {
+                ui.menu_button(tl("Temps"), |ui| {
                     if let Some(i) = self.sel {
                         let t = self.t;
                         let dur = self.comp.duration;
@@ -232,7 +233,7 @@ impl Motion {
                             l.end = dur;
                         }
                         ui.separator();
-                        ui.checkbox(&mut l.fx.reverse_time, "Lecture inversée");
+                        ui.checkbox(&mut l.fx.reverse_time, tl("Lecture inversée"));
                         if item(ui, true, "Figer l'image à la tête", "") {
                             l.fx.freeze = true;
                             l.fx.freeze_at = t;
@@ -244,14 +245,14 @@ impl Motion {
                         }
                     }
                 });
-                ui.menu_button("Mode de fusion", |ui| {
+                ui.menu_button(tl("Mode de fusion"), |ui| {
                     if let Some(i) = self.sel {
                         for (k, (_, name)) in BLENDS.iter().enumerate() {
                             ui.selectable_value(&mut self.comp.layers[i].fx.blend, k as u8, *name);
                         }
                     }
                 });
-                ui.menu_button("Masque", |ui| {
+                ui.menu_button(tl("Masque"), |ui| {
                     if let Some(i) = self.sel {
                         for (k, n) in MATTES.iter().enumerate() {
                             ui.selectable_value(&mut self.comp.layers[i].fx.matte, k as u8, *n);
@@ -269,13 +270,13 @@ impl Motion {
                 if let Some(i) = self.sel {
                     let l = &mut self.comp.layers[i];
                     ui.separator();
-                    ui.checkbox(&mut l.visible, "Visible");
-                    ui.checkbox(&mut l.locked, "Verrouillé");
-                    ui.checkbox(&mut l.solo, "Solo");
+                    ui.checkbox(&mut l.visible, tl("Visible"));
+                    ui.checkbox(&mut l.locked, tl("Verrouillé"));
+                    ui.checkbox(&mut l.solo, tl("Solo"));
                 }
             });
         });
-        ui.menu_button("Animation", |ui| {
+        ui.menu_button(tl("Animation"), |ui| {
             let keys = has || !self.ksel.is_empty();
             if item(ui, keys, "Courbe douce", "F9") {
                 self.easy_ease(0);
@@ -293,7 +294,7 @@ impl Motion {
                 self.with_keys(|k| k.set_ease(Ease::Linear));
             }
             ui.add_enabled_ui(keys, |ui| {
-                ui.menu_button("Courbe de Bézier", |ui| {
+                ui.menu_button(tl("Courbe de Bézier"), |ui| {
                     for (n, b) in BEZ_PRESETS {
                         if item(ui, true, n, "") {
                             self.with_keys(|k| k.bez = Some(b));
@@ -328,7 +329,7 @@ impl Motion {
             }
             ui.separator();
             ui.add_enabled_ui(has, |ui| {
-                ui.menu_button("Animations prêtes", |ui| {
+                ui.menu_button(tl("Animations prêtes"), |ui| {
                     for (gi, g) in GROUPS.iter().enumerate() {
                         ui.menu_button(*g, |ui| {
                             for (name, _, grp, id) in ANIMS {
@@ -340,7 +341,7 @@ impl Motion {
                     }
                 });
             });
-            ui.menu_button("Afficher dans la timeline", |ui| {
+            ui.menu_button(tl("Afficher dans la timeline"), |ui| {
                 for (n, k, props) in [("Position", "P", vec![0, 1]), ("Échelle", "S", vec![2, 10, 11]), ("Rotation", "R", vec![3, 12, 13]), ("Opacité", "T", vec![4]), ("Ancre", "A", vec![8, 9]), ("Tracé", "", vec![14, 15, 16, 17])] {
                     if item(ui, has, n, k) {
                         self.tl_filter = Some(props);
@@ -354,21 +355,21 @@ impl Motion {
                 }
             });
         });
-        ui.menu_button("Composition", |ui| {
+        ui.menu_button(tl("Composition"), |ui| {
             if item(ui, true, "Réglages de la composition…", "Ctrl+K") {
                 self.comp_sheet = true;
             }
             if item(ui, true, "Ajuster la durée à l'animation", "") {
                 self.fit_duration();
             }
-            ui.menu_button("Durée", |ui| {
+            ui.menu_button(tl("Durée"), |ui| {
                 for d in [2.0, 3.0, 5.0, 10.0, 15.0, 30.0, 60.0] {
                     if item(ui, true, &secs(d), "") {
                         self.comp.duration = d;
                     }
                 }
             });
-            ui.menu_button("Images par seconde", |ui| {
+            ui.menu_button(tl("Images par seconde"), |ui| {
                 for f in FPS_CHOICES {
                     if ui.selectable_label(self.comp.fps == f, format!("{f} i/s")).clicked() {
                         self.comp.fps = f;
@@ -376,7 +377,7 @@ impl Motion {
                     }
                 }
             });
-            ui.menu_button("Format", |ui| {
+            ui.menu_button(tl("Format"), |ui| {
                 for (name, kind, w, h) in PRESETS {
                     if ui.selectable_label(self.comp.width == w && self.comp.height == h, format!("{name} · {w} × {h} · {kind}")).clicked() {
                         self.comp.width = w;
@@ -403,7 +404,7 @@ impl Motion {
                 self.comp.work = None;
             }
             ui.separator();
-            ui.menu_button("Finition", |ui| {
+            ui.menu_button(tl("Finition"), |ui| {
                 for (n, v) in [("Sans vignettage", 0.0), ("Vignettage léger", 30.0), ("Vignettage fort", 70.0)] {
                     if ui.selectable_label(self.comp.vignette == v, n).clicked() {
                         self.comp.vignette = v;
@@ -423,38 +424,38 @@ impl Motion {
                 }
             });
         });
-        ui.menu_button("Affichage", |ui| {
-            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+        ui.menu_button(tl("Affichage"), |ui| {
+            ui.menu_button(tl("Espace de travail"), studio_ui::dock::menu);
             ui.separator();
-            ui.checkbox(&mut self.grid, "Grille et tiers                  Ctrl+'");
-            ui.menu_button("Divisions de la grille", |ui| {
+            ui.checkbox(&mut self.grid, tl("Grille et tiers                  Ctrl+'"));
+            ui.menu_button(tl("Divisions de la grille"), |ui| {
                 for n in [4u32, 6, 8, 10, 12, 16, 20] {
                     ui.selectable_value(&mut self.grid_div, n, n.to_string());
                 }
             });
-            ui.checkbox(&mut self.safe, "Zones sûres");
-            ui.menu_button("Type de zones sûres", |ui| {
+            ui.checkbox(&mut self.safe, tl("Zones sûres"));
+            ui.menu_button(tl("Type de zones sûres"), |ui| {
                 for (k, (n, _)) in SAFE.iter().enumerate() {
                     ui.selectable_value(&mut self.safe_kind, k, *n);
                 }
             });
-            ui.checkbox(&mut self.guides, "Axes centraux");
-            ui.checkbox(&mut self.rulers, "Règles                              Ctrl+R");
-            ui.checkbox(&mut self.user_guides, "Repères de mise en page   Ctrl+;");
+            ui.checkbox(&mut self.guides, tl("Axes centraux"));
+            ui.checkbox(&mut self.rulers, tl("Règles                              Ctrl+R"));
+            ui.checkbox(&mut self.user_guides, tl("Repères de mise en page   Ctrl+;"));
             if item(ui, !self.comp.guides.is_empty(), "Effacer les repères", "") {
                 self.comp.guides.clear();
             }
             ui.separator();
-            ui.checkbox(&mut self.checker, "Damier de transparence");
-            ui.checkbox(&mut self.paths, "Trajectoires de mouvement");
-            ui.checkbox(&mut self.onion, "Pelure d'oignon");
-            ui.menu_button("Réglages de la pelure", |ui| {
+            ui.checkbox(&mut self.checker, tl("Damier de transparence"));
+            ui.checkbox(&mut self.paths, tl("Trajectoires de mouvement"));
+            ui.checkbox(&mut self.onion, tl("Pelure d'oignon"));
+            ui.menu_button(tl("Réglages de la pelure"), |ui| {
                 ui.add(egui::DragValue::new(&mut self.onion_n).range(1..=3).prefix("Images de chaque côté "));
                 ui.add(egui::DragValue::new(&mut self.onion_step).range(1..=15).prefix("Écart "));
             });
-            ui.checkbox(&mut self.snap, "Magnétisme");
-            ui.checkbox(&mut self.loop_play, "Lecture en boucle               L");
-            ui.menu_button("Qualité de l'aperçu", |ui| {
+            ui.checkbox(&mut self.snap, tl("Magnétisme"));
+            ui.checkbox(&mut self.loop_play, tl("Lecture en boucle               L"));
+            ui.menu_button(tl("Qualité de l'aperçu"), |ui| {
                 for (k, q) in QUALITY.iter().enumerate() {
                     ui.selectable_value(&mut self.quality, k, *q);
                 }

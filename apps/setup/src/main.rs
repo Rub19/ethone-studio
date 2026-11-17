@@ -293,6 +293,7 @@ fn main() -> eframe::Result {
         options,
         Box::new(move |cc| {
             studio_ui::pro::apply(&cc.egui_ctx);
+            studio_ui::i18n::set_lang(studio_ui::palette::load_prefs().lang);
             Ok(Box::new(Setup { job, uninstall_id, step: Arc::new(Mutex::new(Step::Ready)), desktop: true, open_after: true, purge: false, previous }))
         }),
     )

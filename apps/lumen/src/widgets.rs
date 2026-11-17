@@ -1,4 +1,5 @@
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Pos2, Rect, RichText, Sense, Stroke, Ui, Vec2, pos2, vec2};
+use studio_ui::i18n::tl;
 use image::RgbImage;
 use studio_ui::pro::{BLUE, FAINT, FIELD, INK, INK_STRONG, MUTED, semibold};
 
@@ -194,7 +195,7 @@ pub fn color_wheel(ui: &mut Ui, title: &str, size: f32, hue: &mut f32, sat: &mut
             *sat = ((d.length() / rad).clamp(0.0, 1.0) * 100.0).round();
             *hue = (-d.y.atan2(d.x)).to_degrees().rem_euclid(360.0).round();
         }
-        resp.on_hover_text("Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro");
+        resp.on_hover_text(tl("Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro"));
         ui.label(RichText::new(format!("{:.0}° · {:.0}", *hue, *sat)).size(11.0).color(FAINT));
     });
     (*hue, *sat) != before
@@ -298,7 +299,7 @@ pub fn curve_editor(ui: &mut Ui, pts: &mut Vec<[f32; 2]>, ink: Color32, parametr
     if pts.len() == 2 && pts[0] == [0.0, 0.0] && pts[1] == [1.0, 1.0] {
         pts.clear();
     }
-    resp.on_hover_text("Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer");
+    resp.on_hover_text(tl("Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer"));
     *pts != before
 }
 

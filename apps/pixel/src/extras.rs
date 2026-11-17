@@ -1,4 +1,5 @@
 use crate::filters::{Kind, map};
+use studio_ui::i18n::tl;
 use crate::{Pixel, Sheet};
 use eframe::egui::{self, Align2, Color32, CornerRadius, Frame, Margin, Rect, RichText, Stroke, TextureOptions, Ui, pos2};
 use image::{RgbaImage, imageops};
@@ -187,10 +188,10 @@ impl Pixel {
                     ui.spacing_mut().item_spacing.x = 2.0;
                     let b = |ui: &mut Ui, t: &str, tip: &str| ui.add(egui::Button::new(RichText::new(t).size(12.0).color(INK)).fill(Color32::TRANSPARENT).stroke(Stroke::NONE).corner_radius(CornerRadius::same(4)).min_size(egui::vec2(0.0, 26.0))).on_hover_text(tip).clicked();
                     if let Some((_, split)) = &mut self.compare {
-                        ui.label(RichText::new("Avant").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Avant")).size(12.0).color(MUTED));
                         ui.spacing_mut().slider_width = 160.0;
                         ui.add(egui::Slider::new(split, 0.0..=1.0).show_value(false));
-                        ui.label(RichText::new("Après").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Après")).size(12.0).color(MUTED));
                         if b(ui, "Terminer", "Quitter la comparaison") {
                             self.compare = None;
                         }

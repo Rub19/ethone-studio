@@ -12,6 +12,7 @@ mod timeline;
 mod tutos;
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use studio_ui::i18n::tl;
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Margin, Painter, Pos2,
     Rect, RichText, Sense, Shape, Stroke, StrokeKind, TextureHandle, TextureOptions, Ui, Vec2, pos2,
@@ -288,6 +289,7 @@ fn is_still(p: &Path) -> bool {
 impl Cut {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         media::startup();
         let (tx, rx) = channel();
         let proj = Project::new();
@@ -1742,20 +1744,20 @@ impl Cut {
 
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let mut v = vec![
-            studio_ui::palette::Cmd::new("Fondu enchaîné entre tous les clips", "Séquence", "trans-all:1").confirm(),
-            studio_ui::palette::Cmd::new("Fondu au noir entre tous les clips", "Séquence", "trans-all:2").confirm(),
-            studio_ui::palette::Cmd::new("Retirer toutes les transitions", "Séquence", "trans-all:0").confirm(),
-            studio_ui::palette::Cmd::new("Couper le clip toutes les 2 s", "Clip sélectionné, sinon toute la piste", "every:2").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
-            studio_ui::palette::Cmd::new("Couper le clip toutes les 5 s", "Clip sélectionné, sinon toute la piste", "every:5").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
-            studio_ui::palette::Cmd::new("Couper le clip toutes les 10 s", "Clip sélectionné, sinon toute la piste", "every:10").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
-            studio_ui::palette::Cmd::new("Passer en vertical 9:16 (Shorts, Reels, TikTok)", "Séquence · clips recadrés au centre", "format:1080x1920").confirm(),
-            studio_ui::palette::Cmd::new("Passer en carré 1:1", "Séquence · clips recadrés au centre", "format:1080x1080").confirm(),
-            studio_ui::palette::Cmd::new("Passer en portrait 4:5", "Séquence · clips recadrés au centre", "format:1080x1350").confirm(),
-            studio_ui::palette::Cmd::new("Passer en paysage 16:9", "Séquence · clips recadrés au centre", "format:1920x1080").confirm(),
-            studio_ui::palette::Cmd::new("Fermer tous les blancs de la piste", "Montage · rapproche tous les clips", "close-gaps").confirm(),
-            studio_ui::palette::Cmd::new("Normaliser l'audio sélectionné à −1 dB", "Clip ou musique sélectionné", "normalize-audio"),
-            studio_ui::palette::Cmd::new("Fondus de 0,5 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:0.5").confirm(),
-            studio_ui::palette::Cmd::new("Fondus de 1 s sur tous les clips", "Séquence · entrée et sortie", "fades-all:1").confirm(),
+            studio_ui::palette::Cmd::new(tl("Fondu enchaîné entre tous les clips"), tl("Séquence"), "trans-all:1").confirm(),
+            studio_ui::palette::Cmd::new(tl("Fondu au noir entre tous les clips"), tl("Séquence"), "trans-all:2").confirm(),
+            studio_ui::palette::Cmd::new(tl("Retirer toutes les transitions"), tl("Séquence"), "trans-all:0").confirm(),
+            studio_ui::palette::Cmd::new(tl("Couper le clip toutes les 2 s"), tl("Clip sélectionné, sinon toute la piste"), "every:2").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
+            studio_ui::palette::Cmd::new(tl("Couper le clip toutes les 5 s"), tl("Clip sélectionné, sinon toute la piste"), "every:5").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
+            studio_ui::palette::Cmd::new(tl("Couper le clip toutes les 10 s"), tl("Clip sélectionné, sinon toute la piste"), "every:10").confirm_if(!matches!(self.sel, Some(Sel::Clip(_)))),
+            studio_ui::palette::Cmd::new(tl("Passer en vertical 9:16 (Shorts, Reels, TikTok)"), tl("Séquence · clips recadrés au centre"), "format:1080x1920").confirm(),
+            studio_ui::palette::Cmd::new(tl("Passer en carré 1:1"), tl("Séquence · clips recadrés au centre"), "format:1080x1080").confirm(),
+            studio_ui::palette::Cmd::new(tl("Passer en portrait 4:5"), tl("Séquence · clips recadrés au centre"), "format:1080x1350").confirm(),
+            studio_ui::palette::Cmd::new(tl("Passer en paysage 16:9"), tl("Séquence · clips recadrés au centre"), "format:1920x1080").confirm(),
+            studio_ui::palette::Cmd::new(tl("Fermer tous les blancs de la piste"), tl("Montage · rapproche tous les clips"), "close-gaps").confirm(),
+            studio_ui::palette::Cmd::new(tl("Normaliser l'audio sélectionné à −1 dB"), tl("Clip ou musique sélectionné"), "normalize-audio"),
+            studio_ui::palette::Cmd::new(tl("Fondus de 0,5 s sur tous les clips"), tl("Séquence · entrée et sortie"), "fades-all:0.5").confirm(),
+            studio_ui::palette::Cmd::new(tl("Fondus de 1 s sur tous les clips"), tl("Séquence · entrée et sortie"), "fades-all:1").confirm(),
 
         ];
         v.extend(outils::TOOLS.iter().map(|(id, label, _, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Cut · nouvel outil · montage ou clip choisi", format!("tool:{id}"))));
@@ -2009,7 +2011,7 @@ impl Cut {
                             pro::toolbar_sep(ui);
                             ui.label(RichText::new(name).font(semibold(12.5)).color(INK));
                             if self.proj != self.saved {
-                                ui.label(RichText::new("•").color(MUTED)).on_hover_text("Modifications non enregistrées");
+                                ui.label(RichText::new("•").color(MUTED)).on_hover_text(tl("Modifications non enregistrées"));
                             }
                         }
                     });
@@ -2025,18 +2027,18 @@ impl Cut {
                     if busy {
                         let j = self.job.as_ref().unwrap();
                         let d = j.done.load(Ordering::Relaxed);
-                        if pro::secondary(ui, "Annuler").clicked() {
+                        if pro::secondary(ui, tl("Annuler")).clicked() {
                             j.cancel.store(true, Ordering::Relaxed);
                         }
                         ui.add(egui::ProgressBar::new(d as f32 / j.total.max(1) as f32).desired_width(140.0).corner_radius(CornerRadius::same(6)).text(format!("Export {:.0} %", d as f32 * 100.0 / j.total.max(1) as f32)));
                         ui.ctx().request_repaint_after(std::time::Duration::from_millis(200));
-                    } else if pro::primary_icon(ui, "Exporter", |p, r, c| glyph(p, r, G::Export, c)).on_hover_text("Ctrl+M").clicked() {
+                    } else if pro::primary_icon(ui, tl("Exporter"), |p, r, c| glyph(p, r, G::Export, c)).on_hover_text(tl("Ctrl+M")).clicked() {
                         let mut o = ExportOpts::from_preset(0);
                         o.range = if self.mark_in.is_some() || self.mark_out.is_some() { 1 } else { 0 };
                         self.export = Some(o);
                     }
                     ui.add_space(6.0);
-                    if pro::chip(ui, &format!("{} × {} · {} i/s", self.proj.width, self.proj.height, self.proj.fps)).on_hover_text("Réglages de la séquence").clicked() {
+                    if pro::chip(ui, &format!("{} × {} · {} i/s", self.proj.width, self.proj.height, self.proj.fps)).on_hover_text(tl("Réglages de la séquence")).clicked() {
                         self.seq_sheet = true;
                     }
                 });
@@ -2046,7 +2048,7 @@ impl Cut {
 
     fn menus(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         let row = |ui: &mut Ui, on: bool, label: &str, key: &str| -> bool { ui.add_enabled(on, egui::Button::new(label).shortcut_text(key)).clicked() };
-        ui.menu_button("Fichier", |ui| {
+        ui.menu_button(tl("Fichier"), |ui| {
             if let Some(t) = studio_ui::handoff::menu(ui, &[("pixel", "retoucher l'image"), ("lumen", "développer l'image"), ("page", "mettre en page"), ("vector", "placer l'image"), ("motion", "animer l'image")]) {
                 let ctx = ui.ctx().clone();
                 self.send_to(t, &ctx);
@@ -2062,7 +2064,7 @@ impl Cut {
                 self.import_dialog(ctx);
             }
             ui.add_enabled_ui(!self.home, |ui| {
-                ui.menu_button("Nouvel élément", |ui| {
+                ui.menu_button(tl("Nouvel élément"), |ui| {
                     for (k, (_, name)) in GENERATORS.iter().enumerate() {
                         if ui.button(*name).clicked() {
                             self.add_generator(k);
@@ -2081,7 +2083,7 @@ impl Cut {
                 if row(ui, true, "Exporter…", "Ctrl+M") {
                     self.export = Some(ExportOpts::from_preset(0));
                 }
-                ui.menu_button("Exporter avec un préréglage", |ui| {
+                ui.menu_button(tl("Exporter avec un préréglage"), |ui| {
                     for (k, p) in EXPORT_PRESETS.iter().enumerate() {
                         if ui.button(p.0).clicked() {
                             self.export = Some(ExportOpts::from_preset(k));
@@ -2105,7 +2107,7 @@ impl Cut {
             });
         });
         ui.add_enabled_ui(!self.home, |ui| {
-            ui.menu_button("Édition", |ui| {
+            ui.menu_button(tl("Édition"), |ui| {
                 if row(ui, !self.undo.is_empty(), "Annuler", "Ctrl+Z") {
                     self.undo_step();
                 }
@@ -2156,7 +2158,7 @@ impl Cut {
                     self.paste_grade(&all);
                 }
             });
-            ui.menu_button("Clip", |ui| {
+            ui.menu_button(tl("Clip"), |ui| {
                 let s = self.sel;
                 let is_clip = matches!(s, Some(Sel::Clip(_) | Sel::Over(_)));
                 if row(ui, is_clip, "Vitesse/Durée…", "Ctrl+R") {
@@ -2203,7 +2205,7 @@ impl Cut {
                     self.nudge_clip(1);
                 }
             });
-            ui.menu_button("Séquence", |ui| {
+            ui.menu_button(tl("Séquence"), |ui| {
                 if row(ui, true, "Réglages de la séquence…", "") {
                     self.seq_sheet = true;
                 }
@@ -2230,7 +2232,7 @@ impl Cut {
                 if row(ui, true, "Insérer un titre", "Ctrl+T") {
                     self.add_title_at(0.0, 0.0, false);
                 }
-                ui.menu_button("Titre prédéfini", |ui| {
+                ui.menu_button(tl("Titre prédéfini"), |ui| {
                     for (k, n) in inspect::TITLE_PRESETS.iter().enumerate() {
                         if ui.button(*n).clicked() {
                             self.add_title_at(0.0, 0.0, false);
@@ -2256,7 +2258,7 @@ impl Cut {
                     self.proj.hide = [false; 3];
                 }
             });
-            ui.menu_button("Marqueurs", |ui| {
+            ui.menu_button(tl("Marqueurs"), |ui| {
                 if row(ui, true, "Ajouter / modifier un marqueur", "M") {
                     self.add_marker();
                 }
@@ -2317,7 +2319,7 @@ impl Cut {
                     self.proj.markers.clear();
                 }
             });
-            ui.menu_button("Outils", |ui| {
+            ui.menu_button(tl("Outils"), |ui| {
                 for (g, (_, tools)) in GROUPS.iter().enumerate() {
                     for (k, (tool, name, key)) in tools.iter().enumerate() {
                         if ui.add(egui::Button::selectable(self.tool == *tool, *name).shortcut_text(*key)).clicked() {
@@ -2331,18 +2333,18 @@ impl Cut {
                     }
                 }
             });
-            ui.menu_button("Affichage", |ui| {
-                ui.menu_button("Espace de travail", studio_ui::dock::menu);
+            ui.menu_button(tl("Affichage"), |ui| {
+                ui.menu_button(tl("Espace de travail"), studio_ui::dock::menu);
                 ui.separator();
-                ui.checkbox(&mut self.snap, "Magnétisme (Maj+S)");
-                ui.checkbox(&mut self.looping, "Lecture en boucle");
-                ui.checkbox(&mut self.focus, "Mode visionneuse (F)");
+                ui.checkbox(&mut self.snap, tl("Magnétisme (Maj+S)"));
+                ui.checkbox(&mut self.looping, tl("Lecture en boucle"));
+                ui.checkbox(&mut self.focus, tl("Mode visionneuse (F)"));
                 ui.separator();
-                ui.checkbox(&mut self.safe, "Zones de sécurité");
-                ui.checkbox(&mut self.grid, "Grille des tiers");
-                ui.checkbox(&mut self.guides, "Repères vertical 9:16");
+                ui.checkbox(&mut self.safe, tl("Zones de sécurité"));
+                ui.checkbox(&mut self.grid, tl("Grille des tiers"));
+                ui.checkbox(&mut self.guides, tl("Repères vertical 9:16"));
                 ui.horizontal(|ui| {
-                    ui.label("Qualité de lecture");
+                    ui.label(tl("Qualité de lecture"));
                     for (k, label) in ["Complète", "1/2", "1/4"].iter().enumerate() {
                         if ui.selectable_label(self.quality == k, *label).clicked() {
                             self.quality = k;
@@ -2350,10 +2352,10 @@ impl Cut {
                     }
                 });
                 ui.separator();
-                ui.checkbox(&mut self.show_thumbs, "Vignettes des clips");
-                ui.checkbox(&mut self.show_waves, "Formes d'onde");
+                ui.checkbox(&mut self.show_thumbs, tl("Vignettes des clips"));
+                ui.checkbox(&mut self.show_waves, tl("Formes d'onde"));
                 ui.horizontal(|ui| {
-                    ui.label("Hauteur des pistes");
+                    ui.label(tl("Hauteur des pistes"));
                     for (label, k) in [("S", 0.75), ("M", 1.0), ("L", 1.4), ("XL", 1.8)] {
                         if ui.selectable_label((self.track_scale - k).abs() < 0.01, label).clicked() {
                             self.track_scale = k;
@@ -2409,7 +2411,7 @@ impl Cut {
                         }
                         None => {
                             ui.label(RichText::new(format!("Exporté : {}", j.path.display())).size(12.0).color(GREEN));
-                            if ui.small_button("Afficher").clicked() {
+                            if ui.small_button(tl("Afficher")).clicked() {
                                 open_dir = Some(j.path.clone());
                             }
                         }
@@ -2436,20 +2438,20 @@ impl Cut {
 
     fn home_screen(&mut self, root: &mut Ui, ctx: &egui::Context) {
         egui::Panel::left("home-nav").exact_size(230.0).resizable(false).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(18, 26))).show(root, |ui| {
-            if pro::primary(ui, "Nouveau projet").clicked() {
+            if pro::primary(ui, tl("Nouveau projet")).clicked() {
                 self.new_project(1920, 1080);
             }
             ui.add_space(8.0);
-            if pro::secondary(ui, "Ouvrir…").clicked() {
+            if pro::secondary(ui, tl("Ouvrir…")).clicked() {
                 self.open(ctx);
             }
             ui.add_space(8.0);
-            if pro::secondary(ui, "Importer des médias…").clicked() {
+            if pro::secondary(ui, tl("Importer des médias…")).clicked() {
                 self.new_project(1920, 1080);
                 self.import_dialog(ctx);
             }
             ui.add_space(20.0);
-            if pro::ghost(ui, "?  Tutoriels").clicked() {
+            if pro::ghost(ui, tl("?  Tutoriels")).clicked() {
                 self.help.learn("Importer des médias");
             }
         });
@@ -2459,12 +2461,12 @@ impl Cut {
                     ui.add(egui::Image::new((self.icon.id(), Vec2::splat(40.0))));
                     ui.add_space(8.0);
                     ui.vertical(|ui| {
-                        ui.label(RichText::new("Bienvenue dans Cut").font(semibold(28.0)).color(INK_STRONG));
-                        ui.label(RichText::new("Monte, coupe, étalonne et exporte tes vidéos").color(MUTED));
+                        ui.label(RichText::new(tl("Bienvenue dans Cut")).font(semibold(28.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("Monte, coupe, étalonne et exporte tes vidéos")).color(MUTED));
                     });
                 });
                 ui.add_space(28.0);
-                ui.label(RichText::new("Nouveau projet").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Nouveau projet")).font(semibold(16.0)).color(INK));
                 ui.add_space(12.0);
                 let mut chosen = None;
                 ui.horizontal_wrapped(|ui| {
@@ -2479,7 +2481,7 @@ impl Cut {
                     self.new_project(w, h);
                 }
                 ui.add_space(26.0);
-                ui.label(RichText::new("Projets récents").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Projets récents")).font(semibold(16.0)).color(INK));
                 ui.add_space(10.0);
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 110.0), Sense::hover());
@@ -2513,14 +2515,14 @@ impl Cut {
         egui::Panel::left("bin").resizable(false).exact_size(272.0).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(12, 12))).show(root, |ui| {
             let mut gen_k = None;
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Médias").font(semibold(12.5)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Médias")).font(semibold(12.5)).color(INK_STRONG));
                 ui.label(RichText::new(self.proj.sources.len().to_string()).size(12.0).color(FAINT));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::secondary_icon(ui, "", |p, r, c| glyph(p, r, G::Plus, c)).on_hover_text("Importer des médias (Ctrl+I)").clicked() {
+                    if pro::secondary_icon(ui, "", |p, r, c| glyph(p, r, G::Plus, c)).on_hover_text(tl("Importer des médias (Ctrl+I)")).clicked() {
                         self.import_dialog(ctx);
                     }
                     ui.menu_button(RichText::new("✦").color(MUTED), |ui| {
-                        ui.label(RichText::new("Nouvel élément").size(12.0).color(FAINT));
+                        ui.label(RichText::new(tl("Nouvel élément")).size(12.0).color(FAINT));
                         for (k, (_, name)) in GENERATORS.iter().enumerate() {
                             if ui.button(*name).clicked() {
                                 gen_k = Some(k);
@@ -2529,7 +2531,7 @@ impl Cut {
                         }
                     })
                     .response
-                    .on_hover_text("Nouvel élément : cache couleur, dégradé, mire…");
+                    .on_hover_text(tl("Nouvel élément : cache couleur, dégradé, mire…"));
                 });
             });
             if let Some(k) = gen_k {
@@ -2537,15 +2539,15 @@ impl Cut {
             }
             ui.add_space(8.0);
             ui.horizontal(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut self.bin_query).hint_text("Rechercher").desired_width(ui.available_width() - 84.0));
+                ui.add(egui::TextEdit::singleline(&mut self.bin_query).hint_text(tl("Rechercher")).desired_width(ui.available_width() - 84.0));
                 pro::segmented(ui, &mut self.bin_list, &["▦", "☰"]);
             });
             ui.add_space(6.0);
             ui.horizontal(|ui| {
-                pro::segmented(ui, &mut self.bin_filter, &["Tout", "Vidéo", "Son", "Image"]);
+                pro::segmented(ui, &mut self.bin_filter, &[tl("Tout"), tl("Vidéo"), tl("Son"), tl("Image")]);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.menu_button(RichText::new("⇅").color(MUTED), |ui| {
-                        ui.label(RichText::new("Trier par").size(12.0).color(FAINT));
+                        ui.label(RichText::new(tl("Trier par")).size(12.0).color(FAINT));
                         for (k, n) in ["Ordre d'import", "Nom", "Durée", "Type", "Étiquette"].iter().enumerate() {
                             if ui.selectable_label(self.bin_sort == k, *n).clicked() {
                                 self.bin_sort = k;
@@ -2554,7 +2556,7 @@ impl Cut {
                         }
                     })
                     .response
-                    .on_hover_text("Trier les médias");
+                    .on_hover_text(tl("Trier les médias"));
                 });
             });
             ui.add_space(8.0);
@@ -2786,7 +2788,7 @@ impl Cut {
                     pro::toolbar_sep(ui);
                     if with_slider {
                         ui.spacing_mut().slider_width = 60.0;
-                        ui.add(egui::Slider::new(&mut self.volume, 0.0..=1.5).show_value(false)).on_hover_text("Volume d'écoute");
+                        ui.add(egui::Slider::new(&mut self.volume, 0.0..=1.5).show_value(false)).on_hover_text(tl("Volume d'écoute"));
                     }
                     let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
                     speaker(ui.painter(), r.center(), self.volume == 0.0, if resp.hovered() { INK_STRONG } else { MUTED });
@@ -2825,7 +2827,7 @@ impl Cut {
             let y = r.bottom() - r.height() * ((mark + 48.0) / 48.0);
             p.line_segment([pos2(r.left() - 3.0, y), pos2(r.left() - 1.0, y)], Stroke::new(1.0, FAINT));
         }
-        ui.interact(r, ui.make_persistent_id("meter"), Sense::hover()).on_hover_text("Niveau audio du programme (crête, dBFS)");
+        ui.interact(r, ui.make_persistent_id("meter"), Sense::hover()).on_hover_text(tl("Niveau audio du programme (crête, dBFS)"));
         if self.playing {
             ui.ctx().request_repaint();
         }
@@ -3025,8 +3027,8 @@ impl Cut {
                     ui.painter().rect_filled(r, CornerRadius::same(4), BLUE.gamma_multiply(0.25));
                     glyph(ui.painter(), r.shrink(9.0), G::Export, BLUE);
                     ui.vertical(|ui| {
-                        ui.label(RichText::new("Exporter").font(semibold(18.0)).color(INK_STRONG));
-                        ui.label(RichText::new("MP4 H.264 + AAC, GIF, WAV, PNG ou JPEG").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Exporter")).font(semibold(18.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("MP4 H.264 + AAC, GIF, WAV, PNG ou JPEG")).size(12.0).color(MUTED));
                     });
                 });
                 ui.add_space(12.0);
@@ -3059,7 +3061,7 @@ impl Cut {
                         label(ui, "Taille");
                         ui.horizontal(|ui| {
                             let mut seq = opts.w == 0 && opts.h == 0;
-                            if ui.checkbox(&mut seq, "Séquence").changed() {
+                            if ui.checkbox(&mut seq, tl("Séquence")).changed() {
                                 (opts.w, opts.h) = if seq { (0, 0) } else { (self.proj.width, self.proj.height) };
                             }
                             if !seq {
@@ -3071,7 +3073,7 @@ impl Cut {
                         ui.end_row();
                         label(ui, "Cadrage");
                         let mut f = opts.fill as usize;
-                        if pro::segmented(ui, &mut f, &["Ajuster (bandes)", "Remplir (recadrer)"]) {
+                        if pro::segmented(ui, &mut f, &[tl("Ajuster (bandes)"), tl("Remplir (recadrer)")]) {
                             opts.fill = f == 1;
                         }
                         ui.end_row();
@@ -3079,7 +3081,7 @@ impl Cut {
                     if matches!(opts.kind, 0 | 2 | 3) {
                         label(ui, "Images/s");
                         ui.horizontal(|ui| {
-                            if ui.selectable_label(opts.fps == 0, "Séquence").clicked() {
+                            if ui.selectable_label(opts.fps == 0, tl("Séquence")).clicked() {
                                 opts.fps = 0;
                             }
                             for f in [10, 15, 24, 25, 30, 60] {
@@ -3107,19 +3109,19 @@ impl Cut {
                         let has_marks = self.mark_in.is_some() || self.mark_out.is_some();
                         let has_clip = matches!(self.sel, Some(Sel::Clip(_) | Sel::Over(_)));
                         egui::ComboBox::from_id_salt("exp-range").selected_text(["Toute la séquence", "Entre entrée et sortie", "Clip sélectionné"][opts.range.min(2)]).width(200.0).show_ui(ui, |ui| {
-                            ui.selectable_value(&mut opts.range, 0, "Toute la séquence");
+                            ui.selectable_value(&mut opts.range, 0, tl("Toute la séquence"));
                             if has_marks {
-                                ui.selectable_value(&mut opts.range, 1, "Entre entrée et sortie");
+                                ui.selectable_value(&mut opts.range, 1, tl("Entre entrée et sortie"));
                             }
                             if has_clip {
-                                ui.selectable_value(&mut opts.range, 2, "Clip sélectionné");
+                                ui.selectable_value(&mut opts.range, 2, tl("Clip sélectionné"));
                             }
                         });
                         ui.end_row();
                     }
                 });
                 ui.add_space(6.0);
-                ui.checkbox(&mut opts.open_after, "Afficher le fichier une fois terminé");
+                ui.checkbox(&mut opts.open_after, tl("Afficher le fichier une fois terminé"));
                 ui.add_space(8.0);
                 let (a, b) = self.export_range(opts.range);
                 let secs = b - a;
@@ -3135,10 +3137,10 @@ impl Cut {
                 ui.label(RichText::new(info).size(12.0).color(FAINT));
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Exporter…").clicked() {
+                    if pro::primary(ui, tl("Exporter…")).clicked() {
                         go = true;
                     }
-                    if pro::secondary(ui, "Annuler").clicked() {
+                    if pro::secondary(ui, tl("Annuler")).clicked() {
                         cancel = true;
                     }
                 });
@@ -3153,9 +3155,9 @@ impl Cut {
             let mut close = false;
             let first = self.proj.clips.first().map(|c| self.proj.sources[c.src].clone());
             let keep = pro::sheet(ctx, "sequence", 500.0, |ui| {
-                ui.label(RichText::new("Réglages de la séquence").font(semibold(18.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Réglages de la séquence")).font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
-                ui.label(RichText::new("Format").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Format")).size(12.0).color(MUTED));
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                     for (label, kind, w, h) in PRESETS {
@@ -3168,19 +3170,19 @@ impl Cut {
                 ui.horizontal(|ui| {
                     ui.add(egui::DragValue::new(&mut self.proj.width).range(16..=7680).prefix("L ").suffix(" px"));
                     ui.add(egui::DragValue::new(&mut self.proj.height).range(16..=4320).prefix("H ").suffix(" px"));
-                    if ui.small_button("⇄").on_hover_text("Inverser largeur et hauteur").clicked() {
+                    if ui.small_button("⇄").on_hover_text(tl("Inverser largeur et hauteur")).clicked() {
                         (self.proj.width, self.proj.height) = (self.proj.height, self.proj.width);
                     }
                     if let Some(s) = &first
                         && s.width > 0
-                        && ui.small_button("Comme le 1er clip").clicked()
+                        && ui.small_button(tl("Comme le 1er clip")).clicked()
                     {
                         (self.proj.width, self.proj.height) = (s.width / 2 * 2, s.height / 2 * 2);
                         self.proj.fps = s.fps.round().clamp(1.0, 120.0) as u32;
                     }
                 });
                 ui.add_space(8.0);
-                ui.label(RichText::new("Images par seconde").size(12.0).color(MUTED));
+                ui.label(RichText::new(tl("Images par seconde")).size(12.0).color(MUTED));
                 ui.horizontal(|ui| {
                     for f in FPS {
                         if ui.selectable_label(self.proj.fps == f, format!("{f}")).clicked() {
@@ -3190,7 +3192,7 @@ impl Cut {
                 });
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Couleur de fond").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Couleur de fond")).size(12.0).color(MUTED));
                     let b = self.proj.background;
                     let mut col = Color32::from_rgb(b[0], b[1], b[2]);
                     if ui.color_edit_button_srgba(&mut col).changed() {
@@ -3204,7 +3206,7 @@ impl Cut {
                 });
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Terminé").clicked() {
+                    if pro::primary(ui, tl("Terminé")).clicked() {
                         close = true;
                     }
                 });
@@ -3220,16 +3222,16 @@ impl Cut {
                 return;
             };
             let keep = pro::sheet(ctx, "speed", 380.0, |ui| {
-                ui.label(RichText::new("Vitesse/Durée du clip").font(semibold(18.0)).color(INK_STRONG));
+                ui.label(RichText::new(tl("Vitesse/Durée du clip")).font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
                 egui::Grid::new("speed-grid").num_columns(2).spacing(vec2(14.0, 10.0)).show(ui, |ui| {
-                    ui.label(RichText::new("Vitesse").color(MUTED));
+                    ui.label(RichText::new(tl("Vitesse")).color(MUTED));
                     let mut pct = c.speed * 100.0;
                     if ui.add(egui::DragValue::new(&mut pct).range(10.0..=800.0).suffix(" %").speed(1.0)).changed() {
                         c.speed = pct / 100.0;
                     }
                     ui.end_row();
-                    ui.label(RichText::new("Durée").color(MUTED));
+                    ui.label(RichText::new(tl("Durée")).color(MUTED));
                     let mut dur = c.len();
                     if ui.add(egui::DragValue::new(&mut dur).range(0.1..=3600.0).suffix(" s").speed(0.05).max_decimals(2)).changed() {
                         if c.hold > 0.0 {
@@ -3239,19 +3241,19 @@ impl Cut {
                         }
                     }
                     ui.end_row();
-                    ui.label(RichText::new("Options").color(MUTED));
+                    ui.label(RichText::new(tl("Options")).color(MUTED));
                     ui.vertical(|ui| {
-                        if ui.checkbox(&mut c.reverse, "Lecture inversée").changed() {
+                        if ui.checkbox(&mut c.reverse, tl("Lecture inversée")).changed() {
                             c.keys.clear();
                         }
                         let mut frozen = c.hold > 0.0;
-                        if ui.checkbox(&mut frozen, "Image figée (maintien)").changed() {
+                        if ui.checkbox(&mut frozen, tl("Image figée (maintien)")).changed() {
                             c.hold = if frozen { c.len().max(0.5) } else { 0.0 };
                             if frozen {
                                 c.out = (c.inp + 0.04).min(max);
                             }
                         }
-                        ui.checkbox(&mut c.mute, "Couper le son");
+                        ui.checkbox(&mut c.mute, tl("Couper le son"));
                     });
                     ui.end_row();
                 });
@@ -3265,7 +3267,7 @@ impl Cut {
                 });
                 ui.add_space(14.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if pro::primary(ui, "Terminé").clicked() {
+                    if pro::primary(ui, tl("Terminé")).clicked() {
                         close = true;
                     }
                 });
@@ -3284,12 +3286,12 @@ impl Cut {
             let keep = pro::sheet(ctx, "marker", 400.0, |ui| {
                 ui.label(RichText::new(format!("Marqueur · {}", tc(m.t, fps))).font(semibold(18.0)).color(INK_STRONG));
                 ui.add_space(12.0);
-                ui.add(egui::TextEdit::singleline(&mut m.name).hint_text("Nom (chapitre)").desired_width(f32::INFINITY));
+                ui.add(egui::TextEdit::singleline(&mut m.name).hint_text(tl("Nom (chapitre)")).desired_width(f32::INFINITY));
                 ui.add_space(6.0);
-                ui.add(egui::TextEdit::multiline(&mut m.note).hint_text("Commentaire").desired_rows(3).desired_width(f32::INFINITY));
+                ui.add(egui::TextEdit::multiline(&mut m.note).hint_text(tl("Commentaire")).desired_rows(3).desired_width(f32::INFINITY));
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Couleur").color(MUTED));
+                    ui.label(RichText::new(tl("Couleur")).color(MUTED));
                     for (c, (name, rgb)) in MARKER_COLORS.iter().enumerate() {
                         let (r, resp) = ui.allocate_exact_size(Vec2::splat(22.0), Sense::click());
                         ui.painter().circle_filled(r.center(), 7.5, Color32::from_rgb(rgb[0], rgb[1], rgb[2]));
@@ -3303,16 +3305,16 @@ impl Cut {
                 });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Durée").color(MUTED));
+                    ui.label(RichText::new(tl("Durée")).color(MUTED));
                     ui.add(egui::DragValue::new(&mut m.dur).range(0.0..=3600.0).suffix(" s").speed(0.05));
                 });
                 ui.add_space(14.0);
                 ui.horizontal(|ui| {
-                    if pro::secondary(ui, "Supprimer").clicked() {
+                    if pro::secondary(ui, tl("Supprimer")).clicked() {
                         delete = true;
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if pro::primary(ui, "Terminé").clicked() {
+                        if pro::primary(ui, tl("Terminé")).clicked() {
                             close = true;
                         }
                     });
@@ -3369,8 +3371,8 @@ fn media_menu(ui: &mut Ui, s: &Source, i: usize, action: &mut Option<(u8, usize)
     if s.has_audio {
         item(ui, "Ajouter comme musique (A2)", 1, action);
     }
-    ui.menu_button("Étiquette", |ui| {
-        if ui.button("Aucune").clicked() {
+    ui.menu_button(tl("Étiquette"), |ui| {
+        if ui.button(tl("Aucune")).clicked() {
             *action = Some((20, i));
             ui.close();
         }

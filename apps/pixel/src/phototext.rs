@@ -2,6 +2,7 @@
 //! rewrite, erase, blur or copy it, keeping the original colour and size.
 
 use crate::Pixel;
+use studio_ui::i18n::tl;
 use crate::doc::Area;
 use crate::shapes::{FONTS, TextStyle, render_text};
 use eframe::egui::{self, Color32, RichText, Ui};
@@ -361,7 +362,7 @@ impl Pixel {
 
     pub fn pt_options(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         if self.pt.langs.is_empty() {
-            ui.label(RichText::new("Aucune langue OCR installée dans Windows").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Aucune langue OCR installée dans Windows")).size(12.0).color(MUTED));
             return;
         }
         let cur = self.pt.langs.get(self.pt.lang).map(|l| l.1.clone()).unwrap_or_default();
@@ -373,8 +374,8 @@ impl Pixel {
         if ui.add_enabled(self.pt.job.is_none(), egui::Button::new("Détecter le texte")).clicked() {
             self.pt_detect(ctx);
         }
-        ui.checkbox(&mut self.pt.selection_only, "Dans la sélection");
-        ui.checkbox(&mut self.pt.boxes, "Cadres");
+        ui.checkbox(&mut self.pt.selection_only, tl("Dans la sélection"));
+        ui.checkbox(&mut self.pt.boxes, tl("Cadres"));
         if !self.pt.busy.is_empty() {
             ui.add(egui::Spinner::new());
             ui.label(RichText::new(&self.pt.busy).size(12.0).color(MUTED));
@@ -388,7 +389,7 @@ impl Pixel {
             ui.label(RichText::new(s).size(12.0).color(MUTED));
         };
         ui.horizontal_wrapped(|ui| {
-            if ui.add_enabled(self.pt.job.is_none(), egui::Button::new(RichText::new("Détecter le texte").color(Color32::WHITE)).fill(studio_ui::pro::BLUE)).clicked() {
+            if ui.add_enabled(self.pt.job.is_none(), egui::Button::new(RichText::new(tl("Détecter le texte")).color(Color32::WHITE)).fill(studio_ui::pro::BLUE)).clicked() {
                 self.pt_detect(ctx);
             }
             if !self.pt.busy.is_empty() {
@@ -398,7 +399,7 @@ impl Pixel {
         if !self.pt.busy.is_empty() {
             lab(ui, &self.pt.busy);
         }
-        egui::CollapsingHeader::new(RichText::new("Options de lecture").size(12.0)).id_salt("pt-read").show(ui, |ui| {
+        egui::CollapsingHeader::new(RichText::new(tl("Options de lecture")).size(12.0)).id_salt("pt-read").show(ui, |ui| {
             if !self.pt.langs.is_empty() {
                 let cur = self.pt.langs.get(self.pt.lang).map(|l| l.1.clone()).unwrap_or_default();
                 egui::ComboBox::from_id_salt("pt-lang2").selected_text(cur).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
@@ -407,9 +408,9 @@ impl Pixel {
                     }
                 });
             }
-            ui.checkbox(&mut self.pt.upscale, "Agrandir les petites images (petits caractères)");
-            ui.checkbox(&mut self.pt.selection_only, "Seulement dans la sélection");
-            ui.checkbox(&mut self.pt.boxes, "Afficher les cadres sur l'image");
+            ui.checkbox(&mut self.pt.upscale, tl("Agrandir les petites images (petits caractères)"));
+            ui.checkbox(&mut self.pt.selection_only, tl("Seulement dans la sélection"));
+            ui.checkbox(&mut self.pt.boxes, tl("Afficher les cadres sur l'image"));
             ui.horizontal(|ui| {
                 lab(ui, "Ignorer les lignes de moins de");
                 ui.add(egui::DragValue::new(&mut self.pt.min_conf).range(1..=10));
@@ -417,7 +418,7 @@ impl Pixel {
             });
         });
         if self.pt.lines.is_empty() {
-            ui.label(RichText::new("Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.").size(11.5).color(FAINT));
+            ui.label(RichText::new(tl("Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.")).size(11.5).color(FAINT));
             return;
         }
         ui.add_space(6.0);
@@ -467,44 +468,44 @@ impl Pixel {
         let edited: Vec<usize> = on.iter().copied().filter(|i| self.pt.lines[*i].text != self.pt.lines[*i].orig).collect();
         ui.add_space(6.0);
         ui.horizontal_wrapped(|ui| {
-            if ui.add_enabled(!edited.is_empty() && self.pt.job.is_none(), egui::Button::new(RichText::new(format!("Appliquer ({})", edited.len())).color(Color32::WHITE)).fill(studio_ui::pro::BLUE)).on_hover_text("Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place").clicked() {
+            if ui.add_enabled(!edited.is_empty() && self.pt.job.is_none(), egui::Button::new(RichText::new(format!("Appliquer ({})", edited.len())).color(Color32::WHITE)).fill(studio_ui::pro::BLUE)).on_hover_text(tl("Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place")).clicked() {
                 self.pt_apply(&edited, true, ctx);
             }
-            if ui.add_enabled(!on.is_empty(), egui::Button::new("Tout effacer")).on_hover_text("Supprime le texte des lignes cochées").clicked() {
+            if ui.add_enabled(!on.is_empty(), egui::Button::new("Tout effacer")).on_hover_text(tl("Supprime le texte des lignes cochées")).clicked() {
                 self.pt_apply(&on, false, ctx);
             }
-            if ui.add_enabled(!on.is_empty(), egui::Button::new("Flouter")).on_hover_text("Mosaïque sur les lignes cochées (plaques, adresses, noms…)").clicked() {
+            if ui.add_enabled(!on.is_empty(), egui::Button::new("Flouter")).on_hover_text(tl("Mosaïque sur les lignes cochées (plaques, adresses, noms…)")).clicked() {
                 self.pt_blur(&on);
             }
-            if ui.button("Sélectionner").on_hover_text("Crée une sélection autour des lignes cochées").clicked() {
+            if ui.button(tl("Sélectionner")).on_hover_text(tl("Crée une sélection autour des lignes cochées")).clicked() {
                 self.pt_select(&on);
             }
         });
         ui.horizontal_wrapped(|ui| {
-            if ui.button("Tout cocher").clicked() {
+            if ui.button(tl("Tout cocher")).clicked() {
                 self.pt.lines.iter_mut().for_each(|l| l.on = true);
             }
-            if ui.button("Rien").clicked() {
+            if ui.button(tl("Rien")).clicked() {
                 self.pt.lines.iter_mut().for_each(|l| l.on = false);
             }
-            if ui.button("Copier le texte").clicked() {
+            if ui.button(tl("Copier le texte")).clicked() {
                 ctx.copy_text(self.pt.lines.iter().map(|l| l.text.clone()).collect::<Vec<_>>().join("\n"));
                 studio_ui::handoff::toast(ctx, "Texte copié".into(), true);
             }
-            if ui.button("Enregistrer .txt…").clicked()
+            if ui.button(tl("Enregistrer .txt…")).clicked()
                 && let Some(p) = rfd::FileDialog::new().add_filter("Texte", &["txt"]).set_file_name("texte de la photo.txt").save_file()
             {
                 let _ = std::fs::write(p, self.pt.lines.iter().map(|l| l.text.clone()).collect::<Vec<_>>().join("\n"));
             }
-            if ui.button("Oublier").clicked() {
+            if ui.button(tl("Oublier")).clicked() {
                 self.pt.lines.clear();
                 self.pt.sel = None;
             }
         });
-        egui::CollapsingHeader::new(RichText::new("Rechercher et remplacer").size(12.0)).id_salt("pt-find").show(ui, |ui| {
-            ui.add(egui::TextEdit::singleline(&mut self.pt.find).hint_text("Rechercher").desired_width(f32::INFINITY));
-            ui.add(egui::TextEdit::singleline(&mut self.pt.repl).hint_text("Remplacer par").desired_width(f32::INFINITY));
-            ui.checkbox(&mut self.pt.case, "Respecter la casse");
+        egui::CollapsingHeader::new(RichText::new(tl("Rechercher et remplacer")).size(12.0)).id_salt("pt-find").show(ui, |ui| {
+            ui.add(egui::TextEdit::singleline(&mut self.pt.find).hint_text(tl("Rechercher")).desired_width(f32::INFINITY));
+            ui.add(egui::TextEdit::singleline(&mut self.pt.repl).hint_text(tl("Remplacer par")).desired_width(f32::INFINITY));
+            ui.checkbox(&mut self.pt.case, tl("Respecter la casse"));
             if ui.add_enabled(!self.pt.find.is_empty(), egui::Button::new("Remplacer partout")).clicked() {
                 let (f, r, case) = (self.pt.find.clone(), self.pt.repl.clone(), self.pt.case);
                 let mut n = 0;
@@ -518,16 +519,16 @@ impl Pixel {
                 studio_ui::handoff::toast(ctx, format!("{n} ligne(s) modifiée(s) : « Appliquer » pour les écrire dans l'image"), n > 0);
             }
         });
-        egui::CollapsingHeader::new(RichText::new("Rendu du nouveau texte").size(12.0)).id_salt("pt-style").show(ui, |ui| {
+        egui::CollapsingHeader::new(RichText::new(tl("Rendu du nouveau texte")).size(12.0)).id_salt("pt-style").show(ui, |ui| {
             egui::ComboBox::from_id_salt("pt-font").selected_text(FONTS[self.pt.font].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for (k, f) in FONTS.iter().enumerate() {
                     ui.selectable_value(&mut self.pt.font, k, f.0);
                 }
             });
             ui.horizontal(|ui| {
-                ui.toggle_value(&mut self.pt.bold, RichText::new("G").strong()).on_hover_text("Gras");
-                ui.toggle_value(&mut self.pt.italic, RichText::new("I").italics()).on_hover_text("Italique");
-                ui.checkbox(&mut self.pt.auto_color, "Couleur d'origine");
+                ui.toggle_value(&mut self.pt.bold, RichText::new(tl("G")).strong()).on_hover_text(tl("Gras"));
+                ui.toggle_value(&mut self.pt.italic, RichText::new(tl("I")).italics()).on_hover_text(tl("Italique"));
+                ui.checkbox(&mut self.pt.auto_color, tl("Couleur d'origine"));
             });
             if !self.pt.auto_color {
                 let mut c = Color32::from_rgba_unmultiplied(self.pt.color[0], self.pt.color[1], self.pt.color[2], 255);
@@ -535,15 +536,15 @@ impl Pixel {
                     self.pt.color = c.to_array();
                 }
             }
-            pro::option_slider(ui, "Taille", &mut self.pt.size_k, 0.5..=1.6, "×", false);
-            ui.checkbox(&mut self.pt.fit, "Tenir dans la largeur d'origine");
-            ui.checkbox(&mut self.pt.own_layer, "Un calque par ligne (déplaçable)");
+            pro::option_slider(ui, tl("Taille"), &mut self.pt.size_k, 0.5..=1.6, "×", false);
+            ui.checkbox(&mut self.pt.fit, tl("Tenir dans la largeur d'origine"));
+            ui.checkbox(&mut self.pt.own_layer, tl("Un calque par ligne (déplaçable)"));
         });
-        egui::CollapsingHeader::new(RichText::new("Effacement").size(12.0)).id_salt("pt-erase").show(ui, |ui| {
+        egui::CollapsingHeader::new(RichText::new(tl("Effacement")).size(12.0)).id_salt("pt-erase").show(ui, |ui| {
             pro::segmented(ui, &mut self.pt.method, &METHODS);
-            pro::option_slider(ui, "Marge", &mut self.pt.pad, 0.0..=20.0, " px", false);
-            pro::option_slider(ui, "Mosaïque", &mut self.pt.blur_px, 0.0..=40.0, " px", false);
-            ui.label(RichText::new("Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.").size(11.0).color(FAINT));
+            pro::option_slider(ui, tl("Marge"), &mut self.pt.pad, 0.0..=20.0, " px", false);
+            pro::option_slider(ui, tl("Mosaïque"), &mut self.pt.blur_px, 0.0..=40.0, " px", false);
+            ui.label(RichText::new(tl("Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.")).size(11.0).color(FAINT));
         });
         let _ = (INK, semibold(12.0));
     }

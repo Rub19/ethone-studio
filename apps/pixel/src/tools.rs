@@ -1,4 +1,5 @@
 use crate::doc::{BLENDS, Blend, blend_name};
+use studio_ui::i18n::tl;
 use crate::{Pixel, Sheet};
 use eframe::egui::{self, Color32, CornerRadius, Key, Painter, Rect, RichText, Sense, Stroke, StrokeKind, Ui, Vec2, vec2};
 use studio_ui::pro::{self, FIELD, INK, LINE, MUTED, PANEL, semibold};
@@ -272,7 +273,7 @@ impl Pixel {
                 let front = Rect::from_min_size(rect.min + vec2(4.0, 6.0), Vec2::splat(20.0));
                 ui.painter().rect(back, CornerRadius::same(5), self.secondary, Stroke::new(1.0, MUTED), StrokeKind::Outside);
                 ui.painter().rect(front, CornerRadius::same(5), self.primary, Stroke::new(1.5, INK), StrokeKind::Outside);
-                if resp.on_hover_text("Couleurs principale et secondaire\nClic : inverser (X) · D : noir et blanc").clicked() {
+                if resp.on_hover_text(tl("Couleurs principale et secondaire\nClic : inverser (X) · D : noir et blanc")).clicked() {
                     std::mem::swap(&mut self.primary, &mut self.secondary);
                 }
                 ui.add_space(4.0);
@@ -299,7 +300,7 @@ impl Pixel {
 
     fn sel_options(&mut self, ui: &mut Ui) {
         let mut m = self.sel_mode as usize;
-        if pro::segmented(ui, &mut m, &["Nouvelle", "Ajouter", "Soustraire", "Intersection"]) {
+        if pro::segmented(ui, &mut m, &[tl("Nouvelle"), tl("Ajouter"), tl("Soustraire"), tl("Intersection")]) {
             self.sel_mode = m as u8;
         }
         pro::toolbar_sep(ui);
@@ -331,9 +332,9 @@ impl Pixel {
         let t = self.tool;
         match t {
             t if brushy(t) => {
-                pro::option_slider(ui, "Taille", &mut self.brush.radius, 0.5..=500.0, " px", true);
+                pro::option_slider(ui, tl("Taille"), &mut self.brush.radius, 0.5..=500.0, " px", true);
                 if t != Tool::Pencil {
-                    pro::option_slider(ui, "Dureté", &mut self.brush.hardness, 0.0..=1.0, "", false);
+                    pro::option_slider(ui, tl("Dureté"), &mut self.brush.hardness, 0.0..=1.0, "", false);
                 }
                 let flow_label = if matches!(t, Tool::Dodge | Tool::Burn) { "Exposition" } else if matches!(t, Tool::Blur | Tool::Sharpen | Tool::Smudge) { "Intensité" } else { "Flux" };
                 pro::option_slider(ui, flow_label, &mut self.brush.flow, 0.01..=1.0, "", false);
@@ -341,48 +342,48 @@ impl Pixel {
                     Tool::Brush | Tool::Pencil => {
                         small(ui, "Mode");
                         blend_combo(ui, "brush-mode", &mut self.brush.mode, 140.0);
-                        pro::option_slider(ui, "Lissage", &mut self.smoothing, 0.0..=0.95, "", false);
-                        ui.checkbox(&mut self.symmetry, "Symétrie").on_hover_text("Répète chaque trait en miroir vertical");
-                        ui.checkbox(&mut self.symmetry_v, "Miroir H").on_hover_text("Répète chaque trait en miroir horizontal");
+                        pro::option_slider(ui, tl("Lissage"), &mut self.smoothing, 0.0..=0.95, "", false);
+                        ui.checkbox(&mut self.symmetry, tl("Symétrie")).on_hover_text(tl("Répète chaque trait en miroir vertical"));
+                        ui.checkbox(&mut self.symmetry_v, tl("Miroir H")).on_hover_text(tl("Répète chaque trait en miroir horizontal"));
                     }
                     Tool::Mixer => {
-                        pro::option_slider(ui, "Humidité", &mut self.mixer_wet, 0.0..=1.0, "", false);
-                        pro::option_slider(ui, "Lissage", &mut self.smoothing, 0.0..=0.95, "", false);
+                        pro::option_slider(ui, tl("Humidité"), &mut self.mixer_wet, 0.0..=1.0, "", false);
+                        pro::option_slider(ui, tl("Lissage"), &mut self.smoothing, 0.0..=0.95, "", false);
                     }
                     Tool::ColorReplace => hint(ui, "Repeint la teinte avec la couleur principale en gardant la lumière"),
                     Tool::Eraser => {
-                        ui.checkbox(&mut self.erase_history, "Effacer vers l'historique").on_hover_text("Restaure l'état de l'instantané au lieu de rendre transparent");
-                        ui.checkbox(&mut self.symmetry, "Symétrie");
+                        ui.checkbox(&mut self.erase_history, tl("Effacer vers l'historique")).on_hover_text(tl("Restaure l'état de l'instantané au lieu de rendre transparent"));
+                        ui.checkbox(&mut self.symmetry, tl("Symétrie"));
                     }
                     Tool::BgEraser => {
-                        pro::option_slider(ui, "Tolérance", &mut self.bg_tol, 0.01..=1.0, "", false);
-                        ui.checkbox(&mut self.bg_continuous, "Échantillonnage continu");
+                        pro::option_slider(ui, tl("Tolérance"), &mut self.bg_tol, 0.01..=1.0, "", false);
+                        ui.checkbox(&mut self.bg_continuous, tl("Échantillonnage continu"));
                     }
                     Tool::HistoryBrush => {
-                        if pro::secondary(ui, "Instantané").on_hover_text("Mémorise le calque actif comme source").clicked() {
+                        if pro::secondary(ui, tl("Instantané")).on_hover_text(tl("Mémorise le calque actif comme source")).clicked() {
                             self.snapshot_history();
                         }
                         hint(ui, if self.history_src.is_some() { "Peins pour revenir à l'instantané" } else { "Aucun instantané" });
                     }
                     Tool::Sponge => {
                         let mut k = self.sponge_saturate as usize;
-                        if pro::segmented(ui, &mut k, &["Désaturer", "Saturer"]) {
+                        if pro::segmented(ui, &mut k, &[tl("Désaturer"), tl("Saturer")]) {
                             self.sponge_saturate = k == 1;
                         }
                     }
                     Tool::Dodge | Tool::Burn => {
                         small(ui, "Plage");
                         let mut r = self.dodge_range as usize;
-                        if pro::segmented(ui, &mut r, &["Tons foncés", "Tons moyens", "Tons clairs"]) {
+                        if pro::segmented(ui, &mut r, &[tl("Tons foncés"), tl("Tons moyens"), tl("Tons clairs")]) {
                             self.dodge_range = r as u8;
                         }
                     }
                     Tool::Smudge => {
-                        ui.checkbox(&mut self.finger_paint, "Peinture au doigt").on_hover_text("Commence chaque trait avec la couleur principale");
+                        ui.checkbox(&mut self.finger_paint, tl("Peinture au doigt")).on_hover_text(tl("Commence chaque trait avec la couleur principale"));
                     }
                     Tool::Clone | Tool::Heal => {
-                        ui.checkbox(&mut self.clone_aligned, "Aligné");
-                        ui.checkbox(&mut self.sample_all, "Tous les calques");
+                        ui.checkbox(&mut self.clone_aligned, tl("Aligné"));
+                        ui.checkbox(&mut self.sample_all, tl("Tous les calques"));
                         hint(ui, if self.clone_src.is_some() { "Alt+clic pour changer de source" } else { "Alt+clic sur la zone source" });
                     }
                     _ => {}
@@ -390,19 +391,19 @@ impl Pixel {
             }
             Tool::QuickSelect => {
                 self.sel_options(ui);
-                pro::option_slider(ui, "Taille", &mut self.brush.radius, 1.0..=300.0, " px", true);
-                pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
+                pro::option_slider(ui, tl("Taille"), &mut self.brush.radius, 1.0..=300.0, " px", true);
+                pro::option_slider(ui, tl("Tolérance"), &mut self.tolerance, 0..=255, "", false);
                 hint(ui, "Alt pour retirer");
             }
             Tool::Wand => {
                 self.sel_options(ui);
-                pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
-                ui.checkbox(&mut self.contiguous, "Contiguë");
-                ui.checkbox(&mut self.sample_all, "Tous les calques");
+                pro::option_slider(ui, tl("Tolérance"), &mut self.tolerance, 0..=255, "", false);
+                ui.checkbox(&mut self.contiguous, tl("Contiguë"));
+                ui.checkbox(&mut self.sample_all, tl("Tous les calques"));
             }
             Tool::Marquee | Tool::EllipseMarquee | Tool::RowMarquee | Tool::ColMarquee => {
                 self.sel_options(ui);
-                pro::option_slider(ui, "Contour progressif", &mut self.feather, 0.0..=100.0, " px", false);
+                pro::option_slider(ui, tl("Contour progressif"), &mut self.feather, 0.0..=100.0, " px", false);
                 if matches!(t, Tool::Marquee | Tool::EllipseMarquee) {
                     combo(ui, "mstyle", &mut self.marquee_style, &["Normal", "Proportions fixes", "Taille fixe"], 130.0);
                     match self.marquee_style {
@@ -420,9 +421,9 @@ impl Pixel {
             }
             Tool::Lasso | Tool::PolyLasso | Tool::MagLasso => {
                 self.sel_options(ui);
-                pro::option_slider(ui, "Contour progressif", &mut self.feather, 0.0..=100.0, " px", false);
+                pro::option_slider(ui, tl("Contour progressif"), &mut self.feather, 0.0..=100.0, " px", false);
                 if t == Tool::MagLasso {
-                    pro::option_slider(ui, "Largeur", &mut self.mag_width, 2.0..=40.0, " px", false);
+                    pro::option_slider(ui, tl("Largeur"), &mut self.mag_width, 2.0..=40.0, " px", false);
                 }
                 if t != Tool::Lasso {
                     hint(ui, if t == Tool::PolyLasso { "Clic par sommet · double-clic ou Entrée pour fermer" } else { "Glisse le long d'un bord" });
@@ -434,10 +435,10 @@ impl Pixel {
                 combo(ui, "cover", &mut self.crop_overlay, &["Aucune", "Règle des tiers", "Grille", "Diagonale", "Nombre d'or"], 130.0);
                 if let Some(c) = self.crop {
                     ui.label(RichText::new(format!("{} × {} px", c.width(), c.height())).size(12.0).color(INK));
-                    if pro::primary(ui, "Valider").clicked() {
+                    if pro::primary(ui, tl("Valider")).clicked() {
                         self.commit_crop();
                     }
-                    if pro::secondary(ui, "Annuler").clicked() {
+                    if pro::secondary(ui, tl("Annuler")).clicked() {
                         self.crop = None;
                     }
                 } else {
@@ -446,26 +447,26 @@ impl Pixel {
             }
             Tool::Rect | Tool::Ellipse | Tool::Polygon | Tool::Line | Tool::CustomShape => {
                 if t != Tool::Line {
-                    ui.checkbox(&mut self.shape_fill, "Fond");
-                    ui.checkbox(&mut self.shape_stroke, "Contour").on_hover_text("Contour avec la couleur secondaire quand le fond est actif");
+                    ui.checkbox(&mut self.shape_fill, tl("Fond"));
+                    ui.checkbox(&mut self.shape_stroke, tl("Contour")).on_hover_text(tl("Contour avec la couleur secondaire quand le fond est actif"));
                 }
                 if self.shape_stroke || t == Tool::Line {
-                    pro::option_slider(ui, "Épaisseur", &mut self.stroke_w, 1.0..=200.0, " px", true);
+                    pro::option_slider(ui, tl("Épaisseur"), &mut self.stroke_w, 1.0..=200.0, " px", true);
                 }
                 match t {
                     Tool::Rect => {
-                        pro::option_slider(ui, "Arrondi", &mut self.corner, 0.0..=500.0, " px", false);
+                        pro::option_slider(ui, tl("Arrondi"), &mut self.corner, 0.0..=500.0, " px", false);
                     }
                     Tool::Polygon => {
-                        pro::option_slider(ui, "Côtés", &mut self.sides, 3..=24, "", false);
-                        ui.checkbox(&mut self.star, "Étoile");
+                        pro::option_slider(ui, tl("Côtés"), &mut self.sides, 3..=24, "", false);
+                        ui.checkbox(&mut self.star, tl("Étoile"));
                         if self.star {
-                            pro::option_slider(ui, "Retrait", &mut self.inset, 0.05..=0.95, "", false);
+                            pro::option_slider(ui, tl("Retrait"), &mut self.inset, 0.05..=0.95, "", false);
                         }
                     }
                     Tool::Line => {
-                        ui.checkbox(&mut self.arrow_start, "Flèche au début");
-                        ui.checkbox(&mut self.arrow_end, "Flèche à la fin");
+                        ui.checkbox(&mut self.arrow_start, tl("Flèche au début"));
+                        ui.checkbox(&mut self.arrow_end, tl("Flèche à la fin"));
                     }
                     Tool::CustomShape => {
                         combo(ui, "custom", &mut self.custom, &CUSTOM_SHAPES, 110.0);
@@ -474,7 +475,7 @@ impl Pixel {
                 }
                 small(ui, "Mode");
                 blend_combo(ui, "shape-mode", &mut self.shape_mode, 120.0);
-                ui.checkbox(&mut self.shape_layer, "Nouveau calque");
+                ui.checkbox(&mut self.shape_layer, tl("Nouveau calque"));
             }
             Tool::PhotoText => {
                 let ctx = ui.ctx().clone();
@@ -483,10 +484,10 @@ impl Pixel {
             Tool::TextH | Tool::TextV => {
                 combo(ui, "font", &mut self.text_font, &crate::shapes::FONTS.map(|f| f.0), 130.0);
                 ui.add(egui::DragValue::new(&mut self.text_size).range(4.0..=800.0).suffix(" px"));
-                ui.toggle_value(&mut self.text_bold, RichText::new("G").strong()).on_hover_text("Gras");
-                ui.toggle_value(&mut self.text_italic, RichText::new("I").italics()).on_hover_text("Italique");
-                ui.toggle_value(&mut self.text_underline, RichText::new("S").underline()).on_hover_text("Souligné");
-                pro::segmented(ui, &mut self.text_align, &["Gauche", "Centre", "Droite"]);
+                ui.toggle_value(&mut self.text_bold, RichText::new(tl("G")).strong()).on_hover_text(tl("Gras"));
+                ui.toggle_value(&mut self.text_italic, RichText::new(tl("I")).italics()).on_hover_text(tl("Italique"));
+                ui.toggle_value(&mut self.text_underline, RichText::new(tl("S")).underline()).on_hover_text(tl("Souligné"));
+                pro::segmented(ui, &mut self.text_align, &[tl("Gauche"), tl("Centre"), tl("Droite")]);
                 small(ui, "Approche");
                 ui.add(egui::DragValue::new(&mut self.tracking).range(-50.0..=200.0).suffix(" ‰"));
                 small(ui, "Interligne");
@@ -494,27 +495,27 @@ impl Pixel {
             }
             Tool::Gradient => {
                 combo(ui, "gpreset", &mut self.grad_preset, &GRADIENT_PRESETS, 170.0);
-                pro::segmented(ui, &mut self.grad_kind, &["Linéaire", "Radial", "Angulaire", "Réfléchi", "Losange"]);
+                pro::segmented(ui, &mut self.grad_kind, &[tl("Linéaire"), tl("Radial"), tl("Angulaire"), tl("Réfléchi"), tl("Losange")]);
                 small(ui, "Mode");
                 blend_combo(ui, "grad-mode", &mut self.grad_mode, 120.0);
-                pro::option_slider(ui, "Opacité", &mut self.grad_opacity, 0.01..=1.0, "", false);
-                ui.checkbox(&mut self.grad_reverse, "Inverser");
-                ui.checkbox(&mut self.grad_dither, "Tramage");
+                pro::option_slider(ui, tl("Opacité"), &mut self.grad_opacity, 0.01..=1.0, "", false);
+                ui.checkbox(&mut self.grad_reverse, tl("Inverser"));
+                ui.checkbox(&mut self.grad_dither, tl("Tramage"));
             }
             Tool::Fill => {
-                pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
-                pro::option_slider(ui, "Opacité", &mut self.fill_opacity, 0.01..=1.0, "", false);
-                ui.checkbox(&mut self.contiguous, "Contigu");
-                ui.checkbox(&mut self.sample_all, "Tous les calques");
+                pro::option_slider(ui, tl("Tolérance"), &mut self.tolerance, 0..=255, "", false);
+                pro::option_slider(ui, tl("Opacité"), &mut self.fill_opacity, 0.01..=1.0, "", false);
+                ui.checkbox(&mut self.contiguous, tl("Contigu"));
+                ui.checkbox(&mut self.sample_all, tl("Tous les calques"));
             }
             Tool::MagicEraser => {
-                pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
-                pro::option_slider(ui, "Opacité", &mut self.fill_opacity, 0.01..=1.0, "", false);
-                ui.checkbox(&mut self.contiguous, "Contigu");
+                pro::option_slider(ui, tl("Tolérance"), &mut self.tolerance, 0..=255, "", false);
+                pro::option_slider(ui, tl("Opacité"), &mut self.fill_opacity, 0.01..=1.0, "", false);
+                ui.checkbox(&mut self.contiguous, tl("Contigu"));
             }
             Tool::Move => {
-                ui.checkbox(&mut self.auto_select, "Sélection automatique").on_hover_text("Le clic choisit le calque visible sous le pointeur");
-                ui.checkbox(&mut self.show_bounds, "Cadre de sélection");
+                ui.checkbox(&mut self.auto_select, tl("Sélection automatique")).on_hover_text(tl("Le clic choisit le calque visible sous le pointeur"));
+                ui.checkbox(&mut self.show_bounds, tl("Cadre de sélection"));
                 pro::toolbar_sep(ui);
                 for (k, tip) in ["Aligner à gauche", "Centrer horizontalement", "Aligner à droite", "Aligner en haut", "Centrer verticalement", "Aligner en bas"].iter().enumerate() {
                     if pro::icon_button(ui, 28.0, false, &format!("{tip} (sur la sélection ou la zone de travail)"), |p, r, c| align_icon(p, r, k as u8, c)).clicked() {
@@ -528,17 +529,17 @@ impl Pixel {
             Tool::Hand | Tool::Zoom | Tool::RotateView => {
                 if t == Tool::Zoom {
                     let mut k = self.zoom_out as usize;
-                    if pro::segmented(ui, &mut k, &["Zoom avant", "Zoom arrière"]) {
+                    if pro::segmented(ui, &mut k, &[tl("Zoom avant"), tl("Zoom arrière")]) {
                         self.zoom_out = k == 1;
                     }
                 }
                 if t == Tool::RotateView {
                     ui.add(egui::DragValue::new(&mut self.view_angle).range(-180.0..=180.0).suffix("°").speed(0.5));
-                    if pro::secondary(ui, "Réinitialiser la vue").clicked() {
+                    if pro::secondary(ui, tl("Réinitialiser la vue")).clicked() {
                         self.view_angle = 0.0;
                     }
                 }
-                if pro::secondary(ui, "Ajuster à l'écran").clicked() {
+                if pro::secondary(ui, tl("Ajuster à l'écran")).clicked() {
                     self.fit_pending = true;
                 }
                 if pro::secondary(ui, "100 %").clicked() {
@@ -552,9 +553,9 @@ impl Pixel {
             Tool::Picker | Tool::Sampler => {
                 small(ui, "Échantillon");
                 combo(ui, "psize", &mut self.picker_size, &PICK_SIZES, 130.0);
-                ui.checkbox(&mut self.sample_all, "Tous les calques");
+                ui.checkbox(&mut self.sample_all, tl("Tous les calques"));
                 if t == Tool::Sampler {
-                    if !self.samplers.is_empty() && pro::secondary(ui, "Effacer").clicked() {
+                    if !self.samplers.is_empty() && pro::secondary(ui, tl("Effacer")).clicked() {
                         self.samplers.clear();
                     }
                     hint(ui, "Jusqu'à 4 points, lus dans Infos");
@@ -566,7 +567,7 @@ impl Pixel {
                 if let Some((a, b)) = self.ruler {
                     let (dx, dy) = (b.0 - a.0, b.1 - a.1);
                     ui.label(RichText::new(format!("L {:.1} px   A {:.1}°   ΔX {:.0}   ΔY {:.0}", (dx * dx + dy * dy).sqrt(), -dy.atan2(dx).to_degrees(), dx, dy)).size(12.0).color(INK).monospace());
-                    if pro::secondary(ui, "Redresser le calque").clicked() {
+                    if pro::secondary(ui, tl("Redresser le calque")).clicked() {
                         let mut ang = dy.atan2(dx).to_degrees();
                         if ang.abs() > 45.0 {
                             ang -= 90.0 * ang.signum();
@@ -575,7 +576,7 @@ impl Pixel {
                         self.doc.transform_layer(1.0, -ang);
                         self.ruler = None;
                     }
-                    if pro::secondary(ui, "Effacer").clicked() {
+                    if pro::secondary(ui, tl("Effacer")).clicked() {
                         self.ruler = None;
                     }
                 } else {
@@ -584,38 +585,38 @@ impl Pixel {
             }
             Tool::Note => {
                 hint(ui, &format!("Clique pour poser une note · {} note(s)", self.notes.len()));
-                if !self.notes.is_empty() && pro::secondary(ui, "Tout effacer").clicked() {
+                if !self.notes.is_empty() && pro::secondary(ui, tl("Tout effacer")).clicked() {
                     self.notes.clear();
                 }
             }
             Tool::Remove => {
-                pro::option_slider(ui, "Taille", &mut self.brush.radius, 2.0..=300.0, " px", true);
+                pro::option_slider(ui, tl("Taille"), &mut self.brush.radius, 2.0..=300.0, " px", true);
                 hint(ui, "Peins sur ce qui doit disparaître : le fond est reconstruit autour");
             }
             Tool::Patch => {
-                pro::option_slider(ui, "Diffusion", &mut self.patch_diffusion, 1.0..=20.0, "", false);
+                pro::option_slider(ui, tl("Diffusion"), &mut self.patch_diffusion, 1.0..=20.0, "", false);
                 hint(ui, if self.doc.selection.is_some() { "Fais glisser la sélection vers une zone saine" } else { "Entoure la zone à réparer" });
             }
             Tool::ContentMove => hint(ui, if self.doc.selection.is_some() { "Fais glisser la sélection : l'objet est déplacé et le fond est reconstruit" } else { "Sélectionne d'abord un objet (lasso, sélection d'objet…)" }),
             Tool::RedEye => {
-                pro::option_slider(ui, "Taille de la pupille", &mut self.brush.radius, 2.0..=80.0, " px", false);
-                pro::option_slider(ui, "Assombrir", &mut self.red_eye_dark, 0.0..=1.0, "", false);
+                pro::option_slider(ui, tl("Taille de la pupille"), &mut self.brush.radius, 2.0..=80.0, " px", false);
+                pro::option_slider(ui, tl("Assombrir"), &mut self.red_eye_dark, 0.0..=1.0, "", false);
                 hint(ui, "Clique sur chaque œil rouge");
             }
             Tool::ObjectSelect => {
-                pro::option_slider(ui, "Tolérance", &mut self.tolerance, 0..=255, "", false);
+                pro::option_slider(ui, tl("Tolérance"), &mut self.tolerance, 0..=255, "", false);
                 hint(ui, "Trace un rectangle autour de l'objet : il est détouré automatiquement");
             }
             Tool::CurvePen => hint(ui, &format!("Clique pour poser des points, double-clic ou clic sur le 1er point pour fermer la courbe en sélection · {} point(s)", self.poly.len())),
             Tool::PerspCrop => {
                 hint(ui, &format!("Clique les 4 coins dans l'ordre : haut gauche, haut droit, bas droit, bas gauche · {}/4", self.persp.len()));
-                if !self.persp.is_empty() && pro::secondary(ui, "Annuler").clicked() {
+                if !self.persp.is_empty() && pro::secondary(ui, tl("Annuler")).clicked() {
                     self.persp.clear();
                 }
             }
             Tool::Count => {
                 hint(ui, &format!("Clique pour compter · total : {}", self.counts.len()));
-                if !self.counts.is_empty() && pro::secondary(ui, "Remettre à zéro").clicked() {
+                if !self.counts.is_empty() && pro::secondary(ui, tl("Remettre à zéro")).clicked() {
                     self.counts.clear();
                 }
             }

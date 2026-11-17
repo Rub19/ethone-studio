@@ -1,4 +1,5 @@
 use crate::model::{self, Frame, Kind, MASTER, Node};
+use studio_ui::i18n::tl;
 use crate::{HANDLES, MM, PageApp};
 use eframe::egui::{self, Color32, CornerRadius, Key, Modifiers, Painter, Pos2, Rect, RichText, Shape, Stroke, StrokeKind, Ui, vec2};
 use studio_ui::pro::MUTED;
@@ -935,10 +936,10 @@ impl PageApp {
             }
             Pen if !self.pen.is_empty() => {
                 lbl(ui, &format!("{} points", self.pen.len()));
-                if ui.button("Terminer (Entrée)").clicked() {
+                if ui.button(tl("Terminer (Entrée)")).clicked() {
                     self.commit_pen(false);
                 }
-                if ui.button("Fermer le tracé").clicked() {
+                if ui.button(tl("Fermer le tracé")).clicked() {
                     self.commit_pen(true);
                 }
                 return;

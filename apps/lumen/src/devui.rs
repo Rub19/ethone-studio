@@ -1,4 +1,5 @@
 use crate::develop::{self, Local, Mask, Part, PartKind, PartMode, Settings};
+use studio_ui::i18n::tl;
 use crate::tools::{Tool, part_name};
 use crate::widgets::{caption, color_wheel, curve_editor, draw_histogram, heading, hue_slider, nav_row, pct, rgb, short, slider, slider_full, slider_track};
 use crate::{Collection, Drag, Lumen, STAR, display_name, meta};
@@ -102,13 +103,13 @@ impl Lumen {
                             self.min_rating = r;
                         }
                     }
-                    ui.label(RichText::new("Note").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("Note")).size(12.0).color(FAINT));
                     for (c, l) in [(Collection::Edited, "Modifiées"), (Collection::Picks, "Retenues"), (Collection::All, "Toutes")] {
                         if ui.selectable_label(self.collection == c, l).clicked() {
                             self.collection = c;
                         }
                     }
-                    ui.label(RichText::new("Filtre").size(12.0).color(FAINT));
+                    ui.label(RichText::new(tl("Filtre")).size(12.0).color(FAINT));
                 });
             });
             egui::ScrollArea::horizontal().show(ui, |ui| {
@@ -147,7 +148,7 @@ impl Lumen {
                 heading(ui, "PRÉRÉGLAGES");
                 ui.spacing_mut().slider_width = 96.0;
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Quantité").size(12.0).color(MUTED));
+                    ui.label(RichText::new(tl("Quantité")).size(12.0).color(MUTED));
                     if ui.add(egui::Slider::new(&mut self.preset_amount, 0.0..=200.0).suffix(" %")).changed()
                         && let Some((base, preset)) = self.last_preset.clone()
                     {
@@ -190,7 +191,7 @@ impl Lumen {
                 }
                 let favs: Vec<(&str, Settings)> = catalog.iter().filter(|c| self.catalog.favorites.iter().any(|f| f == c.1)).map(|c| (c.1, c.2.clone())).collect();
                 if !favs.is_empty() {
-                    egui::CollapsingHeader::new(RichText::new("★ Favoris").size(12.0).color(INK)).id_salt("cat-fav").default_open(true).show(ui, |ui| {
+                    egui::CollapsingHeader::new(RichText::new(tl("★ Favoris")).size(12.0).color(INK)).id_salt("cat-fav").default_open(true).show(ui, |ui| {
                         for (name, st) in favs {
                             if nav_row(ui, name, usize::MAX, current == st).clicked() {
                                 self.apply_preset(&st);
@@ -198,20 +199,20 @@ impl Lumen {
                         }
                     });
                 }
-                egui::CollapsingHeader::new(RichText::new("Mes préréglages").size(12.0).color(INK)).id_salt("cat-user").default_open(true).show(ui, |ui| {
+                egui::CollapsingHeader::new(RichText::new(tl("Mes préréglages")).size(12.0).color(INK)).id_salt("cat-user").default_open(true).show(ui, |ui| {
                     let mut remove = None;
                     for (k, (name, st)) in self.catalog.user_presets.clone().into_iter().enumerate() {
-                        let r = nav_row(ui, &name, usize::MAX, current == st).on_hover_text("Clic droit : options");
+                        let r = nav_row(ui, &name, usize::MAX, current == st).on_hover_text(tl("Clic droit : options"));
                         if r.clicked() {
                             self.apply_preset(&st);
                         }
                         r.context_menu(|ui| {
-                            if ui.button("Mettre à jour avec les réglages actuels").clicked() {
+                            if ui.button(tl("Mettre à jour avec les réglages actuels")).clicked() {
                                 self.catalog.user_presets[k].1 = current.clone();
                                 self.dirty_catalog = true;
                                 ui.close();
                             }
-                            if ui.button("Supprimer ce préréglage").clicked() {
+                            if ui.button(tl("Supprimer ce préréglage")).clicked() {
                                 remove = Some(k);
                                 ui.close();
                             }
@@ -223,7 +224,7 @@ impl Lumen {
                     }
                     match &mut self.preset_name {
                         Some(name) => {
-                            let r = ui.add(egui::TextEdit::singleline(name).hint_text("Nom du préréglage").desired_width(f32::INFINITY));
+                            let r = ui.add(egui::TextEdit::singleline(name).hint_text(tl("Nom du préréglage")).desired_width(f32::INFINITY));
                             r.request_focus();
                             if r.lost_focus() {
                                 let n = name.trim().to_string();
@@ -237,7 +238,7 @@ impl Lumen {
                             }
                         }
                         None => {
-                            if pro::ghost(ui, "+ Enregistrer les réglages actuels").clicked() {
+                            if pro::ghost(ui, tl("+ Enregistrer les réglages actuels")).clicked() {
                                 self.preset_name = Some(String::new());
                             }
                         }
@@ -247,7 +248,7 @@ impl Lumen {
                 ui.horizontal(|ui| {
                     heading(ui, "INSTANTANÉS");
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.small_button("+").on_hover_text("Nouvel instantané (Ctrl+N)").clicked() {
+                        if ui.small_button("+").on_hover_text(tl("Nouvel instantané (Ctrl+N)")).clicked() {
                             self.snapshot_name = Some(format!("Instantané {}", self.get(i).snapshots.len() + 1));
                         }
                     });
@@ -267,17 +268,17 @@ impl Lumen {
                 }
                 let mut remove = None;
                 for (k, (name, st)) in snaps.iter().enumerate() {
-                    let r = nav_row(ui, name, usize::MAX, current == *st).on_hover_text("Clic : appliquer · clic droit : options");
+                    let r = nav_row(ui, name, usize::MAX, current == *st).on_hover_text(tl("Clic : appliquer · clic droit : options"));
                     if r.clicked() {
                         self.set_settings(i, st.clone());
                     }
                     r.context_menu(|ui| {
-                        if ui.button("Remplacer par les réglages actuels").clicked() {
+                        if ui.button(tl("Remplacer par les réglages actuels")).clicked() {
                             self.entry(i).snapshots[k].1 = current.clone();
                             self.dirty_catalog = true;
                             ui.close();
                         }
-                        if ui.button("Supprimer").clicked() {
+                        if ui.button(tl("Supprimer")).clicked() {
                             remove = Some(k);
                             ui.close();
                         }
@@ -291,7 +292,7 @@ impl Lumen {
                 ui.horizontal(|ui| {
                     heading(ui, "HISTORIQUE");
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if ui.small_button("Effacer").clicked() {
+                        if ui.small_button(tl("Effacer")).clicked() {
                             self.history.retain(|h| h.0 != i);
                             self.future.retain(|h| h.0 != i);
                         }
@@ -304,7 +305,7 @@ impl Lumen {
                 let mut target = None;
                 if nav_row(ui, "État actuel", usize::MAX, true).clicked() {}
                 for (n, (k, label)) in steps.iter().enumerate().rev().take(40) {
-                    if nav_row(ui, &format!("{}. {label}", n + 1), usize::MAX, false).on_hover_text("Revenir à l'état avant cette étape").clicked() {
+                    if nav_row(ui, &format!("{}. {label}", n + 1), usize::MAX, false).on_hover_text(tl("Revenir à l'état avant cette étape")).clicked() {
                         target = Some(*k);
                     }
                 }
@@ -389,7 +390,7 @@ impl Lumen {
                             None => caption(ui, "Survole la photo pour lire les valeurs RVB"),
                         }
                         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            ui.toggle_value(&mut clipping, RichText::new("Écrêtage").size(11.5)).on_hover_text("J");
+                            ui.toggle_value(&mut clipping, RichText::new(tl("Écrêtage")).size(11.5)).on_hover_text(tl("J"));
                         });
                     });
                 });
@@ -401,14 +402,14 @@ impl Lumen {
                 let mut tool_req: Option<Tool> = None;
                 solo_dock(solo, ui, &mut opened, "basic", "Réglages de base", |ui| {
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("Profil").size(12.0).color(MUTED));
+                        ui.label(RichText::new(tl("Profil")).size(12.0).color(MUTED));
                         egui::ComboBox::from_id_salt("profile").width(120.0).selected_text(develop::PROFILES[(s.profile as usize).min(5)]).show_ui(ui, |ui| {
                             for (k, p) in develop::PROFILES.iter().enumerate() {
                                 ui.selectable_value(&mut s.profile, k as u8, *p);
                             }
                         });
                         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            if pro::ghost(ui, "Auto").on_hover_text("Ctrl+U").clicked()
+                            if pro::ghost(ui, tl("Auto")).on_hover_text(tl("Ctrl+U")).clicked()
                                 && let Some(src) = &src
                             {
                                 let a = develop::auto(src);
@@ -417,23 +418,23 @@ impl Lumen {
                         });
                     });
                     let mut bw = s.mono as usize;
-                    if pro::segmented(ui, &mut bw, &["Couleur", "Noir et blanc"]) {
+                    if pro::segmented(ui, &mut bw, &[tl("Couleur"), tl("Noir et blanc")]) {
                         s.mono = bw == 1;
                     }
                     ui.add_space(6.0);
                     caption(ui, "Balance des blancs");
                     ui.horizontal(|ui| {
                         ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
-                            if ui.small_button("Pipette").on_hover_text("W").clicked() {
+                            if ui.small_button(tl("Pipette")).on_hover_text(tl("W")).clicked() {
                                 tool_req = Some(Tool::WbPicker);
                             }
-                            if ui.small_button("Auto").clicked()
+                            if ui.small_button(tl("Auto")).clicked()
                                 && let Some(src) = &src
                             {
                                 (s.temperature, s.tint) = develop::auto_white_balance(src);
                             }
-                            ui.menu_button(RichText::new("Préréglage").size(12.0), |ui| {
-                                if ui.button("Tel quel").clicked() {
+                            ui.menu_button(RichText::new(tl("Préréglage")).size(12.0), |ui| {
+                                if ui.button(tl("Tel quel")).clicked() {
                                     (s.temperature, s.tint) = (0.0, 0.0);
                                 }
                                 for (name, t, ti) in develop::WB_PRESETS {
@@ -464,7 +465,7 @@ impl Lumen {
                 });
                 let mut channel = self.curve_channel;
                 solo_dock(solo, ui, &mut opened, "curve", "Courbe des tonalités", |ui| {
-                    pro::segmented(ui, &mut channel, &["Param.", "RVB", "R", "V", "B"]);
+                    pro::segmented(ui, &mut channel, &[tl("Param."), tl("RVB"), tl("R"), tl("V"), tl("B")]);
                     ui.add_space(6.0);
                     let lum = hist.as_ref().map(|h| h[3]);
                     match channel {
@@ -493,10 +494,10 @@ impl Lumen {
                         }
                     }
                     ui.horizontal(|ui| {
-                        if ui.small_button("Réglage ciblé").on_hover_text("T : glisse sur la photo").clicked() {
+                        if ui.small_button(tl("Réglage ciblé")).on_hover_text(tl("T : glisse sur la photo")).clicked() {
                             tool_req = Some(Tool::Target);
                         }
-                        if ui.small_button("Réinitialiser la courbe").clicked() {
+                        if ui.small_button(tl("Réinitialiser la courbe")).clicked() {
                             (s.curve, s.curve_rgb, s.curve_r, s.curve_g, s.curve_b) = ([0.0; 4], vec![], vec![], vec![], vec![]);
                         }
                     });
@@ -504,7 +505,7 @@ impl Lumen {
                 self.curve_channel = channel;
                 let mut tab = self.hsl_tab;
                 solo_dock(solo, ui, &mut opened, "hsl", "TSL / Couleur", |ui| {
-                    pro::segmented(ui, &mut tab, &["Teinte", "Saturation", "Luminance", "Tout"]);
+                    pro::segmented(ui, &mut tab, &[tl("Teinte"), tl("Saturation"), tl("Luminance"), tl("Tout")]);
                     ui.add_space(6.0);
                     let tabs: Vec<usize> = if tab == 3 { vec![0, 1, 2] } else { vec![tab] };
                     for t in tabs {
@@ -521,11 +522,11 @@ impl Lumen {
                         }
                     }
                     ui.horizontal(|ui| {
-                        if ui.small_button("Réglage ciblé").clicked() {
+                        if ui.small_button(tl("Réglage ciblé")).clicked() {
                             self.target_mode = tab.min(2) + 1;
                             tool_req = Some(Tool::Target);
                         }
-                        if ui.small_button("Réinitialiser").clicked() {
+                        if ui.small_button(tl("Réinitialiser")).clicked() {
                             s.hsl = [[0.0; 3]; 8];
                         }
                     });
@@ -581,21 +582,21 @@ impl Lumen {
                     slider_track(ui, "Bleu / jaune", &mut s.ca_blue, -100.0..=100.0, 1.0, [Color32::from_rgb(240, 210, 60), Color32::from_rgb(70, 110, 250)]);
                     slider(ui, "Frange violette", &mut s.defringe_purple, 0.0..=100.0, 1.0);
                     slider(ui, "Frange verte", &mut s.defringe_green, 0.0..=100.0, 1.0);
-                    if ui.small_button("Supprimer l'aberration (auto)").on_hover_text("Applique une correction de frange standard").clicked() {
+                    if ui.small_button(tl("Supprimer l'aberration (auto)")).on_hover_text(tl("Applique une correction de frange standard")).clicked() {
                         (s.defringe_purple, s.defringe_green) = (40.0, 25.0);
                     }
                 });
                 solo_dock(solo, ui, &mut opened, "transform", "Transformation", |ui| {
                     ui.horizontal(|ui| {
-                        if ui.small_button("Niveau auto").clicked()
+                        if ui.small_button(tl("Niveau auto")).clicked()
                             && let Some(src) = &src
                         {
                             s.straighten = develop::auto_straighten(src);
                         }
-                        if ui.small_button("Règle").on_hover_text("Trace une ligne sur l'horizon").clicked() {
+                        if ui.small_button(tl("Règle")).on_hover_text(tl("Trace une ligne sur l'horizon")).clicked() {
                             tool_req = Some(Tool::Straighten);
                         }
-                        if ui.small_button("Réinitialiser").clicked() {
+                        if ui.small_button(tl("Réinitialiser")).clicked() {
                             (s.persp_v, s.persp_h, s.persp_rotate, s.persp_aspect, s.persp_scale, s.persp_x, s.persp_y) = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         }
                     });
@@ -609,14 +610,14 @@ impl Lumen {
                     }
                     slider(ui, "Décalage X", &mut s.persp_x, -100.0..=100.0, 0.5);
                     slider(ui, "Décalage Y", &mut s.persp_y, -100.0..=100.0, 0.5);
-                    ui.checkbox(&mut s.flip_v, "Miroir vertical");
+                    ui.checkbox(&mut s.flip_v, tl("Miroir vertical"));
                 });
                 solo_dock(solo, ui, &mut opened, "geometry", "Recadrage et rotation", |ui| {
                     ui.horizontal(|ui| {
-                        if pro::secondary(ui, "Outil Recadrage").on_hover_text("R").clicked() {
+                        if pro::secondary(ui, tl("Outil Recadrage")).on_hover_text(tl("R")).clicked() {
                             tool_req = Some(Tool::Crop);
                         }
-                        if ui.small_button("Auto").on_hover_text("Redressement automatique").clicked()
+                        if ui.small_button(tl("Auto")).on_hover_text(tl("Redressement automatique")).clicked()
                             && let Some(src) = &src
                         {
                             s.straighten = develop::auto_straighten(src);
@@ -638,11 +639,11 @@ impl Lumen {
                         }
                     });
                     ui.horizontal(|ui| {
-                        ui.checkbox(&mut s.flip, "Miroir horizontal");
-                        if ui.small_button("⟲ 90°").clicked() {
+                        ui.checkbox(&mut s.flip, tl("Miroir horizontal"));
+                        if ui.small_button(tl("⟲ 90°")).clicked() {
                             s.rotate = (s.rotate + 3) % 4;
                         }
-                        if ui.small_button("⟳ 90°").clicked() {
+                        if ui.small_button(tl("⟳ 90°")).clicked() {
                             s.rotate = (s.rotate + 1) % 4;
                         }
                     });
@@ -676,28 +677,28 @@ impl Lumen {
                 });
                 solo_dock(solo, ui, &mut opened, "masks", "Masques", |ui| self.masks_panel(ui, &mut s, &mut tool_req));
                 solo_dock(solo, ui, &mut opened, "retouch", "Retouche", |ui| {
-                    pro::label_value(ui, "Corrections de taches", &s.spots.len().to_string());
-                    pro::label_value(ui, "Yeux rouges corrigés", &s.red_eyes.len().to_string());
+                    pro::label_value(ui, tl("Corrections de taches"), &s.spots.len().to_string());
+                    pro::label_value(ui, tl("Yeux rouges corrigés"), &s.red_eyes.len().to_string());
                     ui.add_space(4.0);
                     ui.horizontal_wrapped(|ui| {
-                        if ui.small_button("Suppression (Q)").clicked() {
+                        if ui.small_button(tl("Suppression (Q)")).clicked() {
                             tool_req = Some(Tool::Remove);
                         }
-                        if ui.small_button("Correcteur").clicked() {
+                        if ui.small_button(tl("Correcteur")).clicked() {
                             tool_req = Some(Tool::Heal);
                         }
-                        if ui.small_button("Clonage").clicked() {
+                        if ui.small_button(tl("Clonage")).clicked() {
                             tool_req = Some(Tool::Clone);
                         }
-                        if ui.small_button("Yeux rouges (E)").clicked() {
+                        if ui.small_button(tl("Yeux rouges (E)")).clicked() {
                             tool_req = Some(Tool::RedEye);
                         }
                     });
                     ui.horizontal(|ui| {
-                        if !s.spots.is_empty() && ui.small_button("Effacer les taches").clicked() {
+                        if !s.spots.is_empty() && ui.small_button(tl("Effacer les taches")).clicked() {
                             s.spots.clear();
                         }
-                        if !s.red_eyes.is_empty() && ui.small_button("Effacer les yeux").clicked() {
+                        if !s.red_eyes.is_empty() && ui.small_button(tl("Effacer les yeux")).clicked() {
                             s.red_eyes.clear();
                         }
                     });
@@ -712,25 +713,25 @@ impl Lumen {
                 });
                 solo_dock(solo, ui, &mut opened, "actions", "Réglages", |ui| {
                     ui.horizontal_wrapped(|ui| {
-                        if pro::secondary(ui, "?  Tutoriels").clicked() {
+                        if pro::secondary(ui, tl("?  Tutoriels")).clicked() {
                             self.help.learn("Développement");
                         }
-                        if pro::secondary(ui, "Copier…").on_hover_text("Ctrl+Maj+C : choisir les groupes").clicked() {
+                        if pro::secondary(ui, tl("Copier…")).on_hover_text(tl("Ctrl+Maj+C : choisir les groupes")).clicked() {
                             self.clipboard = Some(s.clone());
                             self.copy_sheet = true;
                         }
                         if self.clipboard.is_some()
-                            && pro::secondary(ui, "Coller").clicked()
+                            && pro::secondary(ui, tl("Coller")).clicked()
                             && let Some(c) = &self.clipboard
                         {
                             s = meta::copy_groups(&s, c, &self.copy_groups);
                         }
-                        if pro::secondary(ui, "Réinitialiser").clicked() {
+                        if pro::secondary(ui, tl("Réinitialiser")).clicked() {
                             s = Settings::default();
                         }
                     });
                     ui.add_space(4.0);
-                    ui.menu_button(RichText::new("Réinitialiser un groupe…").size(12.0), |ui| {
+                    ui.menu_button(RichText::new(tl("Réinitialiser un groupe…")).size(12.0), |ui| {
                         for (k, g) in meta::GROUPS.iter().enumerate() {
                             if ui.button(*g).clicked() {
                                 let mut only = vec![false; meta::GROUPS.len()];
@@ -740,7 +741,7 @@ impl Lumen {
                             }
                         }
                     });
-                    ui.checkbox(&mut self.catalog.solo, "Mode solo : un seul panneau ouvert");
+                    ui.checkbox(&mut self.catalog.solo, tl("Mode solo : un seul panneau ouvert"));
                 });
                 solo_dock(solo, ui, &mut opened, "creative", "Effets créatifs", |ui| {
                     studio_ui::fxpanel::effects_panel(ui, "lumen", &mut s.creative);
@@ -766,7 +767,7 @@ impl Lumen {
     fn masks_panel(&mut self, ui: &mut Ui, s: &mut Settings, tool_req: &mut Option<Tool>) {
         ui.spacing_mut().item_spacing.y = 3.0;
         ui.horizontal(|ui| {
-            ui.menu_button(RichText::new("+ Nouveau masque").size(12.0).color(BLUE), |ui| {
+            ui.menu_button(RichText::new(tl("+ Nouveau masque")).size(12.0).color(BLUE), |ui| {
                 if let Some(k) = kind_menu(ui) {
                     match k {
                         PartKind::Linear => *tool_req = Some(Tool::Linear),
@@ -785,7 +786,7 @@ impl Lumen {
                 }
             });
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                ui.checkbox(&mut self.show_overlay, RichText::new("Superposition").size(12.0)).on_hover_text("O");
+                ui.checkbox(&mut self.show_overlay, RichText::new(tl("Superposition")).size(12.0)).on_hover_text(tl("O"));
             });
         });
         if s.masks.is_empty() {
@@ -797,7 +798,7 @@ impl Lumen {
         for (k, m) in s.masks.iter_mut().enumerate() {
             let sel = self.sel_mask == Some(k);
             ui.horizontal(|ui| {
-                ui.checkbox(&mut m.on, "").on_hover_text("Activer ou masquer");
+                ui.checkbox(&mut m.on, "").on_hover_text(tl("Activer ou masquer"));
                 let name = if m.name.is_empty() { format!("Masque {}", k + 1) } else { m.name.clone() };
                 if ui.add(egui::Button::selectable(sel, RichText::new(short(&name, 20)).size(12.0).color(if sel { INK_STRONG } else { INK }))).clicked() {
                     self.sel_mask = if sel { None } else { Some(k) };
@@ -805,10 +806,10 @@ impl Lumen {
                     self.rename_mask = None;
                 }
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    if ui.small_button("×").on_hover_text("Supprimer le masque").clicked() {
+                    if ui.small_button("×").on_hover_text(tl("Supprimer le masque")).clicked() {
                         remove = Some(k);
                     }
-                    if ui.small_button("⧉").on_hover_text("Dupliquer").clicked() {
+                    if ui.small_button("⧉").on_hover_text(tl("Dupliquer")).clicked() {
                         dup = Some(k);
                     }
                 });
@@ -832,9 +833,9 @@ impl Lumen {
         ui.add_space(4.0);
         let m = &mut s.masks[mi];
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Nom").size(12.0).color(MUTED));
+            ui.label(RichText::new(tl("Nom")).size(12.0).color(MUTED));
             ui.add(egui::TextEdit::singleline(&mut m.name).desired_width(140.0));
-            ui.checkbox(&mut m.invert, "Inverser");
+            ui.checkbox(&mut m.invert, tl("Inverser"));
         });
         slider_full(ui, "Quantité", &mut m.amount, 0.0..=100.0, 1.0, 100.0, None, " %");
         caption(ui, "Composants");
@@ -846,11 +847,11 @@ impl Lumen {
                     self.sel_part = k;
                 }
                 egui::ComboBox::from_id_salt(("pmode", mi, k)).width(78.0).selected_text(match p.mode { PartMode::Add => "Ajouter", PartMode::Subtract => "Soustraire", PartMode::Intersect => "Intersecter" }).show_ui(ui, |ui| {
-                    ui.selectable_value(&mut p.mode, PartMode::Add, "Ajouter");
-                    ui.selectable_value(&mut p.mode, PartMode::Subtract, "Soustraire");
-                    ui.selectable_value(&mut p.mode, PartMode::Intersect, "Intersecter");
+                    ui.selectable_value(&mut p.mode, PartMode::Add, tl("Ajouter"));
+                    ui.selectable_value(&mut p.mode, PartMode::Subtract, tl("Soustraire"));
+                    ui.selectable_value(&mut p.mode, PartMode::Intersect, tl("Intersecter"));
                 });
-                ui.checkbox(&mut p.invert, "").on_hover_text("Inverser ce composant");
+                ui.checkbox(&mut p.invert, "").on_hover_text(tl("Inverser ce composant"));
                 if ui.small_button("×").clicked() {
                     drop = Some(k);
                 }
@@ -885,10 +886,10 @@ impl Lumen {
                 PartKind::Brush => {
                     ui.horizontal(|ui| {
                         caption(ui, &format!("{} touche(s) de pinceau", p.dabs.len()));
-                        if ui.small_button("Peindre").clicked() {
+                        if ui.small_button(tl("Peindre")).clicked() {
                             *tool_req = Some(Tool::Brush);
                         }
-                        if ui.small_button("Effacer le tracé").clicked() {
+                        if ui.small_button(tl("Effacer le tracé")).clicked() {
                             p.dabs.clear();
                         }
                     });
@@ -910,7 +911,7 @@ impl Lumen {
         ui.add_space(6.0);
         caption(ui, "Réglages du masque");
         local_sliders(ui, &mut m.adj);
-        if ui.small_button("Réinitialiser les réglages du masque").clicked() {
+        if ui.small_button(tl("Réinitialiser les réglages du masque")).clicked() {
             m.adj = Local::default();
         }
         let _ = Id::NULL;
@@ -923,17 +924,17 @@ impl Lumen {
             ui.scope_builder(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(14.0, 4.0))), |ui| {
                 ui.horizontal_centered(|ui| {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        let held = ui.add(egui::Button::new(RichText::new("Original").size(12.0)).corner_radius(CornerRadius::same(7)).sense(Sense::click_and_drag()));
+                        let held = ui.add(egui::Button::new(RichText::new(tl("Original")).size(12.0)).corner_radius(CornerRadius::same(7)).sense(Sense::click_and_drag()));
                         if held.is_pointer_button_down_on() {
                             self.before = true;
                         }
-                        held.on_hover_text("Maintenir pour voir l'original (ou \\)");
+                        held.on_hover_text(tl("Maintenir pour voir l'original (ou \\)"));
                         egui::ComboBox::from_id_salt("compare").width(120.0).selected_text(["Avant / après", "Rideau vertical", "Côte à côte", "Rideau horizontal"][self.compare]).show_ui(ui, |ui| {
                             for (k, l) in ["Désactivé", "Rideau vertical", "Côte à côte", "Rideau horizontal"].iter().enumerate() {
                                 ui.selectable_value(&mut self.compare, k, *l);
                             }
                         });
-                        if ui.selectable_label(self.clipping, "Écrêtage").on_hover_text("Rouge : blancs brûlés · bleu : noirs bouchés (J)").clicked() {
+                        if ui.selectable_label(self.clipping, tl("Écrêtage")).on_hover_text(tl("Rouge : blancs brûlés · bleu : noirs bouchés (J)")).clicked() {
                             self.clipping = !self.clipping;
                             self.shown = None;
                         }
@@ -944,10 +945,10 @@ impl Lumen {
                                 }
                             }
                         });
-                        if ui.selectable_label(self.info_overlay > 0, "Infos").on_hover_text("I").clicked() {
+                        if ui.selectable_label(self.info_overlay > 0, tl("Infos")).on_hover_text(tl("I")).clicked() {
                             self.info_overlay = (self.info_overlay + 1) % 3;
                         }
-                        if ui.selectable_label(self.hide_panels, "Plein écran").on_hover_text("Tab : masquer les panneaux").clicked() {
+                        if ui.selectable_label(self.hide_panels, tl("Plein écran")).on_hover_text(tl("Tab : masquer les panneaux")).clicked() {
                             self.hide_panels = !self.hide_panels;
                         }
                         ui.with_layout(Layout::left_to_right(Align::Center), |ui| {

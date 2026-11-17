@@ -102,6 +102,7 @@ struct Launcher {
 impl Launcher {
     fn new(cc: &eframe::CreationContext) -> Self {
         studio_ui::apply_style(&cc.egui_ctx);
+        studio_ui::i18n::set_lang(studio_ui::palette::load_prefs().lang);
         cc.egui_ctx.all_styles_mut(|s| {
             s.visuals.panel_fill = P.page;
             s.visuals.window_fill = P.tile;

@@ -1,4 +1,5 @@
 use crate::model::{self, Geom, Item, MeshPt, Stop};
+use studio_ui::i18n::tl;
 use crate::{Dlg, Doc, GROUPS, NewDoc, PRESETS, Style, Tool, VectorApp, arr, c32, geom, tool_name, FONTS};
 use eframe::egui::{self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Painter, Pos2, Rect, RichText, Sense, Shape, Stroke, StrokeKind, Ui, Vec2, pos2, vec2};
 use studio_ui::pro::{self, BLUE, CHROME, FAINT, FIELD, INK, INK_STRONG, LINE, MUTED, PANEL, PASTEBOARD, RED, semibold};
@@ -175,7 +176,7 @@ pub fn color_toggle(ui: &mut Ui, label: &str, c: &mut Option<Color32>) -> bool {
                     ui.painter().line_segment([r.left_bottom() + vec2(4.0, -4.0), r.right_top() + vec2(-4.0, 4.0)], Stroke::new(1.5, RED));
                 }
             }
-            if resp.on_hover_text("Modifier la couleur").on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
+            if resp.on_hover_text(tl("Modifier la couleur")).on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                 if c.is_none() {
                     *c = Some(Color32::BLACK);
                 }
@@ -238,9 +239,9 @@ fn checker_rect(p: &Painter, r: Rect) {
 }
 
 fn style_swatches(ui: &mut Ui, style: &mut Style) {
-    ui.label(RichText::new("Fond").size(12.0).color(MUTED));
+    ui.label(RichText::new(tl("Fond")).size(12.0).color(MUTED));
     swatch_btn(ui, &mut style.fill);
-    ui.label(RichText::new("Contour").size(12.0).color(MUTED));
+    ui.label(RichText::new(tl("Contour")).size(12.0).color(MUTED));
     swatch_btn(ui, &mut style.stroke);
     ui.add(egui::DragValue::new(&mut style.stroke_w).range(0.0..=200.0).speed(0.2).suffix(" px"));
     ui.add_space(8.0);
@@ -259,11 +260,11 @@ fn swatch_btn(ui: &mut Ui, c: &mut Option<Color32>) {
 impl VectorApp {
     pub(crate) fn home_screen(&mut self, root: &mut Ui) {
         egui::Panel::left("home-nav").exact_size(230.0).resizable(false).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(18, 26))).show(root, |ui| {
-            if pro::primary(ui, "Nouveau fichier").clicked() {
+            if pro::primary(ui, tl("Nouveau fichier")).clicked() {
                 self.new_doc = Some(NewDoc { w: 1000.0, h: 1000.0, preset: 0, transparent: false });
             }
             ui.add_space(8.0);
-            if pro::secondary(ui, "Ouvrir…").clicked() {
+            if pro::secondary(ui, tl("Ouvrir…")).clicked() {
                 self.open();
             }
             ui.add_space(26.0);
@@ -279,12 +280,12 @@ impl VectorApp {
                     ui.add(egui::Image::new((self.icon.id(), Vec2::splat(40.0))));
                     ui.add_space(8.0);
                     ui.vertical(|ui| {
-                        ui.label(RichText::new("Bienvenue dans Vector").font(semibold(28.0)).color(INK_STRONG));
-                        ui.label(RichText::new("Logos, icônes et illustrations nets à toutes les tailles").color(MUTED));
+                        ui.label(RichText::new(tl("Bienvenue dans Vector")).font(semibold(28.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("Logos, icônes et illustrations nets à toutes les tailles")).color(MUTED));
                     });
                 });
                 ui.add_space(28.0);
-                ui.label(RichText::new("Créer un plan de travail").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Créer un plan de travail")).font(semibold(16.0)).color(INK));
                 ui.add_space(12.0);
                 let gap = 14.0;
                 let card_w = 160.0;
@@ -305,7 +306,7 @@ impl VectorApp {
                     self.set_doc(Doc::new(w, h), None);
                 }
                 ui.add_space(14.0);
-                ui.label(RichText::new("Récents").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Récents")).font(semibold(16.0)).color(INK));
                 ui.add_space(10.0);
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 110.0), Sense::hover());
@@ -368,13 +369,13 @@ impl VectorApp {
                                 }
                             }
                             sep(ui);
-                            if pro::ghost(ui, "Grouper").clicked() {
+                            if pro::ghost(ui, tl("Grouper")).clicked() {
                                 self.group();
                             }
-                            if pro::ghost(ui, "Dissocier").clicked() {
+                            if pro::ghost(ui, tl("Dissocier")).clicked() {
                                 self.ungroup();
                             }
-                            if pro::ghost(ui, "Dupliquer").clicked() {
+                            if pro::ghost(ui, tl("Dupliquer")).clicked() {
                                 self.duplicate_selected();
                             }
                         } else {
@@ -387,7 +388,7 @@ impl VectorApp {
                         for (k, n) in ["Fond", "Contour", "Épaisseur", "Opacité"].iter().enumerate() {
                             ui.checkbox(&mut self.o.wand[k], *n);
                         }
-                        pro::option_slider(ui, "Tolérance", &mut self.o.wand_tol, 0.0..=255.0, "", false);
+                        pro::option_slider(ui, tl("Tolérance"), &mut self.o.wand_tol, 0.0..=255.0, "", false);
                     }
                     Tool::Lasso => small(ui, "Entoure les objets à sélectionner · Maj ajoute à la sélection"),
                     Tool::Pen => small(ui, "Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer"),
@@ -418,20 +419,20 @@ impl VectorApp {
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Arc => {
-                        pro::option_slider(ui, "Pente", &mut self.o.arc_slope, 0.0..=1.0, "", false);
-                        ui.checkbox(&mut self.o.arc_concave, "Concave");
-                        ui.checkbox(&mut self.o.arc_closed, "Fermé");
+                        pro::option_slider(ui, tl("Pente"), &mut self.o.arc_slope, 0.0..=1.0, "", false);
+                        ui.checkbox(&mut self.o.arc_concave, tl("Concave"));
+                        ui.checkbox(&mut self.o.arc_closed, tl("Fermé"));
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Spiral => {
-                        pro::option_slider(ui, "Tours", &mut self.o.turns, 0.5..=20.0, "", false);
-                        ui.checkbox(&mut self.o.spiral_ccw, "Sens antihoraire");
+                        pro::option_slider(ui, tl("Tours"), &mut self.o.turns, 0.5..=20.0, "", false);
+                        ui.checkbox(&mut self.o.spiral_ccw, tl("Sens antihoraire"));
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::RectGrid => {
                         opt_dv(ui, "Rangées", &mut self.o.grid_rows, 1..=100, "");
                         opt_dv(ui, "Colonnes", &mut self.o.grid_cols, 1..=100, "");
-                        ui.checkbox(&mut self.o.grid_frame, "Cadre extérieur");
+                        ui.checkbox(&mut self.o.grid_frame, tl("Cadre extérieur"));
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::PolarGrid => {
@@ -440,13 +441,13 @@ impl VectorApp {
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Arrow => {
-                        pro::option_slider(ui, "Épaisseur", &mut self.o.arrow_w, 2.0..=120.0, " px", false);
+                        pro::option_slider(ui, tl("Épaisseur"), &mut self.o.arrow_w, 2.0..=120.0, " px", false);
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Polygon | Tool::Star => {
                         opt_dv(ui, if self.tool == Tool::Star { "Branches" } else { "Côtés" }, &mut self.o.sides, 3..=60, "");
                         if self.tool == Tool::Star {
-                            pro::option_slider(ui, "Creux", &mut self.o.star_ratio, 0.05..=0.95, "", false);
+                            pro::option_slider(ui, tl("Creux"), &mut self.o.star_ratio, 0.05..=0.95, "", false);
                         }
                         style_swatches(ui, &mut self.style);
                     }
@@ -464,16 +465,16 @@ impl VectorApp {
                             }
                         });
                         self.o.brush_profile = p as u8;
-                        pro::option_slider(ui, "Lissage", &mut self.o.pencil_tol, 0.5..=12.0, "", false);
+                        pro::option_slider(ui, tl("Lissage"), &mut self.o.pencil_tol, 0.5..=12.0, "", false);
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Blob => {
                         opt_dv(ui, "Taille", &mut self.o.blob_w, 1.0..=400.0, " px");
-                        ui.checkbox(&mut self.o.blob_merge, "Fusionner avec la même couleur");
+                        ui.checkbox(&mut self.o.blob_merge, tl("Fusionner avec la même couleur"));
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Pencil => {
-                        pro::option_slider(ui, "Lissage", &mut self.o.pencil_tol, 0.5..=12.0, "", false);
+                        pro::option_slider(ui, tl("Lissage"), &mut self.o.pencil_tol, 0.5..=12.0, "", false);
                         style_swatches(ui, &mut self.style);
                     }
                     Tool::Smooth | Tool::PathErase => {
@@ -483,7 +484,7 @@ impl VectorApp {
                     Tool::Rotate | Tool::Reflect | Tool::Scale => {
                         small(ui, "Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint");
                         sep(ui);
-                        ui.checkbox(&mut self.o.scale_strokes, "Contours et effets");
+                        ui.checkbox(&mut self.o.scale_strokes, tl("Contours et effets"));
                         if self.tool == Tool::Rotate {
                             opt_dv(ui, "Pas Maj", &mut self.o.snap_angle, 1.0..=90.0, "°");
                         }
@@ -508,13 +509,13 @@ impl VectorApp {
                                 }
                             });
                             opt_dv(ui, "Espacement", &mut self.o.spray_gap, 4.0..=500.0, " px");
-                            pro::option_slider(ui, "Dispersion", &mut self.o.spray_jitter, 0.0..=2.0, "", false);
+                            pro::option_slider(ui, tl("Dispersion"), &mut self.o.spray_jitter, 0.0..=2.0, "", false);
                             hint(ui, "Glisse pour pulvériser des occurrences du symbole");
                         }
                     }
                     Tool::Warp | Tool::Twirl | Tool::Pucker | Tool::Bloat | Tool::Scallop | Tool::Crystallize | Tool::Wrinkle => {
                         opt_dv(ui, "Rayon", &mut self.o.liquify_r, 5.0..=600.0, " px");
-                        pro::option_slider(ui, "Intensité", &mut self.o.liquify_k, 0.05..=1.0, "", false);
+                        pro::option_slider(ui, tl("Intensité"), &mut self.o.liquify_k, 0.05..=1.0, "", false);
                         hint(ui, if self.tool == Tool::Twirl { "Alt : sens inverse" } else { "Agit sur la sélection, ou sur tout ce qui est sous le pinceau" });
                     }
                     Tool::Builder => small(ui, "Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone"),
@@ -524,7 +525,7 @@ impl VectorApp {
                     }
                     Tool::Gradient => {
                         let mut k = self.o.grad_radial as usize;
-                        if pro::segmented(ui, &mut k, &["Linéaire", "Radial"]) {
+                        if pro::segmented(ui, &mut k, &[tl("Linéaire"), tl("Radial")]) {
                             self.o.grad_radial = k == 1;
                         }
                         small(ui, "Glisse sur l'objet sélectionné pour placer le dégradé");
@@ -554,10 +555,10 @@ impl VectorApp {
                         small(ui, "Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné");
                     }
                     Tool::Hand | Tool::Zoom | Tool::RotView => {
-                        if pro::secondary(ui, "Ajuster").clicked() {
+                        if pro::secondary(ui, tl("Ajuster")).clicked() {
                             self.fit_view(false);
                         }
-                        if pro::secondary(ui, "Tout").clicked() {
+                        if pro::secondary(ui, tl("Tout")).clicked() {
                             self.fit_view(true);
                         }
                         if pro::secondary(ui, "100 %").clicked() {
@@ -565,16 +566,16 @@ impl VectorApp {
                         }
                         if self.tool == Tool::RotView {
                             opt_dv(ui, "Angle", &mut self.rot, -180.0..=180.0, "°");
-                            if pro::secondary(ui, "Réinitialiser").clicked() {
+                            if pro::secondary(ui, tl("Réinitialiser")).clicked() {
                                 self.rot = 0.0;
                             }
                         }
                     }
                     Tool::Board => {
-                        if pro::secondary(ui, "Nouveau").clicked() {
+                        if pro::secondary(ui, tl("Nouveau")).clicked() {
                             self.add_board(self.doc.width, self.doc.height);
                         }
-                        if pro::secondary(ui, "Réorganiser").clicked() {
+                        if pro::secondary(ui, tl("Réorganiser")).clicked() {
                             self.arrange_boards();
                         }
                         hint(ui, "Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr");
@@ -658,7 +659,7 @@ impl VectorApp {
             if self.style.fill.is_none() {
                 ui.painter().line_segment([front.left_bottom(), front.right_top()], Stroke::new(1.5, RED));
             }
-            if resp.on_hover_text("Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond").clicked() {
+            if resp.on_hover_text(tl("Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond")).clicked() {
                 std::mem::swap(&mut self.style.fill, &mut self.style.stroke);
             }
         });
@@ -669,7 +670,7 @@ impl VectorApp {
             ui.add_space(8.0);
             ui.horizontal(|ui| {
                 ui.add_space(12.0);
-                pro::segmented(ui, &mut self.dock_tab, &["Propriétés", "Calques", "Bibliothèques"]);
+                pro::segmented(ui, &mut self.dock_tab, &[tl("Propriétés"), tl("Calques"), tl("Bibliothèques")]);
             });
             ui.add_space(8.0);
             let line = ui.allocate_exact_size(vec2(ui.available_width(), 1.0), Sense::hover()).0;
@@ -679,17 +680,17 @@ impl VectorApp {
                 studio_ui::dock::begin(ui, "vector");
                 match self.dock_tab {
                     1 => {
-                        pro::dock_panel(ui, "layers", "Calques", |ui| self.layers_panel(ui));
-                        pro::dock_panel(ui, "boards", "Plans de travail", |ui| self.boards_panel(ui));
+                        pro::dock_panel(ui, "layers", tl("Calques"), |ui| self.layers_panel(ui));
+                        pro::dock_panel(ui, "boards", tl("Plans de travail"), |ui| self.boards_panel(ui));
                     }
                     2 => {
-                        pro::dock_panel(ui, "swatches", "Nuancier", |ui| self.swatches_panel(ui));
-                        pro::dock_panel(ui, "gstyles", "Styles graphiques", |ui| self.styles_panel(ui));
-                        pro::dock_panel(ui, "rfx", "Effets bitmap (export PNG et JPEG)", |ui| {
+                        pro::dock_panel(ui, "swatches", tl("Nuancier"), |ui| self.swatches_panel(ui));
+                        pro::dock_panel(ui, "gstyles", tl("Styles graphiques"), |ui| self.styles_panel(ui));
+                        pro::dock_panel(ui, "rfx", tl("Effets bitmap (export PNG et JPEG)"), |ui| {
                             studio_ui::fxpanel::effects_panel(ui, "vector", &mut self.doc.raster_fx);
                         });
-                        pro::dock_panel(ui, "symbols", "Symboles", |ui| self.symbols_panel(ui));
-                        pro::dock_panel(ui, "presets", "Formes prêtes", |ui| self.shapes_panel(ui));
+                        pro::dock_panel(ui, "symbols", tl("Symboles"), |ui| self.symbols_panel(ui));
+                        pro::dock_panel(ui, "presets", tl("Formes prêtes"), |ui| self.shapes_panel(ui));
                     }
                     _ => self.properties(ui),
                 }
@@ -701,25 +702,25 @@ impl VectorApp {
     fn properties(&mut self, ui: &mut Ui) {
         let all = self.selection();
         let Some(i) = self.sel.filter(|i| *i < self.doc.items.len()) else {
-            pro::dock_panel(ui, "document", "Document", |ui| self.document_panel(ui));
-            pro::dock_panel(ui, "style", "Style des nouveaux objets", |ui| {
+            pro::dock_panel(ui, "document", tl("Document"), |ui| self.document_panel(ui));
+            pro::dock_panel(ui, "style", tl("Style des nouveaux objets"), |ui| {
                 ui.spacing_mut().item_spacing.y = 6.0;
                 color_toggle(ui, "Fond", &mut self.style.fill);
                 color_toggle(ui, "Contour", &mut self.style.stroke);
                 slider(ui, "Épaisseur", &mut self.style.stroke_w, 0.0..=50.0, " px");
             });
-            pro::dock_panel(ui, "gridp", "Grille et repères", |ui| {
+            pro::dock_panel(ui, "gridp", tl("Grille et repères"), |ui| {
                 ui.spacing_mut().item_spacing.y = 6.0;
-                ui.checkbox(&mut self.show_grid, "Afficher la grille");
-                ui.checkbox(&mut self.snap, "Magnétisme de la grille");
+                ui.checkbox(&mut self.show_grid, tl("Afficher la grille"));
+                ui.checkbox(&mut self.snap, tl("Magnétisme de la grille"));
                 ui.horizontal(|ui| {
                     row_label(ui, "Pas", 60.0);
                     dv(ui, &mut self.grid, 2.0..=500.0, " px");
                 });
-                ui.checkbox(&mut self.rulers, "Règles");
-                ui.checkbox(&mut self.smart, "Repères commentés");
-                ui.checkbox(&mut self.show_guides, "Afficher les repères");
-                ui.checkbox(&mut self.thirds, "Centre et tiers");
+                ui.checkbox(&mut self.rulers, tl("Règles"));
+                ui.checkbox(&mut self.smart, tl("Repères commentés"));
+                ui.checkbox(&mut self.show_guides, tl("Afficher les repères"));
+                ui.checkbox(&mut self.thirds, tl("Centre et tiers"));
                 ui.horizontal(|ui| {
                     row_label(ui, "Déplacement clavier", 130.0);
                     dv(ui, &mut self.o.nudge, 0.1..=100.0, " px");
@@ -730,21 +731,21 @@ impl VectorApp {
         };
         let n = all.len();
         pro::dock_panel(ui, "transform", if n > 1 { "Transformation (sélection)" } else { "Transformation" }, |ui| self.transform_panel(ui, i));
-        pro::dock_panel(ui, "align", "Aligner et répartir", |ui| self.align_panel(ui, n));
+        pro::dock_panel(ui, "align", tl("Aligner et répartir"), |ui| self.align_panel(ui, n));
         if n >= 2 {
-            pro::dock_panel(ui, "pathfinder", "Pathfinder", |ui| self.pathfinder_panel(ui));
+            pro::dock_panel(ui, "pathfinder", tl("Pathfinder"), |ui| self.pathfinder_panel(ui));
         }
         let Some(before) = self.doc.items.get(i).cloned().filter(|_| self.sel == Some(i)) else { return };
         let all = self.selection();
         let mut it = before.clone();
-        pro::dock_panel(ui, "appearance", "Apparence", |ui| appearance(ui, &mut it));
+        pro::dock_panel(ui, "appearance", tl("Apparence"), |ui| appearance(ui, &mut it));
         if it.stroke.is_some() {
-            pro::dock_panel(ui, "stroke", "Contour", |ui| stroke_panel(ui, &mut it));
+            pro::dock_panel(ui, "stroke", tl("Contour"), |ui| stroke_panel(ui, &mut it));
         }
         if it.fill.is_some() && !matches!(it.geom, Geom::Image { .. } | Geom::Text { .. }) {
-            pro::dock_panel(ui, "gradient", "Dégradé", |ui| gradient_panel(ui, &mut it));
+            pro::dock_panel(ui, "gradient", tl("Dégradé"), |ui| gradient_panel(ui, &mut it));
         }
-        pro::dock_panel(ui, "effects", "Effets", |ui| effects_panel(ui, &mut it));
+        pro::dock_panel(ui, "effects", tl("Effets"), |ui| effects_panel(ui, &mut it));
         if !matches!(it.geom, Geom::Ellipse { .. }) {
             let title = match it.geom {
                 Geom::Rect { .. } => "Rectangle",
@@ -759,7 +760,7 @@ impl VectorApp {
                 self.open_trace();
             }
         }
-        pro::dock_panel(ui, "quick", "Actions rapides", |ui| self.quick_actions(ui, n));
+        pro::dock_panel(ui, "quick", tl("Actions rapides"), |ui| self.quick_actions(ui, n));
         if it != before && self.doc.items.get(i) == Some(&before) {
             let diff = |a: &Item, b: &Item| -> Vec<&'static str> {
                 let mut v = Vec::new();
@@ -825,11 +826,11 @@ impl VectorApp {
             self.doc.background = bg.map(arr);
         }
         ui.horizontal(|ui| {
-            if pro::secondary(ui, "Ajuster au contenu").clicked() {
+            if pro::secondary(ui, tl("Ajuster au contenu")).clicked() {
                 let all: Vec<usize> = (0..self.doc.items.len()).filter(|i| self.doc.shown(*i)).collect();
                 self.fit_board_to(self.doc.bounds_of(&all));
             }
-            if pro::secondary(ui, "Exporter…").clicked() {
+            if pro::secondary(ui, tl("Exporter…")).clicked() {
                 self.export = Some(crate::ExportOpts { format: 0, scale: 2.0, transparent: false, quality: 90, scope: 0, minify: false });
             }
         });
@@ -849,7 +850,7 @@ impl VectorApp {
             for k in 0..9 {
                 let c = grid.min + vec2(6.0 + (k % 3) as f32 * 16.0, 6.0 + (k / 3) as f32 * 16.0);
                 let r = Rect::from_center_size(c, Vec2::splat(8.0));
-                let resp = ui.interact(r.expand(3.0), ui.make_persistent_id(("refpt", k)), Sense::click()).on_hover_text("Point de référence");
+                let resp = ui.interact(r.expand(3.0), ui.make_persistent_id(("refpt", k)), Sense::click()).on_hover_text(tl("Point de référence"));
                 ui.painter().rect(r, CornerRadius::same(2), if self.ref_pt == k { BLUE } else { PANEL }, Stroke::new(1.0, if self.ref_pt == k { BLUE } else { MUTED }), StrokeKind::Inside);
                 if resp.clicked() {
                     self.ref_pt = k;
@@ -872,7 +873,7 @@ impl VectorApp {
                     sized |= dv(ui, &mut w, 0.1..=100000.0, "");
                     row_label(ui, "H", 12.0);
                     sized |= dv(ui, &mut h, 0.1..=100000.0, "");
-                    if ui.selectable_label(self.lock_ratio, "🔗").on_hover_text("Conserver les proportions").clicked() {
+                    if ui.selectable_label(self.lock_ratio, "🔗").on_hover_text(tl("Conserver les proportions")).clicked() {
                         self.lock_ratio = !self.lock_ratio;
                     }
                 });
@@ -910,24 +911,24 @@ impl VectorApp {
             }
         });
         ui.horizontal(|ui| {
-            if pro::ghost(ui, "↔ Miroir").clicked() {
+            if pro::ghost(ui, tl("↔ Miroir")).clicked() {
                 self.flip(0);
             }
-            if pro::ghost(ui, "↕ Miroir").clicked() {
+            if pro::ghost(ui, tl("↕ Miroir")).clicked() {
                 self.flip(1);
             }
-            if pro::ghost(ui, "Inclinaison…").clicked() {
+            if pro::ghost(ui, tl("Inclinaison…")).clicked() {
                 self.open_dlg(Dlg::Shear { deg: 15.0, vertical: false });
             }
         });
-        ui.checkbox(&mut self.o.scale_strokes, "Mettre à l'échelle contours et effets");
+        ui.checkbox(&mut self.o.scale_strokes, tl("Mettre à l'échelle contours et effets"));
     }
 
     fn align_panel(&mut self, ui: &mut Ui, n: usize) {
         ui.spacing_mut().item_spacing.y = 6.0;
         ui.horizontal(|ui| {
             row_label(ui, "Aligner sur", 76.0);
-            pro::segmented(ui, &mut self.align_to, &["Sélection", "Plan", "Clé"]);
+            pro::segmented(ui, &mut self.align_to, &[tl("Sélection"), tl("Plan"), tl("Clé")]);
         });
         if self.align_to == 2 {
             hint(ui, "Objet clé : le premier sélectionné (contour bleu épais).");
@@ -955,7 +956,7 @@ impl VectorApp {
             let mut gap: f32 = ui.ctx().data(|d| d.get_temp(id).unwrap_or(20.0));
             let mut fixed: bool = ui.ctx().data(|d| d.get_temp(id.with("f")).unwrap_or(false));
             ui.horizontal(|ui| {
-                ui.checkbox(&mut fixed, "Écart");
+                ui.checkbox(&mut fixed, tl("Écart"));
                 ui.add_enabled(fixed, egui::DragValue::new(&mut gap).range(-1000.0..=5000.0).suffix(" px"));
                 if pro::icon_button(ui, 30.0, false, "Espacement horizontal", |p, r, c| dist_icon(p, r, 0, 0.5, c)).clicked() {
                     self.distribute_spacing(0, fixed.then_some(gap));
@@ -994,52 +995,52 @@ impl VectorApp {
     fn quick_actions(&mut self, ui: &mut Ui, n: usize) {
         ui.spacing_mut().item_spacing = vec2(6.0, 6.0);
         ui.horizontal_wrapped(|ui| {
-            if n >= 2 && pro::chip(ui, "Grouper").clicked() {
+            if n >= 2 && pro::chip(ui, tl("Grouper")).clicked() {
                 self.group();
             }
-            if pro::chip(ui, "Dissocier").clicked() {
+            if pro::chip(ui, tl("Dissocier")).clicked() {
                 self.ungroup();
             }
-            if n >= 2 && pro::chip(ui, "Masque d'écrêtage").clicked() {
+            if n >= 2 && pro::chip(ui, tl("Masque d'écrêtage")).clicked() {
                 self.make_clip(false);
             }
-            if n >= 2 && pro::chip(ui, "Masque d'opacité").clicked() {
+            if n >= 2 && pro::chip(ui, tl("Masque d'opacité")).clicked() {
                 self.make_clip(true);
             }
-            if pro::chip(ui, "Libérer le masque").clicked() {
+            if pro::chip(ui, tl("Libérer le masque")).clicked() {
                 self.release_clip();
             }
-            if n >= 2 && pro::chip(ui, "Tracé composé").clicked() {
+            if n >= 2 && pro::chip(ui, tl("Tracé composé")).clicked() {
                 self.make_compound();
             }
-            if pro::chip(ui, "Décalage…").clicked() {
+            if pro::chip(ui, tl("Décalage…")).clicked() {
                 self.open_dlg(Dlg::Offset { d: 10.0 });
             }
-            if pro::chip(ui, "Vectoriser le contour").clicked() {
+            if pro::chip(ui, tl("Vectoriser le contour")).clicked() {
                 self.outline_selected();
             }
-            if pro::chip(ui, "Simplifier…").clicked() {
+            if pro::chip(ui, tl("Simplifier…")).clicked() {
                 self.open_dlg(Dlg::Simplify { tol: 2.0, smooth: true });
             }
-            if n >= 2 && pro::chip(ui, "Fusion…").clicked() {
+            if n >= 2 && pro::chip(ui, tl("Fusion…")).clicked() {
                 self.open_dlg(Dlg::Blend { steps: 5 });
             }
-            if pro::chip(ui, "Recolorer…").clicked() {
+            if pro::chip(ui, tl("Recolorer…")).clicked() {
                 self.open_recolor();
             }
-            if pro::chip(ui, "Nouveau symbole").clicked() {
+            if pro::chip(ui, tl("Nouveau symbole")).clicked() {
                 self.new_symbol();
             }
-            if self.sel.is_some_and(|i| self.doc.items[i].sym != 0) && pro::chip(ui, "Rompre le lien").clicked() {
+            if self.sel.is_some_and(|i| self.doc.items[i].sym != 0) && pro::chip(ui, tl("Rompre le lien")).clicked() {
                 self.checkpoint();
                 for i in self.selection() {
                     self.doc.items[i].sym = 0;
                 }
             }
-            if pro::chip(ui, "Verrouiller").clicked() {
+            if pro::chip(ui, tl("Verrouiller")).clicked() {
                 self.lock_selected();
             }
-            if pro::chip(ui, "Masquer").clicked() {
+            if pro::chip(ui, tl("Masquer")).clicked() {
                 self.hide_selected();
             }
         });
@@ -1048,23 +1049,23 @@ impl VectorApp {
     fn layers_panel(&mut self, ui: &mut Ui) {
         ui.spacing_mut().item_spacing.y = 3.0;
         ui.horizontal(|ui| {
-            if pro::ghost(ui, "+ Calque").clicked() {
+            if pro::ghost(ui, tl("+ Calque")).clicked() {
                 self.add_layer();
             }
-            if pro::ghost(ui, "Supprimer").clicked() {
+            if pro::ghost(ui, tl("Supprimer")).clicked() {
                 let k = self.active_layer;
                 self.delete_layer(k);
             }
-            if pro::ghost(ui, "↑").on_hover_text("Monter le calque").clicked() {
+            if pro::ghost(ui, "↑").on_hover_text(tl("Monter le calque")).clicked() {
                 let k = self.active_layer;
                 self.move_layer(k, true);
             }
-            if pro::ghost(ui, "↓").on_hover_text("Descendre le calque").clicked() {
+            if pro::ghost(ui, "↓").on_hover_text(tl("Descendre le calque")).clicked() {
                 let k = self.active_layer;
                 self.move_layer(k, false);
             }
         });
-        if self.sel.is_some() && pro::ghost(ui, "Placer la sélection sur le calque actif").clicked() {
+        if self.sel.is_some() && pro::ghost(ui, tl("Placer la sélection sur le calque actif")).clicked() {
             let k = self.active_layer;
             self.sel_to_layer(k);
         }
@@ -1213,20 +1214,20 @@ impl VectorApp {
             });
         }
         ui.horizontal_wrapped(|ui| {
-            if pro::chip(ui, "+ Nouveau").clicked() {
+            if pro::chip(ui, tl("+ Nouveau")).clicked() {
                 self.add_board(self.doc.width, self.doc.height);
             }
-            if pro::chip(ui, "Dupliquer").clicked() {
+            if pro::chip(ui, tl("Dupliquer")).clicked() {
                 let b = self.doc.all_boards()[k].clone();
                 self.add_board(b.w, b.h);
             }
-            if k > 0 && pro::chip(ui, "Supprimer").clicked() {
+            if k > 0 && pro::chip(ui, tl("Supprimer")).clicked() {
                 self.delete_board(k);
             }
-            if pro::chip(ui, "Réorganiser").clicked() {
+            if pro::chip(ui, tl("Réorganiser")).clicked() {
                 self.arrange_boards();
             }
-            if pro::chip(ui, "Tout voir").clicked() {
+            if pro::chip(ui, tl("Tout voir")).clicked() {
                 self.fit_view(true);
             }
         });
@@ -1296,14 +1297,14 @@ impl VectorApp {
             self.swatch_row(ui, &docs, "docsw");
         }
         ui.horizontal_wrapped(|ui| {
-            if pro::chip(ui, "+ Couleur du fond").clicked() {
+            if pro::chip(ui, tl("+ Couleur du fond")).clicked() {
                 let c = self.sel.and_then(|i| self.doc.items[i].fill).or(self.style.fill.map(arr));
                 if let Some(c) = c && !self.doc.swatches.contains(&c) {
                     self.checkpoint();
                     self.doc.swatches.push(c);
                 }
             }
-            if pro::chip(ui, "Ajouter la bibliothèque").clicked() {
+            if pro::chip(ui, tl("Ajouter la bibliothèque")).clicked() {
                 self.checkpoint();
                 for c in lib {
                     if !self.doc.swatches.contains(&c) {
@@ -1311,7 +1312,7 @@ impl VectorApp {
                     }
                 }
             }
-            if pro::chip(ui, "Couleurs utilisées").clicked() {
+            if pro::chip(ui, tl("Couleurs utilisées")).clicked() {
                 self.checkpoint();
                 let used: Vec<[u8; 4]> = self.doc.items.iter().flat_map(|it| [it.fill, it.stroke]).flatten().collect();
                 for c in used {
@@ -1320,7 +1321,7 @@ impl VectorApp {
                     }
                 }
             }
-            if !self.doc.swatches.is_empty() && pro::chip(ui, "Vider").clicked() {
+            if !self.doc.swatches.is_empty() && pro::chip(ui, tl("Vider")).clicked() {
                 self.checkpoint();
                 self.doc.swatches.clear();
             }
@@ -1359,13 +1360,13 @@ impl VectorApp {
             self.apply_style(&it);
         }
         ui.horizontal(|ui| {
-            if self.sel.is_some() && pro::secondary(ui, "Nouveau style").clicked() {
+            if self.sel.is_some() && pro::secondary(ui, tl("Nouveau style")).clicked() {
                 let it = self.doc.items[self.sel.unwrap()].clone();
                 self.checkpoint();
                 let n = self.doc.styles.len() + 1;
                 self.doc.styles.push(model::Named { name: format!("Style {n}"), item: it });
             }
-            if !self.doc.styles.is_empty() && pro::ghost(ui, "Retirer le dernier").clicked() {
+            if !self.doc.styles.is_empty() && pro::ghost(ui, tl("Retirer le dernier")).clicked() {
                 self.checkpoint();
                 self.doc.styles.pop();
             }
@@ -1387,10 +1388,10 @@ impl VectorApp {
                     let count = self.doc.items.iter().filter(|i| i.sym == k as u32 + 1).count();
                     ui.label(RichText::new(&s.name).size(12.0).color(INK));
                     ui.horizontal(|ui| {
-                        if pro::ghost(ui, "Placer").clicked() {
+                        if pro::ghost(ui, tl("Placer")).clicked() {
                             place = Some(k);
                         }
-                        if pro::ghost(ui, "Redéfinir").on_hover_text("Remplace le symbole par la sélection et met à jour ses occurrences").clicked() {
+                        if pro::ghost(ui, tl("Redéfinir")).on_hover_text(tl("Remplace le symbole par la sélection et met à jour ses occurrences")).clicked() {
                             redefine = Some(k);
                         }
                         if pro::ghost(ui, "×").on_hover_text(format!("Supprimer ({count} occurrence(s) conservée(s))")).clicked() {
@@ -1423,8 +1424,8 @@ impl VectorApp {
             }
         }
         ui.horizontal(|ui| {
-            ui.add(egui::TextEdit::singleline(&mut self.symbol_name).hint_text("Nom du symbole").desired_width(150.0));
-            if pro::secondary(ui, "Créer").on_hover_text("Fait de la sélection un symbole réutilisable").clicked() {
+            ui.add(egui::TextEdit::singleline(&mut self.symbol_name).hint_text(tl("Nom du symbole")).desired_width(150.0));
+            if pro::secondary(ui, tl("Créer")).on_hover_text(tl("Fait de la sélection un symbole réutilisable")).clicked() {
                 self.new_symbol();
             }
         });
@@ -1488,21 +1489,21 @@ fn stroke_panel(ui: &mut Ui, it: &mut Item) {
     if closed {
         small(ui, "Position du contour");
         let mut a = it.stroke_align as usize;
-        if pro::segmented(ui, &mut a, &["Centre", "Intérieur", "Extérieur"]) {
+        if pro::segmented(ui, &mut a, &[tl("Centre"), tl("Intérieur"), tl("Extérieur")]) {
             it.stroke_align = a as u8;
         }
     }
     ui.horizontal(|ui| {
         row_label(ui, "Bouts", 64.0);
         let mut cap = it.cap as usize;
-        if pro::segmented(ui, &mut cap, &["Ronds", "Plats", "Carrés"]) {
+        if pro::segmented(ui, &mut cap, &[tl("Ronds"), tl("Plats"), tl("Carrés")]) {
             it.cap = cap as u8;
         }
     });
     ui.horizontal(|ui| {
         row_label(ui, "Angles", 64.0);
         let mut join = it.join as usize;
-        if pro::segmented(ui, &mut join, &["Ronds", "Pointus", "Biseaux"]) {
+        if pro::segmented(ui, &mut join, &[tl("Ronds"), tl("Pointus"), tl("Biseaux")]) {
             it.join = join as u8;
         }
     });
@@ -1581,7 +1582,7 @@ fn stroke_panel(ui: &mut Ui, it: &mut Item) {
         if !it.widths.is_empty() {
             ui.horizontal(|ui| {
                 hint(ui, &format!("{} point(s) de largeur", it.widths.len()));
-                if pro::ghost(ui, "Réinitialiser").clicked() {
+                if pro::ghost(ui, tl("Réinitialiser")).clicked() {
                     it.widths.clear();
                 }
             });
@@ -1593,7 +1594,7 @@ fn gradient_panel(ui: &mut Ui, it: &mut Item) {
     ui.spacing_mut().item_spacing.y = 6.0;
     let has = it.fill2.is_some() || !it.stops.is_empty();
     let mut kind = if !has { 0 } else if it.radial { 2 } else { 1 };
-    if pro::segmented(ui, &mut kind, &["Aucun", "Linéaire", "Radial"]) {
+    if pro::segmented(ui, &mut kind, &[tl("Aucun"), tl("Linéaire"), tl("Radial")]) {
         match kind {
             0 => {
                 it.fill2 = None;
@@ -1652,16 +1653,16 @@ fn gradient_panel(ui: &mut Ui, it: &mut Item) {
         it.stops.remove(k);
     }
     ui.horizontal_wrapped(|ui| {
-        if pro::chip(ui, "+ Arrêt").clicked() {
+        if pro::chip(ui, tl("+ Arrêt")).clicked() {
             let c = it.stops.last().map_or([255; 4], |s| s.c);
             it.stops.push(Stop { t: 0.5, c });
         }
-        if pro::chip(ui, "Inverser").clicked() {
+        if pro::chip(ui, tl("Inverser")).clicked() {
             for s in &mut it.stops {
                 s.t = 1.0 - s.t;
             }
         }
-        if it.grad_vec.is_some() && pro::chip(ui, "Recentrer").clicked() {
+        if it.grad_vec.is_some() && pro::chip(ui, tl("Recentrer")).clicked() {
             it.grad_vec = None;
         }
     });
@@ -1679,7 +1680,7 @@ fn gradient_panel(ui: &mut Ui, it: &mut Item) {
 fn mesh_row(ui: &mut Ui, mesh: &mut Vec<MeshPt>) {
     ui.horizontal(|ui| {
         hint(ui, &format!("Filet : {} point(s) de couleur", mesh.len()));
-        if pro::ghost(ui, "Effacer").clicked() {
+        if pro::ghost(ui, tl("Effacer")).clicked() {
             mesh.clear();
         }
     });
@@ -1688,7 +1689,7 @@ fn mesh_row(ui: &mut Ui, mesh: &mut Vec<MeshPt>) {
 fn effects_panel(ui: &mut Ui, it: &mut Item) {
     ui.spacing_mut().item_spacing.y = 6.0;
     ui.horizontal(|ui| {
-        ui.checkbox(&mut it.shadow, "Ombre portée");
+        ui.checkbox(&mut it.shadow, tl("Ombre portée"));
         if it.shadow {
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| color_btn(ui, &mut it.sh_color));
         }
@@ -1748,19 +1749,19 @@ fn shape_props(ui: &mut Ui, it: &mut Item) -> bool {
         }
         Geom::Path { nodes, closed } => {
             hint(ui, &format!("{} points{}", nodes.len(), if it.sub.is_empty() { String::new() } else { format!(" · {} sous-tracé(s)", it.sub.len()) }));
-            ui.checkbox(closed, "Tracé fermé");
+            ui.checkbox(closed, tl("Tracé fermé"));
             ui.horizontal_wrapped(|ui| {
-                if pro::chip(ui, "Lisser").clicked() {
+                if pro::chip(ui, tl("Lisser")).clicked() {
                     model::smooth(nodes, *closed);
                 }
-                if pro::chip(ui, "Simplifier").clicked() {
+                if pro::chip(ui, tl("Simplifier")).clicked() {
                     let pts: Vec<model::P> = nodes.iter().map(|n| n.p).collect();
                     *nodes = model::simplify(&pts, 1.5);
                 }
-                if pro::chip(ui, "Inverser").clicked() {
+                if pro::chip(ui, tl("Inverser")).clicked() {
                     model::reverse(nodes);
                 }
-                if pro::chip(ui, "+ Points").clicked() {
+                if pro::chip(ui, tl("+ Points")).clicked() {
                     model::add_midpoints(nodes, *closed);
                 }
             });
@@ -1774,30 +1775,30 @@ fn shape_props(ui: &mut Ui, it: &mut Item) -> bool {
             });
             slider(ui, "Taille", size, 4.0..=600.0, " px");
             ui.horizontal(|ui| {
-                ui.toggle_value(bold, RichText::new("G").strong()).on_hover_text("Gras");
-                ui.toggle_value(&mut it.italic, RichText::new("I").italics()).on_hover_text("Italique");
+                ui.toggle_value(bold, RichText::new(tl("G")).strong()).on_hover_text(tl("Gras"));
+                ui.toggle_value(&mut it.italic, RichText::new(tl("I")).italics()).on_hover_text(tl("Italique"));
                 let mut u = it.deco == 1;
-                if ui.toggle_value(&mut u, RichText::new("S").underline()).on_hover_text("Souligné").changed() {
+                if ui.toggle_value(&mut u, RichText::new(tl("S")).underline()).on_hover_text(tl("Souligné")).changed() {
                     it.deco = if u { 1 } else { 0 };
                 }
                 let mut s = it.deco == 2;
-                if ui.toggle_value(&mut s, RichText::new("B").strikethrough()).on_hover_text("Barré").changed() {
+                if ui.toggle_value(&mut s, RichText::new(tl("B")).strikethrough()).on_hover_text(tl("Barré")).changed() {
                     it.deco = if s { 2 } else { 0 };
                 }
                 ui.add_space(6.0);
                 let mut cs = it.case as usize;
-                if pro::segmented(ui, &mut cs, &["Aa", "AA", "aa", "Titre"]) {
+                if pro::segmented(ui, &mut cs, &[tl("Aa"), tl("AA"), tl("aa"), tl("Titre")]) {
                     it.case = cs as u8;
                 }
             });
             let mut al = it.align as usize;
-            if pro::segmented(ui, &mut al, &["Gauche", "Centre", "Droite"]) {
+            if pro::segmented(ui, &mut al, &[tl("Gauche"), tl("Centre"), tl("Droite")]) {
                 it.align = al as u8;
             }
             ui.horizontal(|ui| {
                 row_label(ui, "Approche", 70.0);
                 dv(ui, &mut it.tracking, -20.0..=200.0, " px");
-                ui.checkbox(&mut it.kern, "Crénage");
+                ui.checkbox(&mut it.kern, tl("Crénage"));
             });
             ui.horizontal(|ui| {
                 row_label(ui, "Interlignage", 70.0);
@@ -1812,20 +1813,20 @@ fn shape_props(ui: &mut Ui, it: &mut Item) -> bool {
                 row_label(ui, "Largeur du cadre", 110.0);
                 dv(ui, &mut it.box_w, 0.0..=10000.0, " px");
             });
-            ui.checkbox(&mut it.vertical, "Texte vertical");
+            ui.checkbox(&mut it.vertical, tl("Texte vertical"));
             if !it.text_path.is_empty() {
                 ui.horizontal(|ui| {
                     row_label(ui, "Départ sur le tracé", 120.0);
                     dv(ui, &mut it.path_offset, 0.0..=100.0, " %");
                 });
-                if pro::ghost(ui, "Détacher du tracé").clicked() {
+                if pro::ghost(ui, tl("Détacher du tracé")).clicked() {
                     it.text_path.clear();
                 }
             }
         }
         Geom::Image { w, h, .. } => {
             hint(ui, &format!("{:.0} × {:.0} px", w, h));
-            trace = pro::secondary(ui, "Vectorisation dynamique…").clicked();
+            trace = pro::secondary(ui, tl("Vectorisation dynamique…")).clicked();
         }
         Geom::Ellipse { .. } => {}
     }

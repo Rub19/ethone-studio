@@ -7,6 +7,7 @@ mod algos;
 mod canvas;
 mod doc;
 use studio_fx::{filters, fx};
+use studio_ui::i18n::tl;
 mod extras;
 mod inpaint;
 mod newtools;
@@ -273,6 +274,7 @@ fn write_data(name: &str, text: &str) {
 impl Pixel {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         let checker = {
             let mut px = Vec::with_capacity(16 * 16 * 4);
             for y in 0..16 {
@@ -1308,35 +1310,35 @@ impl Pixel {
     fn commands(&self) -> Vec<studio_ui::palette::Cmd> {
         let has_document = !self.home;
         let mut v = vec![
-            studio_ui::palette::Cmd::new("Ouvrir une image…", "Ctrl+O", "open"),
-            studio_ui::palette::Cmd::new("Exporter…", "Ctrl+E", "export"),
-            studio_ui::palette::Cmd::new("Comparaison rapide avant / après", "Affichage", "compare"),
-            studio_ui::palette::Cmd::new("Créer un timelapse GIF", "Fichier", "timelapse"),
-            studio_ui::palette::Cmd::new("Agrandir ×2 (super-résolution)", "Image", "up2"),
-            studio_ui::palette::Cmd::new("Agrandir ×4 (super-résolution)", "Image", "up4"),
-            studio_ui::palette::Cmd::new("Appliquer des LUT .cube", "Image", "luts"),
-            studio_ui::palette::Cmd::new("Répéter le dernier filtre", "Ctrl+Alt+F", "repeat"),
-            studio_ui::palette::Cmd::new("Répéter la dernière suppression", "Édition", "repeat-remove"),
-            studio_ui::palette::Cmd::new("Harmoniser le calque avec le fond", "Calque", "harmonize"),
-            studio_ui::palette::Cmd::new("Harmoniser à moitié (doux)", "Calque", "harmonize-soft"),
-            studio_ui::palette::Cmd::new("Retirer le filigrane de la sélection (sans IA)", "Entoure le filigrane puis lance", "wm-sel"),
-            studio_ui::palette::Cmd::new("Retirer le filigrane automatiquement (IA)", "Vision locale, sinon OCR", "wm-ai"),
-            studio_ui::palette::Cmd::new("Filigrane : sensibilité normale", "Filigranes nets", "wm-sens:55"),
-            studio_ui::palette::Cmd::new("Filigrane : sensibilité haute", "Filigranes très transparents", "wm-sens:85"),
-            studio_ui::palette::Cmd::new("Supprimer l'arrière-plan (masque de calque)", "Action rapide", "remove-bg"),
-            studio_ui::palette::Cmd::new("Étendre l'image de 10 % (fond reconstruit)", "Image", "expand:0.1"),
-            studio_ui::palette::Cmd::new("Étendre l'image de 25 % (fond reconstruit)", "Image", "expand:0.25"),
-            studio_ui::palette::Cmd::new("Étendre au format carré 1:1", "Image", "expand-to:1"),
-            studio_ui::palette::Cmd::new("Étendre au format paysage 16:9", "Image", "expand-to:1.7778"),
-            studio_ui::palette::Cmd::new("Étendre au format story 9:16", "Image", "expand-to:0.5625"),
-            studio_ui::palette::Cmd::new("Étendre au format 4:5 (Instagram)", "Image", "expand-to:0.8"),
-            studio_ui::palette::Cmd::new("Inverser la sélection", "Sélection", "invert"),
-            studio_ui::palette::Cmd::new("Désélectionner", "Ctrl+D", "deselect"),
-            studio_ui::palette::Cmd::new("Barre de tâches contextuelle (afficher / masquer)", "Affichage", "taskbar"),
-            studio_ui::palette::Cmd::new("Recadrer aux pixels visibles", "Image · retire les marges transparentes", "trim-visible"),
-            studio_ui::palette::Cmd::new("Dupliquer le calque actif", "Calque · Ctrl+J", "duplicate-layer"),
-            studio_ui::palette::Cmd::new("Fusionner les calques visibles", "Calques · conserve les calques masqués", "merge-visible"),
-            studio_ui::palette::Cmd::new("Aplatir toute l'image", "Calques · résultat unique", "flatten-image").confirm(),
+            studio_ui::palette::Cmd::new(tl("Ouvrir une image…"), tl("Ctrl+O"), "open"),
+            studio_ui::palette::Cmd::new(tl("Exporter…"), tl("Ctrl+E"), "export"),
+            studio_ui::palette::Cmd::new(tl("Comparaison rapide avant / après"), tl("Affichage"), "compare"),
+            studio_ui::palette::Cmd::new(tl("Créer un timelapse GIF"), tl("Fichier"), "timelapse"),
+            studio_ui::palette::Cmd::new(tl("Agrandir ×2 (super-résolution)"), tl("Image"), "up2"),
+            studio_ui::palette::Cmd::new(tl("Agrandir ×4 (super-résolution)"), tl("Image"), "up4"),
+            studio_ui::palette::Cmd::new(tl("Appliquer des LUT .cube"), tl("Image"), "luts"),
+            studio_ui::palette::Cmd::new(tl("Répéter le dernier filtre"), tl("Ctrl+Alt+F"), "repeat"),
+            studio_ui::palette::Cmd::new(tl("Répéter la dernière suppression"), tl("Édition"), "repeat-remove"),
+            studio_ui::palette::Cmd::new(tl("Harmoniser le calque avec le fond"), tl("Calque"), "harmonize"),
+            studio_ui::palette::Cmd::new(tl("Harmoniser à moitié (doux)"), tl("Calque"), "harmonize-soft"),
+            studio_ui::palette::Cmd::new(tl("Retirer le filigrane de la sélection (sans IA)"), tl("Entoure le filigrane puis lance"), "wm-sel"),
+            studio_ui::palette::Cmd::new(tl("Retirer le filigrane automatiquement (IA)"), tl("Vision locale, sinon OCR"), "wm-ai"),
+            studio_ui::palette::Cmd::new(tl("Filigrane : sensibilité normale"), tl("Filigranes nets"), "wm-sens:55"),
+            studio_ui::palette::Cmd::new(tl("Filigrane : sensibilité haute"), tl("Filigranes très transparents"), "wm-sens:85"),
+            studio_ui::palette::Cmd::new(tl("Supprimer l'arrière-plan (masque de calque)"), tl("Action rapide"), "remove-bg"),
+            studio_ui::palette::Cmd::new(tl("Étendre l'image de 10 % (fond reconstruit)"), tl("Image"), "expand:0.1"),
+            studio_ui::palette::Cmd::new(tl("Étendre l'image de 25 % (fond reconstruit)"), tl("Image"), "expand:0.25"),
+            studio_ui::palette::Cmd::new(tl("Étendre au format carré 1:1"), tl("Image"), "expand-to:1"),
+            studio_ui::palette::Cmd::new(tl("Étendre au format paysage 16:9"), tl("Image"), "expand-to:1.7778"),
+            studio_ui::palette::Cmd::new(tl("Étendre au format story 9:16"), tl("Image"), "expand-to:0.5625"),
+            studio_ui::palette::Cmd::new(tl("Étendre au format 4:5 (Instagram)"), tl("Image"), "expand-to:0.8"),
+            studio_ui::palette::Cmd::new(tl("Inverser la sélection"), tl("Sélection"), "invert"),
+            studio_ui::palette::Cmd::new(tl("Désélectionner"), tl("Ctrl+D"), "deselect"),
+            studio_ui::palette::Cmd::new(tl("Barre de tâches contextuelle (afficher / masquer)"), tl("Affichage"), "taskbar"),
+            studio_ui::palette::Cmd::new(tl("Recadrer aux pixels visibles"), tl("Image · retire les marges transparentes"), "trim-visible"),
+            studio_ui::palette::Cmd::new(tl("Dupliquer le calque actif"), tl("Calque · Ctrl+J"), "duplicate-layer"),
+            studio_ui::palette::Cmd::new(tl("Fusionner les calques visibles"), tl("Calques · conserve les calques masqués"), "merge-visible"),
+            studio_ui::palette::Cmd::new(tl("Aplatir toute l'image"), tl("Calques · résultat unique"), "flatten-image").confirm(),
         ];
         v.extend(outils::TOOLS.iter().map(|(id, label, _)| studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Pixel · nouvel outil · calque actif ou sélection", format!("tool:{id}"))));
         v = v.into_iter().map(|command| {
@@ -1535,11 +1537,11 @@ impl Pixel {
                 let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
                 ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        if pro::primary_icon(ui, "Exporter", |p, r, c| export_glyph(p, r, c)).on_hover_text("Ctrl+E").clicked() {
+                        if pro::primary_icon(ui, tl("Exporter"), |p, r, c| export_glyph(p, r, c)).on_hover_text(tl("Ctrl+E")).clicked() {
                             self.export_sheet();
                         }
                         ui.add_space(6.0);
-                        if pro::chip(ui, &format!("{} × {} px", self.doc.width(), self.doc.height())).on_hover_text("Taille de la zone de travail").clicked() {
+                        if pro::chip(ui, &format!("{} × {} px", self.doc.width(), self.doc.height())).on_hover_text(tl("Taille de la zone de travail")).clicked() {
                             self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4, relative: false, ext: 0 });
                         }
                     });
@@ -1568,7 +1570,7 @@ impl Pixel {
     }
 
     fn menu_file(&mut self, ui: &mut Ui) {
-        ui.menu_button("Fichier", |ui| {
+        ui.menu_button(tl("Fichier"), |ui| {
             if let Some(t) = studio_ui::handoff::menu(ui, &[("lumen", "développer la photo"), ("vector", "placer l'image"), ("page", "mettre en page"), ("cut", "ajouter au montage"), ("motion", "animer l'image")]) {
                 let ctx = ui.ctx().clone();
                 self.send_to(t, &ctx);
@@ -1583,7 +1585,7 @@ impl Pixel {
             if self.mi(ui, "Ouvrir…", "Ctrl+O") {
                 self.open_dialog();
             }
-            ui.menu_button("Ouvrir les fichiers récents", |ui| {
+            ui.menu_button(tl("Ouvrir les fichiers récents"), |ui| {
                 let mut open = None;
                 for p in &self.recents {
                     if ui.button(p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()).clicked() {
@@ -1591,7 +1593,7 @@ impl Pixel {
                     }
                 }
                 if self.recents.is_empty() {
-                    ui.label(RichText::new("Aucun fichier récent").color(FAINT));
+                    ui.label(RichText::new(tl("Aucun fichier récent")).color(FAINT));
                 }
                 if let Some(p) = open {
                     self.open_path(&p);
@@ -1639,7 +1641,7 @@ impl Pixel {
     }
 
     fn menu_edit(&mut self, ui: &mut Ui) {
-        ui.menu_button("Édition", |ui| {
+        ui.menu_button(tl("Édition"), |ui| {
             if self.mie(ui, self.doc.can_undo(), "Annuler", "Ctrl+Z") {
                 self.doc.undo();
             }
@@ -1690,7 +1692,7 @@ impl Pixel {
             if self.mi(ui, "Transformation manuelle…", "Ctrl+T") {
                 self.sheet = Some(Sheet::Transform(Xform::identity()));
             }
-            ui.menu_button("Transformation", |ui| {
+            ui.menu_button(tl("Transformation"), |ui| {
                 if self.mi(ui, "Rotation 180°", "") {
                     self.doc.transform_layer_full(&Xform { angle: 180.0, nearest: true, ..Xform::identity() });
                 }
@@ -1707,26 +1709,26 @@ impl Pixel {
                     self.doc.flip_layer(false);
                 }
                 ui.separator();
-                if ui.button("Inclinaison…").clicked() {
+                if ui.button(tl("Inclinaison…")).clicked() {
                     self.sheet = Some(Sheet::Transform(Xform { skew_x: 15.0, ..Xform::identity() }));
                 }
-                if ui.button("Perspective…").clicked() {
+                if ui.button(tl("Perspective…")).clicked() {
                     self.sheet = Some(Sheet::Transform(Xform { persp_y: 20.0, ..Xform::identity() }));
                 }
             });
             ui.separator();
-            if ui.button("Raccourcis clavier…").clicked() {
+            if ui.button(tl("Raccourcis clavier…")).clicked() {
                 self.sheet = Some(Sheet::Shortcuts);
             }
-            if ui.button("Préférences…").clicked() {
+            if ui.button(tl("Préférences…")).clicked() {
                 self.sheet = Some(Sheet::Prefs);
             }
         });
     }
 
     fn menu_image(&mut self, ui: &mut Ui) {
-        ui.menu_button("Image", |ui| {
-            ui.menu_button("Agrandir (super-résolution)", |ui| {
+        ui.menu_button(tl("Image"), |ui| {
+            ui.menu_button(tl("Agrandir (super-résolution)"), |ui| {
                 for f in [2u32, 3, 4] {
                     if ui.button(format!("×{f}")).clicked() {
                         self.upscale(f);
@@ -1737,7 +1739,7 @@ impl Pixel {
             if self.mi(ui, "Appliquer des LUT .cube (jusqu'à 3)…", "") {
                 self.apply_cube_luts();
             }
-            ui.menu_button("Réglages", |ui| {
+            ui.menu_button(tl("Réglages"), |ui| {
                 let keys = [(Kind::Levels, "Ctrl+L"), (Kind::Curves, "Ctrl+M"), (Kind::HueSat, "Ctrl+U"), (Kind::ColorBalance, "Ctrl+B"), (Kind::BlackWhiteMix, "Ctrl+Alt+Maj+B")];
                 for k in filters::ADJUSTMENTS {
                     let sc = keys.iter().find(|x| x.0 == *k).map_or("", |x| x.1);
@@ -1769,7 +1771,7 @@ impl Pixel {
             if self.mi(ui, "Taille de la zone de travail…", "Ctrl+Alt+C") {
                 self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4, relative: false, ext: 0 });
             }
-            ui.menu_button("Rotation de l'image", |ui| {
+            ui.menu_button(tl("Rotation de l'image"), |ui| {
                 for (label, f) in [("180°", 0u8), ("90° horaire", 1), ("90° antihoraire", 2), ("Symétrie horizontale de la zone de travail", 3), ("Symétrie verticale de la zone de travail", 4)] {
                     if self.mi(ui, label, "") {
                         self.doc.set_selection(None, None);
@@ -1783,7 +1785,7 @@ impl Pixel {
                         self.fit_pending = true;
                     }
                 }
-                if ui.button("Paramétrée…").clicked() {
+                if ui.button(tl("Paramétrée…")).clicked() {
                     self.sheet = Some(Sheet::RotateCanvas { angle: 15.0 });
                 }
             });
@@ -1819,11 +1821,11 @@ impl Pixel {
     }
 
     fn menu_layer(&mut self, ui: &mut Ui) {
-        ui.menu_button("Calque", |ui| {
+        ui.menu_button(tl("Calque"), |ui| {
             if self.mi(ui, "Nouveau calque", "Ctrl+Maj+N") {
                 self.doc.add_layer(None, None);
             }
-            ui.menu_button("Nouveau calque de remplissage", |ui| {
+            ui.menu_button(tl("Nouveau calque de remplissage"), |ui| {
                 let (w, h) = (self.doc.width(), self.doc.height());
                 if self.mi(ui, "Couleur unie (principale)", "") {
                     self.doc.add_layer(Some("Couleur unie".into()), Some(RgbaImage::from_pixel(w, h, image::Rgba(self.primary.to_array()))));
@@ -1847,7 +1849,7 @@ impl Pixel {
                     self.doc.layers[a].opacity = 0.3;
                 }
             });
-            ui.menu_button("Nouveau calque de réglage", |ui| {
+            ui.menu_button(tl("Nouveau calque de réglage"), |ui| {
                 for k in filters::ADJUSTMENTS.iter().chain([Kind::BlackWhite, Kind::Invert, Kind::Sepia, Kind::Solarize].iter()) {
                     if ui.button(format!("{}…", k.title())).clicked() {
                         self.new_adjustment_layer(*k);
@@ -1870,7 +1872,7 @@ impl Pixel {
                 self.doc.layer_from_selection(true);
             }
             ui.separator();
-            ui.menu_button("Masque de fusion", |ui| {
+            ui.menu_button(tl("Masque de fusion"), |ui| {
                 let has = self.doc.layers[self.doc.active].mask.is_some();
                 if self.mie(ui, !has, "Tout faire apparaître", "") {
                     self.doc.add_mask(0);
@@ -1910,7 +1912,7 @@ impl Pixel {
                 self.doc.layers[a].clip = !clip;
                 self.doc.touch_all();
             }
-            ui.menu_button("Disposition", |ui| {
+            ui.menu_button(tl("Disposition"), |ui| {
                 if self.mi(ui, "Premier plan", "Ctrl+Maj+]") {
                     self.doc.move_layer_to(true);
                 }
@@ -1924,13 +1926,13 @@ impl Pixel {
                     self.doc.move_layer_to(false);
                 }
             });
-            ui.menu_button("Verrouillage", |ui| {
+            ui.menu_button(tl("Verrouillage"), |ui| {
                 let l = &mut self.doc.layers[a];
-                ui.checkbox(&mut l.lock_alpha, "Pixels transparents");
-                ui.checkbox(&mut l.lock_pos, "Position");
-                ui.checkbox(&mut l.locked, "Tout");
+                ui.checkbox(&mut l.lock_alpha, tl("Pixels transparents"));
+                ui.checkbox(&mut l.lock_pos, tl("Position"));
+                ui.checkbox(&mut l.locked, tl("Tout"));
             });
-            ui.menu_button("Effets de calque", |ui| {
+            ui.menu_button(tl("Effets de calque"), |ui| {
                 for (k, label) in [(0u8, "Ombre portée…"), (4, "Ombre interne…"), (1, "Lueur externe…"), (5, "Lueur interne…"), (6, "Biseau et estampage…"), (2, "Contour…"), (7, "Incrustation couleur…"), (8, "Incrustation dégradé…")] {
                     if ui.button(label).clicked() {
                         self.open_sheet_effect(k);
@@ -1952,7 +1954,7 @@ impl Pixel {
     }
 
     fn menu_select(&mut self, ui: &mut Ui) {
-        ui.menu_button("Sélection", |ui| {
+        ui.menu_button(tl("Sélection"), |ui| {
             if self.mi(ui, "Tout sélectionner", "Ctrl+A") {
                 self.doc.set_selection(Some(self.doc.full()), None);
             }
@@ -1972,12 +1974,12 @@ impl Pixel {
             if self.mi(ui, "Pixels du calque", "") {
                 self.doc.select_layer_alpha();
             }
-            if ui.button("Plage de couleurs…").clicked() {
+            if ui.button(tl("Plage de couleurs…")).clicked() {
                 self.sheet = Some(Sheet::ColorRange { mode: 0, fuzz: 40.0 });
             }
             ui.separator();
             ui.add_enabled_ui(has, |ui| {
-                ui.menu_button("Modifier", |ui| {
+                ui.menu_button(tl("Modifier"), |ui| {
                     for (label, kind, sc) in [("Bordure…", 2u8, ""), ("Lisser…", 4, ""), ("Dilater…", 0, ""), ("Contracter…", 1, ""), ("Contour progressif…", 3, "Maj+F6")] {
                         if ui.add(egui::Button::new(label).shortcut_text(RichText::new(sc).color(FAINT))).clicked() {
                             self.sheet = Some(Sheet::SelectBy { kind, px: 4.0 });
@@ -1997,7 +1999,7 @@ impl Pixel {
                 self.sheet = Some(Sheet::SaveSelection { name: format!("Sélection {}", self.saved_sel.len() + 1) });
             }
             ui.add_enabled_ui(!self.saved_sel.is_empty(), |ui| {
-                ui.menu_button("Récupérer la sélection", |ui| {
+                ui.menu_button(tl("Récupérer la sélection"), |ui| {
                     let mut load = None;
                     let mut del = None;
                     for (i, (name, _)) in self.saved_sel.iter().enumerate() {
@@ -2005,7 +2007,7 @@ impl Pixel {
                             if ui.button(name).clicked() {
                                 load = Some(i);
                             }
-                            if ui.small_button("×").on_hover_text("Supprimer").clicked() {
+                            if ui.small_button("×").on_hover_text(tl("Supprimer")).clicked() {
                                 del = Some(i);
                             }
                         });
@@ -2027,7 +2029,7 @@ impl Pixel {
     }
 
     fn menu_filter(&mut self, ui: &mut Ui) {
-        ui.menu_button("Filtre", |ui| {
+        ui.menu_button(tl("Filtre"), |ui| {
             let last = self.last_filter.as_ref().map(|l| l.0.title().to_string());
             if self.mie(ui, last.is_some(), &format!("Dernier filtre{}", last.map(|t| format!(" : {t}")).unwrap_or_default()), "Ctrl+Alt+F") {
                 self.repeat_filter();
@@ -2048,10 +2050,10 @@ impl Pixel {
     }
 
     fn menu_view(&mut self, ui: &mut Ui) {
-        ui.menu_button("Affichage", |ui| {
-            ui.menu_button("Espace de travail", studio_ui::dock::menu);
+        ui.menu_button(tl("Affichage"), |ui| {
+            ui.menu_button(tl("Espace de travail"), studio_ui::dock::menu);
             let proofing = self.proof.is_some();
-            if ui.selectable_label(proofing, "Épreuvage CMJN (aperçu impression)").clicked() {
+            if ui.selectable_label(proofing, tl("Épreuvage CMJN (aperçu impression)")).clicked() {
                 if proofing {
                     self.proof = None;
                     self.tex = None;
@@ -2060,7 +2062,7 @@ impl Pixel {
                 }
                 ui.close();
             }
-            ui.menu_button("Profil d'épreuvage", |ui| {
+            ui.menu_button(tl("Profil d'épreuvage"), |ui| {
                 for p in studio_fx::color::installed_cmyk_profiles() {
                     let name = p.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                     let on = self.proof.as_ref().is_some_and(|c| c.name == name);
@@ -2070,7 +2072,7 @@ impl Pixel {
                     }
                 }
                 ui.separator();
-                if ui.button("Autre profil (.icc)…").clicked() {
+                if ui.button(tl("Autre profil (.icc)…")).clicked() {
                     if let Some(p) = rfd::FileDialog::new().add_filter("Profil ICC", &["icc", "icm"]).pick_file() {
                         self.set_proof(Some(p));
                     }
@@ -2091,14 +2093,14 @@ impl Pixel {
                 self.zoom = 1.0;
                 self.offset = Vec2::ZERO;
             }
-            ui.menu_button("Zoom prédéfini", |ui| {
+            ui.menu_button(tl("Zoom prédéfini"), |ui| {
                 for z in [0.25, 0.5, 2.0, 3.0, 4.0, 8.0, 16.0] {
                     if ui.button(format!("{:.0} %", z * 100.0)).clicked() {
                         self.zoom = z;
                     }
                 }
             });
-            ui.menu_button("Rotation de la vue", |ui| {
+            ui.menu_button(tl("Rotation de la vue"), |ui| {
                 for a in [-90.0f32, -45.0, -15.0, 0.0, 15.0, 45.0, 90.0, 180.0] {
                     if ui.button(if a == 0.0 { "Réinitialiser".to_string() } else { format!("{a:+.0}°") }).clicked() {
                         self.view_angle = a;
@@ -2107,22 +2109,22 @@ impl Pixel {
             });
             ui.separator();
             ui.add(egui::Checkbox::new(&mut self.extras, "Extras (contours de sélection, repères)"));
-            ui.checkbox(&mut self.rulers, "Règles (Ctrl+R)");
-            ui.checkbox(&mut self.show_grid, "Grille (Ctrl+')");
-            ui.checkbox(&mut self.pixel_grid, "Grille de pixels (à partir de 1000 %)");
-            ui.checkbox(&mut self.show_guides, "Repères (Ctrl+;)");
-            ui.checkbox(&mut self.lock_guides, "Verrouiller les repères (Ctrl+Alt+;)");
-            ui.checkbox(&mut self.snap, "Magnétisme (Ctrl+Maj+;)");
+            ui.checkbox(&mut self.rulers, tl("Règles (Ctrl+R)"));
+            ui.checkbox(&mut self.show_grid, tl("Grille (Ctrl+')"));
+            ui.checkbox(&mut self.pixel_grid, tl("Grille de pixels (à partir de 1000 %)"));
+            ui.checkbox(&mut self.show_guides, tl("Repères (Ctrl+;)"));
+            ui.checkbox(&mut self.lock_guides, tl("Verrouiller les repères (Ctrl+Alt+;)"));
+            ui.checkbox(&mut self.snap, tl("Magnétisme (Ctrl+Maj+;)"));
             ui.separator();
-            if ui.button("Nouveau repère…").clicked() {
+            if ui.button(tl("Nouveau repère…")).clicked() {
                 self.sheet = Some(Sheet::Guide { vertical: true, pos: self.doc.width() as f32 / 2.0 });
             }
-            if ui.button("Repères au centre").clicked() {
+            if ui.button(tl("Repères au centre")).clicked() {
                 self.guides.push((true, self.doc.width() as f32 / 2.0));
                 self.guides.push((false, self.doc.height() as f32 / 2.0));
                 self.show_guides = true;
             }
-            if ui.button("Repères aux tiers").clicked() {
+            if ui.button(tl("Repères aux tiers")).clicked() {
                 for k in [1.0, 2.0] {
                     self.guides.push((true, self.doc.width() as f32 * k / 3.0));
                     self.guides.push((false, self.doc.height() as f32 * k / 3.0));
@@ -2134,22 +2136,22 @@ impl Pixel {
             }
             ui.separator();
             ui.horizontal(|ui| {
-                ui.label("Pas de la grille");
+                ui.label(tl("Pas de la grille"));
                 ui.add(egui::DragValue::new(&mut self.grid).range(2..=1000).suffix(" px"));
             });
             ui.horizontal(|ui| {
-                ui.label("Subdivisions");
+                ui.label(tl("Subdivisions"));
                 ui.add(egui::DragValue::new(&mut self.grid_sub).range(1..=10));
             });
             ui.horizontal(|ui| {
-                ui.label("Couleur");
+                ui.label(tl("Couleur"));
                 tools::combo(ui, "gridcol", &mut self.grid_color, &GRID_COLORS.map(|c| c.0), 110.0);
             });
             ui.separator();
             if ui.button(if self.hide_panels { "Afficher les panneaux (Tab)" } else { "Masquer les panneaux (Tab)" }).clicked() {
                 self.hide_panels = !self.hide_panels;
             }
-            ui.checkbox(&mut self.task_bar, "Barre de tâches contextuelle");
+            ui.checkbox(&mut self.task_bar, tl("Barre de tâches contextuelle"));
             if ui.button(if self.compare.is_some() { "Quitter la comparaison" } else { "Comparaison rapide (avant / après)" }).clicked() {
                 let ctx = ui.ctx().clone();
                 self.toggle_compare(&ctx);
@@ -2159,15 +2161,15 @@ impl Pixel {
 
     fn home_screen(&mut self, root: &mut Ui) {
         egui::Panel::left("home-nav").exact_size(230.0).resizable(false).frame(Frame::new().fill(PANEL).inner_margin(Margin::symmetric(18, 26))).show(root, |ui| {
-            if pro::primary(ui, "Nouveau fichier").clicked() {
+            if pro::primary(ui, tl("Nouveau fichier")).clicked() {
                 self.new_doc_sheet();
             }
             ui.add_space(8.0);
-            if pro::secondary(ui, "Ouvrir…").clicked() {
+            if pro::secondary(ui, tl("Ouvrir…")).clicked() {
                 self.open_dialog();
             }
             ui.add_space(8.0);
-            if pro::secondary(ui, "Depuis le presse-papiers").clicked() {
+            if pro::secondary(ui, tl("Depuis le presse-papiers")).clicked() {
                 self.doc_from_clipboard();
             }
             ui.add_space(26.0);
@@ -2181,12 +2183,12 @@ impl Pixel {
                     ui.add(egui::Image::new((self.icon.id(), Vec2::splat(40.0))));
                     ui.add_space(8.0);
                     ui.vertical(|ui| {
-                        ui.label(RichText::new("Bienvenue dans Pixel").font(semibold(28.0)).color(INK_STRONG));
-                        ui.label(RichText::new("Retouche photo et compositing par calques").color(MUTED));
+                        ui.label(RichText::new(tl("Bienvenue dans Pixel")).font(semibold(28.0)).color(INK_STRONG));
+                        ui.label(RichText::new(tl("Retouche photo et compositing par calques")).color(MUTED));
                     });
                 });
                 ui.add_space(28.0);
-                ui.label(RichText::new("Créer un document").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Créer un document")).font(semibold(16.0)).color(INK));
                 ui.add_space(12.0);
                 let gap = 14.0;
                 let card_w = 168.0;
@@ -2203,7 +2205,7 @@ impl Pixel {
                     ui.add_space(gap);
                 }
                 ui.add_space(14.0);
-                ui.label(RichText::new("Récents").font(semibold(16.0)).color(INK));
+                ui.label(RichText::new(tl("Récents")).font(semibold(16.0)).color(INK));
                 ui.add_space(10.0);
                 if self.recents.is_empty() {
                     let (r, _) = ui.allocate_exact_size(vec2(ui.available_width().min(760.0), 120.0), Sense::hover());
@@ -2253,7 +2255,7 @@ impl Pixel {
                     ui.label(small(format!("x {:.0}  y {:.0}", x.floor(), y.floor())));
                 }
                 if self.doc.edit_mask && self.doc.layers[self.doc.active].mask.is_some() {
-                    ui.label(RichText::new("Masque en cours de modification").size(12.0).color(BLUE));
+                    ui.label(RichText::new(tl("Masque en cours de modification")).size(12.0).color(BLUE));
                 }
                 if let Some(e) = self.error.clone() {
                     ui.label(RichText::new(e).size(12.0).color(RED));

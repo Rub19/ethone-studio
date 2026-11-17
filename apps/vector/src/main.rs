@@ -12,6 +12,7 @@ mod panels;
 mod tutos;
 
 use eframe::egui::{self, Color32, Frame, Key, Margin, Pos2, Rect, TextureHandle, Ui, Vec2, pos2, vec2};
+use studio_ui::i18n::tl;
 use model::{BBox, Board, Doc, Geom, Item, Layer, Node, P};
 use resvg::{tiny_skia, usvg};
 use std::path::{Path, PathBuf};
@@ -422,6 +423,7 @@ impl Cam {
 impl VectorApp {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
+        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
         let mut db = usvg::fontdb::Database::new();
         db.load_system_fonts();
         let doc = Doc::new(1000.0, 1000.0);
@@ -2265,13 +2267,13 @@ impl VectorApp {
             let reason = if min > 1 { format!("Sélectionne au moins {min} objets") } else { "Sélectionne d'abord un objet".to_string() };
             v.push(studio_ui::palette::Cmd::new(format!("Outil : {label}"), "Vector · nouvel outil · sélection", format!("tool:{id}")).enabled_if(selection_count >= min, &reason));
         }
-        v.push(studio_ui::palette::Cmd::new("QR code vectoriel du texte sélectionné", "Objet · groupé, net à toutes les tailles", "qr").enabled_if(text_selected, "Sélectionne d'abord un texte"));
-        v.push(studio_ui::palette::Cmd::new("Exporter un pack d'icônes (16 à 1024 px)…", "Plan de travail actif · PNG", "icon-pack"));
-        v.push(studio_ui::palette::Cmd::new("Tout sélectionner", "Document · Ctrl+A", "select-all"));
-        v.push(studio_ui::palette::Cmd::new("Inverser la sélection", "Document", "select-inverse"));
-        v.push(studio_ui::palette::Cmd::new("Dupliquer la sélection", "Objets · Ctrl+Alt+D", "duplicate").enabled_if(has_selection, "Sélectionne d'abord un objet"));
-        v.push(studio_ui::palette::Cmd::new("Grouper la sélection", "Objets · Ctrl+G", "group").enabled_if(selection_count > 1, "Sélectionne au moins deux objets"));
-        v.push(studio_ui::palette::Cmd::new("Dégrouper la sélection", "Objets · Ctrl+Maj+G", "ungroup").enabled_if(has_selection, "Sélectionne d'abord un groupe"));
+        v.push(studio_ui::palette::Cmd::new(tl("QR code vectoriel du texte sélectionné"), tl("Objet · groupé, net à toutes les tailles"), "qr").enabled_if(text_selected, "Sélectionne d'abord un texte"));
+        v.push(studio_ui::palette::Cmd::new(tl("Exporter un pack d'icônes (16 à 1024 px)…"), tl("Plan de travail actif · PNG"), "icon-pack"));
+        v.push(studio_ui::palette::Cmd::new(tl("Tout sélectionner"), tl("Document · Ctrl+A"), "select-all"));
+        v.push(studio_ui::palette::Cmd::new(tl("Inverser la sélection"), tl("Document"), "select-inverse"));
+        v.push(studio_ui::palette::Cmd::new(tl("Dupliquer la sélection"), tl("Objets · Ctrl+Alt+D"), "duplicate").enabled_if(has_selection, "Sélectionne d'abord un objet"));
+        v.push(studio_ui::palette::Cmd::new(tl("Grouper la sélection"), tl("Objets · Ctrl+G"), "group").enabled_if(selection_count > 1, "Sélectionne au moins deux objets"));
+        v.push(studio_ui::palette::Cmd::new(tl("Dégrouper la sélection"), tl("Objets · Ctrl+Maj+G"), "ungroup").enabled_if(has_selection, "Sélectionne d'abord un groupe"));
         for (label, kind) in [("Même couleur de fond", 0), ("Même couleur de contour", 1), ("Même type d'objet", 5), ("Même aspect complet", 6)] {
             v.push(studio_ui::palette::Cmd::new(format!("Sélectionner : {label}"), "Objet actif · document", format!("select-same:{kind}")).enabled_if(has_selection, "Sélectionne d'abord un objet de référence"));
         }
@@ -2505,14 +2507,14 @@ impl VectorApp {
                 let right = Rect::from_min_max(pos2(full.right() - right_w, full.top()), full.max);
                 ui.scope_builder(egui::UiBuilder::new().max_rect(right), |ui| {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        let r = pro::primary_icon(ui, "Exporter", |p, r, c| panels::export_glyph(p, r, c)).on_hover_text("Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E");
+                        let r = pro::primary_icon(ui, tl("Exporter"), |p, r, c| panels::export_glyph(p, r, c)).on_hover_text(tl("Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E"));
                         if r.clicked() {
                             self.export = Some(ExportOpts { format: 0, scale: 2.0, transparent: false, quality: 90, scope: 0, minify: false });
                         }
                         ui.add_space(6.0);
                         let boards = self.doc.all_boards();
                         let b = &boards[self.active_board.min(boards.len() - 1)];
-                        if pro::chip(ui, &format!("{} · {:.0} × {:.0}", b.name, b.w, b.h)).on_hover_text("Plan de travail actif : clic pour l'ajuster à l'écran").clicked() {
+                        if pro::chip(ui, &format!("{} · {:.0} × {:.0}", b.name, b.w, b.h)).on_hover_text(tl("Plan de travail actif : clic pour l'ajuster à l'écran")).clicked() {
                             self.fit_view(false);
                         }
                     });
@@ -2524,15 +2526,15 @@ impl VectorApp {
                     ui.add(egui::Image::new((self.icon.id(), Vec2::splat(20.0))));
                     ui.add_space(6.0);
                     egui::MenuBar::new().ui(ui, |ui| {
-                        ui.menu_button("Fichier", |ui| self.menu_file(ui));
+                        ui.menu_button(tl("Fichier"), |ui| self.menu_file(ui));
                         ui.add_enabled_ui(!self.home, |ui| {
-                            ui.menu_button("Édition", |ui| self.menu_edit(ui));
-                            ui.menu_button("Objet", |ui| self.menu_object(ui));
-                            ui.menu_button("Texte", |ui| self.menu_text(ui));
-                            ui.menu_button("Sélection", |ui| self.menu_select(ui));
-                            ui.menu_button("Effet", |ui| self.menu_effect(ui));
-                            ui.menu_button("Affichage", |ui| self.menu_view(ui));
-                            ui.menu_button("Fenêtre", |ui| self.menu_window(ui));
+                            ui.menu_button(tl("Édition"), |ui| self.menu_edit(ui));
+                            ui.menu_button(tl("Objet"), |ui| self.menu_object(ui));
+                            ui.menu_button(tl("Texte"), |ui| self.menu_text(ui));
+                            ui.menu_button(tl("Sélection"), |ui| self.menu_select(ui));
+                            ui.menu_button(tl("Effet"), |ui| self.menu_effect(ui));
+                            ui.menu_button(tl("Affichage"), |ui| self.menu_view(ui));
+                            ui.menu_button(tl("Fenêtre"), |ui| self.menu_window(ui));
                         });
                         self.help.menu(ui);
                     });
@@ -2553,7 +2555,7 @@ impl VectorApp {
         if mi(ui, "Ouvrir…", "Ctrl+O", true) {
             self.open();
         }
-        ui.menu_button("Ouvrir un fichier récent", |ui| {
+        ui.menu_button(tl("Ouvrir un fichier récent"), |ui| {
             let mut open = None;
             for p in &self.recents {
                 if ui.button(p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()).clicked() {
@@ -2561,7 +2563,7 @@ impl VectorApp {
                 }
             }
             if self.recents.is_empty() {
-                ui.label("Aucun fichier récent");
+                ui.label(tl("Aucun fichier récent"));
             }
             if let Some(p) = open {
                 self.open_path(&p);
@@ -2589,7 +2591,7 @@ impl VectorApp {
             self.export = Some(ExportOpts { format: 0, scale: 2.0, transparent: false, quality: 90, scope: 0, minify: false });
         }
         ui.add_enabled_ui(on, |ui| {
-            ui.menu_button("Exporter rapidement", |ui| {
+            ui.menu_button(tl("Exporter rapidement"), |ui| {
                 for (label, f, s, t) in [("PNG ×1", 0, 1.0, false), ("PNG ×2", 0, 2.0, false), ("PNG ×3", 0, 3.0, false), ("PNG ×4", 0, 4.0, false), ("PNG ×2 fond transparent", 0, 2.0, true), ("JPEG ×2", 1, 2.0, false), ("SVG", 2, 1.0, false), ("SVG optimisé", 4, 1.0, false), ("PDF (tous les plans de travail)", 3, 1.0, false)] {
                     if ui.button(label).clicked() {
                         self.run_export(&ExportOpts { format: f.min(3), scale: s, transparent: t, quality: 90, scope: if f == 3 { 1 } else { 0 }, minify: f == 4 });
@@ -2649,60 +2651,60 @@ impl VectorApp {
             self.duplicate_selected();
         }
         ui.separator();
-        ui.menu_button("Modifier les couleurs", |ui| {
-            if ui.button("Recolorer l'illustration…").clicked() {
+        ui.menu_button(tl("Modifier les couleurs"), |ui| {
+            if ui.button(tl("Recolorer l'illustration…")).clicked() {
                 self.open_recolor();
                 ui.close();
             }
-            if ui.button("Régler la teinte, saturation, luminosité…").clicked() {
+            if ui.button(tl("Régler la teinte, saturation, luminosité…")).clicked() {
                 self.open_dlg(Dlg::Adjust { hue: 0.0, sat: 0.0, light: 0.0 });
                 ui.close();
             }
             ui.separator();
-            if ui.button("Convertir en niveaux de gris").clicked() {
+            if ui.button(tl("Convertir en niveaux de gris")).clicked() {
                 self.recolor_all(&|c| {
                     let l = (0.299 * c[0] as f32 + 0.587 * c[1] as f32 + 0.114 * c[2] as f32) as u8;
                     [l, l, l, c[3]]
                 });
             }
-            if ui.button("Inverser les couleurs").clicked() {
+            if ui.button(tl("Inverser les couleurs")).clicked() {
                 self.recolor_all(&|c| [255 - c[0], 255 - c[1], 255 - c[2], c[3]]);
             }
-            if ui.button("Sépia").clicked() {
+            if ui.button(tl("Sépia")).clicked() {
                 self.recolor_all(&|c| {
                     let (r, g, b) = (c[0] as f32, c[1] as f32, c[2] as f32);
                     [(0.393 * r + 0.769 * g + 0.189 * b).min(255.0) as u8, (0.349 * r + 0.686 * g + 0.168 * b).min(255.0) as u8, (0.272 * r + 0.534 * g + 0.131 * b).min(255.0) as u8, c[3]]
                 });
             }
-            if ui.button("Saturer +20 %").clicked() {
+            if ui.button(tl("Saturer +20 %")).clicked() {
                 self.recolor_all(&|c| hsl_adjust(c, 0.0, 20.0, 0.0));
             }
-            if ui.button("Désaturer −20 %").clicked() {
+            if ui.button(tl("Désaturer −20 %")).clicked() {
                 self.recolor_all(&|c| hsl_adjust(c, 0.0, -20.0, 0.0));
             }
-            if ui.button("Éclaircir +10 %").clicked() {
+            if ui.button(tl("Éclaircir +10 %")).clicked() {
                 self.recolor_all(&|c| hsl_adjust(c, 0.0, 0.0, 10.0));
             }
-            if ui.button("Assombrir −10 %").clicked() {
+            if ui.button(tl("Assombrir −10 %")).clicked() {
                 self.recolor_all(&|c| hsl_adjust(c, 0.0, 0.0, -10.0));
             }
-            if ui.button("Teinte +30°").clicked() {
+            if ui.button(tl("Teinte +30°")).clicked() {
                 self.recolor_all(&|c| hsl_adjust(c, 30.0, 0.0, 0.0));
             }
-            if ui.button("Couleurs complémentaires").clicked() {
+            if ui.button(tl("Couleurs complémentaires")).clicked() {
                 self.recolor_all(&|c| hsl_adjust(c, 180.0, 0.0, 0.0));
             }
             ui.separator();
-            if ui.button("Mélange horizontal").clicked() {
+            if ui.button(tl("Mélange horizontal")).clicked() {
                 self.blend_colors(Some(0));
             }
-            if ui.button("Mélange vertical").clicked() {
+            if ui.button(tl("Mélange vertical")).clicked() {
                 self.blend_colors(Some(1));
             }
-            if ui.button("Mélange avant-arrière").clicked() {
+            if ui.button(tl("Mélange avant-arrière")).clicked() {
                 self.blend_colors(None);
             }
-            if ui.button("Échanger fond et contour").clicked() {
+            if ui.button(tl("Échanger fond et contour")).clicked() {
                 self.swap_fill_stroke();
             }
         });
@@ -2711,7 +2713,7 @@ impl VectorApp {
     fn menu_object(&mut self, ui: &mut Ui) {
         let has = self.sel.is_some();
         let multi = self.selection().len() >= 2;
-        ui.menu_button("Transformation", |ui| {
+        ui.menu_button(tl("Transformation"), |ui| {
             if mi(ui, "Transformer à nouveau", "Ctrl+D", has) {
                 self.transform_again();
             }
@@ -2742,13 +2744,13 @@ impl VectorApp {
                 self.flip(1);
             }
         });
-        ui.menu_button("Disposition", |ui| {
+        ui.menu_button(tl("Disposition"), |ui| {
             for (label, sc, by) in [("Premier plan", "Ctrl+Maj+]", i32::MAX), ("En avant", "Ctrl+]", 1), ("En arrière", "Ctrl+[", -1), ("Arrière-plan", "Ctrl+Maj+[", i32::MIN)] {
                 if mi(ui, label, sc, has) {
                     self.reorder(by);
                 }
             }
-            ui.menu_button("Envoyer vers le calque", |ui| {
+            ui.menu_button(tl("Envoyer vers le calque"), |ui| {
                 let names: Vec<String> = self.doc.layers.iter().map(|l| l.name.clone()).collect();
                 for (k, n) in names.iter().enumerate() {
                     if ui.button(n).clicked() {
@@ -2785,7 +2787,7 @@ impl VectorApp {
         if mi(ui, "Vectoriser le contour", "", has) {
             self.outline_selected();
         }
-        ui.menu_button("Tracé", |ui| {
+        ui.menu_button(tl("Tracé"), |ui| {
             if mi(ui, "Joindre", "Ctrl+J", has) {
                 self.join();
             }
@@ -2810,7 +2812,7 @@ impl VectorApp {
                 self.cleanup();
             }
         });
-        ui.menu_button("Pathfinder", |ui| {
+        ui.menu_button(tl("Pathfinder"), |ui| {
             for (k, name) in geom::PATHFINDER.iter().enumerate() {
                 if k == 4 {
                     ui.separator();
@@ -2820,12 +2822,12 @@ impl VectorApp {
                 }
             }
         });
-        ui.menu_button("Fusion", |ui| {
+        ui.menu_button(tl("Fusion"), |ui| {
             if mi(ui, "Créer une fusion…", "Ctrl+Alt+B", multi) {
                 self.open_dlg(Dlg::Blend { steps: 5 });
             }
         });
-        ui.menu_button("Masque d'écrêtage", |ui| {
+        ui.menu_button(tl("Masque d'écrêtage"), |ui| {
             if mi(ui, "Créer", "Ctrl+7", multi) {
                 self.make_clip(false);
             }
@@ -2833,7 +2835,7 @@ impl VectorApp {
                 self.release_clip();
             }
         });
-        ui.menu_button("Masque d'opacité", |ui| {
+        ui.menu_button(tl("Masque d'opacité"), |ui| {
             if mi(ui, "Créer", "", multi) {
                 self.make_clip(true);
             }
@@ -2841,7 +2843,7 @@ impl VectorApp {
                 self.release_clip();
             }
         });
-        ui.menu_button("Tracé transparent composé", |ui| {
+        ui.menu_button(tl("Tracé transparent composé"), |ui| {
             if mi(ui, "Créer", "Ctrl+8", multi) {
                 self.make_compound();
             }
@@ -2853,18 +2855,18 @@ impl VectorApp {
         if mi(ui, "Vectorisation dynamique…", "", is_img) {
             self.open_trace();
         }
-        ui.menu_button("Plans de travail", |ui| {
-            if ui.button("Nouveau plan de travail").clicked() {
+        ui.menu_button(tl("Plans de travail"), |ui| {
+            if ui.button(tl("Nouveau plan de travail")).clicked() {
                 self.add_board(self.doc.width, self.doc.height);
             }
-            if ui.button("Ajuster à l'illustration").clicked() {
+            if ui.button(tl("Ajuster à l'illustration")).clicked() {
                 let all: Vec<usize> = (0..self.doc.items.len()).filter(|i| self.doc.shown(*i)).collect();
                 self.fit_board_to(self.doc.bounds_of(&all));
             }
             if ui.add_enabled(has, egui::Button::new("Ajuster à la sélection")).clicked() {
                 self.fit_board_to(self.doc.bounds_of(&self.selection()));
             }
-            if ui.button("Réorganiser en grille").clicked() {
+            if ui.button(tl("Réorganiser en grille")).clicked() {
                 self.arrange_boards();
             }
             if ui.add_enabled(self.active_board > 0, egui::Button::new("Supprimer le plan actif")).clicked() {
@@ -2877,7 +2879,7 @@ impl VectorApp {
     fn menu_text(&mut self, ui: &mut Ui) {
         let texts: Vec<usize> = self.selection().into_iter().filter(|i| matches!(self.doc.items[*i].geom, Geom::Text { .. })).collect();
         let on = !texts.is_empty();
-        ui.menu_button("Police", |ui| {
+        ui.menu_button(tl("Police"), |ui| {
             for f in FONTS {
                 if ui.add_enabled(on, egui::Button::new(f)).clicked() {
                     self.checkpoint();
@@ -2889,7 +2891,7 @@ impl VectorApp {
                 }
             }
         });
-        ui.menu_button("Taille", |ui| {
+        ui.menu_button(tl("Taille"), |ui| {
             for s in [8.0, 12.0, 18.0, 24.0, 36.0, 48.0, 64.0, 72.0, 96.0, 144.0, 200.0] {
                 if ui.add_enabled(on, egui::Button::new(format!("{s} px"))).clicked() {
                     self.checkpoint();
@@ -2901,7 +2903,7 @@ impl VectorApp {
                 }
             }
         });
-        ui.menu_button("Casse", |ui| {
+        ui.menu_button(tl("Casse"), |ui| {
             for (k, label) in ["Normale", "MAJUSCULES", "minuscules", "Initiales En Capitales"].iter().enumerate() {
                 if ui.add_enabled(on, egui::Button::new(*label)).clicked() {
                     self.checkpoint();
@@ -2911,7 +2913,7 @@ impl VectorApp {
                 }
             }
         });
-        ui.menu_button("Insérer un caractère spécial", |ui| {
+        ui.menu_button(tl("Insérer un caractère spécial"), |ui| {
             for (c, n) in [("©", "Copyright"), ("®", "Marque déposée"), ("™", "Marque"), ("«  »", "Guillemets"), ("—", "Tiret cadratin"), ("–", "Tiret demi-cadratin"), ("…", "Points de suspension"), ("€", "Euro"), ("°", "Degré"), ("•", "Puce"), ("→", "Flèche"), ("★", "Étoile")] {
                 if ui.add_enabled(texts.len() == 1, egui::Button::new(format!("{c}   {n}"))).clicked() {
                     self.checkpoint();
@@ -2962,7 +2964,7 @@ impl VectorApp {
             self.select_inverse();
         }
         ui.separator();
-        ui.menu_button("Même", |ui| {
+        ui.menu_button(tl("Même"), |ui| {
             for (k, label) in ["Couleur de fond", "Couleur de contour", "Épaisseur de contour", "Opacité", "Mode de fusion", "Type d'objet", "Aspect", "Occurrence de symbole"].iter().enumerate() {
                 if ui.add_enabled(has, egui::Button::new(*label)).clicked() {
                     self.select_same(k as u8);
@@ -2999,7 +3001,7 @@ impl VectorApp {
 
     fn menu_effect(&mut self, ui: &mut Ui) {
         let has = self.sel.is_some();
-        ui.label(egui::RichText::new("Effets dynamiques (modifiables dans Propriétés)").size(11.5).color(pro::FAINT));
+        ui.label(egui::RichText::new(tl("Effets dynamiques (modifiables dans Propriétés)")).size(11.5).color(pro::FAINT));
         let mut live = |ui: &mut Ui, label: &str, f: &dyn Fn(&mut Item)| {
             if ui.add_enabled(has, egui::Button::new(label)).clicked() {
                 self.checkpoint();
@@ -3026,7 +3028,7 @@ impl VectorApp {
             it.grain = 0.0;
         });
         ui.separator();
-        ui.menu_button("Distorsion et transformation", |ui| {
+        ui.menu_button(tl("Distorsion et transformation"), |ui| {
             for (label, d) in [
                 ("Zigzag…", Dlg::Zigzag { size: 8.0, ridges: 20, smooth: false }),
                 ("Ondulation…", Dlg::Zigzag { size: 8.0, ridges: 12, smooth: true }),
@@ -3041,7 +3043,7 @@ impl VectorApp {
                 }
             }
         });
-        ui.menu_button("Styliser", |ui| {
+        ui.menu_button(tl("Styliser"), |ui| {
             if ui.add_enabled(has, egui::Button::new("Arrondis…")).clicked() {
                 self.open_dlg(Dlg::Round { r: 12.0 });
                 ui.close();
@@ -3051,7 +3053,7 @@ impl VectorApp {
                 ui.close();
             }
         });
-        ui.menu_button("Tracé", |ui| {
+        ui.menu_button(tl("Tracé"), |ui| {
             if ui.add_enabled(has, egui::Button::new("Décalage du tracé…")).clicked() {
                 self.open_dlg(Dlg::Offset { d: 10.0 });
                 ui.close();
@@ -3087,30 +3089,30 @@ impl VectorApp {
             self.fit_view(false);
         }
         ui.separator();
-        ui.checkbox(&mut self.outline_view, "Mode tracés (Ctrl+Maj+Y)");
-        ui.checkbox(&mut self.show_edges, "Contours de sélection (Ctrl+H)");
-        ui.checkbox(&mut self.show_bbox, "Cadre de sélection (Ctrl+Maj+B)");
+        ui.checkbox(&mut self.outline_view, tl("Mode tracés (Ctrl+Maj+Y)"));
+        ui.checkbox(&mut self.show_edges, tl("Contours de sélection (Ctrl+H)"));
+        ui.checkbox(&mut self.show_bbox, tl("Cadre de sélection (Ctrl+Maj+B)"));
         ui.separator();
-        ui.checkbox(&mut self.rulers, "Règles (Ctrl+R)");
-        ui.checkbox(&mut self.show_guides, "Repères (Ctrl+;)");
-        ui.checkbox(&mut self.lock_guides, "Verrouiller les repères (Ctrl+Alt+;)");
+        ui.checkbox(&mut self.rulers, tl("Règles (Ctrl+R)"));
+        ui.checkbox(&mut self.show_guides, tl("Repères (Ctrl+;)"));
+        ui.checkbox(&mut self.lock_guides, tl("Verrouiller les repères (Ctrl+Alt+;)"));
         if ui.add_enabled(!self.doc.guides.is_empty(), egui::Button::new("Effacer les repères")).clicked() {
             self.checkpoint();
             self.doc.guides.clear();
         }
-        ui.checkbox(&mut self.smart, "Repères commentés (Ctrl+U)");
-        ui.checkbox(&mut self.thirds, "Repères de composition (centre et tiers)");
+        ui.checkbox(&mut self.smart, tl("Repères commentés (Ctrl+U)"));
+        ui.checkbox(&mut self.thirds, tl("Repères de composition (centre et tiers)"));
         ui.separator();
-        ui.checkbox(&mut self.show_grid, "Grille (Ctrl+')");
-        ui.checkbox(&mut self.snap, "Magnétisme de la grille (Ctrl+Alt+')");
+        ui.checkbox(&mut self.show_grid, tl("Grille (Ctrl+')"));
+        ui.checkbox(&mut self.snap, tl("Magnétisme de la grille (Ctrl+Alt+')"));
         ui.horizontal(|ui| {
-            ui.label("Pas de la grille");
+            ui.label(tl("Pas de la grille"));
             ui.add(egui::DragValue::new(&mut self.grid).range(2.0..=500.0).suffix(" px"));
         });
     }
 
     fn menu_window(&mut self, ui: &mut Ui) {
-        ui.menu_button("Espace de travail", studio_ui::dock::menu);
+        ui.menu_button(tl("Espace de travail"), studio_ui::dock::menu);
         ui.separator();
         for (k, label) in ["Propriétés", "Calques et plans de travail", "Bibliothèques (nuancier, styles, symboles)"].iter().enumerate() {
             if ui.radio(self.dock_tab == k, *label).clicked() {
@@ -3118,10 +3120,10 @@ impl VectorApp {
             }
         }
         ui.separator();
-        if ui.button("Recolorer l'illustration…").clicked() {
+        if ui.button(tl("Recolorer l'illustration…")).clicked() {
             self.open_recolor();
         }
-        if ui.button("Exporter…").clicked() {
+        if ui.button(tl("Exporter…")).clicked() {
             self.export = Some(ExportOpts { format: 0, scale: 2.0, transparent: false, quality: 90, scope: 0, minify: false });
         }
     }

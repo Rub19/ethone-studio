@@ -1,0 +1,245 @@
+# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
+Exporter l'animation	
+Toute la composition	
+Zone de travail	
+Personnalisée	
+Tête → début	
+Tête → fin	
+Préfixe	
+Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.	
+Fond transparent	
+Exporter…	
+Ajouter à la file	
+Ctrl+Alt+M ouvre la file de rendu	
+Annuler	
+File de rendu	
+Plusieurs exports à la suite, en une seule fois.	
+La file est vide : dans Exporter, choisis « Ajouter à la file ».	
+Retirer	
+Ajouter…	
+Vider	
+Fermer	
+Éditeur de courbe	
+Vitesse	
+Préréglages	
+Revenir à la courbe choisie dans la liste	
+Copier sur la sélection	
+Même courbe pour toutes les clés sélectionnées (ou tout le calque)	
+Valeur	
+Aligner tous les calques au même départ	
+Composition	
+Inverser les images clés du calque	
+Animation · plage des clés	
+Répartir régulièrement les images clés	
+Animation · calque sélectionné	
+Ajuster le calque à la composition	
+Calque sélectionné · contenir	
+Adapter la durée aux calques	
+Composition · fin du dernier calque	
+Fractionner le calque à la tête	
+Calque sélectionné · Ctrl+Maj+D	
+Dupliquer le calque	
+Calque sélectionné · Ctrl+D	
+Exporter	
+MP4, GIF, PNG ou SVG · Ctrl+M	
+Réglages de la composition · Ctrl+K	
+Nouvelle composition	
+Ouvrir…	
+Bienvenue dans Motion	
+Titres animés, logos et graphismes en mouvement	
+Projets récents	
+Ajouter un calque	
+Modèles	
+Ajouté à la tête de lecture	
+Animations prêtes	
+Rechercher une animation	
+Sélectionne un calque pour lui appliquer une animation.	
+Ajoutée à partir de la tête de lecture	
+Réglages de la composition	
+Format	
+Inverser largeur et hauteur	
+Images par seconde	
+Durée	
+Ajuster à l'animation	
+Terminé	
+Timeline	
+[ Début zone	
+B	
+Fin zone ]	
+N	
+Effacer la zone de travail	
+Ajuster	
+Toute la durée visible	
+Zoom	
+Ajouter un repère ici	
+Début de zone à la tête	
+Fin de zone à la tête	
+Supprimer ce repère	
+Autres courbes	
+Courbe douce (F9)	
+Éditer la courbe…	
+Copier (Ctrl+C)	
+Sélectionner toute la propriété	
+Supprimer (Suppr)	
+Dupliquer	
+Fractionner à la tête	
+Copier l'animation	
+Premier plan	
+Arrière-plan	
+Couleur d'étiquette	
+Supprimer	
+Fond	
+Dégradé vers le bas	
+Arrondi	
+Texte vertical	
+Taille	
+Gras	
+Italique	
+Alignement sur le point	
+Centre	
+Gauche	
+Droite	
+Espacement des lettres	
+Rayon	
+Creux (1 = polygone)	
+Longueur	
+Épaisseur	
+Révélation % = longueur de l'arc : anime-la pour une jauge.	
+De	
+Avant	
+Après	
+Compte pendant 80 % de la durée du calque	
+Tracé fermé	
+Remplir	
+Tout lisser	
+Tout en angles	
+Inverser	
+Sans remplissage : règle le contour dans Apparence.	
+Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	
+Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	
+L	
+H	
+Couleur	
+Fichier	
+Ouvrir un projet récent	
+Aucun projet récent	
+Exporter directement	
+Édition	
+Calque	
+Nouveau	
+Modèle	
+Transformer	
+Orientation automatique	
+Temps	
+Lecture inversée	
+Mode de fusion	
+Masque	
+Visible	
+Verrouillé	
+Solo	
+Animation	
+Courbe de Bézier	
+Afficher dans la timeline	
+Finition	
+Affichage	
+Espace de travail	
+Grille et tiers                  Ctrl+'	
+Divisions de la grille	
+Zones sûres	
+Type de zones sûres	
+Axes centraux	
+Règles                              Ctrl+R	
+Repères de mise en page   Ctrl+;	
+Damier de transparence	
+Trajectoires de mouvement	
+Pelure d'oignon	
+Réglages de la pelure	
+Magnétisme	
+Lecture en boucle               L	
+Qualité de l'aperçu	
+Ajouter ou retirer une image clé ici	
+Clic droit : réinitialiser, tremblement, boucle	
+Réinitialiser la valeur	
+Expression	
+Tremblement	
+Après la dernière clé	
+Clé suivante	
+Clé précédente	
+Courbe	
+Supprimer l'animation de couleur	
+Images/s	
+Réglages…	
+Finition de l'image	
+Bandes cinéma	
+Effets de composition	
+Repères	
+Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.	
+Aller au repère	
++ Repère à la tête de lecture	
+Repères de mise en page	
+Avec les règles (Ctrl+R), glisse depuis une règle pour tirer un repère ; glisse-le hors de la vue pour le supprimer.	
++ Centre	
++ Tiers	
++ Marges 5 %	
+Tout effacer	
+Verrou	
+Parent	
+Aucun	
+Étiquette	
+Transformation	
+Orientation auto	
+Le calque tourne dans le sens de sa trajectoire	
+Centrer l'ancre	
+Réinitialiser	
+Remet échelle, rotations, ancre et opacité par défaut	
+Aligner sur la composition	
+Met le calque à l'échelle de la composition	
+Centrer au milieu	
+Contenu	
+Tracé et opérateurs	
+Simultané	
+Un par un	
+Ondulé	
+Apparence	
+Contour	
+Extrémités et angles	
+Plates	
+Rondes	
+Carrées	
+Arrondis	
+Pointus	
+Biseautés	
+Dégradé vers	
+Linéaire	
+Radial	
+Miroir horizontal	
+Vertical	
+Flou et lumière	
+Lueur	
+Ombre portée	
+Ombre interne	
+Ombres	
+Lumières	
+Remplir d'une couleur	
+Réinitialiser la couleur	
+Stylisation	
+Animateur de texte	
+Animer lettre par lettre	
+Entrée	
+Sortie	
+Les deux	
+Ordre	
+Mouvement	
+Répéter toutes les clés	
+Non	
+Boucle	
+Aller-retour	
+Figer	
+Fige l'image du calque à l'instant choisi	
+Tête	
+Réinitialiser le temps	
+Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme (ou en dehors, en mode inversé).	
+?  Tutoriels	
+Depuis le centre	
+Terminer (Entrée)	
+Inversé	
