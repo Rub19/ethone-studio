@@ -1,289 +1,403 @@
-# Texte franÃ§ais<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en franÃ§ais.
-Avant	
-Après	
-Ouvrir une image…	
-Ctrl+O	
-Exporter…	
-Ctrl+E	
-Comparaison rapide avant / après	
-Affichage	
-Créer un timelapse GIF	
-Fichier	
-Agrandir ×2 (super-résolution)	
-Image	
-Agrandir ×4 (super-résolution)	
-Appliquer des LUT .cube	
-Répéter le dernier filtre	
-Ctrl+Alt+F	
-Répéter la dernière suppression	
-Édition	
-Harmoniser le calque avec le fond	
-Calque	
-Harmoniser à moitié (doux)	
-Retirer le filigrane de la sélection (sans IA)	
-Entoure le filigrane puis lance	
-Retirer le filigrane automatiquement (IA)	
-Vision locale, sinon OCR	
-Filigrane : sensibilité normale	
-Filigranes nets	
-Filigrane : sensibilité haute	
-Filigranes très transparents	
-Supprimer l'arrière-plan (masque de calque)	
-Action rapide	
-Étendre l'image de 10 % (fond reconstruit)	
-Étendre l'image de 25 % (fond reconstruit)	
-Étendre au format carré 1:1	
-Étendre au format paysage 16:9	
-Étendre au format story 9:16	
-Étendre au format 4:5 (Instagram)	
-Inverser la sélection	
-Sélection	
-Désélectionner	
-Ctrl+D	
-Barre de tâches contextuelle (afficher / masquer)	
-Recadrer aux pixels visibles	
-Image · retire les marges transparentes	
-Dupliquer le calque actif	
-Calque · Ctrl+J	
-Fusionner les calques visibles	
-Calques · conserve les calques masqués	
-Aplatir toute l'image	
-Calques · résultat unique	
-Exporter	
-Taille de la zone de travail	
-Ouvrir les fichiers récents	
-Aucun fichier récent	
-Transformation	
-Inclinaison…	
-Perspective…	
-Raccourcis clavier…	
-Préférences…	
-Agrandir (super-résolution)	
-Réglages	
-Rotation de l'image	
-Paramétrée…	
-Nouveau calque de remplissage	
-Nouveau calque de réglage	
-Masque de fusion	
-Disposition	
-Verrouillage	
-Pixels transparents	
-Position	
-Tout	
-Effets de calque	
-Plage de couleurs…	
-Modifier	
-Récupérer la sélection	
-Supprimer	
-Filtre	
-Espace de travail	
-Épreuvage CMJN (aperçu impression)	
-Profil d'épreuvage	
-Autre profil (.icc)…	
-Zoom prédéfini	
-Rotation de la vue	
-Règles (Ctrl+R)	
-Grille (Ctrl+')	
-Grille de pixels (à partir de 1000 %)	
-Repères (Ctrl+;)	
-Verrouiller les repères (Ctrl+Alt+;)	
-Magnétisme (Ctrl+Maj+;)	
-Nouveau repère…	
-Repères au centre	
-Repères aux tiers	
-Pas de la grille	
-Subdivisions	
-Couleur	
-Barre de tâches contextuelle	
-Nouveau fichier	
-Ouvrir…	
-Depuis le presse-papiers	
-Bienvenue dans Pixel	
-Retouche photo et compositing par calques	
-Créer un document	
-Récents	
-Masque en cours de modification	
-Texte de la photo	
-Nuancier	
-Pinceaux	
-Propriétés	
-Infos	
-Historique	
-Calques	
-RVB	
-TSL	
-CMJN	
-Web	
-Arrondit à la couleur sûre pour le Web la plus proche	
-Clic : principale · Ctrl+clic : secondaire · clic droit : options	
-Définir comme couleur principale	
-Définir comme couleur secondaire	
-Supprimer la nuance	
-Ajouter la couleur principale	
-Prendre cette couleur	
-Document	
-Peindre sans modifier la transparence	
-Désactivé	
-Inverser	
-Navigateur	
-Luminosité	
-Rouge	
-Vert	
-Bleu	
-Survole l'image pour lire la couleur	
-Instantané	
-Source de la forme d'historique	
-Vider l'historique	
-Clic : modifier le masque	
-Afficher ou masquer (Alt : isoler)	
-Verrouiller le calque	
-Renommer	
-Dupliquer	
-Sélectionner les pixels	
-Couleur de l'étiquette	
-Mode de fusion	
-Aucune langue OCR installée dans Windows	
-Dans la sélection	
-Cadres	
-Détecter le texte	
-Options de lecture	
-Agrandir les petites images (petits caractères)	
-Seulement dans la sélection	
-Afficher les cadres sur l'image	
-Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.	
-Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place	
-Supprime le texte des lignes cochées	
-Mosaïque sur les lignes cochées (plaques, adresses, noms…)	
-Sélectionner	
-Crée une sélection autour des lignes cochées	
-Tout cocher	
-Rien	
-Copier le texte	
-Enregistrer .txt…	
-Oublier	
-Rechercher et remplacer	
-Rechercher	
-Remplacer par	
-Respecter la casse	
-Rendu du nouveau texte	
-G	
-Gras	
-I	
-Italique	
-Couleur d'origine	
-Taille	
-Tenir dans la largeur d'origine	
-Un calque par ligne (déplaçable)	
-Effacement	
-Marge	
-Mosaïque	
-Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	
-Annuler	
-Relative (ajoute à la taille actuelle)	
-Pixels	
-Pourcentage	
-Conserver les proportions	
-Lier	
-Pixels nets (plus proche voisin)	
-Symétrie H	
-Symétrie V	
-Réinitialiser	
-Intérieur	
-Centre	
-Extérieur	
-L'effet est créé sur un calque séparé, modifiable et masquable.	
-La sélection obtenue est progressive : les pixels proches sont pris en partie.	
-PNG	
-JPEG	
-WebP	
-BMP	
-TIFF	
-GIF	
-ICO	
-Rapide	
-Normale	
-Maximale	
-La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.	
-Horizontal	
-Vertical	
-Note pour plus tard (non exportée)	
-Grille de pixels aux forts zooms	
-Magnétisme	
-Nouveau document	
-Préréglages	
-Détails	
-Paysage	
-Portrait	
-Créer	
-Supprimer le préréglage	
-Aperçu	
-Nom du préréglage	
-Ton texte	
-S	
-Gauche	
-Droite	
-Couleur principale · nouveau calque de texte	
-Couleurs principale et secondaire Clic : inverser (X) · D : noir et blanc	
-Nouvelle	
-Ajouter	
-Soustraire	
-Intersection	
-Dureté	
-Lissage	
-Symétrie	
-Répète chaque trait en miroir vertical	
-Miroir H	
-Répète chaque trait en miroir horizontal	
-Humidité	
-Effacer vers l'historique	
-Restaure l'état de l'instantané au lieu de rendre transparent	
-Tolérance	
-Échantillonnage continu	
-Mémorise le calque actif comme source	
-Désaturer	
-Saturer	
-Tons foncés	
-Tons moyens	
-Tons clairs	
-Peinture au doigt	
-Commence chaque trait avec la couleur principale	
-Aligné	
-Tous les calques	
-Contiguë	
-Contour progressif	
-Largeur	
-Valider	
-Fond	
-Contour	
-Contour avec la couleur secondaire quand le fond est actif	
-Épaisseur	
-Arrondi	
-Côtés	
-Étoile	
-Retrait	
-Flèche au début	
-Flèche à la fin	
-Nouveau calque	
-Souligné	
-Linéaire	
-Radial	
-Angulaire	
-Réfléchi	
-Losange	
-Opacité	
-Tramage	
-Contigu	
-Sélection automatique	
-Le clic choisit le calque visible sous le pointeur	
-Cadre de sélection	
-Zoom avant	
-Zoom arrière	
-Réinitialiser la vue	
-Ajuster à l'écran	
-Effacer	
-Redresser le calque	
-Tout effacer	
-Diffusion	
-Taille de la pupille	
-Assombrir	
-Remettre à zéro	
+# French text<TAB>English text. One line per text; an empty English column keeps the French.
+Avant	Before
+Après	After
+Ouvrir une image…	Open an image…
+Ctrl+O	Ctrl+O
+Exporter…	Export…
+Ctrl+E	Ctrl+E
+Comparaison rapide avant / après	Quick before / after comparison
+Affichage	View
+Créer un timelapse GIF	Create a timelapse GIF
+Fichier	File
+Agrandir ×2 (super-résolution)	Upscale ×2 (super resolution)
+Image	Image
+Agrandir ×4 (super-résolution)	Upscale ×4 (super resolution)
+Appliquer des LUT .cube	Apply .cube LUTs
+Répéter le dernier filtre	Repeat last filter
+Ctrl+Alt+F	Ctrl+Alt+F
+Répéter la dernière suppression	Repeat last removal
+Édition	Edit
+Harmoniser le calque avec le fond	Harmonize layer with background
+Calque	Layer
+Harmoniser à moitié (doux)	Harmonize halfway (soft)
+Retirer le filigrane de la sélection (sans IA)	Remove watermark from selection (no AI)
+Entoure le filigrane puis lance	Select around the watermark, then run
+Retirer le filigrane automatiquement (IA)	Remove watermark automatically (AI)
+Vision locale, sinon OCR	Local vision, otherwise OCR
+Filigrane : sensibilité normale	Watermark: normal sensitivity
+Filigranes nets	Sharp watermarks
+Filigrane : sensibilité haute	Watermark: high sensitivity
+Filigranes très transparents	Very transparent watermarks
+Supprimer l'arrière-plan (masque de calque)	Remove background (layer mask)
+Action rapide	Quick action
+Étendre l'image de 10 % (fond reconstruit)	Extend image by 10% (background rebuilt)
+Étendre l'image de 25 % (fond reconstruit)	Extend image by 25% (background rebuilt)
+Étendre au format carré 1:1	Extend to square 1:1
+Étendre au format paysage 16:9	Extend to landscape 16:9
+Étendre au format story 9:16	Extend to story 9:16
+Étendre au format 4:5 (Instagram)	Extend to 4:5 (Instagram)
+Inverser la sélection	Inverse selection
+Sélection	Select
+Désélectionner	Deselect
+Ctrl+D	Ctrl+D
+Barre de tâches contextuelle (afficher / masquer)	Contextual task bar (show / hide)
+Recadrer aux pixels visibles	Trim to visible pixels
+Image · retire les marges transparentes	Image · removes transparent margins
+Dupliquer le calque actif	Duplicate active layer
+Calque · Ctrl+J	Layer · Ctrl+J
+Fusionner les calques visibles	Merge visible layers
+Calques · conserve les calques masqués	Layers · keeps hidden layers
+Aplatir toute l'image	Flatten image
+Calques · résultat unique	Layers · single result
+Exporter	Export
+Taille de la zone de travail	Canvas size
+Ouvrir les fichiers récents	Open recent
+Aucun fichier récent	No recent files
+Transformation	Transform
+Inclinaison…	Skew…
+Perspective…	Perspective…
+Raccourcis clavier…	Keyboard shortcuts…
+Préférences…	Preferences…
+Agrandir (super-résolution)	Upscale (super resolution)
+Réglages	Adjustments
+Rotation de l'image	Image rotation
+Paramétrée…	Arbitrary…
+Nouveau calque de remplissage	New fill layer
+Nouveau calque de réglage	New adjustment layer
+Masque de fusion	Layer mask
+Disposition	Arrange
+Verrouillage	Lock
+Pixels transparents	Transparent pixels
+Position	Position
+Tout	All
+Effets de calque	Layer effects
+Plage de couleurs…	Color range…
+Modifier	Modify
+Récupérer la sélection	Load selection
+Supprimer	Delete
+Filtre	Filter
+Espace de travail	Workspace
+Épreuvage CMJN (aperçu impression)	CMYK proof (print preview)
+Profil d'épreuvage	Proof profile
+Autre profil (.icc)…	Other profile (.icc)…
+Zoom prédéfini	Zoom presets
+Rotation de la vue	Rotate view
+Règles (Ctrl+R)	Rulers (Ctrl+R)
+Grille (Ctrl+')	Grid (Ctrl+')
+Grille de pixels (à partir de 1000 %)	Pixel grid (from 1000%)
+Repères (Ctrl+;)	Guides (Ctrl+;)
+Verrouiller les repères (Ctrl+Alt+;)	Lock guides (Ctrl+Alt+;)
+Magnétisme (Ctrl+Maj+;)	Snap (Ctrl+Shift+;)
+Nouveau repère…	New guide…
+Repères au centre	Guides at center
+Repères aux tiers	Guides at thirds
+Pas de la grille	Grid spacing
+Subdivisions	Subdivisions
+Couleur	Color
+Barre de tâches contextuelle	Contextual task bar
+Nouveau fichier	New file
+Ouvrir…	Open…
+Depuis le presse-papiers	From clipboard
+Bienvenue dans Pixel	Welcome to Pixel
+Retouche photo et compositing par calques	Photo editing and layer compositing
+Créer un document	Create a document
+Récents	Recent
+Masque en cours de modification	Editing mask
+Texte de la photo	Photo text
+Nuancier	Swatches
+Pinceaux	Brushes
+Propriétés	Properties
+Infos	Info
+Historique	History
+Calques	Layers
+RVB	RGB
+TSL	HSL
+CMJN	CMYK
+Web	Web
+Arrondit à la couleur sûre pour le Web la plus proche	Rounds to the nearest web-safe color
+Clic : principale · Ctrl+clic : secondaire · clic droit : options	Click: foreground · Ctrl+click: background · right-click: options
+Définir comme couleur principale	Set as foreground color
+Définir comme couleur secondaire	Set as background color
+Supprimer la nuance	Delete swatch
+Ajouter la couleur principale	Add foreground color
+Prendre cette couleur	Pick this color
+Document	Document
+Peindre sans modifier la transparence	Paint without changing transparency
+Désactivé	Disabled
+Inverser	Invert
+Navigateur	Navigator
+Luminosité	Brightness
+Rouge	Red
+Vert	Green
+Bleu	Blue
+Survole l'image pour lire la couleur	Hover over the image to read the color
+Instantané	Snapshot
+Source de la forme d'historique	History brush source
+Vider l'historique	Clear history
+Clic : modifier le masque	Click: edit the mask
+Afficher ou masquer (Alt : isoler)	Show or hide (Alt: solo)
+Verrouiller le calque	Lock layer
+Renommer	Rename
+Dupliquer	Duplicate
+Sélectionner les pixels	Select pixels
+Couleur de l'étiquette	Label color
+Mode de fusion	Blend mode
+Aucune langue OCR installée dans Windows	No OCR language installed in Windows
+Dans la sélection	In selection
+Cadres	Frames
+Détecter le texte	Detect text
+Options de lecture	Reading options
+Agrandir les petites images (petits caractères)	Upscale small images (small print)
+Seulement dans la sélection	Only in selection
+Afficher les cadres sur l'image	Show frames on the image
+Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.	Read the text in a photo (sign, poster, document, screenshot), then edit, erase or blur it while keeping its color and size.
+Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place	Erases the original text of edited lines and writes the new text in the same place
+Supprime le texte des lignes cochées	Removes the text of checked lines
+Mosaïque sur les lignes cochées (plaques, adresses, noms…)	Mosaic on checked lines (plates, addresses, names…)
+Sélectionner	Select
+Crée une sélection autour des lignes cochées	Creates a selection around checked lines
+Tout cocher	Check all
+Rien	None
+Copier le texte	Copy text
+Enregistrer .txt…	Save .txt…
+Oublier	Forget
+Rechercher et remplacer	Find and replace
+Rechercher	Find
+Remplacer par	Replace with
+Respecter la casse	Match case
+Rendu du nouveau texte	New text rendering
+G	B
+Gras	Bold
+I	I
+Italique	Italic
+Couleur d'origine	Original color
+Taille	Size
+Tenir dans la largeur d'origine	Fit the original width
+Un calque par ligne (déplaçable)	One layer per line (movable)
+Effacement	Erasing
+Marge	Margin
+Mosaïque	Mosaic
+Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Rebuild: recreates the background (photos). Background color: quick flat fill (documents, screenshots). Mosaic 0 = automatic size.
+Annuler	Cancel
+Relative (ajoute à la taille actuelle)	Relative (adds to current size)
+Pixels	Pixels
+Pourcentage	Percent
+Conserver les proportions	Constrain proportions
+Lier	Link
+Pixels nets (plus proche voisin)	Hard pixels (nearest neighbor)
+Symétrie H	Flip H
+Symétrie V	Flip V
+Réinitialiser	Reset
+Intérieur	Inside
+Centre	Center
+Extérieur	Outside
+L'effet est créé sur un calque séparé, modifiable et masquable.	The effect is created on a separate layer you can edit and mask.
+La sélection obtenue est progressive : les pixels proches sont pris en partie.	The resulting selection is soft: nearby pixels are partly included.
+PNG	PNG
+JPEG	JPEG
+WebP	WebP
+BMP	BMP
+TIFF	TIFF
+GIF	GIF
+ICO	ICO
+Rapide	Fast
+Normale	Normal
+Maximale	Maximum
+La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.	The canvas grows to fit the rotated image; the background uses the background color.
+Horizontal	Horizontal
+Vertical	Vertical
+Note pour plus tard (non exportée)	Note for later (not exported)
+Grille de pixels aux forts zooms	Pixel grid at high zoom
+Magnétisme	Snap
+Nouveau document	New document
+Préréglages	Presets
+Détails	Details
+Paysage	Landscape
+Portrait	Portrait
+Créer	Create
+Supprimer le préréglage	Delete preset
+Aperçu	Preview
+Nom du préréglage	Preset name
+Ton texte	Your text
+S	U
+Gauche	Left
+Droite	Right
+Couleur principale · nouveau calque de texte	Foreground color · new text layer
+Couleurs principale et secondaire Clic : inverser (X) · D : noir et blanc	Foreground and background colors Click: swap (X) · D: black and white
+Nouvelle	New
+Ajouter	Add
+Soustraire	Subtract
+Intersection	Intersect
+Dureté	Hardness
+Lissage	Smoothing
+Symétrie	Symmetry
+Répète chaque trait en miroir vertical	Mirrors every stroke vertically
+Miroir H	Mirror H
+Répète chaque trait en miroir horizontal	Mirrors every stroke horizontally
+Humidité	Wetness
+Effacer vers l'historique	Erase to history
+Restaure l'état de l'instantané au lieu de rendre transparent	Restores the snapshot instead of making pixels transparent
+Tolérance	Tolerance
+Échantillonnage continu	Sample continuously
+Mémorise le calque actif comme source	Uses the active layer as the source
+Désaturer	Desaturate
+Saturer	Saturate
+Tons foncés	Shadows
+Tons moyens	Midtones
+Tons clairs	Highlights
+Peinture au doigt	Finger painting
+Commence chaque trait avec la couleur principale	Starts each stroke with the foreground color
+Aligné	Aligned
+Tous les calques	All layers
+Contiguë	Contiguous
+Contour progressif	Feather
+Largeur	Width
+Valider	Commit
+Fond	Fill
+Contour	Stroke
+Contour avec la couleur secondaire quand le fond est actif	Stroke with the background color when fill is on
+Épaisseur	Thickness
+Arrondi	Radius
+Côtés	Sides
+Étoile	Star
+Retrait	Indent
+Flèche au début	Arrowhead at start
+Flèche à la fin	Arrowhead at end
+Nouveau calque	New layer
+Souligné	Underline
+Linéaire	Linear
+Radial	Radial
+Angulaire	Angle
+Réfléchi	Reflected
+Losange	Diamond
+Opacité	Opacity
+Tramage	Dither
+Contigu	Contiguous
+Sélection automatique	Auto-select
+Le clic choisit le calque visible sous le pointeur	Clicking picks the visible layer under the pointer
+Cadre de sélection	Show transform controls
+Zoom avant	Zoom in
+Zoom arrière	Zoom out
+Réinitialiser la vue	Reset view
+Ajuster à l'écran	Fit on screen
+Effacer	Clear
+Redresser le calque	Straighten layer
+Tout effacer	Clear all
+Diffusion	Spread
+Taille de la pupille	Pupil size
+Assombrir	Darken amount
+Remettre à zéro	Reset
+Nouveau…	New…
+Nouveau depuis le presse-papiers	New from clipboard
+Importer comme calque…	Place as layer…
+Enregistrer	Save
+Enregistrer sous…	Save as…
+Exporter en CMJN pour l'impression (TIFF)…	Export CMYK for print (TIFF)…
+Exportation rapide en PNG…	Quick export as PNG…
+Exporter la sélection…	Export selection…
+Exporter les calques en PNG…	Export layers as PNG…
+Créer un timelapse (GIF)…	Create a timelapse (GIF)…
+Exporter chaque étape en PNG…	Export each step as PNG…
+Fermer	Close
+Rétablir	Redo
+Couper	Cut
+Copier	Copy
+Copier avec fusion	Copy merged
+Coller	Paste
+Coller en place	Paste in place
+Remplir…	Fill…
+Contour…	Stroke…
+Remplir selon le contenu	Content-aware fill
+Transformation manuelle…	Free transform…
+Rotation 180°	Rotate 180°
+Rotation 90° horaire	Rotate 90° clockwise
+Rotation 90° antihoraire	Rotate 90° counter clockwise
+Symétrie axe horizontal	Flip horizontal
+Symétrie axe vertical	Flip vertical
+Appliquer des LUT .cube (jusqu'à 3)…	Apply .cube LUTs (up to 3)…
+Mappage principale → secondaire	Gradient map foreground → background
+Taille de l'image…	Image size…
+Taille de la zone de travail…	Canvas size…
+Recadrer	Crop
+Rogner les bords transparents	Trim transparent edges
+Tout faire apparaître	Reveal all
+Mode niveaux de gris	Grayscale mode
+Aplatir l'image	Flatten image
+Couleur unie (principale)	Solid color (foreground)
+Dégradé (principale → secondaire)	Gradient (foreground → background)
+Motif damier	Checkerboard pattern
+Bruit (texture)	Noise (texture)
+Dupliquer le calque	Duplicate layer
+Supprimer le calque	Delete layer
+Calque par copie	Layer via copy
+Calque par coupure	Layer via cut
+Tout masquer	Hide all
+Faire apparaître la sélection	Reveal selection
+Intervertir le masque	Invert mask
+Sélection depuis le masque	Selection from mask
+Appliquer le masque	Apply mask
+Supprimer le masque	Delete mask
+Premier plan	Bring to front
+En avant	Bring forward
+En arrière	Send backward
+Arrière-plan	Send to back
+Fusionner avec le dessous	Merge down
+Tout sélectionner	Select all
+Resélectionner	Reselect
+Intervertir	Inverse
+Pixels du calque	Layer pixels
+Étendre	Expand
+Généraliser	Grow
+Mémoriser la sélection…	Save selection…
+Taille réelle (100 %)	Actual size (100%)
+Déplacement	Move
+Rectangle de sélection	Rectangular marquee
+Ellipse de sélection	Elliptical marquee
+Sélection d'une ligne	Single row marquee
+Sélection d'une colonne	Single column marquee
+Lasso	Lasso
+Lasso polygonal	Polygonal lasso
+Lasso magnétique	Magnetic lasso
+Plume de courbure	Curvature pen
+Sélection rapide	Quick selection
+Baguette magique	Magic wand
+Sélection d'objet	Object selection
+Recadrage	Crop
+Recadrage de la perspective	Perspective crop
+Pipette	Eyedropper
+Échantillonnage de couleur	Color sampler
+Règle	Ruler
+Annotation	Note
+Comptage	Count
+Suppression intelligente	Remove tool
+Correcteur	Healing brush
+Pièce	Patch
+Déplacement basé sur le contenu	Content-aware move
+Yeux rouges	Red eye
+Tampon de duplication	Clone stamp
+Forme d'historique	History brush
+Pinceau	Brush
+Crayon	Pencil
+Remplacement de couleur	Color replacement
+Pinceau mélangeur	Mixer brush
+Gomme	Eraser
+Gomme d'arrière-plan	Background eraser
+Gomme magique	Magic eraser
+Dégradé	Gradient
+Pot de peinture	Paint bucket
+Goutte (flou)	Blur
+Netteté	Sharpen
+Doigt	Smudge
+Densité −	Dodge
+Densité +	Burn
+Éponge	Sponge
+Texte horizontal	Horizontal type
+Texte vertical	Vertical type
+Texte de la photo (OCR)	Photo text (OCR)
+Rectangle	Rectangle
+Ellipse	Ellipse
+Polygone	Polygon
+Trait	Line
+Forme personnalisée	Custom shape
+Main	Hand
+Zoom	Zoom

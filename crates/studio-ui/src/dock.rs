@@ -138,7 +138,7 @@ pub fn panel(ui: &mut Ui, id: &str, title: &str, add: impl FnOnce(&mut Ui)) {
         return;
     };
     let (hidden, y) = with_state(&ctx, |st| {
-        st.titles.entry(id.to_string()).or_insert_with(|| title.to_string());
+        st.titles.entry(id.to_string()).or_insert_with(|| crate::i18n::tl(title).to_string());
         if !st.store.current.order.iter().any(|o| o == id) {
             st.store.current.order.push(id.to_string());
         }
@@ -169,7 +169,7 @@ fn draw(ui: &mut Ui, id: &str, title: &str, movable: bool, add: impl FnOnce(&mut
     let c = pos2(head.left() + 11.0, head.center().y);
     let pts = if open { vec![c + vec2(-3.0, -1.5), c + vec2(3.0, -1.5), c + vec2(0.0, 2.5)] } else { vec![c + vec2(-1.5, -3.0), c + vec2(2.5, 0.0), c + vec2(-1.5, 3.0)] };
     ui.painter().add(egui::Shape::convex_polygon(pts, FAINT, Stroke::NONE));
-    ui.painter().text(pos2(head.left() + 20.0, head.center().y), egui::Align2::LEFT_CENTER, title, semibold(11.5), INK);
+    ui.painter().text(pos2(head.left() + 20.0, head.center().y), egui::Align2::LEFT_CENTER, crate::i18n::tl(title), semibold(11.5), INK);
     if movable && resp.hovered() {
         grip(ui, Pos2::new(head.right() - 14.0, head.center().y));
     }

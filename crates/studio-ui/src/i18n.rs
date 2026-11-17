@@ -47,7 +47,7 @@ pub fn lang() -> usize {
 }
 
 /// The text in the interface language: English when a translation exists, French otherwise.
-pub fn tl(fr: &'static str) -> &'static str {
+pub fn tl<'a>(fr: &'a str) -> &'a str {
     if lang() == 0 {
         return fr;
     }

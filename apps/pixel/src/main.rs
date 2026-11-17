@@ -1576,13 +1576,13 @@ impl Pixel {
                 self.send_to(t, &ctx);
             }
             ui.separator();
-            if self.mi(ui, "Nouveau…", "Ctrl+N") {
+            if self.mi(ui, tl("Nouveau…"), "Ctrl+N") {
                 self.new_doc_sheet();
             }
-            if self.mi(ui, "Nouveau depuis le presse-papiers", "") {
+            if self.mi(ui, tl("Nouveau depuis le presse-papiers"), "") {
                 self.doc_from_clipboard();
             }
-            if self.mi(ui, "Ouvrir…", "Ctrl+O") {
+            if self.mi(ui, tl("Ouvrir…"), "Ctrl+O") {
                 self.open_dialog();
             }
             ui.menu_button(tl("Ouvrir les fichiers récents"), |ui| {
@@ -1600,41 +1600,41 @@ impl Pixel {
                 }
             });
             let home = self.home;
-            if self.mie(ui, !home, "Importer comme calque…", "") {
+            if self.mie(ui, !home, tl("Importer comme calque…"), "") {
                 self.import_layer();
             }
             ui.separator();
-            if self.mie(ui, !home, "Enregistrer", "Ctrl+S") {
+            if self.mie(ui, !home, tl("Enregistrer"), "Ctrl+S") {
                 self.save(false);
             }
-            if self.mie(ui, !home, "Enregistrer sous…", "Ctrl+Maj+S") {
+            if self.mie(ui, !home, tl("Enregistrer sous…"), "Ctrl+Maj+S") {
                 self.save(true);
             }
             ui.separator();
-            if self.mie(ui, !home, "Exporter…", "Ctrl+E") {
+            if self.mie(ui, !home, tl("Exporter…"), "Ctrl+E") {
                 self.export_sheet();
             }
-            if self.mie(ui, !home, "Exporter en CMJN pour l'impression (TIFF)…", "") {
+            if self.mie(ui, !home, tl("Exporter en CMJN pour l'impression (TIFF)…"), "") {
                 let ctx = ui.ctx().clone();
                 self.export_cmyk(&ctx);
             }
-            if self.mie(ui, !home, "Exportation rapide en PNG…", "Ctrl+Maj+Alt+S") {
+            if self.mie(ui, !home, tl("Exportation rapide en PNG…"), "Ctrl+Maj+Alt+S") {
                 self.quick_export();
             }
-            if self.mie(ui, !home && self.doc.selection.is_some(), "Exporter la sélection…", "") {
+            if self.mie(ui, !home && self.doc.selection.is_some(), tl("Exporter la sélection…"), "") {
                 self.sheet = Some(Sheet::Export { format: 0, quality: 90, scale: 100.0, bg: 0, level: 1, ico: [true; 7], selection: true });
             }
-            if self.mie(ui, !home, "Exporter les calques en PNG…", "") {
+            if self.mie(ui, !home, tl("Exporter les calques en PNG…"), "") {
                 self.export_layers();
             }
-            if self.mie(ui, !home, "Créer un timelapse (GIF)…", "") {
+            if self.mie(ui, !home, tl("Créer un timelapse (GIF)…"), "") {
                 self.export_timelapse(true);
             }
-            if self.mie(ui, !home, "Exporter chaque étape en PNG…", "") {
+            if self.mie(ui, !home, tl("Exporter chaque étape en PNG…"), "") {
                 self.export_timelapse(false);
             }
             ui.separator();
-            if self.mie(ui, !home, "Fermer", "Ctrl+W") {
+            if self.mie(ui, !home, tl("Fermer"), "Ctrl+W") {
                 self.home = true;
             }
         });
@@ -1642,70 +1642,70 @@ impl Pixel {
 
     fn menu_edit(&mut self, ui: &mut Ui) {
         ui.menu_button(tl("Édition"), |ui| {
-            if self.mie(ui, self.doc.can_undo(), "Annuler", "Ctrl+Z") {
+            if self.mie(ui, self.doc.can_undo(), tl("Annuler"), "Ctrl+Z") {
                 self.doc.undo();
             }
-            if self.mie(ui, self.doc.can_redo(), "Rétablir", "Ctrl+Y") {
+            if self.mie(ui, self.doc.can_redo(), tl("Rétablir"), "Ctrl+Y") {
                 self.doc.redo();
             }
-            if self.mie(ui, self.last_removal.is_some(), "Répéter la dernière suppression", "") {
+            if self.mie(ui, self.last_removal.is_some(), tl("Répéter la dernière suppression"), "") {
                 let ctx = ui.ctx().clone();
                 self.repeat_removal(&ctx);
             }
-            if self.mie(ui, self.last_filter.is_some(), "Répéter le dernier filtre", "Ctrl+Alt+F") {
+            if self.mie(ui, self.last_filter.is_some(), tl("Répéter le dernier filtre"), "Ctrl+Alt+F") {
                 self.repeat_filter();
             }
             ui.separator();
             let has_sel = self.doc.selection.is_some();
-            if self.mie(ui, has_sel, "Couper", "Ctrl+X") {
+            if self.mie(ui, has_sel, tl("Couper"), "Ctrl+X") {
                 self.copy();
                 self.doc.clear_selection();
             }
-            if self.mi(ui, "Copier", "Ctrl+C") {
+            if self.mi(ui, tl("Copier"), "Ctrl+C") {
                 self.copy();
             }
-            if self.mi(ui, "Copier avec fusion", "Ctrl+Maj+C") {
+            if self.mi(ui, tl("Copier avec fusion"), "Ctrl+Maj+C") {
                 let img = self.doc.copy_merged();
                 self.copy_image(img);
             }
-            if self.mi(ui, "Coller", "Ctrl+V") {
+            if self.mi(ui, tl("Coller"), "Ctrl+V") {
                 self.paste(false);
             }
-            if self.mi(ui, "Coller en place", "Ctrl+Maj+V") {
+            if self.mi(ui, tl("Coller en place"), "Ctrl+Maj+V") {
                 self.paste(true);
             }
-            if self.mie(ui, has_sel, "Effacer", "Suppr") {
+            if self.mie(ui, has_sel, tl("Effacer"), "Suppr") {
                 self.doc.clear_selection();
             }
             ui.separator();
-            if self.mi(ui, "Remplir…", "Maj+F5") {
+            if self.mi(ui, tl("Remplir…"), "Maj+F5") {
                 self.sheet = Some(Sheet::Fill { content: 0, opacity: 100.0, blend: 0 });
             }
-            if self.mie(ui, has_sel, "Contour…", "") {
+            if self.mie(ui, has_sel, tl("Contour…"), "") {
                 self.open_sheet_effect(3);
             }
-            if self.mie(ui, has_sel && self.filling.is_none(), "Remplir selon le contenu", "") {
+            if self.mie(ui, has_sel && self.filling.is_none(), tl("Remplir selon le contenu"), "") {
                 let ctx = ui.ctx().clone();
                 self.content_fill_selection(&ctx);
             }
             ui.separator();
-            if self.mi(ui, "Transformation manuelle…", "Ctrl+T") {
+            if self.mi(ui, tl("Transformation manuelle…"), "Ctrl+T") {
                 self.sheet = Some(Sheet::Transform(Xform::identity()));
             }
             ui.menu_button(tl("Transformation"), |ui| {
-                if self.mi(ui, "Rotation 180°", "") {
+                if self.mi(ui, tl("Rotation 180°"), "") {
                     self.doc.transform_layer_full(&Xform { angle: 180.0, nearest: true, ..Xform::identity() });
                 }
-                if self.mi(ui, "Rotation 90° horaire", "") {
+                if self.mi(ui, tl("Rotation 90° horaire"), "") {
                     self.doc.transform_layer_full(&Xform { angle: 90.0, nearest: true, ..Xform::identity() });
                 }
-                if self.mi(ui, "Rotation 90° antihoraire", "") {
+                if self.mi(ui, tl("Rotation 90° antihoraire"), "") {
                     self.doc.transform_layer_full(&Xform { angle: -90.0, nearest: true, ..Xform::identity() });
                 }
-                if self.mi(ui, "Symétrie axe horizontal", "") {
+                if self.mi(ui, tl("Symétrie axe horizontal"), "") {
                     self.doc.flip_layer(true);
                 }
-                if self.mi(ui, "Symétrie axe vertical", "") {
+                if self.mi(ui, tl("Symétrie axe vertical"), "") {
                     self.doc.flip_layer(false);
                 }
                 ui.separator();
@@ -1736,7 +1736,7 @@ impl Pixel {
                     }
                 }
             });
-            if self.mi(ui, "Appliquer des LUT .cube (jusqu'à 3)…", "") {
+            if self.mi(ui, tl("Appliquer des LUT .cube (jusqu'à 3)…"), "") {
                 self.apply_cube_luts();
             }
             ui.menu_button(tl("Réglages"), |ui| {
@@ -1754,7 +1754,7 @@ impl Pixel {
                     }
                 }
                 ui.separator();
-                if self.mi(ui, "Mappage principale → secondaire", "") {
+                if self.mi(ui, tl("Mappage principale → secondaire"), "") {
                     self.doc.gradient_map(self.primary.to_array(), self.secondary.to_array());
                 }
             });
@@ -1765,10 +1765,10 @@ impl Pixel {
                 }
             }
             ui.separator();
-            if self.mi(ui, "Taille de l'image…", "Ctrl+Alt+I") {
+            if self.mi(ui, tl("Taille de l'image…"), "Ctrl+Alt+I") {
                 self.sheet = Some(Sheet::ImageSize { w: self.doc.width(), h: self.doc.height(), keep: true, percent: false, resample: 3, dpi: 72.0 });
             }
-            if self.mi(ui, "Taille de la zone de travail…", "Ctrl+Alt+C") {
+            if self.mi(ui, tl("Taille de la zone de travail…"), "Ctrl+Alt+C") {
                 self.sheet = Some(Sheet::Canvas { w: self.doc.width(), h: self.doc.height(), anchor: 4, relative: false, ext: 0 });
             }
             ui.menu_button(tl("Rotation de l'image"), |ui| {
@@ -1789,18 +1789,18 @@ impl Pixel {
                     self.sheet = Some(Sheet::RotateCanvas { angle: 15.0 });
                 }
             });
-            if self.mie(ui, self.doc.selection.is_some(), "Recadrer", "") {
+            if self.mie(ui, self.doc.selection.is_some(), tl("Recadrer"), "") {
                 self.doc.crop_to_selection();
                 self.fit_pending = true;
             }
-            if self.mi(ui, "Rogner les bords transparents", "") {
+            if self.mi(ui, tl("Rogner les bords transparents"), "") {
                 if self.doc.trim() {
                     self.fit_pending = true;
                 } else {
                     self.error = Some("Aucun bord transparent à rogner".into());
                 }
             }
-            if self.mi(ui, "Tout faire apparaître", "") {
+            if self.mi(ui, tl("Tout faire apparaître"), "") {
                 let (w, h) = (self.doc.width(), self.doc.height());
                 let mut b = Area { x0: 0, y0: 0, x1: w, y1: h };
                 for i in 0..self.doc.layers.len() {
@@ -1811,10 +1811,10 @@ impl Pixel {
                 self.error = Some(if (b.x0, b.y0, b.x1, b.y1) == (0, 0, w, h) { "Tout le contenu est déjà visible".into() } else { "Contenu déjà dans la zone de travail".into() });
             }
             ui.separator();
-            if self.mi(ui, "Mode niveaux de gris", "") {
+            if self.mi(ui, tl("Mode niveaux de gris"), "") {
                 self.doc.transform(|img| Kind::BlackWhite.apply(img, &[]));
             }
-            if self.mi(ui, "Aplatir l'image", "") {
+            if self.mi(ui, tl("Aplatir l'image"), "") {
                 self.doc.flatten_all();
             }
         });
@@ -1822,24 +1822,24 @@ impl Pixel {
 
     fn menu_layer(&mut self, ui: &mut Ui) {
         ui.menu_button(tl("Calque"), |ui| {
-            if self.mi(ui, "Nouveau calque", "Ctrl+Maj+N") {
+            if self.mi(ui, tl("Nouveau calque"), "Ctrl+Maj+N") {
                 self.doc.add_layer(None, None);
             }
             ui.menu_button(tl("Nouveau calque de remplissage"), |ui| {
                 let (w, h) = (self.doc.width(), self.doc.height());
-                if self.mi(ui, "Couleur unie (principale)", "") {
+                if self.mi(ui, tl("Couleur unie (principale)"), "") {
                     self.doc.add_layer(Some("Couleur unie".into()), Some(RgbaImage::from_pixel(w, h, image::Rgba(self.primary.to_array()))));
                 }
-                if self.mi(ui, "Dégradé (principale → secondaire)", "") {
+                if self.mi(ui, tl("Dégradé (principale → secondaire)"), "") {
                     self.doc.add_layer(Some("Dégradé".into()), None);
                     self.doc.gradient_kind((0.0, 0.0), (0.0, h as f32), self.primary.to_array(), self.secondary.to_array(), false);
                 }
-                if self.mi(ui, "Motif damier", "") {
+                if self.mi(ui, tl("Motif damier"), "") {
                     let (a, b) = (self.primary.to_array(), self.secondary.to_array());
                     let cell = (w.max(h) / 16).max(4);
                     self.doc.add_layer(Some("Motif".into()), Some(RgbaImage::from_fn(w, h, |x, y| image::Rgba(if (x / cell + y / cell) % 2 == 0 { a } else { b }))));
                 }
-                if self.mi(ui, "Bruit (texture)", "") {
+                if self.mi(ui, tl("Bruit (texture)"), "") {
                     self.doc.add_layer(Some("Bruit".into()), Some(RgbaImage::from_fn(w, h, |x, y| {
                         let v = (filters::hash(x, y, 5) * 255.0) as u8;
                         image::Rgba([v, v, v, 255])
@@ -1857,30 +1857,30 @@ impl Pixel {
                     }
                 }
             });
-            if self.mi(ui, "Dupliquer le calque", "Ctrl+J") {
+            if self.mi(ui, tl("Dupliquer le calque"), "Ctrl+J") {
                 self.doc.duplicate_layer();
             }
-            if self.mi(ui, "Supprimer le calque", "") {
+            if self.mi(ui, tl("Supprimer le calque"), "") {
                 self.doc.delete_layer();
             }
             ui.separator();
             let has_sel = self.doc.selection.is_some();
-            if self.mie(ui, has_sel, "Calque par copie", "Ctrl+J") {
+            if self.mie(ui, has_sel, tl("Calque par copie"), "Ctrl+J") {
                 self.doc.layer_from_selection(false);
             }
-            if self.mie(ui, has_sel, "Calque par coupure", "Ctrl+Maj+J") {
+            if self.mie(ui, has_sel, tl("Calque par coupure"), "Ctrl+Maj+J") {
                 self.doc.layer_from_selection(true);
             }
             ui.separator();
             ui.menu_button(tl("Masque de fusion"), |ui| {
                 let has = self.doc.layers[self.doc.active].mask.is_some();
-                if self.mie(ui, !has, "Tout faire apparaître", "") {
+                if self.mie(ui, !has, tl("Tout faire apparaître"), "") {
                     self.doc.add_mask(0);
                 }
-                if self.mie(ui, !has, "Tout masquer", "") {
+                if self.mie(ui, !has, tl("Tout masquer"), "") {
                     self.doc.add_mask(1);
                 }
-                if self.mie(ui, !has && has_sel, "Faire apparaître la sélection", "") {
+                if self.mie(ui, !has && has_sel, tl("Faire apparaître la sélection"), "") {
                     self.doc.add_mask(2);
                 }
                 ui.separator();
@@ -1893,16 +1893,16 @@ impl Pixel {
                 if self.mie(ui, has, if self.doc.edit_mask { "Modifier le calque" } else { "Modifier le masque" }, "\\") {
                     self.doc.edit_mask = !self.doc.edit_mask;
                 }
-                if self.mie(ui, has, "Intervertir le masque", "") {
+                if self.mie(ui, has, tl("Intervertir le masque"), "") {
                     self.doc.invert_mask();
                 }
-                if self.mie(ui, has, "Sélection depuis le masque", "") {
+                if self.mie(ui, has, tl("Sélection depuis le masque"), "") {
                     self.doc.select_from_mask();
                 }
-                if self.mie(ui, has, "Appliquer le masque", "") {
+                if self.mie(ui, has, tl("Appliquer le masque"), "") {
                     self.doc.apply_mask();
                 }
-                if self.mie(ui, has, "Supprimer le masque", "") {
+                if self.mie(ui, has, tl("Supprimer le masque"), "") {
                     self.doc.delete_mask();
                 }
             });
@@ -1913,16 +1913,16 @@ impl Pixel {
                 self.doc.touch_all();
             }
             ui.menu_button(tl("Disposition"), |ui| {
-                if self.mi(ui, "Premier plan", "Ctrl+Maj+]") {
+                if self.mi(ui, tl("Premier plan"), "Ctrl+Maj+]") {
                     self.doc.move_layer_to(true);
                 }
-                if self.mi(ui, "En avant", "Ctrl+]") {
+                if self.mi(ui, tl("En avant"), "Ctrl+]") {
                     self.doc.move_layer(true);
                 }
-                if self.mi(ui, "En arrière", "Ctrl+[") {
+                if self.mi(ui, tl("En arrière"), "Ctrl+[") {
                     self.doc.move_layer(false);
                 }
-                if self.mi(ui, "Arrière-plan", "Ctrl+Maj+[") {
+                if self.mi(ui, tl("Arrière-plan"), "Ctrl+Maj+[") {
                     self.doc.move_layer_to(false);
                 }
             });
@@ -1941,13 +1941,13 @@ impl Pixel {
                 }
             });
             ui.separator();
-            if self.mi(ui, "Fusionner avec le dessous", "Ctrl+Alt+E") {
+            if self.mi(ui, tl("Fusionner avec le dessous"), "Ctrl+Alt+E") {
                 self.doc.merge_down();
             }
-            if self.mi(ui, "Fusionner les calques visibles", "Ctrl+Maj+E") {
+            if self.mi(ui, tl("Fusionner les calques visibles"), "Ctrl+Maj+E") {
                 self.doc.merge_visible();
             }
-            if self.mi(ui, "Aplatir l'image", "") {
+            if self.mi(ui, tl("Aplatir l'image"), "") {
                 self.doc.flatten_all();
             }
         });
@@ -1955,23 +1955,23 @@ impl Pixel {
 
     fn menu_select(&mut self, ui: &mut Ui) {
         ui.menu_button(tl("Sélection"), |ui| {
-            if self.mi(ui, "Tout sélectionner", "Ctrl+A") {
+            if self.mi(ui, tl("Tout sélectionner"), "Ctrl+A") {
                 self.doc.set_selection(Some(self.doc.full()), None);
             }
-            if self.mi(ui, "Désélectionner", "Ctrl+D") {
+            if self.mi(ui, tl("Désélectionner"), "Ctrl+D") {
                 self.deselect();
             }
-            if self.mie(ui, self.last_sel.is_some(), "Resélectionner", "Ctrl+Maj+D") {
+            if self.mie(ui, self.last_sel.is_some(), tl("Resélectionner"), "Ctrl+Maj+D") {
                 if let Some(m) = self.last_sel.clone() {
                     self.doc.select_mask(m);
                 }
             }
             let has = self.doc.selection.is_some();
-            if self.mie(ui, has, "Intervertir", "Ctrl+Maj+I") {
+            if self.mie(ui, has, tl("Intervertir"), "Ctrl+Maj+I") {
                 self.doc.invert_selection();
             }
             ui.separator();
-            if self.mi(ui, "Pixels du calque", "") {
+            if self.mi(ui, tl("Pixels du calque"), "") {
                 self.doc.select_layer_alpha();
             }
             if ui.button(tl("Plage de couleurs…")).clicked() {
@@ -1987,15 +1987,15 @@ impl Pixel {
                         }
                     }
                 });
-                if self.mi(ui, "Étendre", "") {
+                if self.mi(ui, tl("Étendre"), "") {
                     self.doc.grow_similar(self.tolerance, true);
                 }
-                if self.mi(ui, "Généraliser", "") {
+                if self.mi(ui, tl("Généraliser"), "") {
                     self.doc.grow_similar(self.tolerance, false);
                 }
             });
             ui.separator();
-            if self.mie(ui, has, "Mémoriser la sélection…", "") {
+            if self.mie(ui, has, tl("Mémoriser la sélection…"), "") {
                 self.sheet = Some(Sheet::SaveSelection { name: format!("Sélection {}", self.saved_sel.len() + 1) });
             }
             ui.add_enabled_ui(!self.saved_sel.is_empty(), |ui| {
@@ -2080,16 +2080,16 @@ impl Pixel {
                 }
             });
             ui.separator();
-            if self.mi(ui, "Zoom avant", "Ctrl++") {
+            if self.mi(ui, tl("Zoom avant"), "Ctrl++") {
                 self.zoom = (self.zoom * 1.25).min(64.0);
             }
-            if self.mi(ui, "Zoom arrière", "Ctrl+−") {
+            if self.mi(ui, tl("Zoom arrière"), "Ctrl+−") {
                 self.zoom = (self.zoom / 1.25).max(0.02);
             }
-            if self.mi(ui, "Ajuster à l'écran", "Ctrl+0") {
+            if self.mi(ui, tl("Ajuster à l'écran"), "Ctrl+0") {
                 self.fit_pending = true;
             }
-            if self.mi(ui, "Taille réelle (100 %)", "Ctrl+1") {
+            if self.mi(ui, tl("Taille réelle (100 %)"), "Ctrl+1") {
                 self.zoom = 1.0;
                 self.offset = Vec2::ZERO;
             }

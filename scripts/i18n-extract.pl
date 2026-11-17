@@ -26,7 +26,8 @@ for my $f (@ARGV) {
     push @order, $fr; $en{$fr} = ''; $new++;
   }
 }
-@head = ("# Texte français<TAB>texte anglais. Une ligne par texte ; colonne anglaise vide = reste en français.") unless @head;
+for my $f (@ARGV) { open my $in, "<:utf8", $f or die; local $/; my $s = <$in>; close $in; while ($s =~ /\(Tool::\w+, "([^"\\]+)"/g) { my $fr = $1; next if $seen{$fr}++; push @order, $fr; $en{$fr} = ""; $new++ } }
+@head = ("# French text<TAB>English text. One line per text; an empty English column keeps the French.") unless @head;
 open my $out, '>:utf8', $dict or die; print $out join("\n", @head), "\n";
 print $out "$_\t$en{$_}\n" for @order;
 close $out;

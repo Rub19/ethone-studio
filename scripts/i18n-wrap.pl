@@ -18,6 +18,8 @@ for my $f (@ARGV) {
   $n += $s =~ s/dock_panel\(ui, ("[^"]*"), $L/dock_panel(ui, $1, tl("$2")/g;
   $n += $s =~ s/\b(pill|cta)\(ui, $L/$1(ui, tl("$2")/g;
   $n += $s =~ s/nav_row\(ui, ([^,]+), ([^,]+), $L/nav_row(ui, $1, $2, tl("$3")/g;
+  $n += $s =~ s/self\.mi\(ui, $L/self.mi(ui, tl("$1")/g;
+  $n += $s =~ s/self\.mie\(ui, ([^,]+), $L/self.mie(ui, $1, tl("$2")/g;
   $n += $s =~ s/pref_title\(ui, $L\)/pref_title(ui, tl("$1"))/g;
   $n += $s =~ s/Cmd::new\($L, $L/Cmd::new(tl("$1"), tl("$2")/g;
   $n += $s =~ s{(segmented\([^;\n]*?&\[)([^\]\n]*)(\])}{ my ($a, $b, $c) = ($1, $2, $3); my $k = ($b =~ s/(?<!tl\()$L/tl("$1")/g) || 0; $a . $b . $c }ge;

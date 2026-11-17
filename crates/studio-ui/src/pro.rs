@@ -248,7 +248,7 @@ pub fn toolbar_sep(ui: &mut Ui) {
 /// iOS-style segmented control; returns true when the selection changed.
 pub fn segmented(ui: &mut Ui, value: &mut usize, items: &[&str]) -> bool {
     let font = FontId::proportional(11.5);
-    let widths: Vec<f32> = items.iter().map(|t| ui.painter().layout_no_wrap(t.to_string(), font.clone(), INK).size().x + 18.0).collect();
+    let widths: Vec<f32> = items.iter().map(|t| ui.painter().layout_no_wrap(crate::i18n::tl(t).to_string(), font.clone(), INK).size().x + 18.0).collect();
     let total: f32 = widths.iter().sum::<f32>() + 4.0;
     let (outer, _) = ui.allocate_exact_size(vec2(total, 22.0), Sense::hover());
     ui.painter().rect_filled(outer, CornerRadius::same(4), WELL);
@@ -263,7 +263,7 @@ pub fn segmented(ui: &mut Ui, value: &mut usize, items: &[&str]) -> bool {
         } else if resp.hovered() {
             ui.painter().rect_filled(r, CornerRadius::same(3), Color32::from_white_alpha(6));
         }
-        ui.painter().text(r.center(), Align2::CENTER_CENTER, *label, if on { semibold(11.5) } else { font.clone() }, if on { INK_STRONG } else { MUTED });
+        ui.painter().text(r.center(), Align2::CENTER_CENTER, crate::i18n::tl(label), if on { semibold(11.5) } else { font.clone() }, if on { INK_STRONG } else { MUTED });
         if resp.clicked() && !on {
             *value = k;
             changed = true;
@@ -437,9 +437,9 @@ pub fn tool_group<T: Copy + PartialEq>(ui: &mut Ui, size: f32, current: &mut T, 
     let active = tools.iter().any(|t| t.0 == *current);
     let (rect, resp) = ui.allocate_exact_size(Vec2::splat(size), Sense::click_and_drag());
     if active {
-        ui.painter().rect_filled(rect, CornerRadius::same(8), BLUE.gamma_multiply(0.28));
+        ui.painter().rect_filled(rect, CornerRadius::same(3), Color32::from_rgb(0x4a, 0x4a, 0x4a));
     } else if resp.hovered() {
-        ui.painter().rect_filled(rect, CornerRadius::same(8), Color32::from_white_alpha(14));
+        ui.painter().rect_filled(rect, CornerRadius::same(3), Color32::from_white_alpha(12));
     }
     let ink = if active { INK_STRONG } else { INK };
     paint(ui.painter(), rect.shrink(size * 0.27), ink, tools[shown].0);
@@ -458,9 +458,11 @@ pub fn tool_group<T: Copy + PartialEq>(ui: &mut Ui, size: f32, current: &mut T, 
         *current = tools[shown].0;
         changed = true;
     }
-    let (name, key) = (tools[shown].1, tools[shown].2);
+    let (name, key) = (crate::i18n::tl(tools[shown].1), tools[shown].2);
     let tip = if key.is_empty() { name.to_string() } else { format!("{name} ({key})") };
-    resp.on_hover_text(if multi { format!("{tip}\nClic droit ou clic maintenu : {} autres outils", tools.len() - 1) } else { tip });
+    let n = tools.len() - 1;
+    let more = if crate::i18n::lang() == 0 { format!("Clic droit ou clic maintenu : {n} autres outils") } else { format!("Right-click or press and hold: {n} more tools") };
+    resp.on_hover_text(if multi { format!("{tip}\n{more}") } else { tip });
     if open {
         let area = egui::Area::new(id.with("flyout")).order(egui::Order::Foreground).fixed_pos(rect.right_top() + vec2(6.0, 0.0)).show(ui.ctx(), |ui| {
             Frame::new().fill(CHROME).stroke(Stroke::new(1.0, LINE)).corner_radius(CornerRadius::same(10)).shadow(Shadow { offset: [0, 8], blur: 24, spread: 0, color: Color32::from_black_alpha(150) }).inner_margin(Margin::same(6)).show(ui, |ui| {
@@ -477,7 +479,7 @@ pub fn tool_group<T: Copy + PartialEq>(ui: &mut Ui, size: f32, current: &mut T, 
                         ui.painter().circle_filled(r.left_center() + vec2(7.0, 0.0), 2.5, INK_STRONG);
                     }
                     paint(ui.painter(), Rect::from_center_size(r.left_center() + vec2(24.0, 0.0), Vec2::splat(15.0)), if on { INK_STRONG } else { INK }, *t);
-                    ui.painter().text(r.left_center() + vec2(42.0, 0.0), Align2::LEFT_CENTER, *n, FontId::proportional(13.0), if on { INK_STRONG } else { INK });
+                    ui.painter().text(r.left_center() + vec2(42.0, 0.0), Align2::LEFT_CENTER, crate::i18n::tl(n), FontId::proportional(12.0), if on { INK_STRONG } else { INK });
                     if !s.is_empty() {
                         ui.painter().text(r.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, *s, FontId::proportional(11.5), FAINT);
                     }
