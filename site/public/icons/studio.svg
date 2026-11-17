@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs></defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="#121212"/>
-<rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.16"/>
-<rect x="14" y="14" width="10" height="36" rx="3" fill="#F3F0EA"/>
-<rect x="27" y="14" width="23" height="10" rx="3" fill="#FF4F1F"/>
-<rect x="27" y="27" width="16" height="10" rx="3" fill="#FF4F1F"/>
-<rect x="27" y="40" width="23" height="10" rx="3" fill="#FF4F1F"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="60" height="60" x="2" y="2" fill="#121212" rx="14"/><rect width="59" height="59" x="2.5" y="2.5" fill="none" stroke="#FFF" stroke-opacity=".16" rx="13.5"/><rect width="10" height="36" x="14" y="14" fill="#F3F0EA" rx="3"/><rect width="23" height="10" x="27" y="14" fill="#FF4F1F" rx="3"/><rect width="16" height="10" x="27" y="27" fill="#FF4F1F" rx="3"/><rect width="23" height="10" x="27" y="40" fill="#FF4F1F" rx="3"/></svg>

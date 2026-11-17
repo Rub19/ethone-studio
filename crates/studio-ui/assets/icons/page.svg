@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<defs></defs>
-<rect x="2" y="2" width="60" height="60" rx="14" fill="#FF7A3D"/>
-
-<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="black"/><g><path d="M19 15 Q19 12 22 12 H37 L46 21 V49 Q46 52 43 52 H22 Q19 52 19 49 Z" fill="white"/></g><g><path d="M37 12 V19 Q37 21 39 21 H46" fill="none" stroke="black" stroke-width="2.4"/>
-<rect x="24" y="25" width="17" height="9" rx="2" fill="black"/>
-<path d="M24 40 H41 M24 46 H35" stroke="black" stroke-width="3" stroke-linecap="round"/></g></mask>
-<rect width="64" height="64" fill="#121212" mask="url(#m)"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="60" height="60" x="2" y="2" fill="#FF7A3D" rx="14"/><mask id="m" width="64" height="64" x="0" y="0" maskUnits="userSpaceOnUse"><rect width="64" height="64" fill="#000"/><g><path fill="#fff" d="M19 15 Q19 12 22 12 H37 L46 21 V49 Q46 52 43 52 H22 Q19 52 19 49 Z"/></g><g><path fill="none" stroke="#000" stroke-width="2.4" d="M37 12 V19 Q37 21 39 21 H46"/><rect width="17" height="9" x="24" y="25" fill="#000" rx="2"/><path stroke="#000" stroke-linecap="round" stroke-width="3" d="M24 40 H41 M24 46 H35"/></g></mask><rect width="64" height="64" fill="#121212" mask="url(#m)"/></svg>
