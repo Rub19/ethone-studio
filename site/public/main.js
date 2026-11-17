@@ -5,7 +5,7 @@
 const RELEASE = 'https://github.com/Rub19/ethone-studio/releases/latest/download/';
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const U = (id, w = 1400) => `https://images.unsplash.com/${id}?w=${w}&q=72&auto=format&fit=crop`;
+const U = (id) => `/photos/${id.replace(/^photo-/, "")}.jpg`;
 
 const APPS = [
   { id: 'pixel', name: 'Pixel', what: 'Retouche photo', c: '255 77 109', t: '214 30 70', head: ['Il n\'y a qu\'un', 'Pixel.'], text: 'Retouche, montage photo et compositing par calques. Tes PSD s\'ouvrent calque par calque, et tes réflexes Photoshop marchent ici.', tags: ['Calques et masques', '38 outils', 'Fichiers PSD'], photo: 'photo-1516575150278-77136aed6920', size: '22 Mo' },
@@ -467,8 +467,34 @@ async function hero() {
   requestAnimationFrame(loop);
 }
 
+/* ---------- Cookies: an honest notice, shown once ---------- */
+
+function cookieNotice() {
+  const KEY = 'ethone-notice-v1';
+  const bar = document.getElementById('consent');
+  const dialog = document.getElementById('cookie-prefs');
+  const seen = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return false; } };
+  const remember = () => { try { localStorage.setItem(KEY, '1'); } catch { /* private mode: the notice just shows again next time */ } };
+  const hide = () => {
+    remember();
+    bar.classList.remove('in');
+    setTimeout(() => { bar.hidden = true; }, reduceMotion ? 0 : 300);
+  };
+  if (!seen()) {
+    bar.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('in')));
+  }
+  document.getElementById('consent-ok').addEventListener('click', hide);
+  const open = () => dialog.showModal();
+  document.getElementById('consent-more').addEventListener('click', open);
+  document.getElementById('cookie-open').addEventListener('click', open);
+  dialog.addEventListener('close', () => { if (dialog.returnValue === 'ok' && !bar.hidden) hide(); });
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+}
+
 buildStory();
 scenes();
+cookieNotice();
 buildFormats();
 buildDownloads();
 reveals();

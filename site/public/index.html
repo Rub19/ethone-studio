@@ -18,9 +18,8 @@
   <link rel="canonical" href="https://studio.ethone.dev/">
   <link rel="icon" href="/icons/studio.svg" type="image/svg+xml">
   <link rel="alternate icon" href="/icons/studio.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&display=swap">
+  <link rel="preload" href="/fonts/bricolage-grotesque-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts/fonts.css">
   <link rel="stylesheet" href="/styles.css">
   <script type="importmap">{ "imports": { "three": "/vendor/three.module.min.js" } }</script>
   <script type="module" src="/main.js"></script>
@@ -107,19 +106,19 @@
         <span class="num">1/3</span>
         <h3>Réglée comme <i>tu aimes.</i></h3>
         <p>Ctrl+, ouvre les préférences : taille de l'interface, couleur d'accent, historique, curseurs, grilles, et des onglets propres à chaque app.</p>
-        <img src="https://images.unsplash.com/photo-1733232073397-80fb13ef3212?w=900&q=70&auto=format&fit=crop" alt="" loading="lazy">
+        <img src="/photos/1733232073397-80fb13ef3212.jpg" alt="" loading="lazy">
       </article>
       <article class="feature reveal" data-speed="0.1">
         <span class="num">2/3</span>
         <h3>Une app, <i>un fichier.</i></h3>
         <p>Installe uniquement ce dont tu as besoin, sans lanceur obligatoire et sans droits administrateur. Tes projets s'ouvrent d'un double-clic.</p>
-        <img src="https://images.unsplash.com/photo-1632187981988-40f3cbaeef5e?w=900&q=70&auto=format&fit=crop" alt="" loading="lazy">
+        <img src="/photos/1632187981988-40f3cbaeef5e.jpg" alt="" loading="lazy">
       </article>
       <article class="feature reveal" data-speed="0.16">
         <span class="num">3/3</span>
         <h3>Prêt à <i>créer.</i></h3>
         <p>2 359 icônes, 5 000 couleurs nommées, 311 bruitages et 7 looks pellicule, intégrés et libres de droits.</p>
-        <img src="https://images.unsplash.com/photo-1589903308904-1010c2294adc?w=900&q=70&auto=format&fit=crop" alt="" loading="lazy">
+        <img src="/photos/1589903308904-1010c2294adc.jpg" alt="" loading="lazy">
       </article>
     </section>
 
@@ -166,9 +165,39 @@
     <nav aria-label="Liens">
       <a href="https://github.com/Rub19/ethone-studio">Code source</a>
       <a href="https://github.com/Rub19/ethone-studio/releases">Toutes les versions</a>
+      <a href="/confidentialite.html">Confidentialité</a>
+      <button type="button" class="linkish" id="cookie-open">Cookies</button>
       <a href="https://unsplash.com/license">Photos : Unsplash</a>
       <a href="/vendor/LICENSE-three.txt">Licence three.js</a>
     </nav>
   </footer>
+
+  <section class="consent" id="consent" aria-label="Cookies" hidden>
+    <p><strong>Aucun cookie sur ce site.</strong> Pas de mesure d'audience, pas de publicité, aucun service tiers : polices, images et scripts sont servis par studio.ethone.dev.</p>
+    <div class="consent-actions">
+      <button type="button" class="button primary" id="consent-ok">Compris</button>
+      <button type="button" class="button ghost" id="consent-more">Détails</button>
+    </div>
+  </section>
+
+  <dialog class="prefs" id="cookie-prefs" aria-labelledby="prefs-title">
+    <form method="dialog">
+      <header>
+        <h2 id="prefs-title">Cookies et <i>confidentialité</i></h2>
+        <button class="close" value="close" aria-label="Fermer">×</button>
+      </header>
+      <p class="lead">Voici tout ce que ce site enregistre ou partage. Il n'y a rien à refuser : rien n'est activé sans toi.</p>
+      <ul>
+        <li><div><strong>Strictement nécessaires</strong><span>Une seule information, dans le stockage de ton navigateur (pas un cookie) : le fait que tu as lu ce message, pour ne plus l'afficher.</span></div><em class="on">Toujours actif</em></li>
+        <li><div><strong>Mesure d'audience</strong><span>Aucun outil de statistiques, aucun pixel de suivi.</span></div><em>Non utilisé</em></li>
+        <li><div><strong>Publicité et réseaux sociaux</strong><span>Aucune publicité, aucun bouton de partage qui te suit.</span></div><em>Non utilisé</em></li>
+        <li><div><strong>Services tiers</strong><span>Aucun au chargement. Les boutons Télécharger t'envoient vers GitHub, qui héberge les installateurs.</span></div><em>Aucun</em></li>
+      </ul>
+      <footer>
+        <a href="/confidentialite.html">Politique de confidentialité</a>
+        <button class="button primary" value="ok">Compris</button>
+      </footer>
+    </form>
+  </dialog>
 </body>
 </html>

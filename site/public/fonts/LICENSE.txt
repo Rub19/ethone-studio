@@ -1,0 +1,7 @@
+Polices hébergées sur ce site
+
+Bricolage Grotesque, Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
+Instrument Serif, Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
+
+Ces polices sont distribuées sous licence SIL Open Font License, version 1.1 :
+https://openfontlicense.org

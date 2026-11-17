@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Confidentialité · Ethone Studio</title>
+  <meta name="description" content="Ce que le site et les apps Ethone Studio enregistrent et partagent : pas de cookie, pas de mesure d'audience, pas de compte.">
+  <meta name="theme-color" content="#0e0e0e">
+  <link rel="canonical" href="https://studio.ethone.dev/confidentialite.html">
+  <link rel="icon" href="/icons/studio.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/bricolage-grotesque-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .legal { max-width: 760px; margin: 0 auto; padding: 140px var(--gutter) 100px; }
+    .legal h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); }
+    .legal h1 i { color: var(--signal); }
+    .legal .updated { margin: 16px 0 48px; color: var(--on-dark-muted); }
+    .legal h2 { font-size: 1.6rem; margin: 44px 0 12px; }
+    .legal p, .legal li { color: var(--on-dark-muted); line-height: 1.65; }
+    .legal strong { color: var(--on-dark); font-weight: 650; }
+    .legal ul { padding-left: 1.2em; }
+    .legal a { color: var(--on-dark); }
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 8px; padding: 0; list-style: none; }
+    .summary li { padding: 18px; border-radius: 14px; border: 1px solid var(--line-dark); }
+    .summary b { display: block; font-family: var(--display); font-size: 1.6rem; color: var(--signal); letter-spacing: -0.03em; }
+    @media (max-width: 720px) { .summary { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="nav scrolled">
+    <a class="brand" href="/" aria-label="Ethone Studio, accueil">
+      <img src="/icons/studio.svg" alt="" width="30" height="30">
+      <span>Ethone <i>Studio</i></span>
+    </a>
+    <a class="pill" href="/#telecharger" style="margin-left: auto">Télécharger</a>
+  </header>
+
+  <main class="legal">
+    <h1>Confidentialité, <i>simplement.</i></h1>
+    <p class="updated">Mise à jour le 17 novembre 2026</p>
+
+    <ul class="summary">
+      <li><b>0</b>cookie déposé par le site</li>
+      <li><b>0</b>outil de statistiques ou de publicité</li>
+      <li><b>0</b>compte à créer pour utiliser les apps</li>
+    </ul>
+
+    <h2>Le site</h2>
+    <p>studio.ethone.dev ne dépose <strong>aucun cookie</strong> et n'utilise aucun outil de mesure d'audience, de publicité ou de réseau social. Les polices, les images et les scripts sont servis par le site lui-même : en le chargeant, ton navigateur ne contacte aucun autre service.</p>
+    <p>Une seule information est enregistrée, dans le stockage local de ton navigateur (et non dans un cookie) : le fait que tu as lu le message sur les cookies, pour ne plus l'afficher. Elle ne quitte jamais ton appareil. Tu peux l'effacer en vidant les données du site dans ton navigateur.</p>
+
+    <h2>L'hébergement</h2>
+    <p>Le site est hébergé par <strong>Cloudflare</strong>. Comme tout hébergeur, Cloudflare reçoit des données techniques nécessaires pour afficher les pages et protéger le site (adresse IP, navigateur, page demandée). Ethone Studio n'exploite pas ces données. Voir la <a href="https://www.cloudflare.com/fr-fr/privacypolicy/">politique de confidentialité de Cloudflare</a>.</p>
+
+    <h2>Les téléchargements</h2>
+    <p>Les installateurs sont hébergés sur <strong>GitHub</strong>. Quand tu cliques sur Télécharger, ton navigateur se connecte à GitHub, qui applique sa propre <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement">déclaration de confidentialité</a>.</p>
+
+    <h2>Les apps</h2>
+    <ul>
+      <li><strong>Pas de compte</strong> et pas de télémétrie : les apps n'envoient ni statistiques d'usage, ni rapports d'erreur, ni tes fichiers.</li>
+      <li><strong>Tes documents restent sur ton PC.</strong> Rien n'est envoyé dans un cloud.</li>
+      <li>Le lanceur et les installateurs web <strong>vérifient les mises à jour</strong> en lisant un fichier public sur GitHub, puis téléchargent les apps depuis GitHub. Aucune information personnelle n'est jointe à ces requêtes.</li>
+      <li>Le retrait de filigrane par IA est <strong>facultatif et local</strong> : il passe par Ollama installé sur ton PC (adresse 127.0.0.1) et ne contacte aucun serveur.</li>
+      <li>Les préférences et les projets récents sont enregistrés dans ton dossier utilisateur. Désinstaller avec l'option « Supprimer aussi les préférences » les efface.</li>
+    </ul>
+
+    <h2>Tes droits</h2>
+    <p>Comme le site et les apps ne collectent aucune donnée personnelle, il n'y a rien à consulter, corriger ou supprimer chez nous. Pour toute question, ouvre une demande sur <a href="https://github.com/Rub19/ethone-studio/issues">la page du projet sur GitHub</a>.</p>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <img src="/icons/studio.svg" alt="" width="22" height="22">
+      <span>Ethone Studio · une création Ethone</span>
+    </div>
+    <nav aria-label="Liens">
+      <a href="/">Accueil</a>
+      <a href="https://github.com/Rub19/ethone-studio">Code source</a>
+      <a href="/fonts/LICENSE.txt">Licence des polices</a>
+    </nav>
+  </footer>
+</body>
+</html>
