@@ -46,7 +46,7 @@ pub fn open_any(path: &Path) -> Result<RgbaImage, String> {
     if is_psd(path) {
         flat(&std::fs::read(path).map_err(|e| e.to_string())?)
     } else {
-        image::open(path).map(|i| i.into_rgba8()).map_err(|e| e.to_string())
+        crate::color::open_srgb(path).map(|(i, _)| i.into_rgba8()).map_err(|e| e.to_string())
     }
 }
 

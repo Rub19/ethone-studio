@@ -625,17 +625,20 @@ pub fn export_one(job: &Job, o: &ExportOpts, dir: &Path, n: u32, mark: Option<&M
         0 => {
             let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(w, o.quality);
             let _ = enc.set_exif_metadata(exif);
+            let _ = enc.set_icc_profile(studio_fx::color::srgb_icc());
             enc.write_image(out.as_raw(), pw, ph, image::ExtendedColorType::Rgb8)
         }
         1 => {
             let mut enc = image::codecs::png::PngEncoder::new(w);
             let _ = enc.set_exif_metadata(exif);
+            let _ = enc.set_icc_profile(studio_fx::color::srgb_icc());
             enc.write_image(out.as_raw(), pw, ph, image::ExtendedColorType::Rgb8)
         }
         2 => image::codecs::tiff::TiffEncoder::new(w).write_image(out.as_raw(), pw, ph, image::ExtendedColorType::Rgb8),
         _ => {
             let mut enc = image::codecs::webp::WebPEncoder::new_lossless(w);
             let _ = enc.set_exif_metadata(exif);
+            let _ = enc.set_icc_profile(studio_fx::color::srgb_icc());
             enc.write_image(out.as_raw(), pw, ph, image::ExtendedColorType::Rgb8)
         }
     };

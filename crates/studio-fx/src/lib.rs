@@ -1,3 +1,4 @@
+pub mod color;
 pub mod filters;
 pub mod archive;
 pub mod fx;

@@ -121,6 +121,7 @@ pub struct Pixel {
     file: Option<PathBuf>,
     autosave: studio_core::recovery::Autosave,
     recovered: bool,
+    proof: Option<studio_fx::color::Cmyk>,
     composite: RgbaImage,
     tex: Option<TextureHandle>,
     tex_filter: TextureOptions,
@@ -307,6 +308,7 @@ impl Pixel {
             file: None,
             autosave: Default::default(),
             recovered: false,
+            proof: None,
             composite: RgbaImage::new(1, 1),
             tex: None,
             tex_filter: TextureOptions::LINEAR,
@@ -532,7 +534,7 @@ impl Pixel {
             }
             return;
         }
-        match image::open(path) {
+        match open_image(path) {
             Ok(img) => {
                 let name = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
                 self.set_doc(Document::from_image(name, img.into_rgba8()));
@@ -651,11 +653,15 @@ impl Pixel {
                 0 => {
                     use image::codecs::png::{CompressionType, FilterType, PngEncoder};
                     let c = [CompressionType::Fast, CompressionType::Default, CompressionType::Best][level.min(2)];
-                    PngEncoder::new_with_quality(file()?, c, FilterType::Adaptive).write_image(flat.as_raw(), flat.width(), flat.height(), image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())
+                    let mut enc = PngEncoder::new_with_quality(file()?, c, FilterType::Adaptive);
+                    let _ = enc.set_icc_profile(studio_fx::color::srgb_icc());
+                    enc.write_image(flat.as_raw(), flat.width(), flat.height(), image::ExtendedColorType::Rgba8).map_err(|e| e.to_string())
                 }
                 1 => {
                     let rgb = image::DynamicImage::ImageRgba8(matte(&flat)).to_rgb8();
-                    image::codecs::jpeg::JpegEncoder::new_with_quality(file()?, quality).encode_image(&rgb).map_err(|e| e.to_string())
+                    let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(file()?, quality);
+                    let _ = enc.set_icc_profile(studio_fx::color::srgb_icc());
+                    enc.write_image(rgb.as_raw(), rgb.width(), rgb.height(), image::ExtendedColorType::Rgb8).map_err(|e| e.to_string())
                 }
                 3 => image::DynamicImage::ImageRgba8(matte(&flat)).to_rgb8().save(&path).map_err(|e| e.to_string()),
                 6 => {
@@ -793,11 +799,20 @@ impl Pixel {
             self.doc.touch_all();
             self.tex = None;
         }
+        // Soft proof: what reaches the screen goes through the printer profile; the document is untouched.
+        let proof = self.proof.as_ref();
+        let shown = |img: &RgbaImage| -> egui::ColorImage {
+            let size = [img.width() as usize, img.height() as usize];
+            match proof.and_then(|p| p.proof(img).ok()) {
+                Some(p) => egui::ColorImage::from_rgba_unmultiplied(size, p.as_raw()),
+                None => egui::ColorImage::from_rgba_unmultiplied(size, img.as_raw()),
+            }
+        };
         let Some(area) = self.doc.dirty.take() else {
             if let Some(t) = &mut self.tex
                 && self.tex_filter != filter
             {
-                t.set(egui::ColorImage::from_rgba_unmultiplied([w as usize, h as usize], self.composite.as_raw()), filter);
+                t.set(shown(&self.composite), filter);
                 self.tex_filter = filter;
             }
             return;
@@ -805,15 +820,53 @@ impl Pixel {
         self.doc.composite_area(&mut self.composite, area);
         match &mut self.tex {
             None => {
-                let img = egui::ColorImage::from_rgba_unmultiplied([w as usize, h as usize], self.composite.as_raw());
-                self.tex = Some(ctx.load_texture("canvas", img, filter));
+                self.tex = Some(ctx.load_texture("canvas", shown(&self.composite), filter));
                 self.tex_filter = filter;
             }
             Some(t) => {
                 let sub = imageops::crop_imm(&self.composite, area.x0, area.y0, area.width(), area.height()).to_image();
-                let img = egui::ColorImage::from_rgba_unmultiplied([area.width() as usize, area.height() as usize], sub.as_raw());
-                t.set_partial([area.x0 as usize, area.y0 as usize], img, self.tex_filter);
+                t.set_partial([area.x0 as usize, area.y0 as usize], shown(&sub), self.tex_filter);
             }
+        }
+    }
+
+    /// Turns the CMYK soft proof on with `path` (or the best installed profile), or off.
+    fn set_proof(&mut self, path: Option<PathBuf>) {
+        self.proof = match path.or_else(|| studio_fx::color::installed_cmyk_profiles().into_iter().next()) {
+            Some(p) => match studio_fx::color::Cmyk::load(&p) {
+                Ok(c) => Some(c),
+                Err(e) => {
+                    self.error = Some(format!("Profil CMJN : {e}"));
+                    None
+                }
+            },
+            None => {
+                self.error = Some("Aucun profil CMJN installé : choisis celui de ton imprimeur (fichier .icc).".into());
+                None
+            }
+        };
+        self.tex = None;
+    }
+
+    /// Writes a CMYK TIFF for print, flattened on white, with the proof profile (or the best installed one).
+    fn export_cmyk(&mut self, ctx: &egui::Context) {
+        if self.proof.is_none() {
+            self.set_proof(None);
+        }
+        let Some(cmyk) = &self.proof else { return };
+        let Some(path) = rfd::FileDialog::new().add_filter("TIFF CMJN", &["tif", "tiff"]).set_file_name(format!("{}-cmjn.tif", self.doc.name)).save_file() else { return };
+        let mut flat = self.doc.flatten();
+        for px in flat.pixels_mut() {
+            let a = px.0[3] as u32;
+            for c in 0..3 {
+                px.0[c] = ((px.0[c] as u32 * a + 255 * (255 - a)) / 255) as u8;
+            }
+            px.0[3] = 255;
+        }
+        let result = cmyk.from_srgb(flat.as_raw()).and_then(|ink| studio_fx::color::write_cmyk_tiff(&path, flat.width(), flat.height(), &ink));
+        match result {
+            Ok(()) => studio_ui::handoff::toast(ctx, format!("TIFF CMJN exporté ({})", cmyk.name), true),
+            Err(e) => self.error = Some(format!("Export CMJN impossible : {e}")),
         }
     }
 
@@ -1373,7 +1426,7 @@ impl Pixel {
             self.open_path(p);
             return;
         }
-        match image::open(p) {
+        match open_image(p) {
             Ok(img) => {
                 let name = p.file_stem().map(|s| s.to_string_lossy().into_owned());
                 self.doc.next_label = Some("Reçu".into());
@@ -1430,7 +1483,7 @@ impl eframe::App for Pixel {
             if self.home {
                 self.open_path(&f);
             } else {
-                match image::open(&f) {
+                match open_image(&f) {
                     Ok(img) => {
                         self.doc.next_label = Some("Importer".into());
                         self.doc.add_layer(f.file_stem().map(|s| s.to_string_lossy().into_owned()), Some(img.into_rgba8()));
@@ -1439,7 +1492,8 @@ impl eframe::App for Pixel {
                 }
             }
         }
-        let title = if self.home { "Pixel".to_string() } else { format!("{}{} — Pixel", self.doc.name, if self.doc.modified { " •" } else { "" }) };
+        let proof = self.proof.as_ref().map(|c| format!(" (épreuvage {})", c.name)).unwrap_or_default();
+        let title = if self.home { "Pixel".to_string() } else { format!("{}{}{proof} — Pixel", self.doc.name, if self.doc.modified { " •" } else { "" }) };
         if title != self.title {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.title = title;
@@ -1557,6 +1611,10 @@ impl Pixel {
             ui.separator();
             if self.mie(ui, !home, "Exporter…", "Ctrl+E") {
                 self.export_sheet();
+            }
+            if self.mie(ui, !home, "Exporter en CMJN pour l'impression (TIFF)…", "") {
+                let ctx = ui.ctx().clone();
+                self.export_cmyk(&ctx);
             }
             if self.mie(ui, !home, "Exportation rapide en PNG…", "Ctrl+Maj+Alt+S") {
                 self.quick_export();
@@ -1992,6 +2050,33 @@ impl Pixel {
     fn menu_view(&mut self, ui: &mut Ui) {
         ui.menu_button("Affichage", |ui| {
             ui.menu_button("Espace de travail", studio_ui::dock::menu);
+            let proofing = self.proof.is_some();
+            if ui.selectable_label(proofing, "Épreuvage CMJN (aperçu impression)").clicked() {
+                if proofing {
+                    self.proof = None;
+                    self.tex = None;
+                } else {
+                    self.set_proof(None);
+                }
+                ui.close();
+            }
+            ui.menu_button("Profil d'épreuvage", |ui| {
+                for p in studio_fx::color::installed_cmyk_profiles() {
+                    let name = p.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+                    let on = self.proof.as_ref().is_some_and(|c| c.name == name);
+                    if ui.selectable_label(on, &name).clicked() {
+                        self.set_proof(Some(p));
+                        ui.close();
+                    }
+                }
+                ui.separator();
+                if ui.button("Autre profil (.icc)…").clicked() {
+                    if let Some(p) = rfd::FileDialog::new().add_filter("Profil ICC", &["icc", "icm"]).pick_file() {
+                        self.set_proof(Some(p));
+                    }
+                    ui.close();
+                }
+            });
             ui.separator();
             if self.mi(ui, "Zoom avant", "Ctrl++") {
                 self.zoom = (self.zoom * 1.25).min(64.0);
@@ -2214,6 +2299,12 @@ pub fn lock_glyph(p: &Painter, r: Rect, locked: bool, c: Color32) {
         vec![pos2(body.left() + 2.0, body.top()), pos2(body.left() + 2.0, r.top() + 5.0 - lift), pos2(r.center().x, r.top() + 2.0 - lift), pos2(body.right() - 2.0, r.top() + 5.0 - lift), pos2(body.right() - 2.0, body.top() - lift)],
         Stroke::new(1.6, c),
     ));
+}
+
+/// Opens an image in the suite's working space: an embedded RGB profile (AdobeRGB, Display P3…)
+/// is converted to sRGB so colours look as intended.
+fn open_image(path: &Path) -> image::ImageResult<image::DynamicImage> {
+    studio_fx::color::open_srgb(path).map(|(img, _)| img)
 }
 
 fn image_dialog() -> rfd::FileDialog {
