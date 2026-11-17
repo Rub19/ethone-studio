@@ -120,6 +120,8 @@ struct PageApp {
     new_guide: Option<bool>,
     find: Option<panels::FindState>,
     notice: Option<(String, bool)>,
+    autosave: studio_core::recovery::Autosave,
+    recovered: bool,
     export: Option<ExportOpts>,
     doc_sheet: bool,
     edit_text: Option<usize>,
@@ -195,6 +197,8 @@ impl PageApp {
             new_guide: None,
             find: None,
             notice: None,
+            autosave: Default::default(),
+            recovered: false,
             export: None,
             doc_sheet: false,
             edit_text: None,
@@ -229,6 +233,10 @@ impl PageApp {
         };
         if let Some(p) = std::env::args().nth(1).map(PathBuf::from).filter(|p| p.is_file()) {
             me.receive(&p);
+        } else if let Some(d) = studio_core::recovery::pending("page", "epage").and_then(|p| std::fs::read(p).ok()).and_then(|b| serde_json::from_slice::<Doc>(&b).ok()) {
+            me.set_doc(d, None);
+            me.recovered = true;
+            me.notice = Some(("Document récupéré après une fermeture inattendue : enregistre-le pour le garder".into(), true));
         }
         me
     }
@@ -466,6 +474,8 @@ impl PageApp {
                 self.remember(&path);
                 self.file = Some(path);
                 self.saved = self.doc.clone();
+                self.recovered = false;
+                studio_core::recovery::clear("page");
             }
             Err(e) => self.notice = Some((format!("Enregistrement : {e}"), false)),
         }
@@ -1174,9 +1184,22 @@ impl PageApp {
 }
 
 impl eframe::App for PageApp {
+    fn on_exit(&mut self) {
+        studio_core::recovery::clear("page");
+    }
+
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
         studio_ui::chrome::resize(ctx);
+        let dirty = !self.home && (self.recovered || self.doc != self.saved);
+        if dirty {
+            ctx.request_repaint_after(std::time::Duration::from_secs(61));
+        }
+        if self.autosave.due(ctx.input(|i| i.time), dirty)
+            && let Ok(b) = serde_json::to_vec(&self.doc)
+        {
+            studio_core::recovery::Autosave::write("page", "epage", &b);
+        }
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
         }

@@ -213,6 +213,8 @@ struct Cut {
     saved: Project,
     file: Option<PathBuf>,
     home: bool,
+    autosave: studio_core::recovery::Autosave,
+    recovered: bool,
     recents: Vec<PathBuf>,
     undo: Vec<Project>,
     redo: Vec<Project>,
@@ -295,6 +297,8 @@ impl Cut {
             proj,
             file: None,
             home: true,
+            autosave: Default::default(),
+            recovered: false,
             recents,
             undo: Vec::new(),
             redo: Vec::new(),
@@ -362,6 +366,14 @@ impl Cut {
         } else if !args.is_empty() {
             me.home = false;
             me.import(args, &cc.egui_ctx);
+        } else {
+            if let Some(rp) = studio_core::recovery::pending("cut", "ecut") {
+                me.open_path(&rp, &cc.egui_ctx);
+                me.recents.retain(|p| p != &rp);
+                me.file = None;
+                me.recovered = true;
+                studio_ui::handoff::toast(&cc.egui_ctx, "Document rÃ©cupÃ©rÃ© aprÃ¨s une fermeture inattendue : enregistre-le pour le garder".into(), true);
+            }
         }
         me
     }
@@ -864,6 +876,8 @@ impl Cut {
         match serde_json::to_vec_pretty(&self.proj).map_err(|e| e.to_string()).and_then(|b| std::fs::write(&path, b).map_err(|e| e.to_string())) {
             Ok(()) => {
                 self.saved = self.proj.clone();
+                self.recovered = false;
+                studio_core::recovery::clear("cut");
                 self.remember(&path);
                 self.file = Some(path);
             }
@@ -1864,8 +1878,21 @@ impl Cut {
 }
 
 impl eframe::App for Cut {
+    fn on_exit(&mut self) {
+        studio_core::recovery::clear("cut");
+    }
+
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        let dirty = !self.home && (self.recovered || self.proj != self.saved);
+        if dirty {
+            ctx.request_repaint_after(std::time::Duration::from_secs(61));
+        }
+        if self.autosave.due(ctx.input(|i| i.time), dirty)
+            && let Ok(b) = serde_json::to_vec(&self.proj)
+        {
+            studio_core::recovery::Autosave::write("cut", "ecut", &b);
+        }
         studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p, ctx);

@@ -102,14 +102,24 @@ impl Catalog {
         studio_core::data_dir().join("lumen").join("catalog.json")
     }
     fn load() -> Self {
-        std::fs::read(Self::path()).ok().and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or_default()
+        let read = |p: PathBuf| std::fs::read(p).ok().and_then(|b| serde_json::from_slice(&b).ok());
+        read(Self::path()).or_else(|| read(Self::path().with_extension("json.bak"))).unwrap_or_default()
     }
+    /// Writes a temporary file then swaps it in, keeping the previous catalog as a backup,
+    /// so a crash during the write can never leave a truncated catalog.
     fn save(&self) {
         let p = Self::path();
         if let Some(dir) = p.parent() {
             let _ = std::fs::create_dir_all(dir);
         }
-        let _ = std::fs::write(p, serde_json::to_vec_pretty(self).unwrap_or_default());
+        let Ok(bytes) = serde_json::to_vec_pretty(self) else { return };
+        let tmp = p.with_extension("json.tmp");
+        if std::fs::write(&tmp, bytes).is_ok() {
+            if p.exists() {
+                let _ = std::fs::copy(&p, p.with_extension("json.bak"));
+            }
+            let _ = std::fs::rename(&tmp, &p);
+        }
     }
 }
 

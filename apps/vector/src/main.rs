@@ -302,6 +302,8 @@ struct RecolorSt {
 struct VectorApp {
     doc: Doc,
     home: bool,
+    autosave: studio_core::recovery::Autosave,
+    recovered: bool,
     recents: Vec<PathBuf>,
     file: Option<PathBuf>,
     saved: Doc,
@@ -428,6 +430,8 @@ impl VectorApp {
             saved: doc.clone(),
             doc,
             home: true,
+            autosave: Default::default(),
+            recovered: false,
             recents,
             file: None,
             undo: Vec::new(),
@@ -531,6 +535,14 @@ impl VectorApp {
         };
         if let Some(p) = std::env::args().nth(1) {
             me.open_path(Path::new(&p));
+        } else {
+            if let Some(rp) = studio_core::recovery::pending("vector", "evec") {
+                me.open_path(&rp);
+                me.recents.retain(|p| p != &rp);
+                me.file = None;
+                me.recovered = true;
+                studio_ui::handoff::toast(&cc.egui_ctx, "Document rÃ©cupÃ©rÃ© aprÃ¨s une fermeture inattendue : enregistre-le pour le garder".into(), true);
+            }
         }
         me
     }
@@ -1828,6 +1840,8 @@ impl VectorApp {
         match serde_json::to_vec_pretty(&self.doc).map_err(|e| e.to_string()).and_then(|b| std::fs::write(&path, b).map_err(|e| e.to_string())) {
             Ok(()) => {
                 self.saved = self.doc.clone();
+                self.recovered = false;
+                studio_core::recovery::clear("vector");
                 self.remember(&path);
                 self.file = Some(path);
             }
@@ -2404,8 +2418,21 @@ impl VectorApp {
 }
 
 impl eframe::App for VectorApp {
+    fn on_exit(&mut self) {
+        studio_core::recovery::clear("vector");
+    }
+
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        let dirty = !self.home && (self.recovered || self.doc != self.saved);
+        if dirty {
+            ctx.request_repaint_after(std::time::Duration::from_secs(61));
+        }
+        if self.autosave.due(ctx.input(|i| i.time), dirty)
+            && let Ok(b) = serde_json::to_vec(&self.doc)
+        {
+            studio_core::recovery::Autosave::write("vector", "evec", &b);
+        }
         studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p);

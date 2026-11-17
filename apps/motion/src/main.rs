@@ -154,6 +154,8 @@ struct Motion {
     saved: Comp,
     file: Option<PathBuf>,
     home: bool,
+    autosave: studio_core::recovery::Autosave,
+    recovered: bool,
     recents: Vec<PathBuf>,
     undo: Vec<Comp>,
     redo: Vec<Comp>,
@@ -276,6 +278,8 @@ impl Motion {
             comp,
             file: None,
             home: true,
+            autosave: Default::default(),
+            recovered: false,
             recents,
             undo: Vec::new(),
             redo: Vec::new(),
@@ -344,6 +348,15 @@ impl Motion {
             } else if p.as_os_str() == "--demo" {
                 me.home = false;
                 me.t = 1.2;
+            }
+        }
+        if std::env::args().nth(1).is_none() {
+            if let Some(rp) = studio_core::recovery::pending("motion", "emot") {
+                me.open_path(&rp);
+                me.recents.retain(|p| p != &rp);
+                me.file = None;
+                me.recovered = true;
+                studio_ui::handoff::toast(&cc.egui_ctx, "Document rÃ©cupÃ©rÃ© aprÃ¨s une fermeture inattendue : enregistre-le pour le garder".into(), true);
             }
         }
         me.comp.normalize();
@@ -976,6 +989,8 @@ impl Motion {
         match serde_json::to_vec_pretty(&self.comp).map_err(|e| e.to_string()).and_then(|b| std::fs::write(&path, b).map_err(|e| e.to_string())) {
             Ok(()) => {
                 self.saved = self.comp.clone();
+                self.recovered = false;
+                studio_core::recovery::clear("motion");
                 self.remember(&path);
                 self.file = Some(path);
             }
@@ -1576,8 +1591,21 @@ impl Motion {
 }
 
 impl eframe::App for Motion {
+    fn on_exit(&mut self) {
+        studio_core::recovery::clear("motion");
+    }
+
     fn ui(&mut self, root: &mut Ui, _frame: &mut eframe::Frame) {
         let ctx = &root.ctx().clone();
+        let dirty = !self.home && (self.recovered || self.comp != self.saved);
+        if dirty {
+            ctx.request_repaint_after(std::time::Duration::from_secs(61));
+        }
+        if self.autosave.due(ctx.input(|i| i.time), dirty)
+            && let Ok(b) = serde_json::to_vec(&self.comp)
+        {
+            studio_core::recovery::Autosave::write("motion", "emot", &b);
+        }
         studio_ui::chrome::resize(ctx);
         for p in self.inbox.poll(ctx) {
             self.receive(&p);
