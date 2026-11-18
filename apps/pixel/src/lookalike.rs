@@ -166,7 +166,7 @@ pub fn blend(img: &mut RgbaImage, look: &Look, color: [u8; 4]) {
     for p in img.pixels_mut().filter(|p| p.0[3] == 0) {
         *p = Rgba([color[0], color[1], color[2], 0]);
     }
-    let sigma = ((look.soft - softness(&alpha_of(img))) * 0.8).clamp(0.0, 2.5);
+    let sigma = ((look.soft - softness(&alpha_of(img))) * 0.5).clamp(0.0, 1.2);
     if sigma > 0.15 {
         *img = imageops::blur(img, sigma);
     }
@@ -198,6 +198,22 @@ pub struct Hand {
     cap: f32,
     base: f32,
     ink: Option<[u8; 4]>,
+    /// Pen width of the original writing, in pixels.
+    pen: f32,
+    /// Each original word, cut out whole, and its columns in the line.
+    words: Vec<RgbaImage>,
+    spans: Vec<(u32, u32)>,
+    /// Rebuild new words from the photo's letters (otherwise the closest font draws them).
+    pub own_letters: bool,
+}
+
+/// The ink of columns `a..b` of the line, as an image with the photo's own pixels.
+fn cut(img: &RgbaImage, mask: &GrayImage, x0: u32, y0: u32, a: u32, b: u32) -> RgbaImage {
+    RgbaImage::from_fn(b - a, mask.height(), |x, y| {
+        let m = mask.get_pixel(a + x, y).0[0] as f32;
+        let p = img.get_pixel(x0 + a + x, y0 + y).0;
+        Rgba([p[0], p[1], p[2], ((m - 40.0) * 255.0 / 175.0).clamp(0.0, 255.0) as u8])
+    })
 }
 
 fn runs(m: &GrayImage, from: u32, to: u32) -> Vec<(u32, u32)> {
@@ -255,7 +271,7 @@ fn median(mut v: Vec<f32>, or: f32) -> f32 {
 
 impl Hand {
     /// Cuts the letters of `text` out of the line whose ink is `mask` (top-left at `x0`, `y0` in `img`).
-    pub fn from_line(img: &RgbaImage, mask: &GrayImage, x0: u32, y0: u32, text: &str) -> Hand {
+    pub fn from_line(img: &RgbaImage, mask: &GrayImage, x0: u32, y0: u32, text: &str, guide: (usize, bool, bool)) -> Hand {
         let (w, h) = mask.dimensions();
         let words: Vec<Vec<char>> = text.split_whitespace().map(|s| s.chars().collect()).collect();
         let all = runs(mask, 0, w);
@@ -276,19 +292,17 @@ impl Hand {
         let mut glyphs: HashMap<char, Vec<RgbaImage>> = HashMap::new();
         let mut gap = Vec::new();
         let (mut caps, mut bases) = (Vec::new(), Vec::new());
+        let spans: Vec<(u32, u32)> = if groups.len() == words.len() { groups.iter().filter_map(|g| Some((g.first()?.0, g.last()?.1))).collect() } else { Vec::new() };
+        let whole: Vec<RgbaImage> = spans.iter().map(|&(a, b)| cut(img, mask, x0, y0, a, b)).collect();
         if groups.len() == words.len() {
             for (g, word) in groups.into_iter().zip(&words) {
-                let rs = fit_runs(mask, g, word.len());
+                let rs = guided_cut(mask, &g, word, guide).unwrap_or_else(|| fit_runs(mask, g.clone(), word.len()));
                 if rs.len() != word.len() {
                     continue;
                 }
                 gap.extend(rs.windows(2).map(|p| p[1].0 as f32 - p[0].1 as f32));
                 for (&(a, b), &ch) in rs.iter().zip(word) {
-                    let cut = RgbaImage::from_fn(b - a, h, |x, y| {
-                        let m = mask.get_pixel(a + x, y).0[0] as f32;
-                        let p = img.get_pixel(x0 + a + x, y0 + y).0;
-                        Rgba([p[0], p[1], p[2], ((m - 40.0) * 255.0 / 175.0).clamp(0.0, 255.0) as u8])
-                    });
+                    let cut = cut(img, mask, x0, y0, a, b);
                     if let Some(t) = tight(&alpha_of(&cut), 110)
                         && !DESC.contains(ch.to_ascii_lowercase())
                         && ch.is_alphanumeric()
@@ -303,15 +317,54 @@ impl Hand {
             }
         }
         let ink = solid_ink(&glyphs);
+        let band = xheight_band(mask);
         Hand {
             glyphs,
             gap: median(gap, h as f32 * 0.06).max(0.0),
             space: median(word_gap, h as f32 * 0.35),
             h,
-            cap: median(caps, h as f32 * 0.7),
-            base: median(bases, h as f32 * 0.8),
+            cap: band.map_or_else(|| median(caps.clone(), h as f32 * 0.7), |b| (b.1 - b.0) / 0.62),
+            base: band.map_or_else(|| median(bases.clone(), h as f32 * 0.8), |b| b.1),
             ink,
+            pen: stroke_width(mask),
+            words: whole,
+            spans,
+            own_letters: all.len() as f32 >= 0.7 * words.iter().map(|w| w.len()).sum::<usize>() as f32,
         }
+    }
+
+    /// Rewrites the line from `orig` to `new`, keeping the words that did not change.
+    /// Returns the new ink for the columns from `start` on, and where the old ink to erase ends
+    /// (columns of the line); `None` when nothing changed.
+    pub fn rewrite(&self, orig: &str, new: &str, font: (usize, bool, bool), color: [u8; 4]) -> Option<(RgbaImage, u32, u32)> {
+        let (ow, nw): (Vec<&str>, Vec<&str>) = (orig.split_whitespace().collect(), new.split_whitespace().collect());
+        if self.spans.len() != ow.len() || ow.is_empty() {
+            return Some((self.write(new, font, color)?, 0, self.spans.last().map_or(0, |s| s.1)));
+        }
+        let pre = ow.iter().zip(&nw).take_while(|(a, b)| a == b).count();
+        let max_suf = ow.len().min(nw.len()) - pre;
+        let suf = ow.iter().rev().zip(nw.iter().rev()).take(max_suf).take_while(|(a, b)| a == b).count();
+        if pre == ow.len() && pre == nw.len() {
+            return None;
+        }
+        let start = if pre < ow.len() { self.spans[pre].0 } else { self.spans[pre - 1].1 + self.space as u32 };
+        let end = if pre < ow.len() { self.spans[ow.len() - 1].1 } else { start };
+        let mut parts: Vec<RgbaImage> = Vec::new();
+        let middle = nw[pre..nw.len() - suf].join(" ");
+        if !middle.is_empty() {
+            parts.push(self.write(&middle, font, color)?);
+        }
+        parts.extend(self.words[ow.len() - suf..].iter().cloned());
+        let gap = self.space.round() as u32;
+        let width = parts.iter().map(|p| p.width()).sum::<u32>() + gap * parts.len().saturating_sub(1) as u32;
+        let height = parts.iter().map(|p| p.height()).max()?;
+        let mut out = RgbaImage::new(width.max(1), height);
+        let mut x = 0i64;
+        for p in &parts {
+            imageops::overlay(&mut out, p, x, 0);
+            x += (p.width() + gap) as i64;
+        }
+        Some((out, start, end))
     }
 
     #[cfg(test)]
@@ -332,7 +385,7 @@ impl Hand {
             }
             let j = (rnd(i as u32 * 7 + 1), rnd(i as u32 * 7 + 2));
             let swap = if ch.is_lowercase() { ch.to_ascii_uppercase() } else { ch.to_ascii_lowercase() };
-            let own = self.glyphs.get(&ch).or_else(|| self.glyphs.get(&swap).filter(|_| SAME_CASE.contains(ch.to_ascii_lowercase())));
+            let own = if self.own_letters { self.glyphs.get(&ch).or_else(|| self.glyphs.get(&swap).filter(|_| SAME_CASE.contains(ch.to_ascii_lowercase()))) } else { None };
             let (g, y) = if let Some(v) = own {
                 let n = used.entry(ch).or_default();
                 let g = &v[*n % v.len()];
@@ -351,6 +404,7 @@ impl Hand {
                 let target = self.cap * if lower { 0.62 } else { 1.0 } * if DESC.contains(ch) { 1.35 } else { 1.0 };
                 let k = target / t.3 as f32;
                 let g = imageops::resize(&imageops::crop_imm(&img, t.0, t.1, t.2, t.3).to_image(), ((t.2 as f32 * k).round() as u32).max(1), (target.round() as u32).max(1), imageops::FilterType::Lanczos3);
+                let g = thicken(g, self.pen);
                 let drop = if DESC.contains(ch) { target * 0.26 } else { 0.0 };
                 (g, self.base - target + drop + j.1 * h as f32 * 0.025)
             };
@@ -399,7 +453,7 @@ mod tests {
         let script = FONTS.iter().position(|f| f.0 == "Ink Free").unwrap();
         let (img, r) = line("Le chat dort", script);
         let (m, x0, y0) = ink(&img, r, ink_c, [245, 240, 230, 255]);
-        let hand = Hand::from_line(&img, &m, x0, y0, "Le chat dort");
+        let hand = Hand::from_line(&img, &m, x0, y0, "Le chat dort", (script, false, false));
         assert!(hand.letters() >= 8, "{} letters", hand.letters());
         let out = hand.write("Le rat dort", (script, false, false), ink_c).unwrap();
         assert_eq!(out.height(), m.height());
@@ -415,9 +469,163 @@ mod tests {
 fn solid_ink(glyphs: &HashMap<char, Vec<RgbaImage>>) -> Option<[u8; 4]> {
     let mut acc = [0u64; 3];
     let mut n = 0u64;
-    for p in glyphs.values().flatten().flat_map(|g| g.pixels()).filter(|p| p.0[3] >= 240) {
-        (0..3).for_each(|k| acc[k] += p.0[k] as u64);
+    let mut solid: Vec<[u8; 4]> = glyphs.values().flatten().flat_map(|g| g.pixels()).filter(|p| p.0[3] >= 240).map(|p| p.0).collect();
+    solid.sort_by_key(|p| p[0] as u32 * 299 + p[1] as u32 * 587 + p[2] as u32 * 114);
+    for p in &solid[..solid.len().div_ceil(3)] {
+        (0..3).for_each(|k| acc[k] += p[k] as u64);
         n += 1;
     }
     (n > 0).then(|| [(acc[0] / n) as u8, (acc[1] / n) as u8, (acc[2] / n) as u8, 255])
+}
+
+/// Erases `r` (x, y, w, h) on a plain background such as paper: a smooth blend of the clean pixels
+/// around it (never copies ink from elsewhere), with the photo's grain added back.
+pub fn paper_fill(img: &mut RgbaImage, r: [f32; 4], ink: [u8; 4], bg: [u8; 4], grain: f32) {
+    let (w, h) = img.dimensions();
+    if w < 2 || h < 2 {
+        return;
+    }
+    let x0 = (r[0].max(0.0) as u32).min(w - 1);
+    let y0 = (r[1].max(0.0) as u32).min(h - 1);
+    let x1 = ((r[0] + r[2]).ceil() as u32).clamp(x0 + 1, w);
+    let y1 = ((r[1] + r[3]).ceil() as u32).clamp(y0 + 1, h);
+    let d = [0, 1, 2].map(|k| ink[k] as f32 - bg[k] as f32);
+    let dd = (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]).max(1.0);
+    let src = img.clone();
+    let coverage = |p: [u8; 4]| (0..3).map(|k| (p[k] as f32 - bg[k] as f32) * d[k]).sum::<f32>() / dd;
+    // the cleanest pixel within 6 px outward from (x, y) along (dx, dy)
+    let clean = |x: i64, y: i64, dx: i64, dy: i64| -> [f32; 3] {
+        let mut best = ([bg[0] as f32, bg[1] as f32, bg[2] as f32], f32::MAX);
+        for s in 1..=6 {
+            let (px, py) = ((x + dx * s).clamp(0, w as i64 - 1) as u32, (y + dy * s).clamp(0, h as i64 - 1) as u32);
+            let p = src.get_pixel(px, py).0;
+            let c = coverage(p);
+            if c < best.1 {
+                best = ([p[0] as f32, p[1] as f32, p[2] as f32], c);
+            }
+        }
+        best.0
+    };
+    let smooth = |v: Vec<[f32; 3]>| -> Vec<[f32; 3]> {
+        let n = v.len() as i64;
+        (0..n).map(|i| {
+            let (a, b) = ((i - 6).max(0), (i + 6).min(n - 1));
+            let mut s = [0.0; 3];
+            for j in a..=b {
+                (0..3).for_each(|k| s[k] += v[j as usize][k]);
+            }
+            s.map(|c| c / (b - a + 1) as f32)
+        }).collect()
+    };
+    let (cw, ch) = ((x1 - x0) as i64, (y1 - y0) as i64);
+    let top = smooth((0..cw).map(|i| clean(x0 as i64 + i, y0 as i64, 0, -1)).collect());
+    let bottom = smooth((0..cw).map(|i| clean(x0 as i64 + i, y1 as i64 - 1, 0, 1)).collect());
+    let left = smooth((0..ch).map(|j| clean(x0 as i64, y0 as i64 + j, -1, 0)).collect());
+    let right = smooth((0..ch).map(|j| clean(x1 as i64 - 1, y0 as i64 + j, 1, 0)).collect());
+    let amp = grain * 1.7;
+    for j in 0..ch {
+        let v = if ch > 1 { j as f32 / (ch - 1) as f32 } else { 0.5 };
+        for i in 0..cw {
+            let u = if cw > 1 { i as f32 / (cw - 1) as f32 } else { 0.5 };
+            let (x, y) = (x0 + i as u32, y0 + j as u32);
+            let mut c = [0u8; 4];
+            for k in 0..3 {
+                let p = (1.0 - v) * top[i as usize][k] + v * bottom[i as usize][k] + (1.0 - u) * left[j as usize][k] + u * right[j as usize][k]
+                    - ((1.0 - u) * (1.0 - v) * top[0][k] + u * (1.0 - v) * top[cw as usize - 1][k] + (1.0 - u) * v * bottom[0][k] + u * v * bottom[cw as usize - 1][k]);
+                c[k] = (p + rnd(y * w + x + 977) * amp).clamp(0.0, 255.0) as u8;
+            }
+            c[3] = src.get_pixel(x, y).0[3];
+            img.put_pixel(x, y, Rgba(c));
+        }
+    }
+}
+
+/// Cuts a joined word into letters where `guide` (the closest font) says each letter ends,
+/// moved to the thinnest stroke nearby. `None` when the font cannot draw the word.
+fn guided_cut(m: &GrayImage, runs: &[(u32, u32)], word: &[char], guide: (usize, bool, bool)) -> Option<Vec<(u32, u32)>> {
+    let (a, b) = (runs.first()?.0, runs.last()?.1);
+    let n = word.len();
+    if n < 2 {
+        return Some(vec![(a, b)]);
+    }
+    let right = |k: usize| -> Option<f32> {
+        let s: String = word[..k].iter().collect();
+        let img = render_text(&s, &style(guide.0, 64.0, guide.1, guide.2, [0, 0, 0, 255]))?;
+        let t = tight(&alpha_of(&img), 60)?;
+        Some((t.0 + t.2) as f32)
+    };
+    let full = right(n)?;
+    let left = {
+        let img = render_text(&word.iter().collect::<String>(), &style(guide.0, 64.0, guide.1, guide.2, [0, 0, 0, 255]))?;
+        tight(&alpha_of(&img), 60)?.0 as f32
+    };
+    let span = (full - left).max(1.0);
+    let wpx = (b - a) as f32;
+    let reach = (wpx / n as f32 * 0.35).max(1.0) as u32;
+    let mut cuts = vec![a];
+    for k in 1..n {
+        let guess = a + (((right(k)? - left) / span).clamp(0.0, 1.0) * wpx) as u32;
+        let lo = guess.saturating_sub(reach).max(*cuts.last()? + 1);
+        let hi = (guess + reach).min(b - 1);
+        cuts.push(if lo < hi { (lo..=hi).min_by_key(|&x| (col_ink(m, x), x.abs_diff(guess))).unwrap() } else { lo.min(b - 1) });
+    }
+    cuts.push(b);
+    Some(cuts.windows(2).filter(|c| c[1] > c[0]).map(|c| (c[0], c[1])).collect::<Vec<_>>()).filter(|v| v.len() == n)
+}
+
+/// Top and bottom rows of the x-height band (where the ink is densest): the baseline is its bottom.
+fn xheight_band(m: &GrayImage) -> Option<(f32, f32)> {
+    let rows: Vec<u32> = (0..m.height()).map(|y| (0..m.width()).filter(|&x| m.get_pixel(x, y).0[0] >= 110).count() as u32).collect();
+    let (peak, &max) = rows.iter().enumerate().max_by_key(|r| r.1)?;
+    if max == 0 {
+        return None;
+    }
+    let dense = |y: usize| rows[y] * 2 >= max;
+    let top = (0..=peak).rev().take_while(|&y| dense(y)).last()?;
+    let bottom = (peak..rows.len()).take_while(|&y| dense(y)).last()?;
+    Some((top as f32, bottom as f32 + 1.0))
+}
+
+/// Average stroke width of the ink: twice its area over its outline.
+fn stroke_width(m: &GrayImage) -> f32 {
+    let (w, h) = m.dimensions();
+    let on = |x: i64, y: i64| x >= 0 && y >= 0 && x < w as i64 && y < h as i64 && m.get_pixel(x as u32, y as u32).0[0] >= 128;
+    let (mut area, mut edge) = (0u32, 0u32);
+    for y in 0..h as i64 {
+        for x in 0..w as i64 {
+            if on(x, y) {
+                area += 1;
+                if !(on(x - 1, y) && on(x + 1, y) && on(x, y - 1) && on(x, y + 1)) {
+                    edge += 1;
+                }
+            }
+        }
+    }
+    if edge == 0 { 0.0 } else { 2.0 * area as f32 / edge as f32 }
+}
+
+/// Grows a letter's strokes (alpha only) until they are about as wide as the pen.
+fn thicken(mut g: RgbaImage, pen: f32) -> RgbaImage {
+    for _ in 0..3 {
+        if pen <= 0.0 || stroke_width(&alpha_of(&g)) >= pen * 0.8 {
+            break;
+        }
+        let src = g.clone();
+        let (w, h) = g.dimensions();
+        for (x, y, p) in g.enumerate_pixels_mut() {
+            let mut a = p.0[3];
+            for (dx, dy) in [(-1i64, 0i64), (1, 0), (0, -1), (0, 1)] {
+                let (nx, ny) = (x as i64 + dx, y as i64 + dy);
+                if nx >= 0 && ny >= 0 && nx < w as i64 && ny < h as i64 {
+                    let q = src.get_pixel(nx as u32, ny as u32).0;
+                    if q[3] > a {
+                        a = q[3];
+                        p.0[..3].copy_from_slice(&q[..3]);
+                    }
+                }
+            }
+            p.0[3] = a;
+        }
+    }
+    g
 }

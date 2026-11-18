@@ -662,3 +662,6 @@ Gabriola
 Mistral	
 Auto	Auto
 Lettres d'origine	Original letters
+Seuls les mots modifiés sont effacés et réécrits. Lettres d'origine : recompose les mots avec les lettres découpées dans la photo (écriture détachée). Police manuscrite : la police la plus proche, à la taille et dans l'encre de l'original (écriture liée). Auto choisit selon l'écriture.	Only the changed words are erased and rewritten. Original letters: rebuilds words from letters cut out of the photo (separate letters). Handwriting font: the closest font, at the original's size and in its ink (joined writing). Auto picks based on the writing.
+Auto : fond uni (papier, mur) recalculé sans recopier d'encre, sinon reconstruction. Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Auto: plain backgrounds (paper, walls) are recomputed without copying ink, otherwise reconstruction. Reconstruction: rebuilds the background (photos). Background colour: quick flat fill (documents, screenshots). Mosaic 0 = automatic size.
+Police manuscrite	Handwriting font

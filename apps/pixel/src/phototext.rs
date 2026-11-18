@@ -32,6 +32,8 @@ pub enum Job {
 /// New text already drawn, ready to lay on the erased photo.
 pub struct Drawn {
     pub rect: [f32; 4],
+    /// The part of the line whose old ink goes (only the changed words of handwriting).
+    pub erase: [f32; 4],
     pub text: String,
     pub img: RgbaImage,
     pub x: i64,
@@ -69,8 +71,8 @@ pub struct State {
     pub blend: bool,
 }
 
-const METHODS: [&str; 3] = ["Reconstruction", "Couleur du fond", "Flou du fond"];
-const HAND: [&str; 3] = ["Auto", "Lettres d'origine", "Police"];
+const METHODS: [&str; 4] = ["Auto", "Reconstruction", "Couleur du fond", "Flou du fond"];
+const HAND: [&str; 3] = ["Auto", "Lettres d'origine", "Police manuscrite"];
 
 impl Default for State {
     fn default() -> Self {
@@ -292,8 +294,7 @@ impl Pixel {
     /// Whether `l` is rewritten with the writer's own letters rather than a font.
     fn pt_handwritten(&self, l: &Line) -> bool {
         match self.pt.hand {
-            1 => true,
-            2 => false,
+            1 | 2 => true,
             _ => l.look.is_some_and(|k| lookalike::is_handwriting(k.font)),
         }
     }
@@ -305,24 +306,31 @@ impl Pixel {
             return None;
         }
         let st = self.pt_style(l);
-        let (mut img, x, y) = if self.pt_handwritten(l) {
+        let (mut img, x, y, erase) = if self.pt_handwritten(l) {
             let (mask, x0, y0) = lookalike::ink(src, l.rect, l.color, l.bg);
-            let hand = Hand::from_line(src, &mask, x0, y0, &l.orig);
-            let mut img = hand.write(text, (st.font, st.bold, st.italic), st.color)?;
-            if self.pt.fit && img.width() as f32 > l.rect[2] * 1.15 {
-                img = imageops::resize(&img, l.rect[2].max(1.0) as u32, img.height(), imageops::FilterType::Triangle);
+            let mut hand = Hand::from_line(src, &mask, x0, y0, &l.orig, (st.font, st.bold, st.italic));
+            match self.pt.hand {
+                1 => hand.own_letters = true,
+                2 => hand.own_letters = false,
+                _ => {}
             }
-            (img, x0 as i64, y0 as i64)
+            let (mut img, start, end) = hand.rewrite(&l.orig, text, (st.font, st.bold, st.italic), st.color)?;
+            let room = l.rect[0] + l.rect[2] - (x0 + start) as f32;
+            if self.pt.fit && img.width() as f32 > room * 1.15 {
+                img = imageops::resize(&img, room.max(1.0) as u32, img.height(), imageops::FilterType::Triangle);
+            }
+            let erase = [(x0 + start) as f32 - 2.0, l.rect[1] - l.rect[3] * 0.2, (end.max(start) - start) as f32 + 4.0, l.rect[3] * 1.4];
+            (img, (x0 + start) as i64, y0 as i64, erase)
         } else {
             let img = line_image(text, l.rect, &st, self.pt.fit, self.pt.size_k)?;
-            (img, l.rect[0].round() as i64, (l.rect[1] + l.rect[3] * (1.0 - self.pt.size_k) / 2.0).round() as i64)
+            (img, l.rect[0].round() as i64, (l.rect[1] + l.rect[3] * (1.0 - self.pt.size_k) / 2.0).round() as i64, l.rect)
         };
         if self.pt.blend
             && let Some(k) = l.look
         {
             lookalike::blend(&mut img, &k, st.color);
         }
-        Some(Drawn { rect: l.rect, text: text.to_owned(), img, x, y })
+        Some(Drawn { rect: l.rect, erase, text: text.to_owned(), img, x, y })
     }
 
     fn pt_write(&mut self, drawn: &[Drawn], layer: usize) {
@@ -359,13 +367,21 @@ impl Pixel {
         }
         let layer = self.pt.layer.min(self.doc.layers.len().saturating_sub(1));
         let lines: Vec<Line> = idx.iter().filter_map(|i| self.pt.lines.get(*i).cloned()).collect();
-        let refs: Vec<&Line> = lines.iter().collect();
         let mut img = self.doc.layers[layer].img.clone();
         let (w, h) = img.dimensions();
         let label = if write { "Remplacement du texte" } else { "Texte effacé" };
         let todo: Vec<Drawn> = if write { lines.iter().filter_map(|l| self.pt_draw(l, &self.composite)).collect() } else { Vec::new() };
-        match self.pt.method {
-            0 => {
+        let erase: Vec<Line> = if write { todo.iter().filter_map(|d| Some(Line { rect: d.erase, ..lines.iter().find(|l| l.rect == d.rect)?.clone() })).collect() } else { lines };
+        let refs: Vec<&Line> = erase.iter().collect();
+        let plain = erase.iter().all(|l| l.look.is_some_and(|k| k.grain < 5.0));
+        match (self.pt.method, plain) {
+            (0, true) => {
+                for l in &erase {
+                    let p = self.pt.pad;
+                    lookalike::paper_fill(&mut img, [l.rect[0] - p, l.rect[1] - p, l.rect[2] + 2.0 * p, l.rect[3] + 2.0 * p], l.color, l.bg, l.look.map_or(0.0, |k| k.grain));
+                }
+            }
+            (0 | 1, _) => {
                 let mask = mask_of(&refs, self.pt.pad, w, h);
                 let (tx, rx) = channel();
                 self.pt.job = Some(rx);
@@ -378,7 +394,7 @@ impl Pixel {
                 });
                 return;
             }
-            1 => fill_flat(&mut img, &refs, self.pt.pad),
+            (2, _) => fill_flat(&mut img, &refs, self.pt.pad),
             _ => {
                 fill_flat(&mut img, &refs, self.pt.pad);
                 blur_rects(&mut img, &refs, self.pt.pad + 2.0, 0.0);
@@ -615,7 +631,7 @@ impl Pixel {
             ui.checkbox(&mut self.pt.auto_font, tl("Police détectée sur chaque ligne"));
             lab(ui, tl("Écriture manuscrite"));
             pro::segmented(ui, &mut self.pt.hand, &HAND.map(tl));
-            ui.label(RichText::new(tl("Lettres d'origine : réécrit avec les lettres découpées dans la photo, les lettres absentes viennent de la police la plus proche. Auto : seulement quand la ligne ressemble à de l'écriture à la main.")).size(11.0).color(FAINT));
+            ui.label(RichText::new(tl("Seuls les mots modifiés sont effacés et réécrits. Lettres d'origine : recompose les mots avec les lettres découpées dans la photo (écriture détachée). Police manuscrite : la police la plus proche, à la taille et dans l'encre de l'original (écriture liée). Auto choisit selon l'écriture.")).size(11.0).color(FAINT));
             ui.checkbox(&mut self.pt.blend, tl("Imiter le grain et la netteté de la photo"));
             ui.add_enabled_ui(!self.pt.auto_font, |ui| egui::ComboBox::from_id_salt("pt-font").selected_text(FONTS[self.pt.font].0).width(ui.available_width() - 8.0).show_ui(ui, |ui| {
                 for (k, f) in FONTS.iter().enumerate() {
@@ -641,7 +657,7 @@ impl Pixel {
             pro::segmented(ui, &mut self.pt.method, &METHODS);
             pro::option_slider(ui, tl("Marge"), &mut self.pt.pad, 0.0..=20.0, " px", false);
             pro::option_slider(ui, tl("Mosaïque"), &mut self.pt.blur_px, 0.0..=40.0, " px", false);
-            ui.label(RichText::new(tl("Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.")).size(11.0).color(FAINT));
+            ui.label(RichText::new(tl("Auto : fond uni (papier, mur) recalculé sans recopier d'encre, sinon reconstruction. Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.")).size(11.0).color(FAINT));
         });
         let _ = (INK, semibold(12.0));
     }
@@ -747,7 +763,7 @@ mod e2e {
         let (f, bold, italic, score) = lookalike::match_font(&mask, &orig).unwrap();
         let (grain, soft) = lookalike::texture(&img, rect, &mask);
         let look = Look { font: f, bold, italic, score, grain, soft };
-        let hand = Hand::from_line(&img, &mask, x0, y0, &orig);
+        let hand = Hand::from_line(&img, &mask, x0, y0, &orig, (f, bold, italic));
         let mut drawn = hand.write(new, (f, bold, italic), color).unwrap();
         lookalike::blend(&mut drawn, &look, color);
         let line = Line { text: String::new(), orig, rect, color, bg, on: true, look: None };
@@ -777,5 +793,59 @@ mod e2e {
         assert_eq!(FONTS[look.font].0, "Ink Free");
         let ink = |img: &RgbaImage| img.pixels().filter(|p| p.0[2] as u16 > p.0[0] as u16 + 40).count();
         assert!(ink(&after) > ink(&before) / 2, "new ink {} vs {}", ink(&after), ink(&before));
+    }
+}
+
+#[cfg(all(test, windows))]
+mod real_photo {
+    use super::*;
+
+    /// Runs the panel's pipeline on a real photo. PT_PHOTO=<image> PT_OUT=<folder> PT_NEW=<new text>, and either
+    /// PT_LINE=<word the OCR reads in the line> or PT_RECT=x,y,w,h with PT_ORIG=<what it says> (like "Sélection → ligne").
+    #[test]
+    #[ignore]
+    fn rewrite_real_photo() {
+        let Ok(photo) = std::env::var("PT_PHOTO") else { return };
+        let img = image::open(photo).unwrap().to_rgba8();
+        let var = |k: &str| std::env::var(k).ok();
+        let (rect, orig) = if let Some(r) = var("PT_RECT") {
+            let v: Vec<f32> = r.split(',').map(|x| x.trim().parse().unwrap()).collect();
+            ([v[0], v[1], v[2], v[3]], var("PT_ORIG").expect("PT_ORIG"))
+        } else {
+            let p = studio_ocr::recognize_with(&img, &var("PT_LANG").unwrap_or_else(|| "en-US".into()), true).unwrap();
+            for l in &p.lines {
+                eprintln!("LINE {:?} rect {:?}", l.text, l.rect.map(|v| v.round()));
+            }
+            let Some(word) = var("PT_LINE") else { return };
+            let l = p.lines.iter().find(|l| l.text.contains(&word)).expect("line");
+            (l.rect, var("PT_ORIG").unwrap_or_else(|| l.text.clone()))
+        };
+        let (Some(new), Some(out)) = (var("PT_NEW"), var("PT_OUT")) else { return };
+        let (color, bg) = studio_ocr::colors(&img, rect);
+        let (mask, x0, y0) = lookalike::ink(&img, rect, color, bg);
+        let (font, bold, italic, score) = lookalike::match_font(&mask, &orig).unwrap();
+        let (grain, soft) = lookalike::texture(&img, rect, &mask);
+        eprintln!("MATCH {} bold={bold} italic={italic} score={score:.2} grain={grain:.1} soft={soft:.2} color={color:?} bg={bg:?}", FONTS[font].0);
+        let mut hand = Hand::from_line(&img, &mask, x0, y0, &orig, (font, bold, italic));
+        if std::env::var("PT_FONTONLY").is_ok() {
+            hand.own_letters = false;
+        }
+        if std::env::var("PT_LETTERS").is_ok() {
+            hand.own_letters = true;
+        }
+        eprintln!("OWN LETTERS {}", hand.own_letters);
+        eprintln!("LETTERS {}", hand.letters());
+        let (mut drawn, start, end) = hand.rewrite(&orig, &new, (font, bold, italic), color).unwrap();
+        lookalike::blend(&mut drawn, &Look { font, bold, italic, score, grain, soft }, color);
+        let mut after = img.clone();
+        let p = 3.0;
+        lookalike::paper_fill(&mut after, [(x0 + start) as f32 - 2.0 - p, rect[1] - rect[3] * 0.2 - p, (end - start) as f32 + 4.0 + 2.0 * p, rect[3] * 1.4 + 2.0 * p], color, bg, grain);
+        imageops::overlay(&mut after, &drawn, (x0 + start) as i64, y0 as i64);
+        let pad = 80.0;
+        let (cx, cy) = ((rect[0] - pad).max(0.0) as u32, (rect[1] - pad).max(0.0) as u32);
+        let (cw, ch) = (((rect[2] + 2.0 * pad) as u32).min(img.width() - cx), ((rect[3] + 2.0 * pad) as u32).min(img.height() - cy));
+        imageops::crop_imm(&img, cx, cy, cw, ch).to_image().save(format!("{out}/real-before.png")).unwrap();
+        imageops::crop_imm(&after, cx, cy, cw, ch).to_image().save(format!("{out}/real-after.png")).unwrap();
+        mask.save(format!("{out}/real-mask.png")).unwrap();
     }
 }
