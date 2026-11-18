@@ -1,1 +1,217 @@
 # French text<TAB>translation. One line per text; a missing line falls back to English.
+Enregistrer	Guardar
+Tous les outils	Todas as ferramentas
+Fichier	Ficheiro
+Ouvrir…                         Ctrl+O	Abrir…                          Ctrl+O
+Créer un PDF depuis des images…	Criar um PDF a partir de imagens…
+Combiner des fichiers…	Combinar ficheiros…
+Nouveau PDF vierge (A4)	Novo PDF em branco (A4)
+Récents	Recentes
+Édition	Editar
+Rechercher               Ctrl+F	Procurar                   Ctrl+F
+Supprimer tous les commentaires	Eliminar todos os comentários
+Affichage	Ver
+Page entière             Ctrl+0	Página inteira            Ctrl+0
+Largeur de la page     Ctrl+2	Largura da página          Ctrl+2
+Taille réelle              Ctrl+1	Tamanho real               Ctrl+1
+Outils	Ferramentas
+Glisse un PDF ou une image dans la fenêtre	Largue um PDF ou uma imagem na janela
+Page précédente	Página anterior
+Page suivante	Página seguinte
+Largeur	Largura
+Signets	Marcadores
+Clic : aller à la page · Ctrl+clic / Maj+clic : sélectionner	Clique: ir para a página · Ctrl+clique / Shift+clique: selecionar
+Bienvenue dans Folio	Bem-vindo ao Folio
+Lis, annote, signe, organise et numérise tes PDF	Leia, anote, assine, organize e digitalize os seus PDF
+Écris ici…	Escreva aqui…
+Annuler	Cancelar
+Document protégé	Documento protegido
+Mot de passe	Palavra-passe
+Ouvrir	Abrir
+Créer ma signature	Criar a minha assinatura
+Dessine à la souris dans le cadre	Desenhe com o rato na caixa
+Utiliser	Usar
+Effacer	Limpar
+Ouvrir…	Abrir…
+Enregistrer sous…	Guardar como…
+Ctrl+Maj+S	Ctrl+Shift+S
+Exporter la page courante en PNG…	Exportar a página atual como PNG…
+Page · rendu 200 ppp	Página · renderizada a 200 ppp
+Pivoter les pages à gauche	Rodar páginas para a esquerda
+Page courante ou sélection	Página atual ou seleção
+Pivoter les pages à droite	Rodar páginas para a direita
+‹ Outils	‹ Ferramentas
+Épaisseur	Espessura
+Taille du texte	Tamanho do texto
+Supprimer les commentaires de la page	Eliminar os comentários desta página
+Redessiner	Redesenhar
+Coché	Marcado
+Appliquer les valeurs	Aplicar valores
+↺ Pivoter à gauche	↺ Rodar para a esquerda
+↻ Pivoter à droite	↻ Rodar para a direita
+Supprimer	Eliminar
+Dupliquer	Duplicar
+▲ Monter	▲ Mover para cima
+▼ Descendre	▼ Mover para baixo
+Inverser l'ordre	Inverter a ordem
+Tout sélectionner	Selecionar tudo
+Page vierge	Página em branco
+Depuis un fichier…	De um ficheiro…
+Extraire la sélection…	Extrair seleção…
+Diviser toutes les	Dividir a cada
+Diviser…	Dividir…
+Supprimer les pages blanches	Eliminar páginas em branco
+Détecte les pages presque vides (dos de scans, séparateurs) et les retire	Deteta páginas quase vazias (versos de digitalização, separadores) e remove-as
+Nouvelle mise en page A4 : chaque feuille regroupe plusieurs pages réduites	Nova paginação A4: cada folha contém várias páginas reduzidas
+Recadrer la sélection	Recortar a seleção
+Ajouter des fichiers…	Adicionar ficheiros…
++ Document ouvert	+ Abrir documento
+Combiner	Combinar
+Depuis des images (pages A4)	De imagens (páginas A4)
+Depuis des images (taille d'origine)	De imagens (tamanho original)
+PDF vierge A4	PDF A4 em branco
+Rendre le PDF consultable (calque de texte invisible)	Tornar o PDF pesquisável (camada de texto invisível)
+Reconnaître le texte	Reconhecer texto
+Copier le texte	Copiar texto
+Enregistrer en .txt…	Guardar como .txt…
+Relancer l'OCR sur ces pages (garde le reste consultable)	Voltar a executar o OCR nestas páginas (o resto continua pesquisável)
+Appliquer le caviardage	Aplicar rasuras
+Effacer les zones	Limpar áreas
+Autoriser l'impression	Permitir imprimir
+Autoriser la copie du texte	Permitir copiar texto
+Autoriser les modifications	Permitir alterações
+Enregistrer une copie protégée…	Guardar uma cópia protegida…
+Compression sans perte	Compressão sem perdas
+72 ppp	72 dpi
+110 ppp	110 dpi
+150 ppp	150 dpi
+Qualité JPEG	Qualidade JPEG
+Compression forte	Compressão forte
+Filigrane	Marca de água
+En-tête	Cabeçalho
+Pied	Rodapé
+Numéros	Números de página
+Premier numéro	Número inicial
+Chiffres	Algarismos
+Taille	Tamanho
+Opacité	Opacidade
+Angle	Ângulo
+Gras	Negrito
+Derrière le contenu	Atrás do conteúdo
+Appliquer	Aplicar
+Appliquer la couleur de fond	Aplicar cor de fundo
+Texte	Texto
+300 ppp	300 dpi
+Exporter…	Exportar…
+Extraire les images du PDF…	Extrair imagens do PDF…
+Enregistre en PNG chaque image contenue dans les pages choisies	Guarda cada imagem das páginas escolhidas como PNG
+Vers Pixel	Para o Pixel
+Vers Lumen	Para o Lumen
+Choisir l'autre version…	Escolher a outra versão…
+Afficher les différences sur les pages	Mostrar as diferenças nas páginas
+Mot ou phrase	Palavra ou frase
+Ajouter pour la page courante	Adicionar para a página atual
+Un par page	Uma por página
+Niveau inférieur	Aninhado
+Version PDF	Versão do PDF
+Format (page courante)	Tamanho (página atual)
+Emplacement	Localização
+Ajouter comme annotation	Adicionar como anotação
+Couleur	Cor
+Tampon	Carimbo
+Glisse sur la page pour poser le tampon, ou clique pour une taille standard.	Arraste na página para colocar o carimbo, ou clique para um tamanho padrão.
+Texte : clique où écrire. Date du jour : un clic.	Texto: clique onde escrever. Data de hoje: um clique.
+Ce PDF n'a pas de champs : utilise Texte, Date et Signature pour le remplir.	Este PDF não tem campos: use Texto, Data e Assinatura para o preencher.
+Insérer après la page courante	Inserir depois da página atual
+Extraire et diviser	Extrair e dividir
+Impression économique	Impressão económica
+Recadrer (marges en mm : gauche, haut, droite, bas)	Recortar (margens em mm: esquerda, cima, direita, baixo)
+Ajoute des PDF et des images (ou glisse-les dans la fenêtre), mets-les dans l'ordre, puis combine.	Adicione PDF e imagens (ou largue-os na janela), ordene-os e combine-os.
+Chaque image devient une page. Lance ensuite l'OCR pour rendre le texte des scans consultable.	Cada imagem torna-se uma página. Depois execute o OCR para tornar pesquisável o texto digitalizado.
+Lit le texte des pages scannées ou photographiées avec le moteur OCR de Windows, sans rien envoyer en ligne.	Lê o texto de páginas digitalizadas ou fotografadas com o motor OCR do Windows, sem enviar nada para a internet.
+Langue du document	Idioma do documento
+Aucune langue OCR installée : Paramètres Windows › Heure et langue › Langue.	Nenhum idioma de OCR instalado: Definições do Windows › Hora e idioma › Idioma.
+Trace des rectangles avec l'outil Caviardage sur ce qui doit disparaître. Appliquer remplace ces pages par une image : le texte caché n'existe plus du tout dans le fichier.	Desenhe retângulos com a ferramenta Rasurar sobre o que deve desaparecer. Aplicar substitui essas páginas por uma imagem: o texto escondido deixa de existir no ficheiro.
+Chiffrement AES-256. Une copie protégée est enregistrée, le document ouvert reste modifiable.	Encriptação AES-256. É guardada uma cópia protegida; o documento aberto continua editável.
+Mot de passe d'ouverture	Palavra-passe de abertura
+Mot de passe des autorisations (facultatif)	Palavra-passe de permissões (opcional)
+Pour retirer un mot de passe : ouvre le PDF protégé, puis Enregistrer : la copie n'en a plus.	Para remover uma palavra-passe: abra o PDF protegido e depois Guardar: a cópia deixa de a ter.
+Compression forte (pages en images)	Compressão forte (páginas como imagens)
+Idéal pour les scans lourds. Le texte n'est plus sélectionnable : relance l'OCR ensuite.	Ideal para digitalizações pesadas. O texto deixa de ser selecionável: volte a executar o OCR depois.
+Arrière-plan	Fundo
+Résolution	Resolução
+Envoyer la page courante	Enviar a página atual
+Compare le document ouvert à une autre version : chaque page reçoit un taux de différence, et les zones modifiées peuvent s'afficher en rouge.	Compara o documento aberto com outra versão: cada página recebe uma pontuação de diferença e as zonas alteradas podem ser mostradas a vermelho.
+Un scan doit d'abord passer par Numériser et OCR.	Uma digitalização tem de passar primeiro por Digitalizar e OCR.
+Aucun signet. Outils › Signets pour en créer.	Sem marcadores. Ferramentas › Marcadores para criar alguns.
+Glisse entre deux points de la page : la distance s'affiche en millimètres (à l'échelle 1:1 du document).	Arraste entre dois pontos da página: a distância aparece em milímetros (à escala 1:1 do documento).
+Main (H)	Mão (H)
+Surligner	Realçar
+Souligner	Sublinhado
+Barrer	Rasurado
+Note	Nota
+Zone de texte	Caixa de texto
+Ligne	Linha
+Flèche	Seta
+Dessin à main levée	Desenho à mão livre
+Date du jour	Data de hoje
+Caviardage	Rasurar
+Mesure	Medir
+Commenter	Comentar
+Remplir et signer	Preencher e assinar
+Organiser les pages	Organizar páginas
+Combiner des fichiers	Combinar ficheiros
+Créer un PDF	Criar PDF
+Numériser et OCR	Digitalizar e OCR
+Caviarder	Rasurar
+Protéger	Proteger
+Compresser	Comprimir
+Filigrane et numérotation	Marca de água e numeração
+Exporter	Exportar
+Comparer des fichiers	Comparar ficheiros
+Rechercher	Pesquisar
+Propriétés	Propriedades
+Mesurer	Medir
+Approuvé	Aprovado
+Rejeté	Rejeitado
+Payé	Pago
+Reçu	Recebido
+Pour information	Para sua informação
+Ouvrir un PDF	Abrir PDF
+Créer depuis des images	Criar a partir de imagens
+PDF vierge	PDF em branco
+Lettre US	Carta US
+Comme la page courante	Igual à página atual
+Mots-clés	Palavras-chave
+retoucher la page	retocar a página
+développer la page	revelar a página
+Ou une image, glissée ici	Ou uma imagem, arrastada para aqui
+Photos et scans en un seul PDF A4	Fotos e digitalizações num único PDF A4
+Plusieurs PDF et images en un seul	Vários PDF e imagens num só
+Le texte des scans et photos	Texto de digitalizações e fotos
+Formulaire, signature manuscrite, date	Formulário, assinatura manuscrita, data
+Une page A4 à remplir	Uma página A4 para preencher
+Document Word (RTF)	Documento Word (RTF)
+Surligner, notes, formes, dessin, tampons	Realçar, notas, formas, desenho, carimbos
+Champs de formulaire, signature, date	Campos de formulário, assinatura, data
+Pivoter, supprimer, déplacer, insérer, extraire	Rodar, eliminar, mover, inserir, extrair
+Fusionner PDF et images	Unir PDF e imagens
+Depuis des images ou une page vierge	De imagens ou de uma página em branco
+Reconnaître le texte des scans	Reconhecer texto em digitalizações
+Effacer définitivement des zones	Apagar áreas definitivamente
+Mot de passe AES-256 et droits	Palavra-passe AES-256 e permissões
+Réduire la taille du fichier	Reduzir o tamanho do ficheiro
+Filigrane, en-tête, pied, numéros, Bates	Marca de água, cabeçalho, rodapé, números, Bates
+Images, texte ou Word	Imagens, texto ou Word
+Trouver les différences entre versions	Encontrar diferenças entre versões
+Un mot dans tout le document	Uma palavra em todo o documento
+Table des matières du PDF	Índice do PDF
+Titre, auteur, informations	Título, autor, informações
+Distances réelles en mm	Distâncias reais em mm
+Résumé et questions, en local	Resumo e perguntas, no dispositivo
+Bas gauche	Em baixo à esquerda
+Bas centre	Em baixo ao centro
+Bas droite	Em baixo à direita
+Haut gauche	Em cima à esquerda
+Haut centre	Em cima ao centro
+Haut droite	Em cima à direita

@@ -1,1 +1,581 @@
 # French text<TAB>translation. One line per text; a missing line falls back to English.
+Annuler	Annulla
+Proportionnelle	Uniforme
+Mettre à l'échelle les contours et effets	Scala tracce ed effetti
+Horizontal	Orizzontale
+Vertical	Verticale
+Angle	Angolo
+Axe horizontal	Asse orizzontale
+Axe vertical	Asse verticale
+Les angles du résultat sont arrondis.	Gli angoli del risultato sono arrotondati.
+Courbes lisses	Curve morbide
+Nombre d'ondes	Creste per segmento
+Pointes	Angolo
+Arrondis	Morbido
+Angles	Angoli
+Étapes intermédiaires	Passi specificati
+Formes et couleurs se fondent progressivement.	Forme e colori si fondono progressivamente.
+Rosace : 12 copies en cercle	Rosetta: 12 copie in cerchio
+Aperçu	Anteprima
+Appliquer sur une copie	Applica a una copia
+Plan actif	Tavola da disegno attiva
+Tous les plans	Tutte le tavole da disegno
+Sélection	Selezione
+Fond transparent	Sfondo trasparente
+Qualité	Qualità
+SVG optimisé (nombres arrondis, attributs inutiles retirés)	SVG ottimizzato (numeri arrotondati, attributi inutilizzati rimossi)
+Texte, dégradés, effets et images intégrés restent modifiables.	Testo, sfumature, effetti e immagini incorporate restano modificabili.
+Un PDF vectoriel, une page par plan de travail, texte réel.	Un PDF vettoriale, una pagina per tavola da disegno, testo reale.
+Noir et blanc	Bianco e nero
+Niveaux de gris	Scala di grigi
+Couleurs	Colori
+Précision	Precisione
+Ignorer le blanc	Ignora il bianco
+Conserver l'image d'origine	Mantieni l'immagine originale
+Réinitialiser	Ripristina
+Largeur	Larghezza
+Hauteur	Altezza
+QR code vectoriel du texte sélectionné	Codice QR vettoriale dal testo selezionato
+Objet · groupé, net à toutes les tailles	Oggetto · raggruppato, nitido a qualsiasi dimensione
+Exporter un pack d'icônes (16 à 1024 px)…	Esporta un pacchetto di icone (da 16 a 1024 px)…
+Plan de travail actif · PNG	Tavola da disegno attiva · PNG
+Tout sélectionner	Seleziona tutto
+Inverser la sélection	Inverti la selezione
+Dupliquer la sélection	Duplica selezione
+Objets · Ctrl+Alt+D	Oggetti · Ctrl+Alt+D
+Grouper la sélection	Raggruppa la selezione
+Objets · Ctrl+G	Oggetti · Ctrl+G
+Dégrouper la sélection	Separa la selezione
+Objets · Ctrl+Maj+G	Oggetti · Ctrl+Maiusc+G
+Exporter	Esporta
+Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E	Opzioni di esportazione: Ctrl+Alt+E · PNG rapido ×2: Ctrl+E
+Plan de travail actif : clic pour l'ajuster à l'écran	Tavola da disegno attiva: clic per adattarla allo schermo
+Fichier	File
+Édition	Modifica
+Objet	Oggetto
+Texte	Testo
+Effet	Effetto
+Affichage	Visualizza
+Fenêtre	Finestra
+Ouvrir un fichier récent	Apri recenti
+Aucun fichier récent	Nessun file recente
+Exporter rapidement	Esportazione rapida
+Modifier les couleurs	Modifica colori
+Recolorer l'illustration…	Ricolora grafica…
+Régler la teinte, saturation, luminosité…	Regola tonalità, saturazione, luminosità…
+Convertir en niveaux de gris	Converti in scala di grigi
+Inverser les couleurs	Inverti colori
+Sépia	Seppia
+Saturer +20 %	Satura +20%
+Désaturer −20 %	Desatura −20%
+Éclaircir +10 %	Schiarisci +10%
+Assombrir −10 %	Scurisci −10%
+Teinte +30°	Tonalità +30°
+Couleurs complémentaires	Colori complementari
+Mélange horizontal	Fondi orizzontalmente
+Mélange vertical	Fondi verticalmente
+Mélange avant-arrière	Fondi da davanti a dietro
+Échanger fond et contour	Scambia riempimento e traccia
+Transformation	Trasforma
+Disposition	Disponi
+Envoyer vers le calque	Invia al livello
+Tracé	Tracciato
+Fusion	Fusione
+Masque d'écrêtage	Maschera di ritaglio
+Masque d'opacité	Maschera di opacità
+Tracé transparent composé	Tracciato composto
+Plans de travail	Tavole da disegno
+Nouveau plan de travail	Nuova tavola da disegno
+Ajuster à l'illustration	Adatta all'illustrazione
+Réorganiser en grille	Riordina in una griglia
+Police	Font
+Taille	Dimensione
+Casse	Maiuscole/minuscole
+Insérer un caractère spécial	Inserisci carattere speciale
+Même	Uguale
+Effets dynamiques (modifiables dans Propriétés)	Effetti dinamici (modificabili in Proprietà)
+Distorsion et transformation	Distorci e trasforma
+Styliser	Stilizzazione
+Mode tracés (Ctrl+Maj+Y)	Modalità contorni (Ctrl+Maiusc+Y)
+Contours de sélection (Ctrl+H)	Bordi della selezione (Ctrl+H)
+Cadre de sélection (Ctrl+Maj+B)	Riquadro di delimitazione (Ctrl+Maiusc+B)
+Règles (Ctrl+R)	Righelli (Ctrl+R)
+Repères (Ctrl+;)	Guide (Ctrl+;)
+Verrouiller les repères (Ctrl+Alt+;)	Blocca guide (Ctrl+Alt+;)
+Repères commentés (Ctrl+U)	Guide smart (Ctrl+U)
+Repères de composition (centre et tiers)	Guide di composizione (centro e terzi)
+Grille (Ctrl+')	Griglia (Ctrl+')
+Magnétisme de la grille (Ctrl+Alt+')	Aggancia alla griglia (Ctrl+Alt+')
+Pas de la grille	Spaziatura della griglia
+Espace de travail	Area di lavoro
+Exporter…	Esporta…
+Modifier la couleur	Modifica colore
+Fond	Riempimento
+Contour	Traccia
+Nouveau fichier	Nuovo file
+Ouvrir…	Apri…
+Bienvenue dans Vector	Benvenuto in Vector
+Logos, icônes et illustrations nets à toutes les tailles	Loghi, icone e illustrazioni, nitidi a qualsiasi dimensione
+Créer un plan de travail	Crea una tavola da disegno
+Récents	Recenti
+Grouper	Raggruppa
+Dissocier	Separa
+Dupliquer	Duplica
+Tolérance	Tolleranza
+Pente	Pendenza
+Fermé	Chiuso
+Tours	Giri
+Sens antihoraire	Antiorario
+Cadre extérieur	Cornice esterna
+Épaisseur	Spessore
+Creux	Rientro interno
+Lissage	Levigatura
+Fusionner avec la même couleur	Unisci con lo stesso colore
+Contours et effets	Tracce ed effetti
+Dispersion	Dispersione
+Intensité	Intensità
+Linéaire	Lineare
+Ajuster	Adatta
+Tout	Tutto
+Nouveau	Nuovo
+Réorganiser	Riordina
+Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond	Riempimento e traccia · clic: scambia (Maiusc+X) · D: predefinito · /: nessun riempimento
+Propriétés	Proprietà
+Calques	Livelli
+Bibliothèques	Librerie
+Nuancier	Campioni
+Styles graphiques	Stili grafici
+Effets bitmap (export PNG et JPEG)	Effetti raster (esportazione PNG e JPEG)
+Symboles	Simboli
+Formes prêtes	Forme pronte
+Style des nouveaux objets	Nuovo stile oggetto
+Grille et repères	Griglia e guide
+Afficher la grille	Mostra griglia
+Magnétisme de la grille	Aggancia alla griglia
+Règles	Righelli
+Repères commentés	Guide smart
+Afficher les repères	Mostra guide
+Centre et tiers	Centro e terzi
+Aligner et répartir	Allinea e distribuisci
+Apparence	Aspetto
+Dégradé	Sfumatura
+Effets	Effetti
+Actions rapides	Azioni rapide
+Ajuster au contenu	Adatta al contenuto
+Point de référence	Punto di riferimento
+Conserver les proportions	Mantieni proporzioni
+↔ Miroir	↔ Rifletti
+↕ Miroir	↕ Rifletti
+Inclinaison…	Inclina…
+Mettre à l'échelle contours et effets	Scala tracce ed effetti
+Plan	Tavola da disegno
+Clé	Oggetto chiave
+Écart	Spaziatura
+Libérer le masque	Rilascia maschera
+Tracé composé	Tracciato composto
+Décalage…	Sfalsa…
+Vectoriser le contour	Traccia contorno
+Simplifier…	Semplifica…
+Fusion…	Fusione…
+Recolorer…	Ricolora…
+Nouveau symbole	Nuovo simbolo
+Rompre le lien	Interrompi collegamento
+Verrouiller	Blocca
+Masquer	Nascondi
++ Calque	+ Livello
+Supprimer	Elimina
+Monter le calque	Sposta il livello su
+Descendre le calque	Sposta il livello giù
+Placer la sélection sur le calque actif	Sposta la selezione nel livello attivo
++ Nouveau	+ Nuovo
+Tout voir	Mostra tutto
++ Couleur du fond	+ Colore di riempimento
+Ajouter la bibliothèque	Aggiungi libreria
+Couleurs utilisées	Colori in uso
+Vider	Vuoto
+Nouveau style	Nuovo stile
+Retirer le dernier	Rimuovi l'ultimo
+Placer	Posiziona
+Redéfinir	Ridefinisci
+Remplace le symbole par la sélection et met à jour ses occurrences	Sostituisce il simbolo con la selezione e ne aggiorna le istanze
+Nom du symbole	Nome del simbolo
+Créer	Crea
+Fait de la sélection un symbole réutilisable	Trasforma la selezione in un simbolo riutilizzabile
+Centre	Centro
+Intérieur	Interno
+Extérieur	Esterno
+Ronds	Arrotondato
+Plats	Piatto
+Carrés	Sporgente
+Pointus	Smussato
+Biseaux	Smusso
+Aucun	Nessuno
++ Arrêt	+ Interruzione
+Inverser	Inverti
+Recentrer	Ricentra
+Effacer	Cancella
+Ombre portée	Ombra esterna
+Tracé fermé	Tracciato chiuso
+Lisser	Morbido
+Simplifier	Semplifica
+Gras	Grassetto
+Italique	Corsivo
+Souligné	Sottolineato
+Barré	Barrato
+Titre	Iniziali Maiuscole
+Gauche	Sinistra
+Droite	Destra
+Crénage	Crenatura
+Texte vertical	Testo verticale
+Détacher du tracé	Stacca dal tracciato
+Vectorisation dynamique…	Ricalco immagine…
+Verticale	Verticale
+Angle de l'axe	Angolo dell'asse
+Angle d'inclinaison	Angolo di inclinazione
+Échelle horizontale	Scala orizzontale
+Échelle verticale	Scala verticale
+Déplacement horizontal	Movimento orizzontale
+Déplacement vertical	Movimento verticale
+Rotation	Ruota
+Décalage (négatif = vers l'intérieur)	Sfalsamento (negativo = verso l'interno)
+Précision (plus haut = moins de points)	Precisione (più alto = meno punti)
+Rayon	Raggio
+Détail (points par 100 px)	Dettaglio (punti ogni 100 px)
+Contraction ← → Dilatation	Pizzica ← → Gonfia
+Angle des hachures	Angolo del tratteggio
+Espacement	Spaziatura
+Teinte	Tonalità
+Luminosité	Luminosità
+Décalage X	Sfalsamento X
+Décalage Y	Sfalsamento Y
+Rotation par copie	Rotazione per copia
+Contenu	Contenuto
+Échelle	Scala
+Vectorisation dynamique	Ricalco immagine
+Seuil	Soglia
+Bruit ignoré	Rumore ignorato
+Courbes (plus haut = plus arrondi)	Curve (più alto = più rotondo)
+Vectoriser	Ricalca
+Recolorer l'illustration	Ricolora grafica
+Nouveau document	Nuovo documento
+Nouveau…	Nuovo…
+Enregistrer	Salva
+Enregistrer sous…	Salva con nome…
+Importer une image…	Posiziona un'immagine…
+Importer un SVG…	Posiziona un SVG…
+Fermer	Chiudi
+Rétablir	Ripeti
+Couper	Taglia
+Copier	Copia
+Coller	Incolla
+Coller devant	Incolla davanti
+Coller derrière	Incolla dietro
+Coller en place	Incolla sul posto
+Transformer à nouveau	Trasforma di nuovo
+Symétrie horizontale	Rifletti orizzontalmente
+Symétrie verticale	Rifletti verticalmente
+Verrouiller la sélection	Blocca selezione
+Tout déverrouiller	Sblocca tutto
+Masquer la sélection	Nascondi la selezione
+Tout afficher	Mostra tutto
+Décomposer	Espandi
+Joindre	Unisci
+Convertir les points en sommets	Converti punti in angoli
+Décalage du tracé…	Sposta tracciato…
+Convertir en tracé	Crea contorni
+Nettoyer les objets vides	Pulisci oggetti vuoti
+Créer une fusion…	Crea fusione…
+Convertir en texte captif	Converti in testo in area
+Convertir en texte de point	Converti in testo da punto
+Orientation horizontale / verticale	Orientamento orizzontale / verticale
+Désélectionner	Deseleziona
+Sélection inverse	Inversa
+Objets du calque actif	Oggetti sul livello attivo
+Objets du plan de travail actif	Oggetti sulla tavola attiva
+Tous les textes	Tutti gli oggetti di testo
+Tracés ouverts	Tracciati aperti
+Masques d'écrêtage	Maschere di ritaglio
+Lueur externe	Bagliore esterno
+Lueur interne	Bagliore interno
+Contour progressif	Sfuma
+Flou gaussien	Sfocatura gaussiana
+Distorsion dynamique	Altera
+Retirer tous les effets	Rimuovi tutti gli effetti
+Zoom avant	Ingrandisci
+Zoom arrière	Riduci
+Ajuster le plan de travail	Adatta la tavola alla finestra
+Tout ajuster	Adatta tutto alla finestra
+Taille réelle	Dimensioni reali
+Zoom sur la sélection	Zoom sulla selezione
+Réinitialiser la rotation de la vue	Ripristina rotazione della vista
+Opacité de la couleur	Opacità del colore
+Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.	Apre anche file SVG, PNG e JPEG: trascinali nella finestra.
+Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone	Clic: seleziona · Maiusc: aggiungi · Alt+trascina: duplica · trascina nel vuoto: selezione
+Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit	Clic su un punto per modificarlo, Canc lo elimina, le frecce lo spostano · Alt+clic elimina, Ctrl+clic converte
+Critères	Criteri
+Entoure les objets à sélectionner · Maj ajoute à la sélection	Disegna attorno agli oggetti per selezionarli · Maiusc aggiunge alla selezione
+Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer	Clic: punto · trascina: curva · clic sul primo punto: chiudi · Invio: termina
+Clique sur un tracé pour ajouter un point sans changer sa forme	Fai clic su un tracciato per aggiungere un punto senza cambiarne la forma
+Clique un point d'ancrage pour le supprimer	Fai clic su un punto di ancoraggio per eliminarlo
+Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques	Clic su un punto morbido: angolo · trascina da un angolo: maniglie simmetriche
+Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer	Ogni clic aggiunge un punto e la curva si ammorbidisce da sola · clic sul primo punto: chiudi
+Maj : proportions fixes	Maiusc: mantieni le proporzioni
+Rangées	Righe
+Colonnes	Colonne
+Cercles	Cerchi
+Rayons	Raggi
+Anneaux	Anelli
+Glisse depuis le centre du halo	Trascina dal centro del riflesso
+Frotte le tracé sélectionné	Strofina sul tracciato selezionato
+Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint	Trascina sulla tavola da disegno · Alt+clic: valori esatti · Maiusc: vincola
+Pas Maj	Passo con Maiusc
+Tire un coin du cadre pour déformer en perspective libre	Trascina un angolo del riquadro per distorcere liberamente in prospettiva
+Tire une partie du tracé sélectionné : les points voisins suivent en douceur	Trascina una parte del tracciato selezionato: i punti vicini seguono dolcemente
+Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur	Trascina da un tratto per allargarlo o restringerlo lì · Alt+clic: rimuove il punto di larghezza
+Étapes	Passi
+Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole	Nessun simbolo: seleziona un'illustrazione, poi Librerie › Simboli › Nuovo simbolo
+Glisse pour pulvériser des occurrences du symbole	Trascina per spruzzare istanze di simbolo
+Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	Seleziona forme sovrapposte · clic o trascina: unisci regioni · Alt: elimina una regione
+Clique une zone fermée pour la peindre avec le fond	Fai clic su una zona chiusa per dipingerla con il riempimento
+Glisse sur l'objet sélectionné pour placer le dégradé	Trascina sull'oggetto selezionato per posizionare la sfumatura
+Rayon du point	Raggio delle punte
+Clic : point de couleur · Alt+clic : le retirer	Clic: punto colore · Alt+clic: rimuovilo
+Glisse pour mesurer une distance et un angle	Trascina per misurare una distanza e un angolo
+Clique sur un tracé pour le couper à cet endroit	Fai clic su un tracciato per tagliarlo lì
+Trace un trait à main levée à travers les formes pour les découper	Disegna a mano libera sulle forme per tagliarle
+Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	Cancella nella selezione, o ovunque se non c'è selezione
+Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	Trascina per creare · clic per attivare · sposta una tavola secondaria · Canc
+Pas	Passo
+Déplacement clavier	Incremento da tastiera
+Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	Trascina da un righello per posare una guida; riportala nel righello per eliminarla.
+Fond du document	Sfondo del documento
+Aligner sur	Allinea a
+Objet clé : le premier sélectionné (contour bleu épais).	Oggetto chiave: il primo selezionato (contorno spesso).
+Répartir les objets	Distribuisci oggetti
+Répartir l'espacement	Distribuisci spaziatura
+Modes de forme	Metodi forma
+Gris	Grigio
+Nuances du document	Campioni del documento
+Ajoute ici les couleurs de ton projet.	Aggiungi qui i colori del tuo progetto.
+Sans sélection, le style devient celui des nouveaux objets.	Senza selezione, lo stile si applica ai nuovi oggetti.
+Opacité	Opacità
+Mode de fusion	Metodo di fusione
+Position du contour	Allinea traccia
+Bouts	Maiuscole
+Limite de pointe	Limite smussatura
+Pointillés	Linea tratteggiata
+Tiret	Trattino
+Espace	Spazio
+Tiret 2	Trattino 2
+Espace 2	Spazio 2
+Pointes de flèche (début · fin)	Punte di freccia (inizio · fine)
+Taille des pointes	Dimensione della punta
+Profil de largeur	Profilo di larghezza
+Flou	Sfocatura
+Distorsion	Distorci
+Finesse	Sottigliezza
+Arrondi des coins	Arrotondamento angoli
+Approche	Tracking
+Interlignage	Interlinea
+Ligne de base	Linea di base
+Largeur du cadre	Larghezza della cornice
+Départ sur le tracé	Inizia sul tracciato
+Sélection directe	Selezione diretta
+Sélection de groupe	Raggruppa la selezione
+Baguette magique	Bacchetta magica
+Plume	Penna
+Ajout de point d'ancrage	Aggiungi punto di ancoraggio
+Suppression de point d'ancrage	Elimina punto di ancoraggio
+Conversion de point d'ancrage	Punto di ancoraggio
+Courbure	Curvatura
+Texte captif	Testo in area
+Texte curviligne	Testo su tracciato
+Segment	Segmento di linea
+Spirale	Spirale
+Grille rectangulaire	Griglia rettangolare
+Grille polaire	Griglia polare
+Flèche	Freccia
+Rectangle arrondi	Rettangolo arrotondato
+Polygone	Poligono
+Étoile	Stella
+Halo	Riflesso
+Cœur	Cuore
+Pinceau	Pennello
+Pinceau goutte	Pennello blob
+Crayon	Matita
+Gomme de tracé	Gomma per tracciati
+Miroir	Rifletti
+Remodelage	Rimodella
+Déformation	Altera
+Torsion	Mulinello
+Contraction	Pizzica
+Dilatation	Gonfiamento
+Festons	Smerlo
+Cristallisation	Cristallizza
+Fronces	Raggrinzisci
+Concepteur de forme	Generatore forme
+Pot de peinture dynamique	Secchiello pittura dinamica
+Dégradé de formes	Fusione
+Pulvérisation de symboles	Spruzzatore di simboli
+Filet	Trama
+Pipette	Contagocce
+Mesure	Misura
+Ciseaux	Forbici
+Cutter	Coltello
+Gomme	Gomma
+Main	Mano
+Rotation de la vue	Ruota la vista
+Plan de travail	Tavola da disegno
+Serré	Stretto
+Logo N&B	Logo B/N
+Gris 4 niveaux	Grigio a 4 livelli
+Affiche 6 couleurs	Poster a 6 colori
+Photo 16 couleurs	Foto a 16 colori
+Teinte −60°	Tonalità −60°
+Complémentaires	Complementare
+Icône	Icona
+Bannière	Banner
+Carte de visite	Biglietto da visita
+Même couleur de fond	Stesso colore di riempimento
+Même couleur de contour	Stesso colore di traccia
+Même type d'objet	Stesso tipo di oggetto
+Même aspect complet	Stesso aspetto
+PNG ×2 fond transparent	PNG ×2 trasparente
+SVG optimisé	SVG ottimizzato
+PDF (tous les plans de travail)	PDF (tutte le tavole)
+Déplacement…	Sposta…
+Mise à l'échelle…	Scala…
+Transformer chaque…	Trasforma ciascuno…
+Répétition…	Ripeti…
+Rotation 90° horaire	Ruota di 90° orario
+Rotation 90° antihoraire	Ruota di 90° antiorario
+Rotation 180°	Ruota di 180°
+Premier plan	Primo piano
+En avant	Avanti
+En arrière	Indietro
+Arrière-plan	Sfondo
+Lisser le tracé	Leviga il tracciato
+Simplifier (rapide)	Semplifica (rapido)
+Inverser le sens	Inverti la direzione
+Fermer / ouvrir le tracé	Chiudi / apri tracciato
+Ajouter des points d'ancrage	Aggiungi punti di ancoraggio
+Distorsion aléatoire…	Irruvidisci…
+Contraction et dilatation…	Pizzica e gonfia…
+Néon	Neon
+Océan	Oceano
+Rétro	Retrò
+Forêt	Foresta
+Coucher de soleil	Tramonto
+Métal	Metallo
+Pêche	Pesca
+Méditerranée	Mediterraneo
+Désert	Deserto
+Gris chauds	Grigi caldi
+Gris froids	Grigi freddi
+Fruits rouges	Frutti rossi
+Médical	Medico
+Contour épais	Contorno spesso
+Ombre douce	Ombra morbida
+Lueur dorée	Bagliore dorato
+Flou artistique	Flou artistico
+Néon rose	Neon rosa
+Néon bleu	Neon blu
+Néon vert	Neon verde
+Bouton iOS	Pulsante iOS
+Carte flottante	Scheda fluttuante
+Verre dépoli	Vetro smerigliato
+Sombre élégant	Scuro elegante
+Pointillé rond	Puntini tondi
+Tirets longs	Trattini lunghi
+Double contour	Doppio contorno
+Ombre longue	Ombra lunga
+Ombre colorée	Ombra colorata
+Fantôme	Fantasma
+Papier kraft	Carta kraft
+Aligner à gauche	Allinea a sinistra
+Centrer horizontalement	Centra orizzontalmente
+Aligner à droite	Allinea a destra
+Aligner en haut	Allinea in alto
+Centrer verticalement	Centra verticalmente
+Aligner en bas	Allinea in basso
+Rotation 90°	Ruota di 90°
+À gauche	Sinistra
+Centres horizontaux	Centri orizzontali
+À droite	Destra
+En haut	In alto
+Centres verticaux	Centri verticali
+En bas	In basso
+Bords gauches	Bordi sinistri
+Bords droits	Bordi destri
+Bords hauts	Bordi superiori
+Bords bas	Bordi inferiori
+Serrés	Stretto
+Accueil	Home
+Tes dessins enregistrés apparaîtront ici	I tuoi disegni salvati appariranno qui
+Projets .evec · glisse-en un pour l'ouvrir	Progetti .evec · trascinane uno per aprirlo
+Décale la sélection d'une distance précise	Sposta la selezione di una distanza precisa
+Agrandit ou réduit depuis le point de référence	Ingrandisce o riduce dal punto di riferimento
+Fait pivoter autour du point de référence	Ruota attorno al punto di riferimento
+Retourne la sélection par rapport à un axe	Rispecchia la selezione rispetto a un asse
+Penche la sélection	Inclina la selezione
+Chaque objet autour de son propre centre	Ogni oggetto attorno al proprio centro
+Crée un contour parallèle, à l'extérieur ou à l'intérieur	Crea un contorno parallelo, all'esterno o all'interno
+Retire des points en gardant l'allure	Rimuove punti mantenendo la forma
+Arrondit les angles vifs	Arrotonda gli angoli vivi
+Transforme le tracé en dents de scie	Trasforma il tracciato in uno zigzag
+Transforme le tracé en vagues régulières	Trasforma il tracciato in onde regolari
+Rend le tracé irrégulier, façon dessin à la main	Rende il tracciato irregolare, stile disegno a mano
+Creuse ou gonfle les côtés	Pizzica o gonfia i lati
+Fait tourner davantage le centre que les bords	Torce il centro più dei bordi
+Remplace le fond par des hachures dessinées	Sostituisce il riempimento con un tratteggio disegnato
+Crée des étapes intermédiaires entre les objets	Crea passaggi intermedi tra gli oggetti
+Teinte, saturation et luminosité de la sélection	Tonalità, saturazione e luminosità della selezione
+Une série de copies décalées, tournées ou non	Una serie di copie sfalsate, ruotate o no
+Unir	Unisci
+Soustraire	Sottrai
+Intersection	Interseca
+Exclure	Escludi
+Diviser	Dividi
+Découpe	Ritaglio
+Cadrer	Cornice
+Détourage	Ritaglio
+Carré	Quadrato
+Écran 16:9	Schermo 16:9
+Réseaux sociaux	Social network
+retoucher en image	ritoccare come immagine
+placer le dessin	posizionare il disegno
+animer le dessin	animare il disegno
+ajouter au montage	aggiungere al montaggio
+développer	sviluppare
+Marque déposée	Marchio registrato
+Tiret cadratin	Lineetta
+Tiret demi-cadratin	Trattino medio
+Points de suspension	Puntini di sospensione
+Degré	Grado
+Différence	Differenza
+Densité couleur −	Densità colore −
+Densité couleur +	Densità colore +
+Lumière crue	Luce dura
+Lumière tamisée	Luce soffusa
+Aucune	Nessuno
+Triangle ouvert	Triangolo aperto
+Flèche fine	Freccia sottile
+Cercle	Cerchio
+Losange	Rombo
+Barre	Barra
+Point	Punto
+Uniforme	Uniforme
+Lentille	Lente
+Pointe à la fin	Punta di freccia alla fine
+Pointe au début	Punta di freccia all'inizio
+Goutte	Goccia
+Vague	Onda
+Calligraphie	Calligrafia
+Décaler la teinte de +30°	Sposta la tonalità di +30°
+Décaler la teinte de −30°	Sposta la tonalità di −30°
+Teinte opposée (complémentaire)	Tonalità opposta (complementare)
+Négatif	Negativo
+Plus saturé	Più saturo
+Moins saturé	Meno saturo
+Plus clair	Più chiaro
+Plus sombre	Più scuro

@@ -1,1 +1,561 @@
 # French text<TAB>translation. One line per text; a missing line falls back to English.
+Exporter l'animation	Esporta animazione
+Toute la composition	Composizione intera
+Zone de travail	Area di lavoro
+Personnalisée	Personalizzato
+Tête → début	Indicatore → inizio
+Tête → fin	Indicatore → fine
+Préfixe	Prefisso
+Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.	Forme, tracciati, null, genitori, trasformazioni, tracciati tagliati, riempimenti e tracce. Testo, immagini ed effetti non vengono esportati.
+Fond transparent	Sfondo trasparente
+Exporter…	Esporta…
+Ajouter à la file	Aggiungi alla coda
+Ctrl+Alt+M ouvre la file de rendu	Ctrl+Alt+M apre la coda di rendering
+Annuler	Annulla
+File de rendu	Coda di rendering
+Plusieurs exports à la suite, en une seule fois.	Più esportazioni di seguito, in un colpo.
+La file est vide : dans Exporter, choisis « Ajouter à la file ».	La coda è vuota: in Esporta, scegli «Aggiungi alla coda».
+Retirer	Rimuovi
+Ajouter…	Aggiungi…
+Vider	Cancella
+Fermer	Chiudi
+Éditeur de courbe	Editor di grafici
+Vitesse	Velocità
+Préréglages	Predefiniti
+Revenir à la courbe choisie dans la liste	Torna alla curva scelta nell'elenco
+Copier sur la sélection	Copia nella selezione
+Même courbe pour toutes les clés sélectionnées (ou tout le calque)	Stessa curva per tutte le chiavi selezionate (o tutto il livello)
+Valeur	Valore
+Aligner tous les calques au même départ	Allinea tutti i livelli allo stesso inizio
+Inverser les images clés du calque	Inverti i fotogrammi chiave del livello
+Animation · plage des clés	Animazione · intervallo di chiavi
+Répartir régulièrement les images clés	Distanzia i fotogrammi chiave uniformemente
+Animation · calque sélectionné	Animazione · livello selezionato
+Ajuster le calque à la composition	Adatta il livello alla composizione
+Calque sélectionné · contenir	Livello selezionato · contieni
+Adapter la durée aux calques	Adatta la durata ai livelli
+Composition · fin du dernier calque	Composizione · fine dell'ultimo livello
+Fractionner le calque à la tête	Dividi il livello all'indicatore
+Calque sélectionné · Ctrl+Maj+D	Livello selezionato · Ctrl+Maiusc+D
+Dupliquer le calque	Duplica livello
+Calque sélectionné · Ctrl+D	Livello selezionato · Ctrl+D
+Exporter	Esporta
+MP4, GIF, PNG ou SVG · Ctrl+M	MP4, GIF, PNG o SVG · Ctrl+M
+Réglages de la composition · Ctrl+K	Impostazioni composizione · Ctrl+K
+Nouvelle composition	Nuova composizione
+Ouvrir…	Apri…
+Bienvenue dans Motion	Benvenuto in Motion
+Titres animés, logos et graphismes en mouvement	Titoli animati, loghi e motion graphics
+Projets récents	Progetti recenti
+Ajouter un calque	Aggiungi un livello
+Modèles	Modelli
+Ajouté à la tête de lecture	Aggiunto all'indicatore
+Animations prêtes	Animazioni pronte
+Rechercher une animation	Cerca animazioni
+Sélectionne un calque pour lui appliquer une animation.	Seleziona un livello per applicargli un'animazione.
+Ajoutée à partir de la tête de lecture	Aggiunto dall'indicatore
+Réglages de la composition	Impostazioni composizione
+Inverser largeur et hauteur	Scambia larghezza e altezza
+Images par seconde	Fotogrammi al secondo
+Durée	Durata
+Ajuster à l'animation	Adatta all'animazione
+Terminé	Fatto
+[ Début zone	[ Inizio dell'area di lavoro
+Fin zone ]	Fine dell'area di lavoro ]
+Effacer la zone de travail	Cancella area di lavoro
+Ajuster	Adatta
+Toute la durée visible	Durata intera visibile
+Ajouter un repère ici	Aggiungi un marcatore qui
+Début de zone à la tête	Inizio dell'area di lavoro all'indicatore
+Fin de zone à la tête	Fine dell'area di lavoro all'indicatore
+Supprimer ce repère	Elimina questo marcatore
+Autres courbes	Altre curve
+Courbe douce (F9)	Andamento facile (F9)
+Éditer la courbe…	Modifica curva…
+Copier (Ctrl+C)	Copia (Ctrl+C)
+Sélectionner toute la propriété	Seleziona l'intera proprietà
+Supprimer (Suppr)	Elimina (Canc)
+Dupliquer	Duplica
+Fractionner à la tête	Dividi all'indicatore
+Copier l'animation	Copia animazione
+Premier plan	Porta in primo piano
+Arrière-plan	Porta in fondo
+Couleur d'étiquette	Colore dell'etichetta
+Supprimer	Elimina
+Fond	Sfondo
+Dégradé vers le bas	Sfumatura verso il basso
+Arrondi	Rotondità
+Texte vertical	Testo verticale
+Taille	Dimensione
+Gras	Grassetto
+Italique	Corsivo
+Alignement sur le point	Allineamento sul punto
+Centre	Centro
+Gauche	Sinistra
+Droite	Destra
+Espacement des lettres	Spaziatura delle lettere
+Rayon	Raggio
+Creux (1 = polygone)	Raggio interno (1 = poligono)
+Longueur	Lunghezza
+Épaisseur	Spessore
+Révélation % = longueur de l'arc : anime-la pour une jauge.	Rivelazione % = lunghezza dell'arco: animala per un indicatore.
+De	Da
+Avant	Prima
+Après	Dopo
+Compte pendant 80 % de la durée du calque	Conta durante l'80% della durata del livello
+Tracé fermé	Tracciato chiuso
+Remplir	Riempimento
+Tout lisser	Leviga tutto
+Tout en angles	Tutti gli angoli
+Inverser	Inverti
+Sans remplissage : règle le contour dans Apparence.	Nessun riempimento: imposta la traccia in Aspetto.
+Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	Un null è invisibile nel render: rendilo genitore per guidare più livelli insieme.
+Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	Livello di regolazione: i suoi effetti (colore, sfocatura, grana, distorsione…) si applicano a tutti i livelli sottostanti. La sua opacità regola il mix.
+Couleur	Colore
+Fichier	File
+Ouvrir un projet récent	Apri progetto recente
+Aucun projet récent	Nessun progetto recente
+Exporter directement	Esporta direttamente
+Édition	Modifica
+Calque	Livello
+Nouveau	Nuovo
+Modèle	Modello
+Transformer	Trasforma
+Orientation automatique	Orientamento automatico
+Temps	Tempo
+Lecture inversée	Inversione temporale
+Mode de fusion	Metodo di fusione
+Masque	Opaco
+Verrouillé	Bloccato
+Courbe de Bézier	Curva di Bézier
+Afficher dans la timeline	Mostra nella timeline
+Finition	Rifinitura
+Affichage	Visualizza
+Espace de travail	Area di lavoro
+Grille et tiers                  Ctrl+'	Griglia e terzi                  Ctrl+'
+Divisions de la grille	Suddivisioni della griglia
+Zones sûres	Zone sicure
+Type de zones sûres	Tipo di zona sicura
+Axes centraux	Assi centrali
+Règles                              Ctrl+R	Righelli                            Ctrl+R
+Repères de mise en page   Ctrl+;	Guide di impaginazione   Ctrl+;
+Damier de transparence	Griglia della trasparenza
+Trajectoires de mouvement	Tracciati di movimento
+Pelure d'oignon	Onion skin
+Réglages de la pelure	Impostazioni onion skin
+Magnétisme	Aggancia
+Lecture en boucle               L	Riproduzione in loop                   L
+Qualité de l'aperçu	Qualità dell'anteprima
+Ajouter ou retirer une image clé ici	Aggiungi o rimuovi un fotogramma chiave qui
+Clic droit : réinitialiser, tremblement, boucle	Clic destro: ripristina, oscillazione, loop
+Réinitialiser la valeur	Ripristina valore
+Tremblement	Oscillazione
+Après la dernière clé	Dopo l'ultima chiave
+Clé suivante	Chiave successiva
+Clé précédente	Chiave precedente
+Courbe	Curva
+Supprimer l'animation de couleur	Rimuovi l'animazione del colore
+Images/s	Fotogrammi/s
+Réglages…	Impostazioni…
+Finition de l'image	Rifinitura dell'immagine
+Bandes cinéma	Letterbox
+Effets de composition	Effetti della composizione
+Repères	Marcatori
+Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.	Premi M per posare un marcatore all'indicatore: funge da punto di aggancio e da scorciatoia J/K.
+Aller au repère	Vai al marcatore
++ Repère à la tête de lecture	+ Marcatore all'indicatore
+Repères de mise en page	Guide di impaginazione
+Avec les règles (Ctrl+R), glisse depuis une règle pour tirer un repère ; glisse-le hors de la vue pour le supprimer.	Con i righelli attivi (Ctrl+R), trascina da un righello per estrarre una guida; trascinala fuori dalla vista per eliminarla.
++ Centre	+ Centro
++ Tiers	+ Terzi
++ Marges 5 %	+ Margini del 5%
+Tout effacer	Cancella tutto
+Verrou	Blocca
+Aucun	Nessuno
+Étiquette	Etichetta
+Transformation	Trasforma
+Orientation auto	Orientamento automatico
+Le calque tourne dans le sens de sa trajectoire	Il livello ruota lungo il suo tracciato
+Centrer l'ancre	Ancoraggio al centro
+Réinitialiser	Ripristina
+Remet échelle, rotations, ancre et opacité par défaut	Ripristina scala, rotazioni, ancoraggio e opacità
+Aligner sur la composition	Allinea alla composizione
+Met le calque à l'échelle de la composition	Adatta la scala del livello alla composizione
+Centrer au milieu	Centra nel mezzo
+Contenu	Contenuto
+Tracé et opérateurs	Tracciato e operatori
+Simultané	Simultaneamente
+Un par un	Singolarmente
+Ondulé	Ondulato
+Apparence	Aspetto
+Contour	Traccia
+Extrémités et angles	Estremità e giunzioni
+Plates	Piatto
+Rondes	Arrotondato
+Carrées	Sporgente
+Arrondis	Arrotondato
+Pointus	Smussato
+Biseautés	Smusso
+Dégradé vers	Sfumatura verso
+Linéaire	Lineare
+Miroir horizontal	Rifletti orizzontalmente
+Vertical	Verticale
+Flou et lumière	Sfocatura e luce
+Lueur	Bagliore
+Ombre portée	Ombra esterna
+Ombre interne	Ombra interna
+Ombres	Ombre
+Lumières	Alte luci
+Remplir d'une couleur	Riempi con un colore
+Réinitialiser la couleur	Ripristina colore
+Stylisation	Stilizzazione
+Animateur de texte	Animatore di testo
+Animer lettre par lettre	Anima lettera per lettera
+Sortie	Uscita
+Les deux	Entrambi
+Ordre	Ordine
+Mouvement	Movimento
+Répéter toutes les clés	Ripeti tutte le chiavi
+Boucle	Loop
+Aller-retour	Ping-pong
+Figer	Blocca
+Fige l'image du calque à l'instant choisi	Blocca il fotogramma del livello al momento scelto
+Tête	Indicatore di riproduzione
+Réinitialiser le temps	Ripristina tempo
+Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme (ou en dehors, en mode inversé).	Il livello appena sopra nella timeline fa da stencil: diventa invisibile e mostra questo livello solo attraverso la sua forma (o fuori, se invertito).
+?  Tutoriels	?  Tutorial
+Depuis le centre	Dal centro
+Terminer (Entrée)	Termina (Invio)
+Inversé	Invertito
+Plage	Intervallo
+Qualité (débit)	Qualità (bitrate)
+Lecture en boucle	Riproduzione in loop
+Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	Spazio riproduci · tasti J K · M marcatore · B N area di lavoro · V H Z W Y Q G strumenti · Ctrl+T testo · Ctrl+B pennello · P S R T A U proprietà · F9 andamento facile
+Vignettage	Vignettatura
+Grain film	Grana della pellicola
+Couper le tracé	Rifila tracciato
+Opérateurs de forme	Operatori forma
+Arrondir les angles	Angoli arrotondati
+Fronce et dilatation	Pizzica e gonfia
+Zigzag	Zigzag
+Agitation	Fai oscillare i tracciati
+Détail	Dettaglio
+Vitesse d'agitation	Velocità di oscillazione
+Torsion	Torsione
+Pointillés (0 = plein)	Trattini (0 = continuo)
+Espace entre tirets	Spazio tra i trattini
+Angle du dégradé	Angolo della sfumatura
+Centre X	Centro X
+Centre Y	Centro Y
+Flou fixe	Sfocatura fissa
+Flou directionnel	Sfocatura direzionale
+Flou radial (zoom)	Sfocatura radiale (zoom)
+Décalage X	Sfalsamento X
+Décalage Y	Sfalsamento Y
+Douceur	Morbidezza
+Opacité	Opacità
+Décalage X 	Sfalsamento X
+Décalage Y 	Sfalsamento Y
+Douceur 	Morbidezza
+Teinte	Tonalità
+Luminosité	Luminosità
+Contraste	Contrasto
+Sépia	Seppia
+Teinte bicolore	Bicromia
+Inversion	Inverti
+Seuil (0 = non)	Soglia (0 = disattivata)
+Postérisation (0 = non)	Posterizza (0 = disattivato)
+Séparation RVB	Separazione RGB
+Angle RVB	Angolo RGB
+Fréquence du glitch	Frequenza del glitch
+Distorsion	Distorsione
+Taille des ondes	Dimensione dell'onda
+Évolution	Evoluzione
+Scintillement	Sfarfallio
+Machine à écrire (0 = non)	Macchina da scrivere (0 = disattivata)
+Décalage entre lettres	Ritardo tra le lettere
+Durée par lettre	Durata per lettera
+Valeurs de départ	Valori iniziali
+Échelle	Scala
+Tremblement de position	Oscillazione della posizione
+Fréquence	Frequenza
+Écho (traînée)	Eco (scia)
+Délai entre échos	Ritardo tra gli echi
+Répéteur	Ripetitore
+Rotation par copie	Rotazione per copia
+Échelle par copie	Scala per copia
+Fondu par copie	Dissolvenza per copia
+Décalage temporel	Sfasamento temporale
+Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe	Trascina: sposta · angoli: scala · cerchio: ruota · Maiusc: asse
+Glisser pour tourner le calque · Maj : pas de 15°	Trascina per ruotare il livello · Maiusc: passi di 15°
+Glisser l'ancre sans bouger le calque · Placer :	Trascina l'ancoraggio senza spostare il livello · Posiziona:
+Clic dans la vue pour écrire	Fai clic nella vista per scrivere
+Peint sur le calque Peinture sélectionné	Dipinge sul livello Pittura selezionato
+Sélectionne un calque puis trace : seule la zone dessinée reste visible	Seleziona un livello, poi disegna: resta visibile solo l'area disegnata
+Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur	Tira una parte di un tracciato o di un tratto di pittura: i punti vicini seguono dolcemente
+Efface les traits du calque Peinture	Cancella i tratti sul livello Pittura
+Sélection	Selezione
+Main	Mano
+Zoom avant	Ingrandisci
+Zoom arrière	Riduci
+Point d'ancrage	Punto di ancoraggio
+Rectangle arrondi	Rettangolo arrotondato
+Polygone	Poligono
+Étoile	Stella
+Plume	Penna
+Ajout de sommet	Aggiungi vertice
+Suppression de sommet	Elimina vertice
+Conversion de sommet	Converti vertice
+Texte horizontal	Testo orizzontale
+Pinceau	Pennello
+Gomme	Gomma
+Masque rectangulaire	Maschera rettangolare
+Masque elliptique	Maschera ellittica
+Marionnette	Marionetta
+Enregistrer	Salva
+Enregistrer sous…	Salva con nome…
+File de rendu…	Coda di rendering…
+Sélectionner toutes les clés du calque	Seleziona tutte le chiavi del livello
+Monter	Sposta su
+Descendre	Sposta giù
+Centrer le point d'ancrage	Centra il punto di ancoraggio
+Ajuster à la composition	Adatta alla composizione
+Ajuster à la largeur	Adatta alla larghezza
+Ajuster à la hauteur	Adatta all'altezza
+Centrer dans la composition	Centra nella composizione
+Rotation +90°	Ruota di +90°
+Rotation −90°	Ruota di −90°
+Retourner horizontalement	Rifletti orizzontalmente
+Retourner verticalement	Rifletti verticalmente
+Réinitialiser la transformation	Ripristina trasformazione
+Commencer à la tête de lecture	Inizia all'indicatore
+Finir à la tête de lecture	Termina all'indicatore
+Déplacer le début à la tête	Sposta l'inizio all'indicatore
+Déplacer la fin à la tête	Sposta la fine all'indicatore
+Étendre à toute la composition	Estendi a tutta la composizione
+Figer l'image à la tête	Fermo immagine all'indicatore
+Créer un nul parent	Crea null genitore
+Courbe douce	Curva morbida
+Ralentir à l'arrivée	Rallenta all'arrivo
+Démarrer en douceur	Inizia dolcemente
+Maintien (bascule)	Mantieni (alterna)
+Répartir les clés uniformément	Distribuisci le chiavi uniformemente
+Inverser les images clés	Inverti i fotogrammi chiave
+Supprimer toutes les images clés	Elimina tutti i fotogrammi chiave
+Propriétés animées	Proprietà animate
+Réglages de la composition…	Impostazioni composizione…
+Ajuster la durée à l'animation	Adatta la durata all'animazione
+Ajouter un repère	Aggiungi guida
+Début de la zone de travail	Inizio dell'area di lavoro
+Fin de la zone de travail	Fine dell'area di lavoro
+Ajuster à la fenêtre	Adatta alla finestra
+Taille réelle (100 %)	Dimensioni reali (100 %)
+PNG séquence	Sequenza PNG
+PNG image	Immagine PNG
+SVG séquence	Sequenza SVG
+Légère	Leggero
+Cinémascope	CinemaScope
+Carré	Quadrato
+Bannière GIF	Banner GIF
+En-tête X	Intestazione X
+Retournement 3D	Ribaltamento 3D
+Bascule 3D	Ribaltamento 3D
+Carte qui tourne	Scheda che ruota
+Tracé dessiné	Tracciato disegnato
+Tracé effacé	Tracciato cancellato
+Tracé qui court	Tracciato che corre
+Lettres qui montent	Lettere che salgono
+Lettres qui tombent	Lettere che cadono
+Lettres en vrac	Lettere sparse
+Lettres qui s'envolent	Lettere che volano via
+Étirement élastique	Stiramento elastico
+Zoom flou	Zoom sfocato
+Tremblement de rotation	Oscillazione della rotazione
+Apparition colorée	Rivelazione colorata
+Fondu entrant	Dissolvenza in entrata
+Glisser depuis la gauche	Scorri da sinistra
+Glisser depuis la droite	Scorri da destra
+Monter depuis le bas	Sale dal basso
+Descendre depuis le haut	Scende dall'alto
+Zoom pop	Zoom pop
+Fondu et montée	Dissolvenza e salita
+Tourbillon entrant	Entrata a vortice
+Révélation	Rivelazione
+Flou entrant	Entrata sfocata
+Machine à écrire	Macchina da scrivere
+Fondu sortant	Dissolvenza in uscita
+Sortie à droite	Uscita a destra
+Sortie vers le bas	Uscita verso il basso
+Battement de cœur	Battito cardiaco
+Rotation continue	Rotazione continua
+Zoom lent	Zoom lento
+Bandeau titre	Fascia del titolo
+Titre cinéma	Titolo cinema
+Bouton S'abonner	Pulsante Iscriviti
+Compte à rebours	Conto alla rovescia
+Barre de progression	Barra di avanzamento
+Coche validée	Segno di spunta
+Titre lettre par lettre	Titolo lettera per lettera
+Classique 90/80 %	Classico 90/80 %
+Moderne 93/90 %	Moderno 93/90 %
+Réseaux sociaux 85/75 %	Social network 85/75 %
+Flèche	Freccia
+Cœur	Cuore
+Vitesse 50 %	Velocità 50 %
+Vitesse 100 %	Velocità 100 %
+Vitesse 200 %	Velocità 200 %
+Étirer les clés × 2	Allunga chiavi × 2
+Compresser les clés × ½	Comprimi chiavi × ½
+Tracé	Tracciato
+Sans vignettage	Senza vignettatura
+Vignettage léger	Vignettatura leggera
+Vignettage fort	Vignettatura forte
+Sans grain	Senza grana
+Grain léger	Grana leggera
+Grain marqué	Grana marcata
+Sans bandes	Senza bande
+Bandes 2,39:1	Bande 2,39:1
+Bandes 1,85:1	Bande 1,85:1
+Entrée douce	Entrata morbida
+Sortie douce	Uscita morbida
+Entrée-sortie	Entrata e uscita morbide
+Décélération	Uscita morbida
+Accélération	Entrata morbida
+Expo sortie	Uscita esponenziale
+Expo entrée	Entrata esponenziale
+Dépasse en sortie	Supera in uscita
+Recul en entrée	Entrata all'indietro
+Fluide Apple	Fluido Apple
+Tes animations enregistrées apparaîtront ici	Le tue animazioni salvate appariranno qui
+Projets .emot	Progetti .emot
+image	fotogramma
+Vidéo H.264, lisible partout	Video H.264, si riproduce ovunque
+Animation légère pour le web et les messages	Animazione leggera per il web e la messaggistica
+Une image par frame, idéal pour le montage	Un'immagine per fotogramma, ideale per il montaggio
+L'image affichée à la tête de lecture	Il fotogramma all'indicatore
+Vectoriel, l'image affichée, modifiable	Vettoriale, l'immagine visualizzata, modificabile
+Un fichier vectoriel par image	Un file vettoriale per fotogramma
+Grille d'images pour présenter l'animation	Griglia di fotogrammi per presentare l'animazione
+Animation vectorielle pour le web et les apps	Animazione vettoriale per il web e le app
+Infinie	Infinito
+Une fois	Una volta
+3 fois	3 volte
+5 fois	5 volte
+Vidéo 16:9	Video 16:9
+Vidéo HD légère	Video HD leggero
+Cinéma	Cinema
+Large 2,39:1	Panoramico 2,39:1
+Publication 1:1	Post 1:1
+Publication 4:5	Post 4:5
+Bannière 3:1	Banner 3:1
+Bannière 4:1	Banner 4:1
+Emoji animé	Emoji animata
+Pivote sur l'axe vertical	Ruota sull'asse verticale
+Bascule vers l'avant	Si inclina in avanti
+Rotation Y continue	Rotazione Y continua
+Le contour se dessine	Il contorno si disegna da solo
+Le contour s'efface	Il contorno si cancella
+Un segment fait le tour	Un segmento fa il giro
+Une lettre après l'autre	Una lettera dopo l'altra
+Arrivent du haut en tournant	Entrano dall'alto ruotando
+Ordre aléatoire, zoom	Ordine casuale, zoom
+Sortie lettre par lettre	Uscita lettera per lettera
+S'étire en largeur	Si allarga
+La teinte tourne sans fin	La tonalità gira senza fine
+Tranches décalées et RVB	Fette sfalsate e RGB
+Arrive avec un flou radial	Arriva con una sfocatura radiale
+Balance sans fin	Oscillazione infinita
+Tourne nerveusement	Ruota nervosamente
+Du blanc vers sa couleur	Dal bianco al suo colore
+Opacité 0 → 100 %	Opacità 0 → 100 %
+Entre par le côté	Entra dal lato
+Entre par l'autre côté	Entra dall'altro lato
+Entre par le bas	Entra dal basso
+Tombe du haut	Cade dall'alto
+Grossit avec un rebond	Cresce con un rimbalzo
+Arrive de très près	Arriva da molto vicino
+Doux et élégant	Morbido ed elegante
+Tourne et grandit	Ruota e cresce
+Apparaît en vibrant	Appare con una scossa
+Tombe et rebondit	Cade e rimbalza
+Se dévoile de gauche à droite	Si rivela da sinistra a destra
+Sort du flou	Esce da una sfocatura
+Arrive penché puis se redresse	Arriva inclinato e si raddrizza
+Texte lettre par lettre	Testo lettera per lettera
+Opacité 100 → 0 %	Opacità 100 → 0 %
+Quitte l'écran	Esce dallo schermo
+S'efface en descendant	Svanisce scendendo
+Respire en boucle	Respira in loop
+Double pulsation	Doppia pulsazione
+Oscille de gauche à droite	Oscilla da sinistra a destra
+Monte et descend en douceur	Sale e scende dolcemente
+Un tour complet	Un giro completo
+Apparaît et disparaît	Appare e scompare
+Caméra à l'épaule	Camera a mano
+Effet Ken Burns	Effetto Ken Burns
+Révélation sur toute la durée	Rivelazione su tutta la durata
+Nom et fonction en bas d'écran	Nome e ruolo in basso nello schermo
+Grand titre espacé qui sort du flou	Grande titolo spaziato che esce da una sfocatura
+Bouton rouge qui rebondit	Pulsante rosso che rimbalza
+10 → 0 avec anneau	10 → 0 con un anello
+Se remplit de 0 à 100 %	Si riempie da 0 a 100 %
+Texte en italique et auteur	Testo in corsivo e autore
+Cercle puis coche qui se dessine	Cerchio, poi un segno di spunta che si disegna
+Entrée et sortie animées	Entrata e uscita animate
+ajouter au montage	aggiungere al montaggio
+retoucher l'image	ritoccare l'immagine
+mettre en page	impaginare
+placer l'image	posizionare l'immagine
+développer	sviluppare
+image de l'animation	fotogramma dell'animazione
+Entrées	Intro
+Sorties	Outro
+Boucles	Loop
+Effets	Effetti
+Tracés	Tracciati
+Texte	Testo
+Complète	Completa
+Demie	Metà
+Quart	Quarto
+Différence	Differenza
+Densité couleur −	Densità colore −
+Lumière tamisée	Luce soffusa
+Lumière crue	Luce dura
+Densité couleur +	Densità colore +
+Aucune	Nessuno
+Décalage	Sfalsamento
+Continuer	Continua
+Alpha du calque du dessus	Alfa del livello superiore
+Luminance du calque du dessus	Luminanza del livello superiore
+Alpha inversé	Alfa invertito
+Luminance inversée	Luminanza invertita
+Gauche → droite	Sinistra → destra
+Droite → gauche	Destra → sinistra
+Centre → bords	Centro → bordi
+Aléatoire	Casuale
+Échelle %	Scala %
+Opacité %	Opacità %
+Inclinaison °	Inclinazione °
+Flou px	Sfocatura px
+Révélation %	Rivelazione %
+Ancre X	Ancoraggio X
+Ancre Y	Ancoraggio Y
+Échelle X %	Scala X %
+Échelle Y %	Scala Y %
+Début du tracé %	Inizio del tracciato %
+Fin du tracé %	Fine del tracciato %
+Décalage du tracé %	Sfalsamento del tracciato %
+Épaisseur du contour	Spessore della traccia
+Teinte °	Tonalità °
+Apparition en fondu	Dissolvenza in entrata
+Zoom d'entrée avec rebond	Zoom in entrata con rimbalzo
+Chute avec rebond	Caduta con rimbalzo
+Entrée en tournant	Entrata ruotando
+Sortie en fondu	Dissolvenza in uscita
+Secousse continue	Scossa continua
+Pulsation continue	Pulsazione continua
+Balancement	Oscillazione
+Clignotement	Lampeggio
+Flottement	Fluttua
+Zoom de sortie	Riduci
+Sortie vers la droite	Uscita a destra

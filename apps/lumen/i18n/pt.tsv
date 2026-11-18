@@ -1,1 +1,463 @@
 # French text<TAB>translation. One line per text; a missing line falls back to English.
+Note	Classificação
+Filtre	Filtro
+Quantité	Quantidade
+★ Favoris	★ Favoritos
+Mes préréglages	As minhas predefinições
+Clic droit : options	Clique direito: opções
+Mettre à jour avec les réglages actuels	Atualizar com as definições atuais
+Supprimer ce préréglage	Eliminar esta predefinição
+Nom du préréglage	Nome da predefinição
++ Enregistrer les réglages actuels	+ Guardar as definições atuais
+Nouvel instantané (Ctrl+N)	Novo instantâneo (Ctrl+N)
+Clic : appliquer · clic droit : options	Clique: aplicar · clique direito: opções
+Remplacer par les réglages actuels	Substituir pelas definições atuais
+Supprimer	Eliminar
+Effacer	Limpar
+Revenir à l'état avant cette étape	Voltar a antes deste passo
+Écrêtage	Recorte
+Profil	Perfil
+Couleur	Cor
+Noir et blanc	Preto e branco
+Pipette	Conta-gotas
+Préréglage	Predefinição
+Tel quel	Como fotografado
+Param.	Paramétrica
+Réglage ciblé	Ajuste direcionado
+T : glisse sur la photo	T: arraste sobre a foto
+Réinitialiser la courbe	Repor curva
+Teinte	Matiz
+Tout	Tudo
+Réinitialiser	Repor
+Supprimer l'aberration (auto)	Remover aberração (auto)
+Applique une correction de frange standard	Aplica uma correção padrão de franjas
+Niveau auto	Nivelamento automático
+Règle	Régua
+Trace une ligne sur l'horizon	Trace uma linha ao longo do horizonte
+Miroir vertical	Inverter verticalmente
+Outil Recadrage	Ferramenta Recortar
+Redressement automatique	Endireitar automaticamente
+Miroir horizontal	Inverter horizontalmente
+Corrections de taches	Correções pontuais
+Yeux rouges corrigés	Olhos vermelhos corrigidos
+Suppression (Q)	Remover (Q)
+Correcteur	Corrigir
+Clonage	Clonar
+Yeux rouges (E)	Olhos vermelhos (E)
+Effacer les taches	Remover manchas
+Effacer les yeux	Olhos claros
+?  Tutoriels	?  Tutoriais
+Copier…	Copiar…
+Ctrl+Maj+C : choisir les groupes	Ctrl+Shift+C: escolher grupos
+Coller	Colar
+Réinitialiser un groupe…	Repor um grupo…
+Mode solo : un seul panneau ouvert	Modo solo: um painel aberto de cada vez
++ Nouveau masque	+ Nova máscara
+Superposition	Sobrepor
+Activer ou masquer	Ativar ou ocultar
+Supprimer le masque	Eliminar máscara
+Dupliquer	Duplicar
+Nom	Nome
+Inverser	Inverter
+Ajouter	Adicionar
+Soustraire	Subtrair
+Intersecter	Intersetar
+Inverser ce composant	Inverter este componente
+Peindre	Pintura
+Effacer le tracé	Limpar o traço
+Réinitialiser les réglages du masque	Repor definições da máscara
+Original	Original
+Maintenir pour voir l'original (ou \\)	Mantenha premido para ver o original (ou \\)
+Rouge : blancs brûlés · bleu : noirs bouchés (J)	Vermelho: realces cortados · azul: sombras cortadas (J)
+Infos	Info
+Plein écran	Ecrã inteiro
+Tab : masquer les panneaux	Tab: ocultar painéis
+Nouvelle collection dynamique	Nova coleção inteligente
+Modifier les règles…	Editar regras…
+Inclure les sous-dossiers	Incluir subpastas
+Ouvrir un dossier…	Abrir uma pasta…
+Rechercher	Pesquisar
+Tri · inverser l'ordre	Ordenar · ordem inversa
+Taille des vignettes	Tamanho das miniaturas
+Synchroniser	Sincronizar
+Copie les réglages de la photo active (groupes cochés dans Copier les réglages)	Copia as definições da foto ativa (grupos marcados em Copiar definições)
+Empiler	Pilha
+Comparer	Comparar
+Tout désélectionner	Desmarcar tudo
+Développement rapide	Revelação rápida
+Balance des blancs	Balanço de brancos
+Mots-clés	Palavras-chave
+Ajouter (virgules acceptées)	Adicionar (vírgulas aceites)
+Retirer ce mot-clé	Remover esta palavra-chave
+Métadonnées	Metadados
+Fichier	Ficheiro
+Taille	Tamanho
+Type	Texto
+Afficher dans l'Explorateur	Mostrar no Explorador
+Aucune photo ne correspond à ce filtre	Nenhuma foto corresponde a este filtro
+Ouvrir en Développement	Abrir em Revelar
+Créer une copie virtuelle	Criar cópia virtual
+Supprimer la copie virtuelle	Eliminar cópia virtual
+Empiler la sélection	Empilhar a seleção
+Réduire / déplier la pile	Recolher / expandir pilha
+Désempiler	Desempilhar
+Exporter…	Exportar…
+◀ Candidat précédent	◀ Candidata anterior
+Candidat suivant ▶	Candidata seguinte ▶
+Le candidat devient la référence	Tornar a candidata a escolhida
+Trouver les photos floues (les sélectionner)	Encontrar fotos desfocadas (selecioná-las)
+Tri	Triagem
+Rejeter les photos floues	Rejeitar fotos desfocadas
+Tri · drapeau X	Triagem · sinalizador X
+Ton auto sur les photos choisies	Tom automático nas fotos escolhidas
+Lot	Lote
+Redresser l'horizon sur les photos choisies	Endireitar o horizonte das fotos escolhidas
+Remettre à zéro les photos choisies	Repor as fotos escolhidas
+Synchroniser les réglages vers les photos choisies	Sincronizar as definições com as fotos escolhidas
+Lot · copie la photo courante	Lote · copia a foto atual
+Attribuer 5 étoiles aux photos choisies	Dar 5 estrelas às fotos escolhidas
+Lot · classement	Lote · classificação
+Marquer les photos choisies comme retenues	Marcar as fotos escolhidas como favoritas
+Lot · drapeau P	Lote · sinalizador P
+Rejeter les photos choisies	Rejeitar as fotos escolhidas
+Lot · drapeau X	Lote · sinalizador X
+Effacer les drapeaux des photos choisies	Limpar sinalizadores das fotos escolhidas
+Lot · neutre	Lote · sem sinalizador
+Ctrl+Maj+E	Ctrl+Shift+E
+Dossiers récents	Pastas recentes
+Actualiser le dossier	Atualizar pasta
+Enregistrer le catalogue	Guardar catálogo
+Ouvrir le dossier du catalogue	Abrir a pasta do catálogo
+Édition	Editar
+Tout sélectionner      Ctrl+A	Selecionar tudo              Ctrl+A
+Désélectionner         Ctrl+D	Desmarcar                   Ctrl+D
+Sélectionner les retenues	Selecionar escolhidas
+Sélectionner les modifiées	Selecionar editadas
+Inverser la sélection	Inverter seleção
+Mode solo des panneaux	Modo de painel único
+Copier les réglages…   Ctrl+Maj+C	Copiar definições…         Ctrl+Shift+C
+Réglage automatique      Ctrl+U	Definições automáticas         Ctrl+U
+Copier les réglages      Ctrl+C	Copiar definições          Ctrl+C
+Réinitialiser               Ctrl+Maj+R	Repor                           Ctrl+Shift+R
+Créer une copie virtuelle   Ctrl+'	Criar cópia virtual         Ctrl+'
+Nouvel instantané             Ctrl+N	Novo instantâneo                  Ctrl+N
+Empiler la sélection          Ctrl+G	Empilhar a seleção               Ctrl+G
+Désempiler                      Ctrl+Maj+G	Desempilhar                     Ctrl+Shift+G
+Réduire / déplier la pile     S	Recolher / expandir pilha       S
+Noir et blanc                   V	Preto e branco                  V
+Rotation 90° horaire	Rodar 90° no sentido horário
+Rotation 90° antihoraire	Rodar 90° no sentido anti-horário
+Drapeau	Sinalizador
+Étiquette de couleur	Etiqueta de cor
+Copier le chemin du fichier	Copiar caminho do ficheiro
+Affichage	Ver
+Masquer les panneaux       Tab	Ocultar painéis                Tab
+Écrêtage                        J	Recorte                         J
+Zoom 100 %                   Z	Zoom 100%                    Z
+Avant / après	Antes / depois
+Infos sur la photo	Info da foto
+Bienvenue dans Lumen	Bem-vindo ao Lumen
+Ouvre un dossier de photos : JPEG, PNG, TIFF, WebP et RAW (CR2, NEF, ARW, DNG, RAF…)	Abra uma pasta de fotos: JPEG, PNG, TIFF, WebP e RAW (CR2, NEF, ARW, DNG, RAF…)
+Ouvrir un dossier	Abrir uma pasta
+Réglages à copier	Definições a copiar
+Tout cocher	Marcar tudo
+Tout décocher	Desmarcar tudo
+Copier	Copiar
+Collection dynamique	Coleção inteligente
+Note minimale	Classificação mínima
+Étiquette	Etiqueta
+Toutes	Tudo
+Mot-clé	Palavra-chave
+Texte contenu	Contém texto
+Retouche	Edição
+Modifiées	Editado
+Intactes	Por editar
+Tous	Tudo
+Enregistrer	Guardar
+Même dossier que l'original	Mesma pasta do original
+Choisir…	Escolher…
+Sous-dossier	Subpasta
+facultatif	opcional
+Si le fichier existe	Se o ficheiro existir
+Texte	Texto
+ex. mariage	ex.: casamento
+Suffixe	Sufixo
+ex. -web	ex.: -web
+Début	Início
+Qualité	Qualidade
+Ne pas agrandir	Não ampliar
+Auteur	Autor
+Ajouter un filigrane texte	Adicionar uma marca de água de texto
+© ton nom	© o seu nome
+Utiliser le copyright	Usar o copyright
+Opacité	Opacidade
+Texte sombre	Texto escuro
+Ouvrir le dossier dans l'Explorateur	Abrir a pasta no Explorador
+Réglages par défaut	Predefinições
+Exporter	Exportar
+Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom	Arraste para se mover com zoom · duplo clique para alternar o zoom
+Format	Proporção
+Verrouiller	Bloquear
+Inverser l'orientation du format	Trocar a orientação
+Angle	Ângulo
+Redresse l'horizon automatiquement	Endireita o horizonte automaticamente
+Terminé	Concluído
+Nouvelle source	Nova origem
+Cherche une autre zone de remplacement	Procura outra área de origem
+Tout effacer	Limpar tudo
+Ou maintiens Alt	Ou mantenha Alt premido
+Nouveau masque	Nova máscara
+Superposition (O)	Sobreposição (O)
+Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro	Arraste para escolher matiz e quantidade · duplo clique para repor
+Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer	Clique: adicionar ponto · arrastar: mover · duplo clique ou clique direito: eliminar
+Température	Temp.
+Exposition	Exposição
+Contraste	Contraste
+Hautes lumières	Realces
+Ombres	Sombras
+Blancs	Brancos
+Noirs	Pretos
+Clarté	Claridade
+Correction du voile	Remover névoa
+Décalage de teinte	Desvio da matiz
+Netteté	Nitidez
+Bruit	Ruído
+Intensité couleur	Intensidade da cor
+Mémorise une version pour y revenir.	Guarda uma versão a que pode voltar.
+Chaque réglage apparaît ici.	Cada ajuste aparece aqui.
+État actuel	Estado atual
+Importation (original)	Importar (original)
+Survole la photo pour lire les valeurs RVB	Passe sobre a foto para ler os valores RGB
+Tonalité	Tom
+Présence	Presença
+En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).	Em preto e branco, a luminância de cada cor define o seu cinzento (mistura P&B).
+Lum. ombres	Lum. sombras
+Lum. tons moyens	Lum. meios-tons
+Lum. hautes lum.	Lum. realces
+Lum. globale	Lum. global
+Fusion	Mistura
+Équilibre	Balanço
+Gain	Quantidade
+Rayon	Raio
+Détail	Detalhe
+Masquage	Mascaramento
+Réduction du bruit	Redução de ruído
+Détail lum.	Detalhe da luminância
+Détail couleur	Detalhe de cor
+Lissage	Suavidade
+Vignetage de l'objectif	Vinheta da objetiva
+Point milieu	Ponto médio
+Distorsion	Distorção
+Aberration chromatique	Aberração cromática
+Rouge / cyan	Vermelho / ciano
+Bleu / jaune	Azul / amarelo
+Frange violette	Franja roxa
+Frange verte	Franja verde
+Verticale	Vertical
+Horizontale	Horizontal
+Rotation	Rodar
+Aspect	Proporção
+Échelle	Escala
+Décalage X	Deslocamento X
+Décalage Y	Deslocamento Y
+Redresser	Endireitar
+Vignettage après recadrage	Vinheta pós-recorte
+Arrondi	Redondeza
+Contour progressif	Difuminar
+Quantité 	Quantidade
+Rugosité	Rugosidade
+Halo lumineux	Brilho
+Délavé	Desbotado
+Teinte des ombres	Tinta das sombras
+Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages.	Gradiente linear (M), radial (Shift+M), pincel (K), céu ou motivo: cada máscara tem todas as suas definições.
+Composants	Componentes
+Glisse les poignées sur la photo (outil M ou Main).	Arraste as alças sobre a foto (ferramenta M ou Mão).
+Largeur	Largura
+Hauteur	Altura
+Maximum	Máximo
+Teinte ciblée	Matiz de destino
+Tolérance	Intervalo
+Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image).	Deteção automática do céu (zonas azuis ou claras ligadas ao topo da imagem).
+Détection automatique du sujet (ce qui se distingue du fond, au centre).	Deteção automática do motivo (o que se destaca do fundo, perto do centro).
+Couvre toute l'image : combine avec Soustraire pour exclure une zone.	Cobre a imagem inteira: combine com Subtrair para excluir uma zona.
+Réglages du masque	Definições da máscara
+Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…	Criar filtros guardados: favoritas 5★, RAW por editar…
+Ajoute des mots-clés dans le panneau de droite.	Adicione palavras-chave no painel direito.
+↑ Dossier parent	↑ Pasta superior
+Récents	Recentes
+Sélectionne une photo pour voir ses informations.	Selecione uma foto para ver as suas informações.
+Titre	Título
+Légende	Legenda
+Aucune donnée EXIF lisible dans ce fichier.	Não há dados EXIF legíveis neste ficheiro.
+À gauche : la référence (photo active). À droite : le candidat.	Esquerda: a escolhida (foto ativa). Direita: a candidata.
+Coller (Ctrl+V) n'appliquera que les groupes cochés.	Colar (Ctrl+V) só aplicará os grupos marcados.
+Les photos qui remplissent toutes les règles y apparaissent automatiquement.	As fotos que cumprem todas as regras aparecem aqui automaticamente.
+Trace une ligne le long de l'horizon ou d'une verticale	Trace uma linha ao longo do horizonte ou de uma vertical
+Clique sur l'œil ou glisse pour tracer le cercle	Clique no olho ou arraste para desenhar o círculo
+Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.	Clique numa zona que deve ser neutra (cinzento, branco). Shift+clique para manter a ferramenta.
+Glisse vers le haut ou le bas sur une couleur ou un ton de la photo	Arraste para cima ou para baixo sobre uma cor ou tom da foto
+Recadrage	Recortar
+Redressement (règle)	Endireitar (régua)
+Suppression de taches	Remoção de manchas
+Yeux rouges	Olhos vermelhos
+Filtre gradué	Gradiente linear
+Filtre radial	Gradiente radial
+Pinceau de réglage	Pincel de ajuste
+Sélectionner le ciel	Selecionar céu
+Sélectionner le sujet	Selecionar motivo
+Pipette de balance des blancs	Conta-gotas do balanço de brancos
+Main et zoom	Mão e zoom
+Lumière du jour	Luz do dia
+Tungstène	Tungsténio
+Couleurs vives	Cores vivas
+Cinéma	Cinema
+Nuit et ville	Cidade à noite
+Linéaire	Linear
+Contraste moyen	Contraste médio
+Contraste fort	Contraste alto
+Film mat	Película mate
+Primaire rouge	Primária vermelha
+Primaire verte	Primária verde
+Primaire bleue	Primária azul
+Retenue   P	Escolhida   P
+Sans drapeau   U	Sem sinalizador   U
+Rejetée   X	Rejeitada   X
+Très grandes	Muito grandes
+Prise de vue	Fotografia
+Correction d'expo	Correção de exposição
+Taille d'origine	Tamanho original
+Écran HD · 1920 px	Ecrã HD · 1920 px
+Instagram carré · 1080	Instagram quadrado · 1080
+Courriel · 1200 px	E-mail · 1200 px
+Miniature · 640 px	Miniatura · 640 px
+Nom d'origine	Nome original
+Nom + suffixe	Nome + sufixo
+Texte + numéro	Texto + número
+Date + nom	Data + nome
+Titre + numéro	Título + número
+Nom + note	Nome + classificação
+Personnalisé	Personalizado
+Chargement…	A carregar…
+Avant	Antes
+Après	Depois
+Aucune photo	Sem fotos
+Heure dorée	Hora dourada
+Heure bleue	Hora azul
+Brume chaude	Névoa quente
+Hiver lumineux	Inverno luminoso
+Rétro 70s	Retro anos 70
+Sombre et intense	Escuro e intenso
+Portra doux	Portra suave
+Ektar vif	Ektar vivo
+Fuji vert	Verde Fuji
+Cinéma 500T	Cinema 500T
+Instantané pastel	Instantânea pastel
+Argentique N&B 400	Película P&B 400
+Jetable 90s	Descartável anos 90
+Saturé	Saturado
+Peau douce	Pele suave
+Portrait chaleureux	Retrato quente
+Portrait lumineux	Retrato luminoso
+Portrait contrasté	Retrato contrastado
+Portrait mat	Retrato mate
+Ciel dramatique	Céu dramático
+Forêt	Floresta
+Coucher de soleil	Pôr do sol
+Mer et ciel	Mar e céu
+Brume matinale	Névoa matinal
+Noir et blanc doux	Preto e branco suave
+N&B contrasté	P&B contrastado
+Filtre rouge	Filtro vermelho
+Filtre jaune	Filtro amarelo
+Filtre vert	Filtro verde
+Sélénium	Selénio
+Nuit américaine	Noite americana
+Diapo 70	Diapositivo anos 70
+Haute clé	Clave alta
+Basse clé	Clave baixa
+Néons de nuit	Néones noturnos
+Déboucher les ombres	Clarear as sombras
+Récupérer le ciel	Recuperar o céu
+Netteté écran	Nitidez para ecrã
+Supprimer la brume	Remover a névoa
+Vif	Vivo
+Neutre	Neutro
+Paysage	Paisagem
+Priorité couleur	Prioridade à cor
+Priorité hautes lumières	Prioridade aos realces
+Superposition de peinture	Sobreposição de pintura
+Réglages de base	Definições básicas
+Courbe des tonalités	Curva de tons
+Étalonnage des couleurs	Gradação de cor
+Recadrage et rotation	Recortar e rodar
+Étalonnage de l'appareil	Calibração da câmara
+mettre en page	paginar
+placer l'image	colocar a imagem
+ajouter au montage	adicionar à montagem
+animer la photo	animar a foto
+Date de modification	Data de modificação
+Taille du fichier	Tamanho do ficheiro
+Type de fichier	Tipo de ficheiro
+Courbe paramétrique	Curva paramétrica
+Courbe RVB	Curva RGB
+Courbe rouge	Curva vermelha
+Courbe verte	Curva verde
+Courbe bleue	Curva azul
+Étalonnage des ombres	Gradação das sombras
+Étalonnage des hautes lumières	Gradação dos realces
+Étalonnage des tons moyens	Gradação dos meios-tons
+Étalonnage global	Gradação global
+Luminance des ombres	Luminância das sombras
+Luminance des tons moyens	Luminância dos meios-tons
+Luminance des hautes lumières	Luminância dos realces
+Luminance globale	Luminância global
+Rayon de netteté	Raio da nitidez
+Détail de netteté	Detalhe da nitidez
+Masquage de netteté	Máscara da nitidez
+Détail du bruit	Detalhe do ruído
+Bruit de couleur	Ruído de cor
+Détail du bruit de couleur	Detalhe do ruído de cor
+Lissage du bruit de couleur	Suavização do ruído de cor
+Point milieu du vignetage	Ponto médio da vinheta
+Aberration rouge/cyan	Aberração vermelho/ciano
+Aberration bleu/jaune	Aberração azul/amarelo
+Perspective verticale	Perspetiva vertical
+Perspective horizontale	Perspetiva horizontal
+Rotation 90°	Rodar 90°
+Style de vignettage	Estilo da vinheta
+Hautes lumières du vignettage	Realces da vinheta
+Taille du grain	Tamanho do grão
+Rugosité du grain	Rugosidade do grão
+Intensité du LUT	Intensidade da LUT
+Teinte des ombres (étalonnage)	Tinta das sombras (calibração)
+Effets créatifs	Efeitos criativos
+Retouche des taches	Pincel de correção localizada
+Profil et lumière	Perfil e luz
+Étalonnage	Gradação de cor
+Optique	Ótica
+Transformation	Transformar
+Effets	Efeitos
+Masques	Máscaras
+Grand côté	Lado longo
+Petit côté	Lado curto
+Cadre L × H	Moldura L × A
+Aucune	Nenhum
+Écran	Ecrã
+Papier mat	Papel mate
+Papier brillant	Papel brilhante
+Faible	Baixa
+Élevée	Alta
+Toutes sauf la localisation	Tudo exceto a localização
+Copyright uniquement	Apenas copyright
+Nom unique	Nome único
+Écraser	Substituir
+Ignorer	Ignorar
+Haut gauche	Em cima à esquerda
+Haut droite	Em cima à direita
+Bas droite	Em baixo à direita
+Bas gauche	Em baixo à esquerda
+Règle des tiers	Regra dos terços
+Grille	Grelha
+Nombre d'or	Proporção áurea
+Diagonales	Diagonais
+Courbe	Curva

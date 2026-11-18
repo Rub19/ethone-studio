@@ -4,7 +4,7 @@ Version **0.9.1**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables
 
 ## Prochaine version
 
-- **Anglais** : Ctrl+, › Interface › « Langue / Language ». Les 9 apps, le lanceur et l'installateur sont traduits (menus, outils, panneaux, options).
+- **Langues** : Ctrl+, › Interface › « Langue / Language » : français, English, Español, Deutsch, Italiano, Português. Les 9 apps, le lanceur et l’installateur sont traduits (menus, outils, panneaux, options), raccourcis compris (Strg, Umschalt, Mayús…).
 - **Couleurs** : les profils ICC des photos (AdobeRGB, Display P3…) sont respectés à l'ouverture, sRGB est intégré aux exports ; Pixel ajoute l'épreuvage CMJN et l'export TIFF CMJN pour l'impression.
 - **Récupération après plantage** : Pixel, Vector, Page, Motion et Cut enregistrent le travail non sauvegardé chaque minute et le rouvrent au démarrage.
 - **Pixel** : format de projet .epix avec calques, masques et calques de réglage (Ctrl+S).

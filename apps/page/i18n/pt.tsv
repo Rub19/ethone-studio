@@ -1,1 +1,485 @@
 # French text<TAB>translation. One line per text; a missing line falls back to English.
+Fusion de données (CSV)…	Combinação de dados (CSV)…
+Publipostage : «Nom» dans les textes	Impressão em série: «Nome» nas molduras de texto
+QR code du texte sélectionné	Código QR do texto selecionado
+Lien, Wi-Fi, contact… · image nette	Ligação, Wi-Fi, contacto… · imagem nítida
+Répéter le bloc en grille (remplir la page)	Repetir em grelha (preencher a página)
+Étiquettes, cartes, badges · écart 10 pt	Etiquetas, cartões, crachás · intervalo de 10 pt
+Répéter le bloc en grille sans écart (traits de coupe communs)	Repetir sem intervalo (marcas de corte partilhadas)
+Objet	Objeto
+Centrer les blocs sur la page	Centrar as molduras na página
+Disposition · sélection	Organizar · seleção
+Distribuer les blocs horizontalement	Distribuir molduras horizontalmente
+Disposition · 3 blocs minimum	Organizar · pelo menos 3 molduras
+Distribuer les blocs verticalement	Distribuir molduras verticalmente
+Dupliquer les blocs	Duplicar molduras
+Disposition · Ctrl+D	Organizar · Ctrl+D
+Grouper les blocs	Agrupar molduras
+Disposition · Ctrl+G	Organizar · Ctrl+G
+Dégrouper les blocs	Desagrupar molduras
+Disposition · Ctrl+Maj+G	Organizar · Ctrl+Shift+G
+Pivoter les blocs de 90°	Rodar as molduras 90°
+Retourner les blocs horizontalement	Inverter as molduras horizontalmente
+Retourner les blocs verticalement	Inverter as molduras verticalmente
+Exporter	Exportar
+PDF, PNG, JPEG ou SVG · Ctrl+E	PDF, PNG, JPEG ou SVG · Ctrl+E
+Format du document · Ctrl+K	Configuração do documento · Ctrl+K
+Fichier	Ficheiro
+Ouvrir un document récent	Abrir recente
+Aucun document récent	Sem documentos recentes
+Exporter avec un préréglage	Exportar com uma predefinição
+Édition	Editar
+Corrections typographiques	Correções tipográficas
+Tout corriger	Corrigir tudo
+Disposition	Organizar
+Transformation	Transformar
+Symétrie horizontale	Inverter horizontalmente
+Symétrie verticale	Inverter verticalmente
+Effacer les transformations	Limpar transformações
+Aligner	Alinhar
+Centrer sur la page	Centrar na página
+Remplir la page (fond perdu compris)	Preencher a página (incluindo sangria)
+Ajustement	Ajuste
+Options d'angle	Opções de canto
+Habillage	Moldagem do texto
+Effets	Efeitos
+Mode de fusion	Modo de mistura
+Effacer les effets	Limpar efeitos
+Styles d'objet	Estilos de objeto
+Nouveau à partir de la sélection…	Novo a partir da seleção…
+Convertir en tracé	Converter em traçado
+Rectangle, ellipse, polygone ou trait deviennent des tracés modifiables à la Plume	Retângulos, elipses, polígonos e linhas tornam-se traçados editáveis com a Caneta
+Texte	Texto
+Police	Tipo de letra
+Corps	Tamanho
+Style de paragraphe	Estilo de parágrafo
+Casse	Alterar maiúsculas/minúsculas
+Listes	Listas
+Lettrine	Capitular
+Insérer une variable	Inserir variável
+Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>	Etiquetas: <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>
+Ajouter une page après	Adicionar página depois
+Ajouter une page avant	Adicionar página antes
+Dupliquer la page	Duplicar página
+Pages en vis-à-vis	Páginas opostas
+Modifier le gabarit	Editar modelo
+Appliquer le gabarit à toutes les pages	Aplicar o modelo a todas as páginas
+Retirer le gabarit de toutes les pages	Remover o modelo de todas as páginas
+Affichage	Ver
+Espace de travail	Espaço de trabalho
+Aperçu (masquer les repères)   W	Pré-visualização (ocultar guias)   W
+Marges, colonnes et grille   Ctrl+;	Margens, colunas e grelha   Ctrl+;
+Bords des blocs   Ctrl+H	Bordas da moldura   Ctrl+H
+Règles   Ctrl+R	Réguas   Ctrl+R
+Magnétisme	Encaixar
+Fenêtre	Janela
+Bienvenue dans Page	Bem-vindo ao Page
+Mise en page de documents, magazines, affiches et PDF	Paginação de documentos, revistas, cartazes e PDF
+Ouvrir…	Abrir…
+Nouveau document	Novo documento
+Modèles	Modelos
+Documents récents	Documentos recentes
+Tes documents .epage apparaîtront ici	Os seus documentos .epage aparecerão aqui
+Aligner sur la sélection	Alinhar à seleção
+Répartir ↔	Distribuir ↔
+Répartir ↕	Distribuir ↕
+Grouper	Agrupar
+Corps · Ctrl+Maj+< / >	Tamanho · Ctrl+Shift+< / >
+Interligne · Alt+↑ / ↓	Entrelinha · Alt+↑ / ↓
+Approche · Alt+← / →	Tracking · Alt+← / →
+Gras · Ctrl+Maj+B	Negrito · Ctrl+Shift+B
+Italique	Itálico
+Souligné · Ctrl+Maj+U	Sublinhado · Ctrl+Shift+U
+Majuscules · Ctrl+Maj+K	Maiúsculas · Ctrl+Shift+K
+Fond	Preenchimento
+Contour	Traço
+Trait	Linha
+Début	Início
+Flèche	Seta
+Remplir	Preenchimento
+Ajuster	Ajustar
+Déformer	Distorcer
+Taille du texte	Tamanho do texto
+· texte en excès sur cette page	· texto em excesso nesta página
+Aperçu	Pré-visualização
+Masque cadres et repères (W)	Oculta molduras e guias (W)
+Ajouter une page à la fin	Adicionar uma página no fim
+Ses blocs apparaissent sur toutes les pages	As suas molduras aparecem em todas as páginas
+Propriétés	Propriedades
+Calques	Camadas
+Liens	Ligações
+Contrôle	Verificação prévia
+Bloc	Moldura
+Effets de l'image	Efeitos de imagem
+Le texte dépasse du bloc.	O texto excede a moldura.
+Ajuster la hauteur	Ajustar à altura
+Écrire sur la page (Entrée)	Escrever na página (Enter)
+Caractère	Caractere
+Taille	Tamanho
+Approche	Tracking
+Petites capitales	Versaletes
+Barré	Rasurado
+Décalage de la ligne de base	Deslocamento da linha de base
+Échelle H	Escala H
+Contour des lettres	Contorno da letra
+Paragraphe	Parágrafo
+Gauche	Esquerda
+Centre	Centro
+Droite	Direita
+Justifié	Justificado
+Interligne	Entrelinha
+Espace après paragraphe	Espaço depois
+Retrait de première ligne	Avanço da primeira linha
+Liste	Lista
+Retrait négatif (texte aligné après la puce)	Avanço pendente (texto alinhado depois do marcador)
++ Créer un style à partir de ce texte	+ Criar um estilo a partir deste texto
+Paragraphe avancé	Parágrafo avançado
+Espace avant paragraphe	Espaço antes
+Retrait gauche	Avanço esquerdo
+droit	direita
+Lettrine sur	Linhas da capitular
+Césure des mots longs	Hifenizar palavras longas
+Éviter les lignes veuves et orphelines	Evitar viúvas e órfãs
+Aligner sur la grille de base	Alinhar à grelha de linhas de base
+Tabulation tous les	Tabulação a cada
+Points de conduite	Pontos de preenchimento
+Caler à droite	Alinhar à direita
+Filet au-dessus	Filete acima
+en dessous	abaixo
+Épaisseur	Espessura
+Écart	Deslocamento
+Bloc de texte	Moldura de texto
+Colonnes	Colunas
+Gouttière	Medianiz
+Équilibrer	Balanço
+Filet entre colonnes	Filete entre colunas
+Hauteur auto	Altura automática
+Ignorer l'habillage	Ignorar a moldagem do texto
+Alignement vertical	Justificação vertical
+Haut	Em cima
+Milieu	Centro
+Bas	Em baixo
+Marge intérieure	Espaçamento interior
+Fond coloré	Cor de fundo
+Suite du texte dans	O texto continua em
+Aucun bloc	Sem moldura
+Le texte qui ne tient pas continue dans ce bloc (texte chaîné).	O texto que não cabe continua nesta moldura (texto encadeado).
+Choisir…	Escolher…
+Cadre aux proportions	Ajustar a moldura ao conteúdo
+Remplir le cadre	Preencher a moldura
+Ajuster dans le cadre	Ajustar na moldura
+Étirer sans garder les proportions	Esticar sem manter as proporções
+Zoom de l'image dans le cadre	Zoom da imagem na moldura
+Décalage X	Deslocamento X
+Centrer	Centro
+Forme du cadre	Forma da moldura
+Polygone	Polígono
+Filtre	Filtro
+Arrondi des coins	Raio do canto
+Miroir horizontal	Inverter horizontalmente
+Forme	Forma
+Arrondi	Raio
+Côtés / branches	Lados / pontas
+Creux (1 = polygone)	Recuo (1 = polígono)
+Ligne	Linha
+Pointillés (0 = plein)	Traços (0 = contínuo)
+Flèche à la fin	Seta no fim
+au début	no início
+Extrémités	Maiúsculas
+Rondes	Redondo
+Carrées	Projetado
+Droites	Plano
+Tracé	Traçado
+Tracé fermé	Traçado fechado
+Sélection directe (A) pour déplacer les points et leurs poignées.	Seleção direta (A) para mover os pontos e as suas alças.
+Texte sur tracé	Texto em traçado
+Départ le long du tracé	Começar ao longo do traçado
+Voir le tracé	Mostrar traçado
+Fermé	Fechado
+Tableau	Tabela
+Première colonne en gras	Primeira coluna a negrito
+Ligne d'en-tête	Linha de cabeçalho
+Lignes alternées	Linhas alternadas
+Aspect	Aspeto
+Opacité	Opacidade
+Pointillés	Tracejado
+Verrouillé	Bloqueado
+Masqué	Oculto
+Non imprimable (visible à l'écran seulement)	Não imprimível (só no ecrã)
++ Ajouter la couleur au nuancier	+ Adicionar cor às amostras
+Ombre portée	Sombra projetada
+Flou	Desfoque
+Lueur externe	Brilho exterior
+Contour progressif	Difuminar
+Contour progressif dégradé	Difuminado do gradiente
+De	De
+Angles	Cantos
+Dégradé radial (si un dégradé est actif)	Gradiente radial (se houver um gradiente ativo)
+Inclinaison	Inclinar
+Miroir ↔	Inverter ↔
+Habillage du texte	Moldagem do texto
+Distance	Deslocamento
+Les textes voisins contournent ce bloc.	O texto próximo contorna esta moldura.
+Note	Nota
+Remarque pour toi ou un relecteur (non imprimée)	Uma nota para si ou um revisor (não impressa)
+Aligner sur les marges	Alinhar às margens
+Ordre	Ordem
+Format…	Configurar…
+Titre	Título
+Marges	Margens
+Grille	Grelha
+Grille de base (0 = masquée)	Grelha de linhas de base (0 = oculta)
+Fond perdu	Sangria
+3 mm = 8,5 pt pour un imprimeur	3 mm = 8,5 pt para a gráfica
+1re page n°	Número da página inicial
+Utiliser le gabarit sur cette page	Usar o modelo nesta página
+Tu modifies le gabarit : ses blocs apparaissent sur toutes les pages.	Está a editar o modelo: as suas molduras aparecem em todas as páginas.
+?  Tutoriels	?  Tutoriais
+Nuancier	Amostras
+Les couleurs du document, réutilisables partout d'un clic.	As cores do documento, reutilizáveis em qualquer lado com um clique.
+Supprimer cette couleur	Eliminar esta cor
+Ajouter une couleur	Adicionar uma cor
+Styles de paragraphe	Estilos de parágrafo
+Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.	Selecione algum texto e depois «Criar um estilo» para reutilizar a formatação.
+Repères	Guias
+Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.	Arraste a partir de uma régua para colocar uma guia; leve-a de volta à régua para a remover.
++ Repère vertical au centre	+ Guia vertical no centro
++ Repère horizontal au centre	+ Guia horizontal no centro
+Objets de la page	Objetos da página
+Aucun bloc sur cette page.	Não há molduras nesta página.
+Glisse vers la page pour poser un repère	Arraste para a página para colocar uma guia
+Le rendu se met à jour sur la page en direct	A página atualiza-se em tempo real
+Couleur	Cor
+Style de caractère	Estilo de caractere
+Terminé	Concluído
+Exporter le document	Exportar documento
+Toutes	Tudo
+Page affichée	Página atual
+Plage	Intervalo
+Fond perdu et traits de coupe (impression)	Sangria e marcas de corte (impressão)
+Règle un fond perdu dans le format du document pour l'activer.	Defina uma sangria na configuração do documento para o ativar.
+Afficher le fichier après l'export	Mostrar o ficheiro após exportar
+Attention : du texte dépasse d'un bloc sur la page affichée.	Atenção: o texto excede uma moldura na página atual.
+Exporter…	Exportar…
+Annuler	Cancelar
+Format du document	Configuração do documento
+Largeur	Largura
+Hauteur	Altura
+Paysage	Paisagem
+Valeur standard des imprimeurs	Valor padrão das gráficas
+Grille de base	Grelha de linhas de base
+Nouveau style de paragraphe	Novo estilo de parágrafo
+Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.	Tipo de letra, tamanho, peso, cor, entrelinha e espaçamento do texto selecionado.
+Créer	Criar
+Couleur du nuancier	Cor da amostra
+Dégradé	Gradiente
+Angle	Ângulo
+Contrôle en amont	Verificação prévia
+Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.	Ferramenta Nota: clique numa moldura para anexar um comentário. As notas nunca são impressas.
+Afficher dans l'explorateur	Mostrar no Explorador
+Remplacer le lien…	Voltar a ligar…
+Atteindre	Ir para
+Rechercher les liens manquants dans un dossier…	Procurar numa pasta as ligações em falta…
++ Nouveau calque	+ Nova camada
+Placer la sélection	Mover a seleção para aqui
+Déplace les blocs sélectionnés sur le calque actif	Move as molduras selecionadas para a camada ativa
+Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.	Clique direito: ordem, seleção, eliminar. A camada de cima fica à frente.
+Styles de caractère	Estilos de caractere
+Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.	Formatação de algumas palavras: no editor de texto, selecione o texto e escolha o estilo.
++ Nouveau style de caractère	+ Novo estilo de caractere
+Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.	Guarda o aspeto de uma moldura (cores, traço, efeitos, cantos) para o voltar a aplicar.
+Appliquer à la sélection	Aplicar à seleção
+Rechercher et remplacer	Procurar e substituir
+Rechercher	Procurar
+Remplacer par	Alterar para
+Respecter la casse	Diferenciar maiúsculas
+Mot entier	Palavra inteira
+Bloc sélectionné	Moldura selecionada
+Tous	Tudo
+Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.	Dica: \\t não é interpretado; cole uma tabulação real se for preciso.
+Tout remplacer	Alterar tudo
+Suivant	Seguinte
+Fermer	Fechar
+Dupliquer et décaler	Duplicar e deslocar
+Créer une grille	Criar uma grelha
+Lignes	Linhas
+Gouttière horizontale	Medianiz horizontal
+Nombre de copies	Número de cópias
+Décalage horizontal	Deslocamento horizontal
+Rotation par copie	Rotação por cópia
+Table des matières	Índice
+Liste les blocs portant ces styles de paragraphe, avec leur numéro de page et des points de conduite.	Lista as molduras que usam estes estilos de parágrafo, com o número de página e pontos de preenchimento.
+Sur une nouvelle page au début du document	Numa nova página no início do documento
+Numérotation et sections	Numeração e secções
+Dès la page	Da página
+Nom	Nome
+Préfixe	Prefixo
+Taille relative	Tamanho relativo
+Enregistrer	Guardar
+Nouveau style d'objet	Novo estilo de objeto
+Couleurs, contour, opacité, angles et effets du bloc sélectionné.	Cores, traço, opacidade, cantos e efeitos da moldura selecionada.
+Supprimer la note	Eliminar nota
+Terminer (Entrée)	Terminar (Enter)
+Fermer le tracé	Fechar traçado
+Couleur du contour	Cor do traço
+Couleur du filet	Cor do filete
+Couleur du fond	Cor de preenchimento
+Couleur du trait	Cor da linha
+Traits	Linhas
+Fond de l'en-tête	Preenchimento do cabeçalho
+Fond alterné	Preenchimento alternado
+Couleur de l'ombre	Cor da sombra
+Couleur de la lueur	Cor do brilho
+Papier	Papel
+Résolution	Resolução
+Qualité JPEG	Qualidade JPEG
+Côtés	Lados
+Branches	Pontos
+Creux	Recuo interior
+Nouveau…	Novo…
+Enregistrer sous…	Guardar como…
+Placer une image…	Colocar imagem…
+Assembler…	Montar…
+Format du document…	Tamanho do documento…
+Couper	Cortar
+Copier	Copiar
+Dupliquer	Duplicar
+Dupliquer et décaler…	Duplicar e deslocar…
+Supprimer	Eliminar
+Tout sélectionner	Selecionar tudo
+Tout désélectionner	Desmarcar tudo
+Rechercher et remplacer…	Procurar e substituir…
+Dissocier	Desagrupar
+Verrouiller	Bloquear
+Tout déverrouiller	Desbloquear tudo
+Masquer	Ocultar
+Tout afficher	Mostrar tudo
+Non imprimable	Não imprimível
+Modifier le texte	Editar o texto
+Ajuster la hauteur au texte	Ajustar a altura ao texto
+Remplir avec du faux texte	Preencher com texto fictício
+Créer la table des matières…	Criar índice…
+Nouveau style de caractère…	Novo estilo de caractere…
+Première page	Primeira página
+Dernière page	Última página
+Format de cette page…	Tamanho desta página…
+Numérotation et sections…	Numeração e secções…
+Ajuster à la fenêtre	Ajustar à janela
+Taille réelle	Tamanho real
+Titre 1	Título 1
+Titre 2	Título 2
+Titre 3	Título 3
+Légende	Legenda
+Petit texte	Texto pequeno
+Impression haute qualité	Impressão de alta qualidade
+PDF/X (imprimeur)	PDF/X (gráfica)
+Web léger	Web leve
+Personnalisé	Personalizado
+Remplir le cadre proportionnellement	Preencher a moldura proporcionalmente
+Ajuster le contenu proportionnellement	Ajustar o conteúdo proporcionalmente
+Ajuster le contenu au cadre	Ajustar o conteúdo à moldura
+Centrer le contenu	Centrar o conteúdo
+Ajuster le cadre au contenu	Ajustar a moldura ao conteúdo
+Premier plan	Primeiro plano
+En avant	Para a frente
+En arrière	Para trás
+Arrière-plan	Fundo
+Rotation de 90° horaire	Rodar 90° horário
+Rotation de 90° antihoraire	Rodar 90° anti-horário
+Rotation de 180°	Rodar 180°
+Centre horizontal	Centro horizontal
+Centre vertical	Centro vertical
+Milieu ↕	Meio ↕
+Derrière	Atrás
+Densité couleur −	Densidade de cor −
+Densité couleur +	Densidade de cor +
+Lumière crue	Luz dura
+Lumière tamisée	Luz suave
+Différence	Diferença
+Luminosité	Brilho
+Lettre US	Carta US
+Légal US	Legal US
+Tabloïd	Tabloide
+Livre 6 × 9 in	Livro 6 × 9 pol
+Carte de visite	Cartão de visita
+Carte postale	Postal
+Carré	Quadrado
+Présentation	Apresentação
+Bannière web	Banner web
+Miniature vidéo	Miniatura de vídeo
+Brochure 3 volets	Desdobrável de três painéis
+Couverture de livre	Capa de livro
+Fiche produit	Ficha de produto
+Carte de vœux	Cartão de felicitações
+Entrées	Entradas
+Velouté de potimarron	Creme de abóbora
+Burrata et tomates anciennes	Burrata e tomates antigos
+Risotto aux cèpes	Risotto de cogumelos porcini
+Filet de bar, beurre blanc	Filete de robalo, beurre blanc
+Joue de bœuf confite	Bochecha de vaca estufada
+Tarte au citron meringuée	Tarte de limão merengada
+Mousse au chocolat noir	Mousse de chocolate negro
+Fromages affinés	Queijos curados
+Variables : {page} {pages} {title} {date} {section}	Variáveis: {page} {pages} {title} {date} {section}
+Gabarit	Modelo
+sur	de
+mots	palavras
+sans gabarit	sem modelo
+Vectoriel, images d'origine, sans repères	Vetorial, imagens originais, sem marcas
+Fond perdu, traits de coupe, repères de montage et infos	Sangria, marcas de corte, registo e informações
+Images réduites et recompressées pour l'écran	Imagens reduzidas e recomprimidas para ecrã
+Tes propres réglages	As suas próprias definições
+retoucher la page	retocar a página
+développer	revelar
+placer la page	colocar a página
+ajouter au montage	adicionar à montagem
+animer la page	animar a página
+Numéro de page	Número de página
+Nombre de pages	Número de páginas
+Titre du document	Título do documento
+Date du jour	Data de hoje
+Nom de section	Nome da secção
+Aucun	Nenhum
+Noir et blanc	Preto e branco
+Sépia	Sépia
+Délavé	Desbotado
+Contraste	Contraste
+Chaud	Quente
+Froid	Frio
+Négatif	Negativo
+Aucune	Nenhum
+Puces	Marcadores
+Biseau	Bisel
+Encoche	Entalhe
+Arrondi inversé	Redondo invertido
+Cadre de sélection	Caixa delimitadora
+Forme de l'objet	Forma do objeto
+Sauter l'objet	Saltar objeto
+Espaces doubles	Espaços duplos
+Apostrophes typographiques	Apóstrofos tipográficos
+Guillemets français	Aspas angulares
+Points de suspension	Reticências
+Espaces fines avant ; : ! ?	Espaços finos antes de ; : ! ?
+minuscules	minúsculas
+Première Lettre En Capitale	Iniciais Maiúsculas
+Phrase normale.	Maiúscula inicial.
+Livret, flyer	Brochura, folheto
+Carte, flyer de poche	Cartão, folheto de bolso
+Livre, catalogue	Livro, catálogo
+Roman, essai	Romance, ensaio
+Dépliant, enveloppe	Desdobrável, envelope
+Publication 1:1	Publicação 1:1
+Réseaux sociaux	Redes sociais
+A4, en-tête, colonnes	A4, cabeçalho, colunas
+A5, événement	A5, evento
+A4, colonne latérale	A4, coluna lateral
+A4, carte et prix	A4, menu e preços
+A3, grand titre	A3, grande título
+A4, trois rubriques	A4, três secções
+A5, cérémonie	A5, cerimónia
+A4 paysage, diplôme	A4 paisagem, diploma
+A4 paysage, recto	A4 paisagem, só frente
+6 × 9 in, plat recto	6 × 9 pol, capa
+A4, photo et caractéristiques	A4, foto e características
+A6, fête	A6, festa
+A4, couverture et sommaire	A4, capa e índice
