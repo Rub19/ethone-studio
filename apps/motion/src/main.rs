@@ -267,7 +267,7 @@ fn demo_comp(w: u32, h: u32) -> Comp {
 impl Motion {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let mut db = usvg::fontdb::Database::new();
         db.load_system_fonts();
         let comp = demo_comp(1920, 1080);

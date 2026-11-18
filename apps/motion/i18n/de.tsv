@@ -1,0 +1,561 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Exporter l'animation	Animation exportieren
+Toute la composition	Ganze Komposition
+Zone de travail	Arbeitsbereich
+Personnalisée	Benutzerdefiniert
+Tête → début	Abspielposition → Anfang
+Tête → fin	Abspielposition → Ende
+Préfixe	Präfix
+Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.	Formen, Pfade, Null-Objekte, Eltern, Transformationen, getrimmte Pfade, Füllungen und Konturen. Text, Bilder und Effekte werden nicht exportiert.
+Fond transparent	Transparenter Hintergrund
+Exporter…	Exportieren…
+Ajouter à la file	Zur Warteschlange hinzufügen
+Ctrl+Alt+M ouvre la file de rendu	Strg+Alt+M öffnet die Renderliste
+Annuler	Abbrechen
+File de rendu	Renderliste
+Plusieurs exports à la suite, en une seule fois.	Mehrere Exporte nacheinander, in einem Durchgang.
+La file est vide : dans Exporter, choisis « Ajouter à la file ».	Die Warteschlange ist leer: in „Exportieren“ „Zur Warteschlange hinzufügen“ wählen.
+Retirer	Entfernen
+Ajouter…	Hinzufügen…
+Vider	Löschen
+Fermer	Schließen
+Éditeur de courbe	Diagrammeditor
+Vitesse	Geschwindigkeit
+Préréglages	Vorgaben
+Revenir à la courbe choisie dans la liste	Zur in der Liste gewählten Kurve zurück
+Copier sur la sélection	Auf Auswahl kopieren
+Même courbe pour toutes les clés sélectionnées (ou tout le calque)	Gleiche Kurve für alle ausgewählten Keys (oder die ganze Ebene)
+Valeur	Wert
+Aligner tous les calques au même départ	Alle Ebenen am gleichen Start ausrichten
+Inverser les images clés du calque	Keyframes der Ebene umkehren
+Animation · plage des clés	Animation · Key-Bereich
+Répartir régulièrement les images clés	Keyframes gleichmäßig verteilen
+Animation · calque sélectionné	Animation · ausgewählte Ebene
+Ajuster le calque à la composition	Ebene an Komposition anpassen
+Calque sélectionné · contenir	Ausgewählte Ebene · einpassen
+Adapter la durée aux calques	Dauer an Ebenen anpassen
+Composition · fin du dernier calque	Komposition · Ende der letzten Ebene
+Fractionner le calque à la tête	Ebene an der Abspielposition teilen
+Calque sélectionné · Ctrl+Maj+D	Ausgewählte Ebene · Strg+Umschalt+D
+Dupliquer le calque	Ebene duplizieren
+Calque sélectionné · Ctrl+D	Ausgewählte Ebene · Strg+D
+Exporter	Exportieren
+MP4, GIF, PNG ou SVG · Ctrl+M	MP4, GIF, PNG oder SVG · Strg+M
+Réglages de la composition · Ctrl+K	Kompositionseinstellungen · Strg+K
+Nouvelle composition	Neue Komposition
+Ouvrir…	Öffnen…
+Bienvenue dans Motion	Willkommen bei Motion
+Titres animés, logos et graphismes en mouvement	Animierte Titel, Logos und Motion Graphics
+Projets récents	Zuletzt verwendete Projekte
+Ajouter un calque	Ebene hinzufügen
+Modèles	Vorlagen
+Ajouté à la tête de lecture	An der Abspielposition hinzugefügt
+Animations prêtes	Fertige Animationen
+Rechercher une animation	Animationen suchen
+Sélectionne un calque pour lui appliquer une animation.	Wähle eine Ebene, um eine Animation darauf anzuwenden.
+Ajoutée à partir de la tête de lecture	Ab der Abspielposition hinzugefügt
+Réglages de la composition	Kompositionseinstellungen
+Inverser largeur et hauteur	Breite und Höhe tauschen
+Images par seconde	Bilder pro Sekunde
+Durée	Dauer
+Ajuster à l'animation	An Animation anpassen
+Terminé	Fertig
+[ Début zone	[ Anfang des Arbeitsbereichs
+Fin zone ]	Ende des Arbeitsbereichs ]
+Effacer la zone de travail	Arbeitsbereich löschen
+Ajuster	Einpassen
+Toute la durée visible	Ganze Dauer sichtbar
+Ajouter un repère ici	Hier eine Marke hinzufügen
+Début de zone à la tête	Anfang des Arbeitsbereichs an der Abspielposition
+Fin de zone à la tête	Ende des Arbeitsbereichs an der Abspielposition
+Supprimer ce repère	Diese Marke löschen
+Autres courbes	Weitere Kurven
+Courbe douce (F9)	Easy Ease (F9)
+Éditer la courbe…	Kurve bearbeiten…
+Copier (Ctrl+C)	Kopieren (Strg+C)
+Sélectionner toute la propriété	Ganze Eigenschaft auswählen
+Supprimer (Suppr)	Löschen (Entf)
+Dupliquer	Duplizieren
+Fractionner à la tête	An der Abspielposition teilen
+Copier l'animation	Animation kopieren
+Premier plan	In den Vordergrund
+Arrière-plan	In den Hintergrund
+Couleur d'étiquette	Etikettfarbe
+Supprimer	Löschen
+Fond	Hintergrund
+Dégradé vers le bas	Verlauf nach unten
+Arrondi	Rundheit
+Texte vertical	Vertikaler Text
+Taille	Größe
+Gras	Fett
+Italique	Kursiv
+Alignement sur le point	Ausrichtung am Punkt
+Centre	Mitte
+Gauche	Links
+Droite	Rechts
+Espacement des lettres	Laufweite
+Rayon	Radius
+Creux (1 = polygone)	Innenradius (1 = Polygon)
+Longueur	Länge
+Épaisseur	Stärke
+Révélation % = longueur de l'arc : anime-la pour une jauge.	Enthüllung % = Bogenlänge: für eine Anzeige animieren.
+De	Von
+Avant	Vorher
+Après	Nachher
+Compte pendant 80 % de la durée du calque	Zählt während 80 % der Ebenendauer
+Tracé fermé	Geschlossener Pfad
+Remplir	Füllung
+Tout lisser	Alles glätten
+Tout en angles	Alle Ecken
+Inverser	Umkehren
+Sans remplissage : règle le contour dans Apparence.	Keine Füllung: Kontur unter Aussehen festlegen.
+Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	Ein Null-Objekt ist im Rendering unsichtbar: Mach es zum übergeordneten Objekt, um mehrere Ebenen zugleich zu steuern.
+Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	Einstellungsebene: Ihre Effekte (Farbe, Unschärfe, Körnung, Verzerrung…) wirken auf alle Ebenen darunter. Ihre Deckkraft bestimmt die Mischung.
+Couleur	Farbe
+Fichier	Datei
+Ouvrir un projet récent	Zuletzt verwendetes Projekt öffnen
+Aucun projet récent	Keine zuletzt verwendeten Projekte
+Exporter directement	Direkt exportieren
+Édition	Bearbeiten
+Calque	Ebene
+Nouveau	Neu
+Modèle	Vorlage
+Transformer	Transformieren
+Orientation automatique	Automatisch drehen
+Temps	Zeit
+Lecture inversée	Zeitumkehr
+Mode de fusion	Füllmethode
+Masque	Matt
+Verrouillé	Gesperrt
+Courbe de Bézier	Bézierkurve
+Afficher dans la timeline	In der Zeitleiste zeigen
+Finition	Feinschliff
+Affichage	Ansicht
+Espace de travail	Arbeitsbereich
+Grille et tiers                  Ctrl+'	Raster und Drittel               Strg+'
+Divisions de la grille	Rasterunterteilungen
+Zones sûres	Sichere Bereiche
+Type de zones sûres	Art des sicheren Bereichs
+Axes centraux	Mittelachsen
+Règles                              Ctrl+R	Lineale                            Strg+R
+Repères de mise en page   Ctrl+;	Layout-Hilfslinien   Strg+;
+Damier de transparence	Transparenzraster
+Trajectoires de mouvement	Bewegungspfade
+Pelure d'oignon	Zwiebelschicht
+Réglages de la pelure	Zwiebelschicht-Einstellungen
+Magnétisme	Ausrichten
+Lecture en boucle               L	Wiedergabe in Schleife          L
+Qualité de l'aperçu	Vorschauqualität
+Ajouter ou retirer une image clé ici	Hier einen Keyframe hinzufügen oder entfernen
+Clic droit : réinitialiser, tremblement, boucle	Rechtsklick: zurücksetzen, Wackeln, Schleife
+Réinitialiser la valeur	Wert zurücksetzen
+Tremblement	Wackeln
+Après la dernière clé	Nach dem letzten Key
+Clé suivante	Nächster Key
+Clé précédente	Vorheriger Key
+Courbe	Kurve
+Supprimer l'animation de couleur	Farbanimation entfernen
+Images/s	Bilder/s
+Réglages…	Einstellungen…
+Finition de l'image	Bildfinish
+Bandes cinéma	Letterbox
+Effets de composition	Kompositionseffekte
+Repères	Marken
+Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.	M drücken, um eine Marke an der Abspielposition zu setzen: sie dient als Ausrichtungspunkt und J/K-Sprungziel.
+Aller au repère	Zur Marke springen
++ Repère à la tête de lecture	+ Marke an der Abspielposition
+Repères de mise en page	Layout-Hilfslinien
+Avec les règles (Ctrl+R), glisse depuis une règle pour tirer un repère ; glisse-le hors de la vue pour le supprimer.	Mit eingeblendeten Linealen (Strg+R) aus einem Lineal ziehen, um eine Hilfslinie herauszuziehen; aus der Ansicht ziehen, um sie zu löschen.
++ Centre	+ Mitte
++ Tiers	+ Drittel
++ Marges 5 %	+ 5 % Ränder
+Tout effacer	Alles löschen
+Verrou	Sperren
+Aucun	Keine
+Étiquette	Etikett
+Transformation	Transformieren
+Orientation auto	Automatisch drehen
+Le calque tourne dans le sens de sa trajectoire	Die Ebene dreht sich entlang ihres Pfads
+Centrer l'ancre	Ankerpunkt Mitte
+Réinitialiser	Zurücksetzen
+Remet échelle, rotations, ancre et opacité par défaut	Setzt Skalierung, Drehungen, Anker und Deckkraft zurück
+Aligner sur la composition	An Komposition ausrichten
+Met le calque à l'échelle de la composition	Skaliert die Ebene auf die Komposition
+Centrer au milieu	In der Mitte zentrieren
+Contenu	Inhalt
+Tracé et opérateurs	Pfad und Operatoren
+Simultané	Gleichzeitig
+Un par un	Einzeln
+Ondulé	Wellig
+Apparence	Aussehen
+Contour	Kontur
+Extrémités et angles	Enden und Ecken
+Plates	Abgeschnitten
+Rondes	Rund
+Carrées	Überstehend
+Arrondis	Rund
+Pointus	Gehrung
+Biseautés	Abgeflacht
+Dégradé vers	Verlauf zu
+Linéaire	Linear
+Miroir horizontal	Horizontal spiegeln
+Vertical	Vertikal
+Flou et lumière	Unschärfe und Licht
+Lueur	Leuchten
+Ombre portée	Schlagschatten
+Ombre interne	Schatten nach innen
+Ombres	Tiefen
+Lumières	Lichter
+Remplir d'une couleur	Mit einer Farbe füllen
+Réinitialiser la couleur	Farbe zurücksetzen
+Stylisation	Stilisieren
+Animateur de texte	Textanimator
+Animer lettre par lettre	Buchstabe für Buchstabe animieren
+Sortie	Aus
+Les deux	Beide
+Ordre	Reihenfolge
+Mouvement	Bewegung
+Répéter toutes les clés	Alle Keys wiederholen
+Boucle	Schleife
+Aller-retour	Ping-Pong
+Figer	Einfrieren
+Fige l'image du calque à l'instant choisi	Friert das Bild der Ebene zum gewählten Zeitpunkt ein
+Tête	Abspielposition
+Réinitialiser le temps	Zeit zurücksetzen
+Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme (ou en dehors, en mode inversé).	Die Ebene direkt darüber in der Zeitleiste wirkt als Schablone: sie wird unsichtbar und zeigt diese Ebene nur durch ihre Form (oder außerhalb, wenn umgekehrt).
+?  Tutoriels	?  Tutorials
+Depuis le centre	Von der Mitte
+Terminer (Entrée)	Fertig (Eingabe)
+Inversé	Umgekehrt
+Plage	Bereich
+Qualité (débit)	Qualität (Bitrate)
+Lecture en boucle	Wiedergabe in Schleife
+Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	Leertaste Wiedergabe · Tasten J K · M Marke · B N Arbeitsbereich · V H Z W Y Q G Werkzeuge · Strg+T Text · Strg+B Pinsel · P S R T A U Eigenschaften · F9 Easy Ease
+Vignettage	Vignette
+Grain film	Filmkorn
+Couper le tracé	Pfad trimmen
+Opérateurs de forme	Formoperatoren
+Arrondir les angles	Abgerundete Ecken
+Fronce et dilatation	Zusammenziehen und aufblähen
+Zigzag	Zickzack
+Agitation	Pfade wackeln
+Détail	Detail
+Vitesse d'agitation	Wackelgeschwindigkeit
+Torsion	Verdrehen
+Pointillés (0 = plein)	Striche (0 = durchgehend)
+Espace entre tirets	Abstand zwischen Strichen
+Angle du dégradé	Verlaufswinkel
+Centre X	Mitte X
+Centre Y	Mitte Y
+Flou fixe	Feste Unschärfe
+Flou directionnel	Bewegungsunschärfe
+Flou radial (zoom)	Radialer Weichzeichner (Zoom)
+Décalage X	Versatz X
+Décalage Y	Versatz Y
+Douceur	Weichheit
+Opacité	Deckkraft
+Décalage X 	Versatz X
+Décalage Y 	Versatz Y
+Douceur 	Weichheit
+Teinte	Farbton
+Luminosité	Helligkeit
+Contraste	Kontrast
+Sépia	Sepia
+Teinte bicolore	Duplex
+Inversion	Umkehren
+Seuil (0 = non)	Schwellenwert (0 = aus)
+Postérisation (0 = non)	Tontrennung (0 = aus)
+Séparation RVB	RGB-Versatz
+Angle RVB	RGB-Winkel
+Fréquence du glitch	Glitch-Frequenz
+Distorsion	Verzerrung
+Taille des ondes	Wellengröße
+Évolution	Entwicklung
+Scintillement	Flackern
+Machine à écrire (0 = non)	Schreibmaschine (0 = aus)
+Décalage entre lettres	Verzögerung zwischen Buchstaben
+Durée par lettre	Dauer pro Buchstabe
+Valeurs de départ	Startwerte
+Échelle	Skalierung
+Tremblement de position	Positions-Wackeln
+Fréquence	Frequenz
+Écho (traînée)	Echo (Spur)
+Délai entre échos	Abstand zwischen Echos
+Répéteur	Wiederholer
+Rotation par copie	Drehung pro Kopie
+Échelle par copie	Skalierung pro Kopie
+Fondu par copie	Verblassen pro Kopie
+Décalage temporel	Zeitversatz
+Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe	Ziehen: verschieben · Ecken: skalieren · Kreis: drehen · Umschalt: Achse
+Glisser pour tourner le calque · Maj : pas de 15°	Ziehen, um die Ebene zu drehen · Umschalt: 15°-Schritte
+Glisser l'ancre sans bouger le calque · Placer :	Anker ziehen, ohne die Ebene zu bewegen · Platzieren:
+Clic dans la vue pour écrire	Klicke in die Ansicht, um zu tippen
+Peint sur le calque Peinture sélectionné	Malt auf der ausgewählten Malebene
+Sélectionne un calque puis trace : seule la zone dessinée reste visible	Ebene auswählen, dann zeichnen: nur der gezeichnete Bereich bleibt sichtbar
+Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur	Ziehe an einem Teil eines Pfads oder Malstrichs: nahe Punkte folgen sanft
+Efface les traits du calque Peinture	Löscht Striche auf der Malebene
+Sélection	Auswahl
+Main	Hand
+Zoom avant	Einzoomen
+Zoom arrière	Auszoomen
+Point d'ancrage	Ankerpunkt
+Rectangle arrondi	Abgerundetes Rechteck
+Polygone	Polygon
+Étoile	Stern
+Plume	Zeichenstift
+Ajout de sommet	Eckpunkt hinzufügen
+Suppression de sommet	Eckpunkt löschen
+Conversion de sommet	Eckpunkt umwandeln
+Texte horizontal	Horizontaler Text
+Pinceau	Pinsel
+Gomme	Radiergummi
+Masque rectangulaire	Rechteckmaske
+Masque elliptique	Ellipsenmaske
+Marionnette	Marionette
+Enregistrer	Speichern
+Enregistrer sous…	Speichern unter…
+File de rendu…	Renderliste…
+Sélectionner toutes les clés du calque	Alle Keys der Ebene auswählen
+Monter	Nach oben
+Descendre	Nach unten
+Centrer le point d'ancrage	Ankerpunkt zentrieren
+Ajuster à la composition	An Komposition anpassen
+Ajuster à la largeur	An Breite anpassen
+Ajuster à la hauteur	An Höhe anpassen
+Centrer dans la composition	In der Komposition zentrieren
+Rotation +90°	Um +90° drehen
+Rotation −90°	Um −90° drehen
+Retourner horizontalement	Horizontal spiegeln
+Retourner verticalement	Vertikal spiegeln
+Réinitialiser la transformation	Transformation zurücksetzen
+Commencer à la tête de lecture	An der Abspielposition beginnen
+Finir à la tête de lecture	An der Abspielposition enden
+Déplacer le début à la tête	Anfang zur Abspielposition verschieben
+Déplacer la fin à la tête	Ende zur Abspielposition verschieben
+Étendre à toute la composition	Auf die ganze Komposition ausdehnen
+Figer l'image à la tête	Standbild an der Abspielposition
+Créer un nul parent	Übergeordnetes Null-Objekt erstellen
+Courbe douce	Sanfte Kurve
+Ralentir à l'arrivée	Beim Ankommen abbremsen
+Démarrer en douceur	Sanft beginnen
+Maintien (bascule)	Halten (umschalten)
+Répartir les clés uniformément	Keys gleichmäßig verteilen
+Inverser les images clés	Keyframes umkehren
+Supprimer toutes les images clés	Alle Keyframes löschen
+Propriétés animées	Animierte Eigenschaften
+Réglages de la composition…	Kompositionseinstellungen…
+Ajuster la durée à l'animation	Dauer an Animation anpassen
+Ajouter un repère	Hilfslinie hinzufügen
+Début de la zone de travail	Anfang des Arbeitsbereichs
+Fin de la zone de travail	Ende des Arbeitsbereichs
+Ajuster à la fenêtre	In Fenster einpassen
+Taille réelle (100 %)	Originalgröße (100 %)
+PNG séquence	PNG-Sequenz
+PNG image	PNG-Bild
+SVG séquence	SVG-Sequenz
+Légère	Leicht
+Cinémascope	CinemaScope
+Carré	Quadrat
+Bannière GIF	GIF-Banner
+En-tête X	X-Kopfzeile
+Retournement 3D	3D-Drehung
+Bascule 3D	3D-Drehung
+Carte qui tourne	Drehende Karte
+Tracé dessiné	Pfad gezeichnet
+Tracé effacé	Pfad gelöscht
+Tracé qui court	Laufender Pfad
+Lettres qui montent	Aufsteigende Buchstaben
+Lettres qui tombent	Fallende Buchstaben
+Lettres en vrac	Verstreute Buchstaben
+Lettres qui s'envolent	Fliegende Buchstaben
+Étirement élastique	Elastisches Dehnen
+Zoom flou	Zoom-Unschärfe
+Tremblement de rotation	Drehungs-Wackeln
+Apparition colorée	Farbenthüllung
+Fondu entrant	Einblenden
+Glisser depuis la gauche	Von links hereinschieben
+Glisser depuis la droite	Von rechts hereinschieben
+Monter depuis le bas	Steigt von unten auf
+Descendre depuis le haut	Fällt von oben
+Zoom pop	Pop-Zoom
+Fondu et montée	Einblenden und aufsteigen
+Tourbillon entrant	Wirbelnd herein
+Révélation	Enthüllen
+Flou entrant	Unscharf einblenden
+Machine à écrire	Schreibmaschine
+Fondu sortant	Ausblenden
+Sortie à droite	Ausgang nach rechts
+Sortie vers le bas	Ausgang nach unten
+Battement de cœur	Herzschlag
+Rotation continue	Dauerdrehung
+Zoom lent	Langsamer Zoom
+Bandeau titre	Titelbanner
+Titre cinéma	Kinotitel
+Bouton S'abonner	Abonnieren-Knopf
+Compte à rebours	Countdown
+Barre de progression	Fortschrittsbalken
+Coche validée	Häkchen
+Titre lettre par lettre	Titel Buchstabe für Buchstabe
+Classique 90/80 %	Klassisch 90/80 %
+Moderne 93/90 %	Modern 93/90 %
+Réseaux sociaux 85/75 %	Soziale Medien 85/75 %
+Flèche	Pfeil
+Cœur	Herz
+Vitesse 50 %	Geschwindigkeit 50 %
+Vitesse 100 %	Geschwindigkeit 100 %
+Vitesse 200 %	Geschwindigkeit 200 %
+Étirer les clés × 2	Keys dehnen × 2
+Compresser les clés × ½	Keys stauchen × ½
+Tracé	Pfad
+Sans vignettage	Ohne Vignette
+Vignettage léger	Leichte Vignette
+Vignettage fort	Starke Vignette
+Sans grain	Ohne Korn
+Grain léger	Leichtes Korn
+Grain marqué	Starkes Korn
+Sans bandes	Ohne Balken
+Bandes 2,39:1	Balken 2,39:1
+Bandes 1,85:1	Balken 1,85:1
+Entrée douce	Einblenden weich
+Sortie douce	Ausblenden weich
+Entrée-sortie	Weich ein und aus
+Décélération	Ausblenden weich
+Accélération	Einblenden weich
+Expo sortie	Expo aus
+Expo entrée	Expo ein
+Dépasse en sortie	Überschwingen am Ende
+Recul en entrée	Rückwärts herein
+Fluide Apple	Apple-Fluid
+Tes animations enregistrées apparaîtront ici	Deine gespeicherten Animationen erscheinen hier
+Projets .emot	.emot-Projekte
+image	Frame
+Vidéo H.264, lisible partout	H.264-Video, läuft überall
+Animation légère pour le web et les messages	Leichte Animation für Web und Messenger
+Une image par frame, idéal pour le montage	Ein Bild pro Frame, ideal für den Schnitt
+L'image affichée à la tête de lecture	Das Bild an der Abspielposition
+Vectoriel, l'image affichée, modifiable	Vektor, das angezeigte Bild, bearbeitbar
+Un fichier vectoriel par image	Eine Vektordatei pro Frame
+Grille d'images pour présenter l'animation	Frame-Raster zur Präsentation der Animation
+Animation vectorielle pour le web et les apps	Vektoranimation für Web und Apps
+Infinie	Unendlich
+Une fois	Einmal
+3 fois	3-mal
+5 fois	5-mal
+Vidéo 16:9	Video 16:9
+Vidéo HD légère	Leichtes HD-Video
+Cinéma	Kino
+Large 2,39:1	Breitbild 2,39:1
+Publication 1:1	Post 1:1
+Publication 4:5	Post 4:5
+Bannière 3:1	Banner 3:1
+Bannière 4:1	Banner 4:1
+Emoji animé	Animiertes Emoji
+Pivote sur l'axe vertical	Dreht sich um die senkrechte Achse
+Bascule vers l'avant	Kippt nach vorn
+Rotation Y continue	Kontinuierliche Y-Drehung
+Le contour se dessine	Die Kontur zeichnet sich selbst
+Le contour s'efface	Die Kontur verschwindet
+Un segment fait le tour	Ein Segment läuft herum
+Une lettre après l'autre	Ein Buchstabe nach dem anderen
+Arrivent du haut en tournant	Drehen sich von oben herein
+Ordre aléatoire, zoom	Zufällige Reihenfolge, Zoom
+Sortie lettre par lettre	Ausstieg Buchstabe für Buchstabe
+S'étire en largeur	Dehnt sich in die Breite
+La teinte tourne sans fin	Der Farbton läuft endlos durch
+Tranches décalées et RVB	Verschobene Streifen und RGB
+Arrive avec un flou radial	Kommt mit radialer Unschärfe
+Balance sans fin	Endloses Schwingen
+Tourne nerveusement	Dreht sich nervös
+Du blanc vers sa couleur	Von Weiß zu seiner Farbe
+Opacité 0 → 100 %	Deckkraft 0 → 100 %
+Entre par le côté	Kommt von der Seite
+Entre par l'autre côté	Kommt von der anderen Seite
+Entre par le bas	Kommt von unten
+Tombe du haut	Fällt von oben
+Grossit avec un rebond	Wächst mit Abprallen
+Arrive de très près	Kommt aus nächster Nähe
+Doux et élégant	Sanft und elegant
+Tourne et grandit	Dreht sich und wächst
+Apparaît en vibrant	Erscheint mit einem Wackeln
+Tombe et rebondit	Fällt und prallt ab
+Se dévoile de gauche à droite	Enthüllt sich von links nach rechts
+Sort du flou	Kommt aus der Unschärfe
+Arrive penché puis se redresse	Kommt schräg und richtet sich auf
+Texte lettre par lettre	Text Buchstabe für Buchstabe
+Opacité 100 → 0 %	Deckkraft 100 → 0 %
+Quitte l'écran	Verlässt den Bildschirm
+S'efface en descendant	Verblasst nach unten
+Respire en boucle	Atmet in Schleife
+Double pulsation	Doppelpuls
+Oscille de gauche à droite	Schwingt nach links und rechts
+Monte et descend en douceur	Steigt und sinkt sanft
+Un tour complet	Eine volle Umdrehung
+Apparaît et disparaît	Erscheint und verschwindet
+Caméra à l'épaule	Handkamera
+Effet Ken Burns	Ken-Burns-Effekt
+Révélation sur toute la durée	Enthüllung über die ganze Dauer
+Nom et fonction en bas d'écran	Name und Funktion unten im Bild
+Grand titre espacé qui sort du flou	Gesperrte Schlagzeile, die aus der Unschärfe kommt
+Bouton rouge qui rebondit	Hüpfender roter Knopf
+10 → 0 avec anneau	10 → 0 mit Ring
+Se remplit de 0 à 100 %	Füllt sich von 0 bis 100 %
+Texte en italique et auteur	Kursiver Text und Autor
+Cercle puis coche qui se dessine	Kreis, dann ein Häkchen, das sich zeichnet
+Entrée et sortie animées	Animierter Ein- und Ausstieg
+ajouter au montage	zum Schnitt hinzufügen
+retoucher l'image	das Bild bearbeiten
+mettre en page	layouten
+placer l'image	das Bild platzieren
+développer	entwickeln
+image de l'animation	Frame der Animation
+Entrées	Intros
+Sorties	Outros
+Boucles	Loops
+Effets	Effekte
+Tracés	Pfade
+Texte	Text
+Complète	Voll
+Demie	Halb
+Quart	Viertel
+Différence	Differenz
+Densité couleur −	Farbdichte −
+Lumière tamisée	Gedämpftes Licht
+Lumière crue	Hartes Licht
+Densité couleur +	Farbdichte +
+Aucune	Keine
+Décalage	Versatz
+Continuer	Weiter
+Alpha du calque du dessus	Alpha der Ebene darüber
+Luminance du calque du dessus	Luminanz der Ebene darüber
+Alpha inversé	Umgekehrtes Alpha
+Luminance inversée	Umgekehrte Luminanz
+Gauche → droite	Links → rechts
+Droite → gauche	Rechts → links
+Centre → bords	Mitte → Ränder
+Aléatoire	Zufällig
+Échelle %	Skalierung %
+Opacité %	Deckkraft %
+Inclinaison °	Neigung °
+Flou px	Unschärfe px
+Révélation %	Enthüllung %
+Ancre X	Anker X
+Ancre Y	Anker Y
+Échelle X %	Skalierung X %
+Échelle Y %	Skalierung Y %
+Début du tracé %	Pfadanfang %
+Fin du tracé %	Pfadende %
+Décalage du tracé %	Pfadversatz %
+Épaisseur du contour	Konturstärke
+Teinte °	Farbton °
+Apparition en fondu	Einblenden
+Zoom d'entrée avec rebond	Zoom mit Abprallen
+Chute avec rebond	Fall mit Abprallen
+Entrée en tournant	Hereindrehen
+Sortie en fondu	Ausblenden
+Secousse continue	Dauerndes Wackeln
+Pulsation continue	Dauerpuls
+Balancement	Schwingen
+Clignotement	Blinken
+Flottement	Schweben
+Zoom de sortie	Auszoomen
+Sortie vers la droite	Ausgang nach rechts

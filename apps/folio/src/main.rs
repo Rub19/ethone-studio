@@ -183,7 +183,7 @@ pub fn toast(ctx: &egui::Context, s: impl Into<String>, ok: bool) {
 impl Folio {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let recent = recent_file().and_then(|p| std::fs::read_to_string(p).ok()).and_then(|s| serde_json::from_str::<Vec<PathBuf>>(&s).ok()).unwrap_or_default();
         let mut me = Self {
             od: None,

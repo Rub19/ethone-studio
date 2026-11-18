@@ -163,7 +163,7 @@ fn recents_path() -> PathBuf {
 impl PageApp {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let mut db = fontdb::Database::new();
         db.load_system_fonts();
         let families = db.faces().flat_map(|f| f.families.iter().map(|(n, _)| n.clone())).collect();

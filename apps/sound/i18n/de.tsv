@@ -1,0 +1,287 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Ouvrir un son…	Ton öffnen…
+Exporter…	Exportieren…
+Tout sélectionner	Alles auswählen
+Lecture / pause	Wiedergabe / Pause
+Espace	Leertaste
+Ajouter un marqueur	Marke hinzufügen
+Supprimer les silences (plus de 0,8 s)	Stillen entfernen (über 0,8 s)
+Édition	Bearbeiten
+Supprimer les silences courts (plus de 0,4 s)	Kurze Stillen entfernen (über 0,4 s)
+Rogner les silences au début et à la fin	Stille am Anfang und Ende entfernen
+Nettoyage · conserve les pauses internes	Bereinigung · behält innere Pausen
+Normaliser la crête à −1 dB	Spitze auf −1 dB normalisieren
+Volume · sélection ou fichier entier	Lautstärke · Auswahl oder ganze Datei
+Normaliser le volume perçu à −16 LUFS	Lautheit auf −16 LUFS normalisieren
+Podcast et voix · sélection ou fichier entier	Podcast und Stimme · Auswahl oder ganze Datei
+Ajouter des micro-fondus aux bords	Mikroblenden an den Rändern hinzufügen
+20 ms · évite les clics	20 ms · verhindert Knackser
+Découper aux silences en fichiers WAV…	An Stillen in WAV-Dateien teilen…
+Prises, samples, chapitres	Takes, Samples, Kapitel
+Boucle parfaite (fondu de 0,5 s)	Nahtlose Schleife (0,5 s Überblendung)
+Musique de jeu, ambiance	Spielmusik, Atmosphäre
+Boucle parfaite (fondu de 2 s)	Nahtlose Schleife (2 s Überblendung)
+Annuler	Rückgängig
+Exporter	Exportieren
+WAV 16/24/32 bits, sélection ou morceaux · Ctrl+E	WAV 16/24/32 Bit, Auswahl oder Segmente · Strg+E
+Fréquence d'échantillonnage et canaux	Abtastrate und Kanäle
+Fichier	Datei
+Nouveau (5 s de silence)	Neu (5 s Stille)
+Ouvrir…                         Ctrl+O	Öffnen…                         Strg+O
+Exporter…                       Ctrl+E	Exportieren…                    Strg+E
+Propriétés du son…	Toneigenschaften…
+Tout sélectionner         Ctrl+A	Alles auswählen                 Strg+A
+Du curseur au début     Maj+Origine	Cursor zum Anfang           Umschalt+Pos1
+Du curseur à la fin       Maj+Fin	Cursor zum Ende             Umschalt+Ende
+Ajouter / retirer un marqueur   M	Marke hinzufügen / entfernen           M
+Effets	Effekte
+Préréglages	Vorgaben
+Générer	Erzeugen
+Plus de sons dans le panneau Générer	Weitere Klänge im Bedienfeld „Erzeugen“
+Affichage	Ansicht
+Espace de travail	Arbeitsbereich
+Tout afficher               Ctrl+0	Alles einblenden                Strg+0
+Zoom avant                   Ctrl++	Einzoomen                      Strg++
+Zoom arrière                Ctrl+−	Auszoomen                      Strg+−
+Spectrogramme                S	Spektrogramm                   S
+Suivre la lecture              F	Wiedergabe folgen                F
+Lecture en boucle            L	Wiedergabe in Schleife          L
+Lecture / pause (Espace)	Wiedergabe / Pause (Leertaste)
+Enregistrer au micro au curseur (R)	Vom Mikrofon am Cursor aufnehmen (R)
+Sélection	Auswahl
+Analyse	Analyse
+Écrêtés	Beschnitten
+Crête réelle	True Peak
+Volume perçu (LUFS)	Lautheit (LUFS)
+Courbe des fondus	Blendenkurve
+Linéaire	Linear
+En S	S-Kurve
+Fondu entrant	Einblenden
+Fondu sortant	Ausblenden
+Nettoyage	Bereinigung
+Réduction de bruit	Rauschreduzierung
+1. Sélectionne un passage où l'on n'entend que le bruit, 2. capture-le, 3. sélectionne tout et applique.	1. Eine Stelle nur mit Rauschen auswählen, 2. erfassen, 3. alles auswählen und anwenden.
+Supprimer les silences	Stillen entfernen
+Raccourcir les blancs	Lücken verkürzen
+Égaliseur 5 bandes	5-Band-Equalizer
+Dynamique	Dynamik
+Trémolo	Tremolo
+Panoramique automatique	Automatisches Panorama
+Temps et hauteur	Zeit und Tonhöhe
+Stéréo	Stereo
+Échanger G/D	L/R tauschen
+Inséré au curseur	Am Cursor eingefügt
+Tonalité	Ton
+Insérer la tonalité	Ton einfügen
+Bruit	Rauschen
+Blanc	Weiß
+Rose	Rosa
+Brun	Braun
+Insérer le bruit	Rauschen einfügen
+Balayage	Sweep
+Insérer un balayage	Sweep einfügen
+Métronome	Metronom
+Insérer le métronome	Metronom einfügen
+Détection	Erkennung
+Détecter le tempo	Tempo erkennen
+Analyse la sélection ou tout le fichier	Analysiert die Auswahl oder die ganze Datei
+Marqueur sur chaque mesure	Marke auf jedem Takt
+Repérer les sons (un marqueur par prise)	Klänge finden (eine Marke pro Take)
+Poser les marqueurs	Marken setzen
+Rechercher un effet…	Effekte suchen…
+Valeurs par défaut	Standardwerte
+Marqueurs	Marken
+M pose un marqueur au curseur. Ils servent à naviguer (↑ ↓) et à découper l'export en morceaux.	M setzt eine Marke am Cursor. Damit navigieren (↑ ↓) und den Export in Segmente teilen.
+Aller au marqueur	Zur Marke springen
++ Marqueur au curseur	+ Marke am Cursor
+Exporter le son	Ton exportieren
+WAV sans perte, lisible partout	Verlustfreies WAV, läuft überall
+16 bits (CD)	16 Bit (CD)
+24 bits	24 Bit
+32 flottant	32 Bit Gleitkomma
+8 bits	8 Bit
+Aucun	Keine
+Triangulaire	Dreieckig
+Mise en forme	Geformt
+Originale	Original
+Conversion haute qualité (filtre sinc)	Hochwertige Umwandlung (Sinc-Filter)
+Originaux	Original
+Tout	Alle
+Un fichier par marqueur	Eine Datei pro Marke
+Pose des marqueurs (M) pour découper en plusieurs fichiers.	Marken (M) setzen, um in mehrere Dateien zu teilen.
+Normaliser à −1 dB avant l'export	Vor dem Export auf −1 dB normalisieren
+Inclure les marqueurs (repères lus par les éditeurs audio)	Marken einschließen (Cues für Audioeditoren)
+Métadonnées	Metadaten
+Attention : des échantillons sont écrêtés. Le limiteur ou la normalisation les corrigent.	Achtung: einige Samples übersteuern. Limiter oder Normalisierung beheben das.
+Propriétés du son	Toneigenschaften
+Convertir la fréquence d'échantillonnage	Abtastrate umwandeln
+Terminé	Fertig
+Zoom 1:1 (échantillons)	Zoom 1:1 (Samples)
+Entrée	Eingabe
+Reconstruit la zone à partir de ce qui l'entoure	Baut den Bereich aus seiner Umgebung neu auf
+Garde seulement la zone (le reste devient silencieux)	Nur den Bereich behalten (der Rest wird stumm)
+Effacer la zone (Échap)	Bereich löschen (Esc)
+Zoom aux échantillons	Auf Samples zoomen
+Réinitialiser	Zurücksetzen
+Forme d'onde	Wellenform
+Spectrogramme	Spektrogramm
+Hauteur	Höhe
+Suivre	Folgen
+La vue suit la lecture (F)	Die Ansicht folgt der Wiedergabe (F)
+Vue d'ensemble : clique ou glisse pour te déplacer	Übersicht: klicken oder ziehen zum Verschieben
+▶ Écouter	▶ Vorschau
+Essaie l'effet sur 15 s sans rien modifier	Testet den Effekt 15 s lang, ohne etwas zu ändern
+Appliquer	Anwenden
+Glisser : sélection · bords : ajuster · molette : zoom · Maj+molette : défiler · double-clic : entre marqueurs · M marqueur · Z zoom sélection · S spectrogramme	Ziehen: auswählen · Ränder: anpassen · Mausrad: Zoom · Umschalt+Mausrad: scrollen · Doppelklick: zwischen Marken · M Marke · Z Zoom auf Auswahl · S Spektrogramm
+Normaliser la crête à	Spitze normalisieren auf
+Limiteur (plafond)	Limiter (Obergrenze)
+Intensité	Stärke
+Porte de bruit	Noise Gate
+Coupe-bas	Tiefensperre
+Coupe-haut	Höhensperre
+Seuil	Schwellenwert
+Pauses de plus de	Pausen länger als
+Garder	Behalten
+Gain de sortie	Ausgangspegel
+Sous-échantillonnage	Neuberechnung
+Profondeur	Tiefe
+Vitesse	Bewerten
+Mélange	Mischung
+Réinjection	Rückkopplung
+Modulation en anneau (robot)	Ringmodulation (Roboter)
+Délai d'écho	Echoverzögerung
+Taille de la pièce	Raumgröße
+Mélange réverb	Hallanteil
+Vitesse (comme une bande)	Geschwindigkeit (wie ein Band)
+Tempo (même hauteur)	Tempo (gleiche Tonhöhe)
+Hauteur en demi-tons (même durée)	Tonhöhe in Halbtönen (gleiche Dauer)
+Balance	Balance
+Largeur stéréo	Stereobreite
+Durée	Dauer
+Fréquence	Frequenz
+Jusqu'à	Bis
+Seuil du silence	Stilleschwelle
+Silence minimum	Minimale Stille
+Son minimum	Minimaler Klang
+Qualité	Qualität
+Dither (adoucit la réduction de bits)	Dithering (glättet die Bitreduzierung)
+Canaux	Kanäle
+Plage	Bereich
+Échelle	Skalierung
+Taille	Größe
+Sélection temporelle	Zeitauswahl
+Main (défilement)	Hand (verschieben)
+Rectangle de fréquences	Frequenzauswahl
+Lasso spectral	Spektrallasso
+Pinceau spectral	Spektralpinsel
+Correction des taches	Bereichsreparatur
+Crayon	Buntstift
+Rasoir	Rasierklinge
+Fondus par poignées	Blendengriffe
+Enveloppe de volume	Lautstärkehüllkurve
+Début (Origine)	Start (Ursprung)
+Marqueur précédent (↑)	Vorherige Marke (↑)
+Marqueur suivant (↓)	Nächste Marke (↓)
+Fin	Ende
+Boucle sur la sélection (L)	Auswahl in Schleife (L)
+Montée	Aufstieg
+Légère montée	Sanfter Anstieg
+Voix douce	Sanfte Stimme
+Voix serrée	Gepresste Stimme
+Bus de mix	Mix-Bus
+Écrasé	Gestaucht
+Léger	Leicht
+Plus de salle	Mehr Raum
+Étouffé	Gedämpft
+Résonant	Resonant
+Téléphone	Telefon
+Sifflement 1 kHz	1-kHz-Pfeifen
+Larsen 2,5 kHz	Rückkopplung 2,5 kHz
+Présence	Präsenz
+Plus de basses	Mehr Bass
+Moins de basses	Weniger Bass
+Amérique	Amerika
+Voix aiguë	Hohe Stimme
+Métal	Metall
+Radio cassée	Kaputtes Radio
+Métallique	Metallisch
+Croches à 120 BPM	Achtelnoten bei 120 BPM
+Régulier	Normal
+Petite pièce	Kleiner Raum
+Grande salle	Großer Saal
+Cathédrale	Kathedrale
+Bande usée	Abgenutztes Band
+Extrême	Extrem
+Ampli vintage	Vintage-Verstärker
+Robot grave	Tiefer Roboter
+Androïde	Android
+Synthé	Synthesizer
+Très large	Sehr breit
+Octave grave	Oktave tiefer
+Démon	Dämon
+Accordage 432 Hz	Stimmung 432 Hz
+Médiums creusés	Abgesenkte Mitten
+Petit volume	Geringe Lautstärke
+Voix chaude	Warme Stimme
+Grosse caisse	Bassdrum
+Télévision	Fernseher
+Cinéma	Kino
+Porte fermée	Hinter einer geschlossenen Tür
+Chez le voisin	Beim Nachbarn
+Hall de gare	Bahnhofshalle
+Usée	Abgenutzt
+Cassé	Kaputt
+Très grave	Sehr tief
+Aiguë	Hoch
+Très aiguë	Sehr hoch
+Chœur	Chor
+Céleste	Himmlisch
+Aéroport	Flughafen
+Mal de mer	Seekrank
+Voix de podcast	Podcast-Stimme
+Voix radio	Radiostimme
+Mégaphone	Megafon
+Voix grave	Tiefe Stimme
+Sous l'eau	Unter Wasser
+Couper                     Ctrl+X	Ausschneiden               Strg+X
+Copier                     Ctrl+C	Kopieren                   Strg+C
+Dupliquer               Ctrl+D	Duplizieren             Strg+D
+Rogner                     Ctrl+T	Trimmen                    Strg+T
+Supprimer               Suppr	Löschen                 Entf
+Normaliser (−1 dB)	Normalisieren (−1 dB)
+Volume perçu −16 LUFS	Lautheit −16 LUFS
+Limiteur −1 dB	Limiter −1 dB
+Volume moyen (RMS −18 dB)	Mittlere Lautheit (RMS −18 dB)
+Coupe-bas 80 Hz	Tiefensperre 80 Hz
+Supprimer le décalage (DC)	DC-Versatz entfernen
+À l'envers	Umkehren
+Inverser la polarité	Polarität umkehren
+Rendre silencieux	Stille
+Convertir en mono	In Mono umwandeln
+Échanger gauche et droite	Links und rechts tauschen
+Tonalité 440 Hz	440-Hz-Ton
+Bruit blanc	Weißes Rauschen
+Crête	Spitze
+Creux au centre	Delle in der Mitte
+Numérique	Digital
+Filtres	Filter
+Restauration	Restaurierung
+Distorsion	Verzerrung
+Délai et écho	Delay und Echo
+Réverbération	Hall
+Voix et créatif	Stimme und Kreativ
+Ambiances et voix	Atmosphären und Stimmen
+Nettoie, compresse et règle à −16 LUFS	Säubert, komprimiert und stellt auf −16 LUFS
+Pleine, présente et dense	Voll, präsent und dicht
+Bande étroite 400 Hz – 3,4 kHz	Schmalband 400 Hz – 3,4 kHz
+Médiums saturés	Gesättigte Mitten
+Modulation en anneau et bits réduits	Ringmodulation und Bitreduktion
+−4 demi-tons, même durée	−4 Halbtöne, gleiche Länge
++5 demi-tons, même durée	+5 Halbtöne, gleiche Länge
+Grain de vieux sampler	Alter-Sampler-Grit
+Réverbération ample	Großer Hall
+Étouffé et ondulant	Gedämpft und schwankend
+ajouter au montage (sélection ou tout)	zum Schnitt hinzufügen (Auswahl oder alles)
+Sinus	Sinus
+Carré	Quadrat
+Scie	Säge

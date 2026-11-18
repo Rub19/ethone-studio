@@ -289,7 +289,7 @@ fn is_still(p: &Path) -> bool {
 impl Cut {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         media::startup();
         let (tx, rx) = channel();
         let proj = Project::new();

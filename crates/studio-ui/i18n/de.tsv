@@ -1,0 +1,94 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Masquer ce panneau	Dieses Bedienfeld ausblenden
+Réinitialiser l'espace de travail	Arbeitsbereich zurücksetzen
+Aucun panneau déplaçable ici	Hier gibt es keine verschiebbaren Bedienfelder
+Panneaux	Bedienfelder
+Nom de l'espace	Name des Arbeitsbereichs
+Enregistrer	Speichern
+Enregistrer l'espace de travail…	Arbeitsbereich speichern…
++ Ajouter un effet	+ Effekt hinzufügen
+Retirer	Entfernen
+Monter	Nach oben
+Réglages	Einstellungen
+Valeurs par défaut	Standardwerte
+Envoyer vers	Senden an
+Ouvre ton travail dans une autre app, en un clic	Öffne deine Arbeit mit einem Klick in einer anderen App
+Aide	Hilfe
+Apprendre                F1	Lernen                      F1
+Apprendre	Lernen
+‹  Tous les tutoriels	‹  Alle Tutorials
+Rechercher un outil ou une fonction	Werkzeug oder Funktion suchen
+Valeurs par défaut de cette section	Standardwerte dieses Abschnitts
+Préférences	Voreinstellungen
+Taille de l'interface	Größe der Oberfläche
+Couleur d'accentuation	Akzentfarbe
+Coins	Ecken
+Animations de l'interface	Animationen der Oberfläche
+Outils	Werkzeuge
+Info-bulles	QuickInfos
+Ctrl+K ouvre la palette de commandes, Ctrl+, ces préférences.	Strg+K öffnet die Befehlspalette, Strg+, diese Voreinstellungen.
+Performances	Leistung
+Historique : valeur conseillée par chaque app	Protokoll: empfohlener Wert jeder App
+Plus d'états permet d'annuler plus loin, mais utilise plus de mémoire. Pris en compte au prochain document ou au redémarrage de l'app.	Mehr Protokollobjekte erlauben weiteres Rückgängigmachen, brauchen aber mehr Speicher. Gilt für das nächste Dokument oder nach einem Neustart.
+Général	Allgemein
+Ces préférences sont communes à toutes les apps d'Ethone Studio.	Diese Voreinstellungen gelten für alle Apps von Ethone Studio.
+Ouvrir le dossier des préférences	Ordner der Voreinstellungen öffnen
+Rétablir les préférences par défaut	Standard-Voreinstellungen wiederherstellen
+Ouvrir l'aide (tutoriels)	Hilfe öffnen (Tutorials)
+Préférences…	Voreinstellungen…
+Interface, outils, performances · Ctrl+,	Oberfläche, Werkzeuge, Leistung · Strg+,
+Synchroniser les réglages	Einstellungen synchronisieren
+Photos choisies	Ausgewählte Fotos
+Look Portra · 40 %	Portra-Look · 40 %
+Pellicule	Film
+Palette Corail	Korallenpalette
+Triade	Triade
+Zébulon magique	Magisches Hüpfen
+essai	Essay
+Raccourcis	Tastaturbefehle
+Transferts récents	Letzte Übertragungen
+entre les apps et depuis l'Assistant	zwischen Apps und vom Assistenten
+Effacer	Löschen
+Rien pour l'instant : utilise « Envoyer vers » dans une app, ou lance une demande ici.	Noch nichts: „Senden an“ in einer App verwenden oder hier eine Anfrage starten.
+Dossier	Ordner
+Rouvrir	Erneut öffnen
+Dépose une image, une vidéo, un son ou un PDF, dis ce que tu veux : Ethone choisit l'app et les outils.	Bild, Video, Ton oder PDF ablegen und sagen, was du willst: Ethone wählt App und Werkzeuge.
+Retirer le fichier	Datei entfernen
+Que veux-tu faire ?	Was möchtest du tun?
+Ex. : retire les oiseaux du ciel et rends la photo plus lumineuse	Z. B. entferne die Vögel vom Himmel und mach das Foto heller
+Le plan s'affichera ici dès que tu écris ta demande.	Der Plan erscheint hier, sobald du deine Anfrage eingibst.
+Ce que je vais faire	Was ich tun werde
+  Lancer  	  Ausführen
+Ctrl+Entrée	Strg+Eingabe
+Ouvrir le résultat dans l'app	Ergebnis in der App öffnen
+Ouvrir le dossier	Ordner öffnen
+Continuer avec ce résultat	Mit diesem Ergebnis fortfahren
+Le résultat devient le fichier de départ	Das Ergebnis wird zur Ausgangsdatei
+Toutes les apps	Alle Apps
+Installées	Installiert
+Mises à jour	Updates
+Rien à afficher ici	Hier gibt es nichts anzuzeigen
+Essaie une autre recherche ou une autre catégorie.	Versuche eine andere Suche oder Kategorie.
+Paramètres	Einstellungen
+Dossier des apps	App-Ordner
+Source des mises à jour	Quelle aktualisieren
+À propos	Über
+Rechercher une app	App suchen
+Plus d'options	Weitere Optionen
+Rechercher des mises à jour	Nach Updates suchen
+Supprimer aussi les préférences de l'application	Auch die Voreinstellungen der App löschen
+Désinstaller	Deinstallieren
+Créer un raccourci sur le Bureau	Desktop-Verknüpfung erstellen
+Ouvrir l'application à la fin	App nach Abschluss öffnen
+Installer	Installieren
+Réessayer	Erneut versuchen
+effets, empilés dans l'ordre, chacun avec son intensité	Effekte, der Reihe nach gestapelt, jeder mit eigener Stärke
+Instantanées	Sofortbild
+Crème	Creme
+Pêche	Pfirsich
+Forêt	Wald
+Bleu roi	Königsblau
+Rose poudré	Puderrosa
+Carrés	Quadrate
+Arrondis	Abgerundet
+Très arrondis	Sehr abgerundet

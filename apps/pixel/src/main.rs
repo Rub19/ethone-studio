@@ -275,7 +275,7 @@ fn write_data(name: &str, text: &str) {
 impl Pixel {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let checker = {
             let mut px = Vec::with_capacity(16 * 16 * 4);
             for y in 0..16 {

@@ -423,7 +423,7 @@ impl Cam {
 impl VectorApp {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let mut db = usvg::fontdb::Database::new();
         db.load_system_fonts();
         let doc = Doc::new(1000.0, 1000.0);

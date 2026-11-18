@@ -1,0 +1,463 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Note	Bewertung
+Filtre	Filter
+Quantité	Stärke
+★ Favoris	★ Favoriten
+Mes préréglages	Meine Vorgaben
+Clic droit : options	Rechtsklick: Optionen
+Mettre à jour avec les réglages actuels	Mit aktuellen Einstellungen aktualisieren
+Supprimer ce préréglage	Diese Vorgabe löschen
+Nom du préréglage	Name der Vorgabe
++ Enregistrer les réglages actuels	+ Aktuelle Einstellungen speichern
+Nouvel instantané (Ctrl+N)	Neuer Schnappschuss (Strg+N)
+Clic : appliquer · clic droit : options	Klick: anwenden · Rechtsklick: Optionen
+Remplacer par les réglages actuels	Durch aktuelle Einstellungen ersetzen
+Supprimer	Löschen
+Effacer	Löschen
+Revenir à l'état avant cette étape	Zum Stand vor diesem Schritt zurück
+Écrêtage	Beschneidung
+Profil	Profil
+Couleur	Farbe
+Noir et blanc	Schwarzweiß
+Pipette	Pipette
+Préréglage	Vorgabe
+Tel quel	Wie aufgenommen
+Param.	Parametrisch
+Réglage ciblé	Selektive Korrektur
+T : glisse sur la photo	T: auf dem Foto ziehen
+Réinitialiser la courbe	Kurve zurücksetzen
+Teinte	Farbton
+Tout	Alle
+Réinitialiser	Zurücksetzen
+Supprimer l'aberration (auto)	Aberration entfernen (auto)
+Applique une correction de frange standard	Wendet eine Standard-Farbsaumkorrektur an
+Niveau auto	Automatisch ausrichten
+Règle	Lineal
+Trace une ligne sur l'horizon	Eine Linie entlang des Horizonts ziehen
+Miroir vertical	Vertikal spiegeln
+Outil Recadrage	Freistellungswerkzeug
+Redressement automatique	Automatisch gerade richten
+Miroir horizontal	Horizontal spiegeln
+Corrections de taches	Punktkorrekturen
+Yeux rouges corrigés	Rote Augen korrigiert
+Suppression (Q)	Entfernen (Q)
+Correcteur	Reparieren
+Clonage	Klonen
+Yeux rouges (E)	Rote Augen (E)
+Effacer les taches	Flecken entfernen
+Effacer les yeux	Klare Augen
+?  Tutoriels	?  Tutorials
+Copier…	Kopieren…
+Ctrl+Maj+C : choisir les groupes	Strg+Umschalt+C: Gruppen wählen
+Coller	Einfügen
+Réinitialiser un groupe…	Eine Gruppe zurücksetzen…
+Mode solo : un seul panneau ouvert	Solomodus: jeweils ein Bedienfeld offen
++ Nouveau masque	+ Neue Maske
+Superposition	Ineinanderkopieren
+Activer ou masquer	Aktivieren oder ausblenden
+Supprimer le masque	Maske löschen
+Dupliquer	Duplizieren
+Nom	Name
+Inverser	Umkehren
+Ajouter	Hinzufügen
+Soustraire	Subtrahieren
+Intersecter	Schnittmenge
+Inverser ce composant	Diese Komponente umkehren
+Peindre	Malen
+Effacer le tracé	Strich löschen
+Réinitialiser les réglages du masque	Maskeneinstellungen zurücksetzen
+Original	Original
+Maintenir pour voir l'original (ou \\)	Gedrückt halten, um das Original zu sehen (oder \\)
+Rouge : blancs brûlés · bleu : noirs bouchés (J)	Rot: beschnittene Lichter · Blau: beschnittene Tiefen (J)
+Infos	Info
+Plein écran	Vollbild
+Tab : masquer les panneaux	Tab: Bedienfelder ausblenden
+Nouvelle collection dynamique	Neue Smart-Sammlung
+Modifier les règles…	Regeln bearbeiten…
+Inclure les sous-dossiers	Unterordner einschließen
+Ouvrir un dossier…	Ordner öffnen…
+Rechercher	Suchen
+Tri · inverser l'ordre	Sortieren · umgekehrte Reihenfolge
+Taille des vignettes	Miniaturgröße
+Synchroniser	Synchronisieren
+Copie les réglages de la photo active (groupes cochés dans Copier les réglages)	Kopiert die Einstellungen des aktiven Fotos (in „Einstellungen kopieren“ markierte Gruppen)
+Empiler	Stapel
+Comparer	Vergleichen
+Tout désélectionner	Alles abwählen
+Développement rapide	Ad-hoc-Entwicklung
+Balance des blancs	Weißabgleich
+Mots-clés	Stichwörter
+Ajouter (virgules acceptées)	Hinzufügen (Kommas erlaubt)
+Retirer ce mot-clé	Dieses Stichwort entfernen
+Métadonnées	Metadaten
+Fichier	Datei
+Taille	Größe
+Type	Text
+Afficher dans l'Explorateur	Im Explorer anzeigen
+Aucune photo ne correspond à ce filtre	Kein Foto entspricht diesem Filter
+Ouvrir en Développement	In Entwickeln öffnen
+Créer une copie virtuelle	Virtuelle Kopie erstellen
+Supprimer la copie virtuelle	Virtuelle Kopie löschen
+Empiler la sélection	Auswahl stapeln
+Réduire / déplier la pile	Stapel ein-/ausklappen
+Désempiler	Stapel auflösen
+Exporter…	Exportieren…
+◀ Candidat précédent	◀ Vorheriger Kandidat
+Candidat suivant ▶	Nächster Kandidat ▶
+Le candidat devient la référence	Kandidat zur Auswahl machen
+Trouver les photos floues (les sélectionner)	Unscharfe Fotos finden (auswählen)
+Tri	Sichtung
+Rejeter les photos floues	Unscharfe Fotos ablehnen
+Tri · drapeau X	Sichtung · Markierung X
+Ton auto sur les photos choisies	Auto-Tonwert für ausgewählte Fotos
+Lot	Stapel
+Redresser l'horizon sur les photos choisies	Horizont der ausgewählten Fotos ausrichten
+Remettre à zéro les photos choisies	Ausgewählte Fotos zurücksetzen
+Synchroniser les réglages vers les photos choisies	Einstellungen mit ausgewählten Fotos synchronisieren
+Lot · copie la photo courante	Stapel · kopiert das aktuelle Foto
+Attribuer 5 étoiles aux photos choisies	Ausgewählten Fotos 5 Sterne geben
+Lot · classement	Stapel · Bewertung
+Marquer les photos choisies comme retenues	Ausgewählte Fotos als Favoriten markieren
+Lot · drapeau P	Stapel · Markierung P
+Rejeter les photos choisies	Ausgewählte Fotos ablehnen
+Lot · drapeau X	Stapel · Markierung X
+Effacer les drapeaux des photos choisies	Markierungen der ausgewählten Fotos entfernen
+Lot · neutre	Stapel · ohne Markierung
+Ctrl+Maj+E	Strg+Umschalt+E
+Dossiers récents	Zuletzt verwendete Ordner
+Actualiser le dossier	Ordner aktualisieren
+Enregistrer le catalogue	Katalog speichern
+Ouvrir le dossier du catalogue	Katalogordner öffnen
+Édition	Bearbeiten
+Tout sélectionner      Ctrl+A	Alles auswählen              Strg+A
+Désélectionner         Ctrl+D	Auswahl aufheben            Strg+D
+Sélectionner les retenues	Favoriten auswählen
+Sélectionner les modifiées	Bearbeitete auswählen
+Inverser la sélection	Auswahl umkehren
+Mode solo des panneaux	Einzel-Bedienfeldmodus
+Copier les réglages…   Ctrl+Maj+C	Einstellungen kopieren…    Strg+Umschalt+C
+Réglage automatique      Ctrl+U	Automatische Einstellungen     Strg+U
+Copier les réglages      Ctrl+C	Einstellungen kopieren     Strg+C
+Réinitialiser               Ctrl+Maj+R	Zurücksetzen                     Strg+Umschalt+R
+Créer une copie virtuelle   Ctrl+'	Virtuelle Kopie erstellen   Strg+'
+Nouvel instantané             Ctrl+N	Neuer Schnappschuss              Strg+N
+Empiler la sélection          Ctrl+G	Auswahl stapeln                 Strg+G
+Désempiler                      Ctrl+Maj+G	Stapel auflösen                 Strg+Umschalt+G
+Réduire / déplier la pile     S	Stapel ein-/ausklappen          S
+Noir et blanc                   V	Schwarzweiß                     V
+Rotation 90° horaire	90° im Uhrzeigersinn drehen
+Rotation 90° antihoraire	90° gegen den Uhrzeigersinn drehen
+Drapeau	Markierung
+Étiquette de couleur	Farbetikett
+Copier le chemin du fichier	Dateipfad kopieren
+Affichage	Ansicht
+Masquer les panneaux       Tab	Bedienfelder ausblenden       Tab
+Écrêtage                        J	Beschneidung                    J
+Zoom 100 %                   Z	Zoom 100 %                     Z
+Avant / après	Vorher / Nachher
+Infos sur la photo	Fotoinfo
+Bienvenue dans Lumen	Willkommen bei Lumen
+Ouvre un dossier de photos : JPEG, PNG, TIFF, WebP et RAW (CR2, NEF, ARW, DNG, RAF…)	Fotoordner öffnen: JPEG, PNG, TIFF, WebP und RAW (CR2, NEF, ARW, DNG, RAF…)
+Ouvrir un dossier	Ordner öffnen
+Réglages à copier	Zu kopierende Einstellungen
+Tout cocher	Alle markieren
+Tout décocher	Alle abwählen
+Copier	Kopieren
+Collection dynamique	Smart-Sammlung
+Note minimale	Mindestbewertung
+Étiquette	Etikett
+Toutes	Alle
+Mot-clé	Stichwort
+Texte contenu	Enthält Text
+Retouche	Bearbeitung
+Modifiées	Bearbeitet
+Intactes	Unbearbeitet
+Tous	Alle
+Enregistrer	Speichern
+Même dossier que l'original	Gleicher Ordner wie das Original
+Choisir…	Auswählen…
+Sous-dossier	Unterordner
+facultatif	optional
+Si le fichier existe	Wenn die Datei existiert
+Texte	Text
+ex. mariage	z. B. Hochzeit
+Suffixe	Suffix
+ex. -web	z. B. -web
+Début	Anfang
+Qualité	Qualität
+Ne pas agrandir	Nicht vergrößern
+Auteur	Autor
+Ajouter un filigrane texte	Text-Wasserzeichen hinzufügen
+© ton nom	© dein Name
+Utiliser le copyright	Copyright verwenden
+Opacité	Deckkraft
+Texte sombre	Dunkler Text
+Ouvrir le dossier dans l'Explorateur	Ordner im Explorer öffnen
+Réglages par défaut	Standardwerte
+Exporter	Exportieren
+Glisse pour te déplacer quand le zoom est actif · double-clic pour basculer le zoom	Ziehen zum Verschieben im Zoom · Doppelklick wechselt den Zoom
+Format	Seitenverhältnis
+Verrouiller	Sperren
+Inverser l'orientation du format	Ausrichtung tauschen
+Angle	Winkel
+Redresse l'horizon automatiquement	Richtet den Horizont automatisch aus
+Terminé	Fertig
+Nouvelle source	Neue Quelle
+Cherche une autre zone de remplacement	Sucht einen anderen Quellbereich
+Tout effacer	Alles löschen
+Ou maintiens Alt	Oder Alt gedrückt halten
+Nouveau masque	Neue Maske
+Superposition (O)	Überlagerung (O)
+Glisse pour choisir la teinte et l'intensité · double-clic pour remettre à zéro	Ziehen, um Farbton und Stärke zu wählen · Doppelklick zum Zurücksetzen
+Clic : ajouter un point · glisser : déplacer · double-clic ou clic droit : supprimer	Klick: Punkt hinzufügen · Ziehen: verschieben · Doppelklick oder Rechtsklick: löschen
+Température	Temp.
+Exposition	Belichtung
+Contraste	Kontrast
+Hautes lumières	Lichter
+Ombres	Tiefen
+Blancs	Weiß
+Noirs	Schwarz
+Clarté	Klarheit
+Correction du voile	Dunst entfernen
+Décalage de teinte	Farbtonverschiebung
+Netteté	Schärfe
+Bruit	Rauschen
+Intensité couleur	Farbintensität
+Mémorise une version pour y revenir.	Speichert eine Version, zu der du zurückkehren kannst.
+Chaque réglage apparaît ici.	Jede Korrektur erscheint hier.
+État actuel	Aktueller Zustand
+Importation (original)	Importieren (Original)
+Survole la photo pour lire les valeurs RVB	Über das Foto fahren, um RGB-Werte zu lesen
+Tonalité	Ton
+Présence	Präsenz
+En noir et blanc, la luminance des couleurs règle leur gris (mélangeur N&B).	In Schwarzweiß bestimmt die Luminanz jeder Farbe ihr Grau (S/W-Mischung).
+Lum. ombres	Lum. Tiefen
+Lum. tons moyens	Lum. Mitteltöne
+Lum. hautes lum.	Lum. Lichter
+Lum. globale	Globale Lum.
+Fusion	Überblendung
+Équilibre	Balance
+Gain	Stärke
+Rayon	Radius
+Détail	Detail
+Masquage	Maskierung
+Réduction du bruit	Rauschreduzierung
+Détail lum.	Luminanzdetail
+Détail couleur	Farbdetail
+Lissage	Weichheit
+Vignetage de l'objectif	Objektiv-Vignettierung
+Point milieu	Mittelpunkt
+Distorsion	Verzerrung
+Aberration chromatique	Chromatische Aberration
+Rouge / cyan	Rot / Cyan
+Bleu / jaune	Blau / Gelb
+Frange violette	Lila Farbsaum
+Frange verte	Grüner Farbsaum
+Verticale	Vertikal
+Horizontale	Horizontal
+Rotation	Drehen
+Aspect	Seitenverhältnis
+Échelle	Skalierung
+Décalage X	Versatz X
+Décalage Y	Versatz Y
+Redresser	Gerade ausrichten
+Vignettage après recadrage	Vignette nach Freistellen
+Arrondi	Rundheit
+Contour progressif	Weiche Kante
+Quantité 	Stärke
+Rugosité	Rauheit
+Halo lumineux	Leuchten
+Délavé	Verblasst
+Teinte des ombres	Tiefentönung
+Filtre gradué (M), radial (Maj+M), pinceau (K), ciel ou sujet : chaque masque a tous ses réglages.	Linearer Verlauf (M), radial (Umschalt+M), Pinsel (K), Himmel oder Motiv: jede Maske hat alle eigenen Einstellungen.
+Composants	Komponenten
+Glisse les poignées sur la photo (outil M ou Main).	Die Griffe auf dem Foto ziehen (Werkzeug M oder Hand).
+Largeur	Breite
+Hauteur	Höhe
+Maximum	Maximum
+Teinte ciblée	Zielfarbton
+Tolérance	Bereich
+Détection automatique du ciel (zones bleues ou claires reliées au haut de l'image).	Automatische Himmelserkennung (blaue oder helle Bereiche, die oben angrenzen).
+Détection automatique du sujet (ce qui se distingue du fond, au centre).	Automatische Motiverkennung (was sich vom Hintergrund abhebt, nahe der Mitte).
+Couvre toute l'image : combine avec Soustraire pour exclure une zone.	Deckt das ganze Bild ab: mit Subtrahieren kombinieren, um einen Bereich auszuschließen.
+Réglages du masque	Maskeneinstellungen
+Crée des filtres enregistrés : 5★ retenues, RAW non retouchés…	Gespeicherte Filter erstellen: 5★-Favoriten, unbearbeitete RAW…
+Ajoute des mots-clés dans le panneau de droite.	Stichwörter im rechten Bedienfeld hinzufügen.
+↑ Dossier parent	↑ Übergeordneter Ordner
+Récents	Zuletzt verwendet
+Sélectionne une photo pour voir ses informations.	Wähle ein Foto, um seine Infos zu sehen.
+Titre	Titel
+Légende	Bildunterschrift
+Aucune donnée EXIF lisible dans ce fichier.	Keine lesbaren EXIF-Daten in dieser Datei.
+À gauche : la référence (photo active). À droite : le candidat.	Links: die Auswahl (aktives Foto). Rechts: der Kandidat.
+Coller (Ctrl+V) n'appliquera que les groupes cochés.	Einfügen (Strg+V) wendet nur die markierten Gruppen an.
+Les photos qui remplissent toutes les règles y apparaissent automatiquement.	Fotos, die alle Regeln erfüllen, erscheinen hier automatisch.
+Trace une ligne le long de l'horizon ou d'une verticale	Eine Linie entlang des Horizonts oder einer Senkrechten ziehen
+Clique sur l'œil ou glisse pour tracer le cercle	Klicke auf das Auge oder ziehe, um den Kreis zu zeichnen
+Clique sur une zone qui devrait être neutre (gris, blanc). Maj+clic pour garder l'outil.	Klicke auf einen Bereich, der neutral sein soll (Grau, Weiß). Umschalt+Klick behält das Werkzeug.
+Glisse vers le haut ou le bas sur une couleur ou un ton de la photo	Auf einer Farbe oder einem Ton im Foto nach oben oder unten ziehen
+Recadrage	Freistellen
+Redressement (règle)	Gerade ausrichten (Lineal)
+Suppression de taches	Bereichsreparatur
+Yeux rouges	Rote Augen
+Filtre gradué	Linearer Verlauf
+Filtre radial	Radialer Verlauf
+Pinceau de réglage	Korrekturpinsel
+Sélectionner le ciel	Himmel auswählen
+Sélectionner le sujet	Motiv auswählen
+Pipette de balance des blancs	Weißabgleich-Pipette
+Main et zoom	Hand und Zoom
+Lumière du jour	Tageslicht
+Tungstène	Kunstlicht
+Couleurs vives	Lebendige Farben
+Cinéma	Kino
+Nuit et ville	Stadt bei Nacht
+Linéaire	Linear
+Contraste moyen	Mittlerer Kontrast
+Contraste fort	Hoher Kontrast
+Film mat	Matter Film
+Primaire rouge	Rot-Primärfarbe
+Primaire verte	Grün-Primärfarbe
+Primaire bleue	Blau-Primärfarbe
+Retenue   P	Ausgewählt   P
+Sans drapeau   U	Ohne Markierung   U
+Rejetée   X	Abgelehnt   X
+Très grandes	Sehr groß
+Prise de vue	Aufnahme
+Correction d'expo	Belichtungskorrektur
+Taille d'origine	Originalgröße
+Écran HD · 1920 px	HD-Bildschirm · 1920 px
+Instagram carré · 1080	Instagram quadratisch · 1080
+Courriel · 1200 px	E-Mail · 1200 px
+Miniature · 640 px	Miniatur · 640 px
+Nom d'origine	Originalname
+Nom + suffixe	Name + Suffix
+Texte + numéro	Text + Nummer
+Date + nom	Datum + Name
+Titre + numéro	Titel + Nummer
+Nom + note	Name + Bewertung
+Personnalisé	Benutzerdefiniert
+Chargement…	Wird geladen…
+Avant	Vorher
+Après	Nachher
+Aucune photo	Keine Fotos
+Heure dorée	Goldene Stunde
+Heure bleue	Blaue Stunde
+Brume chaude	Warmer Dunst
+Hiver lumineux	Heller Winter
+Rétro 70s	70er-Retro
+Sombre et intense	Dunkel und intensiv
+Portra doux	Weiches Portra
+Ektar vif	Lebendiges Ektar
+Fuji vert	Fuji-Grün
+Cinéma 500T	Kino 500T
+Instantané pastel	Pastell-Sofortbild
+Argentique N&B 400	S/W-Film 400
+Jetable 90s	90er-Einwegkamera
+Saturé	Gesättigt
+Peau douce	Weiche Haut
+Portrait chaleureux	Warmes Porträt
+Portrait lumineux	Heller Porträtlook
+Portrait contrasté	Kontrastreiches Porträt
+Portrait mat	Mattes Porträt
+Ciel dramatique	Dramatischer Himmel
+Forêt	Wald
+Coucher de soleil	Sonnenuntergang
+Mer et ciel	Meer und Himmel
+Brume matinale	Morgennebel
+Noir et blanc doux	Weiches Schwarzweiß
+N&B contrasté	Kontrastreiches S/W
+Filtre rouge	Rotfilter
+Filtre jaune	Gelbfilter
+Filtre vert	Grünfilter
+Sélénium	Selen
+Nuit américaine	Day for Night
+Diapo 70	Diafilm 70
+Haute clé	High Key
+Basse clé	Low Key
+Néons de nuit	Nachtneon
+Déboucher les ombres	Tiefen aufhellen
+Récupérer le ciel	Himmel wiederherstellen
+Netteté écran	Bildschirmschärfung
+Supprimer la brume	Dunst entfernen
+Vif	Lebendig
+Neutre	Neutral
+Paysage	Querformat
+Priorité couleur	Farbpriorität
+Priorité hautes lumières	Lichterpriorität
+Superposition de peinture	Malüberlagerung
+Réglages de base	Grundeinstellungen
+Courbe des tonalités	Gradationskurve
+Étalonnage des couleurs	Farbkorrektur
+Recadrage et rotation	Freistellen und drehen
+Étalonnage de l'appareil	Kamerakalibrierung
+mettre en page	layouten
+placer l'image	das Bild platzieren
+ajouter au montage	zum Schnitt hinzufügen
+animer la photo	das Foto animieren
+Date de modification	Änderungsdatum
+Taille du fichier	Dateigröße
+Type de fichier	Dateityp
+Courbe paramétrique	Parametrische Kurve
+Courbe RVB	RGB-Kurve
+Courbe rouge	Rotkurve
+Courbe verte	Grünkurve
+Courbe bleue	Blaukurve
+Étalonnage des ombres	Tiefen-Farbkorrektur
+Étalonnage des hautes lumières	Lichter-Farbkorrektur
+Étalonnage des tons moyens	Mitteltöne-Farbkorrektur
+Étalonnage global	Globale Farbkorrektur
+Luminance des ombres	Tiefen-Luminanz
+Luminance des tons moyens	Mitteltöne-Luminanz
+Luminance des hautes lumières	Lichter-Luminanz
+Luminance globale	Globale Luminanz
+Rayon de netteté	Schärfungsradius
+Détail de netteté	Schärfungsdetail
+Masquage de netteté	Schärfungsmaskierung
+Détail du bruit	Rauschdetail
+Bruit de couleur	Farbrauschen
+Détail du bruit de couleur	Farbrauschdetail
+Lissage du bruit de couleur	Farbrauschglättung
+Point milieu du vignetage	Vignettenmittelpunkt
+Aberration rouge/cyan	Rot/Cyan-Aberration
+Aberration bleu/jaune	Blau/Gelb-Aberration
+Perspective verticale	Vertikale Perspektive
+Perspective horizontale	Horizontale Perspektive
+Rotation 90°	Um 90° drehen
+Style de vignettage	Vignettenstil
+Hautes lumières du vignettage	Vignettenlichter
+Taille du grain	Korngröße
+Rugosité du grain	Kornrauheit
+Intensité du LUT	LUT-Intensität
+Teinte des ombres (étalonnage)	Tiefentönung (Kalibrierung)
+Effets créatifs	Kreative Effekte
+Retouche des taches	Bereichsreparatur
+Profil et lumière	Profil und Licht
+Étalonnage	Farbkorrektur
+Optique	Optik
+Transformation	Transformieren
+Effets	Effekte
+Masques	Masken
+Grand côté	Lange Seite
+Petit côté	Kurze Seite
+Cadre L × H	Rahmen B × H
+Aucune	Keine
+Écran	Negativ multiplizieren
+Papier mat	Mattpapier
+Papier brillant	Glanzpapier
+Faible	Niedrig
+Élevée	Hoch
+Toutes sauf la localisation	Alles außer Standort
+Copyright uniquement	Nur Copyright
+Nom unique	Eindeutiger Name
+Écraser	Überschreiben
+Ignorer	Ignorieren
+Haut gauche	Oben links
+Haut droite	Oben rechts
+Bas droite	Unten rechts
+Bas gauche	Unten links
+Règle des tiers	Drittelregel
+Grille	Raster
+Nombre d'or	Goldener Schnitt
+Diagonales	Diagonalen
+Courbe	Kurve

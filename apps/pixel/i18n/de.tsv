@@ -1,0 +1,567 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Avant	Vorher
+Après	Nachher
+Ouvrir une image…	Bild öffnen…
+Exporter…	Exportieren…
+Comparaison rapide avant / après	Schneller Vorher-Nachher-Vergleich
+Affichage	Ansicht
+Créer un timelapse GIF	Zeitraffer-GIF erstellen
+Fichier	Datei
+Agrandir ×2 (super-résolution)	Hochskalieren ×2 (Superauflösung)
+Agrandir ×4 (super-résolution)	Hochskalieren ×4 (Superauflösung)
+Appliquer des LUT .cube	.cube-LUTs anwenden
+Répéter le dernier filtre	Letzten Filter wiederholen
+Répéter la dernière suppression	Letztes Entfernen wiederholen
+Édition	Bearbeiten
+Harmoniser le calque avec le fond	Ebene an Hintergrund angleichen
+Calque	Ebene
+Harmoniser à moitié (doux)	Halb angleichen (weich)
+Retirer le filigrane de la sélection (sans IA)	Wasserzeichen aus Auswahl entfernen (ohne KI)
+Entoure le filigrane puis lance	Um das Wasserzeichen herum auswählen, dann ausführen
+Retirer le filigrane automatiquement (IA)	Wasserzeichen automatisch entfernen (KI)
+Vision locale, sinon OCR	Lokale Erkennung, sonst OCR
+Filigrane : sensibilité normale	Wasserzeichen: normale Empfindlichkeit
+Filigranes nets	Scharfe Wasserzeichen
+Filigrane : sensibilité haute	Wasserzeichen: hohe Empfindlichkeit
+Filigranes très transparents	Sehr transparente Wasserzeichen
+Supprimer l'arrière-plan (masque de calque)	Hintergrund entfernen (Ebenenmaske)
+Action rapide	Schnellaktion
+Étendre l'image de 10 % (fond reconstruit)	Bild um 10 % erweitern (Hintergrund rekonstruiert)
+Étendre l'image de 25 % (fond reconstruit)	Bild um 25 % erweitern (Hintergrund rekonstruiert)
+Étendre au format carré 1:1	Auf Quadrat 1:1 erweitern
+Étendre au format paysage 16:9	Auf Querformat 16:9 erweitern
+Étendre au format story 9:16	Auf Story 9:16 erweitern
+Étendre au format 4:5 (Instagram)	Auf 4:5 erweitern (Instagram)
+Inverser la sélection	Auswahl umkehren
+Sélection	Auswählen
+Désélectionner	Auswahl aufheben
+Barre de tâches contextuelle (afficher / masquer)	Kontextbezogene Taskleiste (ein/aus)
+Recadrer aux pixels visibles	Auf sichtbare Pixel zuschneiden
+Image · retire les marges transparentes	Bild · entfernt transparente Ränder
+Dupliquer le calque actif	Aktive Ebene duplizieren
+Calque · Ctrl+J	Ebene · Strg+J
+Fusionner les calques visibles	Sichtbare Ebenen zusammenführen
+Calques · conserve les calques masqués	Ebenen · behält ausgeblendete Ebenen
+Aplatir toute l'image	Auf Hintergrundebene reduzieren
+Calques · résultat unique	Ebenen · ein einziges Ergebnis
+Exporter	Exportieren
+Taille de la zone de travail	Arbeitsfläche
+Ouvrir les fichiers récents	Zuletzt verwendet
+Aucun fichier récent	Keine zuletzt verwendeten Dateien
+Transformation	Transformieren
+Inclinaison…	Neigen…
+Raccourcis clavier…	Tastaturbefehle…
+Préférences…	Voreinstellungen…
+Agrandir (super-résolution)	Hochskalieren (Superauflösung)
+Réglages	Korrekturen
+Rotation de l'image	Bilddrehung
+Paramétrée…	Beliebig…
+Nouveau calque de remplissage	Neue Füllebene
+Nouveau calque de réglage	Neue Einstellungsebene
+Masque de fusion	Ebenenmaske
+Disposition	Anordnen
+Verrouillage	Sperren
+Pixels transparents	Transparente Pixel
+Tout	Alle
+Effets de calque	Ebeneneffekte
+Plage de couleurs…	Farbbereich…
+Modifier	Ändern
+Récupérer la sélection	Auswahl laden
+Supprimer	Löschen
+Filtre	Filter
+Espace de travail	Arbeitsbereich
+Épreuvage CMJN (aperçu impression)	CMYK-Proof (Druckvorschau)
+Profil d'épreuvage	Proof-Profil
+Autre profil (.icc)…	Anderes Profil (.icc)…
+Zoom prédéfini	Zoomstufen
+Rotation de la vue	Ansicht drehen
+Règles (Ctrl+R)	Lineale (Strg+R)
+Grille (Ctrl+')	Raster (Strg+')
+Grille de pixels (à partir de 1000 %)	Pixelraster (ab 1000 %)
+Repères (Ctrl+;)	Hilfslinien (Strg+;)
+Verrouiller les repères (Ctrl+Alt+;)	Hilfslinien sperren (Strg+Alt+;)
+Magnétisme (Ctrl+Maj+;)	Ausrichten (Strg+Umschalt+;)
+Nouveau repère…	Neue Hilfslinie…
+Repères au centre	Hilfslinien in der Mitte
+Repères aux tiers	Hilfslinien in den Dritteln
+Pas de la grille	Rasterabstand
+Couleur	Farbe
+Barre de tâches contextuelle	Kontextbezogene Taskleiste
+Nouveau fichier	Neue Datei
+Ouvrir…	Öffnen…
+Depuis le presse-papiers	Aus der Zwischenablage
+Bienvenue dans Pixel	Willkommen bei Pixel
+Retouche photo et compositing par calques	Fotobearbeitung und Ebenen-Compositing
+Créer un document	Dokument erstellen
+Récents	Zuletzt verwendet
+Masque en cours de modification	Maske wird bearbeitet
+Texte de la photo	Text im Foto
+Nuancier	Farbfelder
+Pinceaux	Pinsel
+Propriétés	Eigenschaften
+Infos	Info
+Historique	Protokoll
+Calques	Ebenen
+Arrondit à la couleur sûre pour le Web la plus proche	Rundet auf die nächste websichere Farbe
+Clic : principale · Ctrl+clic : secondaire · clic droit : options	Klick: Vordergrund · Strg+Klick: Hintergrund · Rechtsklick: Optionen
+Définir comme couleur principale	Als Vordergrundfarbe festlegen
+Définir comme couleur secondaire	Als Hintergrundfarbe festlegen
+Supprimer la nuance	Farbfeld löschen
+Ajouter la couleur principale	Vordergrundfarbe hinzufügen
+Prendre cette couleur	Diese Farbe übernehmen
+Peindre sans modifier la transparence	Malen ohne Transparenz zu ändern
+Désactivé	Deaktiviert
+Inverser	Umkehren
+Navigateur	Navigator
+Luminosité	Helligkeit
+Rouge	Rot
+Vert	Grün
+Bleu	Blau
+Survole l'image pour lire la couleur	Über das Bild fahren, um die Farbe zu lesen
+Instantané	Schnappschuss
+Source de la forme d'historique	Quelle für Protokollpinsel
+Vider l'historique	Protokoll löschen
+Clic : modifier le masque	Klick: Maske bearbeiten
+Afficher ou masquer (Alt : isoler)	Ein- oder ausblenden (Alt: Solo)
+Verrouiller le calque	Ebene sperren
+Renommer	Umbenennen
+Dupliquer	Duplizieren
+Sélectionner les pixels	Pixel auswählen
+Couleur de l'étiquette	Etikettfarbe
+Mode de fusion	Füllmethode
+Aucune langue OCR installée dans Windows	In Windows ist keine OCR-Sprache installiert
+Dans la sélection	In der Auswahl
+Cadres	Frames
+Détecter le texte	Text erkennen
+Options de lecture	Leseoptionen
+Agrandir les petites images (petits caractères)	Kleine Bilder hochskalieren (kleine Schrift)
+Seulement dans la sélection	Nur in der Auswahl
+Afficher les cadres sur l'image	Rahmen auf dem Bild zeigen
+Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.	Lies den Text eines Fotos (Schild, Plakat, Dokument, Screenshot) und bearbeite, lösche oder verwische ihn mit gleicher Farbe und Größe.
+Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place	Löscht den Originaltext der bearbeiteten Zeilen und schreibt den neuen an dieselbe Stelle
+Supprime le texte des lignes cochées	Entfernt den Text der markierten Zeilen
+Mosaïque sur les lignes cochées (plaques, adresses, noms…)	Mosaik auf markierten Zeilen (Kennzeichen, Adressen, Namen…)
+Sélectionner	Auswählen
+Crée une sélection autour des lignes cochées	Erstellt eine Auswahl um die markierten Zeilen
+Tout cocher	Alle markieren
+Rien	Keine
+Copier le texte	Text kopieren
+Enregistrer .txt…	.txt speichern…
+Oublier	Vergessen
+Rechercher et remplacer	Suchen und ersetzen
+Rechercher	Suchen
+Remplacer par	Ersetzen durch
+Respecter la casse	Groß-/Kleinschreibung beachten
+Rendu du nouveau texte	Neue Textdarstellung
+Gras	Fett
+Italique	Kursiv
+Couleur d'origine	Originalfarbe
+Taille	Größe
+Tenir dans la largeur d'origine	In die Originalbreite einpassen
+Un calque par ligne (déplaçable)	Eine Ebene pro Zeile (verschiebbar)
+Effacement	Löschen
+Marge	Rand
+Mosaïque	Mosaik
+Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Rekonstruieren: baut den Hintergrund neu auf (Fotos). Hintergrundfarbe: schnelle flache Füllung (Dokumente, Screenshots). Mosaik 0 = automatische Größe.
+Annuler	Abbrechen
+Relative (ajoute à la taille actuelle)	Relativ (zur aktuellen Größe addiert)
+Pourcentage	Prozent
+Conserver les proportions	Proportionen beibehalten
+Lier	Link
+Pixels nets (plus proche voisin)	Harte Pixel (Pixelwiederholung)
+Symétrie H	Spiegeln H
+Symétrie V	Spiegeln V
+Réinitialiser	Zurücksetzen
+Intérieur	Innen
+Centre	Mitte
+Extérieur	Außen
+L'effet est créé sur un calque séparé, modifiable et masquable.	Der Effekt entsteht auf einer eigenen Ebene, die du bearbeiten und maskieren kannst.
+La sélection obtenue est progressive : les pixels proches sont pris en partie.	Die entstandene Auswahl ist weich: Pixel in der Nähe sind teilweise enthalten.
+Rapide	Schnell
+Normale	Normal
+Maximale	Maximum
+La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.	Die Arbeitsfläche wächst für das gedrehte Bild mit; der Hintergrund nutzt die Hintergrundfarbe.
+Horizontal	Horizontal
+Vertical	Vertikal
+Note pour plus tard (non exportée)	Notiz für später (wird nicht exportiert)
+Grille de pixels aux forts zooms	Pixelraster bei starkem Zoom
+Magnétisme	Ausrichten
+Nouveau document	Neues Dokument
+Préréglages	Vorgaben
+Détails	Details
+Paysage	Querformat
+Créer	Erstellen
+Supprimer le préréglage	Vorgabe löschen
+Aperçu	Vorschau
+Nom du préréglage	Name der Vorgabe
+Ton texte	Dein Text
+Gauche	Links
+Droite	Rechts
+Couleur principale · nouveau calque de texte	Vordergrundfarbe · neue Textebene
+Couleurs principale et secondaire Clic : inverser (X) · D : noir et blanc	Vorder- und Hintergrundfarbe Klick: tauschen (X) · D: Schwarz und Weiß
+Nouvelle	Neu
+Ajouter	Hinzufügen
+Soustraire	Subtrahieren
+Intersection	Schnittmenge
+Dureté	Härte
+Lissage	Glättung
+Symétrie	Symmetrie
+Répète chaque trait en miroir vertical	Spiegelt jeden Strich vertikal
+Miroir H	Spiegeln H
+Répète chaque trait en miroir horizontal	Spiegelt jeden Strich horizontal
+Humidité	Nässe
+Effacer vers l'historique	Aus Protokoll löschen
+Restaure l'état de l'instantané au lieu de rendre transparent	Stellt den Schnappschuss wieder her, statt Pixel transparent zu machen
+Tolérance	Toleranz
+Échantillonnage continu	Kontinuierlich aufnehmen
+Mémorise le calque actif comme source	Verwendet die aktive Ebene als Quelle
+Désaturer	Entsättigen
+Saturer	Sättigen
+Tons foncés	Tiefen
+Tons moyens	Mitteltöne
+Tons clairs	Lichter
+Peinture au doigt	Fingermalerei
+Commence chaque trait avec la couleur principale	Beginnt jeden Strich mit der Vordergrundfarbe
+Aligné	Ausgerichtet
+Tous les calques	Alle Ebenen
+Contiguë	Benachbart
+Contour progressif	Weiche Kante
+Largeur	Breite
+Valider	Übernehmen
+Fond	Füllung
+Contour	Kontur
+Contour avec la couleur secondaire quand le fond est actif	Kontur in Hintergrundfarbe, wenn Füllung aktiv ist
+Épaisseur	Stärke
+Arrondi	Radius
+Côtés	Seiten
+Étoile	Stern
+Retrait	Einzug
+Flèche au début	Pfeilspitze am Anfang
+Flèche à la fin	Pfeilspitze am Ende
+Nouveau calque	Neue Ebene
+Souligné	Unterstrichen
+Linéaire	Linear
+Angulaire	Winkel
+Réfléchi	Gespiegelt
+Losange	Raute
+Opacité	Deckkraft
+Tramage	Dithering
+Contigu	Benachbart
+Sélection automatique	Automatisch auswählen
+Le clic choisit le calque visible sous le pointeur	Ein Klick wählt die sichtbare Ebene unter dem Zeiger
+Cadre de sélection	Transformationssteuerungen einblenden
+Zoom avant	Einzoomen
+Zoom arrière	Auszoomen
+Réinitialiser la vue	Ansicht zurücksetzen
+Ajuster à l'écran	An Bildschirm anpassen
+Effacer	Löschen
+Redresser le calque	Ebene gerade ausrichten
+Tout effacer	Alles löschen
+Diffusion	Ausbreitung
+Taille de la pupille	Pupillengröße
+Assombrir	Abdunkelungsstärke
+Remettre à zéro	Zurücksetzen
+Nouveau…	Neu…
+Nouveau depuis le presse-papiers	Neu aus Zwischenablage
+Importer comme calque…	Als Ebene platzieren…
+Enregistrer	Speichern
+Enregistrer sous…	Speichern unter…
+Exporter en CMJN pour l'impression (TIFF)…	CMYK für den Druck exportieren (TIFF)…
+Exportation rapide en PNG…	Schnellexport als PNG…
+Exporter la sélection…	Auswahl exportieren…
+Exporter les calques en PNG…	Ebenen als PNG exportieren…
+Créer un timelapse (GIF)…	Zeitraffer erstellen (GIF)…
+Exporter chaque étape en PNG…	Jeden Schritt als PNG exportieren…
+Fermer	Schließen
+Rétablir	Wiederholen
+Couper	Ausschneiden
+Copier	Kopieren
+Copier avec fusion	Auf eine Ebene reduziert kopieren
+Coller	Einfügen
+Coller en place	An Originalposition einfügen
+Remplir…	Füllen…
+Contour…	Kontur…
+Remplir selon le contenu	Inhaltsbasierte Füllung
+Transformation manuelle…	Frei transformieren…
+Rotation 180°	Um 180° drehen
+Rotation 90° horaire	90° im Uhrzeigersinn drehen
+Rotation 90° antihoraire	90° gegen den Uhrzeigersinn drehen
+Symétrie axe horizontal	Horizontal spiegeln
+Symétrie axe vertical	Vertikal spiegeln
+Appliquer des LUT .cube (jusqu'à 3)…	.cube-LUTs anwenden (bis zu 3)…
+Mappage principale → secondaire	Verlaufsumsetzung Vordergrund → Hintergrund
+Taille de l'image…	Bildgröße…
+Taille de la zone de travail…	Arbeitsfläche…
+Recadrer	Freistellen
+Rogner les bords transparents	Transparente Ränder zuschneiden
+Tout faire apparaître	Alle einblenden
+Mode niveaux de gris	Graustufenmodus
+Aplatir l'image	Auf Hintergrundebene reduzieren
+Couleur unie (principale)	Volltonfarbe (Vordergrund)
+Dégradé (principale → secondaire)	Verlauf (Vordergrund → Hintergrund)
+Motif damier	Schachbrettmuster
+Bruit (texture)	Rauschen (Textur)
+Dupliquer le calque	Ebene duplizieren
+Supprimer le calque	Ebene löschen
+Calque par copie	Ebene durch Kopie
+Calque par coupure	Ebene durch Ausschneiden
+Tout masquer	Alles ausblenden
+Faire apparaître la sélection	Auswahl einblenden
+Intervertir le masque	Maske umkehren
+Sélection depuis le masque	Auswahl aus Maske
+Appliquer le masque	Maske anwenden
+Supprimer le masque	Maske löschen
+Premier plan	In den Vordergrund
+En avant	Schrittweise nach vorne
+En arrière	Schrittweise nach hinten
+Arrière-plan	In den Hintergrund
+Fusionner avec le dessous	Auf eine Ebene reduzieren
+Tout sélectionner	Alles auswählen
+Resélectionner	Erneut auswählen
+Intervertir	Umkehren
+Pixels du calque	Ebenenpixel
+Étendre	Erweitern
+Généraliser	Wachsen
+Mémoriser la sélection…	Auswahl speichern…
+Taille réelle (100 %)	Originalgröße (100 %)
+Déplacement	Verschieben
+Rectangle de sélection	Auswahlrechteck
+Ellipse de sélection	Auswahlellipse
+Sélection d'une ligne	Auswahl einzelne Zeile
+Sélection d'une colonne	Auswahl einzelne Spalte
+Lasso polygonal	Polygon-Lasso
+Lasso magnétique	Magnetisches Lasso
+Plume de courbure	Kurvenzeichenstift
+Sélection rapide	Schnellauswahl
+Baguette magique	Zauberstab
+Sélection d'objet	Objektauswahl
+Recadrage	Freistellen
+Recadrage de la perspective	Perspektivisches Freistellen
+Pipette	Pipette
+Échantillonnage de couleur	Farbaufnahme
+Règle	Lineal
+Annotation	Notiz
+Comptage	Anzahl
+Suppression intelligente	Entfernen-Werkzeug
+Correcteur	Reparatur-Pinsel
+Pièce	Ausbessern
+Déplacement basé sur le contenu	Inhaltsbasiertes Verschieben
+Yeux rouges	Rote Augen
+Tampon de duplication	Kopierstempel
+Forme d'historique	Protokollpinsel
+Pinceau	Pinsel
+Crayon	Buntstift
+Remplacement de couleur	Farbe ersetzen
+Pinceau mélangeur	Misch-Pinsel
+Gomme	Radiergummi
+Gomme d'arrière-plan	Hintergrund-Radiergummi
+Gomme magique	Magischer Radiergummi
+Dégradé	Verlauf
+Pot de peinture	Füllwerkzeug
+Goutte (flou)	Unschärfe
+Netteté	Scharfzeichnen
+Doigt	Wischfinger
+Densité −	Abwedeln
+Densité +	Nachbelichten
+Éponge	Schwamm
+Texte horizontal	Horizontaler Text
+Texte vertical	Vertikaler Text
+Texte de la photo (OCR)	Text im Foto (OCR)
+Polygone	Polygon
+Trait	Linie
+Forme personnalisée	Eigene Form
+Main	Hand
+Terminer	Fertig
+Supprimer l'objet	Objekt entfernen
+Rééclairer	Neu beleuchten
+Agrandir ×2	Hochskalieren ×2
+Comparer	Vergleichen
+Teinte	Farbton
+Bibliothèque	Bibliothek
+Récentes	Zuletzt verwendet
+Espacement	Abstand
+Angle	Winkel
+Rondeur	Rundheit
+Var. taille	Größenvariation
+Var. flux	Flussvariation
+Dispersion	Streuung
+Fusion	Zusammenführen
+Verrou	Sperren
+Étiquette	Etikett
+Masque	Maske
+Ajouter un masque de fusion (depuis la sélection s'il y en a une)	Ebenenmaske hinzufügen (aus der Auswahl, falls vorhanden)
+Monter	Nach oben
+Descendre	Nach unten
+Ignorer les lignes de moins de	Zeilen ignorieren mit weniger als
+caractère(s)	Zeichen
+Position de l'image actuelle	Position des aktuellen Frames
+Couleur d'extension	Farbe der Arbeitsflächenerweiterung
+Hauteur	Höhe
+Rééchantillonnage	Neuberechnung
+Résolution	Auflösung
+Échelle	Skalierung
+Inclinaison horizontale / verticale	Neigung horizontal / vertikal
+Perspective horizontale / verticale	Perspektive horizontal / vertikal
+Profondeur	Tiefe
+Prends la couleur avec la pipette (I)	Farbe mit der Pipette aufnehmen (I)
+Contenu	Inhalt
+Format	Größe
+Qualité	Qualität
+Tailles de l'icône	Symbolgrößen
+Fond des zones transparentes	Transparenzhintergrund
+États d'historique	Protokollobjekte
+Plan de travail	Zeichenfläche
+Curseur de peinture	Malcursor
+Estomper	Verblassen
+Police	Schrift
+Approche	Laufweite
+Interligne	Zeilenabstand
+Repeint la teinte avec la couleur principale en gardant la lumière	Malt den Farbton mit der Hauptfarbe neu und behält das Licht
+Plage	Strand
+Alt pour retirer	Alt zum Subtrahieren
+Grille	Raster
+Glisse pour tracer le cadre à conserver	Ziehen, um den zu behaltenden Bereich zu zeichnen
+Flèches : 1 px · Maj : 10 px	Pfeiltasten: 1 px · Umschalt: 10 px
+Échantillon	Probe
+Jusqu'à 4 points, lus dans Infos	Bis zu 4 Punkte, angezeigt in Info
+Alt+clic : couleur secondaire	Alt+Klick: Zweitfarbe
+Glisse pour mesurer une distance et un angle	Ziehen, um Abstand und Winkel zu messen
+Peins sur ce qui doit disparaître : le fond est reconstruit autour	Male über das, was verschwinden soll: der Hintergrund wird drumherum neu aufgebaut
+Clique sur chaque œil rouge	Klicke auf jedes rote Auge
+Trace un rectangle autour de l'objet : il est détouré automatiquement	Zeichne ein Rechteck um das Objekt: es wird automatisch freigestellt
+Ton auto	Auto-Tonwert
+Retirer la brume	Dunst entfernen
+Miniature YouTube	YouTube-Miniatur
+Publication carrée	Quadratischer Post
+A4 300 ppp	A4 300 ppi
+A5 300 ppp	A5 300 ppi
+Carte de visite	Visitenkarte
+Icône	Symbol
+Bannière	Banner
+Fond d'écran	Hintergrundbild
+Néon	Neon
+Matériel	Material
+Symétrie horizontale de la zone de travail	Arbeitsbereich horizontal spiegeln
+Symétrie verticale de la zone de travail	Arbeitsbereich vertikal spiegeln
+Contour progressif…	Weiche Kante…
+Gris moyen	Mittelgrau
+Complémentaire	Komplementär
+Tétrade	Tetrade
+Ctrl+E / Ctrl+Maj+Alt+S	Strg+E / Strg+Umschalt+Alt+S
+Ctrl+C / Ctrl+Maj+C	Strg+C / Strg+Umschalt+C
+Ctrl+V / Ctrl+Maj+V	Strg+V / Strg+Umschalt+V
+Ctrl+J / Ctrl+Maj+J	Strg+J / Strg+Umschalt+J
+Ctrl+I / Ctrl+Maj+U	Strg+I / Strg+Umschalt+U
+Ctrl+Maj+L / Ctrl+Maj+B	Strg+Umschalt+L / Strg+Umschalt+B
+Ctrl+A / Ctrl+D / Ctrl+Maj+D	Strg+A / Strg+D / Strg+Umschalt+D
+Ctrl+Maj+I / Maj+F6	Strg+Umschalt+I / Umschalt+F6
+Maj+F5 / Alt+Retour	Umschalt+F5 / Alt+Rücktaste
+Ctrl+Maj+N / Ctrl+Alt+G	Strg+Umschalt+N / Strg+Alt+G
+Ctrl+Maj+E / Ctrl+Alt+E	Strg+Umschalt+E / Strg+Alt+E
+Ctrl+Maj+; / Ctrl+H	Strg+Umschalt+; / Strg+H
+Lettre / Maj+lettre	Buchstabe / Umschalt+Buchstabe
+[ ] / Maj+[ ]	[ ] / Umschalt+[ ]
+0 à 9	0 bis 9
+Flèches / Maj+flèches	Pfeiltasten / Umschalt+Pfeiltasten
+Espace / Tab / F1	Leertaste / Tab / F1
+Rond dur	Hart rund
+Rond doux	Weich rund
+Aérographe	Airbrush
+Encre calligraphique	Kalligrafie-Tinte
+Pinceau sec	Trockener Pinsel
+1:1 carré	Quadrat 1:1
+Reconstruction du fond…	Hintergrund wird rekonstruiert…
+Accueil	Start
+Dépose une image n'importe où pour l'ouvrir	Bild irgendwo ablegen, um es zu öffnen
+Corrige l'exposition et le contraste	Korrigiert Belichtung und Kontrast
+Ajoute une ou deux lumières (Relight)	Fügt ein oder zwei Lichter hinzu (Neu beleuchten)
+Supprime brume et effets d'ambiance	Entfernt Dunst und atmosphärische Effekte
+Trois LUT créatifs empilables	Drei stapelbare kreative LUTs
+Retouche automatique de la peau	Automatische Hautretusche
+Écran 16:9	Bildschirm 16:9
+Vidéo	Video
+Réseaux sociaux	Soziale Medien
+développer la photo	das Foto entwickeln
+placer l'image	das Bild platzieren
+mettre en page	layouten
+ajouter au montage	zum Schnitt hinzufügen
+animer l'image	das Bild animieren
+Blanc	Weiß
+Noir	Schwarz
+Couleur principale	Hauptfarbe
+Couleur secondaire	Zweitfarbe
+Aucune	Keine
+Jaune	Gelb
+Violet	Lila
+Couleur du fond	Hintergrundfarbe
+Flou du fond	Hintergrundunschärfe
+Nouveau, ouvrir, fermer	Neu, öffnen, schließen
+Exporter, exportation rapide PNG	Exportieren, schneller PNG-Export
+Annuler, rétablir	Rückgängig, Wiederholen
+Copier, copier avec fusion	Kopieren, reduziert kopieren
+Coller, coller en place	Einfügen, an Originalposition einfügen
+Calque par copie, par coupure	Ebene durch Kopie, durch Ausschneiden
+Transformation manuelle	Frei transformieren
+Niveaux, courbes, teinte, balance	Tonwerte, Kurven, Farbton, Balance
+Négatif, noir et blanc	Negativ, Schwarzweiß
+Ton auto, couleur auto	Auto-Tonwert, Auto-Farbe
+Taille de l'image, de la zone	Bildgröße, Arbeitsfläche
+Tout, désélectionner, resélectionner	Alles, Auswahl aufheben, erneut auswählen
+Intervertir, contour progressif	Umkehren, weiche Kante
+Remplir, remplir en couleur principale	Füllen, mit Hauptfarbe füllen
+Nouveau calque, écrêtage	Neue Ebene, Schnittmaske
+Descendre, monter le calque	Ebene nach unten, oben
+Fusionner visibles, avec le dessous	Sichtbare zusammenführen, nach unten reduzieren
+Règles, grille, repères	Lineale, Raster, Hilfslinien
+Magnétisme, extras	Ausrichten, Extras
+Ajuster, 100 %, zoom	Einpassen, 100 %, Zoom
+Outil, outil suivant du groupe	Werkzeug, nächstes Werkzeug der Gruppe
+Taille, dureté du pinceau	Pinselgröße, Härte
+Flux ou opacité de l'outil	Fluss oder Deckkraft des Werkzeugs
+Inverser, couleurs par défaut	Tauschen, Standardfarben
+Déplacer le calque de 1 ou 10 px	Ebene um 1 oder 10 px verschieben
+Main, masquer les panneaux, aide	Hand, Bedienfelder ausblenden, Hilfe
+Plus proche voisin	Pixelwiederholung
+Bilinéaire	Bilinear
+Bicubique	Bikubisch
+Lanczos (net)	Lanczos (scharf)
+Gaussien (doux)	Gauß (weich)
+Gris 50 %	50 % Grau
+Selon le contenu	Inhaltsbasiert
+Rouges	Rottöne
+Jaunes	Gelbtöne
+Verts	Grüntöne
+Bleus	Blautöne
+Tons chair	Hauttöne
+Cœur	Herz
+Flèche	Pfeil
+Bulle	Blase
+Coche	Häkchen
+Croix	Kreuz
+Éclair	Blitz
+Goutte	Tropfen
+Lune	Mond
+Principale → secondaire	Haupt → Zweitfarbe
+Principale → transparent	Haupt → transparent
+Noir → blanc	Schwarz → Weiß
+Arc-en-ciel	Regenbogen
+Cuivre	Kupfer
+Coucher de soleil	Sonnenuntergang
+Océan	Ozean
+Point	Punkt
+Moyenne 3 × 3	Mittelwert 3 × 3
+Moyenne 5 × 5	Mittelwert 5 × 5
+Moyenne 11 × 11	Mittelwert 11 × 11
+Moyenne 31 × 31	Mittelwert 31 × 31
+Sélection → ligne	Auswahl → Zeile
+Texte non détecté (écriture difficile à lire) : sélectionne-le au rectangle, puis ajoute-le comme ligne et tape ce qui est écrit	Text nicht erkannt (schwer lesbare Schrift): mit dem Rechteck auswählen, als Zeile hinzufügen und eintippen, was dort steht
+Ce qui est écrit	Was dort steht
+Corrige la lecture si l'OCR s'est trompé : l'écriture manuscrite est recomposée lettre par lettre à partir de ce texte	Korrigiere die Erkennung, falls die OCR sich geirrt hat: die Handschrift wird Buchstabe für Buchstabe aus diesem Text neu aufgebaut
+Police détectée sur chaque ligne	Schrift pro Zeile erkannt
+Écriture manuscrite	Handschrift
+Lettres d'origine : réécrit avec les lettres découpées dans la photo, les lettres absentes viennent de la police la plus proche. Auto : seulement quand la ligne ressemble à de l'écriture à la main.	Originalbuchstaben: schreibt mit aus dem Foto ausgeschnittenen Buchstaben; fehlende Buchstaben kommen aus der ähnlichsten Schrift. Auto: nur wenn die Zeile handschriftlich aussieht.
+Imiter le grain et la netteté de la photo	Korn und Schärfe des Fotos nachahmen
+Lettres d'origine	Originalbuchstaben
+Seuls les mots modifiés sont effacés et réécrits. Lettres d'origine : recompose les mots avec les lettres découpées dans la photo (écriture détachée). Police manuscrite : la police la plus proche, à la taille et dans l'encre de l'original (écriture liée). Auto choisit selon l'écriture.	Nur geänderte Wörter werden gelöscht und neu geschrieben. Originalbuchstaben: setzt Wörter aus dem Foto ausgeschnittenen Buchstaben zusammen (getrennte Schrift). Handschriftliche Schrift: die ähnlichste Schrift, in Größe und Tinte des Originals (verbundene Schrift). Auto wählt je nach Schrift.
+Auto : fond uni (papier, mur) recalculé sans recopier d'encre, sinon reconstruction. Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Auto: einfarbige Hintergründe (Papier, Wand) werden ohne Tintenkopie neu berechnet, sonst Rekonstruktion. Rekonstruktion: baut den Hintergrund neu auf (Fotos). Hintergrundfarbe: schnelle flache Füllung (Dokumente, Screenshots). Mosaik 0 = automatische Größe.
+Police manuscrite	Handschriftliche Schrift

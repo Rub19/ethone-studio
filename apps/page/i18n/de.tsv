@@ -1,0 +1,485 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Fusion de données (CSV)…	Datenzusammenführung (CSV)…
+Publipostage : «Nom» dans les textes	Serienbrief: «Name» in Textrahmen
+QR code du texte sélectionné	QR-Code aus ausgewähltem Text
+Lien, Wi-Fi, contact… · image nette	Link, WLAN, Kontakt… · scharfes Bild
+Répéter le bloc en grille (remplir la page)	Im Raster wiederholen (Seite füllen)
+Étiquettes, cartes, badges · écart 10 pt	Etiketten, Karten, Ausweise · 10 pt Abstand
+Répéter le bloc en grille sans écart (traits de coupe communs)	Ohne Abstand wiederholen (gemeinsame Schnittmarken)
+Objet	Objekt
+Centrer les blocs sur la page	Rahmen auf der Seite zentrieren
+Disposition · sélection	Anordnen · Auswahl
+Distribuer les blocs horizontalement	Rahmen horizontal verteilen
+Disposition · 3 blocs minimum	Anordnen · mindestens 3 Rahmen
+Distribuer les blocs verticalement	Rahmen vertikal verteilen
+Dupliquer les blocs	Rahmen duplizieren
+Disposition · Ctrl+D	Anordnen · Strg+D
+Grouper les blocs	Rahmen gruppieren
+Disposition · Ctrl+G	Anordnen · Strg+G
+Dégrouper les blocs	Rahmengruppierung aufheben
+Disposition · Ctrl+Maj+G	Anordnen · Strg+Umschalt+G
+Pivoter les blocs de 90°	Rahmen um 90° drehen
+Retourner les blocs horizontalement	Rahmen horizontal spiegeln
+Retourner les blocs verticalement	Rahmen vertikal spiegeln
+Exporter	Exportieren
+PDF, PNG, JPEG ou SVG · Ctrl+E	PDF, PNG, JPEG oder SVG · Strg+E
+Format du document · Ctrl+K	Dokument einrichten · Strg+K
+Fichier	Datei
+Ouvrir un document récent	Zuletzt verwendet
+Aucun document récent	Keine zuletzt verwendeten Dokumente
+Exporter avec un préréglage	Mit einer Vorgabe exportieren
+Édition	Bearbeiten
+Corrections typographiques	Typografische Korrekturen
+Tout corriger	Alle beheben
+Disposition	Anordnen
+Transformation	Transformieren
+Symétrie horizontale	Horizontal spiegeln
+Symétrie verticale	Vertikal spiegeln
+Effacer les transformations	Transformationen zurücksetzen
+Aligner	Ausrichten
+Centrer sur la page	Auf der Seite zentrieren
+Remplir la page (fond perdu compris)	Seite füllen (inkl. Anschnitt)
+Ajustement	Einpassung
+Options d'angle	Eckenoptionen
+Habillage	Textumfluss
+Effets	Effekte
+Mode de fusion	Füllmethode
+Effacer les effets	Effekte entfernen
+Styles d'objet	Objektformate
+Nouveau à partir de la sélection…	Neu aus Auswahl…
+Convertir en tracé	In Pfad umwandeln
+Rectangle, ellipse, polygone ou trait deviennent des tracés modifiables à la Plume	Rechtecke, Ellipsen, Polygone und Linien werden zu Pfaden, die mit dem Zeichenstift bearbeitbar sind
+Texte	Text
+Police	Schrift
+Corps	Größe
+Style de paragraphe	Absatzformat
+Casse	Groß-/Kleinschreibung ändern
+Listes	Listen
+Lettrine	Initiale
+Insérer une variable	Variable einfügen
+Balises : <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>	Tags: <b> <i> <u> <s> <sup> <sub> <sc> <c=#ff0000>
+Ajouter une page après	Seite danach einfügen
+Ajouter une page avant	Seite davor einfügen
+Dupliquer la page	Seite duplizieren
+Pages en vis-à-vis	Doppelseiten
+Modifier le gabarit	Musterseite bearbeiten
+Appliquer le gabarit à toutes les pages	Musterseite auf alle Seiten anwenden
+Retirer le gabarit de toutes les pages	Musterseite von allen Seiten entfernen
+Affichage	Ansicht
+Espace de travail	Arbeitsbereich
+Aperçu (masquer les repères)   W	Vorschau (Hilfslinien aus)   W
+Marges, colonnes et grille   Ctrl+;	Ränder, Spalten und Raster   Strg+;
+Bords des blocs   Ctrl+H	Rahmenkanten   Strg+H
+Règles   Ctrl+R	Lineale   Strg+R
+Magnétisme	Ausrichten
+Fenêtre	Fenster
+Bienvenue dans Page	Willkommen bei Page
+Mise en page de documents, magazines, affiches et PDF	Layout für Dokumente, Magazine, Plakate und PDF
+Ouvrir…	Öffnen…
+Nouveau document	Neues Dokument
+Modèles	Vorlagen
+Documents récents	Zuletzt verwendete Dokumente
+Tes documents .epage apparaîtront ici	Deine .epage-Dokumente erscheinen hier
+Aligner sur la sélection	An Auswahl ausrichten
+Répartir ↔	Verteilen ↔
+Répartir ↕	Verteilen ↕
+Grouper	Gruppieren
+Corps · Ctrl+Maj+< / >	Größe · Strg+Umschalt+< / >
+Interligne · Alt+↑ / ↓	Zeilenabstand · Alt+↑ / ↓
+Approche · Alt+← / →	Laufweite · Alt+← / →
+Gras · Ctrl+Maj+B	Fett · Strg+Umschalt+B
+Italique	Kursiv
+Souligné · Ctrl+Maj+U	Unterstrichen · Strg+Umschalt+U
+Majuscules · Ctrl+Maj+K	Großbuchstaben · Strg+Umschalt+K
+Fond	Füllung
+Contour	Kontur
+Trait	Linie
+Début	Anfang
+Flèche	Pfeil
+Remplir	Füllung
+Ajuster	Einpassen
+Déformer	Verzerren
+Taille du texte	Textgröße
+· texte en excès sur cette page	· Übersatztext auf dieser Seite
+Aperçu	Vorschau
+Masque cadres et repères (W)	Blendet Rahmen und Hilfslinien aus (W)
+Ajouter une page à la fin	Seite am Ende hinzufügen
+Ses blocs apparaissent sur toutes les pages	Seine Rahmen erscheinen auf jeder Seite
+Propriétés	Eigenschaften
+Calques	Ebenen
+Liens	Verknüpfungen
+Contrôle	Preflight
+Bloc	Rahmen
+Effets de l'image	Bildeffekte
+Le texte dépasse du bloc.	Der Text läuft über den Rahmen hinaus.
+Ajuster la hauteur	An Höhe anpassen
+Écrire sur la page (Entrée)	Auf der Seite tippen (Eingabe)
+Caractère	Zeichen
+Taille	Größe
+Approche	Laufweite
+Petites capitales	Kapitälchen
+Barré	Durchgestrichen
+Décalage de la ligne de base	Grundlinienversatz
+Échelle H	Skalierung H
+Contour des lettres	Buchstabenkontur
+Paragraphe	Absatz
+Gauche	Links
+Centre	Mitte
+Droite	Rechts
+Justifié	Blocksatz
+Interligne	Zeilenabstand
+Espace après paragraphe	Abstand danach
+Retrait de première ligne	Einzug erste Zeile
+Liste	Liste
+Retrait négatif (texte aligné après la puce)	Hängender Einzug (Text nach dem Aufzählungszeichen ausgerichtet)
++ Créer un style à partir de ce texte	+ Stil aus diesem Text erstellen
+Paragraphe avancé	Erweiterter Absatz
+Espace avant paragraphe	Abstand davor
+Retrait gauche	Einzug links
+droit	rechts
+Lettrine sur	Initialzeilen
+Césure des mots longs	Lange Wörter trennen
+Éviter les lignes veuves et orphelines	Hurenkinder und Schusterjungen vermeiden
+Aligner sur la grille de base	An Grundlinienraster ausrichten
+Tabulation tous les	Tabulator alle
+Points de conduite	Füllpunkte
+Caler à droite	Rechtsbündig
+Filet au-dessus	Linie oberhalb
+en dessous	darunter
+Épaisseur	Stärke
+Écart	Versatz
+Bloc de texte	Textrahmen
+Colonnes	Spalten
+Gouttière	Steg
+Équilibrer	Balance
+Filet entre colonnes	Spaltenlinie
+Hauteur auto	Automatische Höhe
+Ignorer l'habillage	Textumfluss ignorieren
+Alignement vertical	Vertikale Ausrichtung
+Haut	Oben
+Milieu	Mitte
+Bas	Unten
+Marge intérieure	Innenabstand
+Fond coloré	Hintergrundfarbe
+Suite du texte dans	Text geht weiter in
+Aucun bloc	Kein Rahmen
+Le texte qui ne tient pas continue dans ce bloc (texte chaîné).	Text, der nicht passt, fließt in diesen Rahmen weiter (verketteter Text).
+Choisir…	Auswählen…
+Cadre aux proportions	Rahmen an Inhalt anpassen
+Remplir le cadre	Rahmen füllen
+Ajuster dans le cadre	In Rahmen einpassen
+Étirer sans garder les proportions	Strecken ohne Proportionen
+Zoom de l'image dans le cadre	Bildzoom im Rahmen
+Décalage X	Versatz X
+Centrer	Mitte
+Forme du cadre	Rahmenform
+Polygone	Polygon
+Filtre	Filter
+Arrondi des coins	Eckenradius
+Miroir horizontal	Horizontal spiegeln
+Forme	Form
+Arrondi	Radius
+Côtés / branches	Seiten / Spitzen
+Creux (1 = polygone)	Einzug (1 = Polygon)
+Ligne	Linie
+Pointillés (0 = plein)	Striche (0 = durchgehend)
+Flèche à la fin	Pfeil am Ende
+au début	am Anfang
+Extrémités	Großbuchstaben
+Rondes	Rund
+Carrées	Überstehend
+Droites	Abgeschnitten
+Tracé	Pfad
+Tracé fermé	Geschlossener Pfad
+Sélection directe (A) pour déplacer les points et leurs poignées.	Direktauswahl (A), um Punkte und ihre Griffe zu verschieben.
+Texte sur tracé	Pfadtext
+Départ le long du tracé	Entlang des Pfads beginnen
+Voir le tracé	Pfad zeigen
+Fermé	Geschlossen
+Tableau	Tabelle
+Première colonne en gras	Erste Spalte fett
+Ligne d'en-tête	Kopfzeile
+Lignes alternées	Abwechselnde Zeilen
+Aspect	Aussehen
+Opacité	Deckkraft
+Pointillés	Gestrichelt
+Verrouillé	Gesperrt
+Masqué	Ausgeblendet
+Non imprimable (visible à l'écran seulement)	Nicht druckend (nur am Bildschirm)
++ Ajouter la couleur au nuancier	+ Farbe zu Farbfeldern hinzufügen
+Ombre portée	Schlagschatten
+Flou	Unschärfe
+Lueur externe	Schein nach außen
+Contour progressif	Weiche Kante
+Contour progressif dégradé	Verlaufsweiche
+De	Von
+Angles	Ecken
+Dégradé radial (si un dégradé est actif)	Radialer Verlauf (wenn ein Verlauf aktiv ist)
+Inclinaison	Verbiegen
+Miroir ↔	Spiegeln ↔
+Habillage du texte	Textumfluss
+Distance	Versatz
+Les textes voisins contournent ce bloc.	Text in der Nähe umfließt diesen Rahmen.
+Note	Notiz
+Remarque pour toi ou un relecteur (non imprimée)	Eine Notiz für dich oder einen Prüfer (wird nicht gedruckt)
+Aligner sur les marges	An Rändern ausrichten
+Ordre	Reihenfolge
+Format…	Einrichten…
+Titre	Titel
+Marges	Ränder
+Grille	Raster
+Grille de base (0 = masquée)	Grundlinienraster (0 = ausgeblendet)
+Fond perdu	Anschnitt
+3 mm = 8,5 pt pour un imprimeur	3 mm = 8,5 pt für die Druckerei
+1re page n°	Erste Seitenzahl
+Utiliser le gabarit sur cette page	Musterseite auf dieser Seite verwenden
+Tu modifies le gabarit : ses blocs apparaissent sur toutes les pages.	Du bearbeitest die Musterseite: ihre Rahmen erscheinen auf jeder Seite.
+?  Tutoriels	?  Tutorials
+Nuancier	Farbfelder
+Les couleurs du document, réutilisables partout d'un clic.	Die Farben des Dokuments, überall mit einem Klick wiederverwendbar.
+Supprimer cette couleur	Diese Farbe löschen
+Ajouter une couleur	Farbe hinzufügen
+Styles de paragraphe	Absatzformate
+Sélectionne un texte puis « Créer un style » pour réutiliser sa mise en forme.	Text auswählen, dann „Stil erstellen“, um seine Formatierung wiederzuverwenden.
+Repères	Hilfslinien
+Glisse depuis une règle pour poser un repère ; ramène-le sur la règle pour le retirer.	Aus einem Lineal ziehen, um eine Hilfslinie zu setzen; zurück ins Lineal ziehen, um sie zu entfernen.
++ Repère vertical au centre	+ Vertikale Hilfslinie in der Mitte
++ Repère horizontal au centre	+ Horizontale Hilfslinie in der Mitte
+Objets de la page	Seitenobjekte
+Aucun bloc sur cette page.	Keine Rahmen auf dieser Seite.
+Glisse vers la page pour poser un repère	Auf die Seite ziehen, um eine Hilfslinie zu setzen
+Le rendu se met à jour sur la page en direct	Die Seite wird live aktualisiert
+Couleur	Farbe
+Style de caractère	Zeichenformat
+Terminé	Fertig
+Exporter le document	Dokument exportieren
+Toutes	Alle
+Page affichée	Aktuelle Seite
+Plage	Bereich
+Fond perdu et traits de coupe (impression)	Anschnitt und Schnittmarken (Druck)
+Règle un fond perdu dans le format du document pour l'activer.	Lege in „Dokument einrichten“ einen Anschnitt fest, um dies zu aktivieren.
+Afficher le fichier après l'export	Datei nach dem Export zeigen
+Attention : du texte dépasse d'un bloc sur la page affichée.	Achtung: Text läuft auf der aktuellen Seite über einen Rahmen hinaus.
+Exporter…	Exportieren…
+Annuler	Abbrechen
+Format du document	Dokument einrichten
+Largeur	Breite
+Hauteur	Höhe
+Paysage	Querformat
+Valeur standard des imprimeurs	Standardwert der Druckereien
+Grille de base	Grundlinienraster
+Nouveau style de paragraphe	Neues Absatzformat
+Police, taille, graisse, couleur, interligne et espacements du texte sélectionné.	Schrift, Größe, Stärke, Farbe, Zeilenabstand und Laufweite des ausgewählten Textes.
+Créer	Erstellen
+Couleur du nuancier	Farbfeldfarbe
+Dégradé	Verlauf
+Angle	Winkel
+Contrôle en amont	Preflight
+Outil Note : clique un bloc pour y attacher un commentaire. Les notes ne sont jamais imprimées.	Notizwerkzeug: Klicke auf einen Rahmen, um einen Kommentar anzuhängen. Notizen werden nie gedruckt.
+Afficher dans l'explorateur	Im Explorer anzeigen
+Remplacer le lien…	Erneut verknüpfen…
+Atteindre	Gehe zu
+Rechercher les liens manquants dans un dossier…	Ordner nach fehlenden Verknüpfungen durchsuchen…
++ Nouveau calque	+ Neue Ebene
+Placer la sélection	Auswahl hierher verschieben
+Déplace les blocs sélectionnés sur le calque actif	Verschiebt die ausgewählten Rahmen auf die aktive Ebene
+Clic droit : ordre, sélection, suppression. Le calque du haut passe devant.	Rechtsklick: Reihenfolge, Auswahl, Löschen. Die oberste Ebene liegt vorn.
+Styles de caractère	Zeichenformate
+Mise en forme à appliquer à quelques mots : dans la fenêtre d'écriture, sélectionne le texte puis choisis le style.	Formatierung für einige Wörter: im Texteditor den Text auswählen und dann das Format wählen.
++ Nouveau style de caractère	+ Neues Zeichenformat
+Enregistre l'aspect d'un bloc (couleurs, contour, effets, angles) pour le réappliquer.	Speichert das Aussehen eines Rahmens (Farben, Kontur, Effekte, Ecken), um es wieder anzuwenden.
+Appliquer à la sélection	Auf Auswahl anwenden
+Rechercher et remplacer	Suchen und ersetzen
+Rechercher	Suchen
+Remplacer par	Ändern in
+Respecter la casse	Groß-/Kleinschreibung beachten
+Mot entier	Ganzes Wort
+Bloc sélectionné	Ausgewählter Rahmen
+Tous	Alle
+Astuce : \\t n'est pas interprété, colle une vraie tabulation si besoin.	Tipp: \\t wird nicht ausgewertet; bei Bedarf einen echten Tabulator einfügen.
+Tout remplacer	Alle ändern
+Suivant	Weiter
+Fermer	Schließen
+Dupliquer et décaler	Duplizieren und versetzen
+Créer une grille	Raster erstellen
+Lignes	Zeilen
+Gouttière horizontale	Horizontaler Steg
+Nombre de copies	Anzahl der Kopien
+Décalage horizontal	Horizontaler Versatz
+Rotation par copie	Drehung pro Kopie
+Table des matières	Inhaltsverzeichnis
+Liste les blocs portant ces styles de paragraphe, avec leur numéro de page et des points de conduite.	Listet Rahmen mit diesen Absatzformaten auf, mit Seitenzahl und Füllpunkten.
+Sur une nouvelle page au début du document	Auf einer neuen Seite am Anfang des Dokuments
+Numérotation et sections	Nummerierung und Abschnitte
+Dès la page	Ab Seite
+Nom	Name
+Préfixe	Präfix
+Taille relative	Relative Größe
+Enregistrer	Speichern
+Nouveau style d'objet	Neues Objektformat
+Couleurs, contour, opacité, angles et effets du bloc sélectionné.	Farben, Kontur, Deckkraft, Ecken und Effekte des ausgewählten Rahmens.
+Supprimer la note	Notiz löschen
+Terminer (Entrée)	Fertig (Eingabe)
+Fermer le tracé	Pfad schließen
+Couleur du contour	Konturfarbe
+Couleur du filet	Linienfarbe
+Couleur du fond	Füllfarbe
+Couleur du trait	Linienfarbe
+Traits	Linien
+Fond de l'en-tête	Kopfzeilenfüllung
+Fond alterné	Abwechselnde Füllung
+Couleur de l'ombre	Schattenfarbe
+Couleur de la lueur	Leuchtfarbe
+Papier	Papier
+Résolution	Auflösung
+Qualité JPEG	JPEG-Qualität
+Côtés	Seiten
+Branches	Punkte
+Creux	Innenabstand
+Nouveau…	Neu…
+Enregistrer sous…	Speichern unter…
+Placer une image…	Bild platzieren…
+Assembler…	Zusammenfügen…
+Format du document…	Dokumentformat…
+Couper	Ausschneiden
+Copier	Kopieren
+Dupliquer	Duplizieren
+Dupliquer et décaler…	Duplizieren und versetzen…
+Supprimer	Löschen
+Tout sélectionner	Alles auswählen
+Tout désélectionner	Alles abwählen
+Rechercher et remplacer…	Suchen und ersetzen…
+Dissocier	Gruppierung aufheben
+Verrouiller	Sperren
+Tout déverrouiller	Alle entsperren
+Masquer	Ausblenden
+Tout afficher	Alles einblenden
+Non imprimable	Nicht druckend
+Modifier le texte	Text bearbeiten
+Ajuster la hauteur au texte	Höhe an Text anpassen
+Remplir avec du faux texte	Mit Platzhaltertext füllen
+Créer la table des matières…	Inhaltsverzeichnis erstellen…
+Nouveau style de caractère…	Neues Zeichenformat…
+Première page	Erste Seite
+Dernière page	Letzte Seite
+Format de cette page…	Format dieser Seite…
+Numérotation et sections…	Nummerierung und Abschnitte…
+Ajuster à la fenêtre	In Fenster einpassen
+Taille réelle	Originalgröße
+Titre 1	Überschrift 1
+Titre 2	Überschrift 2
+Titre 3	Überschrift 3
+Légende	Bildunterschrift
+Petit texte	Kleiner Text
+Impression haute qualité	Hochwertiger Druck
+PDF/X (imprimeur)	PDF/X (Druckerei)
+Web léger	Leicht fürs Web
+Personnalisé	Benutzerdefiniert
+Remplir le cadre proportionnellement	Rahmen proportional füllen
+Ajuster le contenu proportionnellement	Inhalt proportional anpassen
+Ajuster le contenu au cadre	Inhalt an Rahmen anpassen
+Centrer le contenu	Inhalt zentrieren
+Ajuster le cadre au contenu	Rahmen an Inhalt anpassen
+Premier plan	Vordergrund
+En avant	Vorwärts
+En arrière	Rückwärts
+Arrière-plan	Hintergrund
+Rotation de 90° horaire	90° im UZS drehen
+Rotation de 90° antihoraire	90° gegen den UZS drehen
+Rotation de 180°	Um 180° drehen
+Centre horizontal	Horizontale Mitte
+Centre vertical	Vertikale Mitte
+Milieu ↕	Mitte ↕
+Derrière	Dahinter
+Densité couleur −	Farbdichte −
+Densité couleur +	Farbdichte +
+Lumière crue	Hartes Licht
+Lumière tamisée	Gedämpftes Licht
+Différence	Differenz
+Luminosité	Helligkeit
+Lettre US	US Letter
+Légal US	US Legal
+Tabloïd	Tabloid
+Livre 6 × 9 in	Buch 6 × 9 in
+Carte de visite	Visitenkarte
+Carte postale	Postkarte
+Carré	Quadrat
+Présentation	Präsentation
+Bannière web	Webbanner
+Miniature vidéo	Video-Miniatur
+Brochure 3 volets	Dreifach-Falzflyer
+Couverture de livre	Buchcover
+Fiche produit	Produktblatt
+Carte de vœux	Grußkarte
+Entrées	Vorspeisen
+Velouté de potimarron	Hokkaido-Kürbissuppe
+Burrata et tomates anciennes	Burrata und alte Tomatensorten
+Risotto aux cèpes	Steinpilzrisotto
+Filet de bar, beurre blanc	Wolfsbarschfilet, Beurre blanc
+Joue de bœuf confite	Geschmorte Rinderbacke
+Tarte au citron meringuée	Zitronen-Baiser-Tarte
+Mousse au chocolat noir	Zartbitter-Mousse
+Fromages affinés	Gereifte Käse
+Variables : {page} {pages} {title} {date} {section}	Variablen: {page} {pages} {title} {date} {section}
+Gabarit	Master
+sur	von
+mots	Wörter
+sans gabarit	ohne Musterseite
+Vectoriel, images d'origine, sans repères	Vektor, Originalbilder, ohne Marken
+Fond perdu, traits de coupe, repères de montage et infos	Anschnitt, Schnittmarken, Passermarken und Infos
+Images réduites et recompressées pour l'écran	Bilder verkleinert und neu komprimiert für den Bildschirm
+Tes propres réglages	Deine eigenen Einstellungen
+retoucher la page	die Seite bearbeiten
+développer	entwickeln
+placer la page	die Seite platzieren
+ajouter au montage	zum Schnitt hinzufügen
+animer la page	die Seite animieren
+Numéro de page	Seitenzahl
+Nombre de pages	Seitenanzahl
+Titre du document	Dokumenttitel
+Date du jour	Heutiges Datum
+Nom de section	Abschnittsname
+Aucun	Keine
+Noir et blanc	Schwarzweiß
+Sépia	Sepia
+Délavé	Verblasst
+Contraste	Kontrast
+Chaud	Warm
+Froid	Kühl
+Négatif	Negativ
+Aucune	Keine
+Puces	Aufzählungszeichen
+Biseau	Abgeflacht
+Encoche	Kerbe
+Arrondi inversé	Umgekehrt rund
+Cadre de sélection	Begrenzungsrahmen
+Forme de l'objet	Objektform
+Sauter l'objet	Objekt überspringen
+Espaces doubles	Doppelte Leerzeichen
+Apostrophes typographiques	Typografische Apostrophe
+Guillemets français	Französische Anführungszeichen
+Points de suspension	Auslassungspunkte
+Espaces fines avant ; : ! ?	Schmale Leerzeichen vor ; : ! ?
+minuscules	Kleinbuchstaben
+Première Lettre En Capitale	Erster Buchstabe Groß
+Phrase normale.	Satzanfang groß.
+Livret, flyer	Broschüre, Flyer
+Carte, flyer de poche	Karte, Taschenflyer
+Livre, catalogue	Buch, Katalog
+Roman, essai	Roman, Essay
+Dépliant, enveloppe	Faltblatt, Umschlag
+Publication 1:1	Post 1:1
+Réseaux sociaux	Soziale Medien
+A4, en-tête, colonnes	A4, Kopfzeile, Spalten
+A5, événement	A5, Veranstaltung
+A4, colonne latérale	A4, Seitenspalte
+A4, carte et prix	A4, Speisekarte und Preise
+A3, grand titre	A3, große Schlagzeile
+A4, trois rubriques	A4, drei Rubriken
+A5, cérémonie	A5, Feier
+A4 paysage, diplôme	A4 quer, Urkunde
+A4 paysage, recto	A4 quer, einseitig
+6 × 9 in, plat recto	6 × 9 in, Titelseite
+A4, photo et caractéristiques	A4, Foto und technische Daten
+A6, fête	A6, Party
+A4, couverture et sommaire	A4, Titelseite und Inhalt

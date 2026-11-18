@@ -1,0 +1,413 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Double-clic pour réinitialiser	Doppelklick zum Zurücksetzen
+Image clé suivante	Nächster Keyframe
+Image clé précédente	Vorheriger Keyframe
+Image	Video
+Effets	Effekte
+Couleur	Farbe
+Audio	Audio
+Nom du clip	Clipname
+Activé	Aktiviert
+Maj+E	Umschalt+E
+Lecture inversée	Rückwärtswiedergabe
+Durée et vitesse	Dauer und Geschwindigkeit
+Image figée	Standbild
+Vitesse/Durée…	Geschwindigkeit/Dauer…
+Transition d'entrée	Eingangsübergang
+Un espace vide précède le clip : la transition est ignorée.	Vor dem Clip ist eine Lücke: der Übergang wird ignoriert.
+Fondus	Blenden
+Fondu vers	Blende auf
+Noir	Schwarz
+Blanc	Weiß
+Étiquette	Etikett
+Détacher l'audio	Audio trennen
+Trajectoire	Bewegung
+Zoom progressif (Ken Burns)	Langsamer Zoom (Ken Burns)
+Miroir	Spiegeln
+Retourner	Spiegeln
+Incrustation d'image	Bild im Bild
+Idéal sur la piste V2, au-dessus de la vidéo principale.	Am besten auf Spur V2, über dem Hauptvideo.
+Recadrage	Freistellen
+Images clés	Keyframes
+Bibliothèque d'effets	Effektbibliothek
+Préréglages d'effets	Effektvorgaben
+Flou et netteté	Weichzeichnen und Scharfzeichnen
+Stylisation	Stilisieren
+Négatif (inverser les couleurs)	Negativ (Farben umkehren)
+Incrustation (fond vert)	Chroma Key (Greenscreen)
+Activer	Aktivieren
+Vert	Grün
+Bleu	Blau
+Masque	Maske
+Aucun	Keine
+Plume	Zeichenstift
+Inverser le masque	Maske umkehren
+Côtés du polygone	Polygonseiten
+Dessine-le dans le moniteur avec la Plume (P), le Rectangle, l'Ellipse ou le Polygone ; déplace ses points avec la Sélection.	Im Monitor mit Zeichenstift (P), Rechteck, Ellipse oder Polygon zeichnen; Punkte mit der Auswahl verschieben.
+Réinitialiser	Zurücksetzen
+Réinitialiser tous les effets	Alle Effekte zurücksetzen
+Correction de base	Grundkorrektur
+Créatif	Kreativ
+Courbes	Gradationskurven
+Maître	Master
+Rouge	Rot
+Roues chromatiques	Farbräder
+Double-clic sur une roue pour la remettre au centre.	Doppelklick auf ein Rad zentriert es neu.
+Étalonnage	Farbkorrektur
+Copier	Kopieren
+Appliquer à tous	Auf alle anwenden
+Copie cet étalonnage sur tous les clips V1 et V2	Kopiert diese Farbkorrektur auf alle Clips in V1 und V2
+Son du clip	Clip-Audio
+Couper le son du clip	Clip stumm schalten
+Une image figée n'a pas de son.	Ein Standbild hat keinen Ton.
+Normalisation	Normalisieren
+Fondus audio	Audioblenden
+Détacher l'audio sur A2	Audio auf A2 trennen
+Musique	Musik
+Placer à la tête de lecture	An der Abspielposition platzieren
+Mixage	Mischung
+Couper	Stumm
+Styles prédéfinis	Vordefinierte Stile
+Texte	Text
+Police	Schrift
+Alignement	Ausrichtung
+Gauche	Links
+Centre	Mitte
+Droite	Rechts
+Texte vertical	Vertikaler Text
+Apparence	Aussehen
+Ombre portée	Schlagschatten
+Bandeau	Banner
+Position et durée	Position und Dauer
+Haut	Oben
+Bas	Unten
+Tiers	Bauchbinde
+Défilement	Rollen
+Animation d'entrée et de sortie	Ein- und Ausstiegsanimation
+Séquence	Sequenz
+Images/s	Bilder/s
+Durée	Dauer
+V1 · V2 · titres · A2	V1 · V2 · Titel · A2
+Réglages de la séquence…	Sequenzeinstellungen…
+Ajouter	Hinzufügen
+Titre	Titel
+Marqueur	Marke
+La musique (A2) baisse automatiquement quand un clip V1 a du son.	Die Musik (A2) wird automatisch abgesenkt, wenn ein V1-Clip Ton hat.
+Marqueurs	Marken
+Modifier	Bearbeiten
+Copier comme chapitres YouTube	Als YouTube-Kapitel kopieren
+Historique	Protokoll
+Revenir juste avant cette étape	Zurück zu direkt vor diesem Schritt
+Raccourcis	Tastaturbefehle
+Tous les tutoriels  →	Alle Tutorials  →
+Fondu enchaîné entre tous les clips	Kreuzblende zwischen allen Clips
+Fondu au noir entre tous les clips	Schwarzblende zwischen allen Clips
+Retirer toutes les transitions	Alle Übergänge entfernen
+Couper le clip toutes les 2 s	Clip alle 2 s teilen
+Clip sélectionné, sinon toute la piste	Ausgewählter Clip, sonst die ganze Spur
+Couper le clip toutes les 5 s	Clip alle 5 s teilen
+Couper le clip toutes les 10 s	Clip alle 10 s teilen
+Passer en vertical 9:16 (Shorts, Reels, TikTok)	Auf Hochkant 9:16 wechseln (Shorts, Reels, TikTok)
+Séquence · clips recadrés au centre	Sequenz · Clips mittig beschnitten
+Passer en carré 1:1	Auf Quadrat 1:1 wechseln
+Passer en portrait 4:5	Auf Hochformat 4:5 wechseln
+Passer en paysage 16:9	Auf Querformat 16:9 wechseln
+Fermer tous les blancs de la piste	Alle Lücken der Spur schließen
+Montage · rapproche tous les clips	Schnitt · fügt alle Clips zusammen
+Normaliser l'audio sélectionné à −1 dB	Ausgewähltes Audio auf −1 dB normalisieren
+Clip ou musique sélectionné	Ausgewählter Clip oder Musik
+Fondus de 0,5 s sur tous les clips	0,5-s-Blenden auf allen Clips
+Séquence · entrée et sortie	Sequenz · In und Out
+Fondus de 1 s sur tous les clips	1-s-Blenden auf allen Clips
+Modifications non enregistrées	Nicht gespeicherte Änderungen
+Annuler	Abbrechen
+Exporter	Exportieren
+Réglages de la séquence	Sequenzeinstellungen
+Fichier	Datei
+Nouvel élément	Neues Element
+Exporter avec un préréglage	Mit einer Vorgabe exportieren
+Édition	Bearbeiten
+Titre prédéfini	Vordefinierter Titel
+Outils	Werkzeuge
+Affichage	Ansicht
+Espace de travail	Arbeitsbereich
+Magnétisme (Maj+S)	Ausrichten (Umschalt+S)
+Lecture en boucle	Wiedergabe in Schleife
+Mode visionneuse (F)	Betrachtermodus (F)
+Zones de sécurité	Sichere Ränder
+Grille des tiers	Drittelraster
+Repères vertical 9:16	Hochkant-Hilfslinien 9:16
+Qualité de lecture	Wiedergabequalität
+Vignettes des clips	Clip-Miniaturen
+Formes d'onde	Wellenformen
+Hauteur des pistes	Spurhöhe
+Afficher	Einblenden
+Nouveau projet	Neues Projekt
+Ouvrir…	Öffnen…
+Importer des médias…	Medien importieren…
+?  Tutoriels	?  Tutorials
+Bienvenue dans Cut	Willkommen bei Cut
+Monte, coupe, étalonne et exporte tes vidéos	Schneide, korrigiere und exportiere deine Videos
+Projets récents	Zuletzt verwendete Projekte
+Médias	Medien
+Importer des médias (Ctrl+I)	Medien importieren (Strg+I)
+Nouvel élément : cache couleur, dégradé, mire…	Neues Element: Farbfläche, Verlauf, Balken…
+Rechercher	Suchen
+Tout	Alle
+Vidéo	Video
+Son	Audio
+Trier par	Sortieren nach
+Trier les médias	Medien sortieren
+Volume d'écoute	Abhörlautstärke
+Niveau audio du programme (crête, dBFS)	Programm-Audiopegel (Spitze, dBFS)
+MP4 H.264 + AAC, GIF, WAV, PNG ou JPEG	MP4 H.264 + AAC, GIF, WAV, PNG oder JPEG
+Ajuster (bandes)	Einpassen (Balken)
+Remplir (recadrer)	Füllen (Beschnitt)
+Toute la séquence	Gesamte Sequenz
+Entre entrée et sortie	Zwischen In und Out
+Clip sélectionné	Ausgewählter Clip
+Afficher le fichier une fois terminé	Datei nach Abschluss zeigen
+Exporter…	Exportieren…
+Inverser largeur et hauteur	Breite und Höhe tauschen
+Comme le 1er clip	An 1. Clip angleichen
+Images par seconde	Bilder pro Sekunde
+Couleur de fond	Hintergrundfarbe
+Terminé	Fertig
+Vitesse/Durée du clip	Clip-Geschwindigkeit/-Dauer
+Vitesse	Geschwindigkeit
+Image figée (maintien)	Standbild (halten)
+Couper le son	Stumm
+Nom (chapitre)	Name (Kapitel)
+Commentaire	Kommentieren
+Supprimer	Löschen
+Aucune	Keine
+Dupliquer	Duplizieren
+Couper / réactiver le son	Stumm / laut
+Normaliser (crête −1 dB)	Normalisieren (Spitze −1 dB)
+Effet prédéfini	Vorgabeeffekt
+Sortie	Aus
+Durée figée	Haltedauer
+Fondu d'entrée	Einblenden
+Fondu de sortie	Ausblenden
+Échelle finale	Endskalierung
+Netteté	Scharfzeichnen
+Mosaïque	Mosaik
+Postérisation	Tontrennung
+Vignettage	Vignette
+Tolérance	Toleranz
+Douceur	Weichheit
+Contour progressif	Weiche Kante
+Contraste	Kontrast
+Hautes lumières	Lichter
+Ombres	Tiefen
+Blancs	Weiß
+Noirs	Schwarz
+Température	Temperatur
+Teinte	Tönung
+Intensité du look	Look-Intensität
+Rotation de teinte	Farbtondrehung
+Balance	Balance
+Début	Anfang
+Taille	Größe
+Espacement des lettres	Laufweite
+Interligne	Zeilenabstand
+Couleur du texte	Textfarbe
+Contour	Kontur
+Couleur du contour	Konturfarbe
+Couleur du bandeau	Bannerfarbe
+Décalage X	Versatz X
+Décalage Y	Versatz Y
+Volume général	Master-Lautstärke
+Atténuation musique sous les voix	Musik unter Stimmen absenken
+Préréglage	Vorgabe
+Cadrage	Bildausschnitt
+Débit vidéo	Videobitrate
+Audio AAC	AAC-Audio
+Plage	Bereich
+Ajouter à la fin de V1	Ans Ende von V1 anhängen
+Insérer à la tête de lecture	An der Abspielposition einfügen
+Incruster sur V2 à la tête	Auf V2 an der Abspielposition überlagern
+Remplacer le clip sélectionné	Ausgewählten Clip ersetzen
+Ajouter comme musique (A2)	Als Musik hinzufügen (A2)
+Remplacer le fichier…	Datei ersetzen…
+Afficher dans l'explorateur	Im Explorer anzeigen
+Retirer du projet	Aus dem Projekt entfernen
+Scinder à la tête de lecture	An der Abspielposition teilen
+Figer l'image à la tête	Standbild an der Abspielposition
+Inverser la lecture	Rückwärtswiedergabe
+Activer / désactiver	Aktivieren / deaktivieren
+Normaliser l'audio (−1 dB)	Audio normalisieren (−1 dB)
+Réinitialiser les effets	Effekte zurücksetzen
+Lever (laisser un vide)	Herausheben (Lücke lassen)
+Supprimer et refermer	Löschen und Lücke schließen
+Sélection	Auswahl
+Sélection de piste avant	Spurauswahl vorwärts
+Sélection de piste arrière	Spurauswahl rückwärts
+Modification par propagation	Ripple-Bearbeitung
+Modification par déplacement	Rolling-Bearbeitung
+Allongement de la durée	Ratendehnung
+Cutter	Rasierklinge
+Couper toutes les pistes	Alle Spuren schneiden
+Glissement	Slip
+Déplacement	Verschieben
+Plume (masque)	Zeichenstift (Maske)
+Rectangle (masque)	Rechteck (Maske)
+Ellipse (masque)	Ellipse (Maske)
+Polygone (masque)	Polygon (Maske)
+Main	Hand
+Ouvrir un projet…	Projekt öffnen…
+Enregistrer	Speichern
+Enregistrer sous…	Speichern unter…
+Exporter l'image affichée (PNG)…	Angezeigtes Bild exportieren (PNG)…
+Tout sélectionner	Alles auswählen
+Sélectionner la même étiquette	Gleiches Etikett auswählen
+Changer de piste (V1 ↔ V2)	Spur wechseln (V1 ↔ V2)
+Déplacer à gauche	Nach links verschieben
+Déplacer à droite	Nach rechts verschieben
+Scinder toutes les pistes	Alle Spuren teilen
+Rogner le début à la tête	Anfang bis zur Abspielposition trimmen
+Rogner la fin à la tête	Ende bis zur Abspielposition trimmen
+Figer l'image (2 s)	Standbild (2 s)
+Insérer un titre	Titel einfügen
+Désactiver tous les solos	Alle Solos aufheben
+Déverrouiller toutes les pistes	Alle Spuren entsperren
+Afficher toutes les pistes	Alle Spuren einblenden
+Ajouter / modifier un marqueur	Marke hinzufügen / bearbeiten
+Supprimer le marqueur	Marke löschen
+Marqueur précédent	Vorherige Marke
+Marqueur suivant	Nächste Marke
+Point d'entrée	In-Punkt
+Point de sortie	Out-Punkt
+Entrée/sortie sur le clip	In/Out am Clip
+Effacer entrée et sortie	In und Out löschen
+Point de montage précédent	Vorheriger Schnittpunkt
+Point de montage suivant	Nächster Schnittpunkt
+Ajuster la timeline	Zeitleiste einpassen
+Zoom avant	Einzoomen
+Zoom arrière	Auszoomen
+Crête −1 dB	Spitze −1 dB
+Crête −3 dB	Spitze −3 dB
+Crête −6 dB	Spitze −6 dB
+Normaliser −1 dB	Normalisieren −1 dB
+−12 dB (fond)	−12 dB (Hintergrund)
+Carré	Quadrat
+Cinéma	Kino
+Instagram carré	Instagram quadratisch
+Master haute qualité	Hochwertiges Master
+Brouillon rapide	Schnellentwurf
+GIF animé	Animiertes GIF
+Audio WAV	WAV-Audio
+Séquence PNG	PNG-Sequenz
+Image PNG	PNG-Bild
+Image JPEG	JPEG-Bild
+Ralenti ×0,25	Zeitlupe ×0,25
+Accéléré ×4	Schnell ×4
+Dépose des vidéos, des photos ou de la musique n'importe où	Videos, Fotos oder Musik irgendwo ablegen
+Glisse tes fichiers ici	Ziehe deine Dateien hierher
+Vidéos, photos et musiques	Videos, Fotos und Musik
+Importe une vidéo pour commencer	Importiere ein Video, um zu beginnen
+Glisse un fichier ici ou Ctrl+I	Datei hierher ziehen oder Strg+I
+Navette arrière · pause · avant	Shuttle zurück · Pause · vor
+Rogner début / fin	Anfang / Ende trimmen
+Entrée / sortie	Ein / Aus
+Nouveau titre	Neuer Titel
+Vitesse/Durée	Geschwindigkeit/Dauer
+Point de montage	Schnittpunkt
+Magnétisme	Magnetisch ausrichten
+Mode visionneuse	Betrachtermodus
+Rêve	Traum
+Négatif	Negativ
+Bande dessinée	Comic
+Film ancien	Alter Film
+Netteté +	Schärfen +
+Flou d'arrière-plan	Hintergrundunschärfe
+Néon	Neon
+Haut gauche	Oben links
+Haut droite	Oben rechts
+Bas gauche	Unten links
+Bas droite	Unten rechts
+Plein écran	Vollbild
+Moitié gauche	Linke Hälfte
+Moitié droite	Rechte Hälfte
+Titre cinéma	Kinotitel
+Sous-titre	Untertitel
+Tiers inférieur classique	Klassisches Bauchbinden-Design
+Tiers inférieur moderne	Moderne Bauchbinde
+Générique défilant	Abspann
+Bandeau d'info	Nachrichtenticker
+Citation	Zitat
+Chapitre	Kapitel
+Gros titre YouTube	Großer YouTube-Titel
+Titre vertical	Vertikaler Titel
+Paysage 16:9	Querformat 16:9
+Publication 1:1	Post 1:1
+Format TV	TV-Format
+Cinéma 17:9	Kino 17:9
+Stories légères	Leichte Stories
+retoucher l'image	das Bild bearbeiten
+développer l'image	das Bild entwickeln
+mettre en page	layouten
+placer l'image	das Bild platzieren
+animer l'image	das Bild animieren
+image de la vidéo	Videoframe
+Vidéo MP4	MP4-Video
+Cache couleur	Farbfläche
+Dégradé	Verlauf
+Mire de barres	Farbbalken
+Fond vert	Greenscreen
+Noir et blanc	Schwarzweiß
+Sépia	Sepia
+Vif	Lebendig
+Froid	Kühl
+Chaud	Warm
+Délavé	Verblasst
+Nuit américaine	Day for Night
+Sans blanchiment	Bleach Bypass
+Rétro 70	70er-Retro
+Noir contrasté	Kontrastreiches Schwarz
+Matrice	Matrix
+Désaturé	Entsättigt
+Coucher de soleil	Sonnenuntergang
+Infrarouge	Infrarot
+Fondu enchaîné	Kreuzblende
+Fondu au noir	Schwarzblende
+Fondu au blanc	Weißblende
+Volet vers la droite	Wischblende nach rechts
+Volet vers la gauche	Wischblende nach links
+Volet vers le bas	Wischblende nach unten
+Volet vers le haut	Wischblende nach oben
+Glissement depuis la droite	Von rechts hereinschieben
+Glissement depuis la gauche	Von links hereinschieben
+Glissement depuis le bas	Von unten hereinschieben
+Glissement depuis le haut	Von oben hereinschieben
+Poussée vers la gauche	Nach links schieben
+Poussée vers la droite	Nach rechts schieben
+Poussée vers le haut	Nach oben schieben
+Poussée vers le bas	Nach unten schieben
+Iris rond	Runde Iris
+Iris carré	Quadratische Iris
+Zoom croisé	Kreuzzoom
+Flou croisé	Kreuzunschärfe
+Volet horloge	Uhr-Wischblende
+Volet diagonal	Diagonale Wischblende
+Store vénitien	Jalousie
+Damier	Schachbrett
+Portes	Türen
+Fondu additif	Additive Überblendung
+Centrée sur la coupe	Am Schnitt zentriert
+Début à la coupe	Am Schnitt beginnen
+Fin à la coupe	Am Schnitt enden
+Échelle	Skalierung
+Opacité	Deckkraft
+Flou	Unschärfe
+Luminosité	Helligkeit
+Exposition	Belichtung
+Fondu	Verblassen
+Glisse vers le haut	Gleitet nach oben
+Machine à écrire	Schreibmaschine
+Depuis la gauche	Von links
+Depuis la droite	Von rechts
+Descente	Fall
+Lettres espacées	Gesperrte Buchstaben
+Fixe	Fest
+Défilement horizontal	Horizontaler Bildlauf

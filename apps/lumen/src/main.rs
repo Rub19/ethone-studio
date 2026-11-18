@@ -276,7 +276,7 @@ struct Lumen {
 impl Lumen {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let (tx, rx) = channel();
         let mut me = Self {
             catalog: Catalog::load(),

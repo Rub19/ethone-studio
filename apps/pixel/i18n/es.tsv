@@ -1,0 +1,567 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Avant	Antes
+Après	Después
+Ouvrir une image…	Abrir una imagen…
+Exporter…	Exportar…
+Comparaison rapide avant / après	Comparación rápida antes / después
+Affichage	Vista
+Créer un timelapse GIF	Crear un GIF timelapse
+Fichier	Archivo
+Agrandir ×2 (super-résolution)	Ampliar ×2 (superresolución)
+Agrandir ×4 (super-résolution)	Ampliar ×4 (superresolución)
+Appliquer des LUT .cube	Aplicar LUT .cube
+Répéter le dernier filtre	Repetir el último filtro
+Répéter la dernière suppression	Repetir la última eliminación
+Édition	Editar
+Harmoniser le calque avec le fond	Armonizar la capa con el fondo
+Calque	Capa
+Harmoniser à moitié (doux)	Armonizar a medias (suave)
+Retirer le filigrane de la sélection (sans IA)	Quitar la marca de agua de la selección (sin IA)
+Entoure le filigrane puis lance	Selecciona alrededor de la marca de agua y ejecuta
+Retirer le filigrane automatiquement (IA)	Quitar la marca de agua automáticamente (IA)
+Vision locale, sinon OCR	Visión local, si no OCR
+Filigrane : sensibilité normale	Marca de agua: sensibilidad normal
+Filigranes nets	Marcas de agua nítidas
+Filigrane : sensibilité haute	Marca de agua: sensibilidad alta
+Filigranes très transparents	Marcas de agua muy transparentes
+Supprimer l'arrière-plan (masque de calque)	Quitar el fondo (máscara de capa)
+Action rapide	Acción rápida
+Étendre l'image de 10 % (fond reconstruit)	Ampliar la imagen un 10% (fondo reconstruido)
+Étendre l'image de 25 % (fond reconstruit)	Ampliar la imagen un 25% (fondo reconstruido)
+Étendre au format carré 1:1	Ampliar a cuadrado 1:1
+Étendre au format paysage 16:9	Ampliar a horizontal 16:9
+Étendre au format story 9:16	Ampliar a historia 9:16
+Étendre au format 4:5 (Instagram)	Ampliar a 4:5 (Instagram)
+Inverser la sélection	Invertir la selección
+Sélection	Seleccionar
+Désélectionner	Deseleccionar
+Barre de tâches contextuelle (afficher / masquer)	Barra de tareas contextual (mostrar / ocultar)
+Recadrer aux pixels visibles	Recortar a los píxeles visibles
+Image · retire les marges transparentes	Imagen · quita los márgenes transparentes
+Dupliquer le calque actif	Duplicar la capa activa
+Calque · Ctrl+J	Capa · Ctrl+J
+Fusionner les calques visibles	Combinar capas visibles
+Calques · conserve les calques masqués	Capas · conserva las capas ocultas
+Aplatir toute l'image	Acoplar imagen
+Calques · résultat unique	Capas · un solo resultado
+Exporter	Exportar
+Taille de la zone de travail	Tamaño del lienzo
+Ouvrir les fichiers récents	Abrir reciente
+Aucun fichier récent	No hay archivos recientes
+Transformation	Transformar
+Inclinaison…	Inclinar…
+Raccourcis clavier…	Atajos de teclado…
+Préférences…	Preferencias…
+Agrandir (super-résolution)	Ampliar (superresolución)
+Réglages	Ajustes
+Rotation de l'image	Rotación de imagen
+Paramétrée…	Arbitrario…
+Nouveau calque de remplissage	Nueva capa de relleno
+Nouveau calque de réglage	Nueva capa de ajuste
+Masque de fusion	Máscara de capa
+Disposition	Organizar
+Verrouillage	Bloquear
+Pixels transparents	Píxeles transparentes
+Tout	Todo
+Effets de calque	Efectos de capa
+Plage de couleurs…	Gama de colores…
+Modifier	Modificar
+Récupérer la sélection	Cargar selección
+Supprimer	Eliminar
+Filtre	Filtro
+Espace de travail	Espacio de trabajo
+Épreuvage CMJN (aperçu impression)	Prueba CMYK (vista de impresión)
+Profil d'épreuvage	Perfil de prueba
+Autre profil (.icc)…	Otro perfil (.icc)…
+Zoom prédéfini	Niveles de zoom
+Rotation de la vue	Girar la vista
+Règles (Ctrl+R)	Reglas (Ctrl+R)
+Grille (Ctrl+')	Cuadrícula (Ctrl+')
+Grille de pixels (à partir de 1000 %)	Cuadrícula de píxeles (desde 1000%)
+Repères (Ctrl+;)	Guías (Ctrl+;)
+Verrouiller les repères (Ctrl+Alt+;)	Bloquear guías (Ctrl+Alt+;)
+Magnétisme (Ctrl+Maj+;)	Ajustar (Ctrl+Mayús+;)
+Nouveau repère…	Nueva guía…
+Repères au centre	Guías en el centro
+Repères aux tiers	Guías en los tercios
+Pas de la grille	Espaciado de la cuadrícula
+Couleur	Color
+Barre de tâches contextuelle	Barra de tareas contextual
+Nouveau fichier	Nuevo archivo
+Ouvrir…	Abrir…
+Depuis le presse-papiers	Desde el portapapeles
+Bienvenue dans Pixel	Bienvenido a Pixel
+Retouche photo et compositing par calques	Edición de fotos y composición por capas
+Créer un document	Crear un documento
+Récents	Recientes
+Masque en cours de modification	Editando la máscara
+Texte de la photo	Texto de la foto
+Nuancier	Muestras
+Pinceaux	Pinceles
+Propriétés	Propiedades
+Infos	Info
+Historique	Historial
+Calques	Capas
+Arrondit à la couleur sûre pour le Web la plus proche	Redondea al color seguro para web más cercano
+Clic : principale · Ctrl+clic : secondaire · clic droit : options	Clic: frontal · Ctrl+clic: fondo · clic derecho: opciones
+Définir comme couleur principale	Usar como color frontal
+Définir comme couleur secondaire	Usar como color de fondo
+Supprimer la nuance	Eliminar muestra
+Ajouter la couleur principale	Añadir color frontal
+Prendre cette couleur	Tomar este color
+Peindre sans modifier la transparence	Pintar sin cambiar la transparencia
+Désactivé	Desactivado
+Inverser	Invertir
+Navigateur	Navegador
+Luminosité	Brillo
+Rouge	Rojo
+Vert	Verde
+Bleu	Azul
+Survole l'image pour lire la couleur	Pasa sobre la imagen para leer el color
+Instantané	Instantánea
+Source de la forme d'historique	Origen del pincel de historia
+Vider l'historique	Borrar historial
+Clic : modifier le masque	Clic: editar la máscara
+Afficher ou masquer (Alt : isoler)	Mostrar u ocultar (Alt: solo)
+Verrouiller le calque	Bloquear capa
+Renommer	Renombrar
+Dupliquer	Duplicar
+Sélectionner les pixels	Seleccionar píxeles
+Couleur de l'étiquette	Color de etiqueta
+Mode de fusion	Modo de fusión
+Aucune langue OCR installée dans Windows	No hay ningún idioma de OCR instalado en Windows
+Dans la sélection	En la selección
+Cadres	Fotogramas
+Détecter le texte	Detectar el texto
+Options de lecture	Opciones de lectura
+Agrandir les petites images (petits caractères)	Ampliar las imágenes pequeñas (letra pequeña)
+Seulement dans la sélection	Solo en la selección
+Afficher les cadres sur l'image	Mostrar los marcos en la imagen
+Lis le texte d'une photo (panneau, affiche, document, capture), puis modifie-le, efface-le ou floute-le en gardant sa couleur et sa taille.	Lee el texto de una foto (cartel, póster, documento, captura) y luego edítalo, bórralo o desenfócalo conservando su color y tamaño.
+Efface le texte d'origine des lignes modifiées et écrit le nouveau à la même place	Borra el texto original de las líneas editadas y escribe el nuevo en el mismo lugar
+Supprime le texte des lignes cochées	Elimina el texto de las líneas marcadas
+Mosaïque sur les lignes cochées (plaques, adresses, noms…)	Mosaico en las líneas marcadas (matrículas, direcciones, nombres…)
+Sélectionner	Seleccionar
+Crée une sélection autour des lignes cochées	Crea una selección alrededor de las líneas marcadas
+Tout cocher	Marcar todo
+Rien	Ninguno
+Copier le texte	Copiar texto
+Enregistrer .txt…	Guardar .txt…
+Oublier	Olvidar
+Rechercher et remplacer	Buscar y reemplazar
+Rechercher	Buscar
+Remplacer par	Reemplazar por
+Respecter la casse	Coincidir mayúsculas
+Rendu du nouveau texte	Nuevo renderizado de texto
+Gras	Negrita
+Italique	Cursiva
+Couleur d'origine	Color original
+Taille	Tamaño
+Tenir dans la largeur d'origine	Ajustar al ancho original
+Un calque par ligne (déplaçable)	Una capa por línea (movible)
+Effacement	Borrado
+Marge	Margen
+Mosaïque	Mosaico
+Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Reconstruir: recrea el fondo (fotos). Color de fondo: relleno plano rápido (documentos, capturas). Mosaico 0 = tamaño automático.
+Annuler	Cancelar
+Relative (ajoute à la taille actuelle)	Relativo (se suma al tamaño actual)
+Pourcentage	Porcentaje
+Conserver les proportions	Mantener proporciones
+Lier	Enlace
+Pixels nets (plus proche voisin)	Píxeles duros (vecino más próximo)
+Symétrie H	Voltear H
+Symétrie V	Voltear V
+Réinitialiser	Restablecer
+Intérieur	Dentro
+Centre	Centro
+Extérieur	Fuera
+L'effet est créé sur un calque séparé, modifiable et masquable.	El efecto se crea en una capa aparte que puedes editar y enmascarar.
+La sélection obtenue est progressive : les pixels proches sont pris en partie.	La selección resultante es suave: los píxeles cercanos se incluyen en parte.
+Rapide	Rápido
+Normale	Normal
+Maximale	Máximo
+La zone de travail s'agrandit pour contenir l'image tournée ; le fond prend la couleur secondaire.	El lienzo crece para contener la imagen girada; el fondo usa el color de fondo.
+Horizontal	Horizontal
+Vertical	Vertical
+Note pour plus tard (non exportée)	Nota para después (no se exporta)
+Grille de pixels aux forts zooms	Cuadrícula de píxeles con zoom alto
+Magnétisme	Ajustar
+Nouveau document	Nuevo documento
+Préréglages	Ajustes preestablecidos
+Détails	Detalles
+Paysage	Horizontal
+Créer	Crear
+Supprimer le préréglage	Eliminar ajuste preestablecido
+Aperçu	Vista previa
+Nom du préréglage	Nombre del ajuste
+Ton texte	Tu texto
+Gauche	Izquierda
+Droite	Derecha
+Couleur principale · nouveau calque de texte	Color frontal · nueva capa de texto
+Couleurs principale et secondaire Clic : inverser (X) · D : noir et blanc	Colores frontal y de fondo Clic: intercambiar (X) · D: blanco y negro
+Nouvelle	Nuevo
+Ajouter	Añadir
+Soustraire	Restar
+Intersection	Intersecar
+Dureté	Dureza
+Lissage	Suavizado
+Symétrie	Simetría
+Répète chaque trait en miroir vertical	Refleja cada trazo verticalmente
+Miroir H	Espejo H
+Répète chaque trait en miroir horizontal	Refleja cada trazo horizontalmente
+Humidité	Humedad
+Effacer vers l'historique	Borrar al historial
+Restaure l'état de l'instantané au lieu de rendre transparent	Restaura la instantánea en lugar de volver transparentes los píxeles
+Tolérance	Tolerancia
+Échantillonnage continu	Muestrear continuamente
+Mémorise le calque actif comme source	Usa la capa activa como origen
+Désaturer	Desaturar
+Saturer	Saturar
+Tons foncés	Sombras
+Tons moyens	Medios tonos
+Tons clairs	Altas luces
+Peinture au doigt	Pintura con los dedos
+Commence chaque trait avec la couleur principale	Empieza cada trazo con el color frontal
+Aligné	Alineado
+Tous les calques	Todas las capas
+Contiguë	Contiguo
+Contour progressif	Desvanecer
+Largeur	Ancho
+Valider	Confirmar
+Fond	Relleno
+Contour	Trazo
+Contour avec la couleur secondaire quand le fond est actif	Trazo con el color de fondo cuando el relleno está activo
+Épaisseur	Grosor
+Arrondi	Radio
+Côtés	Lados
+Étoile	Estrella
+Retrait	Sangría
+Flèche au début	Punta de flecha al inicio
+Flèche à la fin	Punta de flecha al final
+Nouveau calque	Nueva capa
+Souligné	Subrayado
+Linéaire	Lineal
+Angulaire	Ángulo
+Réfléchi	Reflejado
+Losange	Rombo
+Opacité	Opacidad
+Tramage	Tramado
+Contigu	Contiguo
+Sélection automatique	Selección automática
+Le clic choisit le calque visible sous le pointeur	Al hacer clic se elige la capa visible bajo el puntero
+Cadre de sélection	Mostrar controles de transformación
+Zoom avant	Acercar
+Zoom arrière	Alejar
+Réinitialiser la vue	Restablecer vista
+Ajuster à l'écran	Ajustar a la pantalla
+Effacer	Borrar
+Redresser le calque	Enderezar la capa
+Tout effacer	Borrar todo
+Diffusion	Extensión
+Taille de la pupille	Tamaño de la pupila
+Assombrir	Cantidad de oscurecimiento
+Remettre à zéro	Restablecer
+Nouveau…	Nuevo…
+Nouveau depuis le presse-papiers	Nuevo desde el portapapeles
+Importer comme calque…	Colocar como capa…
+Enregistrer	Guardar
+Enregistrer sous…	Guardar como…
+Exporter en CMJN pour l'impression (TIFF)…	Exportar CMYK para impresión (TIFF)…
+Exportation rapide en PNG…	Exportación rápida como PNG…
+Exporter la sélection…	Exportar la selección…
+Exporter les calques en PNG…	Exportar capas como PNG…
+Créer un timelapse (GIF)…	Crear un timelapse (GIF)…
+Exporter chaque étape en PNG…	Exportar cada paso como PNG…
+Fermer	Cerrar
+Rétablir	Rehacer
+Couper	Cortar
+Copier	Copiar
+Copier avec fusion	Copiar combinado
+Coller	Pegar
+Coller en place	Pegar en el lugar
+Remplir…	Rellenar…
+Contour…	Trazo…
+Remplir selon le contenu	Relleno según el contenido
+Transformation manuelle…	Transformación libre…
+Rotation 180°	Girar 180°
+Rotation 90° horaire	Girar 90° en sentido horario
+Rotation 90° antihoraire	Girar 90° en sentido antihorario
+Symétrie axe horizontal	Voltear horizontal
+Symétrie axe vertical	Voltear vertical
+Appliquer des LUT .cube (jusqu'à 3)…	Aplicar LUT .cube (hasta 3)…
+Mappage principale → secondaire	Mapa de degradado frontal → fondo
+Taille de l'image…	Tamaño de imagen…
+Taille de la zone de travail…	Tamaño del lienzo…
+Recadrer	Recortar
+Rogner les bords transparents	Recortar bordes transparentes
+Tout faire apparaître	Mostrar todo
+Mode niveaux de gris	Modo escala de grises
+Aplatir l'image	Acoplar imagen
+Couleur unie (principale)	Color sólido (frontal)
+Dégradé (principale → secondaire)	Degradado (frontal → fondo)
+Motif damier	Patrón de damero
+Bruit (texture)	Ruido (textura)
+Dupliquer le calque	Duplicar capa
+Supprimer le calque	Eliminar capa
+Calque par copie	Capa vía copiar
+Calque par coupure	Capa vía cortar
+Tout masquer	Ocultar todo
+Faire apparaître la sélection	Mostrar la selección
+Intervertir le masque	Invertir máscara
+Sélection depuis le masque	Selección desde la máscara
+Appliquer le masque	Aplicar máscara
+Supprimer le masque	Eliminar máscara
+Premier plan	Traer al frente
+En avant	Traer adelante
+En arrière	Enviar atrás
+Arrière-plan	Enviar al fondo
+Fusionner avec le dessous	Combinar hacia abajo
+Tout sélectionner	Seleccionar todo
+Resélectionner	Volver a seleccionar
+Intervertir	Inversa
+Pixels du calque	Píxeles de la capa
+Étendre	Expandir
+Généraliser	Crecer
+Mémoriser la sélection…	Guardar selección…
+Taille réelle (100 %)	Tamaño real (100%)
+Déplacement	Mover
+Rectangle de sélection	Marco rectangular
+Ellipse de sélection	Marco elíptico
+Sélection d'une ligne	Marco de fila única
+Sélection d'une colonne	Marco de columna única
+Lasso polygonal	Lazo poligonal
+Lasso magnétique	Lazo magnético
+Plume de courbure	Pluma de curvatura
+Sélection rapide	Selección rápida
+Baguette magique	Varita mágica
+Sélection d'objet	Selección de objetos
+Recadrage	Recortar
+Recadrage de la perspective	Recorte en perspectiva
+Pipette	Cuentagotas
+Échantillonnage de couleur	Muestra de color
+Règle	Regla
+Annotation	Nota
+Comptage	Número
+Suppression intelligente	Herramienta Quitar
+Correcteur	Pincel corrector
+Pièce	Parche
+Déplacement basé sur le contenu	Mover según el contenido
+Yeux rouges	Ojos rojos
+Tampon de duplication	Tampón de clonar
+Forme d'historique	Pincel de historia
+Pinceau	Pincel
+Crayon	Lápiz
+Remplacement de couleur	Sustitución de color
+Pinceau mélangeur	Pincel mezclador
+Gomme	Borrador
+Gomme d'arrière-plan	Borrador de fondos
+Gomme magique	Borrador mágico
+Dégradé	Degradado
+Pot de peinture	Bote de pintura
+Goutte (flou)	Desenfoque
+Netteté	Enfocar
+Doigt	Difuminar
+Densité −	Sobreexponer
+Densité +	Quemar
+Éponge	Esponja
+Texte horizontal	Texto horizontal
+Texte vertical	Texto vertical
+Texte de la photo (OCR)	Texto de la foto (OCR)
+Polygone	Polígono
+Trait	Línea
+Forme personnalisée	Forma personalizada
+Main	Mano
+Terminer	Hecho
+Supprimer l'objet	Quitar objeto
+Rééclairer	Reiluminar
+Agrandir ×2	Ampliar ×2
+Comparer	Comparar
+Teinte	Tono
+Bibliothèque	Biblioteca
+Récentes	Recientes
+Espacement	Espaciado
+Angle	Ángulo
+Rondeur	Redondez
+Var. taille	Variación de tamaño
+Var. flux	Variación de flujo
+Dispersion	Dispersión
+Fusion	Combinar
+Verrou	Bloquear
+Étiquette	Etiqueta
+Masque	Máscara
+Ajouter un masque de fusion (depuis la sélection s'il y en a une)	Añadir máscara de capa (desde la selección si existe)
+Monter	Subir
+Descendre	Bajar
+Ignorer les lignes de moins de	Ignorar líneas de menos de
+caractère(s)	carácter(es)
+Position de l'image actuelle	Posición del fotograma actual
+Couleur d'extension	Color de extensión del lienzo
+Hauteur	Altura
+Rééchantillonnage	Remuestreo
+Résolution	Resolución
+Échelle	Escala
+Inclinaison horizontale / verticale	Inclinación horizontal / vertical
+Perspective horizontale / verticale	Perspectiva horizontal / vertical
+Profondeur	Profundidad
+Prends la couleur avec la pipette (I)	Toma el color con el cuentagotas (I)
+Contenu	Contenido
+Format	Tamaño
+Qualité	Calidad
+Tailles de l'icône	Tamaños del icono
+Fond des zones transparentes	Fondo de transparencia
+États d'historique	Estados del historial
+Plan de travail	Mesa de trabajo
+Curseur de peinture	Cursor de pintura
+Estomper	Atenuar
+Police	Fuente
+Approche	Espaciado
+Interligne	Interlineado
+Repeint la teinte avec la couleur principale en gardant la lumière	Repinta el tono con el color principal conservando la luz
+Plage	Playa
+Alt pour retirer	Alt para restar
+Grille	Cuadrícula
+Glisse pour tracer le cadre à conserver	Arrastra para dibujar la zona a conservar
+Flèches : 1 px · Maj : 10 px	Flechas: 1 px · Mayús: 10 px
+Échantillon	Muestra
+Jusqu'à 4 points, lus dans Infos	Hasta 4 puntos, mostrados en Info
+Alt+clic : couleur secondaire	Alt+clic: color secundario
+Glisse pour mesurer une distance et un angle	Arrastra para medir una distancia y un ángulo
+Peins sur ce qui doit disparaître : le fond est reconstruit autour	Pinta sobre lo que debe desaparecer: el fondo se reconstruye alrededor
+Clique sur chaque œil rouge	Haz clic en cada ojo rojo
+Trace un rectangle autour de l'objet : il est détouré automatiquement	Dibuja un rectángulo alrededor del objeto: se recorta automáticamente
+Ton auto	Tono automático
+Retirer la brume	Eliminar neblina
+Miniature YouTube	Miniatura de YouTube
+Publication carrée	Publicación cuadrada
+A4 300 ppp	A4 300 ppp
+A5 300 ppp	A5 300 ppp
+Carte de visite	Tarjeta de visita
+Icône	Icono
+Bannière	Banner
+Fond d'écran	Fondo de pantalla
+Néon	Neón
+Matériel	Material
+Symétrie horizontale de la zone de travail	Voltear el área de trabajo horizontalmente
+Symétrie verticale de la zone de travail	Voltear el área de trabajo verticalmente
+Contour progressif…	Desvanecer…
+Gris moyen	Gris medio
+Complémentaire	Complementario
+Tétrade	Tétrada
+Ctrl+E / Ctrl+Maj+Alt+S	Ctrl+E / Ctrl+Mayús+Alt+S
+Ctrl+C / Ctrl+Maj+C	Ctrl+C / Ctrl+Mayús+C
+Ctrl+V / Ctrl+Maj+V	Ctrl+V / Ctrl+Mayús+V
+Ctrl+J / Ctrl+Maj+J	Ctrl+J / Ctrl+Mayús+J
+Ctrl+I / Ctrl+Maj+U	Ctrl+I / Ctrl+Mayús+U
+Ctrl+Maj+L / Ctrl+Maj+B	Ctrl+Mayús+L / Ctrl+Mayús+B
+Ctrl+A / Ctrl+D / Ctrl+Maj+D	Ctrl+A / Ctrl+D / Ctrl+Mayús+D
+Ctrl+Maj+I / Maj+F6	Ctrl+Mayús+I / Mayús+F6
+Maj+F5 / Alt+Retour	Mayús+F5 / Alt+Retroceso
+Ctrl+Maj+N / Ctrl+Alt+G	Ctrl+Mayús+N / Ctrl+Alt+G
+Ctrl+Maj+E / Ctrl+Alt+E	Ctrl+Mayús+E / Ctrl+Alt+E
+Ctrl+Maj+; / Ctrl+H	Ctrl+Mayús+; / Ctrl+H
+Lettre / Maj+lettre	Letra / Mayús+letra
+[ ] / Maj+[ ]	[ ] / Mayús+[ ]
+0 à 9	0 a 9
+Flèches / Maj+flèches	Flechas / Mayús+flechas
+Espace / Tab / F1	Espacio / Tab / F1
+Rond dur	Redondo duro
+Rond doux	Redondo suave
+Aérographe	Aerógrafo
+Encre calligraphique	Tinta caligráfica
+Pinceau sec	Pincel seco
+1:1 carré	Cuadrado 1:1
+Reconstruction du fond…	Reconstruyendo el fondo…
+Accueil	Inicio
+Dépose une image n'importe où pour l'ouvrir	Suelta una imagen en cualquier lugar para abrirla
+Corrige l'exposition et le contraste	Corrige la exposición y el contraste
+Ajoute une ou deux lumières (Relight)	Añade una o dos luces (Reiluminar)
+Supprime brume et effets d'ambiance	Elimina la neblina y los efectos atmosféricos
+Trois LUT créatifs empilables	Tres LUT creativas apilables
+Retouche automatique de la peau	Retoque automático de la piel
+Écran 16:9	Pantalla 16:9
+Vidéo	Vídeo
+Réseaux sociaux	Redes sociales
+développer la photo	revelar la foto
+placer l'image	colocar la imagen
+mettre en page	maquetar
+ajouter au montage	añadir al montaje
+animer l'image	animar la imagen
+Blanc	Blanco
+Noir	Negro
+Couleur principale	Color principal
+Couleur secondaire	Color secundario
+Aucune	Ninguno
+Jaune	Amarillo
+Violet	Violeta
+Couleur du fond	Color de fondo
+Flou du fond	Desenfoque del fondo
+Nouveau, ouvrir, fermer	Nuevo, abrir, cerrar
+Exporter, exportation rapide PNG	Exportar, exportación rápida PNG
+Annuler, rétablir	Deshacer, rehacer
+Copier, copier avec fusion	Copiar, copiar combinado
+Coller, coller en place	Pegar, pegar en el lugar
+Calque par copie, par coupure	Capa vía copiar, vía cortar
+Transformation manuelle	Transformación libre
+Niveaux, courbes, teinte, balance	Niveles, curvas, tono, balance
+Négatif, noir et blanc	Negativo, blanco y negro
+Ton auto, couleur auto	Tono automático, color automático
+Taille de l'image, de la zone	Tamaño de imagen, tamaño del lienzo
+Tout, désélectionner, resélectionner	Todo, deseleccionar, volver a seleccionar
+Intervertir, contour progressif	Invertir, desvanecer
+Remplir, remplir en couleur principale	Rellenar, rellenar con el color principal
+Nouveau calque, écrêtage	Nueva capa, recorte
+Descendre, monter le calque	Bajar, subir la capa
+Fusionner visibles, avec le dessous	Combinar visibles, combinar hacia abajo
+Règles, grille, repères	Reglas, cuadrícula, guías
+Magnétisme, extras	Magnetismo, extras
+Ajuster, 100 %, zoom	Ajustar, 100 %, zoom
+Outil, outil suivant du groupe	Herramienta, siguiente herramienta del grupo
+Taille, dureté du pinceau	Tamaño y dureza del pincel
+Flux ou opacité de l'outil	Flujo u opacidad de la herramienta
+Inverser, couleurs par défaut	Intercambiar, colores por defecto
+Déplacer le calque de 1 ou 10 px	Desplazar la capa 1 o 10 px
+Main, masquer les panneaux, aide	Mano, ocultar paneles, ayuda
+Plus proche voisin	Vecino más próximo
+Bilinéaire	Bilineal
+Bicubique	Bicúbica
+Lanczos (net)	Lanczos (nítido)
+Gaussien (doux)	Gaussiano (suave)
+Gris 50 %	Gris 50 %
+Selon le contenu	Según el contenido
+Rouges	Rojos
+Jaunes	Amarillos
+Verts	Verdes
+Bleus	Azules
+Tons chair	Tonos de piel
+Cœur	Corazón
+Flèche	Flecha
+Bulle	Burbuja
+Coche	Marca de verificación
+Croix	Cruz
+Éclair	Relámpago
+Goutte	Gota
+Lune	Luna
+Principale → secondaire	Principal → secundario
+Principale → transparent	Principal → transparente
+Noir → blanc	Negro → blanco
+Arc-en-ciel	Arcoíris
+Cuivre	Cobre
+Coucher de soleil	Puesta de sol
+Océan	Océano
+Point	Punto
+Moyenne 3 × 3	Promedio 3 × 3
+Moyenne 5 × 5	Promedio 5 × 5
+Moyenne 11 × 11	Promedio 11 × 11
+Moyenne 31 × 31	Promedio 31 × 31
+Sélection → ligne	Selección → línea
+Texte non détecté (écriture difficile à lire) : sélectionne-le au rectangle, puis ajoute-le comme ligne et tape ce qui est écrit	Texto no detectado (escritura difícil de leer): selecciónalo con el rectángulo, añádelo como línea y escribe lo que dice
+Ce qui est écrit	Lo que dice
+Corrige la lecture si l'OCR s'est trompé : l'écriture manuscrite est recomposée lettre par lettre à partir de ce texte	Corrige la lectura si el OCR se equivocó: la escritura a mano se reconstruye letra a letra a partir de este texto
+Police détectée sur chaque ligne	Fuente detectada en cada línea
+Écriture manuscrite	Escritura a mano
+Lettres d'origine : réécrit avec les lettres découpées dans la photo, les lettres absentes viennent de la police la plus proche. Auto : seulement quand la ligne ressemble à de l'écriture à la main.	Letras originales: reescribe con letras recortadas de la foto; las letras que faltan vienen de la fuente más parecida. Auto: solo cuando la línea parece escrita a mano.
+Imiter le grain et la netteté de la photo	Imitar el grano y la nitidez de la foto
+Lettres d'origine	Letras originales
+Seuls les mots modifiés sont effacés et réécrits. Lettres d'origine : recompose les mots avec les lettres découpées dans la photo (écriture détachée). Police manuscrite : la police la plus proche, à la taille et dans l'encre de l'original (écriture liée). Auto choisit selon l'écriture.	Solo se borran y reescriben las palabras cambiadas. Letras originales: recompone las palabras con letras recortadas de la foto (escritura separada). Fuente manuscrita: la fuente más parecida, al tamaño y con la tinta del original (escritura ligada). Auto elige según la escritura.
+Auto : fond uni (papier, mur) recalculé sans recopier d'encre, sinon reconstruction. Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Auto: los fondos lisos (papel, pared) se recalculan sin copiar tinta; si no, reconstrucción. Reconstrucción: rehace el fondo (fotos). Color de fondo: relleno plano rápido (documentos, capturas). Mosaico 0 = tamaño automático.
+Police manuscrite	Fuente manuscrita

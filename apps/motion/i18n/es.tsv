@@ -1,0 +1,561 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Exporter l'animation	Exportar animación
+Toute la composition	Composición completa
+Zone de travail	Área de trabajo
+Personnalisée	Personalizado
+Tête → début	Cabezal → inicio
+Tête → fin	Cabezal → final
+Préfixe	Prefijo
+Formes, tracés, nuls, parents, transformations, tracés coupés, remplissages et contours. Les textes, images et effets ne sont pas exportés.	Formas, trazados, nulos, padres, transformaciones, trazados recortados, rellenos y trazos. El texto, las imágenes y los efectos no se exportan.
+Fond transparent	Fondo transparente
+Exporter…	Exportar…
+Ajouter à la file	Añadir a la cola
+Ctrl+Alt+M ouvre la file de rendu	Ctrl+Alt+M abre la cola de render
+Annuler	Cancelar
+File de rendu	Cola de render
+Plusieurs exports à la suite, en une seule fois.	Varias exportaciones seguidas, de una vez.
+La file est vide : dans Exporter, choisis « Ajouter à la file ».	La cola está vacía: en Exportar, elige «Añadir a la cola».
+Retirer	Quitar
+Ajouter…	Añadir…
+Vider	Borrar
+Fermer	Cerrar
+Éditeur de courbe	Editor de gráficos
+Vitesse	Velocidad
+Préréglages	Ajustes preestablecidos
+Revenir à la courbe choisie dans la liste	Volver a la curva elegida en la lista
+Copier sur la sélection	Copiar a la selección
+Même courbe pour toutes les clés sélectionnées (ou tout le calque)	Misma curva para todas las claves seleccionadas (o toda la capa)
+Valeur	Valor
+Aligner tous les calques au même départ	Alinear todas las capas al mismo inicio
+Inverser les images clés du calque	Invertir los fotogramas clave de la capa
+Animation · plage des clés	Animación · rango de claves
+Répartir régulièrement les images clés	Espaciar los fotogramas clave uniformemente
+Animation · calque sélectionné	Animación · capa seleccionada
+Ajuster le calque à la composition	Ajustar la capa a la composición
+Calque sélectionné · contenir	Capa seleccionada · contener
+Adapter la durée aux calques	Ajustar la duración a las capas
+Composition · fin du dernier calque	Composición · final de la última capa
+Fractionner le calque à la tête	Dividir la capa en el cabezal
+Calque sélectionné · Ctrl+Maj+D	Capa seleccionada · Ctrl+Mayús+D
+Dupliquer le calque	Duplicar capa
+Calque sélectionné · Ctrl+D	Capa seleccionada · Ctrl+D
+Exporter	Exportar
+MP4, GIF, PNG ou SVG · Ctrl+M	MP4, GIF, PNG o SVG · Ctrl+M
+Réglages de la composition · Ctrl+K	Ajustes de la composición · Ctrl+K
+Nouvelle composition	Nueva composición
+Ouvrir…	Abrir…
+Bienvenue dans Motion	Bienvenido a Motion
+Titres animés, logos et graphismes en mouvement	Títulos animados, logotipos y motion graphics
+Projets récents	Proyectos recientes
+Ajouter un calque	Añadir una capa
+Modèles	Plantillas
+Ajouté à la tête de lecture	Añadido en el cabezal
+Animations prêtes	Animaciones listas
+Rechercher une animation	Buscar animaciones
+Sélectionne un calque pour lui appliquer une animation.	Selecciona una capa para aplicarle una animación.
+Ajoutée à partir de la tête de lecture	Añadido desde el cabezal
+Réglages de la composition	Ajustes de la composición
+Inverser largeur et hauteur	Intercambiar ancho y alto
+Images par seconde	Fotogramas por segundo
+Durée	Duración
+Ajuster à l'animation	Ajustar a la animación
+Terminé	Hecho
+[ Début zone	[ Inicio del área de trabajo
+Fin zone ]	Final del área de trabajo ]
+Effacer la zone de travail	Borrar área de trabajo
+Ajuster	Ajustar
+Toute la durée visible	Toda la duración visible
+Ajouter un repère ici	Añadir un marcador aquí
+Début de zone à la tête	Inicio del área de trabajo en el cabezal
+Fin de zone à la tête	Final del área de trabajo en el cabezal
+Supprimer ce repère	Eliminar este marcador
+Autres courbes	Otras curvas
+Courbe douce (F9)	Suavizado fácil (F9)
+Éditer la courbe…	Editar curva…
+Copier (Ctrl+C)	Copiar (Ctrl+C)
+Sélectionner toute la propriété	Seleccionar toda la propiedad
+Supprimer (Suppr)	Eliminar (Supr)
+Dupliquer	Duplicar
+Fractionner à la tête	Dividir en el cabezal
+Copier l'animation	Copiar animación
+Premier plan	Traer al frente
+Arrière-plan	Enviar al fondo
+Couleur d'étiquette	Color de etiqueta
+Supprimer	Eliminar
+Fond	Fondo
+Dégradé vers le bas	Degradado hacia abajo
+Arrondi	Redondez
+Texte vertical	Texto vertical
+Taille	Tamaño
+Gras	Negrita
+Italique	Cursiva
+Alignement sur le point	Alineación en el punto
+Centre	Centro
+Gauche	Izquierda
+Droite	Derecha
+Espacement des lettres	Espaciado entre letras
+Rayon	Radio
+Creux (1 = polygone)	Radio interior (1 = polígono)
+Longueur	Longitud
+Épaisseur	Grosor
+Révélation % = longueur de l'arc : anime-la pour une jauge.	Revelado % = longitud del arco: anímalo para un indicador.
+De	Desde
+Avant	Antes
+Après	Después
+Compte pendant 80 % de la durée du calque	Cuenta durante el 80% de la duración de la capa
+Tracé fermé	Trazado cerrado
+Remplir	Relleno
+Tout lisser	Suavizar todo
+Tout en angles	Todas las esquinas
+Inverser	Invertir
+Sans remplissage : règle le contour dans Apparence.	Sin relleno: define el trazo en Apariencia.
+Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	Un nulo es invisible en el render: hazlo padre para mover varias capas a la vez.
+Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	Capa de ajuste: sus efectos (color, desenfoque, grano, distorsión…) se aplican a todas las capas inferiores. Su opacidad fija la mezcla.
+Couleur	Color
+Fichier	Archivo
+Ouvrir un projet récent	Abrir proyecto reciente
+Aucun projet récent	No hay proyectos recientes
+Exporter directement	Exportar directamente
+Édition	Editar
+Calque	Capa
+Nouveau	Nuevo
+Modèle	Plantilla
+Transformer	Transformar
+Orientation automatique	Orientación automática
+Temps	Tiempo
+Lecture inversée	Inversión temporal
+Mode de fusion	Modo de fusión
+Masque	Mate
+Verrouillé	Bloqueado
+Courbe de Bézier	Curva Bézier
+Afficher dans la timeline	Mostrar en la línea de tiempo
+Finition	Acabado
+Affichage	Vista
+Espace de travail	Espacio de trabajo
+Grille et tiers                  Ctrl+'	Cuadrícula y tercios                  Ctrl+'
+Divisions de la grille	Divisiones de la cuadrícula
+Zones sûres	Zonas seguras
+Type de zones sûres	Tipo de zona segura
+Axes centraux	Ejes centrales
+Règles                              Ctrl+R	Reglas                              Ctrl+R
+Repères de mise en page   Ctrl+;	Guías de maquetación   Ctrl+;
+Damier de transparence	Cuadrícula de transparencia
+Trajectoires de mouvement	Trayectorias de movimiento
+Pelure d'oignon	Papel cebolla
+Réglages de la pelure	Ajustes de papel cebolla
+Magnétisme	Ajustar
+Lecture en boucle               L	Reproducción en bucle                   L
+Qualité de l'aperçu	Calidad de la vista previa
+Ajouter ou retirer une image clé ici	Añadir o quitar un fotograma clave aquí
+Clic droit : réinitialiser, tremblement, boucle	Clic derecho: restablecer, oscilación, bucle
+Réinitialiser la valeur	Restablecer valor
+Tremblement	Oscilación
+Après la dernière clé	Tras la última clave
+Clé suivante	Siguiente clave
+Clé précédente	Clave anterior
+Courbe	Curva
+Supprimer l'animation de couleur	Quitar la animación de color
+Images/s	Fotogramas/s
+Réglages…	Ajustes…
+Finition de l'image	Acabado de imagen
+Bandes cinéma	Bandas negras
+Effets de composition	Efectos de composición
+Repères	Marcadores
+Appuie sur M pour poser un repère à la tête de lecture : il sert de point d'accroche et de raccourci J/K.	Pulsa M para poner un marcador en el cabezal: sirve como punto de ajuste y atajo J/K.
+Aller au repère	Ir al marcador
++ Repère à la tête de lecture	+ Marcador en el cabezal
+Repères de mise en page	Guías de maquetación
+Avec les règles (Ctrl+R), glisse depuis une règle pour tirer un repère ; glisse-le hors de la vue pour le supprimer.	Con las reglas activas (Ctrl+R), arrastra desde una regla para sacar una guía; sácala de la vista para eliminarla.
++ Centre	+ Centro
++ Tiers	+ Tercios
++ Marges 5 %	+ Márgenes del 5%
+Tout effacer	Borrar todo
+Verrou	Bloquear
+Aucun	Ninguno
+Étiquette	Etiqueta
+Transformation	Transformar
+Orientation auto	Orientación automática
+Le calque tourne dans le sens de sa trajectoire	La capa gira siguiendo su trayectoria
+Centrer l'ancre	Ancla central
+Réinitialiser	Restablecer
+Remet échelle, rotations, ancre et opacité par défaut	Restablece escala, rotaciones, ancla y opacidad
+Aligner sur la composition	Alinear a la composición
+Met le calque à l'échelle de la composition	Escala la capa a la composición
+Centrer au milieu	Centrar en el medio
+Contenu	Contenido
+Tracé et opérateurs	Trazado y operadores
+Simultané	Simultáneamente
+Un par un	Individualmente
+Ondulé	Ondulado
+Apparence	Apariencia
+Contour	Trazo
+Extrémités et angles	Extremos y uniones
+Plates	Plano
+Rondes	Redondo
+Carrées	Proyectado
+Arrondis	Redondo
+Pointus	Inglete
+Biseautés	Bisel
+Dégradé vers	Degradado hacia
+Linéaire	Lineal
+Miroir horizontal	Voltear horizontal
+Vertical	Vertical
+Flou et lumière	Desenfoque y luz
+Lueur	Resplandor
+Ombre portée	Sombra paralela
+Ombre interne	Sombra interior
+Ombres	Sombras
+Lumières	Altas luces
+Remplir d'une couleur	Rellenar con un color
+Réinitialiser la couleur	Restablecer color
+Stylisation	Estilizar
+Animateur de texte	Animador de texto
+Animer lettre par lettre	Animar letra a letra
+Sortie	Salida
+Les deux	Ambos
+Ordre	Orden
+Mouvement	Movimiento
+Répéter toutes les clés	Repetir todas las claves
+Boucle	Bucle
+Aller-retour	Ping-pong
+Figer	Congelar
+Fige l'image du calque à l'instant choisi	Congela el fotograma de la capa en el momento elegido
+Tête	Cabezal
+Réinitialiser le temps	Restablecer tiempo
+Le calque juste au-dessus dans la timeline sert de pochoir : il devient invisible et ne laisse voir ce calque qu'à travers sa forme (ou en dehors, en mode inversé).	La capa justo encima en la línea de tiempo actúa como plantilla: se vuelve invisible y solo deja ver esta capa a través de su forma (o fuera de ella, si se invierte).
+?  Tutoriels	?  Tutoriales
+Depuis le centre	Desde el centro
+Terminer (Entrée)	Terminar (Intro)
+Inversé	Invertido
+Plage	Rango
+Qualité (débit)	Calidad (tasa de bits)
+Lecture en boucle	Reproducción en bucle
+Espace lire · J K clés · M repère · B N zone · V H Z W Y Q G outils · Ctrl+T texte · Ctrl+B pinceau · P S R T A U propriétés · F9 courbe douce	Espacio reproducir · teclas J K · M marcador · B N área de trabajo · V H Z W Y Q G herramientas · Ctrl+T texto · Ctrl+B pincel · P S R T A U propiedades · F9 suavizado fácil
+Vignettage	Viñeta
+Grain film	Grano de película
+Couper le tracé	Recortar trazado
+Opérateurs de forme	Operadores de forma
+Arrondir les angles	Esquinas redondeadas
+Fronce et dilatation	Fruncir y engordar
+Zigzag	Zigzag
+Agitation	Oscilar trazados
+Détail	Detalle
+Vitesse d'agitation	Velocidad de oscilación
+Torsion	Torcer
+Pointillés (0 = plein)	Guiones (0 = continuo)
+Espace entre tirets	Hueco entre guiones
+Angle du dégradé	Ángulo del degradado
+Centre X	Centro X
+Centre Y	Centro Y
+Flou fixe	Desenfoque fijo
+Flou directionnel	Desenfoque direccional
+Flou radial (zoom)	Desenfoque radial (zoom)
+Décalage X	Desplazamiento X
+Décalage Y	Desplazamiento Y
+Douceur	Suavidad
+Opacité	Opacidad
+Décalage X 	Desplazamiento X
+Décalage Y 	Desplazamiento Y
+Douceur 	Suavidad
+Teinte	Tono
+Luminosité	Brillo
+Contraste	Contraste
+Sépia	Sepia
+Teinte bicolore	Duotono
+Inversion	Invertir
+Seuil (0 = non)	Umbral (0 = desactivado)
+Postérisation (0 = non)	Posterizar (0 = desactivado)
+Séparation RVB	Separación RGB
+Angle RVB	Ángulo RGB
+Fréquence du glitch	Frecuencia del glitch
+Distorsion	Distorsión
+Taille des ondes	Tamaño de la onda
+Évolution	Evolución
+Scintillement	Parpadeo
+Machine à écrire (0 = non)	Máquina de escribir (0 = desactivado)
+Décalage entre lettres	Retardo entre letras
+Durée par lettre	Duración por letra
+Valeurs de départ	Valores iniciales
+Échelle	Escala
+Tremblement de position	Oscilación de posición
+Fréquence	Frecuencia
+Écho (traînée)	Eco (estela)
+Délai entre échos	Retardo entre ecos
+Répéteur	Repetidor
+Rotation par copie	Rotación por copia
+Échelle par copie	Escala por copia
+Fondu par copie	Atenuación por copia
+Décalage temporel	Desfase temporal
+Glisser : déplacer · coins : échelle · rond : rotation · Maj : axe	Arrastrar: mover · esquinas: escalar · círculo: girar · Mayús: eje
+Glisser pour tourner le calque · Maj : pas de 15°	Arrastra para girar la capa · Mayús: pasos de 15°
+Glisser l'ancre sans bouger le calque · Placer :	Arrastra el ancla sin mover la capa · Colocar:
+Clic dans la vue pour écrire	Haz clic en la vista para escribir
+Peint sur le calque Peinture sélectionné	Pinta en la capa de pintura seleccionada
+Sélectionne un calque puis trace : seule la zone dessinée reste visible	Selecciona una capa y dibuja: solo la zona dibujada queda visible
+Tire une partie d'un tracé ou d'une peinture : les points proches suivent en douceur	Estira parte de un trazado o trazo de pintura: los puntos cercanos siguen suavemente
+Efface les traits du calque Peinture	Borra los trazos de la capa Pintura
+Sélection	Selección
+Main	Mano
+Zoom avant	Acercar
+Zoom arrière	Alejar
+Point d'ancrage	Punto de ancla
+Rectangle arrondi	Rectángulo redondeado
+Polygone	Polígono
+Étoile	Estrella
+Plume	Pluma
+Ajout de sommet	Añadir vértice
+Suppression de sommet	Eliminar vértice
+Conversion de sommet	Convertir vértice
+Texte horizontal	Texto horizontal
+Pinceau	Pincel
+Gomme	Borrador
+Masque rectangulaire	Máscara rectangular
+Masque elliptique	Máscara elíptica
+Marionnette	Marioneta
+Enregistrer	Guardar
+Enregistrer sous…	Guardar como…
+File de rendu…	Cola de render…
+Sélectionner toutes les clés du calque	Seleccionar todas las claves de la capa
+Monter	Subir
+Descendre	Bajar
+Centrer le point d'ancrage	Centrar el punto de ancla
+Ajuster à la composition	Ajustar a la composición
+Ajuster à la largeur	Ajustar al ancho
+Ajuster à la hauteur	Ajustar a la altura
+Centrer dans la composition	Centrar en la composición
+Rotation +90°	Girar +90°
+Rotation −90°	Girar −90°
+Retourner horizontalement	Voltear horizontal
+Retourner verticalement	Voltear vertical
+Réinitialiser la transformation	Restablecer transformación
+Commencer à la tête de lecture	Empezar en el cabezal
+Finir à la tête de lecture	Terminar en el cabezal
+Déplacer le début à la tête	Mover el inicio al cabezal
+Déplacer la fin à la tête	Mover el final al cabezal
+Étendre à toute la composition	Extender a toda la composición
+Figer l'image à la tête	Congelar la imagen en el cabezal
+Créer un nul parent	Crear nulo padre
+Courbe douce	Curva suave
+Ralentir à l'arrivée	Frenar al llegar
+Démarrer en douceur	Empezar suavemente
+Maintien (bascule)	Mantener (alternar)
+Répartir les clés uniformément	Distribuir claves uniformemente
+Inverser les images clés	Invertir fotogramas clave
+Supprimer toutes les images clés	Eliminar todos los fotogramas clave
+Propriétés animées	Propiedades animadas
+Réglages de la composition…	Ajustes de la composición…
+Ajuster la durée à l'animation	Ajustar la duración a la animación
+Ajouter un repère	Añadir guía
+Début de la zone de travail	Inicio del área de trabajo
+Fin de la zone de travail	Final del área de trabajo
+Ajuster à la fenêtre	Ajustar a la ventana
+Taille réelle (100 %)	Tamaño real (100 %)
+PNG séquence	Secuencia PNG
+PNG image	Imagen PNG
+SVG séquence	Secuencia SVG
+Légère	Ligero
+Cinémascope	CinemaScope
+Carré	Cuadrado
+Bannière GIF	Banner GIF
+En-tête X	Encabezado X
+Retournement 3D	Giro 3D
+Bascule 3D	Giro 3D
+Carte qui tourne	Tarjeta giratoria
+Tracé dessiné	Trazado dibujado
+Tracé effacé	Trazado borrado
+Tracé qui court	Trazado que corre
+Lettres qui montent	Letras que suben
+Lettres qui tombent	Letras que caen
+Lettres en vrac	Letras dispersas
+Lettres qui s'envolent	Letras que vuelan
+Étirement élastique	Estiramiento elástico
+Zoom flou	Zoom desenfocado
+Tremblement de rotation	Oscilación de rotación
+Apparition colorée	Revelado de color
+Fondu entrant	Fundido de entrada
+Glisser depuis la gauche	Deslizar desde la izquierda
+Glisser depuis la droite	Deslizar desde la derecha
+Monter depuis le bas	Sube desde abajo
+Descendre depuis le haut	Cae desde arriba
+Zoom pop	Zoom pop
+Fondu et montée	Fundido y subida
+Tourbillon entrant	Entrada en remolino
+Révélation	Revelar
+Flou entrant	Entrada con desenfoque
+Machine à écrire	Máquina de escribir
+Fondu sortant	Fundido de salida
+Sortie à droite	Salida a la derecha
+Sortie vers le bas	Salida hacia abajo
+Battement de cœur	Latido
+Rotation continue	Giro continuo
+Zoom lent	Zoom lento
+Bandeau titre	Banda de título
+Titre cinéma	Título de cine
+Bouton S'abonner	Botón Suscribirse
+Compte à rebours	Cuenta atrás
+Barre de progression	Barra de progreso
+Coche validée	Marca de verificación
+Titre lettre par lettre	Título letra a letra
+Classique 90/80 %	Clásico 90/80 %
+Moderne 93/90 %	Moderno 93/90 %
+Réseaux sociaux 85/75 %	Redes sociales 85/75 %
+Flèche	Flecha
+Cœur	Corazón
+Vitesse 50 %	Velocidad 50 %
+Vitesse 100 %	Velocidad 100 %
+Vitesse 200 %	Velocidad 200 %
+Étirer les clés × 2	Estirar claves × 2
+Compresser les clés × ½	Comprimir claves × ½
+Tracé	Trazado
+Sans vignettage	Sin viñeta
+Vignettage léger	Viñeta ligera
+Vignettage fort	Viñeta fuerte
+Sans grain	Sin grano
+Grain léger	Grano ligero
+Grain marqué	Grano marcado
+Sans bandes	Sin bandas
+Bandes 2,39:1	Bandas 2,39:1
+Bandes 1,85:1	Bandas 1,85:1
+Entrée douce	Entrada suave
+Sortie douce	Salida suave
+Entrée-sortie	Entrada y salida suaves
+Décélération	Salida suave
+Accélération	Entrada suave
+Expo sortie	Salida exponencial
+Expo entrée	Entrada exponencial
+Dépasse en sortie	Rebasa a la salida
+Recul en entrée	Entrada hacia atrás
+Fluide Apple	Fluido Apple
+Tes animations enregistrées apparaîtront ici	Tus animaciones guardadas aparecerán aquí
+Projets .emot	Proyectos .emot
+image	fotograma
+Vidéo H.264, lisible partout	Vídeo H.264, se reproduce en todas partes
+Animation légère pour le web et les messages	Animación ligera para la web y la mensajería
+Une image par frame, idéal pour le montage	Una imagen por fotograma, ideal para editar
+L'image affichée à la tête de lecture	El fotograma en el cabezal
+Vectoriel, l'image affichée, modifiable	Vectorial, la imagen mostrada, editable
+Un fichier vectoriel par image	Un archivo vectorial por fotograma
+Grille d'images pour présenter l'animation	Cuadrícula de fotogramas para presentar la animación
+Animation vectorielle pour le web et les apps	Animación vectorial para la web y las apps
+Infinie	Infinito
+Une fois	Una vez
+3 fois	3 veces
+5 fois	5 veces
+Vidéo 16:9	Vídeo 16:9
+Vidéo HD légère	Vídeo HD ligero
+Cinéma	Cine
+Large 2,39:1	Panorámico 2,39:1
+Publication 1:1	Publicación 1:1
+Publication 4:5	Publicación 4:5
+Bannière 3:1	Banner 3:1
+Bannière 4:1	Banner 4:1
+Emoji animé	Emoji animado
+Pivote sur l'axe vertical	Gira sobre el eje vertical
+Bascule vers l'avant	Se inclina hacia delante
+Rotation Y continue	Rotación Y continua
+Le contour se dessine	El trazo se dibuja solo
+Le contour s'efface	El trazo se borra
+Un segment fait le tour	Un segmento da la vuelta
+Une lettre après l'autre	Una letra tras otra
+Arrivent du haut en tournant	Entran desde arriba girando
+Ordre aléatoire, zoom	Orden aleatorio, zoom
+Sortie lettre par lettre	Salida letra a letra
+S'étire en largeur	Se estira a lo ancho
+La teinte tourne sans fin	El tono gira sin fin
+Tranches décalées et RVB	Franjas desplazadas y RGB
+Arrive avec un flou radial	Llega con un desenfoque radial
+Balance sans fin	Balanceo sin fin
+Tourne nerveusement	Gira nervioso
+Du blanc vers sa couleur	Del blanco a su color
+Opacité 0 → 100 %	Opacidad 0 → 100 %
+Entre par le côté	Entra por el lado
+Entre par l'autre côté	Entra por el otro lado
+Entre par le bas	Entra por abajo
+Tombe du haut	Cae desde arriba
+Grossit avec un rebond	Crece con un rebote
+Arrive de très près	Llega desde muy cerca
+Doux et élégant	Suave y elegante
+Tourne et grandit	Gira y crece
+Apparaît en vibrant	Aparece con una sacudida
+Tombe et rebondit	Cae y rebota
+Se dévoile de gauche à droite	Se revela de izquierda a derecha
+Sort du flou	Sale de un desenfoque
+Arrive penché puis se redresse	Llega inclinado y se endereza
+Texte lettre par lettre	Texto letra a letra
+Opacité 100 → 0 %	Opacidad 100 → 0 %
+Quitte l'écran	Sale de la pantalla
+S'efface en descendant	Se desvanece bajando
+Respire en boucle	Respira en bucle
+Double pulsation	Doble pulso
+Oscille de gauche à droite	Oscila de izquierda a derecha
+Monte et descend en douceur	Sube y baja suavemente
+Un tour complet	Una vuelta completa
+Apparaît et disparaît	Aparece y desaparece
+Caméra à l'épaule	Cámara al hombro
+Effet Ken Burns	Efecto Ken Burns
+Révélation sur toute la durée	Revelado durante toda la duración
+Nom et fonction en bas d'écran	Nombre y cargo en la parte inferior de la pantalla
+Grand titre espacé qui sort du flou	Titular espaciado que sale de un desenfoque
+Bouton rouge qui rebondit	Botón rojo que rebota
+10 → 0 avec anneau	10 → 0 con un anillo
+Se remplit de 0 à 100 %	Se llena de 0 a 100 %
+Texte en italique et auteur	Texto en cursiva y autor
+Cercle puis coche qui se dessine	Círculo y luego una marca que se dibuja
+Entrée et sortie animées	Entrada y salida animadas
+ajouter au montage	añadir al montaje
+retoucher l'image	retocar la imagen
+mettre en page	maquetar
+placer l'image	colocar la imagen
+développer	revelar
+image de l'animation	fotograma de la animación
+Entrées	Entradas
+Sorties	Salidas
+Boucles	Bucles
+Effets	Efectos
+Tracés	Trazados
+Texte	Texto
+Complète	Completa
+Demie	Media
+Quart	Cuarto
+Différence	Diferencia
+Densité couleur −	Densidad de color −
+Lumière tamisée	Luz tenue
+Lumière crue	Luz dura
+Densité couleur +	Densidad de color +
+Aucune	Ninguno
+Décalage	Desplazamiento
+Continuer	Continuar
+Alpha du calque du dessus	Alfa de la capa superior
+Luminance du calque du dessus	Luminancia de la capa superior
+Alpha inversé	Alfa invertido
+Luminance inversée	Luminancia invertida
+Gauche → droite	Izquierda → derecha
+Droite → gauche	Derecha → izquierda
+Centre → bords	Centro → bordes
+Aléatoire	Aleatorio
+Échelle %	Escala %
+Opacité %	Opacidad %
+Inclinaison °	Inclinación °
+Flou px	Desenfoque px
+Révélation %	Revelado %
+Ancre X	Ancla X
+Ancre Y	Ancla Y
+Échelle X %	Escala X %
+Échelle Y %	Escala Y %
+Début du tracé %	Inicio del trazado %
+Fin du tracé %	Final del trazado %
+Décalage du tracé %	Desplazamiento del trazado %
+Épaisseur du contour	Grosor del trazo
+Teinte °	Tono °
+Apparition en fondu	Fundido de entrada
+Zoom d'entrée avec rebond	Zoom de entrada con rebote
+Chute avec rebond	Caída con rebote
+Entrée en tournant	Entrada girando
+Sortie en fondu	Fundido de salida
+Secousse continue	Sacudida continua
+Pulsation continue	Pulso continuo
+Balancement	Balanceo
+Clignotement	Parpadeo
+Flottement	Flotar
+Zoom de sortie	Alejar
+Sortie vers la droite	Salida a la derecha

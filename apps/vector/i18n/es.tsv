@@ -1,0 +1,581 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Annuler	Cancelar
+Proportionnelle	Uniforme
+Mettre à l'échelle les contours et effets	Escalar trazos y efectos
+Horizontal	Horizontal
+Vertical	Vertical
+Angle	Ángulo
+Axe horizontal	Eje horizontal
+Axe vertical	Eje vertical
+Les angles du résultat sont arrondis.	Las esquinas del resultado se redondean.
+Courbes lisses	Curvas suaves
+Nombre d'ondes	Crestas por segmento
+Pointes	Esquina
+Arrondis	Suave
+Angles	Esquinas
+Étapes intermédiaires	Pasos especificados
+Formes et couleurs se fondent progressivement.	Las formas y los colores se fusionan progresivamente.
+Rosace : 12 copies en cercle	Roseta: 12 copias en círculo
+Aperçu	Vista previa
+Appliquer sur une copie	Aplicar a una copia
+Plan actif	Mesa de trabajo activa
+Tous les plans	Todas las mesas de trabajo
+Sélection	Selección
+Fond transparent	Fondo transparente
+Qualité	Calidad
+SVG optimisé (nombres arrondis, attributs inutiles retirés)	SVG optimizado (números redondeados, atributos sin usar eliminados)
+Texte, dégradés, effets et images intégrés restent modifiables.	El texto, los degradados, los efectos y las imágenes incrustadas siguen editables.
+Un PDF vectoriel, une page par plan de travail, texte réel.	Un PDF vectorial, una página por mesa de trabajo, texto real.
+Noir et blanc	Blanco y negro
+Niveaux de gris	Escala de grises
+Couleurs	Colores
+Précision	Precisión
+Ignorer le blanc	Ignorar el blanco
+Conserver l'image d'origine	Conservar la imagen original
+Réinitialiser	Restablecer
+Largeur	Ancho
+Hauteur	Altura
+QR code vectoriel du texte sélectionné	Código QR vectorial del texto seleccionado
+Objet · groupé, net à toutes les tailles	Objeto · agrupado, nítido a cualquier tamaño
+Exporter un pack d'icônes (16 à 1024 px)…	Exportar un pack de iconos (16 a 1024 px)…
+Plan de travail actif · PNG	Mesa de trabajo activa · PNG
+Tout sélectionner	Seleccionar todo
+Inverser la sélection	Invertir la selección
+Dupliquer la sélection	Duplicar selección
+Objets · Ctrl+Alt+D	Objetos · Ctrl+Alt+D
+Grouper la sélection	Agrupar la selección
+Objets · Ctrl+G	Objetos · Ctrl+G
+Dégrouper la sélection	Desagrupar la selección
+Objets · Ctrl+Maj+G	Objetos · Ctrl+Mayús+G
+Exporter	Exportar
+Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E	Opciones de exportación: Ctrl+Alt+E · PNG rápido ×2: Ctrl+E
+Plan de travail actif : clic pour l'ajuster à l'écran	Mesa de trabajo activa: clic para ajustarla a la pantalla
+Fichier	Archivo
+Édition	Editar
+Objet	Objeto
+Texte	Texto
+Effet	Efecto
+Affichage	Vista
+Fenêtre	Ventana
+Ouvrir un fichier récent	Abrir reciente
+Aucun fichier récent	No hay archivos recientes
+Exporter rapidement	Exportación rápida
+Modifier les couleurs	Editar colores
+Recolorer l'illustration…	Volver a colorear la ilustración…
+Régler la teinte, saturation, luminosité…	Ajustar tono, saturación, brillo…
+Convertir en niveaux de gris	Convertir a escala de grises
+Inverser les couleurs	Invertir colores
+Sépia	Sepia
+Saturer +20 %	Saturar +20%
+Désaturer −20 %	Desaturar −20%
+Éclaircir +10 %	Aclarar +10%
+Assombrir −10 %	Oscurecer −10%
+Teinte +30°	Tono +30°
+Couleurs complémentaires	Colores complementarios
+Mélange horizontal	Fusionar horizontalmente
+Mélange vertical	Fusionar verticalmente
+Mélange avant-arrière	Fusionar de delante hacia atrás
+Échanger fond et contour	Intercambiar relleno y trazo
+Transformation	Transformar
+Disposition	Organizar
+Envoyer vers le calque	Enviar a la capa
+Tracé	Trazado
+Fusion	Fusión
+Masque d'écrêtage	Máscara de recorte
+Masque d'opacité	Máscara de opacidad
+Tracé transparent composé	Trazado compuesto
+Plans de travail	Mesas de trabajo
+Nouveau plan de travail	Nueva mesa de trabajo
+Ajuster à l'illustration	Ajustar a la ilustración
+Réorganiser en grille	Reorganizar en cuadrícula
+Police	Fuente
+Taille	Tamaño
+Casse	Cambiar mayúsculas/minúsculas
+Insérer un caractère spécial	Insertar carácter especial
+Même	Igual
+Effets dynamiques (modifiables dans Propriétés)	Efectos en vivo (editables en Propiedades)
+Distorsion et transformation	Distorsionar y transformar
+Styliser	Estilizar
+Mode tracés (Ctrl+Maj+Y)	Modo contorno (Ctrl+Mayús+Y)
+Contours de sélection (Ctrl+H)	Bordes de selección (Ctrl+H)
+Cadre de sélection (Ctrl+Maj+B)	Cuadro delimitador (Ctrl+Mayús+B)
+Règles (Ctrl+R)	Reglas (Ctrl+R)
+Repères (Ctrl+;)	Guías (Ctrl+;)
+Verrouiller les repères (Ctrl+Alt+;)	Bloquear guías (Ctrl+Alt+;)
+Repères commentés (Ctrl+U)	Guías inteligentes (Ctrl+U)
+Repères de composition (centre et tiers)	Guías de composición (centro y tercios)
+Grille (Ctrl+')	Cuadrícula (Ctrl+')
+Magnétisme de la grille (Ctrl+Alt+')	Ajustar a la cuadrícula (Ctrl+Alt+')
+Pas de la grille	Espaciado de la cuadrícula
+Espace de travail	Espacio de trabajo
+Exporter…	Exportar…
+Modifier la couleur	Editar color
+Fond	Relleno
+Contour	Trazo
+Nouveau fichier	Nuevo archivo
+Ouvrir…	Abrir…
+Bienvenue dans Vector	Bienvenido a Vector
+Logos, icônes et illustrations nets à toutes les tailles	Logotipos, iconos e ilustraciones, nítidos a cualquier tamaño
+Créer un plan de travail	Crear una mesa de trabajo
+Récents	Recientes
+Grouper	Agrupar
+Dissocier	Desagrupar
+Dupliquer	Duplicar
+Tolérance	Tolerancia
+Pente	Pendiente
+Fermé	Cerrado
+Tours	Vueltas
+Sens antihoraire	Sentido antihorario
+Cadre extérieur	Marco exterior
+Épaisseur	Grosor
+Creux	Margen interior
+Lissage	Suavizado
+Fusionner avec la même couleur	Combinar con el mismo color
+Contours et effets	Trazos y efectos
+Dispersion	Dispersión
+Intensité	Intensidad
+Linéaire	Lineal
+Ajuster	Ajustar
+Tout	Todo
+Nouveau	Nuevo
+Réorganiser	Reorganizar
+Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond	Relleno y trazo · clic: intercambiar (Mayús+X) · D: por defecto · /: sin relleno
+Propriétés	Propiedades
+Calques	Capas
+Bibliothèques	Bibliotecas
+Nuancier	Muestras
+Styles graphiques	Estilos gráficos
+Effets bitmap (export PNG et JPEG)	Efectos de trama (exportación PNG y JPEG)
+Symboles	Símbolos
+Formes prêtes	Formas listas
+Style des nouveaux objets	Nuevo estilo de objeto
+Grille et repères	Cuadrícula y guías
+Afficher la grille	Mostrar cuadrícula
+Magnétisme de la grille	Ajustar a la cuadrícula
+Règles	Reglas
+Repères commentés	Guías inteligentes
+Afficher les repères	Mostrar guías
+Centre et tiers	Centro y tercios
+Aligner et répartir	Alinear y distribuir
+Apparence	Apariencia
+Dégradé	Degradado
+Effets	Efectos
+Actions rapides	Acciones rápidas
+Ajuster au contenu	Ajustar al contenido
+Point de référence	Punto de referencia
+Conserver les proportions	Mantener proporciones
+↔ Miroir	↔ Voltear
+↕ Miroir	↕ Voltear
+Inclinaison…	Inclinar…
+Mettre à l'échelle contours et effets	Escalar trazos y efectos
+Plan	Mesa de trabajo
+Clé	Objeto clave
+Écart	Espaciado
+Libérer le masque	Liberar máscara
+Tracé composé	Trazado compuesto
+Décalage…	Desplazar…
+Vectoriser le contour	Contornear trazo
+Simplifier…	Simplificar…
+Fusion…	Fusionar…
+Recolorer…	Volver a colorear…
+Nouveau symbole	Nuevo símbolo
+Rompre le lien	Romper vínculo
+Verrouiller	Bloquear
+Masquer	Ocultar
++ Calque	+ Capa
+Supprimer	Eliminar
+Monter le calque	Subir la capa
+Descendre le calque	Bajar la capa
+Placer la sélection sur le calque actif	Mover la selección a la capa activa
++ Nouveau	+ Nuevo
+Tout voir	Mostrar todo
++ Couleur du fond	+ Color de relleno
+Ajouter la bibliothèque	Añadir biblioteca
+Couleurs utilisées	Colores en uso
+Vider	Vacío
+Nouveau style	Nuevo estilo
+Retirer le dernier	Quitar el último
+Placer	Colocar
+Redéfinir	Redefinir
+Remplace le symbole par la sélection et met à jour ses occurrences	Sustituye el símbolo por la selección y actualiza sus instancias
+Nom du symbole	Nombre del símbolo
+Créer	Crear
+Fait de la sélection un symbole réutilisable	Convierte la selección en un símbolo reutilizable
+Centre	Centro
+Intérieur	Dentro
+Extérieur	Fuera
+Ronds	Redondo
+Plats	Plano
+Carrés	Proyectado
+Pointus	Inglete
+Biseaux	Bisel
+Aucun	Ninguno
++ Arrêt	+ Parada
+Inverser	Invertir
+Recentrer	Recentrar
+Effacer	Borrar
+Ombre portée	Sombra paralela
+Tracé fermé	Trazado cerrado
+Lisser	Suave
+Simplifier	Simplificar
+Gras	Negrita
+Italique	Cursiva
+Souligné	Subrayado
+Barré	Tachado
+Titre	Tipo Título
+Gauche	Izquierda
+Droite	Derecha
+Crénage	Interletraje
+Texte vertical	Texto vertical
+Détacher du tracé	Separar del trazado
+Vectorisation dynamique…	Calco de imagen…
+Verticale	Vertical
+Angle de l'axe	Ángulo del eje
+Angle d'inclinaison	Ángulo de inclinación
+Échelle horizontale	Escala horizontal
+Échelle verticale	Escala vertical
+Déplacement horizontal	Movimiento horizontal
+Déplacement vertical	Movimiento vertical
+Rotation	Girar
+Décalage (négatif = vers l'intérieur)	Desplazamiento (negativo = hacia dentro)
+Précision (plus haut = moins de points)	Precisión (mayor = menos puntos)
+Rayon	Radio
+Détail (points par 100 px)	Detalle (puntos por 100 px)
+Contraction ← → Dilatation	Fruncir ← → Engordar
+Angle des hachures	Ángulo del rayado
+Espacement	Espaciado
+Teinte	Tono
+Luminosité	Brillo
+Décalage X	Desplazamiento X
+Décalage Y	Desplazamiento Y
+Rotation par copie	Rotación por copia
+Contenu	Contenido
+Échelle	Escala
+Vectorisation dynamique	Calco de imagen
+Seuil	Umbral
+Bruit ignoré	Ruido ignorado
+Courbes (plus haut = plus arrondi)	Curvas (mayor = más redondo)
+Vectoriser	Calcar
+Recolorer l'illustration	Volver a colorear la ilustración
+Nouveau document	Nuevo documento
+Nouveau…	Nuevo…
+Enregistrer	Guardar
+Enregistrer sous…	Guardar como…
+Importer une image…	Colocar una imagen…
+Importer un SVG…	Colocar un SVG…
+Fermer	Cerrar
+Rétablir	Rehacer
+Couper	Cortar
+Copier	Copiar
+Coller	Pegar
+Coller devant	Pegar delante
+Coller derrière	Pegar detrás
+Coller en place	Pegar en el lugar
+Transformer à nouveau	Transformar de nuevo
+Symétrie horizontale	Voltear horizontal
+Symétrie verticale	Voltear vertical
+Verrouiller la sélection	Bloquear selección
+Tout déverrouiller	Desbloquear todo
+Masquer la sélection	Ocultar la selección
+Tout afficher	Mostrar todo
+Décomposer	Expandir
+Joindre	Unir
+Convertir les points en sommets	Convertir puntos en esquinas
+Décalage du tracé…	Desplazar trazado…
+Convertir en tracé	Crear contornos
+Nettoyer les objets vides	Limpiar objetos vacíos
+Créer une fusion…	Crear fusión…
+Convertir en texte captif	Convertir en texto de área
+Convertir en texte de point	Convertir en texto de punto
+Orientation horizontale / verticale	Orientación horizontal / vertical
+Désélectionner	Deseleccionar
+Sélection inverse	Inversa
+Objets du calque actif	Objetos de la capa activa
+Objets du plan de travail actif	Objetos de la mesa de trabajo activa
+Tous les textes	Todos los objetos de texto
+Tracés ouverts	Trazados abiertos
+Masques d'écrêtage	Máscaras de recorte
+Lueur externe	Resplandor exterior
+Lueur interne	Resplandor interior
+Contour progressif	Desvanecer
+Flou gaussien	Desenfoque gaussiano
+Distorsion dynamique	Deformar
+Retirer tous les effets	Quitar todos los efectos
+Zoom avant	Acercar
+Zoom arrière	Alejar
+Ajuster le plan de travail	Ajustar la mesa de trabajo en la ventana
+Tout ajuster	Ajustar todo en la ventana
+Taille réelle	Tamaño real
+Zoom sur la sélection	Zoom a la selección
+Réinitialiser la rotation de la vue	Restablecer la rotación de la vista
+Opacité de la couleur	Opacidad del color
+Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.	También abre archivos SVG, PNG y JPEG: suéltalos en la ventana.
+Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone	Clic: seleccionar · Mayús: añadir · Alt+arrastrar: duplicar · arrastrar en vacío: marco
+Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit	Clic en un punto para editarlo, Supr lo elimina, las flechas lo desplazan · Alt+clic elimina, Ctrl+clic convierte
+Critères	Criterios
+Entoure les objets à sélectionner · Maj ajoute à la sélection	Dibuja alrededor de los objetos para seleccionarlos · Mayús añade a la selección
+Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer	Clic: punto · arrastrar: curva · clic en el primer punto: cerrar · Intro: terminar
+Clique sur un tracé pour ajouter un point sans changer sa forme	Haz clic en un trazado para añadir un punto sin cambiar su forma
+Clique un point d'ancrage pour le supprimer	Haz clic en un punto de ancla para eliminarlo
+Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques	Clic en un punto suave: esquina · arrastrar desde una esquina: manejadores simétricos
+Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer	Cada clic añade un punto y la curva se suaviza sola · clic en el primer punto: cerrar
+Maj : proportions fixes	Mayús: mantener proporciones
+Rangées	Filas
+Colonnes	Columnas
+Cercles	Círculos
+Rayons	Rayos
+Anneaux	Anillos
+Glisse depuis le centre du halo	Arrastra desde el centro del destello
+Frotte le tracé sélectionné	Frota sobre el trazado seleccionado
+Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint	Arrastra sobre la mesa de trabajo · Alt+clic: valores exactos · Mayús: restringir
+Pas Maj	Paso con Mayús
+Tire un coin du cadre pour déformer en perspective libre	Arrastra una esquina del cuadro para distorsionar libremente en perspectiva
+Tire une partie du tracé sélectionné : les points voisins suivent en douceur	Arrastra parte del trazado seleccionado: los puntos cercanos siguen suavemente
+Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur	Arrastra desde un trazo para ensancharlo o estrecharlo ahí · Alt+clic: quita el punto de anchura
+Étapes	Pasos
+Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole	No hay símbolos: selecciona una ilustración y luego Bibliotecas › Símbolos › Nuevo símbolo
+Glisse pour pulvériser des occurrences du symbole	Arrastra para rociar instancias de símbolo
+Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	Selecciona formas superpuestas · clic o arrastrar: unir regiones · Alt: eliminar una región
+Clique une zone fermée pour la peindre avec le fond	Haz clic en una zona cerrada para pintarla con el relleno
+Glisse sur l'objet sélectionné pour placer le dégradé	Arrastra sobre el objeto seleccionado para colocar el degradado
+Rayon du point	Radio de la punta
+Clic : point de couleur · Alt+clic : le retirer	Clic: punto de color · Alt+clic: quitarlo
+Glisse pour mesurer une distance et un angle	Arrastra para medir una distancia y un ángulo
+Clique sur un tracé pour le couper à cet endroit	Haz clic en un trazado para cortarlo ahí
+Trace un trait à main levée à travers les formes pour les découper	Dibuja a mano alzada sobre las formas para cortarlas
+Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	Borra en la selección, o en todo si no hay nada seleccionado
+Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	Arrastra para crear · clic para activar · mueve una mesa secundaria · Supr
+Pas	Paso
+Déplacement clavier	Incremento del teclado
+Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	Arrastra desde una regla para colocar una guía; devuélvela a la regla para eliminarla.
+Fond du document	Fondo del documento
+Aligner sur	Alinear con
+Objet clé : le premier sélectionné (contour bleu épais).	Objeto clave: el primero seleccionado (contorno grueso).
+Répartir les objets	Distribuir objetos
+Répartir l'espacement	Distribuir espaciado
+Modes de forme	Modos de forma
+Gris	Gris
+Nuances du document	Muestras del documento
+Ajoute ici les couleurs de ton projet.	Añade aquí los colores de tu proyecto.
+Sans sélection, le style devient celui des nouveaux objets.	Sin nada seleccionado, el estilo se aplica a los objetos nuevos.
+Opacité	Opacidad
+Mode de fusion	Modo de fusión
+Position du contour	Alinear trazo
+Bouts	Mayúsculas
+Limite de pointe	Límite de inglete
+Pointillés	Línea discontinua
+Tiret	Guion
+Espace	Hueco
+Tiret 2	Guion 2
+Espace 2	Hueco 2
+Pointes de flèche (début · fin)	Puntas de flecha (inicio · final)
+Taille des pointes	Tamaño de la punta
+Profil de largeur	Perfil de anchura
+Flou	Desenfoque
+Distorsion	Distorsionar
+Finesse	Delgadez
+Arrondi des coins	Redondeo de esquinas
+Approche	Espaciado
+Interlignage	Interlineado
+Ligne de base	Línea base
+Largeur du cadre	Ancho del marco
+Départ sur le tracé	Empezar en el trazado
+Sélection directe	Selección directa
+Sélection de groupe	Agrupar la selección
+Baguette magique	Varita mágica
+Plume	Pluma
+Ajout de point d'ancrage	Añadir punto de ancla
+Suppression de point d'ancrage	Eliminar punto de ancla
+Conversion de point d'ancrage	Punto de ancla
+Courbure	Curvatura
+Texte captif	Texto de área
+Texte curviligne	Texto en trazado
+Segment	Segmento de línea
+Spirale	Espiral
+Grille rectangulaire	Cuadrícula rectangular
+Grille polaire	Cuadrícula polar
+Flèche	Flecha
+Rectangle arrondi	Rectángulo redondeado
+Polygone	Polígono
+Étoile	Estrella
+Halo	Destello
+Cœur	Corazón
+Pinceau	Pincel
+Pinceau goutte	Pincel de manchas
+Crayon	Lápiz
+Gomme de tracé	Borrador de trazados
+Miroir	Reflejar
+Remodelage	Remodelar
+Déformation	Deformar
+Torsion	Remolino
+Contraction	Fruncir
+Dilatation	Engordar
+Festons	Festón
+Cristallisation	Cristalizar
+Fronces	Arrugar
+Concepteur de forme	Generador de formas
+Pot de peinture dynamique	Bote de pintura interactiva
+Dégradé de formes	Fusión
+Pulvérisation de symboles	Rociador de símbolos
+Filet	Malla
+Pipette	Cuentagotas
+Mesure	Medir
+Ciseaux	Tijeras
+Cutter	Cuchillo
+Gomme	Borrador
+Main	Mano
+Rotation de la vue	Girar la vista
+Plan de travail	Mesa de trabajo
+Serré	Ajustado
+Logo N&B	Logo B/N
+Gris 4 niveaux	Gris de 4 niveles
+Affiche 6 couleurs	Póster de 6 colores
+Photo 16 couleurs	Foto de 16 colores
+Teinte −60°	Tono −60°
+Complémentaires	Complementario
+Icône	Icono
+Bannière	Banner
+Carte de visite	Tarjeta de visita
+Même couleur de fond	Mismo color de relleno
+Même couleur de contour	Mismo color de trazo
+Même type d'objet	Mismo tipo de objeto
+Même aspect complet	Misma apariencia
+PNG ×2 fond transparent	PNG ×2 transparente
+SVG optimisé	SVG optimizado
+PDF (tous les plans de travail)	PDF (todas las mesas de trabajo)
+Déplacement…	Mover…
+Mise à l'échelle…	Escalar…
+Transformer chaque…	Transformar cada…
+Répétition…	Repetir…
+Rotation 90° horaire	Girar 90° horario
+Rotation 90° antihoraire	Girar 90° antihorario
+Rotation 180°	Girar 180°
+Premier plan	Primer plano
+En avant	Hacia delante
+En arrière	Hacia atrás
+Arrière-plan	Fondo
+Lisser le tracé	Suavizar el trazado
+Simplifier (rapide)	Simplificar (rápido)
+Inverser le sens	Invertir la dirección
+Fermer / ouvrir le tracé	Cerrar / abrir trazado
+Ajouter des points d'ancrage	Añadir puntos de ancla
+Distorsion aléatoire…	Hacer áspero…
+Contraction et dilatation…	Fruncir y engordar…
+Néon	Neón
+Océan	Océano
+Rétro	Retro
+Forêt	Bosque
+Coucher de soleil	Puesta de sol
+Métal	Metal
+Pêche	Melocotón
+Méditerranée	Mediterráneo
+Désert	Desierto
+Gris chauds	Grises cálidos
+Gris froids	Grises fríos
+Fruits rouges	Frutos rojos
+Médical	Médico
+Contour épais	Trazo grueso
+Ombre douce	Sombra suave
+Lueur dorée	Resplandor dorado
+Flou artistique	Desenfoque artístico
+Néon rose	Neón rosa
+Néon bleu	Neón azul
+Néon vert	Neón verde
+Bouton iOS	Botón iOS
+Carte flottante	Tarjeta flotante
+Verre dépoli	Vidrio esmerilado
+Sombre élégant	Oscuro elegante
+Pointillé rond	Puntos redondos
+Tirets longs	Guiones largos
+Double contour	Trazo doble
+Ombre longue	Sombra larga
+Ombre colorée	Sombra de color
+Fantôme	Fantasma
+Papier kraft	Papel kraft
+Aligner à gauche	Alinear a la izquierda
+Centrer horizontalement	Centrar horizontalmente
+Aligner à droite	Alinear a la derecha
+Aligner en haut	Alinear arriba
+Centrer verticalement	Centrar verticalmente
+Aligner en bas	Alinear abajo
+Rotation 90°	Girar 90°
+À gauche	Izquierda
+Centres horizontaux	Centros horizontales
+À droite	Derecha
+En haut	Arriba
+Centres verticaux	Centros verticales
+En bas	Abajo
+Bords gauches	Bordes izquierdos
+Bords droits	Bordes derechos
+Bords hauts	Bordes superiores
+Bords bas	Bordes inferiores
+Serrés	Ajustado
+Accueil	Inicio
+Tes dessins enregistrés apparaîtront ici	Tus dibujos guardados aparecerán aquí
+Projets .evec · glisse-en un pour l'ouvrir	Proyectos .evec · arrastra uno para abrirlo
+Décale la sélection d'une distance précise	Mueve la selección una distancia exacta
+Agrandit ou réduit depuis le point de référence	Amplía o reduce desde el punto de referencia
+Fait pivoter autour du point de référence	Gira alrededor del punto de referencia
+Retourne la sélection par rapport à un axe	Refleja la selección respecto a un eje
+Penche la sélection	Inclina la selección
+Chaque objet autour de son propre centre	Cada objeto alrededor de su propio centro
+Crée un contour parallèle, à l'extérieur ou à l'intérieur	Crea un contorno paralelo, por fuera o por dentro
+Retire des points en gardant l'allure	Elimina puntos conservando la forma
+Arrondit les angles vifs	Redondea las esquinas agudas
+Transforme le tracé en dents de scie	Convierte el trazado en zigzag
+Transforme le tracé en vagues régulières	Convierte el trazado en ondas regulares
+Rend le tracé irrégulier, façon dessin à la main	Hace el trazado irregular, estilo dibujo a mano
+Creuse ou gonfle les côtés	Pellizca o hincha los lados
+Fait tourner davantage le centre que les bords	Retuerce más el centro que los bordes
+Remplace le fond par des hachures dessinées	Sustituye el relleno por un rayado dibujado
+Crée des étapes intermédiaires entre les objets	Crea pasos intermedios entre los objetos
+Teinte, saturation et luminosité de la sélection	Tono, saturación y luminosidad de la selección
+Une série de copies décalées, tournées ou non	Una serie de copias desplazadas, giradas o no
+Unir	Unir
+Soustraire	Restar
+Intersection	Intersecar
+Exclure	Excluir
+Diviser	Dividir
+Découpe	Recorte
+Cadrer	Marco
+Détourage	Recorte
+Carré	Cuadrado
+Écran 16:9	Pantalla 16:9
+Réseaux sociaux	Redes sociales
+retoucher en image	retocar como imagen
+placer le dessin	colocar el dibujo
+animer le dessin	animar el dibujo
+ajouter au montage	añadir al montaje
+développer	revelar
+Marque déposée	Marca registrada
+Tiret cadratin	Raya
+Tiret demi-cadratin	Semirraya
+Points de suspension	Puntos suspensivos
+Degré	Grado
+Différence	Diferencia
+Densité couleur −	Densidad de color −
+Densité couleur +	Densidad de color +
+Lumière crue	Luz dura
+Lumière tamisée	Luz tenue
+Aucune	Ninguno
+Triangle ouvert	Triángulo abierto
+Flèche fine	Flecha fina
+Cercle	Círculo
+Losange	Rombo
+Barre	Barra
+Point	Punto
+Uniforme	Uniforme
+Lentille	Lente
+Pointe à la fin	Punta de flecha al final
+Pointe au début	Punta de flecha al inicio
+Goutte	Gota
+Vague	Onda
+Calligraphie	Caligrafía
+Décaler la teinte de +30°	Desplazar el tono +30°
+Décaler la teinte de −30°	Desplazar el tono −30°
+Teinte opposée (complémentaire)	Tono opuesto (complementario)
+Négatif	Negativo
+Plus saturé	Más saturado
+Moins saturé	Menos saturado
+Plus clair	Más claro
+Plus sombre	Más oscuro

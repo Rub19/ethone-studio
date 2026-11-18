@@ -304,7 +304,7 @@ struct Sound {
 impl Sound {
     fn new(cc: &eframe::CreationContext) -> Self {
         pro::apply(&cc.egui_ctx);
-        studio_ui::i18n::register(include_str!("../i18n/en.tsv"));
+        studio_ui::register_i18n!();
         let clip = Clip { rate: 44_100, ch: vec![vec![0.0; 44_100 * 5], vec![0.0; 44_100 * 5]] };
         let player = Player::new(Arc::new(clip.clone()));
         let mut me = Self {

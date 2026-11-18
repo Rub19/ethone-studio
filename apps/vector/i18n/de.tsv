@@ -1,0 +1,581 @@
+# French text<TAB>translation. One line per text; a missing line falls back to English.
+Annuler	Abbrechen
+Proportionnelle	Gleichmäßig
+Mettre à l'échelle les contours et effets	Konturen und Effekte skalieren
+Horizontal	Horizontal
+Vertical	Vertikal
+Angle	Winkel
+Axe horizontal	Horizontale Achse
+Axe vertical	Vertikale Achse
+Les angles du résultat sont arrondis.	Die Ecken des Ergebnisses werden abgerundet.
+Courbes lisses	Weiche Kurven
+Nombre d'ondes	Grate pro Segment
+Pointes	Ecke
+Arrondis	Glatt
+Angles	Ecken
+Étapes intermédiaires	Festgelegte Stufen
+Formes et couleurs se fondent progressivement.	Formen und Farben gehen schrittweise ineinander über.
+Rosace : 12 copies en cercle	Rosette: 12 Kopien im Kreis
+Aperçu	Vorschau
+Appliquer sur une copie	Auf eine Kopie anwenden
+Plan actif	Aktive Zeichenfläche
+Tous les plans	Alle Zeichenflächen
+Sélection	Auswahl
+Fond transparent	Transparenter Hintergrund
+Qualité	Qualität
+SVG optimisé (nombres arrondis, attributs inutiles retirés)	Optimiertes SVG (gerundete Zahlen, ungenutzte Attribute entfernt)
+Texte, dégradés, effets et images intégrés restent modifiables.	Text, Verläufe, Effekte und eingebettete Bilder bleiben bearbeitbar.
+Un PDF vectoriel, une page par plan de travail, texte réel.	Ein Vektor-PDF, eine Seite pro Zeichenfläche, echter Text.
+Noir et blanc	Schwarzweiß
+Niveaux de gris	Graustufen
+Couleurs	Farben
+Précision	Genauigkeit
+Ignorer le blanc	Weiß ignorieren
+Conserver l'image d'origine	Originalbild behalten
+Réinitialiser	Zurücksetzen
+Largeur	Breite
+Hauteur	Höhe
+QR code vectoriel du texte sélectionné	Vektor-QR-Code aus ausgewähltem Text
+Objet · groupé, net à toutes les tailles	Objekt · gruppiert, scharf in jeder Größe
+Exporter un pack d'icônes (16 à 1024 px)…	Icon-Paket exportieren (16 bis 1024 px)…
+Plan de travail actif · PNG	Aktive Zeichenfläche · PNG
+Tout sélectionner	Alles auswählen
+Inverser la sélection	Auswahl umkehren
+Dupliquer la sélection	Auswahl duplizieren
+Objets · Ctrl+Alt+D	Objekte · Strg+Alt+D
+Grouper la sélection	Auswahl gruppieren
+Objets · Ctrl+G	Objekte · Strg+G
+Dégrouper la sélection	Gruppierung der Auswahl aufheben
+Objets · Ctrl+Maj+G	Objekte · Strg+Umschalt+G
+Exporter	Exportieren
+Options d'export : Ctrl+Alt+E · PNG ×2 rapide : Ctrl+E	Exportoptionen: Strg+Alt+E · schnelles PNG ×2: Strg+E
+Plan de travail actif : clic pour l'ajuster à l'écran	Aktive Zeichenfläche: Klicken, um sie einzupassen
+Fichier	Datei
+Édition	Bearbeiten
+Objet	Objekt
+Texte	Text
+Effet	Effekt
+Affichage	Ansicht
+Fenêtre	Fenster
+Ouvrir un fichier récent	Zuletzt verwendet
+Aucun fichier récent	Keine zuletzt verwendeten Dateien
+Exporter rapidement	Schnellexport
+Modifier les couleurs	Farben bearbeiten
+Recolorer l'illustration…	Bildmaterial neu färben…
+Régler la teinte, saturation, luminosité…	Farbton, Sättigung, Helligkeit anpassen…
+Convertir en niveaux de gris	In Graustufen umwandeln
+Inverser les couleurs	Farben umkehren
+Sépia	Sepia
+Saturer +20 %	Sättigen +20 %
+Désaturer −20 %	Entsättigen −20 %
+Éclaircir +10 %	Aufhellen +10 %
+Assombrir −10 %	Abdunkeln −10 %
+Teinte +30°	Farbton +30°
+Couleurs complémentaires	Komplementärfarben
+Mélange horizontal	Horizontal angleichen
+Mélange vertical	Vertikal angleichen
+Mélange avant-arrière	Von vorne nach hinten angleichen
+Échanger fond et contour	Fläche und Kontur tauschen
+Transformation	Transformieren
+Disposition	Anordnen
+Envoyer vers le calque	An Ebene senden
+Tracé	Pfad
+Fusion	Angleichen
+Masque d'écrêtage	Schnittmaske
+Masque d'opacité	Deckkraftmaske
+Tracé transparent composé	Zusammengesetzter Pfad
+Plans de travail	Zeichenflächen
+Nouveau plan de travail	Neue Zeichenfläche
+Ajuster à l'illustration	An Grafik anpassen
+Réorganiser en grille	Im Raster neu anordnen
+Police	Schrift
+Taille	Größe
+Casse	Groß-/Kleinschreibung ändern
+Insérer un caractère spécial	Sonderzeichen einfügen
+Même	Gleich
+Effets dynamiques (modifiables dans Propriétés)	Live-Effekte (in Eigenschaften bearbeitbar)
+Distorsion et transformation	Verzerren und transformieren
+Styliser	Stilisieren
+Mode tracés (Ctrl+Maj+Y)	Pfadansicht (Strg+Umschalt+Y)
+Contours de sélection (Ctrl+H)	Auswahlkanten (Strg+H)
+Cadre de sélection (Ctrl+Maj+B)	Begrenzungsrahmen (Strg+Umschalt+B)
+Règles (Ctrl+R)	Lineale (Strg+R)
+Repères (Ctrl+;)	Hilfslinien (Strg+;)
+Verrouiller les repères (Ctrl+Alt+;)	Hilfslinien sperren (Strg+Alt+;)
+Repères commentés (Ctrl+U)	Intelligente Hilfslinien (Strg+U)
+Repères de composition (centre et tiers)	Kompositionshilfen (Mitte und Drittel)
+Grille (Ctrl+')	Raster (Strg+')
+Magnétisme de la grille (Ctrl+Alt+')	Am Raster ausrichten (Strg+Alt+')
+Pas de la grille	Rasterabstand
+Espace de travail	Arbeitsbereich
+Exporter…	Exportieren…
+Modifier la couleur	Farbe bearbeiten
+Fond	Füllung
+Contour	Kontur
+Nouveau fichier	Neue Datei
+Ouvrir…	Öffnen…
+Bienvenue dans Vector	Willkommen bei Vector
+Logos, icônes et illustrations nets à toutes les tailles	Logos, Symbole und Illustrationen, scharf in jeder Größe
+Créer un plan de travail	Zeichenfläche erstellen
+Récents	Zuletzt verwendet
+Grouper	Gruppieren
+Dissocier	Gruppierung aufheben
+Dupliquer	Duplizieren
+Tolérance	Toleranz
+Pente	Neigung
+Fermé	Geschlossen
+Tours	Umdrehungen
+Sens antihoraire	Gegen den Uhrzeigersinn
+Cadre extérieur	Äußerer Rahmen
+Épaisseur	Stärke
+Creux	Innenabstand
+Lissage	Glättung
+Fusionner avec la même couleur	Mit gleicher Farbe zusammenführen
+Contours et effets	Konturen und Effekte
+Dispersion	Streuung
+Intensité	Intensität
+Linéaire	Linear
+Ajuster	Einpassen
+Tout	Alle
+Nouveau	Neu
+Réorganiser	Neu anordnen
+Fond et contour · clic : intervertir (Maj+X) · D : par défaut · / : sans fond	Fläche und Kontur · Klick: tauschen (Umschalt+X) · D: Standard · /: keine Füllung
+Propriétés	Eigenschaften
+Calques	Ebenen
+Bibliothèques	Bibliotheken
+Nuancier	Farbfelder
+Styles graphiques	Grafikstile
+Effets bitmap (export PNG et JPEG)	Rastereffekte (PNG- und JPEG-Export)
+Symboles	Symbole
+Formes prêtes	Fertige Formen
+Style des nouveaux objets	Neues Objektformat
+Grille et repères	Raster und Hilfslinien
+Afficher la grille	Raster einblenden
+Magnétisme de la grille	Am Raster ausrichten
+Règles	Lineale
+Repères commentés	Intelligente Hilfslinien
+Afficher les repères	Hilfslinien einblenden
+Centre et tiers	Mitte und Drittel
+Aligner et répartir	Ausrichten und verteilen
+Apparence	Aussehen
+Dégradé	Verlauf
+Effets	Effekte
+Actions rapides	Schnellaktionen
+Ajuster au contenu	An Inhalt anpassen
+Point de référence	Referenzpunkt
+Conserver les proportions	Proportionen beibehalten
+↔ Miroir	↔ Spiegeln
+↕ Miroir	↕ Spiegeln
+Inclinaison…	Verbiegen…
+Mettre à l'échelle contours et effets	Konturen und Effekte skalieren
+Plan	Zeichenfläche
+Clé	Basisobjekt
+Écart	Abstand
+Libérer le masque	Maske zurückwandeln
+Tracé composé	Zusammengesetzter Pfad
+Décalage…	Versatz…
+Vectoriser le contour	Konturlinie
+Simplifier…	Vereinfachen…
+Fusion…	Angleichen…
+Recolorer…	Neu färben…
+Nouveau symbole	Neues Symbol
+Rompre le lien	Verknüpfung lösen
+Verrouiller	Sperren
+Masquer	Ausblenden
++ Calque	+ Ebene
+Supprimer	Löschen
+Monter le calque	Ebene nach oben
+Descendre le calque	Ebene nach unten
+Placer la sélection sur le calque actif	Auswahl auf aktive Ebene verschieben
++ Nouveau	+ Neu
+Tout voir	Alles einblenden
++ Couleur du fond	+ Füllfarbe
+Ajouter la bibliothèque	Bibliothek hinzufügen
+Couleurs utilisées	Verwendete Farben
+Vider	Leer
+Nouveau style	Neuer Stil
+Retirer le dernier	Letzten entfernen
+Placer	Platzieren
+Redéfinir	Neu definieren
+Remplace le symbole par la sélection et met à jour ses occurrences	Ersetzt das Symbol durch die Auswahl und aktualisiert seine Instanzen
+Nom du symbole	Symbolname
+Créer	Erstellen
+Fait de la sélection un symbole réutilisable	Macht die Auswahl zu einem wiederverwendbaren Symbol
+Centre	Mitte
+Intérieur	Innen
+Extérieur	Außen
+Ronds	Rund
+Plats	Abgeschnitten
+Carrés	Überstehend
+Pointus	Gehrung
+Biseaux	Abgeflacht
+Aucun	Keine
++ Arrêt	+ Farbunterbrechung
+Inverser	Umkehren
+Recentrer	Neu zentrieren
+Effacer	Löschen
+Ombre portée	Schlagschatten
+Tracé fermé	Geschlossener Pfad
+Lisser	Glatt
+Simplifier	Vereinfachen
+Gras	Fett
+Italique	Kursiv
+Souligné	Unterstrichen
+Barré	Durchgestrichen
+Titre	Erster Buchstabe Groß
+Gauche	Links
+Droite	Rechts
+Crénage	Kerning
+Texte vertical	Vertikaler Text
+Détacher du tracé	Vom Pfad lösen
+Vectorisation dynamique…	Bildnachzeichner…
+Verticale	Vertikal
+Angle de l'axe	Achsenwinkel
+Angle d'inclinaison	Neigungswinkel
+Échelle horizontale	Horizontale Skalierung
+Échelle verticale	Vertikale Skalierung
+Déplacement horizontal	Horizontale Bewegung
+Déplacement vertical	Vertikale Bewegung
+Rotation	Drehen
+Décalage (négatif = vers l'intérieur)	Versatz (negativ = nach innen)
+Précision (plus haut = moins de points)	Genauigkeit (höher = weniger Punkte)
+Rayon	Radius
+Détail (points par 100 px)	Detail (Punkte pro 100 px)
+Contraction ← → Dilatation	Zusammenziehen ← → Aufblähen
+Angle des hachures	Schraffurwinkel
+Espacement	Abstand
+Teinte	Farbton
+Luminosité	Helligkeit
+Décalage X	Versatz X
+Décalage Y	Versatz Y
+Rotation par copie	Drehung pro Kopie
+Contenu	Inhalt
+Échelle	Skalierung
+Vectorisation dynamique	Bildnachzeichner
+Seuil	Schwellenwert
+Bruit ignoré	Rauschen ignoriert
+Courbes (plus haut = plus arrondi)	Kurven (höher = runder)
+Vectoriser	Nachzeichnen
+Recolorer l'illustration	Bildmaterial neu färben
+Nouveau document	Neues Dokument
+Nouveau…	Neu…
+Enregistrer	Speichern
+Enregistrer sous…	Speichern unter…
+Importer une image…	Bild platzieren…
+Importer un SVG…	SVG platzieren…
+Fermer	Schließen
+Rétablir	Wiederholen
+Couper	Ausschneiden
+Copier	Kopieren
+Coller	Einfügen
+Coller devant	Davor einfügen
+Coller derrière	Dahinter einfügen
+Coller en place	An Originalposition einfügen
+Transformer à nouveau	Erneut transformieren
+Symétrie horizontale	Horizontal spiegeln
+Symétrie verticale	Vertikal spiegeln
+Verrouiller la sélection	Auswahl sperren
+Tout déverrouiller	Alle entsperren
+Masquer la sélection	Auswahl ausblenden
+Tout afficher	Alles einblenden
+Décomposer	Erweitern
+Joindre	Zusammenfügen
+Convertir les points en sommets	Punkte in Eckpunkte umwandeln
+Décalage du tracé…	Pfad verschieben…
+Convertir en tracé	In Pfade umwandeln
+Nettoyer les objets vides	Leere Objekte entfernen
+Créer une fusion…	Angleichung erstellen…
+Convertir en texte captif	In Flächentext umwandeln
+Convertir en texte de point	In Punkttext umwandeln
+Orientation horizontale / verticale	Ausrichtung horizontal / vertikal
+Désélectionner	Auswahl aufheben
+Sélection inverse	Umkehren
+Objets du calque actif	Objekte auf der aktiven Ebene
+Objets du plan de travail actif	Objekte auf der aktiven Zeichenfläche
+Tous les textes	Alle Textobjekte
+Tracés ouverts	Offene Pfade
+Masques d'écrêtage	Schnittmasken
+Lueur externe	Schein nach außen
+Lueur interne	Schein nach innen
+Contour progressif	Weiche Kante
+Flou gaussien	Gaußscher Weichzeichner
+Distorsion dynamique	Verkrümmen
+Retirer tous les effets	Alle Effekte entfernen
+Zoom avant	Einzoomen
+Zoom arrière	Auszoomen
+Ajuster le plan de travail	Zeichenfläche in Fenster einpassen
+Tout ajuster	Alles in Fenster einpassen
+Taille réelle	Originalgröße
+Zoom sur la sélection	Auf Auswahl zoomen
+Réinitialiser la rotation de la vue	Ansichtsdrehung zurücksetzen
+Opacité de la couleur	Farbdeckkraft
+Ouvre aussi les fichiers SVG, PNG et JPEG : glisse-les dans la fenêtre.	Öffnet auch SVG-, PNG- und JPEG-Dateien: einfach ins Fenster ziehen.
+Clic : sélectionner · Maj : ajouter · Alt+glisser : dupliquer · glisse dans le vide : zone	Klick: auswählen · Umschalt: hinzufügen · Alt+Ziehen: duplizieren · Ziehen ins Leere: Auswahlrahmen
+Clique un point pour le modifier, Suppr l'efface, les flèches le décalent · Alt+clic supprime, Ctrl+clic convertit	Klicke auf einen Punkt, um ihn zu bearbeiten, Entf löscht ihn, Pfeiltasten verschieben ihn · Alt+Klick löscht, Strg+Klick wandelt um
+Critères	Kriterien
+Entoure les objets à sélectionner · Maj ajoute à la sélection	Um Objekte herum zeichnen, um sie auszuwählen · Umschalt fügt zur Auswahl hinzu
+Clic : point · glisser : courbe · clic sur le premier point : fermer · Entrée : terminer	Klick: Punkt · Ziehen: Kurve · Klick auf den ersten Punkt: schließen · Eingabe: fertig
+Clique sur un tracé pour ajouter un point sans changer sa forme	Klicke auf einen Pfad, um einen Punkt hinzuzufügen, ohne die Form zu ändern
+Clique un point d'ancrage pour le supprimer	Klicke auf einen Ankerpunkt, um ihn zu löschen
+Clic sur un point courbe : sommet · glisser depuis un sommet : poignées symétriques	Klick auf einen Kurvenpunkt: Eckpunkt · von einem Eckpunkt ziehen: symmetrische Griffe
+Chaque clic ajoute un point, la courbe se lisse toute seule · clic sur le premier point : fermer	Jeder Klick fügt einen Punkt hinzu, die Kurve glättet sich selbst · Klick auf den ersten Punkt: schließen
+Maj : proportions fixes	Umschalt: Proportionen beibehalten
+Rangées	Zeilen
+Colonnes	Spalten
+Cercles	Kreise
+Rayons	Strahlen
+Anneaux	Ringe
+Glisse depuis le centre du halo	Vom Zentrum des Blendenflecks ziehen
+Frotte le tracé sélectionné	Über den ausgewählten Pfad reiben
+Glisse sur le plan de travail · Alt+clic : valeurs précises · Maj : contraint	Auf der Zeichenfläche ziehen · Alt+Klick: genaue Werte · Umschalt: einschränken
+Pas Maj	Schritt mit Umschalt
+Tire un coin du cadre pour déformer en perspective libre	Ziehe eine Ecke des Rahmens, um frei perspektivisch zu verzerren
+Tire une partie du tracé sélectionné : les points voisins suivent en douceur	Einen Teil des ausgewählten Pfads ziehen: nahe Punkte folgen sanft
+Glisse depuis un contour pour l'élargir ou l'affiner à cet endroit · Alt+clic : retire le point de largeur	Von einer Kontur ziehen, um sie dort breiter oder schmaler zu machen · Alt+Klick: entfernt den Breitenpunkt
+Étapes	Stufen
+Aucun symbole : sélectionne une illustration puis Bibliothèques › Symboles › Nouveau symbole	Keine Symbole: Grafik auswählen, dann Bibliotheken › Symbole › Neues Symbol
+Glisse pour pulvériser des occurrences du symbole	Ziehen, um Symbolinstanzen aufzusprühen
+Sélectionne des formes qui se chevauchent · clic ou glisser : unir des zones · Alt : supprimer une zone	Überlappende Formen auswählen · Klick oder Ziehen: Bereiche vereinen · Alt: Bereich löschen
+Clique une zone fermée pour la peindre avec le fond	Klicke in einen geschlossenen Bereich, um ihn mit der Füllung zu malen
+Glisse sur l'objet sélectionné pour placer le dégradé	Über das ausgewählte Objekt ziehen, um den Verlauf zu platzieren
+Rayon du point	Spitzenradius
+Clic : point de couleur · Alt+clic : le retirer	Klick: Farbpunkt · Alt+Klick: entfernen
+Glisse pour mesurer une distance et un angle	Ziehen, um Abstand und Winkel zu messen
+Clique sur un tracé pour le couper à cet endroit	Klicke auf einen Pfad, um ihn dort zu schneiden
+Trace un trait à main levée à travers les formes pour les découper	Freihand über Formen zeichnen, um sie zu schneiden
+Efface sur la sélection, ou sur tout s'il n'y a rien de sélectionné	Löscht in der Auswahl oder überall, wenn nichts ausgewählt ist
+Glisse pour créer · clique pour activer · déplace un plan secondaire · Suppr	Ziehen zum Erstellen · Klick zum Aktivieren · Nebenzeichenfläche verschieben · Entf
+Pas	Schritt
+Déplacement clavier	Schritt per Tastatur
+Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	Aus einem Lineal ziehen, um eine Hilfslinie zu setzen; zurück ins Lineal ziehen, um sie zu löschen.
+Fond du document	Dokumenthintergrund
+Aligner sur	Ausrichten an
+Objet clé : le premier sélectionné (contour bleu épais).	Basisobjekt: das zuerst ausgewählte (dicker Rahmen).
+Répartir les objets	Objekte verteilen
+Répartir l'espacement	Abstände verteilen
+Modes de forme	Formmodi
+Gris	Grau
+Nuances du document	Dokumentfarbfelder
+Ajoute ici les couleurs de ton projet.	Füge hier die Farben deines Projekts hinzu.
+Sans sélection, le style devient celui des nouveaux objets.	Ohne Auswahl gilt der Stil für neue Objekte.
+Opacité	Deckkraft
+Mode de fusion	Füllmethode
+Position du contour	Kontur ausrichten
+Bouts	Großbuchstaben
+Limite de pointe	Gehrungsgrenze
+Pointillés	Gestrichelte Linie
+Tiret	Strich
+Espace	Lücke
+Tiret 2	Strich 2
+Espace 2	Lücke 2
+Pointes de flèche (début · fin)	Pfeilspitzen (Anfang · Ende)
+Taille des pointes	Pfeilspitzengröße
+Profil de largeur	Breitenprofil
+Flou	Unschärfe
+Distorsion	Verzerren
+Finesse	Dünnheit
+Arrondi des coins	Eckenrundung
+Approche	Laufweite
+Interlignage	Zeilenabstand
+Ligne de base	Grundlinie
+Largeur du cadre	Rahmenbreite
+Départ sur le tracé	Auf dem Pfad beginnen
+Sélection directe	Direktauswahl
+Sélection de groupe	Auswahl gruppieren
+Baguette magique	Zauberstab
+Plume	Zeichenstift
+Ajout de point d'ancrage	Ankerpunkt hinzufügen
+Suppression de point d'ancrage	Ankerpunkt löschen
+Conversion de point d'ancrage	Ankerpunkt
+Courbure	Krümmung
+Texte captif	Flächentext
+Texte curviligne	Pfadtext
+Segment	Liniensegment
+Spirale	Spirale
+Grille rectangulaire	Rechteckiges Raster
+Grille polaire	Polarraster
+Flèche	Pfeil
+Rectangle arrondi	Abgerundetes Rechteck
+Polygone	Polygon
+Étoile	Stern
+Halo	Blendenfleck
+Cœur	Herz
+Pinceau	Pinsel
+Pinceau goutte	Tropfenpinsel
+Crayon	Buntstift
+Gomme de tracé	Pfad-Radiergummi
+Miroir	Spiegeln
+Remodelage	Umformen
+Déformation	Verkrümmen
+Torsion	Strudel
+Contraction	Zusammenziehen
+Dilatation	Aufblähen
+Festons	Ausbuchten
+Cristallisation	Kristallisieren
+Fronces	Zerknittern
+Concepteur de forme	Formerstellungswerkzeug
+Pot de peinture dynamique	Interaktiv-malen-Werkzeug
+Dégradé de formes	Angleichen
+Pulvérisation de symboles	Symbol-Sprühdose
+Filet	Gitter
+Pipette	Pipette
+Mesure	Messen
+Ciseaux	Schere
+Cutter	Messer
+Gomme	Radiergummi
+Main	Hand
+Rotation de la vue	Ansicht drehen
+Plan de travail	Zeichenfläche
+Serré	Eng
+Logo N&B	S/W-Logo
+Gris 4 niveaux	4 Graustufen
+Affiche 6 couleurs	6-Farben-Poster
+Photo 16 couleurs	16-Farben-Foto
+Teinte −60°	Farbton −60°
+Complémentaires	Komplementär
+Icône	Symbol
+Bannière	Banner
+Carte de visite	Visitenkarte
+Même couleur de fond	Gleiche Füllfarbe
+Même couleur de contour	Gleiche Konturfarbe
+Même type d'objet	Gleicher Objekttyp
+Même aspect complet	Gleiches Aussehen
+PNG ×2 fond transparent	PNG ×2 transparent
+SVG optimisé	Optimiertes SVG
+PDF (tous les plans de travail)	PDF (alle Zeichenflächen)
+Déplacement…	Verschieben…
+Mise à l'échelle…	Skalieren…
+Transformer chaque…	Einzeln transformieren…
+Répétition…	Wiederholen…
+Rotation 90° horaire	90° im UZS drehen
+Rotation 90° antihoraire	90° gegen den UZS drehen
+Rotation 180°	Um 180° drehen
+Premier plan	Vordergrund
+En avant	Vorwärts
+En arrière	Rückwärts
+Arrière-plan	Hintergrund
+Lisser le tracé	Pfad glätten
+Simplifier (rapide)	Vereinfachen (schnell)
+Inverser le sens	Richtung umkehren
+Fermer / ouvrir le tracé	Pfad schließen / öffnen
+Ajouter des points d'ancrage	Ankerpunkte hinzufügen
+Distorsion aléatoire…	Aufrauen…
+Contraction et dilatation…	Zusammenziehen und aufblähen…
+Néon	Neon
+Océan	Ozean
+Rétro	Retro
+Forêt	Wald
+Coucher de soleil	Sonnenuntergang
+Métal	Metall
+Pêche	Pfirsich
+Méditerranée	Mittelmeer
+Désert	Wüste
+Gris chauds	Warme Grautöne
+Gris froids	Kühle Grautöne
+Fruits rouges	Rote Beeren
+Médical	Medizinisch
+Contour épais	Dicke Kontur
+Ombre douce	Weicher Schatten
+Lueur dorée	Goldener Schimmer
+Flou artistique	Weichzeichnung
+Néon rose	Rosa Neon
+Néon bleu	Blaues Neon
+Néon vert	Grünes Neon
+Bouton iOS	iOS-Knopf
+Carte flottante	Schwebende Karte
+Verre dépoli	Milchglas
+Sombre élégant	Elegantes Dunkel
+Pointillé rond	Runde Punkte
+Tirets longs	Lange Striche
+Double contour	Doppelte Kontur
+Ombre longue	Langer Schatten
+Ombre colorée	Farbiger Schatten
+Fantôme	Geist
+Papier kraft	Kraftpapier
+Aligner à gauche	Links ausrichten
+Centrer horizontalement	Horizontal zentrieren
+Aligner à droite	Rechts ausrichten
+Aligner en haut	Oben ausrichten
+Centrer verticalement	Vertikal zentrieren
+Aligner en bas	Unten ausrichten
+Rotation 90°	Um 90° drehen
+À gauche	Links
+Centres horizontaux	Horizontale Mitten
+À droite	Rechts
+En haut	Oben
+Centres verticaux	Vertikale Mitten
+En bas	Unten
+Bords gauches	Linke Kanten
+Bords droits	Rechte Kanten
+Bords hauts	Obere Kanten
+Bords bas	Untere Kanten
+Serrés	Eng
+Accueil	Start
+Tes dessins enregistrés apparaîtront ici	Deine gespeicherten Zeichnungen erscheinen hier
+Projets .evec · glisse-en un pour l'ouvrir	.evec-Projekte · zum Öffnen hineinziehen
+Décale la sélection d'une distance précise	Verschiebt die Auswahl um einen genauen Abstand
+Agrandit ou réduit depuis le point de référence	Vergrößert oder verkleinert vom Referenzpunkt aus
+Fait pivoter autour du point de référence	Dreht um den Referenzpunkt
+Retourne la sélection par rapport à un axe	Spiegelt die Auswahl an einer Achse
+Penche la sélection	Neigt die Auswahl
+Chaque objet autour de son propre centre	Jedes Objekt um seinen eigenen Mittelpunkt
+Crée un contour parallèle, à l'extérieur ou à l'intérieur	Erstellt eine parallele Kontur, außen oder innen
+Retire des points en gardant l'allure	Entfernt Punkte, die Form bleibt erhalten
+Arrondit les angles vifs	Rundet spitze Ecken ab
+Transforme le tracé en dents de scie	Macht den Pfad zum Zickzack
+Transforme le tracé en vagues régulières	Macht den Pfad zu gleichmäßigen Wellen
+Rend le tracé irrégulier, façon dessin à la main	Macht den Pfad unregelmäßig, wie von Hand gezeichnet
+Creuse ou gonfle les côtés	Zieht die Seiten zusammen oder bläht sie auf
+Fait tourner davantage le centre que les bords	Verdreht die Mitte stärker als die Ränder
+Remplace le fond par des hachures dessinées	Ersetzt die Füllung durch gezeichnete Schraffur
+Crée des étapes intermédiaires entre les objets	Erstellt Zwischenstufen zwischen Objekten
+Teinte, saturation et luminosité de la sélection	Farbton, Sättigung und Helligkeit der Auswahl
+Une série de copies décalées, tournées ou non	Eine Reihe versetzter Kopien, gedreht oder nicht
+Unir	Vereinen
+Soustraire	Subtrahieren
+Intersection	Schnittmenge
+Exclure	Ausschließen
+Diviser	Unterteilen
+Découpe	Ausschnitt
+Cadrer	Rahmen
+Détourage	Ausschnitt
+Carré	Quadrat
+Écran 16:9	Bildschirm 16:9
+Réseaux sociaux	Soziale Medien
+retoucher en image	als Bild bearbeiten
+placer le dessin	die Zeichnung platzieren
+animer le dessin	die Zeichnung animieren
+ajouter au montage	zum Schnitt hinzufügen
+développer	entwickeln
+Marque déposée	Marke
+Tiret cadratin	Geviertstrich
+Tiret demi-cadratin	Halbgeviertstrich
+Points de suspension	Auslassungspunkte
+Degré	Grad
+Différence	Differenz
+Densité couleur −	Farbdichte −
+Densité couleur +	Farbdichte +
+Lumière crue	Hartes Licht
+Lumière tamisée	Gedämpftes Licht
+Aucune	Keine
+Triangle ouvert	Offenes Dreieck
+Flèche fine	Dünner Pfeil
+Cercle	Kreis
+Losange	Raute
+Barre	Balken
+Point	Punkt
+Uniforme	Gleichmäßig
+Lentille	Linse
+Pointe à la fin	Pfeilspitze am Ende
+Pointe au début	Pfeilspitze am Anfang
+Goutte	Tropfen
+Vague	Welle
+Calligraphie	Kalligrafie
+Décaler la teinte de +30°	Farbton um +30° verschieben
+Décaler la teinte de −30°	Farbton um −30° verschieben
+Teinte opposée (complémentaire)	Gegenfarbton (komplementär)
+Négatif	Negativ
+Plus saturé	Stärker gesättigt
+Moins saturé	Weniger gesättigt
+Plus clair	Heller
+Plus sombre	Dunkler
