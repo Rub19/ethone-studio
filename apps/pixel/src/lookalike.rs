@@ -200,6 +200,10 @@ pub struct Hand {
     ink: Option<[u8; 4]>,
     /// Pen width of the original writing, in pixels.
     pen: f32,
+    /// Lean of the writing (horizontal shift per pixel of height; positive leans right).
+    slant: f32,
+    /// Average width of one letter in the original words.
+    letter_w: f32,
     /// Each original word, cut out whole, and its columns in the line.
     words: Vec<RgbaImage>,
     spans: Vec<(u32, u32)>,
@@ -317,6 +321,8 @@ impl Hand {
             }
         }
         let ink = solid_ink(&glyphs);
+        let chars: usize = words.iter().map(|w| w.len()).sum();
+        let letter_w = if spans.is_empty() || chars == 0 { 0.0 } else { spans.iter().map(|s| (s.1 - s.0) as f32).sum::<f32>() / chars as f32 };
         let band = xheight_band(mask);
         Hand {
             glyphs,
@@ -327,6 +333,8 @@ impl Hand {
             base: band.map_or_else(|| median(bases.clone(), h as f32 * 0.8), |b| b.1),
             ink,
             pen: stroke_width(mask),
+            slant: slant_of(mask),
+            letter_w: letter_w,
             words: whole,
             spans,
             own_letters: all.len() as f32 >= 0.7 * words.iter().map(|w| w.len()).sum::<usize>() as f32,
@@ -352,7 +360,7 @@ impl Hand {
         let mut parts: Vec<RgbaImage> = Vec::new();
         let middle = nw[pre..nw.len() - suf].join(" ");
         if !middle.is_empty() {
-            parts.push(self.write(&middle, font, color)?);
+            parts.push(if self.own_letters { self.write(&middle, font, color)? } else { self.font_word(&middle, font, color)? });
         }
         parts.extend(self.words[ow.len() - suf..].iter().cloned());
         let gap = self.space.round() as u32;
@@ -365,6 +373,36 @@ impl Hand {
             x += (p.width() + gap) as i64;
         }
         Some((out, start, end))
+    }
+
+    /// Draws `text` in one piece with the closest font (keeping cursive joins), then gives it the
+    /// writer's height, letter width, slant, pen width, and a hand's irregular baseline and pressure.
+    pub fn font_word(&self, text: &str, font: (usize, bool, bool), color: [u8; 4]) -> Option<RgbaImage> {
+        let ink = self.ink.unwrap_or(color);
+        let draw = |bold: bool| -> Option<(RgbaImage, f32)> {
+            let img = render_text(text, &style(font.0, 120.0, bold, font.2, ink))?;
+            let t = tight(&alpha_of(&img), 40)?;
+            let word = imageops::crop_imm(&img, t.0, t.1, t.2, t.3).to_image();
+            let band = xheight_band(&alpha_of(&word))?;
+            let k = (self.cap * 0.62) / (band.1 - band.0).max(1.0);
+            let n = text.chars().filter(|c| !c.is_whitespace()).count().max(1) as f32;
+            let natural = word.width() as f32 * k / n;
+            let kx = if self.letter_w > 0.0 { k * (self.letter_w / natural).clamp(0.75, 1.35) } else { k };
+            let (nw, nh) = ((word.width() as f32 * kx).round().max(1.0) as u32, (word.height() as f32 * k).round().max(1.0) as u32);
+            let word = imageops::resize(&word, nw, nh, imageops::FilterType::Lanczos3);
+            Some((word, band.1 * k))
+        };
+        // the weight whose stroke is closest to the writer's pen
+        let (word, base_in_word) = [false, true]
+            .into_iter()
+            .filter_map(draw)
+            .min_by(|a, b| (stroke_width(&alpha_of(&a.0)) - self.pen).abs().total_cmp(&(stroke_width(&alpha_of(&b.0)) - self.pen).abs()))?;
+        let word = shear(&word, self.slant - slant_of(&alpha_of(&word)), base_in_word);
+        let word = thicken(word, self.pen);
+        let (word, pad) = wobble(&word, base_in_word, self.cap * 0.62, text.len() as u32);
+        let mut out = RgbaImage::new(word.width(), self.h.max(1));
+        imageops::overlay(&mut out, &word, 0, (self.base - base_in_word - pad as f32).round() as i64);
+        Some(out)
     }
 
     #[cfg(test)]
@@ -607,7 +645,7 @@ fn stroke_width(m: &GrayImage) -> f32 {
 /// Grows a letter's strokes (alpha only) until they are about as wide as the pen.
 fn thicken(mut g: RgbaImage, pen: f32) -> RgbaImage {
     for _ in 0..3 {
-        if pen <= 0.0 || stroke_width(&alpha_of(&g)) >= pen * 0.8 {
+        if pen <= 0.0 || stroke_width(&alpha_of(&g)) >= pen * 0.6 {
             break;
         }
         let src = g.clone();
@@ -628,4 +666,82 @@ fn thicken(mut g: RgbaImage, pen: f32) -> RgbaImage {
         }
     }
     g
+}
+
+/// The shear that makes the strokes most vertical: how far the writing leans.
+fn slant_of(m: &GrayImage) -> f32 {
+    let (w, h) = m.dimensions();
+    let c = h as f32 / 2.0;
+    let mut best = (0.0f32, 0.0f64);
+    for i in -14..=14 {
+        let s = i as f32 * 0.05;
+        let mut cols = vec![0u32; (w as f32 + h as f32 * 0.8) as usize + 2];
+        let off = h as f32 * 0.4;
+        for (x, y, p) in m.enumerate_pixels() {
+            if p.0[0] >= 110 {
+                let cx = (x as f32 + s * (y as f32 - c) + off).round().clamp(0.0, (cols.len() - 1) as f32) as usize;
+                cols[cx] += 1;
+            }
+        }
+        let score: f64 = cols.iter().map(|&v| (v as f64).powi(2)).sum();
+        if score > best.1 {
+            best = (s, score);
+        }
+    }
+    best.0
+}
+
+/// Leans an image by `s` (positive leans right), pivoting on row `pivot`.
+fn shear(img: &RgbaImage, s: f32, pivot: f32) -> RgbaImage {
+    if s.abs() < 0.02 {
+        return img.clone();
+    }
+    let (w, h) = img.dimensions();
+    let extra = (s.abs() * h as f32).ceil() as u32;
+    let off = if s > 0.0 { s * (h as f32 - pivot) } else { -s * pivot };
+    RgbaImage::from_fn(w + extra, h, |x, y| sample(img, x as f32 - off - s * (pivot - y as f32), y as f32))
+}
+
+fn sample(img: &RgbaImage, x: f32, y: f32) -> Rgba<u8> {
+    let (w, h) = img.dimensions();
+    if x < 0.0 || y < 0.0 || x > (w - 1) as f32 || y > (h - 1) as f32 {
+        return Rgba([0, 0, 0, 0]);
+    }
+    let (x0, y0) = (x.floor() as u32, y.floor() as u32);
+    let (x1, y1) = ((x0 + 1).min(w - 1), (y0 + 1).min(h - 1));
+    let (fx, fy) = (x - x0 as f32, y - y0 as f32);
+    let p = |x: u32, y: u32| img.get_pixel(x, y).0.map(|v| v as f32);
+    let (a, b, c, d) = (p(x0, y0), p(x1, y0), p(x0, y1), p(x1, y1));
+    let mut o = [0u8; 4];
+    for k in 0..4 {
+        o[k] = (a[k] * (1.0 - fx) * (1.0 - fy) + b[k] * fx * (1.0 - fy) + c[k] * (1.0 - fx) * fy + d[k] * fx * fy).round() as u8;
+    }
+    if o[3] > 0 {
+        let pick = [a, b, c, d].into_iter().max_by(|l, r| l[3].total_cmp(&r[3])).unwrap();
+        for k in 0..3 {
+            o[k] = pick[k] as u8;
+        }
+    }
+    Rgba(o)
+}
+
+/// A hand's irregularity: the baseline drifts, letters grow and shrink a little, pressure varies.
+fn wobble(img: &RgbaImage, base: f32, xh: f32, seed: u32) -> (RgbaImage, u32) {
+    let (w, h) = img.dimensions();
+    let pad = (xh * 0.12).ceil() as u32;
+    let ph = [rnd(seed * 31 + 1), rnd(seed * 31 + 2), rnd(seed * 31 + 3), rnd(seed * 31 + 4)].map(|v| v * std::f32::consts::PI);
+    let tau = std::f32::consts::TAU;
+    let lam = (xh * 2.6).max(8.0);
+    let out = RgbaImage::from_fn(w, h + 2 * pad, |x, y| {
+        let u = x as f32;
+        let dy = xh * (0.05 * (tau * u / lam + ph[0]).sin() + 0.03 * (tau * u / (lam * 2.7) + ph[1]).sin());
+        let sc = 1.0 + 0.06 * (tau * u / (lam * 1.7) + ph[2]).sin();
+        let yy = y as f32 - pad as f32;
+        let sy = base + (yy - base - dy) / sc;
+        let mut p = sample(img, u, sy);
+        let pressure = 0.82 + 0.18 * (0.5 + 0.5 * (tau * u / (lam * 1.3) + ph[3]).sin());
+        p.0[3] = (p.0[3] as f32 * pressure) as u8;
+        p
+    });
+    (out, pad)
 }
