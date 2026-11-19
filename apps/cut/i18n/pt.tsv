@@ -2,7 +2,7 @@
 Double-clic pour réinitialiser	Duplo clique para repor
 Image clé suivante	Keyframe seguinte
 Image clé précédente	Keyframe anterior
-Image	Vídeo
+Image	Imagem
 Effets	Efeitos
 Couleur	Cor
 Audio	Áudio
@@ -411,3 +411,83 @@ Descente	Queda
 Lettres espacées	Letras espaçadas
 Fixe	Fixo
 Défilement horizontal	Deslocação horizontal
+Actions	Ações
+Ajoute d'abord un clip à la piste	Adicione primeiro um clipe à faixa
+Ajouter un marqueur (M)	Adicionar um marcador (M)
+Aller à l'entrée	Ir para a entrada
+Aller à la sortie	Ir para a saída
+Appliquer la transition par défaut	Aplicar a transição predefinida
+Auto	Auto
+Clip V2	Clipe V2
+Coller l'étalonnage	Colar a gradação
+Coller à la tête de lecture	Colar na agulha
+Cut · nouvel outil · montage ou clip choisi	Cut · nova ferramenta · montagem ou clipe escolhido
+Dossier de la séquence d'images	Pasta da sequência de imagens
+Ellipse	Elipse
+Exporter les marqueurs (CSV)…	Exportar marcadores (CSV)…
+Figer l'image 2 s (Ctrl+Maj+F)	Congelar imagem 2 s (Ctrl+Shift+F)
+Format	Formato
+Grain	Grão
+Hautes lum.	Realces
+Il faut au moins deux clips dans la piste	A faixa precisa de pelo menos dois clipes
+Image précédente (←)	Imagem anterior (←)
+Image suivante (→)	Imagem seguinte (→)
+Importer des médias	Importar multimédia
+Incrustations	Sobreposições
+La piste n'a aucun blanc à fermer	A faixa não tem espaços para fechar
+Lecture en boucle (entre entrée et sortie)	Reprodução em ciclo (entre entrada e saída)
+Lecture et navigation	Reprodução e navegação
+Look	Look
+Magnétisme activé	Magnetismo ativado
+Magnétisme désactivé	Magnetismo desativado
+Masquer la piste dans le programme	Ocultar a faixa no programa
+Média	Multimédia
+Nouveau titre (Ctrl+T)	Novo título (Ctrl+T)
+Options	Opções
+Orange	Laranja
+Ordre d'import	Ordem de importação
+Ouvre ou crée d'abord un projet	Abra ou crie primeiro um projeto
+Point d'entrée (I)	Ponto de entrada (I)
+Point de montage précédent (↑)	Ponto de edição anterior (↑)
+Point de montage suivant (↓)	Ponto de edição seguinte (↓)
+Point de sortie (O)	Ponto de saída (O)
+Portrait 4:5	Retrato 4:5
+Position X	Posição X
+Position Y	Posição Y
+Programme	Programa
+Projet Cut	Projeto Cut
+Rectangle	Retângulo
+Retirer les médias inutilisés	Remover multimédia não usada
+Rotation	Rotação
+Saturation	Saturação
+Scinder	Dividir
+Scinder à la tête de lecture (S)	Dividir na agulha (S)
+Scope	Âmbito
+Supprimer la sélection (Suppr)	Eliminar a seleção (Del)
+Supprimer tous les espaces vides	Remover todos os espaços vazios
+Supprimer tous les marqueurs	Eliminar todos os marcadores
+Surveillance	Vigilância
+Sélectionne d'abord un clip	Selecione primeiro um clipe
+Sélectionne d'abord un clip de la piste principale	Selecione primeiro um clipe da faixa principal
+Sélectionne d'abord un clip ou une musique	Selecione primeiro um clipe ou uma música
+Titres	Títulos
+Tout supprimer	Eliminar tudo
+Verrouiller la piste	Bloquear a faixa
+Vertical	Vertical
+Vibrance	Vibração
+Vignettes	Miniaturas
+Volume	Volume
+Zoom	Zoom
+Zoom arrière (−)	Reduzir (−)
+Zoom avant (+)	Ampliar (+)
+Éclaircir	Clarear
+Élément	Elemento
+Contraste doux	Contraste suave
+Fondu des noirs	Pretos esbatidos
+Lecture	Reprodução
+Type	Tipo
+Allongement	Alongamento
+Propagation	Propagação
+Sans titre	Sem título
+Sélection de piste	Seleção de faixa
+Élément généré	Elemento gerado

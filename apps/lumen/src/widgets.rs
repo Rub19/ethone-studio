@@ -38,7 +38,7 @@ pub fn nav_row(ui: &mut Ui, label: &str, count: usize, selected: bool) -> egui::
     } else if resp.hovered() {
         p.rect_filled(rect, CornerRadius::same(7), Color32::from_white_alpha(8));
     }
-    p.text(rect.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, short(label, 28), if selected { semibold(12.5) } else { FontId::proportional(12.5) }, if selected { INK_STRONG } else { INK });
+    p.text(rect.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, short(tl(label), 28), if selected { semibold(12.5) } else { FontId::proportional(12.5) }, if selected { INK_STRONG } else { INK });
     if count != usize::MAX {
         p.text(rect.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, count.to_string(), FontId::proportional(12.0), FAINT);
     }

@@ -8,7 +8,6 @@ Ctrl+A	Ctrl+A
 Lecture / pause	Play / pause
 Espace	Space
 Ajouter un marqueur	Add a marker
-M	M
 Supprimer les silences (plus de 0,8 s)	Remove silences (over 0.8 s)
 Édition	Edit
 Supprimer les silences courts (plus de 0,4 s)	Remove short silences (over 0.4 s)
@@ -144,7 +143,6 @@ Hauteur	Height
 Suivre	Follow
 La vue suit la lecture (F)	The view follows playback (F)
 Zoom	Zoom
-Z	Z
 Ctrl+0	Ctrl+0
 Vue d'ensemble : clique ou glisse pour te déplacer	Overview: click or drag to move
 G D	L R
@@ -613,3 +611,390 @@ wooded box open
 wooden 1	
 wooden 2	
 wooden 3	
+Début	Start
+Descente	Fall
+Plafond	Ceiling
+Relâchement	Release
+Transparent	Transparent
+Fort	Strong
+Diffusion	Spread
+Attaque	Attack
+Genou	Knee
+Batterie	Drums
+Maintien	Hold
+Plancher	Floor
+Voix	Voice
+Doux	Soft
+Coupure basse	Low cut
+Coupure haute	High cut
+Seuil graves	Bass threshold
+Seuil médiums	Mid threshold
+Seuil aigus	Treble threshold
+Master	Master
+Radio	Radio
+Percutant	Punchy
+Adouci	Softened
+Sec	Dry
+Pente	Slope
+Grondements	Rumble
+Centre	Center
+Talkie-walkie	Walkie-talkie
+Large	Wide
+Boue	Mud
+Nasal	
+Air	Air
+Adoucir	Soften
+Fréquence basse	Low frequency
+Fréquence haute	High frequency
+Funk	
+Lent	Slow
+Sensibilité	Sensitivity
+Largeur max	Max width
+Vinyle	Vinyl
+Agressif	Aggressive
+Secteur	Sector
+Harmoniques	Harmonics
+Finesse	Thinness
+Europe	Europe
+Réduction max	Max reduction
+Moyen	Medium
+Type	Type
+Douce	Soft
+Fuzz	
+Redresseur double	Full-wave rectifier
+Lampe	Lamp
+Drive	
+Chaleur	Warmth
+Overdrive	
+Octaveur	Octaver
+Console	Console
+Dither	Dither
+Dalek	
+Cloche	Bell
+Délai	Delay
+Court	Short
+Long	Long
+Canyon	
+Niveau	Level
+Rockabilly	
+Doublage	Doubling
+Répétitions	Repetitions
+Décroissance	Decay
+Espacement	Spacing
+Rebonds	Bounces
+Bande	Band
+Sombre	Dark
+Amortissement	Damping
+Pré-délai	Pre-delay
+Largeur	Width
+Studio	
+Salle	Room
+Plaque	Plate
+Aspiration	Suction
+Subtile	Subtle
+Épais	Thick
+Avion	Plane
+Étages	Stages
+Classique	Classic
+Profond	Deep
+Rapide	Fast
+Chanteur	Singer
+Forme	Shape
+Hachoir	Chopper
+Rotatif	Rotary
+Robot	Robot
+Porteuse	Carrier
+Note	Rating
+Bandes	Bars
+Électro	
+Souffle	Breath
+Bloc	Frame
+Glitch	
+Sens	Direction
+Ralentir	Slow down
+Retard	Delay
+Côté	Side
+Gauche	Left
+Subtil	Subtle
+Demi	Half
+Double	Double
+Demi-tons	Semitones
+Centièmes	Hundredths
+Quinte	Fifth
+Quarte	Fourth
+Tierce	Third
+Chipmunk	
+Basses	Bass
+Brillant	Glossy
+Sourire	Smile
+Bande 1	Band 1
+Gain 1	Gain 1
+Bande 2	Band 2
+Gain 2	Gain 2
+Bande 3	Band 3
+Gain 3	Gain 3
+Bande 4	Band 4
+Gain 4	Gain 4
+Guitare	Guitar
+Podcast	
+Cible	Target
+Club	
+Grésillement	Crackle
+Propre	Clean
+Ancienne	Old
+Ligne	Line
+Fixe	Fixed
+Mauvaise ligne	Wrong line
+Manifestation	Event
+Piscine	Pool
+Abysses	Abyss
+Distance	Offset
+Tunnel	Tunnel
+Caverne	Cave
+Écho	Echo
+Stade	Stadium
+Pleurage	Wow
+Neuve	New
+Craquements	Crackles
+Filtre	Filter
+Chill	
+Grave	Low
+Grain	Grain
+Ogre	Ogre
+Hantise	Haunting
+Martien	Martian
+Insecte	Insect
+Gare	Station
+Police	Font
+Jouet	Toy
+Pompette	Tipsy
+Station	Station
+Galaxie	Galaxy
+Lo-fi	
+Titre	Title
+Artiste	Artist
+Album	Album
+Année	Year
+Genre	Genre
+Commentaire	Comment
+Sound	
+Suppression des silences	Silence removal
+Coller	Paste
+Dupliquer	Duplicate
+Rogner	Trim
+Enregistrement	Recording
+Dossier des morceaux	Pieces folder
+Atténuation spectrale	Spectral attenuation
+Audio	Audio
+Fondus	Fades
+Rien à annuler	Nothing to undo
+Ouvre ou enregistre d'abord un son	Open or record a sound first
+Sound · nouvel outil · sélection ou fichier	Sound · new tool · selection or file
+Réglages actuels	Current settings
+Normalisation à −1 dB	Normalized to −1 dB
+Normalisation à −16 LUFS	Normalized to −16 LUFS
+Micro-fondus de bord	Edge micro fades
+Rogner les silences de bord	Trim edge silences
+Boucle parfaite	Perfect loop
+Reçu	Received
+Coller                      Ctrl+V	Paste                       Ctrl+V
+Supprimer tous les marqueurs	Delete all markers
+Silence	Silence
+Zoom sur la sélection    Z	Zoom to selection    Z
+Normalisation	Normalize
+Spotify, YouTube, réseaux	Spotify, YouTube, social
+Voix posée, livres audio	Calm voice, audiobooks
+Volume perçu	Loudness
+Limiteur	Limiter
+Plat	Flat
+Égaliseur	Equalizer
+Compresseur	Compressor
+Bitcrusher	
+Modulation en anneau	Ring modulation
+Passer en mono	Switch to mono
+Passer en stéréo	Switch to stereo
+Conversion de fréquence	Sample rate conversion
+Désélectionner	Deselect
+Appliquer le gain	Apply gain
+Gain spectral	Spectral gain
+Supprimer	Delete
+Suppression spectrale	Spectral removal
+Réparer	Repair
+Réparation spectrale	Spectral repair
+Isoler	Isolate
+Isoler la zone spectrale	Isolate spectral area
+Exporter en morceaux…	Export in pieces…
+Courbe entrée	Curve in
+Courbe sortie	Curve out
+Effacer	Clear
+Correction spectrale	Spectral repair
+Interface	Interface
+Aventure	Adventure
+Quotidien	Daily
+M	
+Z	
+Dure	Hard
+Redresseur	Rectifier
+Repliement	Foldover
+Démarrer	Start
+Droite	Right
+Portable	Laptop
+Podcasts	Podcasts
+Télévision (EBU R128)	Television (EBU R128)
+sur	of
+Rampe de volume	Volume ramp
+Monte ou descend le volume progressivement sur la plage.	Gradually raises or lowers the volume over the range.
+Normaliser par canal	Normalize per channel
+Chaque canal atteint la même crête, utile si un côté est plus faible.	Each channel reaches the same peak, useful when one side is quieter.
+Limiteur avancé	Advanced limiter
+Plafond infranchissable avec anticipation de 2 ms.	Hard ceiling with 2 ms lookahead.
+Retourne la forme d'onde (même son, phase opposée).	Flips the waveform (same sound, opposite phase).
+Remplace la plage par du silence sans changer la durée.	Replaces the range with silence without changing the length.
+Réduit l'écart entre passages forts et faibles.	Reduces the gap between loud and quiet passages.
+Expandeur	Expander
+Baisse encore les passages faibles pour creuser le fond.	Pushes quiet passages further down to deepen the background.
+Porte avancée	Advanced gate
+Coupe sous le seuil avec maintien et plancher réglables.	Cuts below the threshold with adjustable hold and floor.
+Compresseur 3 bandes	3-band compressor
+Compresse graves, médiums et aigus séparément.	Compresses lows, mids and highs separately.
+Modeleur de transitoires	Transient shaper
+Renforce ou adoucit l'attaque et la queue des sons.	Boosts or softens the attack and tail of sounds.
+Passe-bas	Low pass
+Garde les graves, retire les aigus au-dessus de la fréquence.	Keeps the lows, removes highs above the frequency.
+Passe-haut	High pass
+Retire les graves sous la fréquence (souffle de vent, grondements).	Removes lows below the frequency (wind, rumble).
+Passe-bande	Band pass
+Ne garde qu'une bande autour du centre.	Keeps only a band around the centre.
+Coupe-bande	Band stop
+Retire une fréquence précise (sifflement, larsen).	Removes a precise frequency (whistle, feedback).
+Monte ou baisse une zone de fréquences.	Raises or lowers a frequency area.
+Plateau grave	Low shelf
+Monte ou baisse tout ce qui est sous la fréquence.	Raises or lowers everything below the frequency.
+Plateau aigu	High shelf
+Monte ou baisse tout ce qui est au-dessus de la fréquence.	Raises or lowers everything above the frequency.
+Wah automatique	Auto wah
+Filtre qui balaie les fréquences en rythme.	Filter that sweeps frequencies in rhythm.
+Anti-clics	Declicker
+Détecte les clics et craquements et les reconstruit.	Detects clicks and crackles and rebuilds them.
+Déécrêtage	Declip
+Redessine les crêtes écrêtées puis baisse le gain.	Redraws clipped peaks then lowers the gain.
+Anti-ronflement	Dehum
+Retire le bourdonnement du secteur et ses harmoniques.	Removes mains hum and its harmonics.
+Dé-esseur	De-esser
+Adoucit les « s » et « ch » trop sifflants.	Softens harsh "s" and "sh" sounds.
+Souffle automatique	Auto denoise
+Estime le bruit de fond tout seul et le réduit.	Estimates the background noise by itself and reduces it.
+Supprimer le décalage DC	Remove DC offset
+Recentre la forme d'onde sur zéro.	Recentres the waveform on zero.
+Reconstruire la plage	Rebuild the range
+Remplace la sélection par une interpolation de ses bords.	Replaces the selection with an interpolation of its edges.
+Sept caractères de saturation avec tonalité.	Seven saturation flavours with tone.
+Réduit les bits et la fréquence, son 8 bits.	Reduces bits and sample rate, 8-bit sound.
+Réduire la profondeur	Reduce bit depth
+Quantifie avec dither, comme un export basse résolution.	Quantizes with dither, like a low-resolution export.
+Multiplie par une sinusoïde : métal, robot, cloche.	Multiplies by a sine: metal, robot, bell.
+Répétitions régulières qui s'éteignent.	Regular repeats that fade away.
+Ping-pong	
+Les répétitions rebondissent de gauche à droite.	Repeats bounce from left to right.
+Slapback	
+Une seule répétition très courte, son rockabilly.	A single very short repeat, rockabilly sound.
+Multi-répétitions	Multi-tap delay
+Plusieurs répétitions espacées, alternées en stéréo.	Several spaced repeats, alternating in stereo.
+Écho analogique	Analog echo
+Chaque répétition est plus sombre, comme une bande.	Each repeat is darker, like tape.
+Simule une pièce : taille, amortissement, pré-délai.	Simulates a room: size, damping, pre-delay.
+Réverbération inversée	Reverse reverb
+La réverbération arrive avant le son, effet aspiré.	The reverb comes before the sound, a sucked-in effect.
+Épaissit le son comme plusieurs voix.	Thickens the sound like several voices.
+Balayage métallique, effet « avion ».	Metallic sweep, "jet" effect.
+Phaser	Phaser
+Creux qui tournent dans le spectre.	Notches sweeping through the spectrum.
+Vibrato	
+Fait onduler la hauteur.	Makes the pitch wobble.
+Fait vibrer le volume.	Makes the volume pulse.
+Promène le son de gauche à droite.	Moves the sound from left to right.
+Voix monocorde de robot (phase remise à zéro).	Monotone robot voice (phase reset).
+Chuchotement	Whisper
+Transforme une voix en murmure (phases aléatoires).	Turns a voice into a whisper (random phases).
+Vocodeur	Vocoder
+La voix sculpte une onde de synthé.	The voice shapes a synth wave.
+Bégaiement	Stutter
+Répète de courts blocs en rafale, effet glitch.	Repeats short blocks in bursts, glitch effect.
+Arrêt de bande	Tape stop
+Le son ralentit jusqu'à l'arrêt, ou démarre.	The sound slows to a stop, or starts up.
+Joue la plage à rebours.	Plays the range backwards.
+Balance et largeur	Balance and width
+Place le son et élargit ou resserre l'image stéréo.	Places the sound and widens or narrows the stereo image.
+Effet Haas	Haas effect
+Retarde un canal de quelques ms pour élargir.	Delays one channel by a few ms to widen.
+Encoder en M/S	Encode to M/S
+Gauche devient le milieu, droite les côtés.	Left becomes mid, right becomes side.
+Décoder le M/S	Decode M/S
+Revient en gauche/droite depuis milieu/côtés.	Back to left/right from mid/side.
+Inverser la phase gauche	Invert left phase
+Corrige un canal câblé à l'envers.	Fixes a channel wired backwards.
+Inverser la phase droite	Invert right phase
+Extraire le canal gauche	Extract left channel
+Copie le canal gauche des deux côtés.	Copies the left channel to both sides.
+Extraire le canal droit	Extract right channel
+Copie le canal droit des deux côtés.	Copies the right channel to both sides.
+Isoler le centre	Isolate centre
+Garde ce qui est commun aux deux canaux.	Keeps what both channels share.
+Supprimer le centre	Remove centre
+Retire la voix centrée (karaoké).	Removes the centred voice (karaoke).
+Mélange les canaux.	Mixes the channels.
+Permute les deux canaux.	Swaps the two channels.
+Comme une bande : la hauteur suit.	Like tape: the pitch follows.
+Change la durée sans changer la hauteur.	Changes the length without changing the pitch.
+Change la hauteur sans changer la durée.	Changes the pitch without changing the length.
+Égaliseur graphique 10 bandes	10-band graphic equalizer
+Dix curseurs de 31 Hz à 16 kHz.	Ten sliders from 31 Hz to 16 kHz.
+Égaliseur paramétrique 4 bandes	4-band parametric equalizer
+Quatre cloches réglables en fréquence, gain et largeur.	Four bells adjustable in frequency, gain and width.
+Maximiseur	Maximizer
+Pousse le volume au maximum sans saturer.	Pushes the volume to the max without clipping.
+Volume perçu cible (LUFS)	Target loudness (LUFS)
+Règle le volume perçu sur la norme d'une plateforme.	Sets loudness to a platform's standard.
+Radio AM	AM radio
+Bande étroite, saturation et grésillement.	Narrow band, saturation and crackle.
+La voix comme au bout du fil.	The voice as if on the phone.
+Voix criée dans un porte-voix.	Voice shouted through a megaphone.
+Son étouffé et ondulant.	Muffled, wavering sound.
+Pièce voisine	Next room
+Comme entendu à travers un mur.	As heard through a wall.
+Grotte	Cave
+Grande résonance minérale avec écho.	Big mineral resonance with echo.
+Annonce dans un grand stade.	Announcement in a big stadium.
+Cassette	
+Pleurage, souffle et aigus doux.	Wow, hiss and soft highs.
+Craquements et souffle de disque.	Vinyl crackle and hiss.
+Bits réduits, aigus coupés, légère ondulation.	Fewer bits, cut highs, slight wobble.
+Abaisse la voix sans changer la durée.	Lowers the voice without changing the length.
+Monte la voix sans changer la durée.	Raises the voice without changing the length.
+Monstre	Monster
+Voix caverneuse et granuleuse.	Cavernous, gritty voice.
+Ange	Angel
+Voix céleste, plus aiguë et réverbérée.	Heavenly voice, higher and reverberant.
+Fantôme	Ghost
+Souffle inversé et ondulation.	Reversed hiss and wobble.
+Extraterrestre	Alien
+Modulation métallique et ondulante.	Metallic, wavering modulation.
+Sono de gare	Station PA
+Annonce diffusée dans un grand hall.	Announcement in a big hall.
+Bande très étroite et saturée.	Very narrow, saturated band.
+Ivresse	Drunk
+Hauteur qui tangue et son qui se promène.	Pitch that sways and sound that wanders.
+Espace lointain	Deep space
+Immense réverbération et échos qui tournent.	Huge reverb and swirling echoes.
+Sans titre	Untitled
+Glisse pour sélectionner une durée, tire les bords pour ajuster. Maj+clic étend, double-clic prend l'espace entre deux marqueurs.	Drag to select a duration, pull the edges to adjust. Shift+click extends, double-click takes the space between two markers.
+Glisse pour faire défiler la vue sans toucher à la sélection.	Drag to scroll the view without touching the selection.
+Clic : zoom avant au point cliqué. Alt+clic ou clic droit : zoom arrière. Glisse pour zoomer sur une zone.	Click: zoom in at that point. Alt+click or right-click: zoom out. Drag to zoom into an area.
+Dans le spectrogramme, glisse un rectangle temps × fréquences, puis atténue, supprime ou répare la zone.	In the spectrogram, drag a time × frequency rectangle, then attenuate, delete or repair the area.
+Dessine librement le contour d'un bruit dans le spectrogramme (sifflet, toux, sonnerie).	Freely draw around a noise in the spectrogram (whistle, cough, ringtone).
+Peins sur le spectrogramme les zones à traiter ; la taille se règle ci-dessous.	Paint the areas to process on the spectrogram; set the size below.
+Peins sur un clic ou un bruit bref : il est reconstruit à partir de ce qui l'entoure. Dans le spectrogramme, seule la zone peinte est réparée.	Paint over a click or short noise: it is rebuilt from what surrounds it. In the spectrogram, only the painted area is repaired.
+Zoome jusqu'aux échantillons puis dessine la forme d'onde à la main pour effacer un clic.	Zoom down to the samples, then draw the waveform by hand to erase a click.
+Clic : pose une coupe (le fichier s'exporte en morceaux). Alt+clic : supprime le segment entre deux coupes.	Click: places a cut (the file exports in pieces). Alt+click: removes the segment between two cuts.
+Tire les carrés en haut à gauche et à droite : horizontalement la durée, verticalement la courbe. Double-clic : retire le fondu.	Pull the squares at the top left and right: horizontally the length, vertically the curve. Double-click: removes the fade.
+Clic sur la forme d'onde : ajoute un point de volume. Glisse un point pour le déplacer, clic droit pour le retirer.	Click the waveform: adds a volume point. Drag a point to move it, right-click to remove it.

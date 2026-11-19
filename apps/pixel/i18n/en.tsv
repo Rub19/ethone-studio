@@ -166,9 +166,7 @@ Rechercher	Find
 Remplacer par	Replace with
 Respecter la casse	Match case
 Rendu du nouveau texte	New text rendering
-G	B
 Gras	Bold
-I	I
 Italique	Italic
 Couleur d'origine	Original color
 Taille	Size
@@ -219,7 +217,6 @@ Supprimer le préréglage	Delete preset
 Aperçu	Preview
 Nom du préréglage	Preset name
 Ton texte	Your text
-S	U
 Gauche	Left
 Droite	Right
 Couleur principale · nouveau calque de texte	Foreground color · new text layer
@@ -552,7 +549,7 @@ Pinceau sec	Dry brush
 Reconstruction du fond…	Rebuilding the background…
 Accueil	Home
 Dépose une image n'importe où pour l'ouvrir	Drop an image anywhere to open it
-PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO	
+PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO	PNG, JPEG, WebP, BMP, TIFF, GIF or ICO
 Corrige l'exposition et le contraste	Fixes exposure and contrast
 Ajoute une ou deux lumières (Relight)	Adds one or two lights (Relight)
 Supprime brume et effets d'ambiance	Removes haze and atmospheric effects
@@ -665,3 +662,215 @@ Lettres d'origine	Original letters
 Seuls les mots modifiés sont effacés et réécrits. Lettres d'origine : recompose les mots avec les lettres découpées dans la photo (écriture détachée). Police manuscrite : la police la plus proche, à la taille et dans l'encre de l'original (écriture liée). Auto choisit selon l'écriture.	Only the changed words are erased and rewritten. Original letters: rebuilds words from letters cut out of the photo (separate letters). Handwriting font: the closest font, at the original's size and in its ink (joined writing). Auto picks based on the writing.
 Auto : fond uni (papier, mur) recalculé sans recopier d'encre, sinon reconstruction. Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Auto: plain backgrounds (paper, walls) are recomputed without copying ink, otherwise reconstruction. Reconstruction: rebuilds the background (photos). Background colour: quick flat fill (documents, screenshots). Mosaic 0 = automatic size.
 Police manuscrite	Handwriting font
+Harmoniser	Harmonize
+Normal	
+Fondu	Fade
+Obscurcir	Darken
+Produit	Product
+Densité couleur +	Colour density +
+Densité linéaire +	Linear density +
+Couleur plus foncée	Darker colour
+Éclaircir	Lighten
+Superposition	Overlay
+Densité couleur −	Colour density −
+Densité linéaire − (ajout)	Linear density − (add)
+Couleur plus claire	Lighter colour
+Incrustation	Overlay
+Lumière tamisée	Dim light
+Lumière crue	Harsh light
+Lumière vive	Vivid light
+Lumière linéaire	Linear light
+Lumière ponctuelle	Pin light
+Mélange maximal	Maximum blend
+Différence	Difference
+Exclusion	Exclusion
+Soustraction	Subtract
+Division	Division
+Ombre	Shadow
+Lueur	Glow
+Ombre interne	Inner shadow
+Lueur interne	Inner glow
+Biseau	Bevel
+Incrustation couleur	Colour overlay
+Incrustation dégradé	Gradient overlay
+Dossier des étapes	Steps folder
+Choisis jusqu'à 3 LUT, appliquées dans l'ordre	Choose up to 3 LUTs, applied in order
+Quitter la comparaison	Exit comparison
+Remplit la sélection selon le contenu autour	Fills the selection from the surrounding content
+Couleur, motif ou contenu	Colour, pattern or content
+Relight sur la sélection	Relight on selection
+Looks	Looks
+Imperfections	Blemishes
+Super-résolution ×2	Super resolution ×2
+Masquer la barre de tâches (Affichage)	Hide the task bar (View)
+Bonjour Paris	
+Georgia	
+Le chat dort	
+Le rat dort	
+Story	Story
+Essentiel	Essentials
+Pastel	
+Terre	Earth
+Gris	Gray
+Peau	Skin
+Pixel	
+Projet Pixel	Pixel project
+Collage	Collage
+Pixel · nouvel outil · calque actif ou sélection	Pixel · new tool · active layer or selection
+Ouvre d'abord une image	Open an image first
+Ctrl+N	
+Ctrl+S	
+Ctrl+Maj+S	Ctrl+Shift+S
+Ctrl+Maj+Alt+S	
+Ctrl+W	
+Ctrl+Z	
+Ctrl+Y	
+Ctrl+X	
+Ctrl+C	
+Ctrl+Maj+C	
+Ctrl+V	
+Ctrl+Maj+V	
+Suppr	
+Maj+F5	
+Ctrl+T	
+Ctrl+L	
+Ctrl+M	
+Ctrl+U	
+Ctrl+B	
+Ctrl+Alt+Maj+B	
+Ctrl+Maj+U	
+Ctrl+I	
+Ctrl+Maj+L	
+Ctrl+Alt+Maj+L	
+Ctrl+Maj+B	
+Ctrl+Alt+I	
+Ctrl+Alt+C	
+Ctrl+Maj+N	
+Ctrl+J	
+Ctrl+Maj+J	
+Ctrl+Alt+G	
+Ctrl+Maj+]	
+Ctrl+]	
+Ctrl+[	
+Ctrl+Maj+[	
+Ombre portée…	Drop shadow…
+Ombre interne…	Inner shadow…
+Lueur externe…	Outer glow…
+Lueur interne…	Inner glow…
+Biseau et estampage…	Bevel and emboss…
+Incrustation couleur…	Colour overlay…
+Incrustation dégradé…	Gradient overlay…
+Ctrl+Alt+E	
+Ctrl+Maj+E	Ctrl+Shift+E
+Ctrl+A	
+Ctrl+Maj+D	
+Ctrl+Maj+I	
+Bordure…	Border…
+Lisser…	Smooth…
+Dilater…	Expand…
+Contracter…	Contract…
+Maj+F6	
+Profil ICC	ICC profile
+Ctrl++	
+Ctrl+−	
+Ctrl+0	
+Ctrl+1	
+Extras (contours de sélection, repères)	Extras (selection edges, guides)
+Effacer les repères	Clear guides
+Magenta	
+Sombre	Dark
+Clair	Light
+Images et projets	Images and projects
+Cyan	
+Analogues	Analogous
+Triade	Triad
+Nuances	Shades
+Transparence	Transparency
+Remplacer	Replace
+Flouter	Blur
+Texte	Text
+Remplacer partout	Replace all
+Prix PROMO promo	
+Prix SOLDES SOLDES	
+Bonjour	
+Rendez-vous lundi	
+Rendez-vous mardi	
+Rendez-vous dimanche	
+Arial	
+Calibri	
+Verdana	
+Consolas	
+Impact	
+Bahnschrift	
+Garamond	
+Tahoma	
+Constantia	
+Corbel	
+Candara	
+Inkfree.ttf	
+Modifier le masque du calque	Edit layer mask
+Ombre portée	Drop shadow
+Contour du calque	Layer outline
+Biseau et estampage	Bevel and emboss
+Dilater la sélection	Expand selection
+Bordure de sélection	Selection border
+Lisser la sélection	Smooth selection
+Basse	Low
+Moyenne	Medium
+Haute	High
+Position 	Position 
+Forme	Shape
+Précis	Precise
+Taille de l'image	Image size
+Remplir	Fill
+Craie	Chalk
+Pointilliste	Pointillist
+Marqueur	Marker
+Feuillage	Foliage
+Plat	Flat
+Taille fixe	Fixed size
+Nombre d'or	Golden ratio
+Aligner à gauche	Align left
+Aligner à droite	Align right
+Centrer verticalement	Centre vertically
+Libre	Free
+Original	Original
+G	
+I	
+S	
+Impression	Print
+Interface	Interface
+Bureau	Desk
+Lueur externe	Outer glow
+Contour de la sélection	Selection outline
+Contracter la sélection	Contract selection
+Forme et réticule	Shape and reticle
+Proportions fixes	Fixed proportions
+Règle des tiers	Rule of thirds
+Diagonale	Diagonal
+Centrer horizontalement	Centre horizontally
+Aligner en haut	Align top
+Aligner en bas	Align bottom
+Sans titre	Untitled
+Presse-papiers	Clipboard
+Transformation du calque	Layer transform
+Plage de couleurs	Colour range
+Nouveau repère	New guide
+Mémoriser la sélection	Save selection
+Préférences	Preferences
+Raccourcis clavier	Keyboard shortcuts
+Flou	Blur
+Appliquer	Apply
+Suppression	Removal
+Sélections	Selections
+Lassos	Lassos
+Outils de Photoshop 2027	Photoshop 2027 tools
+Sélection rapide et baguette	Quick selection and wand
+Pinceaux et dynamique	Brushes and dynamics
+Gommes	Erasers
+Dégradés	Gradients
+Formes	Shapes
+Pipette, règle et notes	Eyedropper, ruler and notes
+Navigation	Navigation
+Déplacement et alignement	Move and align
+Retouche locale	Local adjustments

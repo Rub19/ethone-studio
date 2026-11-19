@@ -906,7 +906,7 @@ impl Sound {
         if t.spectral() {
             self.view_mode = 1;
         }
-        self.notice = Some((format!("{} : {}", t.name(), t.help()), true));
+        self.notice = Some((format!("{} : {}", tl(t.name()), tl(t.help())), true));
     }
 
     fn cycle_tool(&mut self, key: Key) {
@@ -1483,7 +1483,7 @@ impl Sound {
                 ui.vertical(|ui| {
                     ui.add_space(5.0);
                     ui.label(RichText::new(fmt_time(self.clip.secs(shown))).font(FontId::monospace(17.0)).color(INK_STRONG));
-                    ui.label(RichText::new(format!("sur {}", fmt_time(self.clip.secs(self.clip.len())))).monospace().size(10.0).color(MUTED));
+                    ui.label(RichText::new(format!("{} {}", tl("sur"), fmt_time(self.clip.secs(self.clip.len())))).monospace().size(10.0).color(MUTED));
                 });
                 ui.add_space(12.0);
                 if let Some(r) = &self.recorder {
@@ -1624,7 +1624,7 @@ impl Sound {
                     ui.label(RichText::new(tl("Volume perçu (LUFS)")).size(12.0).color(MUTED));
                     let labels: Vec<&str> = LUFS.iter().map(|l| l.0).collect();
                     pro::segmented(ui, &mut fx.lufs, &labels);
-                    ui.label(RichText::new(["Spotify, YouTube, réseaux", "Podcasts", "Voix posée, livres audio", "Télévision (EBU R128)"][fx.lufs]).size(11.5).color(FAINT));
+                    ui.label(RichText::new(tl(["Spotify, YouTube, réseaux", "Podcasts", "Voix posée, livres audio", "Télévision (EBU R128)"][fx.lufs])).size(11.5).color(FAINT));
                     let target = LUFS[fx.lufs].1;
                     act!(ui, "Volume perçu", move |c: &mut Clip, a, b| c.loudness_normalize(a, b, target));
                     slider(ui, tl("Limiteur (plafond)"), &mut fx.ceiling, -12.0..=0.0, " dB");
@@ -1944,15 +1944,15 @@ impl Sound {
     fn rack(&mut self, ui: &mut Ui) {
         let scope = if self.sel.is_some() { "à la sélection" } else { "à tout le fichier" };
         let mut run = None;
-        pro::dock_panel(ui, "rack", &format!("Effets · {}", effects::DEFS.len()), |ui| {
+        pro::dock_panel(ui, "rack", &format!("{} · {}", tl("Effets"), effects::DEFS.len()), |ui| {
             ui.spacing_mut().item_spacing.y = 5.0;
             ui.add(egui::TextEdit::singleline(&mut self.rack_search).hint_text(tl("Rechercher un effet…")).desired_width(f32::INFINITY));
             let q = self.rack_search.to_lowercase();
             if q.is_empty() {
-                egui::ComboBox::from_id_salt("rack-cat").width(ui.available_width()).selected_text(effects::CATS[self.rack_cat]).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("rack-cat").width(ui.available_width()).selected_text(tl(effects::CATS[self.rack_cat])).show_ui(ui, |ui| {
                     for (k, c) in effects::CATS.iter().enumerate() {
                         let n = effects::DEFS.iter().filter(|d| d.cat == k).count();
-                        if ui.selectable_label(self.rack_cat == k, format!("{c}  ({n})")).clicked() {
+                        if ui.selectable_label(self.rack_cat == k, format!("{}  ({n})", tl(c))).clicked() {
                             self.rack_cat = k;
                             if let Some(i) = effects::DEFS.iter().position(|d| d.cat == k) {
                                 self.rack_pick = i;
@@ -1965,7 +1965,7 @@ impl Sound {
                 ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                 for (k, d) in effects::DEFS.iter().enumerate() {
                     let show = if q.is_empty() { d.cat == self.rack_cat } else { d.name.to_lowercase().contains(&q) || d.hint.to_lowercase().contains(&q) };
-                    if show && ui.selectable_label(self.rack_pick == k, RichText::new(d.name).size(12.0)).on_hover_text(d.hint).clicked() {
+                    if show && ui.selectable_label(self.rack_pick == k, RichText::new(tl(d.name)).size(12.0)).on_hover_text(tl(d.hint)).clicked() {
                         self.rack_pick = k;
                         self.rack_cat = d.cat;
                     }
@@ -1975,14 +1975,14 @@ impl Sound {
             let d = &effects::DEFS[k];
             ui.add_space(4.0);
             ui.horizontal(|ui| {
-                ui.label(RichText::new(d.name).font(semibold(12.5)).color(INK_STRONG));
-                pro::tip(ui, d.hint);
+                ui.label(RichText::new(tl(d.name)).font(semibold(12.5)).color(INK_STRONG));
+                pro::tip(ui, tl(d.hint));
             });
             if !d.presets.is_empty() {
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                     for (name, vals) in d.presets {
-                        if pro::chip(ui, name).clicked() {
+                        if pro::chip(ui, tl(name)).clicked() {
                             self.rack_vals[k] = vals.to_vec();
                         }
                     }
@@ -1990,7 +1990,7 @@ impl Sound {
             }
             let vals = &mut self.rack_vals[k];
             for (i, prm) in d.params.iter().enumerate() {
-                ui.label(RichText::new(prm.name).size(12.0).color(MUTED));
+                ui.label(RichText::new(tl(prm.name)).size(12.0).color(MUTED));
                 if !prm.choices.is_empty() {
                     let mut c = (vals[i].round() as usize).min(prm.choices.len() - 1);
                     if prm.choices.len() <= 3 {
@@ -1998,9 +1998,9 @@ impl Sound {
                             vals[i] = c as f32;
                         }
                     } else {
-                        egui::ComboBox::from_id_salt(("rack", k, i)).width(ui.available_width()).selected_text(prm.choices[c]).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt(("rack", k, i)).width(ui.available_width()).selected_text(tl(prm.choices[c])).show_ui(ui, |ui| {
                             for (j, ch) in prm.choices.iter().enumerate() {
-                                if ui.selectable_label(c == j, *ch).clicked() {
+                                if ui.selectable_label(c == j, tl(ch)).clicked() {
                                     vals[i] = j as f32;
                                 }
                             }
@@ -2203,7 +2203,7 @@ impl Sound {
     fn options_bar(&mut self, ui: &mut Ui) {
         ui.spacing_mut().slider_width = 90.0;
         let t = self.tool;
-        ui.label(RichText::new(t.name()).font(semibold(12.0)).color(INK_STRONG));
+        ui.label(RichText::new(tl(t.name())).font(semibold(12.0)).color(INK_STRONG));
         pro::toolbar_sep(ui);
         let small = |ui: &mut Ui, s: &str| {
             ui.add(egui::Label::new(RichText::new(tl(&s)).size(12.0).color(MUTED)).truncate());
@@ -2213,7 +2213,7 @@ impl Sound {
                 if ui.small_button(tl("Tout sélectionner")).clicked() {
                     self.sel = Some((0, self.clip.len()));
                 }
-                if ui.add_enabled(self.sel.is_some(), egui::Button::new("Désélectionner").small()).clicked() {
+                if ui.add_enabled(self.sel.is_some(), egui::Button::new(tl("Désélectionner")).small()).clicked() {
                     self.sel = None;
                 }
                 if ui.small_button(tl("Zoom 1:1 (échantillons)")).clicked() {
@@ -2221,7 +2221,7 @@ impl Sound {
                     self.spp = 0.1;
                     self.view_start = c - 50.0;
                 }
-                small(ui, t.help());
+                small(ui, tl(t.help()));
             }
             Tool::SpecRect | Tool::Lasso | Tool::Brush | Tool::Heal => {
                 small(ui, tl("Échelle"));

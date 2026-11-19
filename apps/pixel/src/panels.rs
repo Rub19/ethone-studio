@@ -222,7 +222,7 @@ impl Pixel {
             ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
             for (i, p) in BRUSH_PRESETS.iter().enumerate() {
                 let on = self.brush_preset == i;
-                let txt = RichText::new(p.0).size(11.5).color(if on { INK_STRONG } else { INK });
+                let txt = RichText::new(tl(p.0)).size(11.5).color(if on { INK_STRONG } else { INK });
                 if ui.add(egui::Button::new(txt).fill(if on { BLUE.gamma_multiply(0.35) } else { FIELD }).corner_radius(6)).clicked() {
                     self.brush_preset = i;
                     let (_, hard, spacing, angle, round, sj, fj, sc) = *p;

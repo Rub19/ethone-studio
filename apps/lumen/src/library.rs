@@ -161,7 +161,7 @@ impl Lumen {
                     }
                 });
                 for r in 0..=5u8 {
-                    let label = if r == 0 { "Toutes".to_string() } else { format!("{r}★") };
+                    let label = if r == 0 { tl("Toutes").to_string() } else { format!("{r}★") };
                     let on = self.min_rating == r;
                     let (rect, resp) = ui.allocate_exact_size(vec2(if r == 0 { 56.0 } else { 34.0 }, 26.0), Sense::click());
                     ui.painter().rect_filled(rect, CornerRadius::same(6), if on { BLUE } else if resp.hovered() { FIELD } else { Color32::TRANSPARENT });

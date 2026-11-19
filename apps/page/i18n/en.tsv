@@ -91,11 +91,8 @@ Ctrl+G	Ctrl+G
 Corps · Ctrl+Maj+< / >	Size · Ctrl+Shift+< / >
 Interligne · Alt+↑ / ↓	Leading · Alt+↑ / ↓
 Approche · Alt+← / →	Tracking · Alt+← / →
-G	B
 Gras · Ctrl+Maj+B	Bold · Ctrl+Shift+B
-I	I
 Italique	Italic
-S	U
 Souligné · Ctrl+Maj+U	Underline · Ctrl+Shift+U
 AA	AA
 Majuscules · Ctrl+Maj+K	All caps · Ctrl+Shift+K
@@ -126,10 +123,6 @@ Calques	Layers
 Liens	Links
 Contrôle	Preflight
 Bloc	Frame
-X	X
-Y	Y
-L	W
-H	H
 Rotation	Rotation
 Effets de l'image	Image effects
 Le texte dépasse du bloc.	The text overflows the frame.
@@ -146,7 +139,6 @@ Petites capitales	Small caps
 Barré	Strikethrough
 Décalage de la ligne de base	Baseline shift
 Échelle H	Scale H
-V	V
 Contour des lettres	Letter outline
 Paragraphe	Paragraph
 Gauche	Left
@@ -532,10 +524,6 @@ I, II, III
 i, ii, iii	
 A, B, C	
 a, b, c	
-b	
-i	
-u	
-s	
 sup	
 sub	
 sc	
@@ -569,3 +557,257 @@ A4 paysage, recto	A4 landscape, single-sided
 A4, photo et caractéristiques	A4, photo and specs
 A6, fête	A6, party
 A4, couverture et sommaire	A4, cover and contents
+Anchor	Anchor
+Bold	Bold
+Justification	Justification
+Story	Story
+Self	Self
+Link	Link
+Chapeau	Hat
+Citation	Quote
+Dossier d'export	Export folder
+Dossier où assembler le document	Folder to assemble the document in
+Instructions.txt	
+Projet Page	Page project
+Projet Page ou InDesign	Page or InDesign project
+Sélectionne d'abord un bloc texte	Select a text frame first
+Sélectionne d'abord un bloc	Select a frame first
+Sélectionne au moins trois blocs	Select at least three frames
+Sélectionne au moins deux blocs	Select at least two frames
+Sélectionne d'abord un groupe	Select a group first
+Page · nouvel outil · page ou blocs	Page · new tool · page or frames
+Choisis une page (pas le gabarit)	Choose a page (not the master)
+Sélectionne d'abord un bloc image	Select an image frame first
+Tableau CSV	CSV table
+Ctrl+N	
+Ctrl+O	
+Ctrl+S	
+Ctrl+Maj+S	Ctrl+Shift+S
+Revenir à la version enregistrée	Revert to saved
+Ctrl+Maj+I	
+Ctrl+E	
+Ctrl+K	
+Rétablir	Redo
+Ctrl+X	
+Ctrl+C	
+Coller	Paste
+Coller sur place	Paste in place
+Ctrl+D	
+Ctrl+Alt+U	
+Suppr	
+Ctrl+A	
+Ctrl+Maj+A	
+Ctrl+F	
+Ctrl+Maj+G	
+Répartir horizontalement	Distribute horizontally
+Répartir verticalement	Distribute vertically
+Ctrl+L	
+Ctrl+3	
+Ctrl+Alt+3	
+Sur 2 lignes	On 2 lines
+Sur 3 lignes	On 3 lines
+Sur 4 lignes	On 4 lines
+Entrée	In
+Déplacer vers le haut	Move up
+Déplacer vers le bas	Move down
+Supprimer la page	Delete page
+Fin	End
+Maj+P	
+Ctrl+1	
+Effacer tous les repères	Clear all guides
+Échelle 	Scale 
+Insérer une page avant	Insert page before
+Descendre	Move down
+Appliquer…	Apply…
+Images	Images
+Côtés 	Sides 
+Devant	In front
+Avancer	Forward
+Reculer	Back
+Gras	Bold
+Exposant	Superscript
+Indice	Subscript
+Pc	
+Majuscules	Capitals
+Minuscules	Lowercase
+Aa	
+Aa.	
+Guillemets français autour	French quotes around
+Espaces multiples réduits	Multiple spaces collapsed
+Rouge	Red
+Bleu	Blue
+Vert	Green
+Orange	Orange
+Violet	Purple
+Gris	Gray
+Noir	Black
+Blanc	White
+Vectoriel, toutes les pages dans un fichier, prêt à imprimer	Vector, all pages in one file, ready to print
+Image légère pour le web et les messages	Light image for the web and messaging
+Normal	
+Produit	Product
+Superposition	Overlay
+Incrustation	Overlay
+Obscurcir	Darken
+Éclaircir	Lighten
+Exclusion	Exclusion
+Teinte	Tint
+Saturation	Saturation
+Texte vide	Empty text
+Pied 2	Footer 2
+Pied	Footer
+Pied 1	Footer 1
+Revue 	Review 
+Prix	Price
+Dupont; Jean	
+Bonjour «Nom» de <<Ville>>	
+Imprimer ce calque	Print this layer
+Monter	Move up
+Placer la sélection ici	Place the selection here
+Sélectionner ses blocs	Select its frames
+Supprimer le calque	Delete layer
+Petites cap.	Small caps
+Chat chat CHAT achat	
+Chat chat	
+Quoi ?	What?
+Le Petit Chat	
+Bonjour. Ça va	
+Affiche	Poster
+Instagram	
+Magazine	Magazine
+Flyer	
+Menu	Menu
+Newsletter	
+Invitation	Invitation
+Certificat	Certificate
+Rapport	Report
+Le magazine Ethone	
+Mise en page, colonnes liées, styles et export PDF prêt pour l'imprimeur.	Layout, linked columns, styles and print-ready PDF export.
+Samedi 14 décembre · 20 h	Saturday 14 December · 8 pm
+Prénom Nom	First Last
+Graphiste et monteur vidéo	Graphic designer and video editor
+Directeur artistique	Art director
+La Table	
+Plats	Butt
+Desserts	Desserts
+La lettre	
+À la une	Featured
+Réponse souhaitée avant le 1er mai	Please reply before 1 May
+Ce certificat est décerné à	This certificate is awarded to
+Date	Date
+Nos services	Our services
+Casque sans fil Aria	Aria wireless headphones
+Réduction de bruit active · 40 h d'autonomie	Active noise cancelling · 40 h battery
+Caractéristique	Feature
+Poids	Weight
+Autonomie	Battery life
+Bluetooth	
+Garantie	Warranty
+Résultats, projets et perspectives de l'année écoulée.	Results, projects and outlook for the past year.
+Introduction	Introduction
+Sélection	Selection
+Sélection directe	Direct selection
+Espace	Space
+Plume	Pen
+Ajout de point d'ancrage	Add anchor point
+Suppression de point d'ancrage	Delete anchor point
+Conversion de point directionnel	Anchor point conversion
+Crayon	Pencil
+Bloc rectangulaire	Rectangular block
+Bloc elliptique	Elliptical block
+Bloc polygonal	Polygonal block
+Étoile	Star
+Ciseaux	Scissors
+Transformation manuelle	Free transform
+Mise à l'échelle	Scaling
+Déformation	Warp
+Nuancier de dégradé	Gradient swatches
+Contour progressif du dégradé	Gradient feather
+Pipette	Eyedropper
+Thème de couleur	Colour theme
+Mesure	Measure
+Main	Hand
+Maj+	
+G	
+I	
+S	
+X	
+Y	
+L	
+H	
+V	
+b	
+i	
+u	
+s	
+Ctrl+Alt+Maj+E	
+Ctrl+Alt+Maj+C	
+Ctrl+Maj+E	Ctrl+Shift+E
+Ctrl+Alt+C	
+Ctrl+Z	
+Ctrl+Y	
+Ctrl+V	
+Ctrl+Maj+V	
+Ctrl+Maj+]	
+Ctrl+]	
+Ctrl+[	
+Ctrl+Maj+[	
+Contour progressif directionnel	Directional feather
+Ctrl+Maj+D	
+Ctrl+Alt+Maj+F	
+Insérer une page après	Insert page after
+Majuscule à chaque mot	Capitalize Each Word
+Majuscule en début de phrase	Sentence case
+Image sans perte, transparence conservée	Lossless image, transparency kept
+Vectoriel modifiable dans Vector	Vector, editable in Vector
+Ville	City
+Contrat	Contract
+Journal	Journal
+A6 paysage	A6 landscape
+Agenda	Calendar
+Signature	Signature
+Qui sommes-nous ?	About us
+Valeur	Value
+Maj+T	
+Maj+C	
+Maj+G	
+Maj+I	
+Stories/	
+Sans titre	Untitled
+Bloc image vide	Empty image frame
+Page 1/2	Page 1/2
+Accent fort	Strong accent
+Annexes	Appendices
+Calque 1	Layer 1
+Sommaire	Contents
+Ethone Mag	
+Abonnez-vous : lalettre@exemple.fr	
+Rapport annuel	Annual report
+Clique un bloc · Maj+clic pour en ajouter · Alt+glisser duplique · double-clic pour écrire	Click a frame · Shift+click to add · Alt+drag duplicates · double-click to type
+Déplace l'image dans son cadre ou les points d'un tracé	Moves the image inside its frame or the points of a path
+Glisse pour redimensionner la page affichée	Drag to resize the displayed page
+Glisse dans l'espace entre deux blocs pour le déplacer	Drag in the space between two frames to move it
+Trace un bloc de texte	Draw a text frame
+Clique une forme ou un tracé pour y poser du texte, ou trace un arc	Click a shape or path to place text on it, or draw an arc
+Trace le tableau, puis règle lignes et colonnes à droite	Draw the table, then set rows and columns on the right
+Clic : point d'angle · glisser : point lisse · clic sur le premier point pour fermer · Entrée pour finir	Click: corner point · drag: smooth point · click the first point to close · Enter to finish
+Clique un segment du tracé sélectionné pour ajouter un point	Click a segment of the selected path to add a point
+Clique un point d'ancrage pour le supprimer	Click an anchor point to delete it
+Clique un point pour basculer angle / lisse, glisse pour tirer ses poignées	Click a point to toggle corner / smooth, drag to pull its handles
+Dessine à main levée ; termine près du départ pour fermer le tracé	Draw freehand; finish near the start to close the path
+Trace un trait · Maj contraint à 45°	Draw a line · Shift constrains to 45°
+Trace un bloc d'image vide, double-clic pour placer une image	Draw an empty image frame, double-click to place an image
+Trace la forme · Maj garde les proportions	Draw the shape · Shift keeps proportions
+Clique un tracé ou une forme pour le couper à cet endroit	Click a path or shape to cut it there
+Poignées pour mettre à l'échelle, glisse hors du bloc pour pivoter	Handles to scale, drag outside the frame to rotate
+Glisse pour faire pivoter le bloc sélectionné · Maj par pas de 15°	Drag to rotate the selected frame · Shift for 15° steps
+Glisse pour agrandir ou réduire le bloc depuis son centre	Drag to scale the frame from its centre
+Glisse horizontalement pour incliner le bloc	Drag horizontally to skew the frame
+Glisse sur le bloc pour orienter son dégradé	Drag over the frame to orient its gradient
+Glisse pour fondre le bloc vers la transparence	Drag to fade the frame to transparency
+Clique un bloc pour y attacher une note (non imprimée)	Click a frame to attach a note (not printed)
+Sélectionne un bloc, puis clique un autre bloc pour lui prendre son style	Select a frame, then click another frame to take its style
+Clique une image ou un bloc : ses 5 couleurs dominantes rejoignent le nuancier	Click an image or frame: its 5 dominant colours join the swatches
+Glisse pour mesurer une distance et un angle	Drag to measure a distance and an angle
+Glisse pour faire défiler · Espace maintenu marche avec tous les outils	Drag to scroll · holding Space works with every tool
+Clic pour zoomer · Alt+clic pour dézoomer	Click to zoom in · Alt+click to zoom out

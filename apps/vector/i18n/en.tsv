@@ -229,13 +229,9 @@ Tracé fermé	Closed path
 Lisser	Smooth
 Simplifier	Simplify
 + Points	+ Points
-G	B
 Gras	Bold
-I	I
 Italique	Italic
-S	U
 Souligné	Underline
-B	S
 Barré	Strikethrough
 Aa	Aa
 AA	AA
@@ -374,11 +370,7 @@ Glisse pour créer · clique pour activer · déplace un plan secondaire · Supp
 Pas	Step
 Déplacement clavier	Keyboard increment
 Tire depuis une règle pour poser un repère, ramène-le dans la règle pour le supprimer.	Drag from a ruler to place a guide; drag it back into the ruler to delete it.
-L	W
-H	H
 Fond du document	Document background
-X	X
-Y	Y
 Aligner sur	Align to
 Objet clé : le premier sélectionné (contour bleu épais).	Key object: the first one selected (thick outline).
 Répartir les objets	Distribute objects
@@ -645,3 +637,249 @@ Plus saturé	More saturated
 Moins saturé	Less saturated
 Plus clair	Lighter
 Plus sombre	Darker
+Déplacement	Slide
+Mise à l'échelle	Scaling
+Inclinaison	Shear
+Transformer chaque	Transform each
+Décalage du tracé	Path offset
+Zigzag	Zig zag
+Ondulation	Ripple
+Distorsion aléatoire	Random distortion
+Contraction et dilatation	Pucker and bloat
+Griffonnage	Scribble
+Régler les couleurs	Adjust colours
+Répétition	Repetition
+Croquis	Sketch
+Large	Wide
+Nerveux	Nervous
+Formats web, impression et fichiers vectoriels	Web, print and vector formats
+Transforme une image en formes vectorielles	Turns an image into vector shapes
+Silhouette	Silhouette
+Remplace chaque couleur, ou fais tourner toute la palette	Replace each colour, or rotate the whole palette
+Choisis un format ou saisis une taille	Choose a size or type one
+Logo	
+Miniature	Thumbnail
+Publication	Post
+Story	Story
+Mobile	Mobile
+Impression	Print
+Vector	
+Dossier d'export	Export folder
+Projet Vector	Vector project
+Fichiers Vector	Vector files
+Vector · nouvel outil · sélection	Vector · new tool · selection
+Sélectionne d'abord un texte	Select a text first
+Sélectionne d'abord un objet	Select an object first
+Sélectionne au moins deux objets	Select at least two objects
+Sélectionne d'abord un groupe	Select a group first
+Objet actif · document	Active object · document
+Sélectionne d'abord un objet de référence	Select a reference object first
+Sélection, sinon tout	Selection, otherwise everything
+Ctrl+N	
+Ctrl+O	
+Ctrl+S	
+Ctrl+Maj+S	Ctrl+Shift+S
+Ctrl+Alt+E	
+Ctrl+Z	
+Ctrl+Y	
+Ctrl+X	
+Ctrl+C	
+Ctrl+V	
+Ctrl+F	
+Ctrl+B	
+Ctrl+Maj+V	
+Suppr	
+Ctrl+Alt+D	
+Ctrl+D	
+Rotation…	Rotate…
+Miroir…	Mirror…
+Ctrl+G	
+Ctrl+Maj+G	
+Ctrl+2	
+Ctrl+Alt+2	
+Ctrl+3	
+Ctrl+Alt+3	
+Ctrl+J	
+Ctrl+Alt+J	
+Ctrl+Alt+B	
+Ctrl+7	
+Ctrl+Alt+7	
+Ctrl+8	
+Ctrl+Alt+8	
+Ajuster à la sélection	Fit to selection
+Supprimer le plan actif	Delete active artboard
+Normale	Normal
+Initiales En Capitales	Title Case
+Copyright	
+Marque	Brand
+Guillemets	Quotes
+Euro	
+Puce	Bullet
+Ctrl+Maj+O	
+Ctrl+A	
+Ctrl+Maj+A	
+Couleur de fond	Background color
+Épaisseur de contour	Stroke weight
+Aspect	Appearance
+Zigzag…	
+Ondulation…	Ripple…
+Torsion…	Twist…
+Transformer…	Transform…
+Arrondis…	Round…
+Griffonnage…	Scribble…
+Ctrl++	
+Ctrl+−	
+Ctrl+0	
+Ctrl+Alt+0	
+Ctrl+1	
+Effacer les repères	Clear guides
+Bibliothèques (nuancier, styles, symboles)	Libraries (swatches, styles, symbols)
+Normal	
+Produit	Product
+Superposition	Overlay
+Incrustation	Overlay
+Obscurcir	Darken
+Éclaircir	Lighten
+Exclusion	Exclusion
+Couleur	Color
+Bulle	Bubble
+Éclair	Lightning
+Nuage	Cloud
+Engrenage	Gear
+Lune	Moon
+Étoile 6 branches	6-point star
+Étincelle	Spark
+Explosion 24	
+Fleur	Flower
+Hexagone	Hexagon
+Trapèze	Trapezoid
+Flèche droite	Right arrow
+Flèche haut	Up arrow
+Double flèche	Double arrow
+Écusson	Badge
+Signet	Bookmark
+Croix diagonale	Diagonal cross
+Feuille	Leaf
+Lecture	Playback
+Infini	Infinite
+Sceau	Seal
+Bonjour Le Monde	
+Ethone	
+Pastel	
+Terre	Earth
+Mono	
+Automne	Autumn
+Printemps	Spring
+Material	Material
+Bonbons	Sweets
+Peau	Skin
+Corporate	
+Nordique	Nordic
+Solaire	Solar
+Dracula	
+Glace	Ice
+Lave	Lava
+Lavande	Lavender
+Menthe	Mint
+Cyberpunk	
+Vaporwave	
+Bauhaus	
+Japon	Japan
+Tropical	Tropical
+Vintage	
+Arc-en-ciel	Rainbow
+Bois	Wood
+Jardin	Garden
+Nuit	Night
+Aurore	Dawn
+Agrumes	Citrus
+Enfance	Childhood
+Tech	
+Plat	Flat
+Verre	Glass
+Relief	Emboss
+Papier	Paper
+Encre	Ink
+Feu	Fire
+Chrome	
+Or	
+Argent	Silver
+Bronze	
+Bonbon	Candy
+Tampon	Stamp
+Craie	Chalk
+Marqueur	Marker
+Aquarelle	Watercolour
+Multiplier	Multiply
+Écran	Screen
+Magnétisme	Snapping
+Mode tracés	Paths mode
+Espacement horizontal	Horizontal spacing
+Espacement vertical	Vertical spacing
+Plein	Full
+Tirets	Dashes
+Points	Points
+Tiret-point	Dash-dot
+Longs	Long
+L	
+H	
+X	
+Y	
+G	
+I	
+S	
+B	
+Maj+C	
+Maj+²	
+Maj+B	
+Maj+W	
+Maj+R	
+Maj+M	
+Maj+S	
+Maj+E	Shift+E
+Maj+H	
+Maj+O	
+Interface	Interface
+Web	
+Ctrl+Maj+M	
+Ctrl+Alt+Maj+D	
+Ctrl+Maj+]	
+Ctrl+]	
+Ctrl+[	
+Ctrl+Maj+[	
+Couleur de contour	Stroke colour
+Type d'objet	Object type
+Occurrence de symbole	Symbol instance
+Calques et plans de travail	Layers and artboards
+Croix	Cross
+Repère	Guide
+Coche	Checkmark
+Badge	Badge
+Étoile 5 branches	5-point star
+Étoile 8 branches	8-point star
+Explosion 12	
+Soleil	Sun
+Pentagone	Pentagon
+Octogone	Octagon
+Parallélogramme	Parallelogram
+Flèche gauche	Left arrow
+Flèche bas	Down arrow
+Chevron	
+Étiquette	Label
+Maison	House
+Drapeau	Flag
+Bulle ronde	Round bubble
+Pile	Stack
+Engrenage fin	Fine gear
+Cible	Target
+Caractère	Character
+Calque 1	Layer 1
+Forme	Shape
+Image	Image
+Sans titre	Untitled
+Plan de travail 1	Artboard 1
+Glisse un cadre, ou clique une forme fermée	Drag a box, or click a closed shape
+Clique un tracé pour écrire le long	Click a path to type along it
+Clique pour écrire de haut en bas	Click to write top to bottom
+Clique pour écrire, clique un texte pour le modifier	Click to write, click a text to edit it
+Caractère et paragraphe	Character and paragraph

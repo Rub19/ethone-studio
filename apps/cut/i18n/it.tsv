@@ -2,7 +2,7 @@
 Double-clic pour réinitialiser	Doppio clic per ripristinare
 Image clé suivante	Fotogramma chiave successivo
 Image clé précédente	Fotogramma chiave precedente
-Image	Video
+Image	Immagine
 Effets	Effetti
 Couleur	Colore
 Audio	Audio
@@ -411,3 +411,83 @@ Descente	Caduta
 Lettres espacées	Lettere spaziate
 Fixe	Fisso
 Défilement horizontal	Scorrimento orizzontale
+Actions	Azioni
+Ajoute d'abord un clip à la piste	Aggiungi prima una clip alla traccia
+Ajouter un marqueur (M)	Aggiungi un marcatore (M)
+Aller à l'entrée	Vai all'attacco
+Aller à la sortie	Vai all'uscita
+Appliquer la transition par défaut	Applica la transizione predefinita
+Auto	Auto
+Clip V2	Clip V2
+Coller l'étalonnage	Incolla la correzione colore
+Coller à la tête de lecture	Incolla all'indicatore
+Cut · nouvel outil · montage ou clip choisi	Cut · nuovo strumento · montaggio o clip scelta
+Dossier de la séquence d'images	Cartella della sequenza di immagini
+Ellipse	Ellisse
+Exporter les marqueurs (CSV)…	Esporta marcatori (CSV)…
+Figer l'image 2 s (Ctrl+Maj+F)	Fermo immagine 2 s (Ctrl+Maiusc+F)
+Format	Formato
+Grain	Grana
+Hautes lum.	Alte luci
+Il faut au moins deux clips dans la piste	La traccia deve avere almeno due clip
+Image précédente (←)	Fotogramma precedente (←)
+Image suivante (→)	Fotogramma successivo (→)
+Importer des médias	Importa media
+Incrustations	Sovrapposizioni
+La piste n'a aucun blanc à fermer	La traccia non ha spazi da chiudere
+Lecture en boucle (entre entrée et sortie)	Riproduzione in loop (tra entrata e uscita)
+Lecture et navigation	Riproduzione e navigazione
+Look	Look
+Magnétisme activé	Magnetismo attivo
+Magnétisme désactivé	Magnetismo disattivato
+Masquer la piste dans le programme	Nascondi la traccia nel programma
+Média	Media
+Nouveau titre (Ctrl+T)	Nuovo titolo (Ctrl+T)
+Options	Opzioni
+Orange	Arancione
+Ordre d'import	Ordine di importazione
+Ouvre ou crée d'abord un projet	Apri o crea prima un progetto
+Point d'entrée (I)	Punto di attacco (I)
+Point de montage précédent (↑)	Punto di montaggio precedente (↑)
+Point de montage suivant (↓)	Punto di montaggio successivo (↓)
+Point de sortie (O)	Punto di uscita (O)
+Portrait 4:5	Verticale 4:5
+Position X	Posizione X
+Position Y	Posizione Y
+Programme	Programma
+Projet Cut	Progetto Cut
+Rectangle	Rettangolo
+Retirer les médias inutilisés	Rimuovi media inutilizzati
+Rotation	Rotazione
+Saturation	Saturazione
+Scinder	Dividi
+Scinder à la tête de lecture (S)	Dividi all'indicatore (S)
+Scope	Ambito
+Supprimer la sélection (Suppr)	Elimina la selezione (Canc)
+Supprimer tous les espaces vides	Rimuovi tutti gli spazi vuoti
+Supprimer tous les marqueurs	Elimina tutti i marcatori
+Surveillance	Sorveglianza
+Sélectionne d'abord un clip	Seleziona prima una clip
+Sélectionne d'abord un clip de la piste principale	Seleziona prima una clip della traccia principale
+Sélectionne d'abord un clip ou une musique	Seleziona prima una clip o una musica
+Titres	Titoli
+Tout supprimer	Elimina tutto
+Verrouiller la piste	Blocca la traccia
+Vertical	Verticale
+Vibrance	Vividezza
+Vignettes	Miniature
+Volume	Volume
+Zoom	Zoom
+Zoom arrière (−)	Riduci (−)
+Zoom avant (+)	Ingrandisci (+)
+Éclaircir	Schiarisci
+Élément	Elemento
+Contraste doux	Contrasto morbido
+Fondu des noirs	Neri sbiaditi
+Lecture	Riproduzione
+Type	Tipo
+Allongement	Allungamento
+Propagation	Propagazione
+Sans titre	Senza titolo
+Sélection de piste	Selezione traccia
+Élément généré	Elemento generato

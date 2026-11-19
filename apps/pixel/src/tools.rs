@@ -193,9 +193,9 @@ pub fn gradient_stops(preset: usize, a: [u8; 4], b: [u8; 4]) -> Vec<[u8; 4]> {
 
 pub fn combo(ui: &mut Ui, id: &str, value: &mut usize, items: &[&str], width: f32) -> bool {
     let mut changed = false;
-    egui::ComboBox::from_id_salt(id).selected_text(*items.get(*value).unwrap_or(&"")).width(width).show_ui(ui, |ui| {
+    egui::ComboBox::from_id_salt(id).selected_text(tl(items.get(*value).unwrap_or(&""))).width(width).show_ui(ui, |ui| {
         for (k, it) in items.iter().enumerate() {
-            if ui.selectable_label(*value == k, *it).clicked() {
+            if ui.selectable_label(*value == k, tl(it)).clicked() {
                 *value = k;
                 changed = true;
             }

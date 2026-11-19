@@ -340,11 +340,11 @@ impl Motion {
                 pro::toolbar_sep(ui);
                 egui::ComboBox::from_id_salt("quality").width(78.0).selected_text(tl(QUALITY[self.quality])).show_ui(ui, |ui| {
                     for (k, q) in QUALITY.iter().enumerate() {
-                        ui.selectable_value(&mut self.quality, k, *q);
+                        ui.selectable_value(&mut self.quality, k, tl(q));
                     }
                 });
                 let zl = self.zoom.map_or("Ajuster".to_string(), |z| format!("{:.0} %", z * 100.0));
-                egui::ComboBox::from_id_salt("zoom").width(78.0).selected_text(zl).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("zoom").width(78.0).selected_text(tl(&zl)).show_ui(ui, |ui| {
                     if ui.selectable_label(self.zoom.is_none(), tl("Ajuster")).clicked() {
                         self.zoom = None;
                         self.pan = Vec2::ZERO;

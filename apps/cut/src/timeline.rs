@@ -88,7 +88,7 @@ impl Cut {
         p.rect_filled(head, CornerRadius::same(6), CHROME);
         p.text(head.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, id, semibold(11.5), MUTED);
         if head.height() > 34.0 {
-            p.text(head.left_top() + vec2(10.0, 6.0), Align2::LEFT_TOP, label, FontId::proportional(11.0), crate::FAINT);
+            p.text(head.left_top() + vec2(10.0, 6.0), Align2::LEFT_TOP, tl(label), FontId::proportional(11.0), crate::FAINT);
         }
         let mut x = head.right() - 14.0;
         let mut button = |ui: &mut Ui, kind: u8, on: bool, tip: &str| -> bool {

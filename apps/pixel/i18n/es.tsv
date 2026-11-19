@@ -565,3 +565,137 @@ Lettres d'origine	Letras originales
 Seuls les mots modifiés sont effacés et réécrits. Lettres d'origine : recompose les mots avec les lettres découpées dans la photo (écriture détachée). Police manuscrite : la police la plus proche, à la taille et dans l'encre de l'original (écriture liée). Auto choisit selon l'écriture.	Solo se borran y reescriben las palabras cambiadas. Letras originales: recompone las palabras con letras recortadas de la foto (escritura separada). Fuente manuscrita: la fuente más parecida, al tamaño y con la tinta del original (escritura ligada). Auto elige según la escritura.
 Auto : fond uni (papier, mur) recalculé sans recopier d'encre, sinon reconstruction. Reconstruction : recrée le fond (photos). Couleur du fond : aplat rapide (documents, captures). Mosaïque 0 = taille automatique.	Auto: los fondos lisos (papel, pared) se recalculan sin copiar tinta; si no, reconstrucción. Reconstrucción: rehace el fondo (fotos). Color de fondo: relleno plano rápido (documentos, capturas). Mosaico 0 = tamaño automático.
 Police manuscrite	Fuente manuscrita
+Analogues	Análogos
+Auto	Auto
+Basse	Baja
+Biseau et estampage	Bisel y relieve
+Biseau et estampage…	Bisel y relieve…
+Bordure de sélection	Borde de selección
+Bordure…	Borde…
+Choisis jusqu'à 3 LUT, appliquées dans l'ordre	Elige hasta 3 LUT, aplicadas en orden
+Clair	Claro
+Collage	Collage
+Compression	Compresión
+Contour du calque	Contorno de la capa
+Contracter…	Contraer…
+Couleur plus claire	Color más claro
+Couleur plus foncée	Color más oscuro
+Couleur, motif ou contenu	Color, motivo o contenido
+Craie	Tiza
+Cyans	Cianes
+Densité linéaire +	Densidad lineal +
+Densité linéaire − (ajout)	Densidad lineal − (suma)
+Dilater la sélection	Expandir la selección
+Dilater…	Expandir…
+Distance	Distancia
+Division	División
+Document	Documento
+Dossier des étapes	Carpeta de los pasos
+Effacer les repères	Borrar guías
+Ellipse	Elipse
+Essentiel	Esencial
+Exclusion	Exclusión
+Extras (contours de sélection, repères)	Extras (bordes de selección, guías)
+Feuillage	Follaje
+Flouter	Desenfocar
+Harmonies	Armonías
+Harmoniser	Armonizar
+Haute	Alta
+Image	Imagen
+Images et projets	Imágenes y proyectos
+Imperfections	Imperfecciones
+Incrustation	Superposición
+Incrustation couleur	Superposición de color
+Incrustation couleur…	Superposición de color…
+Incrustation dégradé	Superposición de degradado
+Incrustation dégradé…	Superposición de degradado…
+Lasso	Lazo
+Libre	Libre
+Lisser la sélection	Suavizar la selección
+Lisser…	Suavizar…
+Looks	Looks
+Lueur externe…	Resplandor exterior…
+Lueur interne…	Resplandor interior…
+Lumière linéaire	Luz lineal
+Lumière ponctuelle	Luz focal
+Lumière vive	Luz intensa
+Magentas	Magentas
+Masquer la barre de tâches (Affichage)	Ocultar la barra de tareas (Vista)
+Mode	Modo
+Modifier le masque du calque	Editar la máscara de capa
+Moyenne	Media
+Mélange maximal	Mezcla máxima
+Nuances	Matices
+Obscurcir	Oscurecer
+Ombre	Sombra
+Ombre interne…	Sombra interior…
+Ombre portée…	Sombra paralela…
+Orange	Naranja
+Orientation	Orientación
+Original	Original
+Ouvre d'abord une image	Abre primero una imagen
+PNG, JPEG, WebP, BMP, TIFF, GIF ou ICO	PNG, JPEG, WebP, BMP, TIFF, GIF o ICO
+Peau	Piel
+Perspective…	Perspectiva…
+Pixel · nouvel outil · calque actif ou sélection	Pixel · nueva herramienta · capa activa o selección
+Pixels	Píxeles
+Plat	Plano
+Pointilliste	Puntillista
+Portrait	Retrato
+Portrait 4:5	Retrato 4:5
+Position	Posición
+Position 	Posición 
+Produit	Producto
+Profil ICC	Perfil ICC
+Projet Pixel	Proyecto Pixel
+Précis	Preciso
+Quitter la comparaison	Salir de la comparación
+Radial	Radial
+Reconstruction	Reconstrucción
+Rectangle	Rectángulo
+Relight sur la sélection	Reiluminar la selección
+Remplacer	Reemplazar
+Remplacer partout	Reemplazar todo
+Remplit la sélection selon le contenu autour	Rellena la selección según el contenido de alrededor
+Rotation	Rotación
+Saturation	Saturación
+Sombre	Oscuro
+Soustraction	Resta
+Story	Historia
+Subdivisions	Subdivisiones
+Super-résolution ×2	Superresolución ×2
+Taille de l'image	Tamaño de imagen
+Taille fixe	Tamaño fijo
+Terre	Tierra
+Transparence	Transparencia
+Transparent	Transparente
+Zoom	Zoom
+Éclaircir	Aclarar
+Bureau	Escritorio
+Contour de la sélection	Contorno de la selección
+Contracter la sélection	Contraer la selección
+Diagonale	Diagonal
+Forme et réticule	Forma y retícula
+Impression	Impresión
+Interface	Interfaz
+Proportions fixes	Proporciones fijas
+Dégradés	Degradados
+Déplacement et alignement	Mover y alinear
+Formes	Formas
+Gommes	Borradores
+Lassos	Lazos
+Mémoriser la sélection	Memorizar la selección
+Navigation	Navegación
+Nouveau repère	Nueva guía
+Outils de Photoshop 2027	Herramientas de Photoshop 2027
+Pinceaux et dynamique	Pinceles y dinámica
+Pipette, règle et notes	Cuentagotas, regla y notas
+Plage de couleurs	Gama de colores
+Presse-papiers	Portapapeles
+Raccourcis clavier	Atajos de teclado
+Retouche locale	Retoque local
+Sans titre	Sin título
+Suppression	Eliminación
+Sélection rapide et baguette	Selección rápida y varita
+Sélections	Selecciones
+Transformation du calque	Transformación de la capa

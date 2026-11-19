@@ -268,7 +268,7 @@ fn all(app: &mut Folio, ui: &mut Ui) {
         ui.painter().rect_filled(ic, CornerRadius::same(4), crate::ACCENT.gamma_multiply(0.2));
         panel_glyph(ui.painter(), ic.shrink(7.0), *p, crate::ACCENT);
         ui.painter().text(r.min + vec2(48.0, 16.0), egui::Align2::LEFT_CENTER, tl(*name), semibold(12.5), INK);
-        ui.painter().text(r.min + vec2(48.0, 33.0), egui::Align2::LEFT_CENTER, d, egui::FontId::proportional(11.0), FAINT);
+        ui.painter().text(r.min + vec2(48.0, 33.0), egui::Align2::LEFT_CENTER, tl(d), egui::FontId::proportional(11.0), FAINT);
         if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
             app.panel = *p;
         }

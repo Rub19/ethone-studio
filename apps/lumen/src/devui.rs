@@ -99,7 +99,7 @@ impl Lumen {
                 ui.label(RichText::new(format!("{pos} / {} · {}", vis.len(), short(&display_name(&self.files[i]), 40))).size(12.0).color(MUTED));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     for r in (0..=5u8).rev() {
-                        if ui.selectable_label(self.min_rating == r, if r == 0 { "Toutes".to_string() } else { format!("{r}★") }).clicked() {
+                        if ui.selectable_label(self.min_rating == r, if r == 0 { tl("Toutes").to_string() } else { format!("{r}★") }).clicked() {
                             self.min_rating = r;
                         }
                     }
@@ -403,9 +403,9 @@ impl Lumen {
                 solo_dock(solo, ui, &mut opened, "basic", "Réglages de base", |ui| {
                     ui.horizontal(|ui| {
                         ui.label(RichText::new(tl("Profil")).size(12.0).color(MUTED));
-                        egui::ComboBox::from_id_salt("profile").width(120.0).selected_text(develop::PROFILES[(s.profile as usize).min(5)]).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("profile").width(120.0).selected_text(tl(develop::PROFILES[(s.profile as usize).min(5)])).show_ui(ui, |ui| {
                             for (k, p) in develop::PROFILES.iter().enumerate() {
-                                ui.selectable_value(&mut s.profile, k as u8, *p);
+                                ui.selectable_value(&mut s.profile, k as u8, tl(p));
                             }
                         });
                         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -650,7 +650,7 @@ impl Lumen {
                 });
                 solo_dock(solo, ui, &mut opened, "effects", "Effets", |ui| {
                     caption(ui, tl("Vignettage après recadrage"));
-                    egui::ComboBox::from_id_salt("vig-style").width(ui.available_width() - 4.0).selected_text(develop::VIGNETTE_STYLES[(s.vignette_style as usize).min(2)]).show_ui(ui, |ui| {
+                    egui::ComboBox::from_id_salt("vig-style").width(ui.available_width() - 4.0).selected_text(tl(develop::VIGNETTE_STYLES[(s.vignette_style as usize).min(2)])).show_ui(ui, |ui| {
                         for (k, n) in develop::VIGNETTE_STYLES.iter().enumerate() {
                             ui.selectable_value(&mut s.vignette_style, k as u8, *n);
                         }
@@ -929,18 +929,18 @@ impl Lumen {
                             self.before = true;
                         }
                         held.on_hover_text(tl("Maintenir pour voir l'original (ou \\)"));
-                        egui::ComboBox::from_id_salt("compare").width(120.0).selected_text(["Avant / après", "Rideau vertical", "Côte à côte", "Rideau horizontal"][self.compare]).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("compare").width(120.0).selected_text(tl(["Avant / après", "Rideau vertical", "Côte à côte", "Rideau horizontal"][self.compare])).show_ui(ui, |ui| {
                             for (k, l) in ["Désactivé", "Rideau vertical", "Côte à côte", "Rideau horizontal"].iter().enumerate() {
-                                ui.selectable_value(&mut self.compare, k, *l);
+                                ui.selectable_value(&mut self.compare, k, tl(l));
                             }
                         });
                         if ui.selectable_label(self.clipping, tl("Écrêtage")).on_hover_text(tl("Rouge : blancs brûlés · bleu : noirs bouchés (J)")).clicked() {
                             self.clipping = !self.clipping;
                             self.shown = None;
                         }
-                        egui::ComboBox::from_id_salt("zoom").width(70.0).selected_text(ZOOMS.iter().find(|z| z.1 == self.zoom).map(|z| z.0).unwrap_or("Zoom")).show_ui(ui, |ui| {
+                        egui::ComboBox::from_id_salt("zoom").width(70.0).selected_text(tl(ZOOMS.iter().find(|z| z.1 == self.zoom).map(|z| z.0).unwrap_or("Zoom"))).show_ui(ui, |ui| {
                             for (n, z) in ZOOMS {
-                                if ui.selectable_value(&mut self.zoom, z, n).clicked() {
+                                if ui.selectable_value(&mut self.zoom, z, tl(n)).clicked() {
                                     self.pan = Vec2::ZERO;
                                 }
                             }

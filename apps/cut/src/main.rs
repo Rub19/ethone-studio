@@ -2428,8 +2428,8 @@ impl Cut {
                 }
                 if !self.home {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        let tool = GROUPS.iter().flat_map(|g| g.1.iter()).find(|x| x.0 == self.tool).map_or("", |x| x.1);
-                        ui.label(small(format!("{tool} · {}", if self.snap { "Magnétisme activé" } else { "Magnétisme désactivé" })));
+                        let tool = GROUPS.iter().flat_map(|g| g.1.iter()).find(|x| x.0 == self.tool).map_or("", |x| tl(x.1));
+                        ui.label(small(format!("{tool} · {}", if self.snap { tl("Magnétisme activé") } else { tl("Magnétisme désactivé") })));
                     });
                 }
             });

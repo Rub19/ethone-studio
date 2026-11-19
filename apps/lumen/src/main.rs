@@ -1488,7 +1488,7 @@ impl Lumen {
                     });
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if !self.files.is_empty() {
-                            let label = if self.picked.len() > 1 { format!("Exporter {}", self.picked.len()) } else if self.view == View::Develop { "Exporter".to_string() } else { format!("Exporter {}", self.visible().len()) };
+                            let label = if self.picked.len() > 1 { format!("{} {}", tl("Exporter"), self.picked.len()) } else if self.view == View::Develop { tl("Exporter").to_string() } else { format!("{} {}", tl("Exporter"), self.visible().len()) };
                             let dev = self.view == View::Develop && self.picked.len() < 2;
                             if pro::primary_icon(ui, &label, export_glyph).on_hover_text(tl("Ctrl+Maj+E")).clicked() {
                                 self.open_export(dev);

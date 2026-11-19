@@ -2,7 +2,7 @@
 Double-clic pour réinitialiser	Doppelklick zum Zurücksetzen
 Image clé suivante	Nächster Keyframe
 Image clé précédente	Vorheriger Keyframe
-Image	Video
+Image	Bild
 Effets	Effekte
 Couleur	Farbe
 Audio	Audio
@@ -411,3 +411,83 @@ Descente	Fall
 Lettres espacées	Gesperrte Buchstaben
 Fixe	Fest
 Défilement horizontal	Horizontaler Bildlauf
+Actions	Aktionen
+Ajoute d'abord un clip à la piste	Füge zuerst einen Clip zur Spur hinzu
+Ajouter un marqueur (M)	Marke hinzufügen (M)
+Aller à l'entrée	Zum In-Punkt
+Aller à la sortie	Zum Out-Punkt
+Appliquer la transition par défaut	Standardübergang anwenden
+Auto	Auto
+Clip V2	V2-Clip
+Coller l'étalonnage	Farbkorrektur einfügen
+Coller à la tête de lecture	An der Abspielposition einfügen
+Cut · nouvel outil · montage ou clip choisi	Cut · neues Werkzeug · Schnitt oder gewählter Clip
+Dossier de la séquence d'images	Ordner der Bildsequenz
+Ellipse	Ellipse
+Exporter les marqueurs (CSV)…	Marken exportieren (CSV)…
+Figer l'image 2 s (Ctrl+Maj+F)	Standbild 2 s (Strg+Umschalt+F)
+Format	Format
+Grain	Korn
+Hautes lum.	Lichter
+Il faut au moins deux clips dans la piste	Die Spur braucht mindestens zwei Clips
+Image précédente (←)	Vorheriger Frame (←)
+Image suivante (→)	Nächster Frame (→)
+Importer des médias	Medien importieren
+Incrustations	Überlagerungen
+La piste n'a aucun blanc à fermer	Die Spur hat keine Lücke zum Schließen
+Lecture en boucle (entre entrée et sortie)	Wiedergabe in Schleife (zwischen In und Out)
+Lecture et navigation	Wiedergabe und Navigation
+Look	Look
+Magnétisme activé	Ausrichten an
+Magnétisme désactivé	Ausrichten aus
+Masquer la piste dans le programme	Spur im Programm ausblenden
+Média	Medien
+Nouveau titre (Ctrl+T)	Neuer Titel (Strg+T)
+Options	Optionen
+Orange	Orange
+Ordre d'import	Importreihenfolge
+Ouvre ou crée d'abord un projet	Öffne oder erstelle zuerst ein Projekt
+Point d'entrée (I)	In-Punkt (I)
+Point de montage précédent (↑)	Vorheriger Schnittpunkt (↑)
+Point de montage suivant (↓)	Nächster Schnittpunkt (↓)
+Point de sortie (O)	Out-Punkt (O)
+Portrait 4:5	Hochformat 4:5
+Position X	Position X
+Position Y	Position Y
+Programme	Programm
+Projet Cut	Cut-Projekt
+Rectangle	Rechteck
+Retirer les médias inutilisés	Unbenutzte Medien entfernen
+Rotation	Drehung
+Saturation	Sättigung
+Scinder	Teilen
+Scinder à la tête de lecture (S)	An der Abspielposition teilen (S)
+Scope	Bereich
+Supprimer la sélection (Suppr)	Auswahl löschen (Entf)
+Supprimer tous les espaces vides	Alle Lücken entfernen
+Supprimer tous les marqueurs	Alle Marken löschen
+Surveillance	Überwachung
+Sélectionne d'abord un clip	Wähle zuerst einen Clip
+Sélectionne d'abord un clip de la piste principale	Wähle zuerst einen Clip auf der Hauptspur
+Sélectionne d'abord un clip ou une musique	Wähle zuerst einen Clip oder Musik
+Titres	Titel
+Tout supprimer	Alles löschen
+Verrouiller la piste	Spur sperren
+Vertical	Vertikal
+Vibrance	Dynamik
+Vignettes	Miniaturen
+Volume	Lautstärke
+Zoom	Zoom
+Zoom arrière (−)	Auszoomen (−)
+Zoom avant (+)	Einzoomen (+)
+Éclaircir	Aufhellen
+Élément	Element
+Contraste doux	Weicher Kontrast
+Fondu des noirs	Verblasstes Schwarz
+Lecture	Wiedergabe
+Type	Typ
+Allongement	Dehnung
+Propagation	Ausbreitung
+Sans titre	Ohne Titel
+Sélection de piste	Spurauswahl
+Élément généré	Erzeugtes Element

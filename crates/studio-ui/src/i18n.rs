@@ -1,5 +1,5 @@
 //! Interface language. Code keeps its French text and wraps it in [`tl`]; other languages come from
-//! `FR<TAB>translation` dictionaries, one per language (`i18n/<code>.tsv`), shared plus one set per app.
+//! `FR<TAB>translation` dictionaries per language; `i18n/all-<code>.tsv` merges every app's (scripts/i18n-fr.pl).
 //! A missing entry falls back to English, then French, so a language can be completed progressively.
 
 use std::collections::HashMap;
@@ -17,11 +17,11 @@ fn dicts() -> &'static RwLock<Vec<Dict>> {
     DICTS.get_or_init(|| {
         let mut v = vec![HashMap::new(); LANGS.len()];
         for (k, tsv) in [
-            (1, include_str!("../i18n/en.tsv")),
-            (2, include_str!("../i18n/es.tsv")),
-            (3, include_str!("../i18n/de.tsv")),
-            (4, include_str!("../i18n/it.tsv")),
-            (5, include_str!("../i18n/pt.tsv")),
+            (1, include_str!("../i18n/all-en.tsv")),
+            (2, include_str!("../i18n/all-es.tsv")),
+            (3, include_str!("../i18n/all-de.tsv")),
+            (4, include_str!("../i18n/all-it.tsv")),
+            (5, include_str!("../i18n/all-pt.tsv")),
         ] {
             parse_into(&mut v[k], tsv);
         }

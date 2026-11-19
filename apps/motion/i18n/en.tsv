@@ -64,9 +64,7 @@ Ajuster à l'animation	Fit to animation
 Terminé	Done
 Timeline	Timeline
 [ Début zone	[ Work area start
-B	B
 Fin zone ]	Work area end ]
-N	N
 Effacer la zone de travail	Clear work area
 Ajuster	Fit
 Toute la durée visible	Whole duration visible
@@ -117,8 +115,6 @@ Inverser	Reverse
 Sans remplissage : règle le contour dans Apparence.	No fill: set the stroke in Appearance.
 Un nul est invisible au rendu : choisis-le comme parent pour piloter plusieurs calques à la fois.	A null is invisible in the render: make it a parent to drive several layers at once.
 Calque d'effets : ses effets (couleur, flou, grain, distorsion…) s'appliquent à tous les calques situés en dessous. Son opacité dose le mélange.	Adjustment layer: its effects (color, blur, grain, distortion…) apply to every layer below. Its opacity sets the mix.
-L	W
-H	H
 Couleur	Color
 Fichier	File
 Ouvrir un projet récent	Open recent project
@@ -582,14 +578,14 @@ Gauche → droite	Left → right
 Droite → gauche	Right → left
 Centre → bords	Centre → edges
 Aléatoire	Random
-Bords → centre	
+Bords → centre	Edges → centre
 butt	
 round	
 square	
 miter	
 bevel	
-Position X	
-Position Y	
+Position X	Position X
+Position Y	Position Y
 Échelle %	Scale %
 Rotation °	Rotation °
 Opacité %	Opacity %
@@ -619,3 +615,196 @@ Clignotement	Blink
 Flottement	Float
 Zoom de sortie	Zoom out
 Sortie vers la droite	Exit right
+Planche	Board
+Compo	
+Moyenne	Medium
+Haute	High
+Maximale	Maximum
+Meilleure	Best
+Bonne	Good
+Rapide	Fast
+Vidéo MP4	MP4 video
+Dossier de la séquence	Sequence folder
+De l'image 	From the image 
+Premier n° 	First no. 
+Une image sur 	One frame in 
+Colonnes 	Columns 
+Lignes 	Lines 
+Revenir	Revert
+Portrait	Portrait
+Sticker	
+Écrasement	Crush
+Arc-en-ciel	Rainbow
+Pendule	Pendulum
+Élastique	Elastic
+Rebond	Bounce
+Inclinaison	Shear
+Pulsation	Pulse
+Progression	Progress
+Citation	Quote
+Ethone Motion	
+Motion	
+Ligne	Line
+Compteur	Counter
+Triangle	Triangle
+Anneau	Ring
+Nul	Null
+Calque d'effets	Effects layer
+Solide	Solid
+Losange	Diamond
+Spirale	Spiral
+Vague	Wave
+Coche	Checkmark
+Peinture	Paint
+Images	Images
+Bandeau	Banner
+Nom	Name
+Prénom Nom	First Last
+Fonction	Role
+Fonction ou sujet	Role or topic
+Filet	Mesh
+Bouton	Button
+Texte du bouton	Button text
+Compte	Count
+Piste	Track
+Remplissage	Fill
+Pourcentage	Percent
+Cercle	Circle
+Titre animé	Animated title
+Auteur	Author
+Projet Motion	Motion project
+Export pour jeux · PNG transparent	Game export · transparent PNG
+Sélectionne d'abord un calque	Select a layer first
+Calque sélectionné	Selected layer
+Motion · nouvel outil · calque ou composition	Motion · new tool · layer or composition
+Ajouter un repère (M)	Add a guide (M)
+Effacer la zone	Clear the area
+Verrouiller	Lock
+Coller l'animation	Paste animation
+Bleu	Blue
+Vert	Green
+Violet	Purple
+Image…	Image…
+Branches 	Branches 
+Décimales 	Decimals 
+Annuler le dernier trait	Undo last stroke
+Ctrl+O	
+Ctrl+S	
+Ctrl+Maj+S	Ctrl+Shift+S
+Ctrl+M	
+Ctrl+Alt+M	
+Image courante en PNG…	Current frame as PNG…
+Image courante en SVG…	Current frame as SVG…
+Planche contact PNG…	PNG contact sheet…
+Animation Lottie JSON…	Lottie JSON animation…
+Rétablir	Redo
+Ctrl+C	
+Ctrl+V	
+Ctrl+D	
+Suppr	
+Coller l'animation à la tête de lecture	Paste animation at playhead
+Ctrl+A	
+Tout désélectionner	Deselect all
+Ctrl+Maj+D	
+Ctrl+]	
+Ctrl+[	
+Ctrl+Alt+Origine	
+Ctrl+Alt+F	
+Alt+[	
+Alt+]	
+Détacher du parent	Detach from parent
+Maj+F9	
+Ctrl+Maj+F9	
+Ctrl+Alt+H	
+Ctrl+Alt+R	
+Position	Position
+Ancre	Anchor
+Ctrl+K	
+Supprimer tous les repères	Delete all guides
+Effacer les repères	Clear guides
+Images de chaque côté 	Frames on each side 
+Écart 	Gap 
+Ctrl+0	
+Ctrl+1	
+Douce	Soft
+Douce forte	Soft strong
+Accélère	Speeds up
+Ralentit	Slows down
+Maintien	Hold
+Dépassement	Overshoot
+Expo	Expo
+Expo entrée-sortie	Expo in-out
+Circulaire	Circular
+Circulaire entrée	Circular in
+Sinus	Sine
+Sinus entrée	Sine in
+Sinus sortie	Sine out
+Quintique	Quintic
+Anticipation	Anticipation
+Dépassement double	Double overshoot
+Saccadé	Choppy
+Saccadé fin	Fine choppy
+Standard	Standard
+Material	Material
+Claquement	Clap
+Normal	
+Produit	Product
+Superposition	Overlay
+Incrustation	Overlay
+Obscurcir	Darken
+Éclaircir	Lighten
+Exclusion	Exclusion
+A&amp;B	
+Bonjour	
+Hi	
+Supprimer l'animation	Delete animation
+Retirer l'expression	Remove expression
+Rotation X ° (3D)	Rotation X ° (3D)
+Rotation Y ° (3D)	Rotation Y ° (3D)
+Haut	Top
+Bas	Bottom
+Largeur	Width
+Hauteur	Height
+Début %	Start %
+Fin %	End %
+Décalage %	Offset %
+Crêtes 	Peaks 
+Épaisseur px	Thickness px
+Flou animé px	Motion blur px
+Teinte animée °	Animated hue °
+Figé à 	Frozen at 
+Arrondi 	Rounded 
+Côtés 	Sides 
+Creux 	Troughs 
+Taille 	Size 
+Lissage 	Smoothing 
+Portée 	Reach 
+Afficher les repères tirés des règles	Show guides pulled from rulers
+Règles (glisser pour créer un repère)	Rulers (drag to create a guide)
+Grille et tiers	Grid and thirds
+Début (Origine)	Home (Origin)
+Image clé précédente (J)	Previous keyframe (J)
+Image précédente (←)	Previous frame (←)
+Image suivante (→)	Next frame (→)
+Image clé suivante (K)	Next keyframe (K)
+Fin	End
+Lecture en boucle (L)	Loop playback (L)
+B	
+N	
+L	
+H	
+Web	
+Rose	Pink
+Orange	Orange
+Cyan	
+Ctrl+Z	
+Ctrl+Y	
+Ctrl+T	
+Ctrl+B	
+Titre	Title
+Image	Image
+Sans titre	Untitled
+Clic : sommet · glisser : courbe · clic sur le 1er : fermer	Click: vertex · drag: curve · click the 1st: close
+Clic sur un segment du tracé sélectionné	Click a segment of the selected path
+Clic sur un sommet pour le retirer	Click a vertex to remove it
+Clic : angle ↔ courbe · glisser : nouvelles poignées	Click: corner ↔ curve · drag: new handles

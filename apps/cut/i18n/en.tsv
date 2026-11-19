@@ -3,7 +3,7 @@ Double-clic pour réinitialiser	Double-click to reset
 Image clé suivante	Next keyframe
 Image clé précédente	Previous keyframe
 Clip	Clip
-Image	Video
+Image	Image
 Effets	Effects
 Couleur	Color
 Audio	Audio
@@ -349,7 +349,6 @@ Vidéos, photos et musiques	Videos, photos and music
 Programme	Programme
 Importe une vidéo pour commencer	Import a video to start
 Glisse un fichier ici ou Ctrl+I	Drag a file here or Ctrl+I
-S	
 Navette arrière · pause · avant	Shuttle back · pause · forward
 Rogner début / fin	Trim start / end
 Entrée / sortie	In / out
@@ -468,8 +467,8 @@ Centrée sur la coupe	Centred on the cut
 Début à la coupe	Start at the cut
 Fin à la coupe	End at the cut
 Échelle	Scale
-Position X	
-Position Y	
+Position X	Position X
+Position Y	Position Y
 Rotation	Rotation
 Opacité	Opacity
 Flou	Blur
@@ -486,3 +485,125 @@ Lettres espacées	Spaced letters
 Pop	Pop
 Fixe	Fixed
 Défilement horizontal	Horizontal scroll
+Magnétisme activé	Snapping on
+Magnétisme désactivé	Snapping off
+Lissage	Smoothness
+Tout supprimer	Delete all
+Linéaire	Linear
+Contraste fort	High contrast
+Éclaircir	Lighten
+Hautes lum.	Highlights
+Coller	Paste
+Espace	Space
+Scinder	Split
+Ctrl+Maj+K	
+Maj+Suppr	
+Alt+Suppr	
+Ctrl+T	
+Maj+S	
+Lecture et navigation	Playback and navigation
+Vertical	Vertical
+Instagram	
+Scope	Scope
+Cut	
+Dossier de la séquence d'images	Image sequence folder
+Projet Cut	Cut project
+Clip V2	V2 clip
+Média	Media
+Cut · nouvel outil · montage ou clip choisi	Cut · new tool · edit or chosen clip
+Ouvre ou crée d'abord un projet	Open or create a project first
+Il faut au moins deux clips dans la piste	The track needs at least two clips
+La piste n'a aucun blanc à fermer	The track has no gap to close
+Sélectionne d'abord un clip ou une musique	Select a clip or music first
+Sélectionne d'abord un clip de la piste principale	Select a clip on the main track first
+Ajoute d'abord un clip à la piste	Add a clip to the track first
+Sélectionne d'abord un clip	Select a clip first
+Ctrl+I	
+Ctrl+S	
+Ctrl+Maj+S	Ctrl+Shift+S
+Ctrl+Maj+E	Ctrl+Shift+E
+Exporter les marqueurs (CSV)…	Export markers (CSV)…
+Retirer les médias inutilisés	Remove unused media
+Rétablir	Redo
+Ctrl+X	
+Ctrl+C	
+Coller à la tête de lecture	Paste at playhead
+Effacer	Clear
+Ctrl+A	
+Tout désélectionner	Deselect all
+Coller l'étalonnage	Paste grade
+Appliquer la transition par défaut	Apply default transition
+Alt+←	
+Alt+→	
+Ctrl+Maj+F	
+Supprimer tous les espaces vides	Remove all gaps
+Maj+M	
+Maj+↑	
+Maj+↓	
+Aller à l'entrée	Go to in point
+Aller à la sortie	Go to out point
+Alt+X	
+Supprimer tous les marqueurs	Delete all markers
+Complète	Full
+Importer des médias	Import media
+Ordre d'import	Import order
+Point de montage précédent (↑)	Previous edit point (↑)
+Image précédente (←)	Previous frame (←)
+Image suivante (→)	Next frame (→)
+Point de montage suivant (↓)	Next edit point (↓)
+Lecture en boucle (entre entrée et sortie)	Loop playback (between in and out)
+Point de sortie (O)	Out point (O)
+Point d'entrée (I)	In point (I)
+Gris	Gray
+Normal	
+Bruit	Noise
+Élément	Item
+Violet	Purple
+Jaune	Yellow
+Orange	Orange
+Rose	Pink
+Cyan	
+Arial	
+Impact	
+Georgia	
+Verdana	
+Consolas	
+Trebuchet	
+Tahoma	
+Calibri	
+Verrouiller la piste	Lock track
+Masquer la piste dans le programme	Hide the track in the program
+Scinder à la tête de lecture (S)	Split at playhead (S)
+Supprimer la sélection (Suppr)	Delete selection (Del)
+Figer l'image 2 s (Ctrl+Maj+F)	Freeze frame 2 s (Ctrl+Shift+F)
+Nouveau titre (Ctrl+T)	New title (Ctrl+T)
+Ajouter un marqueur (M)	Add a marker (M)
+Vignettes	Thumbnails
+Zoom avant (+)	Zoom in (+)
+Zoom arrière (−)	Zoom out (−)
+Titres	Titles
+Incrustations	Overlays
+S	
+Contraste doux	Soft contrast
+Fondu des noirs	Faded blacks
+Assombrir	Darken amount
+Tons moyens	Midtones
+Lecture	Playback
+Maj+A	
+Maj+C	
+Ctrl+Z	
+Ctrl+Y	
+Ctrl+V	
+Ctrl+D	
+Suppr	
+Ctrl+Maj+A	
+Ctrl+Maj+D	
+Maj+I	
+Maj+O	
+Nom	Name
+Type	Type
+Sans titre	Untitled
+Élément généré	Generated item
+Propagation	Spread
+Allongement	Stretch
+Sélection de piste	Track select

@@ -16,21 +16,16 @@ Supprimer	Delete
 Effacer	Clear
 Revenir à l'état avant cette étape	Go back to before this step
 Écrêtage	Clipping
-J	J
 Profil	Profile
 Auto	Auto
 Ctrl+U	Ctrl+U
 Couleur	Color
 Noir et blanc	Black & white
 Pipette	Eyedropper
-W	W
 Préréglage	Preset
 Tel quel	As shot
 Param.	Parametric
 RVB	RGB
-R	R
-V	G
-B	B
 Réglage ciblé	Targeted adjustment
 T : glisse sur la photo	T: drag on the photo
 Réinitialiser la courbe	Reset curve
@@ -66,7 +61,6 @@ Réinitialiser un groupe…	Reset a group…
 Mode solo : un seul panneau ouvert	Solo mode: one panel open at a time
 + Nouveau masque	+ New mask
 Superposition	Overlay
-O	O
 Activer ou masquer	Enable or hide
 Supprimer le masque	Delete mask
 Dupliquer	Duplicate
@@ -83,7 +77,6 @@ Original	Original
 Maintenir pour voir l'original (ou \\)	Hold to see the original (or \\)
 Rouge : blancs brûlés · bleu : noirs bouchés (J)	Red: clipped highlights · blue: clipped shadows (J)
 Infos	Info
-I	I
 Plein écran	Full screen
 Tab : masquer les panneaux	Tab: hide panels
 Nouvelle collection dynamique	New smart collection
@@ -466,13 +459,13 @@ Courbe des tonalités	Tone curve
 Étalonnage des couleurs	Colour grading
 Recadrage et rotation	Crop and rotate
 Étalonnage de l'appareil	Camera calibration
-Red	
+Red	Red
 Orange	Orange
-Yellow	
-Green	
+Yellow	Yellow
+Green	Green
 Aqua	Aqua
-Blue	
-Purple	
+Blue	Blue
+Purple	Purple
 Magenta	Magenta
 mettre en page	lay out
 placer l'image	place the image
@@ -551,3 +544,163 @@ Grille	Grid
 Nombre d'or	Golden ratio
 Diagonales	Diagonals
 Courbe	Curve
+Rouges	Reds
+Oranges	Oranges
+Jaunes	Yellows
+Verts	Greens
+Turquoises	Turquoises
+Bleus	Blues
+Violets	Purples
+Magentas	Magentas
+Nuageux	Cloudy
+Ombre	Shadow
+Fluorescent	Fluorescent
+Flash	
+Libre	Free
+Ambiances	Ambience
+Pellicule	Film
+Vintage	
+Correction	Correction
+Chaud	Warm
+Nuit	Night
+Ajuster	Fit
+Réglages	Adjustments
+Histogramme	Histogram
+Retenues	Picked
+Tons clairs	Highlights
+Inversion	Invert
+Tons moyens	Midtones
+Hautes lum.	Highlights
+Marge gauche	Left margin
+Marge droite	Right margin
+Développement	Develop
+Rideau vertical	Vertical curtain
+Rideau horizontal	Horizontal curtain
+Désactivé	Disabled
+Côte à côte	Side by side
+Zoom	Zoom
+Toutes les photos	All photos
+Notées 3★ et plus	Rated 3★ and up
+Sans note	Unrated
+Copies virtuelles	Virtual copies
+Rejetées	Rejected
+Ensemble	Together
+Réglages synchronisés	Settings synced
+Retenir	Pick
+Rejeter	Reject
+Contrast2012	
+Highlights2012	
+Shadows2012	
+Whites2012	
+Blacks2012	
+Clarity2012	
+Dehaze	Dehaze
+Sharpness	Sharpness
+Exposure2012	
+Temperature	Temperature
+Tint	Tint
+Hue	Hue
+Rouge	Red
+Jaune	Yellow
+Vert	Green
+Bleu	Blue
+Violet	Purple
+Lumen	
+Choisir un dossier de photos	Choose a photo folder
+Dossier d'export	Export folder
+Copie virtuelle créée	Virtual copy created
+Réglages copiés	Settings copied
+Instantané enregistré	Snapshot saved
+Lumen · nouvel outil · photo courante ou choisies	Lumen · new tool · current or chosen photos
+Ouvre d'abord un dossier de photos	Open a photo folder first
+Il faut au moins deux photos à comparer	At least two photos are needed to compare
+Ouvre la photo modèle puis choisis d'autres photos (Ctrl+clic)	Open the reference photo, then choose other photos (Ctrl+click)
+Choisis d'abord des photos (clic ou Ctrl+clic)	Choose photos first (click or Ctrl+click)
+Choisis d'abord une photo	Choose a photo first
+Exporter la photo…	Export photo…
+Exporter la sélection…        Ctrl+Maj+E	Export selection…        Ctrl+Shift+E
+Exporter comme précédemment	Export as before
+Catalogue enregistré	Catalog saved
+Annuler                Ctrl+Z	Undo                   Ctrl+Z
+Rétablir               Ctrl+Y	Redo                   Ctrl+Y
+Coller les réglages       Ctrl+V	Paste settings       Ctrl+V
+Coller sur les photos affichées   Ctrl+Maj+V	Paste to displayed photos   Ctrl+Shift+V
+Grille                         G	Grid                           G
+Développement              D	Develop                    D
+Comparaison                 C	Compare                     C
+Ensemble                     N	Together                     N
+Données de prise de vue	Shooting data
+Petites	Small
+Moyennes	Mids
+Grandes	Large
+Non rejetées	Not rejected
+Bibliothèque	Library
+Redressement	Straightening
+Vignettage	Vignette
+Appareil	Camera
+Objectif	Lens
+Vitesse	Speed
+Ouverture	Opening
+Focale	Focal length
+Logiciel	Software
+Localisation	Location
+Contour	Outline
+Pupille	Pupil
+Assombrir	Darken amount
+Débit	Flow
+Gomme	Eraser
+Aucun	None
+Sélectionne	Select
+J	
+W	
+R	
+V	
+B	
+O	
+I	
+Naturel	Natural
+Désert	Desert
+Cyberpunk	
+Diapositive	Slide film
+Doux	Soft
+Froid	Cool
+Lumineux	Bright
+Mat	Matte
+Pastel	
+Pop	
+Tropical	Tropical
+Néon	Neon
+Automne	Autumn
+Montagne	Mountain
+Infrarouge	Infrared
+Sépia	Sepia
+Blockbuster	
+Néo-noir	Neo-noir
+Western	
+Argentique	Film
+Lomo	
+Cross-process	
+Rêveur	Dreamy
+Dramatique	Dramatic
+Urbain	Urban
+Industriel	Industrial
+Tons foncés	Shadows
+Marge haute	Top margin
+Marge basse	Bottom margin
+Nom et réglages	Name and settings
+Maj+M	
+Chaque réglage	Each setting
+Pinceau	Brush
+Ton auto appliqué	Auto tone applied
+Horizon redressé	Horizon straightened
+Réglages remis à zéro	Settings reset
+Aucun dossier ouvert	No folder open
+R recadrer · Q retouche · E yeux rouges · M masques · K pinceau · W pipette · T ciblage · Y avant/après · Tab panneaux	R crop · Q retouch · E red eye · M masks · K brush · W eyedropper · T targeted · Y before/after · Tab panels
+Espace colorimétrique sRGB, idéal pour le web et les réseaux.	sRGB colour space, ideal for the web and social media.
+Réglage	Setting
+Ciel	Sky
+Sujet	Subject
+Plage de luminance	Luminance range
+Plage de couleur	Colour range
+Image entière	Whole image
+Suppression	Removal

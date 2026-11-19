@@ -96,7 +96,7 @@ fn chips(ui: &mut Ui, items: &[&str], current: Option<usize>) -> Option<usize> {
     ui.horizontal_wrapped(|ui| {
         ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
         for (k, name) in items.iter().enumerate() {
-            if ui.selectable_label(current == Some(k), *name).clicked() {
+            if ui.selectable_label(current == Some(k), tl(*name)).clicked() {
                 hit = Some(k);
             }
         }
