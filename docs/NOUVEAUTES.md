@@ -1,8 +1,8 @@
 # Nouveautés Ethone Studio
 
-Version **0.9.1**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur [studio.ethone.dev](https://studio.ethone.dev) et sur la page des versions GitHub du projet.
+Version **0.10.0**. Les installateurs (Pixel-Setup.exe…) sont téléchargeables sur [studio.ethone.dev](https://studio.ethone.dev) et sur la page des versions GitHub du projet.
 
-## Prochaine version
+## 0.10.0
 
 - **Langues** : Ctrl+, › Interface › « Langue / Language » : français, English, Español, Deutsch, Italiano, Português. Les 9 apps, le lanceur et l’installateur sont traduits (menus, outils, panneaux, options), raccourcis compris (Strg, Umschalt, Mayús…).
 - **Couleurs** : les profils ICC des photos (AdobeRGB, Display P3…) sont respectés à l'ouverture, sRGB est intégré aux exports ; Pixel ajoute l'épreuvage CMJN et l'export TIFF CMJN pour l'impression.
@@ -150,6 +150,7 @@ Chaque option est une vraie combinaison des réglages de l'app, nommée en fran�
 
 ## Rappel des versions précédentes
 
+- v0.10.0 : six langues d'interface, texte manuscrit réécrit dans Pixel, couleurs ICC et CMJN, récupération après plantage, panneaux déplaçables.
 - v0.9.1 : miniatures de Page, curseurs de Lumen, palette de Motion, transport de Sound.
 - v0.9.0 : nouvelle identité et interface pro (section du haut).
 - v0.8.0 : préférences, installateurs, ressources et outils décrits sur cette page.
